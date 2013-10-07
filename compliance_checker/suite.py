@@ -11,10 +11,21 @@ from wicken.netcdf_dogma import NetCDFDogma
 class CheckSuite(object):
 
     def _get_checks(self, checkclass):
+        """
+        Helper method to retreive check methods from a Checker class.
+
+        The name of the methods in the Checker class should start with "check_" for this
+        method to find them.
+        """
         meths = inspect.getmembers(checkclass, inspect.ismethod)
         return [x[1] for x in meths if x[0].startswith("check_")]
 
     def run(self, dataset, *args):
+        """
+        Runs this CheckSuite on the dataset with all the passed Checker instances.
+
+        Returns a dictionary mapping Checkers to their grouped scores.
+        """
 
         all_checks = []
         map(all_checks.extend, (self._get_checks(a) for a in args))
@@ -27,12 +38,18 @@ class CheckSuite(object):
         return list(itertools.chain.from_iterable(vals))
 
     def load_dataset(self, ds_str, belief_map):
+        """
+        Helper method to load a dataset.
+        """
         ds = Dataset(ds_str)
         data_object = NetCDFDogma('ds', belief_map, ds)
 
         return data_object
 
     def scores(self, raw_scores):
+        """
+        Transforms raw scores from a single checker into a fully tallied and grouped scoreline.
+        """
         grouped = self._group_raw(raw_scores)
 
         # score each top level item in groups
@@ -46,6 +63,11 @@ class CheckSuite(object):
         return ((cur_score, max_score), grouped)
 
     def _group_raw(self, raw_scores, cur=None, level=1):
+        """
+        Internal recursive method to group raw scores into a cascading score summary.
+
+        Only top level items are tallied for scores.
+        """
         #print "_group_raw", level, cur, len(raw_scores), raw_scores[0]
 
         def build_group(label=None, weight=None, value=None, sub=None):
@@ -98,6 +120,10 @@ class CheckSuite(object):
         return ret_val
 
     def _translate_value(self, val):
+        """
+        Turns shorthand True/False checks into full scores (1, 1)/(0, 1).
+        Leaves full scores alone.
+        """
         if val == True:
             return (1, 1)
         elif val == False:
