@@ -6,6 +6,7 @@ Compliance Checker
 
 from functools import wraps
 import collections
+from wicken.exceptions import DogmaGetterSetterException
 
 class BaseCheck(object):
     HIGH   = 3
@@ -18,7 +19,7 @@ class BaseCheck(object):
 def std_check_in(dataset, name, allowed_vals):
     #return name in dataset.variables and dataset.variables[name] in allowed_vals
     try:
-        return hasattr(dataset, name) and dataset.name in allowed_vals
+        return hasattr(dataset, name) and getattr(dataset, name) in allowed_vals
     except DogmaGetterSetterException:
         pass
 
