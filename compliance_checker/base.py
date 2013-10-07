@@ -13,21 +13,22 @@ class BaseCheck(object):
     MEDIUM = 2
     LOW    = 1
 
-    def beliefs(self):
+    @classmethod
+    def beliefs(cls):
         raise NotImplementedError("Define this in your derived Checker class")
 
-def std_check_in(dataset, name, allowed_vals):
-    #return name in dataset.variables and dataset.variables[name] in allowed_vals
+def std_check_in(dataset_dogma, name, allowed_vals):
+    #return name in dataset_dogma.variables and dataset_dogma.variables[name] in allowed_vals
     try:
-        return hasattr(dataset, name) and getattr(dataset, name) in allowed_vals
+        return hasattr(dataset_dogma, name) and getattr(dataset_dogma, name) in allowed_vals
     except DogmaGetterSetterException:
         pass
 
     return False
 
-def std_check(dataset, name):
-    #return name in dataset.variables
-    return hasattr(dataset, name)
+def std_check(dataset_dogma, name):
+    #return name in dataset_dogma.variables
+    return hasattr(dataset_dogma, name)
 
 def check_has(priority=BaseCheck.HIGH):
 
@@ -38,9 +39,9 @@ def check_has(priority=BaseCheck.HIGH):
             ret_val = []
             for l in list_vars:
                 if isinstance(l, tuple):
-                    ret_val.append((priority, std_check_in(ds, l[0], l[1]), l[0]))
+                    ret_val.append((priority, std_check_in(ds.dogma, l[0], l[1]), l[0]))
                 else:
-                    ret_val.append((priority, std_check(ds, l), l))
+                    ret_val.append((priority, std_check(ds.dogma, l), l))
 
             return ret_val
 

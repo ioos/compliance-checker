@@ -43,6 +43,11 @@ class CheckSuite(object):
 
         return ret_val
 
+    class DSPair(object):
+        def __init__(self, ds, dogma):
+            self.dataset = ds
+            self.dogma = dogma
+
     def load_dataset(self, ds_str, belief_map):
         """
         Helper method to load a dataset.
@@ -50,7 +55,7 @@ class CheckSuite(object):
         ds = Dataset(ds_str)
         data_object = NetCDFDogma('ds', belief_map, ds)
 
-        return data_object
+        return self.DSPair(ds, data_object)
 
     def scores(self, raw_scores):
         """
