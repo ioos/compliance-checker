@@ -20,22 +20,28 @@ class CheckSuite(object):
         meths = inspect.getmembers(checkclass, inspect.ismethod)
         return [x[1] for x in meths if x[0].startswith("check_")]
 
-    def run(self, dataset, *args):
+    def run(self, dataset_location, *args):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
         Returns a dictionary mapping Checkers to their grouped scores.
         """
 
-        all_checks = []
-        map(all_checks.extend, (self._get_checks(a) for a in args))
+        ret_val = {}
 
+        for a in args:
+            checks = self._get_checks(a)
 
-        vals = [[v] if not isinstance(v, list) else v for v in [c(dataset) for c in all_checks]]
+            ds = self.load_dataset(dataset_location, a.beliefs())
 
-        # transform to scores
+            vals = [[v] if not isinstance(v, list) else v for v in [c(ds) for c in checks]]
 
-        return list(itertools.chain.from_iterable(vals))
+            # transform to scores
+            scores = self.scores(list(itertools.chain.from_iterable(vals)))
+
+            ret_val[a] = scores
+
+        return ret_val
 
     def load_dataset(self, ds_str, belief_map):
         """

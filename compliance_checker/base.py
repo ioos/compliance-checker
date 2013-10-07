@@ -12,6 +12,9 @@ class BaseCheck(object):
     MEDIUM = 2
     LOW    = 1
 
+    def beliefs(self):
+        raise NotImplementedError("Define this in your derived Checker class")
+
 def std_check_in(dataset, name, allowed_vals):
     #return name in dataset.variables and dataset.variables[name] in allowed_vals
     try:

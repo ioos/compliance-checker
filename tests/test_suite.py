@@ -5,14 +5,15 @@ from pprint import pprint
 
 def test_suite():
     cs = CheckSuite()
-    ds = cs.load_dataset("/Users/asadeveloper/Downloads/hycomglobalnavy_2012120300.nc", ACDDCheck.beliefs())
+    #ds = cs.load_dataset("/Users/asadeveloper/Downloads/hycomglobalnavy_2012120300.nc", ACDDCheck.beliefs())
     #ds = cs.load_dataset("/Users/asadeveloper/Downloads/hycom.ncml", ACDDCheck.beliefs)
     acdd = ACDDCheck()
 
-    vals = cs.run(ds, acdd)
+    vals = cs.run("/Users/asadeveloper/Downloads/sresa1b_ncar_ccsm3_0_run1_200001.nc", acdd)
 
     pprint(vals)
-    assert vals == []
+    assert acdd in vals
+    assert vals[acdd][0] == (43.5, 78)
 
 def test_scores():
     cs = CheckSuite()
@@ -68,42 +69,46 @@ def test_scores():
           (3, False, ('varattr', 'water_temp', 'var_coverage_content_type')),
           (3, False, ('varattr', 'salinity', 'var_coverage_content_type')),
           (3, False, ('varattr', 'surf_el', 'var_coverage_content_type')),
-    (3, False, ('varattr', 'water_u', 'var_coverage_content_type')),
-    (3, False, ('varattr', 'water_v', 'var_coverage_content_type')),
-    (3, True, ('varattr', 'time', 'var_long_name')),
-    (3, True, ('varattr', 'tau', 'var_long_name')),
-    (3, True, ('varattr', 'depth', 'var_long_name')),
-    (3, True, ('varattr', 'lat', 'var_long_name')),
-    (3, True, ('varattr', 'lon', 'var_long_name')),
-    (3, True, ('varattr', 'water_temp', 'var_long_name')),
-    (3, True, ('varattr', 'salinity', 'var_long_name')),
-    (3, True, ('varattr', 'surf_el', 'var_long_name')),
-    (3, True, ('varattr', 'water_u', 'var_long_name')),
-    (3, True, ('varattr', 'water_v', 'var_long_name')),
-    (3, False, ('varattr', 'time', 'var_std_name')),
-    (3, False, ('varattr', 'tau', 'var_std_name')),
-    (3, True, ('varattr', 'depth', 'var_std_name')),
-    (3, True, ('varattr', 'lat', 'var_std_name')),
-    (3, True, ('varattr', 'lon', 'var_std_name')),
-    (3, True, ('varattr', 'water_temp', 'var_std_name')),
-    (3, True, ('varattr', 'salinity', 'var_std_name')),
-    (3, False, ('varattr', 'surf_el', 'var_std_name')),
-    (3, False, ('varattr', 'water_u', 'var_std_name')),
-    (3, False, ('varattr', 'water_v', 'var_std_name')),
-    (3, True, ('varattr', 'time', 'var_units')),
-    (3, True, ('varattr', 'tau', 'var_units')),
-    (3, True, ('varattr', 'depth', 'var_units')),
-    (3, True, ('varattr', 'lat', 'var_units')),
-    (3, True, ('varattr', 'lon', 'var_units')),
-    (3, True, ('varattr', 'water_temp', 'var_units')),
-    (3, True, ('varattr', 'salinity', 'var_units')),
-    (3, True, ('varattr', 'surf_el', 'var_units')),
-    (3, True, ('varattr', 'water_u', 'var_units')),
-    (3, True, ('varattr', 'water_v', 'var_units'))]
+          (3, False, ('varattr', 'water_u', 'var_coverage_content_type')),
+          (3, False, ('varattr', 'water_v', 'var_coverage_content_type')),
+          (3, True, ('varattr', 'time', 'var_long_name')),
+          (3, True, ('varattr', 'tau', 'var_long_name')),
+          (3, True, ('varattr', 'depth', 'var_long_name')),
+          (3, True, ('varattr', 'lat', 'var_long_name')),
+          (3, True, ('varattr', 'lon', 'var_long_name')),
+          (3, True, ('varattr', 'water_temp', 'var_long_name')),
+          (3, True, ('varattr', 'salinity', 'var_long_name')),
+          (3, True, ('varattr', 'surf_el', 'var_long_name')),
+          (3, True, ('varattr', 'water_u', 'var_long_name')),
+          (3, True, ('varattr', 'water_v', 'var_long_name')),
+          (3, False, ('varattr', 'time', 'var_std_name')),
+          (3, False, ('varattr', 'tau', 'var_std_name')),
+          (3, True, ('varattr', 'depth', 'var_std_name')),
+          (3, True, ('varattr', 'lat', 'var_std_name')),
+          (3, True, ('varattr', 'lon', 'var_std_name')),
+          (3, True, ('varattr', 'water_temp', 'var_std_name')),
+          (3, True, ('varattr', 'salinity', 'var_std_name')),
+          (3, False, ('varattr', 'surf_el', 'var_std_name')),
+          (3, False, ('varattr', 'water_u', 'var_std_name')),
+          (3, False, ('varattr', 'water_v', 'var_std_name')),
+          (3, True, ('varattr', 'time', 'var_units')),
+          (3, True, ('varattr', 'tau', 'var_units')),
+          (3, True, ('varattr', 'depth', 'var_units')),
+          (3, True, ('varattr', 'lat', 'var_units')),
+          (3, True, ('varattr', 'lon', 'var_units')),
+          (3, True, ('varattr', 'water_temp', 'var_units')),
+          (3, True, ('varattr', 'salinity', 'var_units')),
+          (3, True, ('varattr', 'surf_el', 'var_units')),
+          (3, True, ('varattr', 'water_u', 'var_units')),
+          (3, True, ('varattr', 'water_v', 'var_units'))]
 
     val = cs.scores(v2)
     pprint(val)
 
-    assert val == []
+    assert val[0] == (42.0, 78)
+    assert "varattr" in [v[0] for v in val[1]]
+
+    va = [v for v in val[1] if v[0] == "varattr"]
+    assert len(va[0][3]) == 10
 
 
