@@ -7,6 +7,7 @@ import itertools
 from netCDF4 import Dataset
 from lxml import etree as ET
 from wicken.netcdf_dogma import NetCDFDogma
+from compliance_checker.base import BaseCheck, fix_return_value
 
 class CheckSuite(object):
 
@@ -19,6 +20,14 @@ class CheckSuite(object):
         """
         meths = inspect.getmembers(checkclass, inspect.ismethod)
         return [x[1] for x in meths if x[0].startswith("check_")]
+
+    def _run_check(self, check_method, ds):
+        val = check_method(ds)
+
+        if isinstance(val, list):
+            return [fix_return_value(v, check_method.im_func.func_name) for v in val]
+
+        return [fix_return_value(val, check_method.im_func.func_name)]
 
     def run(self, dataset_location, *args):
         """
@@ -34,10 +43,13 @@ class CheckSuite(object):
 
             ds = self.load_dataset(dataset_location, a.beliefs())
 
-            vals = [[v] if not isinstance(v, list) else v for v in [c(ds) for c in checks]]
+            #vals = list(itertools.chain.from_iterable([[v] if not isinstance(v, list) else v for v in [c(ds) for c in checks]]))
+            vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, ds), checks)))
+
+            # remove Nones?
 
             # transform to scores
-            scores = self.scores(list(itertools.chain.from_iterable(vals)))
+            scores = self.scores(vals)
 
             ret_val[a] = scores
 
@@ -67,11 +79,28 @@ class CheckSuite(object):
         weights = [x[1] for x in grouped]
         scores = [x[2] for x in grouped]
 
-        max_score = sum(weights)
-        cur_score = reduce(lambda acc, cur: acc + (1 if cur[0][0] == cur[0][1] else 0.5) * cur[1], zip(scores, weights), 0)
-        #cur_score = 
+        def score(acc, cur):
+            # cur is ((x, x), weight)
+            cs, weight = cur
 
-        return ((cur_score, max_score), grouped)
+            # acc is (score, total possible)
+            cas, catotal = acc
+
+            pts = 0
+            if cs[1] == 0:
+                return acc  # effectively a skip @TODO keep track of that?
+
+            if cs[0] == cs[1]:
+                return (cas + (1 * weight), catotal + weight)
+            elif cs[0] == 0:
+                return (cas, catotal + weight)
+
+            # @TODO: could do cs[0] / cs[1] for exact pct points
+            return (cas + (0.5 * weight), catotal + weight)
+
+        cur_score = reduce(score, zip(scores, weights), (0, 0))
+
+        return (cur_score, grouped)
 
     def _group_raw(self, raw_scores, cur=None, level=1):
         """
@@ -139,6 +168,8 @@ class CheckSuite(object):
             return (1, 1)
         elif val == False:
             return (0, 1)
+        elif val is None:
+            return (0, 0)
 
         return val
 

@@ -49,6 +49,26 @@ def check_has(priority=BaseCheck.HIGH):
 
     return _inner
 
+def fix_return_value(v, method_name=None):
+    """
+    Fixes up the return value of any check method.
+
+    Full return format is (weight, value, identifier).
+    Check method authors only have to specify value, or weight/value as a 2-tuple.
+
+    This method ensures it is a 3-tuple.
+    """
+    if v is None or not isinstance(v, tuple):
+        v = (BaseCheck.MEDIUM, v, method_name)
+    elif isinstance(v, tuple) and len(v) == 2:
+        v = (v[0], v[1], method_name)
+    elif isinstance(v, tuple):
+        pass
+    else:
+        raise StandardError("Unknown return value from check method %s: %s, expected either value or 2/3-tuple of (weight, value, optional name)" % (check_method.im_func.func_name, type(v)))
+
+    return v
+
 def score_group(group_name=None):
     def _inner(func):
         def _dec(s, ds):
@@ -74,6 +94,7 @@ def score_group(group_name=None):
 
                 return tuple(list(r[0:2]) + [tuple(cur_grouping)])
 
+            ret_val = map(lambda x: fix_return_value(x, func.func_name), ret_val)
             ret_val = map(dogroup, ret_val)
 
             return ret_val
