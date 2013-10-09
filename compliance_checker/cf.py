@@ -1,0 +1,790 @@
+from compliance_checker.base import BaseCheck, check_has, score_group
+
+class CFCheck(BaseCheck):
+    """
+    CF Convention Checker
+
+    These checks are translated from the document at http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html
+    """
+
+    @classmethod
+    def beliefs(cls): # @TODO
+        return {}
+
+    def check_filename_extension(self, ds):
+        """
+        2.1 Filename - NetCDF files should have the file name extension ".nc".
+        """
+        return (BaseCheck.MEDIUM, ds.dataset.filepath().endswith(".nc"), 'filename_extension')
+
+    def check_data_types(self, ds):
+        """
+        2.2 The netCDF data types char, byte, short, int, float or real, and double are all acceptable
+        """
+        pass
+
+    def check_char_str_types(self, ds):
+        """
+        2.2 NetCDF does not support a character string type, so these must be represented as character arrays.
+        An n-dimensional array of strings must be implemented as a character array of dimension (n,max_string_length),
+        with the last (most rapidly varying) dimension declared large enough to contain the longest string in the array.
+        """
+        pass
+
+    def check_naming_conventions(self, ds):
+        """
+        2.3 Variable, dimension and attribute names should begin with a letter and be composed of letters, digits, and underscores. 
+        """
+        pass
+
+    def check_names_unique(self, ds):
+        """
+        2.3 names should not be distinguished purely by case, i.e., if case is disregarded, no two names should be the same.
+        """
+        pass
+
+    def check_dimension_names(self, ds):
+        """
+        2.4 A variable may have any number of dimensions, including zero, and the dimensions must all have different names.
+        """
+        pass
+
+    def check_dimension_order(self, ds):
+        """
+        2.4 If any or all of the dimensions of a variable have the interpretations of "date or time" (T), "height or depth" (Z),
+        "latitude" (Y), or "longitude" (X) then we recommend, those dimensions to appear in the relative order T, then Z, then Y,
+        then X in the CDL definition corresponding to the file. All other dimensions should, whenever possible, be placed to the
+        left of the spatiotemporal dimensions.
+        """
+        pass
+
+    def check_dimension_single_value_applicable(self, ds):
+        """
+        2.4 When a single value of some coordinate applies to all the values in a variable, the recommended means of attaching this
+        information to the variable is by use of a dimension of size unity with a one-element coordinate variable. It is also
+        acceptable to use a scalar coordinate variable which eliminates the need for an associated size one dimension in the data
+        variable.
+        """
+        pass
+
+    def check_fill_value_outside_valid_range(self, ds):
+        """
+        2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
+        """
+        pass
+
+    def check_conventions_are_cf_16(self, ds):
+        """
+        2.6.1 the NUG defined global attribute Conventions to the string value "CF-1.6"
+        """
+        pass
+
+    ###############################################################################
+    #
+    # CHAPTER 3: Description of the Data
+    #
+    ###############################################################################
+
+    @score_group('convention_attrs')
+    @check_has(BaseCheck.MEDIUM)
+    def check_convention_globals(self, ds):
+        return ['title', 'history']
+
+    @score_group('convention_attrs')
+    def check_convention_possibly_var_attrs(self, ds):
+        """
+        2.6.2 institution, source, references, and comment, either global or assigned to individual variables.
+        When an attribute appears both globally and as a variable attribute, the variable's version has precedence.
+        """
+        pass
+
+    def check_units(self, ds):
+        """
+        3.1 The units attribute is required for all variables that represent dimensional quantities
+        (except for boundary variables defined in Section 7.1, “Cell Boundaries” and climatology variables
+        defined in Section 7.4, “Climatological Statistics”).
+
+        Units are not required for dimensionless quantities. A variable with no units attribute is assumed
+        to be dimensionless. However, a units attribute specifying a dimensionless unit may optionally be
+        included.
+        """
+        pass
+
+    def check_long_name(self, ds):
+        """
+        3.2 highly recommended that either long_name or the standard_name attribute be provided to make the file self-describing
+        """
+        pass
+
+    def check_standard_name(self, ds):
+        """
+        3.3 A standard name is associated with a variable via the attribute standard_name which takes a
+        string value comprised of a standard name optionally followed by one or more blanks and a
+        standard name modifier
+        """
+        # use cf-standard-name-table.xml
+        pass
+
+    def check_ancillary_data(self, ds):
+        """
+        3.4 It is a string attribute whose value is a blank separated list of variable names.
+        The nature of the relationship between variables associated via ancillary_variables must
+        be determined by other attributes. The variables listed by the ancillary_variables attribute
+        will often have the standard name of the variable which points to them including a modifier
+        (Appendix C, Standard Name Modifiers) to indicate the relationship.
+        """
+        pass
+
+    def check_flags(self, ds):
+        """
+        3.5 The attributes flag_values, flag_masks and flag_meanings are intended to make variables
+        that contain flag values self describing. Status codes and Boolean (binary) condition flags may be
+        expressed with different combinations of flag_values and flag_masks attribute definitions.
+
+        The flag_values and flag_meanings attributes describe a status flag consisting of mutually exclusive coded values.
+
+        The flag_meanings attribute is a string whose value is a blank separated list of descriptive words
+        or phrases, one for each flag value. Each word or phrase should consist of characters from
+        the alphanumeric set and the following five: '_', '-', '.', '+', '@'. 
+
+        The flag_masks and flag_meanings attributes describe a number of independent Boolean conditions
+        using bit field notation by setting unique bits in each flag_masks value. 
+
+        The flag_masks, flag_values and flag_meanings attributes, used together, describe a blend of
+        independent Boolean conditions and enumerated status codes. A flagged condition is identified
+        by a bitwise AND of the variable value and each flag_masks value; a result that matches the
+        flag_values value indicates a true condition. 
+        """
+        pass
+
+    ###############################################################################
+    #
+    # CHAPTER 4: Coordinate Types
+    #
+    ###############################################################################
+
+    def check_coordinate_axis_attr(self, ds):
+        """
+        4 The attribute axis may be attached to a coordinate variable and given one of the values X, Y, Z or T
+        which stand for a longitude, latitude, vertical, or time axis respectively. Alternatively the standard_name
+        attribute may be used for direct identification.
+        """
+        pass
+
+    def check_coordinate_vars_for_all_coordinate_types(self, ds):
+        """
+        4 We strongly recommend that coordinate variables be used for all coordinate types whenever they are applicable.
+        """
+        pass
+
+    def check_latitude(self, ds):
+        """
+        4.1 Variables representing latitude must always explicitly include the units attribute; there is no default value.
+        The recommended unit of latitude is degrees_north. Also acceptable are degree_north, degree_N, degrees_N, degreeN, and degreesN.
+
+        Optionally, the latitude type may be indicated additionally by providing the standard_name attribute with the
+        value latitude, and/or the axis attribute with the value Y.
+        """
+        pass
+
+    def check_longitude(self, ds):
+        """
+        4.2 Variables representing longitude must always explicitly include the units attribute; there is no default value.
+        The recommended unit of longitude is degrees_east. Also acceptable are degree_east, degree_E, degrees_E, degreeE, and degreesE.
+
+        Optionally, the longitude type may be indicated additionally by providing the standard_name attribute with the
+        value longitude, and/or the axis attribute with the value X.
+        """
+        pass
+
+    def check_vertical_coordinate(self, ds):
+        """
+        4.3 Variables representing dimensional height or depth axes must always explicitly include the units attribute;
+        there is no default value.
+
+        The attribute positive is required if the vertical axis units are not a valid unit of pressure. The positive
+        attribute may have the value up or down (case insensitive). This attribute may be applied to either coordinate
+        variables or auxillary coordinate variables that contain vertical coordinate data.
+
+        A vertical coordinate will be identifiable by: units of pressure; or the presence of the positive attribute with a
+        value of up or down (case insensitive).  Optionally, the vertical type may be indicated additionally by providing
+        the standard_name attribute with an appropriate value, and/or the axis attribute with the value Z.
+        """
+        pass
+
+    def check_dimensional_vertical_coordinate(self, ds):
+        """
+        4.3.1 The units attribute for dimensional coordinates will be a string formatted as per the udunits.dat file.
+        The acceptable units for vertical (depth or height) coordinate variables are:
+        - units of pressure as listed in the file udunits.dat. For vertical axes the most commonly used of these
+          include include bar, millibar, decibar, atmosphere (atm), pascal (Pa), and hPa.
+        - units of length as listed in the file udunits.dat. For vertical axes the most commonly used of these include
+          meter (metre, m), and kilometer (km).
+        - other units listed in the file udunits.dat that may under certain circumstances reference vertical position
+          such as units of density or temperature.
+
+        Plural forms are also acceptable.
+        """
+        pass
+
+    def check_dimensionless_vertical_coordinate(self, ds):
+        """
+        4.3.2 The units attribute is not required for dimensionless coordinates.
+
+        The standard_name attribute associates a coordinate with its definition from Appendix D, Dimensionless
+        Vertical Coordinates. The definition provides a mapping between the dimensionless coordinate values and
+        dimensional values that can positively and uniquely indicate the location of the data.
+
+        A new attribute, formula_terms, is used to associate terms in the definitions with variables in a netCDF file.
+        To maintain backwards compatibility with COARDS the use of these attributes is not required, but is strongly recommended.
+        """
+        pass
+
+    def check_time_coordinate(self, ds):
+        """
+        4.4 Variables representing time must always explicitly include the units attribute; there is no default value.
+
+        The units attribute takes a string value formatted as per the recommendations in the Udunits package.
+
+        The acceptable units for time are listed in the udunits.dat file. The most commonly used of these strings
+        (and their abbreviations) includes day (d), hour (hr, h), minute (min) and second (sec, s). Plural forms are
+        also acceptable. The reference time string (appearing after the identifier since) may include date alone; date and
+        time; or date, time, and time zone. The reference time is required. A reference time in year 0 has a special meaning
+        (see Section 7.4, “Climatological Statistics”).
+
+        Recommend that the unit year be used with caution. It is not a calendar year.
+        For similar reasons the unit month should also be used with caution.
+
+        A time coordinate is identifiable from its units string alone.
+        Optionally, the time coordinate may be indicated additionally by providing the standard_name attribute with an
+        appropriate value, and/or the axis attribute with the value T.
+        """
+        pass
+
+    def check_calendar(self, ds):
+        """
+        4.4.1 In order to calculate a new date and time given a base date, base time and a time increment one
+        must know what calendar to use.
+
+        The values currently defined for calendar are:
+        - gregorian or standard
+        - proleptic_gregorian
+        - noleap or 365_day
+        - all_leap or 366_day
+        - 360_day
+        - julian
+        - none
+
+        The calendar attribute may be set to none in climate experiments that simulate a fixed time of year.
+        The time of year is indicated by the date in the reference time of the units attribute.
+
+        If none of the calendars defined above applies, a non-standard calendar can be defined. The lengths of each
+        month are explicitly defined with the month_lengths attribute of the time axis.
+
+        If leap years are included, then two other attributes of the time axis should also be defined:
+
+        leap_year, leap_month
+
+        The calendar attribute is not required when a non-standard calendar is being used. It is sufficient to define
+        the calendar using the month_lengths attribute, along with leap_year, and leap_month as appropriate. However,
+        the calendar attribute is allowed to take non-standard values and in that case defining the non-standard calendar
+        using the appropriate attributes is required.
+        """
+        pass
+
+    ###############################################################################
+    #
+    # CHAPTER 5: Coordinate Systems
+    #
+    ###############################################################################
+
+    def check_coordinate_systems(self, ds):
+        """
+        5 All of a variable's spatiotemporal dimensions that are not latitude, longitude, vertical, or time dimensions are
+        required to be associated with the relevant latitude, longitude, vertical, or time coordinates via the new
+        coordinates attribute of the variable. The value of the coordinates attribute is a blank separated list of the
+        names of auxiliary coordinate variables.
+
+        The dimensions of an auxiliary coordinate variable must be a subset of the dimensions of the variable with
+        which the coordinate is associated, with two exceptions:
+        - String-valued coordinates (Section 6.1, “Labels”) have a dimension for maximum string length
+        - In the ragged array representations of data (Chapter 9, Discrete Sampling Geometries), special methods are
+          needed to connect the data and coordinates
+
+        Recommend that the name of a multidimensional coordinate variable should not match the name of any of its dimensions
+        because that precludes supplying a coordinate variable for the dimension.
+
+        Auxiliary coordinate variables may not be used as the only way to identify latitude and longitude coordinates that
+        could be identified using coordinate variables.
+
+        An application that is trying to find the latitude coordinate of a variable should always look first to see if any
+        of the variable's dimensions correspond to a latitude coordinate variable. If the latitude coordinate is not found
+        this way, then the auxiliary coordinate variables listed by the coordinates attribute should be checked. Note that it
+        is permissible, but optional, to list coordinate variables as well as auxiliary coordinate variables in the
+        coordinates attribute.
+
+        It is not permissible for a data variable to have both a coordinate variable and an auxiliary coordinate variable,
+        or more than one of either type of variable, having an axis attribute with any given value e.g. there must be no
+        more than one axis attribute for X for any data variable.
+        """
+        pass
+
+    def check_independent_axis_dimensions(self, ds):
+        """
+        5.1 When each of a variable's spatiotemporal dimensions is a latitude, longitude, vertical, or time dimension,
+        then each axis is identified by a coordinate variable.
+        """
+        pass
+
+    def check_two_dimensional(self, ds):
+        """
+        5.2 The latitude and longitude coordinates of a horizontal grid that was not defined as a Cartesian product of
+        latitude and longitude axes, can sometimes be represented using two-dimensional coordinate variables.
+        """
+        pass
+
+    def check_reduced_horizontal_grid(self, ds):
+        """
+        5.3 A "reduced" longitude-latitude grid is one in which the points are arranged along constant latitude lines
+        with the number of points on a latitude line decreasing toward the poles.
+
+        Recommend that this type of gridded data be stored using the compression scheme described in Section 8.2,
+        "Compression by Gathering". The compressed latitude and longitude auxiliary coordinate variables are identified
+        by the coordinates attribute.
+        """
+        pass
+
+    def check_horz_crfs_grid_mappings_projections(self, ds):
+        """
+        5.6 When the coordinate variables for a horizontal grid are not longitude and latitude, it is required that the
+        true latitude and longitude coordinates be supplied via the coordinates attribute. If in addition it is desired
+        to describe the mapping between the given coordinate variables and the true latitude and longitude coordinates,
+        the attribute grid_mapping may be used to supply this description.
+
+        This attribute is attached to data variables so that variables with different mappings may be present in a single
+        file. The attribute takes a string value which is the name of another variable in the file that provides the
+        description of the mapping via a collection of attached attributes. This variable is called a grid mapping variable
+        and is of arbitrary type since it contains no data. Its purpose is to act as a container for the attributes that
+        define the mapping.
+
+        The one attribute that all grid mapping variables must have is grid_mapping_name which takes a string value that
+        contains the mapping's name. The other attributes that define a specific mapping depend on the value of
+        grid_mapping_name. The valid values of grid_mapping_name along with the attributes that provide specific map
+        parameter values are described in Appendix F, Grid Mappings.
+
+        When the coordinate variables for a horizontal grid are longitude and latitude, a grid mapping variable with
+        grid_mapping_name of latitude_longitude may be used to specify the ellipsoid and prime meridian.
+
+
+        In order to make use of a grid mapping to directly calculate latitude and longitude values it is necessary to associate
+        the coordinate variables with the independent variables of the mapping. This is done by assigning a standard_name to the
+        coordinate variable. The appropriate values of the standard_name depend on the grid mapping and are given in Appendix F, Grid Mappings.
+        """
+        pass
+
+    def check_scalar_coordinate_system(self, ds):
+        """
+        5.7 When a variable has an associated coordinate which is single-valued, that coordinate may be represented as a
+        scalar variable. Since there is no associated dimension these scalar coordinate variables should be attached to a
+        data variable via the coordinates attribute.
+
+        Once a name is used for a scalar coordinate variable it can not be used for a 1D coordinate variable. For this
+        reason we strongly recommend against using a name for a scalar coordinate variable that matches the name of any
+        dimension in the file.
+        """
+        pass
+
+    ###############################################################################
+    #
+    # CHAPTER 6: Labels and Alternative Coordinates
+    #
+    ###############################################################################
+
+    def check_geographic_region(self, ds):
+        """
+        6.1.1 When data is representative of geographic regions which can be identified by names but which have complex
+        boundaries that cannot practically be specified using longitude and latitude boundary coordinates, a labeled
+        axis should be used to identify the regions. 
+
+        Recommend that the names be chosen from the list of standardized region names whenever possible. To indicate
+        that the label values are standardized the variable that contains the labels must be given the standard_name
+        attribute with the value region.
+        """
+        pass
+
+    def check_alternative_coordinates(self, ds):
+        """
+        6.2 In some situations a dimension may have alternative sets of coordinates values. Since there can only be
+        one coordinate variable for the dimension (the variable with the same name as the dimension), any alternative
+        sets of values have to be stored in auxiliary coordinate variables. For such alternative coordinate variables,
+        there are no mandatory attributes, but they may have any of the attributes allowed for coordinate variables.
+        """
+        pass
+
+    ###############################################################################
+    #
+    # CHAPTER 7: Data Representative of Cells
+    #
+    ###############################################################################
+
+    def check_cell_boundaries(self, ds):
+        """
+        7.1 To represent cells we add the attribute bounds to the appropriate coordinate variable(s). The value of bounds
+        is the name of the variable that contains the vertices of the cell boundaries. We refer to this type of variable as
+        a "boundary variable." A boundary variable will have one more dimension than its associated coordinate or auxiliary
+        coordinate variable. The additional dimension should be the most rapidly varying one, and its size is the maximum
+        number of cell vertices. 
+
+        Applications that process cell boundary data often times need to determine whether or not adjacent cells share an
+        edge. In order to facilitate this type of processing the following restrictions are placed on the data in boundary
+        variables:
+
+        Bounds for 1-D coordinate variables
+
+            For a coordinate variable such as lat(lat) with associated boundary variable latbnd(x,2), the interval endpoints
+            must be ordered consistently with the associated coordinate, e.g., for an increasing coordinate, lat(1) > lat(0)
+            implies latbnd(i,1) >= latbnd(i,0) for all i
+
+            If adjacent intervals are contiguous, the shared endpoint must be represented indentically in each instance where
+            it occurs in the boundary variable. For example, if the intervals that contain grid points lat(i) and lat(i+1) are
+            contiguous, then latbnd(i+1,0) = latbnd(i,1).
+            
+        Bounds for 2-D coordinate variables with 4-sided cells
+            
+            In the case where the horizontal grid is described by two-dimensional auxiliary coordinate variables in latitude
+            lat(n,m) and longitude lon(n,m), and the associated cells are four-sided, then the boundary variables are given
+            in the form latbnd(n,m,4) and lonbnd(n,m,4), where the trailing index runs over the four vertices of the cells. 
+
+        Bounds for multi-dimensional coordinate variables with p-sided cells
+
+            In all other cases, the bounds should be dimensioned (...,n,p), where (...,n) are the dimensions of the auxiliary
+            coordinate variables, and p the number of vertices of the cells. The vertices must be traversed anticlockwise in the
+            lon-lat plane as viewed from above. The starting vertex is not specified.
+        """
+        pass
+
+    def check_cell_measures(self, ds):
+        """
+        7.2 To indicate extra information about the spatial properties of a variable's grid cells, a cell_measures attribute may
+        be defined for a variable. This is a string attribute comprising a list of blank-separated pairs of words of the form
+        "measure: name". "area" and "volume" are the only defined measures.
+
+        The "name" is the name of the variable containing the measure values, which we refer to as a "measure variable". The
+        dimensions of the measure variable should be the same as or a subset of the dimensions of the variable to which they are
+        related, but their order is not restricted.
+
+        The variable must have a units attribute and may have other attributes such as a standard_name.
+        """
+        pass
+
+    def check_cell_methods(self, ds):
+        """
+        7.3 To describe the characteristic of a field that is represented by cell values, we define the cell_methods attribute
+        of the variable. This is a string attribute comprising a list of blank-separated words of the form "name: method". Each
+        "name: method" pair indicates that for an axis identified by name, the cell values representing the field have been
+        determined or derived by the specified method.
+
+        name can be a dimension of the variable, a scalar coordinate variable, a valid standard name, or the word "area"
+
+        values of method should be selected from the list in Appendix E, Cell Methods, which includes point, sum, mean, maximum,
+        minimum, mid_range, standard_deviation, variance, mode, and median. Case is not significant in the method name. Some
+        methods (e.g., variance) imply a change of units of the variable, as is indicated in Appendix E, Cell Methods.
+
+        Because the default interpretation for an intensive quantity differs from that of an extensive quantity and because this
+        distinction may not be understood by some users of the data, it is recommended that every data variable include for each
+        of its dimensions and each of its scalar coordinate variables the cell_methods information of interest (unless this
+        information would not be meaningful). It is especially recommended that cell_methods be explicitly specified for each
+        spatio-temporal dimension and each spatio-temporal scalar coordinate variable.
+        """
+        pass
+
+    def check_cell_methods_for_multi_axes(self, ds):
+        """
+        7.3.1 If a data value is representative of variation over a combination of axes, a single method should be prefixed by the
+        names of all the dimensions involved (listed in any order, since in this case the order must be immaterial). 
+        """
+        pass
+
+    def check_spacing_and_extra_info(self, ds):
+        """
+        7.3.2 To indicate more precisely how the cell method was applied, extra information may be included in parentheses ()
+        after the identification of the method. This information includes standardized and non-standardized parts.
+
+        The only standardized information is to provide the typical interval between the original data values to which the method
+        was applied, in the situation where the present data values are statistically representative of original data values which
+        had a finer spacing.
+
+        The syntax is (interval: value unit), where value is a numerical value and unit is a string that can be recognized by
+        UNIDATA's Udunits package.
+
+        If the cell method applies to a combination of axes, they may have a common original interval. Alternatively, they may have
+        separate intervals, which are matched to the names of axes by position.
+
+        If there is both standardized and non-standardized information, the non-standardized follows the standardized information
+        and the keyword comment:. If there is no standardized information, the keyword comment: should be omitted.
+
+        A dimension of size one may be the result of "collapsing" an axis by some statistical operation, for instance by
+        calculating a variance from time series data. We strongly recommend that dimensions of size one be retained (or scalar
+        coordinate variables be defined) to enable documentation of the method (through the cell_methods attribute) and its
+        domain (through the cell_bounds attribute).
+        """
+        pass
+
+    def check_stats_applying_to_portions_of_cells(self, ds):
+        """
+        7.3.3 By default, the statistical method indicated by cell_methods is assumed to have been evaluated over the entire
+        horizontal area of the cell. Sometimes, however, it is useful to limit consideration to only a portion of a cell.
+
+        One of two conventions may be used.
+
+        The first convention is a method that can be used for the common case of a single area-type. In this case, the
+        cell_methods attribute may include a string of the form "name: method where type".
+
+        The second convention is the more general. In this case, the cell_methods entry is of the form "name: method where
+        typevar". Here typevar is a string-valued auxiliary coordinate variable or string-valued scalar coordinate variable
+        with a standard_name of area_type. The variable typevar contains the name(s) of the selected portion(s) of the grid
+        cell to which the method is applied. 
+
+        If the method is mean, various ways of calculating the mean can be distinguished in the cell_methods attribute with
+        a string of the form "mean where type1 [over type2]". Here, type1 can be any of the possibilities allowed for typevar
+        or type (as specified in the two paragraphs preceding above Example). The same options apply to type2, except it is
+        not allowed to be the name of an auxiliary coordinate variable with a dimension greater than one (ignoring the
+        dimension accommodating the maximum string length)
+        """
+        pass
+
+    def check_cell_methods_with_no_coords(self, ds):
+        """
+        7.3.4 To provide an indication that a particular cell method is relevant to the data without having to provide a
+        precise description of the corresponding cell, the "name" that appears in a "name: method" pair may be an
+        appropriate standard_name (which identifies the dimension) or the string, "area" (rather than the name of a scalar
+        coordinate variable or a dimension with a coordinate variable). This convention cannot be used, however, if the name
+        of a dimension or scalar coordinate variable is identical to name. 
+
+        Recommend that whenever possible, cell bounds should be supplied by giving the variable a dimension of size one
+        and attaching bounds to the associated coordinate variable.
+        """
+        pass
+
+    def check_climatological_statistics(self, ds):
+        """
+        7.4 A climatological time coordinate variable does not have a bounds attribute. Instead, it has a climatology
+        attribute, which names a variable with dimensions (n,2), n being the dimension of the climatological time axis.
+        Using the units and calendar of the time coordinate variable, element (i,0) of the climatology variable specifies
+        the beginning of the first subinterval and element (i,1) the end of the last subinterval used to evaluate the
+        climatological statistics with index i in the time dimension. The time coordinates should be values that are
+        representative of the climatological time intervals, such that an application which does not recognise climatological
+        time will nonetheless be able to make a reasonable interpretation.
+
+        Valid values of the cell_methods attribute must be in one of the forms from the following list.
+
+        - time: method1 within years   time: method2 over years
+        - time: method1 within days   time: method2 over days
+        - time: method1 within days   time: method2 over days   time: method3 over years
+
+        The methods which can be specified are those listed in Appendix E, Cell Methods and each entry in the cell_methods
+        attribute may also, contain non-standardised information in parentheses after the method. 
+        """
+        pass
+
+    ###############################################################################
+    #
+    # CHAPTER 8: Reduction of Dataset Size
+    #
+    ###############################################################################
+
+    def check_packed_data(self, ds):
+        """
+        8.1 Simple packing may be achieved through the use of the optional NUG defined attributes scale_factor and
+        add_offset. After the data values of a variable have been read, they are to be multiplied by the scale_factor,
+        and have add_offset added to them. 
+
+        The units of a variable should be representative of the unpacked data.
+
+        If the scale_factor and add_offset attributes are of the same data type as the associated variable, the unpacked
+        data is assumed to be of the same data type as the packed data. However, if the scale_factor and add_offset
+        attributes are of a different data type from the variable (containing the packed data) then the unpacked data
+        should match the type of these attributes, which must both be of type float or both be of type double. An additional
+        restriction in this case is that the variable containing the packed data must be of type byte, short or int. It is
+        not advised to unpack an int into a float as there is a potential precision loss.
+
+        When data to be packed contains missing values the attributes that indicate missing values (_FillValue, valid_min,
+        valid_max, valid_range) must be of the same data type as the packed data.
+        """
+        pass
+
+    def check_compression(self, ds):
+        """
+        8.2 To save space in the netCDF file, it may be desirable to eliminate points from data arrays that are invariably
+        missing. Such a compression can operate over one or more adjacent axes, and is accomplished with reference to a list
+        of the points to be stored. 
+
+        The list is stored as the coordinate variable for the compressed axis of the data array. Thus, the list variable and
+        its dimension have the same name. The list variable has a string attribute compress, containing a blank-separated
+        list of the dimensions which were affected by the compression in the order of the CDL declaration of the uncompressed
+        array. 
+        """
+        pass
+
+    ###############################################################################
+    #
+    # CHAPTER 9: Discrete Sampling Geometries
+    #
+    ###############################################################################
+
+    def check_all_features_are_same_type(self, ds):
+        """
+        9.1 The features contained within a collection must always be of the same type; and all the collections in a CF file
+        must be of the same feature type. 
+
+        point, timeSeries, trajectory, profile, timeSeriesProfile, trajectoryProfile.
+
+        The space-time coordinates that are indicated for each feature are mandatory.  However a featureType may also include
+        other space-time coordinates which are not mandatory (notably the z coordinate).
+        """
+        pass
+
+    def check_collections_instances_and_elements(self, ds):
+        """
+        9.2 The dimension with subscript i identifies a particular feature within a collection of features. It is called the
+        instance dimension. One-dimensional variables in a Discrete Geometry CF file, which have only this dimension (such as
+        x(i) y(i) and z(i) for a timeseries), are instance variables. Instance variables provide the metadata that
+        differentiates individual features.
+
+        The subscripts o and p distinguish the data elements that compose a single feature. We refer to data values in a feature
+        as its elements, and to the dimensions of o and p as element dimensions. Each feature can have its own set of element
+        subscripts o and p.
+
+        Feature instances within a collection need not have the same numbers of elements. If the features do all have the same
+        number of elements, and the sequence of element coordinates is identical for all features, savings in simplicity and
+        space are achievable by storing only one copy of these coordinates. 
+
+        If there is only a single feature to be stored in a data variable, there is no need for an instance dimension and it
+        is permitted to omit it. 
+        """
+        pass
+
+    def check_orthogonal_multidim_array(self, ds):
+        """
+        9.3.1 The orthogonal multidimensional array representation, the simplest representation, can be used if each feature
+        instance in the collection has identical coordinates along the element axis of the features. 
+
+        Data variables have both an instance dimension and an element dimension.  The dimensions may be given in any order. 
+        If there is a need for either the instance or an element dimension to be the netCDF unlimited dimension (so that more
+        features or more elements can be appended), then that dimension must be the outer dimension of the data variable
+        i.e. the leading dimension in CDL.
+        """
+        pass
+
+    def check_incomplete_multidim_array(self, ds):
+        """
+        9.3.2 The incomplete multidimensional array representation can used if the features within a collection do not all have
+        the same number of elements, but sufficient storage space is available to allocate the number of elements required by
+        the longest feature to all features.  That is, features that are shorter than the longest feature must be padded with
+        missing values to bring all instances to the same storage size.
+
+        Data variables have both an instance dimension and an element dimension.  The dimensions may be given in any order. 
+        If there is a need for either the instance or an element dimension to be the netCDF unlimited dimension (so that more
+        features or more elements can be appended), then that dimension must be the outer dimension of the data variable
+        i.e. the leading dimension in CDL.
+        """
+        pass
+
+    def check_contiguous_ragged_array(self, ds):
+        """
+        9.3.3 The contiguous ragged array representation can be used only if the size of each feature is known at the time
+        that it is created. 
+
+        In this representation, the file contains a count variable, which must be of type integer and must have the instance
+        dimension as its sole dimension.  The count variable contains the number of elements that each feature has. This
+        representation and its count variable are identifiable by the presence of an attribute, sample_dimension, found on
+        the count variable, which names the sample dimension being counted. For indices that correspond to features, whose
+        data have not yet been written, the count variable should  have a value of zero or a missing value. 
+
+        In the ragged array representations, the instance dimension (i), which sequences the individual features within the
+        collection, and the element dimension, which sequences the data elements of each feature (o and p), both occupy the
+        same dimension (the sample dimension).   If the sample dimension is the netCDF unlimited dimension, new data can be
+        appended to the file.  
+        """
+        pass
+
+    def check_indexed_ragged_array(self, ds):
+        """
+        9.3.4 The indexed ragged array representation stores the features interleaved along the sample dimension in the data
+        variable.
+
+        In this representation, the file contains an index variable, which must be of type integer, and must have the sample
+        dimension as its single dimension. The index variable contains the zero-based index of the feature to which each
+        element belongs. This representation is identifiable by the presence of an attribute, instance_dimension, on the index
+        variable, which names the dimension of the instance variables. For those indices of the sample dimension, into which
+        data have not yet been written, the index variable should be pre-filled with missing values.
+
+        In the ragged array representations, the instance dimension (i), which sequences the individual features within the
+        collection, and the element dimension, which sequences the data elements of each feature (o and p), both occupy the
+        same dimension (the sample dimension).   If the sample dimension is the netCDF unlimited dimension, new data can be
+        appended to the file.  
+        """
+        pass
+
+    def check_feature_type(self, ds):
+        """
+        9.4 A global attribute, featureType, is required for all Discrete Geometry representations except the orthogonal
+        multidimensional array representation, for which it is highly recommended.
+
+        The value assigned to the featureType attribute is case-insensitive.
+        """
+        pass
+
+    def check_coordinates_and_metadata(self, ds):
+        """
+        9.5 Every feature within a Discrete Geometry CF file must be unambiguously associated with an extensible collection
+        of instance variables that identify the feature and provide other metadata as needed to describe it.  Every element of
+        every feature must be unambiguously associated with its space and time coordinates and with the feature that contains
+        it.
+
+        The coordinates attribute must be attached to every data variable to indicate the spatiotemporal coordinate variables
+        that are needed to geo-locate the data.
+
+        Where feasible a variable with the attribute cf_role should be included.  The only acceptable values of cf_role for
+        Discrete Geometry CF data sets are timeseries_id, profile_id, and trajectory_id.   The variable carrying the cf_role
+        attribute may have any data type.  When a variable is assigned this attribute, it must provide a unique identifier
+        for each feature instance.
+
+        CF files that contain timeSeries, profile or trajectory featureTypes, should include only a single occurrence of a
+        cf_role attribute;  CF files that contain timeSeriesProfile or trajectoryProfile may contain two occurrences,
+        corresponding to the two levels of structure in these feature types.
+
+        CF Discrete Geometries provides a mechanism to encode both the nominal and the precise positions, while retaining the
+        semantics of the idealized feature type. Only the set of coordinates which are regarded as the nominal (default or
+        preferred) positions should be indicated by the attribute axis, which should be assigned string values to indicate
+        the orientations of the axes (X, Y, Z, or T).
+
+        Auxiliary coordinate variables containing the nominal and the precise positions should be listed in the relevant
+        coordinates attributes of data variables. In orthogonal representations the nominal positions could be  coordinate
+        variables, which do not need to be listed in the coordinates attribute, rather than auxiliary coordinate variables.
+
+        Coordinate bounds may optionally be associated with coordinate variables and auxiliary coordinate variables using
+        the bounds attribute.
+
+        If there is a vertical coordinate variable or auxiliary coordinate variable, it must be identified by the means
+        specified in section 4.3.   The use of the attribute axis=Z is recommended for clarity.  A standard_name attribute
+        that identifies the vertical coordinate is recommended.
+        """
+        pass
+
+    def check_missing_data(self, ds):
+        """
+        9.6 Auxiliary coordinate variables (spatial and time) must contain missing values to indicate a void in data storage
+        in the file but must not have missing data for any other reason.
+
+        It is not permitted for auxiliary coordinate variables to have missing values for elements where there is non-missing
+        data. Where any auxiliary coordinate variable contains a missing value, all other coordinate, auxiliary coordinate
+        and data values corresponding to that element should also contain missing values. Data variables should (as usual)
+        also contain missing values to indicate when there is no valid data available for the element, although the
+        coordinates are valid.
+
+        Similarly, for indices where the instance variable identified by cf_role contains a missing value indicator, all other
+        instance variable should also contain missing values.
+        """
+        pass
+
