@@ -101,8 +101,8 @@ class CFCheck(BaseCheck):
     def check_units(self, ds):
         """
         3.1 The units attribute is required for all variables that represent dimensional quantities
-        (except for boundary variables defined in Section 7.1, “Cell Boundaries” and climatology variables
-        defined in Section 7.4, “Climatological Statistics”).
+        (except for boundary variables defined in Section 7.1, "Cell Boundaries" and climatology variables
+        defined in Section 7.4, "Climatological Statistics").
 
         Units are not required for dimensionless quantities. A variable with no units attribute is assumed
         to be dimensionless. However, a units attribute specifying a dimensionless unit may optionally be
@@ -250,7 +250,7 @@ class CFCheck(BaseCheck):
         (and their abbreviations) includes day (d), hour (hr, h), minute (min) and second (sec, s). Plural forms are
         also acceptable. The reference time string (appearing after the identifier since) may include date alone; date and
         time; or date, time, and time zone. The reference time is required. A reference time in year 0 has a special meaning
-        (see Section 7.4, “Climatological Statistics”).
+        (see Section 7.4, "Climatological Statistics").
 
         Recommend that the unit year be used with caution. It is not a calendar year.
         For similar reasons the unit month should also be used with caution.
@@ -307,7 +307,7 @@ class CFCheck(BaseCheck):
 
         The dimensions of an auxiliary coordinate variable must be a subset of the dimensions of the variable with
         which the coordinate is associated, with two exceptions:
-        - String-valued coordinates (Section 6.1, “Labels”) have a dimension for maximum string length
+        - String-valued coordinates (Section 6.1, "Labels") have a dimension for maximum string length
         - In the ragged array representations of data (Chapter 9, Discrete Sampling Geometries), special methods are
           needed to connect the data and coordinates
 
