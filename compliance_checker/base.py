@@ -58,6 +58,8 @@ def fix_return_value(v, method_name=None):
 
     This method ensures it is a 3-tuple.
     """
+    method_name = method_name.replace("check_", "")     # remove common check prefix
+
     if v is None or not isinstance(v, tuple):
         v = (BaseCheck.MEDIUM, v, method_name)
     elif isinstance(v, tuple) and len(v) == 2:
