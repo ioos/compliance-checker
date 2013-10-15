@@ -1,10 +1,66 @@
+import re
+from collections import defaultdict
+import numpy as np
+
 from compliance_checker.base import BaseCheck, check_has, score_group
+
+# copied from paegan
+# paegan may depend on these later
+_possiblet = ["time", "TIME", "Time",
+           "t", "T",
+           "ocean_time", "OCEAN_TIME",
+           "jd", "JD",
+           "dn", "DN",
+           "times", "TIMES", "Times",
+           "mt", "MT",
+           "dt", "DT",
+          ]
+_possiblez = ["depth", "DEPTH",
+           "depths", "DEPTHS",
+           "height", "HEIGHT",
+           "altitude", "ALTITUDE",
+           "alt", "ALT", 
+           "Alt", "Altitude",
+           "h", "H",
+           "s_rho", "S_RHO",
+           "s_w", "S_W",
+           "z", "Z",
+           "siglay", "SIGLAY",
+           "siglev", "SIGLEV",
+           "sigma", "SIGMA",
+          ]
+_possiblex = ["x", "X",
+           "lon", "LON",
+           "xlon", "XLON",
+           "lonx", "lonx",
+           "lon_u", "LON_U",
+           "lon_v", "LON_V",
+           "lonc", "LONC",
+           "Lon", "Longitude",
+           "longitude", "LONGITUDE",
+           "lon_rho", "LON_RHO",
+           "lon_psi", "LON_PSI",
+          ]
+_possibley = ["y", "Y",
+           "lat", "LAT",
+           "ylat", "YLAT",
+           "laty", "laty",
+           "lat_u", "LAT_U",
+           "lat_v", "LAT_V",
+           "latc", "LATC",
+           "Lat", "Latitude",
+           "latitude", "LATITUDE",
+           "lat_rho", "LAT_RHO",
+           "lat_psi", "LAT_PSI",
+          ]
 
 class CFCheck(BaseCheck):
     """
     CF Convention Checker
 
-    These checks are translated from the document at http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html
+    These checks are translated documents: 
+        http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html
+        http://cf-pcmdi.llnl.gov/conformance/requirements-and-recommendations/1.6/
     """
 
     @classmethod
@@ -15,39 +71,72 @@ class CFCheck(BaseCheck):
         """
         2.1 Filename - NetCDF files should have the file name extension ".nc".
         """
-        return (BaseCheck.MEDIUM, ds.dataset.filepath().endswith(".nc"), 'filename_extension')
+        return BaseCheck.LOW, ds.dataset.filepath().endswith(".nc")
 
     def check_data_types(self, ds):
         """
         2.2 The netCDF data types char, byte, short, int, float or real, and double are all acceptable
         """
-        pass
+        fails = []
+        total = len(ds.dataset.variables)
 
-    def check_char_str_types(self, ds):
-        """
-        2.2 NetCDF does not support a character string type, so these must be represented as character arrays.
-        An n-dimensional array of strings must be implemented as a character array of dimension (n,max_string_length),
-        with the last (most rapidly varying) dimension declared large enough to contain the longest string in the array.
-        """
-        pass
+        for k, v in ds.dataset.variables.iteritems():
+            if v.datatype not in [np.character,
+                                  np.dtype('b'),
+                                  np.dtype('i4'),
+                                  np.int32,
+                                  np.float32,
+                                  np.double]:
+                fails.append((k, v.datatype))
+
+        return BaseCheck.HIGH, (total - len(fails), total), 'data_types', fails
 
     def check_naming_conventions(self, ds):
         """
         2.3 Variable, dimension and attribute names should begin with a letter and be composed of letters, digits, and underscores. 
         """
-        pass
+        fails = []
+        total = len(ds.dataset.variables)
+
+        rname = re.compile("[A-Za-z][A-Za-z0-9_]*")
+
+        for k, v in ds.dataset.variables.iteritems():
+            if not rname.match(k):
+                fails.append(k)
+
+        return BaseCheck.HIGH, (total - len(fails), total), 'naming_conventions', fails
 
     def check_names_unique(self, ds):
         """
         2.3 names should not be distinguished purely by case, i.e., if case is disregarded, no two names should be the same.
         """
-        pass
+        fails = []
+        total = len(ds.dataset.variables)
+        names = defaultdict(int)
+
+        for k in ds.dataset.variables:
+            names[k.lower()] += 1
+
+        fails = [k for k,v in names.iteritems() if v > 1]
+
+        return BaseCheck.LOW, (total - len(fails), total), 'names_unique', fails
 
     def check_dimension_names(self, ds):
         """
         2.4 A variable may have any number of dimensions, including zero, and the dimensions must all have different names.
         """
-        pass
+        fails = []
+        total = len(ds.dataset.variables)
+
+        for k, v in ds.dataset.variables.iteritems():
+            dims = defaultdict(int)
+            for d in v.dimensions:
+                dims[d] += 1
+
+            cur_fails = [(k, kk) for kk, vv in dims.iteritems() if vv > 1]
+            fails.extend(cur_fails)
+
+        return BaseCheck.HIGH, (total - len(fails), total), 'dimension_names', fails
 
     def check_dimension_order(self, ds):
         """
@@ -56,7 +145,43 @@ class CFCheck(BaseCheck):
         then X in the CDL definition corresponding to the file. All other dimensions should, whenever possible, be placed to the
         left of the spatiotemporal dimensions.
         """
-        pass
+        fails = []
+        total = len(ds.dataset.variables)
+
+        dimclasses = {'T':_possiblet,
+                      'Z':_possiblez,
+                      'Y':_possibley,
+                      'X':_possiblex}
+
+        expected = ['T', 'Z', 'Y', 'X']
+
+        for k, v in ds.dataset.variables.iteritems():
+            # classify each dimension by name
+            def classify_dim(d):
+                for dcname, dcvals in dimclasses.iteritems():
+                    if d in dcvals:
+                        return dcname
+
+                return None
+
+            dclass = map(classify_dim, v.dimensions)
+
+            # any nones should be before classified ones
+            nones    = [i for i, x in enumerate(dclass) if x is None]
+            nonnones = [i for i, x in enumerate(dclass) if x is not None]
+
+            if len(nones) and len(nonnones) and max(nones) > min(nonnones):
+                fails.append((k, "non-space-time dimension after space-time-dimensions"))
+
+            # classified ones should be in correct order
+            nonnones = [expected.index(x) for x in dclass if x is not None]
+            nonnones_sorted = sorted(nonnones)
+
+            if nonnones != nonnones_sorted:
+                fails.append((k, "dimensions not in T Z Y X order"))
+
+        # there are two checks here per variable so totals must be doubled
+        return BaseCheck.LOW, (total*2 - len(fails), total*2), 'dimension_order', fails
 
     def check_dimension_single_value_applicable(self, ds):
         """
@@ -71,32 +196,75 @@ class CFCheck(BaseCheck):
         """
         2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
         """
-        pass
+        fails = []
+        checked = 0
 
+        for k, v in ds.dataset.variables.iteritems():
+            if hasattr(v, '_FillValue'):
+                attrs = v.ncattrs()
+
+                if 'valid_range' in attrs:
+                    rmin, rmax = v.valid_range
+                elif 'valid_min' in attrs and 'valid_max' in attrs:
+                    rmin = v.valid_min
+                    rmax = v.valid_max
+                else:
+                    continue
+
+                checked += 1
+
+                if v._FillValue >= rmin and v._FillValue <= rmax:
+                    fails.append((k, "%s is between %s and %s" % (v._FillValue, rmin, rmax)))
+
+        return BaseCheck.HIGH, (checked - len(fails), checked), 'fill_value_outside_valid_range', fails
+
+    @check_has(BaseCheck.HIGH)
     def check_conventions_are_cf_16(self, ds):
         """
         2.6.1 the NUG defined global attribute Conventions to the string value "CF-1.6"
         """
-        pass
-
-    ###############################################################################
-    #
-    # CHAPTER 3: Description of the Data
-    #
-    ###############################################################################
+        return [("Conventions", ["CF-1.6"])]
 
     @score_group('convention_attrs')
-    @check_has(BaseCheck.MEDIUM)
     def check_convention_globals(self, ds):
-        return ['title', 'history']
+        """
+        2.6.2 title/history global attributes, must be strings. Do not need to exist.
+        """
+        attrs = ['title', 'history']
+        ret = []
+
+        for a in attrs:
+            if hasattr(ds.dataset, a):
+                ret.append((BaseCheck.HIGH, isinstance(getattr(ds.dataset, a), basestring), ('global', a)))
+
+        return ret
 
     @score_group('convention_attrs')
     def check_convention_possibly_var_attrs(self, ds):
         """
         2.6.2 institution, source, references, and comment, either global or assigned to individual variables.
         When an attribute appears both globally and as a variable attribute, the variable's version has precedence.
+        Must be strings.
         """
-        pass
+        attrs = ['institution', 'source', 'references', 'comment']
+        ret = []
+
+        # check attrs on global ds
+
+        # can't predetermine total - we only report attrs we find
+        for k, v in ds.dataset.variables.iteritems():
+            vattrs = v.ncattrs()
+            for a in attrs:
+                if a in vattrs:
+                    ret.append((BaseCheck.HIGH, isinstance(getattr(v, a), basestring), (k, a)))
+
+        return ret
+
+    ###############################################################################
+    #
+    # CHAPTER 3: Description of the Data
+    #
+    ###############################################################################
 
     def check_units(self, ds):
         """
