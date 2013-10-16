@@ -11,8 +11,7 @@ def main(ds_loc):
     out = cs.run(ds_loc, ACDDCheck(), CFCheck())
 
     import pprint
-    pprint.pprint({str(type(k)): v[0] for k,v in out.iteritems()})
-
+    pprint.pprint({str(type(k)): (v[0], [vv for vv in v[1] if vv.value != (0, 0)]) for k,v in out.iteritems()})
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

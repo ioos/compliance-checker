@@ -7,7 +7,7 @@ import itertools
 from netCDF4 import Dataset
 from lxml import etree as ET
 from wicken.netcdf_dogma import NetCDFDogma
-from compliance_checker.base import BaseCheck, fix_return_value
+from compliance_checker.base import BaseCheck, fix_return_value, Result
 
 class CheckSuite(object):
 
@@ -76,8 +76,8 @@ class CheckSuite(object):
         grouped = self._group_raw(raw_scores)
 
         # score each top level item in groups
-        weights = [x[1] for x in grouped]
-        scores = [x[2] for x in grouped]
+        weights = [x.weight for x in grouped]
+        scores = [x.value for x in grouped]
 
         def score(acc, cur):
             # cur is ((x, x), weight)
@@ -116,18 +116,22 @@ class CheckSuite(object):
             value  = self._translate_value(value)
             sub    = sub or []
 
-            return (label, weight, value, sub)
+            return Result(weight=weight,
+                          value=value,
+                          name=label,
+                          children=sub)
 
         def trim_groups(r):
-            if isinstance(r[2], tuple) or isinstance(r[2], list):
-                new_r2 = r[2][1:]
+            if isinstance(r.name, tuple) or isinstance(r.name, list):
+                new_name = r.name[1:]
             else:
-                new_r2 = []
+                new_name = []
 
-            return r[0:2] + tuple([new_r2])
+            return Result(r.weight, r.value, new_name, r.msgs)
 
-        # CHECK FOR TERMINAL CONDITION: all raw_scores[2] are single length
-        terminal = map(lambda x: len(x[2]), raw_scores)
+        # CHECK FOR TERMINAL CONDITION: all raw_scores.name are single length
+        # @TODO could have a problem here with scalar name, but probably still works
+        terminal = map(lambda x: len(x.name), raw_scores)
         if terminal == [0] * len(raw_scores):
             return []
 
@@ -135,9 +139,9 @@ class CheckSuite(object):
             """
             Slices off first element (if list/tuple) of classification or just returns it if scalar.
             """
-            if isinstance(r[2], tuple) or isinstance(r[2], list):
-                return r[2][0:1][0]
-            return r[2]
+            if isinstance(r.name, tuple) or isinstance(r.name, list):
+                return r.name[0:1][0]
+            return r.name
 
         grouped = itertools.groupby(sorted(raw_scores, key=group_func), key=group_func)
         ret_val = []
@@ -149,19 +153,21 @@ class CheckSuite(object):
             cv = self._group_raw(map(trim_groups, v), k, level+1)
             if len(cv):
                 # if this node has children, max weight of children + sum of all the scores
-                max_weight = max(map(lambda x: x[1], cv))
-                sum_scores = tuple(map(sum, zip(*(map(lambda x: x[2], cv)))))
+                max_weight = max(map(lambda x: x.weight, cv))
+                sum_scores = tuple(map(sum, zip(*(map(lambda x: x.value, cv)))))
+                msgs = []
             else:
-                max_weight = max(map(lambda x: x[0], v))
-                sum_scores = tuple(map(sum, zip(*(map(lambda x: self._translate_value(x[1]), v)))))
+                max_weight = max(map(lambda x: x.weight, v))
+                sum_scores = tuple(map(sum, zip(*(map(lambda x: self._translate_value(x.value), v)))))
+                msgs = sum(map(lambda x: x.msgs, v), [])
 
-            ret_val.append(build_group(k, max_weight, sum_scores, cv))
+            ret_val.append(Result(name=k, weight=max_weight, value=sum_scores, children=cv, msgs=msgs))
 
         return ret_val
 
     def _translate_value(self, val):
         """
-        Turns shorthand True/False checks into full scores (1, 1)/(0, 1).
+        Turns shorthand True/False/None checks into full scores (1, 1)/(0, 1)/(0, 0).
         Leaves full scores alone.
         """
         if val == True:

@@ -1,6 +1,6 @@
 import json
 import itertools
-from compliance_checker.base import BaseCheck, check_has, score_group
+from compliance_checker.base import BaseCheck, check_has, score_group, Result
 
 class ACDDCheck(BaseCheck):
 
@@ -107,21 +107,21 @@ class ACDDCheck(BaseCheck):
     def check_var_long_name(self, ds):
         vars = self._get_vars(ds, 'long_name')
 
-        retval = [(BaseCheck.HIGH, v[0] is not None, (v[1], "var_long_name")) for v in vars]
+        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_long_name")) for v in vars]
         return retval
 
     @score_group('varattr')
     def check_var_standard_name(self, ds):
         vars = self._get_vars(ds, 'standard_name')
 
-        retval = [(BaseCheck.HIGH, v[0] is not None, (v[1], "var_std_name")) for v in vars]
+        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_std_name")) for v in vars]
         return retval
 
     @score_group('varattr')
     def check_var_units(self, ds):
         vars = self._get_vars(ds, 'units')
 
-        retval = [(BaseCheck.HIGH, v[0] is not None, (v[1], "var_units")) for v in vars]
+        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_units")) for v in vars]
         return retval
 
     @score_group('varattr')
@@ -129,6 +129,6 @@ class ACDDCheck(BaseCheck):
         vars = self._get_vars(ds, 'coverage_content_type')
         allowed = ['image','thematicClassification','physicalMeasurement','auxiliaryInformation','qualityInformation','referenceInformation','modelResult','coordinate']
 
-        retval = [(BaseCheck.HIGH, v[0] is not None and v[0] in allowed, (v[1], "var_coverage_content_type")) for v in vars]
+        retval = [Result(BaseCheck.HIGH, v[0] is not None and v[0] in allowed, (v[1], "var_coverage_content_type")) for v in vars]
         return retval
 

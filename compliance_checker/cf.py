@@ -2,7 +2,7 @@ import re
 from collections import defaultdict
 import numpy as np
 
-from compliance_checker.base import BaseCheck, check_has, score_group
+from compliance_checker.base import BaseCheck, check_has, score_group, Result
 
 # copied from paegan
 # paegan may depend on these later
@@ -56,7 +56,7 @@ _possibley = ["y", "Y",
 
 class CFCheck(BaseCheck):
     """
-    CF Convention Checker
+    CF Convention Checker (1.6)
 
     These checks are translated documents: 
         http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html
@@ -71,7 +71,7 @@ class CFCheck(BaseCheck):
         """
         2.1 Filename - NetCDF files should have the file name extension ".nc".
         """
-        return BaseCheck.LOW, ds.dataset.filepath().endswith(".nc")
+        return Result(BaseCheck.LOW, ds.dataset.filepath().endswith(".nc"))
 
     def check_data_types(self, ds):
         """
@@ -89,7 +89,7 @@ class CFCheck(BaseCheck):
                                   np.double]:
                 fails.append((k, v.datatype))
 
-        return BaseCheck.HIGH, (total - len(fails), total), 'data_types', fails
+        return Result(BaseCheck.HIGH, (total - len(fails), total), msgs=fails)
 
     def check_naming_conventions(self, ds):
         """
@@ -104,7 +104,7 @@ class CFCheck(BaseCheck):
             if not rname.match(k):
                 fails.append(k)
 
-        return BaseCheck.HIGH, (total - len(fails), total), 'naming_conventions', fails
+        return Result(BaseCheck.HIGH, (total - len(fails), total), msgs=fails)
 
     def check_names_unique(self, ds):
         """
@@ -119,7 +119,7 @@ class CFCheck(BaseCheck):
 
         fails = [k for k,v in names.iteritems() if v > 1]
 
-        return BaseCheck.LOW, (total - len(fails), total), 'names_unique', fails
+        return Result(BaseCheck.LOW, (total - len(fails), total), msgs=fails)
 
     def check_dimension_names(self, ds):
         """
@@ -136,7 +136,7 @@ class CFCheck(BaseCheck):
             cur_fails = [(k, kk) for kk, vv in dims.iteritems() if vv > 1]
             fails.extend(cur_fails)
 
-        return BaseCheck.HIGH, (total - len(fails), total), 'dimension_names', fails
+        return Result(BaseCheck.HIGH, (total - len(fails), total), msgs=fails)
 
     def check_dimension_order(self, ds):
         """
@@ -181,7 +181,7 @@ class CFCheck(BaseCheck):
                 fails.append((k, "dimensions not in T Z Y X order"))
 
         # there are two checks here per variable so totals must be doubled
-        return BaseCheck.LOW, (total*2 - len(fails), total*2), 'dimension_order', fails
+        return Result(BaseCheck.LOW, (total*2 - len(fails), total*2), msgs=fails)
 
     def check_dimension_single_value_applicable(self, ds):
         """
@@ -216,7 +216,7 @@ class CFCheck(BaseCheck):
                 if v._FillValue >= rmin and v._FillValue <= rmax:
                     fails.append((k, "%s is between %s and %s" % (v._FillValue, rmin, rmax)))
 
-        return BaseCheck.HIGH, (checked - len(fails), checked), 'fill_value_outside_valid_range', fails
+        return Result(BaseCheck.HIGH, (checked - len(fails), checked), msgs=fails)
 
     @check_has(BaseCheck.HIGH)
     def check_conventions_are_cf_16(self, ds):
@@ -235,7 +235,7 @@ class CFCheck(BaseCheck):
 
         for a in attrs:
             if hasattr(ds.dataset, a):
-                ret.append((BaseCheck.HIGH, isinstance(getattr(ds.dataset, a), basestring), ('global', a)))
+                ret.append(Result(BaseCheck.HIGH, isinstance(getattr(ds.dataset, a), basestring), ('global', a)))
 
         return ret
 
@@ -256,7 +256,7 @@ class CFCheck(BaseCheck):
             vattrs = v.ncattrs()
             for a in attrs:
                 if a in vattrs:
-                    ret.append((BaseCheck.HIGH, isinstance(getattr(v, a), basestring), (k, a)))
+                    ret.append(Result(BaseCheck.HIGH, isinstance(getattr(v, a), basestring), (k, a)))
 
         return ret
 

@@ -17,6 +17,31 @@ class BaseCheck(object):
     def beliefs(cls):
         raise NotImplementedError("Define this in your derived Checker class")
 
+class Result(object):
+    """
+    Holds the result of a check method.
+
+    Stores such information as the check's value (True, False, a 2-tuple of (pass, total) or None for a skip),
+    weight of the check, any granular messages, or a hierarchy of results.
+    """
+    def __init__(self, weight=BaseCheck.MEDIUM, value=None, name=None, msgs=None, children=None):
+        self.weight = weight
+        self.value  = value
+        self.name   = name
+        self.msgs   = msgs or []
+
+        self.children = children or []
+
+    def __repr__(self):
+        ret = "%s (*%s): %s" % (self.name, self.weight, self.value)
+        if len(self.msgs):
+            ret += " (%d msgs)" % len(self.msgs)
+
+        if len(self.children):
+            ret += " (%d children)" % len(self.children)
+
+        return ret
+
 def std_check_in(dataset_dogma, name, allowed_vals):
     #return name in dataset_dogma.variables and dataset_dogma.variables[name] in allowed_vals
     try:
@@ -39,9 +64,10 @@ def check_has(priority=BaseCheck.HIGH):
             ret_val = []
             for l in list_vars:
                 if isinstance(l, tuple):
-                    ret_val.append((priority, std_check_in(ds.dogma, l[0], l[1]), l[0]))
+                    name, allowed = l
+                    ret_val.append(Result(priority, std_check_in(ds.dogma, name, allowed), name))
                 else:
-                    ret_val.append((priority, std_check(ds.dogma, l), l))
+                    ret_val.append(Result(priority, std_check(ds.dogma, l), l))
 
             return ret_val
 
@@ -51,24 +77,14 @@ def check_has(priority=BaseCheck.HIGH):
 
 def fix_return_value(v, method_name=None):
     """
-    Fixes up the return value of any check method.
-
-    Full return format is (weight, value, identifier).
-    Check method authors only have to specify value, or weight/value as a 2-tuple.
-
-    This method ensures it is a 3-tuple.
+    Transforms scalar return values into Result.
     """
     method_name = method_name.replace("check_", "")     # remove common check prefix
 
-    if v is None or not isinstance(v, tuple):
-        v = (BaseCheck.MEDIUM, v, method_name)
-    elif isinstance(v, tuple) and len(v) == 2:
-        v = (v[0], v[1], method_name)
-    elif isinstance(v, tuple):
-        pass
-    else:
-        raise StandardError("Unknown return value from check method %s: %s, expected either value or 2/3-tuple of (weight, value, optional name)" % (check_method.im_func.func_name, type(v)))
+    if v is None or not isinstance(v, Result):
+        v = Result(value=v, name=method_name)
 
+    v.name = v.name or method_name
     return v
 
 def score_group(group_name=None):
@@ -85,7 +101,7 @@ def score_group(group_name=None):
                 ret_val = [ret_val]
 
             def dogroup(r):
-                cur_grouping = r[2] if len(r) >= 3 else []
+                cur_grouping = r.name
 
                 if isinstance(cur_grouping, tuple):
                     cur_grouping = list(cur_grouping)
@@ -94,7 +110,7 @@ def score_group(group_name=None):
 
                 cur_grouping.insert(0, group_name)
 
-                return tuple(list(r[0:2]) + [tuple(cur_grouping)])
+                return Result(r.weight, r.value, tuple(cur_grouping), r.msgs)
 
             ret_val = map(lambda x: fix_return_value(x, func.func_name), ret_val)
             ret_val = map(dogroup, ret_val)
