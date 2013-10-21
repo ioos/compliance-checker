@@ -39,14 +39,15 @@ class CheckSuite(object):
         ret_val = {}
 
         for a in args:
-            checks = self._get_checks(a)
 
             ds = self.load_dataset(dataset_location, a.beliefs())
 
-            #vals = list(itertools.chain.from_iterable([[v] if not isinstance(v, list) else v for v in [c(ds) for c in checks]]))
+            a.setup(ds)
+            checks = self._get_checks(a)
+
             vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, ds), checks)))
 
-            # remove Nones?
+            # remove Nones? (aka skips)
 
             # transform to scores
             scores = self.scores(vals)

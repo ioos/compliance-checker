@@ -2,7 +2,7 @@ import re
 from collections import defaultdict
 import numpy as np
 
-from compliance_checker.base import BaseCheck, check_has, score_group, Result
+from compliance_checker.base import BaseCheck, check_has, score_group, Result, StandardNameTable, units_known
 
 # copied from paegan
 # paegan may depend on these later
@@ -54,6 +54,24 @@ _possibley = ["y", "Y",
            "lat_psi", "LAT_PSI",
           ]
 
+def guess_dim_type(dimension):
+    """
+    Guesses the type of dimension of a variable X/Y/Z/T
+
+    If can't figure it out, None is returned.
+    """
+
+    dimclasses = {'T':_possiblet,
+                  'Z':_possiblez,
+                  'Y':_possibley,
+                  'X':_possiblex}
+
+    for dcname, dcvals in dimclasses.iteritems():
+        if dimension in dcvals:
+            return dcname
+
+    return None
+
 class CFCheck(BaseCheck):
     """
     CF Convention Checker (1.6)
@@ -63,9 +81,123 @@ class CFCheck(BaseCheck):
         http://cf-pcmdi.llnl.gov/conformance/requirements-and-recommendations/1.6/
     """
 
+    def __init__(self):
+        self._dim_vars      = defaultdict(list)
+        self._clim_vars     = defaultdict(list)
+        self._boundary_vars = defaultdict(dict)
+
+        self._std_names     = StandardNameTable('cf-standard-name-table.xml')
+
     @classmethod
     def beliefs(cls): # @TODO
         return {}
+
+    ################################################################################
+    #
+    # Helper Methods - var classifications, etc
+    #
+    ################################################################################
+
+    def setup(self, ds):
+        self._find_dim_vars(ds)
+        self._find_clim_vars(ds)
+        self._find_boundary_vars(ds)
+
+    def _find_dim_vars(self, ds, refresh=False):
+        """
+        Finds all dimension variables in a dataset.
+
+        Dimension variables are vars that only depend on a dimension of the same name.
+
+        The result is cached by the passed in dataset object inside of this checker. Pass refresh=True
+        to redo the cached value.
+        """
+        if ds in self._dim_vars and not refresh:
+            return self._dim_vars[ds]
+
+        for d in ds.dataset.dimensions:
+            if d in ds.dataset.variables and ds.dataset.variables[d].dimensions == (d,):
+                self._dim_vars[ds].append(ds.dataset.variables[d])
+
+        return self._dim_vars[ds]
+
+    def _find_clim_vars(self, ds, refresh=False):
+        """
+        Finds all climatology variables in a dataset.
+
+        Climatology variables (7.4)
+
+        Cached.
+        """
+
+        if ds in self._clim_vars and not refresh:
+            return self._clim_vars[ds]
+
+        c_time = set()  # set of climatological time axes
+        c_vars = set()  # set of climatological variables
+
+        dim_vars = self._find_dim_vars(ds)
+
+        # find all time dimension variables
+        time_vars = [v for v in dim_vars if guess_dim_type(v.dimensions[0]) == 'T']
+
+        for k, v in ds.dataset.variables.iteritems():
+            is_cvar = False
+
+            if v in dim_vars:
+                if hasattr(v, 'climatology') and not hasattr(v, 'bounds'):
+                    is_cvar = True
+
+                if k in time_vars and hasattr(v, 'units'):
+                    units_split = v.units.split()
+                    if len(units_split) == 3 and units_split[1:] == ['since', '0-1-1']:
+                        is_cvar = True
+
+                if is_cvar:
+                    c_time.add(v)
+
+            else:
+                # check cell_methods
+                if hasattr(v, 'cell_methods'):
+                    try:
+                        cell_methods = parse_cell_methods(v.cell_methods)
+                    except:
+                        pass
+
+        dvars = set(ds.dataset.variables.itervalues()) - set(dim_vars)
+        for dim in c_time:
+            for v in dvars:
+                if dim in v.dimensions:
+                    c_vars.add(v)
+
+        self._clim_vars[ds] = c_vars
+
+        return c_vars
+
+    def _find_boundary_vars(self, ds, refresh=False):
+        """
+        Returns dict of coordinates vars -> associated boundary vars
+
+        Cached.
+        """
+        if ds in self._boundary_vars and not refresh:
+            return self._boundary_vars[ds]
+
+        b_vars = {}
+
+        for k, v in ds.dataset.variables.iteritems():
+            bounds = getattr(v, 'bounds', None)
+            if bounds is not None and isinstance(bounds, basestring) and bounds in ds.dataset.variables:
+                b_vars[v] = ds.dataset.variables[bounds]
+
+        self._boundary_vars[ds] = b_vars
+        return b_vars
+
+    ###############################################################################
+    #
+    # CHAPTER 2: NetCDF Files and Components
+    #
+    ###############################################################################
 
     def check_filename_extension(self, ds):
         """
@@ -148,23 +280,10 @@ class CFCheck(BaseCheck):
         fails = []
         total = len(ds.dataset.variables)
 
-        dimclasses = {'T':_possiblet,
-                      'Z':_possiblez,
-                      'Y':_possibley,
-                      'X':_possiblex}
-
         expected = ['T', 'Z', 'Y', 'X']
 
         for k, v in ds.dataset.variables.iteritems():
-            # classify each dimension by name
-            def classify_dim(d):
-                for dcname, dcvals in dimclasses.iteritems():
-                    if d in dcvals:
-                        return dcname
-
-                return None
-
-            dclass = map(classify_dim, v.dimensions)
+            dclass = map(guess_dim_type, v.dimensions)
 
             # any nones should be before classified ones
             nones    = [i for i, x in enumerate(dclass) if x is None]
@@ -275,8 +394,74 @@ class CFCheck(BaseCheck):
         Units are not required for dimensionless quantities. A variable with no units attribute is assumed
         to be dimensionless. However, a units attribute specifying a dimensionless unit may optionally be
         included.
+
+        - units required
+        - type must be recognized by udunits
+        - if std name specified, must be consistent with standard name table, must also be consistent with a
+          specified cell_methods attribute if present
         """
-        pass
+        ret_val = []
+
+        deprecated = ['level', 'layer', 'sigma_level']
+
+        for k, v in ds.dataset.variables.iteritems():
+
+            # skip dim vars, climatological vars, boundary vars
+            if v in self._find_dim_vars(ds) or \
+               v in self._find_clim_vars(ds) or \
+               v in self._find_boundary_vars(ds):
+                continue
+
+            # skip string type vars
+            if v.dtype.char == 'S':
+                continue
+
+            units = getattr(v, 'units', None)
+
+            if units is None:
+                ret_val.append(Result(BaseCheck.HIGH, False, ('units', k, 'required'), ['units attribute required']))
+                continue
+
+            if not isinstance(units, basestring):
+                ret_val.append(Result(BaseCheck.HIGH, False, ('units', k, 'string'), ["units not a string (%s)" % type(units)]))
+                continue
+
+            # units are present and string
+            if units in deprecated:
+                ret_val.append(Result(BaseCheck.LOW, False, ('units', k, 'deprecated'), ['units (%s) is deprecated' % units]))
+                continue
+            elif not units_known(units):
+                ret_val.append(Result(BaseCheck.HIGH, False, ('units', k, 'known'), ['unknown units type (%s)' % units]))
+                continue
+
+            # units look ok so far, check against standard name / cell methods
+            std_name = getattr(v, 'standard_name', None)
+            std_name_modifier = None
+
+            if isinstance(std_name, basestring):
+                if ' ' in std_name:
+                    std_name, std_name_modifier = std_name.split(' ', 1)
+
+            # if no standard name or cell_methods, nothing left to do, so put something in the ret val for it
+            if std_name is None and not hasattr(v, 'cell_methods'):
+                ret_val.append(Result(BaseCheck.HIGH, True, ('units', k, 'ok')))
+                continue
+
+            if std_name is not None and std_name in self._std_names:
+                std_units = self._std_names[std_name].canonical_units
+
+                #@TODO modifiers changes units
+                msgs = []
+                if units != std_units:
+                    msgs = ['units are %s, standard_name units should be %s' % (units, std_units)]
+
+                ret_val.append(Result(BaseCheck.HIGH, units == std_units, ('units', k, 'standard_name'), msgs))
+
+            if hasattr(v, 'cell_methods'):
+                cell_methods = v.cell_methods
+                pass
+
+        return ret_val
 
     def check_long_name(self, ds):
         """
