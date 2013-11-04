@@ -140,7 +140,7 @@ class CFCheck(BaseCheck):
     """
 
     def __init__(self):
-        self._coord_vars      = defaultdict(list)
+        self._coord_vars    = defaultdict(list)
         self._clim_vars     = defaultdict(list)
         self._boundary_vars = defaultdict(dict)
 
@@ -262,7 +262,7 @@ class CFCheck(BaseCheck):
         """
         2.1 Filename - NetCDF files should have the file name extension ".nc".
         """
-        return Result(BaseCheck.LOW, ds.dataset.filepath().endswith(".nc"))
+        return Result(BaseCheck.LOW, ds.dataset.filepath().endswith(".nc"), 'filename')
 
     def check_data_types(self, ds):
         """
@@ -295,7 +295,7 @@ class CFCheck(BaseCheck):
             if not rname.match(k):
                 fails.append(k)
 
-        return Result(BaseCheck.HIGH, (total - len(fails), total), msgs=fails)
+        return Result(BaseCheck.HIGH, (total - len(fails), total), '2.3 Variable names', fails)
 
     def check_names_unique(self, ds):
         """
@@ -368,6 +368,8 @@ class CFCheck(BaseCheck):
         acceptable to use a scalar coordinate variable which eliminates the need for an associated size one dimension in the data
         variable.
         """
+        #TODO: We need to identify a non-compliant example of this that can be verified, but I believe
+        #      that if the file is netCDF then this requirement may be met.
         pass
 
     def check_fill_value_outside_valid_range(self, ds):
@@ -835,7 +837,51 @@ class CFCheck(BaseCheck):
         """
         4 We strongly recommend that coordinate variables be used for all coordinate types whenever they are applicable.
         """
-        pass
+        ret_val = []
+        # 1. Verify that for any known or common coordinate name as a dmension
+        #    there is a coordinate variable for that dimension.
+        known_coordinate_names = ('longitude', 'lon'   , 'x',
+                                  'latitude' , 'lat'   , 'y',
+                                  'vertical' , 'height', 'z',
+                                  'time'               , 't')
+        for k,v in ds.dataset.dimensions.iteritems():
+            if k.lower() in known_coordinate_names:
+                valid = k in ds.dataset.variables
+                result = Result(BaseCheck.MEDIUM, valid, ('coordinate_type', k, 'var_for_coordinate_type'))
+                if not valid:
+                    result.msgs = ['No coordinate variable for coordinate type %s' % k]
+
+                ret_val.append(result)
+
+        #@TODO: Additional verifiable requirements
+
+        return ret_val
+
+
+    def _coord_has_units(self, name,coordinate, var, recommended, acceptable):
+        ret_val = []
+        has_units = hasattr(var, 'units')
+        result = Result(BaseCheck.HIGH, has_units, ('latitude', name, 'has_units'))
+        ret_val.append(result)
+
+
+        # 0 - does not have units
+        # 1 - incorrect units
+        # 2 - also acceptable units
+        # 3 - recommend units
+        if not has_units:
+            result = Result(BaseCheck.MEDIUM, (0, 3), (coordinate, name, 'correct_units'))
+            ret_val.append(result)
+        elif has_units and var.units == recommended:
+            result = Result(BaseCheck.MEDIUM, (3, 3), (coordinate, name, 'correct_units'))
+            ret_val.append(result)
+        elif has_units and var.units in acceptable:
+            result = Result(BaseCheck.MEDIUM, (2, 3), (coordinate, name, 'correct_units'))
+            ret_val.append(result)
+        else:
+            result = Result(BaseCheck.MEDIUM, (1, 3), (coordinate, name, 'correct_units'))
+            ret_val.append(result)
+        return ret_val
 
     def check_latitude(self, ds):
         """
@@ -845,7 +891,18 @@ class CFCheck(BaseCheck):
         Optionally, the latitude type may be indicated additionally by providing the standard_name attribute with the
         value latitude, and/or the axis attribute with the value Y.
         """
-        pass
+        ret_val = []
+
+        recommended = 'degrees_north'
+        acceptable = ['degree_north', 'degree_N', 'degrees_N', 'degreeN', 'degreesN']
+    
+        for k,v in ds.dataset.variables.iteritems():
+            if k == 'latitude' or getattr(v, 'standard_name', None) == 'latitude':
+                results = self._coord_has_units(k, 'latitude', v, recommended, acceptable)
+                ret_val.extend(results)
+
+
+        return ret_val
 
     def check_longitude(self, ds):
         """
@@ -855,7 +912,18 @@ class CFCheck(BaseCheck):
         Optionally, the longitude type may be indicated additionally by providing the standard_name attribute with the
         value longitude, and/or the axis attribute with the value X.
         """
-        pass
+        ret_val = []
+
+        recommended = 'degrees_east'
+        acceptable = ['degree_east', 'degree_E', 'degrees_E', 'degreeE', 'degreesE']
+    
+        for k,v in ds.dataset.variables.iteritems():
+            if k == 'longitude' or getattr(v, 'standard_name', None) == 'longitude':
+                results = self._coord_has_units(k, 'longitude', v, recommended, acceptable)
+                ret_val.extend(results)
+
+
+        return ret_val
 
     def check_vertical_coordinate(self, ds):
         """

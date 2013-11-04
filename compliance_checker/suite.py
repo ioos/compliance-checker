@@ -9,6 +9,16 @@ from lxml import etree as ET
 from wicken.netcdf_dogma import NetCDFDogma
 from compliance_checker.base import BaseCheck, fix_return_value, Result
 
+class DSPair(object):
+    '''
+    Structure to hold a dataset and dogma pairing
+    '''
+    dataset = None 
+    dogma   = None
+    def __init__(self, ds, dogma):
+        self.dataset = ds
+        self.dogma = dogma
+
 class CheckSuite(object):
 
     def _get_checks(self, checkclass):
@@ -56,10 +66,6 @@ class CheckSuite(object):
 
         return ret_val
 
-    class DSPair(object):
-        def __init__(self, ds, dogma):
-            self.dataset = ds
-            self.dogma = dogma
 
     def load_dataset(self, ds_str, belief_map):
         """
