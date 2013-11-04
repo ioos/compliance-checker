@@ -2,7 +2,7 @@ import re
 from collections import defaultdict
 import numpy as np
 
-from compliance_checker.base import BaseCheck, check_has, score_group, Result, StandardNameTable, units_known
+from compliance_checker.base import BaseCheck, check_has, score_group, Result, StandardNameTable, units_known, units_convertible
 
 # copied from paegan
 # paegan may depend on these later
@@ -72,6 +72,64 @@ def guess_dim_type(dimension):
 
     return None
 
+def guess_coord_type(units, positive=None):
+    """
+    Guesses coordinate variable type (X/Y/Z/T) from units and positive attrs
+    """
+    coord_types = {'X':['degrees_east', 'degree_east', 'degrees_E', 'degree_E', 'degreesE', 'degreeE'],
+                   'Y':['degrees_north', 'degree_north', 'degrees_N', 'degree_N', 'degreesN', 'degreeN']}
+
+    deprecated = ['level', 'layer', 'sigma_level']
+
+    if not units or not isinstance(units, basestring) or not (units_known(units) or units in deprecated):
+        return None
+
+    if isinstance(positive, basestring) and positive.lower() in ['up', 'down']:
+        # only Z if units without positive deos not result in something else
+        if guess_coord_type(units, None) in [None, 'Z']:
+            return 'Z'
+        else:
+            # they differ, then we can't conclude
+            return None
+
+    if units in deprecated or units_convertible(units, 'hPa', reftimeistime=True):
+        return 'Z'
+
+    if positive:
+        return None
+
+    for ctype, unitsposs in coord_types.iteritems():
+        if units in unitsposs:
+            return ctype
+
+    if units_convertible(units, 'days since 1970-01-01', reftimeistime=False):
+        return 'T'
+
+    return None
+
+def map_axes(dim_vars, reverse_map=False):
+    """
+    axis name       -> [dimension names]
+    dimension name  -> [axis_name], length 0 if reverse_map
+    """
+    ret_val = defaultdict(list)
+    axes = ['X', 'Y', 'Z', 'T']
+
+    for k, v in dim_vars.iteritems():
+        axis = getattr(v, 'axis', '')
+        if not axis:
+            continue
+
+        axis = axis.upper()
+        if axis in axes:
+            if reverse_map:
+                ret_val[k].append(axis)
+            else:
+                ret_val[axis].append(k)
+
+    return dict(ret_val)
+
+
 class CFCheck(BaseCheck):
     """
     CF Convention Checker (1.6)
@@ -82,7 +140,7 @@ class CFCheck(BaseCheck):
     """
 
     def __init__(self):
-        self._dim_vars      = defaultdict(list)
+        self._coord_vars      = defaultdict(list)
         self._clim_vars     = defaultdict(list)
         self._boundary_vars = defaultdict(dict)
 
@@ -99,27 +157,27 @@ class CFCheck(BaseCheck):
     ################################################################################
 
     def setup(self, ds):
-        self._find_dim_vars(ds)
+        self._find_coord_vars(ds)
         self._find_clim_vars(ds)
         self._find_boundary_vars(ds)
 
-    def _find_dim_vars(self, ds, refresh=False):
+    def _find_coord_vars(self, ds, refresh=False):
         """
-        Finds all dimension variables in a dataset.
+        Finds all coordinate variables in a dataset.
 
-        Dimension variables are vars that only depend on a dimension of the same name.
+        A variable with the same name as a dimension is called a coordinate variable.
 
         The result is cached by the passed in dataset object inside of this checker. Pass refresh=True
         to redo the cached value.
         """
-        if ds in self._dim_vars and not refresh:
-            return self._dim_vars[ds]
+        if ds in self._coord_vars and not refresh:
+            return self._coord_vars[ds]
 
         for d in ds.dataset.dimensions:
             if d in ds.dataset.variables and ds.dataset.variables[d].dimensions == (d,):
-                self._dim_vars[ds].append(ds.dataset.variables[d])
+                self._coord_vars[ds].append(ds.dataset.variables[d])
 
-        return self._dim_vars[ds]
+        return self._coord_vars[ds]
 
     def _find_clim_vars(self, ds, refresh=False):
         """
@@ -136,15 +194,15 @@ class CFCheck(BaseCheck):
         c_time = set()  # set of climatological time axes
         c_vars = set()  # set of climatological variables
 
-        dim_vars = self._find_dim_vars(ds)
+        coord_vars = self._find_coord_vars(ds)
 
         # find all time dimension variables
-        time_vars = [v for v in dim_vars if guess_dim_type(v.dimensions[0]) == 'T']
+        time_vars = [v for v in coord_vars if guess_dim_type(v.dimensions[0]) == 'T']
 
         for k, v in ds.dataset.variables.iteritems():
             is_cvar = False
 
-            if v in dim_vars:
+            if v in coord_vars:
                 if hasattr(v, 'climatology') and not hasattr(v, 'bounds'):
                     is_cvar = True
 
@@ -160,11 +218,12 @@ class CFCheck(BaseCheck):
                 # check cell_methods
                 if hasattr(v, 'cell_methods'):
                     try:
+                        print "@TODO PARSE CELL METHODS"
                         cell_methods = parse_cell_methods(v.cell_methods)
                     except:
                         pass
 
-        dvars = set(ds.dataset.variables.itervalues()) - set(dim_vars)
+        dvars = set(ds.dataset.variables.itervalues()) - set(coord_vars)
         for dim in c_time:
             for v in dvars:
                 if dim in v.dimensions:
@@ -406,10 +465,9 @@ class CFCheck(BaseCheck):
 
         for k, v in ds.dataset.variables.iteritems():
 
-            # skip dim vars, climatological vars, boundary vars
-            if v in self._find_dim_vars(ds) or \
-               v in self._find_clim_vars(ds) or \
-               v in self._find_boundary_vars(ds):
+            # skip climatological vars, boundary vars
+            if v in self._find_clim_vars(ds) or \
+               v in self._find_boundary_vars(ds).itervalues():
                 continue
 
             # skip string type vars
@@ -718,7 +776,60 @@ class CFCheck(BaseCheck):
         which stand for a longitude, latitude, vertical, or time axis respectively. Alternatively the standard_name
         attribute may be used for direct identification.
         """
-        pass
+        ret_val = []
+        dim_to_axis = map_axes({k:v for k,v in ds.dataset.variables.iteritems() if v in self._find_coord_vars(ds)}, reverse_map=True)
+        data_vars = {k:v for k,v in ds.dataset.variables.iteritems() if v not in self._find_coord_vars(ds)}
+
+        for k, v in ds.dataset.variables.iteritems():
+            axis = getattr(v, 'axis', None)
+
+            if axis is None:
+                continue
+
+            # 1) axis must be X, Y, Z, or T
+            axis_valid = axis in ['X', 'Y', 'Z', 'T']
+
+            avr = Result(BaseCheck.HIGH, axis_valid, ('axis', k, 'valid_value'))
+            if not axis_valid:
+                avr.msgs = ['axis value (%s) is not valid' % axis]
+
+            ret_val.append(avr)
+
+            # 2) only coordinate vars are allowed to have axis set
+            acvr = Result(BaseCheck.HIGH, v in self._find_coord_vars(ds), ('axis', k, 'is_coordinate_var'))
+            if not acvr.value:
+                acvr.msgs = ['%s is not allowed to have an axis attr as it is not a coordinate var' % k]
+
+            ret_val.append(acvr)
+
+            # 3) must be consistent with coordinate type deduced from units and positive
+            axis_type = guess_coord_type(getattr(v, 'units', None), getattr(v, 'positive', None))
+            if axis_type is not None:
+                atr = Result(BaseCheck.HIGH, axis_type == axis, ('axis', k, 'consistent_with_coord_type'))
+                if not atr.value:
+                    atr.msgs = ['%s guessed type (%s) is not consistent with coord type (%s)' % (k, axis_type, axis)]
+
+                ret_val.append(atr)
+
+            # 4) a data variable must not have more than one coordinate variable with a particular value of the axis attribute
+            if k in data_vars:
+                dep_axes = [(dim_to_axis[d], d) for d in v.dimensions if d in dim_to_axis]
+                dups = defaultdict(int)
+                for d in dep_axes:
+                    dups[d[0][0]] += 1
+
+                dups = {kk:vv for kk,vv in dups.iteritems() if vv > 1}
+
+                coores = Result(BaseCheck.HIGH, len(dups) == 0, ('axis', k, 'does_not_depend_on_mult_coord_vars'))
+                if not coores.value:
+                    coores.msgs = []
+                    for kk, vv in dups.iteritems():
+                        same_axis = [item[1] for item in dep_axes if item[0] == kk]
+                        coores.msgs.append('%s depends on multiple coord vars with axis attribute (%s): %s' % (k, kk, ','.join(same_axis)))
+
+                ret_val.append(coores)
+
+        return ret_val
 
     def check_coordinate_vars_for_all_coordinate_types(self, ds):
         """

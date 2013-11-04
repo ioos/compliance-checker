@@ -13,7 +13,7 @@ import pprint
 
 from lxml import etree
 from wicken.exceptions import DogmaGetterSetterException
-from udunitspy import Unit, UdunitsError
+from udunitspy import Unit, UdunitsError, Converter
 
 class BaseCheck(object):
     HIGH   = 3
@@ -202,5 +202,13 @@ def units_known(units):
         Unit(str(units))
     except UdunitsError:
         return False
+    return True
+
+def units_convertible(units1, units2, reftimeistime=True):
+    try:
+        Converter(str(units1), str(units2))
+    except UdunitsError:
+        return False
+
     return True
 
