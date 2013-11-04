@@ -74,7 +74,7 @@ class CheckSuite(object):
         ds = Dataset(ds_str)
         data_object = NetCDFDogma('ds', belief_map, ds)
 
-        return self.DSPair(ds, data_object)
+        return DSPair(ds, data_object)
 
     def scores(self, raw_scores):
         """
