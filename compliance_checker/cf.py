@@ -28,6 +28,7 @@ _possiblez = ["depth", "DEPTH",
            "siglay", "SIGLAY",
            "siglev", "SIGLEV",
            "sigma", "SIGMA",
+           "vertical", "VERTICAL",
           ]
 _possiblex = ["x", "X",
            "lon", "LON",
@@ -925,6 +926,29 @@ class CFCheck(BaseCheck):
 
         return ret_val
 
+    def _is_vertical_coordinate(self, var_name, var):
+        '''
+        Determines if a variable is a vertical coordinate variable
+        
+        4.3
+        A vertical coordinate will be identifiable by: units of pressure; or the presence of the positive attribute with a
+        value of up or down (case insensitive).  Optionally, the vertical type may be indicated additionally by providing
+        the standard_name attribute with an appropriate value, and/or the axis attribute with the value Z.
+        '''
+        # Known name
+        satisfied = var_name.lower() in _possiblez 
+        satisfied |= getattr(var, 'standard_name', '') in _possiblez
+        # Is the axis set to Z?
+        satisfied |= getattr(var, 'axis', '').lower() == 'z'
+        is_pressure = units_convertible(getattr(var, 'units', '1'), 'dbar')
+        satisfied |= is_pressure
+        if not is_pressure:
+            satisfied |= getattr(var,'positive', '').lower() in ('up', 'down')
+        return satisfied
+
+
+
+
     def check_vertical_coordinate(self, ds):
         """
         4.3 Variables representing dimensional height or depth axes must always explicitly include the units attribute;
@@ -933,12 +957,33 @@ class CFCheck(BaseCheck):
         The attribute positive is required if the vertical axis units are not a valid unit of pressure. The positive
         attribute may have the value up or down (case insensitive). This attribute may be applied to either coordinate
         variables or auxillary coordinate variables that contain vertical coordinate data.
-
-        A vertical coordinate will be identifiable by: units of pressure; or the presence of the positive attribute with a
-        value of up or down (case insensitive).  Optionally, the vertical type may be indicated additionally by providing
-        the standard_name attribute with an appropriate value, and/or the axis attribute with the value Z.
         """
-        pass
+        ret_val = []
+        for k,v in ds.dataset.variables.iteritems():
+            if self._is_vertical_coordinate(k,v):
+                # Vertical variables MUST have units
+                has_units = hasattr(v, 'units')
+                result = Result(BaseCheck.HIGH, has_units, ('vertical', k, 'has_units'))
+                ret_val.append(result)
+
+                # If it's not pressure then it must have positive defined
+                if not has_units:
+                    result = Result(BaseCheck.HIGH, False, ('vertical', k, 'correct_units'))
+                    ret_val.append(result)
+                    continue
+
+                is_pressure = units_convertible('dbar', v.units)
+                if is_pressure: 
+                    result = Result(BaseCheck.HIGH, True, ('vertical', k, 'correct_units'))
+                elif getattr(v,'positive', '').lower() in ('up', 'down'):
+                    result = Result(BaseCheck.HIGH, True, ('vertical', k, 'correct_units'))
+                else:
+                    result = Result(BaseCheck.HIGH, False, ('vertical', k, 'correct_units'), 
+                                        ['vertical variable needs to define positive attribute'])
+                ret_val.append(result)
+        return ret_val
+
+        
 
     def check_dimensional_vertical_coordinate(self, ds):
         """

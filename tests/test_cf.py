@@ -122,6 +122,7 @@ class TestCF(unittest.TestCase):
         '''
         Section 4.1 Latitude Coordinate
         '''
+        # Check compliance
         dataset = self.get_pair(static_files['example-grid'])
         results = self.cf.check_latitude(dataset)
         for r in results:
@@ -130,11 +131,32 @@ class TestCF(unittest.TestCase):
             else:
                 self.assertTrue(r.value)
         
+        # Verify non-compliance
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_latitude(dataset)
+        # Store the results in a dict
+        rd = {}
+        for r in results:
+            rd[r.name[1:]] = r.value
+        # ('lat', 'has_units') should be False
+        self.assertFalse(rd[('lat', 'has_units')])
+        # ('lat', 'correct_units') should be (0,3)
+        self.assertEquals(rd[('lat', 'correct_units')], (0,3))
+        # ('lat_uv', 'has_units') should be True
+        self.assertTrue(rd[('lat_uv', 'has_units')])
+        # ('lat_uv', 'correct_units') should be (2,3)
+        self.assertEquals(rd[('lat_uv', 'correct_units')], (2,3))
+        # ('lat_like', 'has_units') should be True
+        self.assertTrue(rd[('lat_like', 'has_units')])
+        # ('lat_like', 'correct_units') should be (1,3)
+        self.assertEquals(rd[('lat_like', 'correct_units')], (1,3))
+        
 
     def test_longitude(self):
         '''
         Section 4.2 Longitude Coordinate
         '''
+        # Check compliance
         dataset = self.get_pair(static_files['example-grid'])
         results = self.cf.check_longitude(dataset)
         for r in results:
@@ -142,4 +164,83 @@ class TestCF(unittest.TestCase):
                 self.assertEquals(r.value[0], r.value[1])
             else:
                 self.assertTrue(r.value)
+        
+        # Verify non-compliance
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_longitude(dataset)
+        # Store the results in a dict
+        rd = {}
+        for r in results:
+            rd[r.name[1:]] = r.value
+        # ('lon', 'has_units') should be False
+        self.assertFalse(rd[('lon', 'has_units')])
+        # ('lon', 'correct_units') should be (0,3)
+        self.assertEquals(rd[('lon', 'correct_units')], (0,3))
+        # ('lon_uv', 'has_units') should be True
+        self.assertTrue(rd[('lon_uv', 'has_units')])
+        # ('lon_uv', 'correct_units') should be (2,3)
+        self.assertEquals(rd[('lon_uv', 'correct_units')], (2,3))
+        # ('lon_like', 'has_units') should be True
+        self.assertTrue(rd[('lon_like', 'has_units')])
+        # ('lon_like', 'correct_units') should be (1,3)
+        self.assertEquals(rd[('lon_like', 'correct_units')], (1,3))
+
+    def test_is_vertical_coordinate(self):
+        '''
+        Section 4.3 Qualifiers for Vertical Coordinate
+
+        NOTE: The standard doesn't explicitly say that vertical coordinates must be a 
+        coordinate type.
+        '''
+        # Make something that I can attach attrs to
+        mock_variable = type('MockVariable', (object,), {})
+
+        # Proper name/standard_name
+        known_name = mock_variable()
+        known_name.standard_name = 'depth'
+        self.assertTrue(self.cf._is_vertical_coordinate('not_known', known_name))
+
+        # Proper Axis
+        axis_set = mock_variable()
+        axis_set.axis = 'Z'
+        self.assertTrue(self.cf._is_vertical_coordinate('not_known', axis_set))
+
+        # Proper units
+        units_set = mock_variable()
+        units_set.units = 'dbar'
+        self.assertTrue(self.cf._is_vertical_coordinate('not_known', units_set))
+
+        # Proper units/positive
+        positive = mock_variable()
+        positive.units = 'm'
+        positive.positive = 'up'
+        self.assertTrue(self.cf._is_vertical_coordinate('not_known', positive))
+
+    def test_vertical_coordinate(self):
+        # Check compliance
+
+        dataset = self.get_pair(static_files['example-grid'])
+        results = self.cf.check_vertical_coordinate(dataset)
+        for r in results:
+            self.assertTrue(r.value)
+
+        # Check non-compliance
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_vertical_coordinate(dataset)
+        
+        # Store the results by the tuple
+        rd = { r.name[1:] : r.value for r in results }
+        # ('height', 'has_units') should be False
+        self.assertFalse(rd[('height', 'has_units')])
+        # ('height', 'correct_units') should be False
+        self.assertFalse(rd[('height', 'correct_units')])
+        # ('depth', 'has_units') should be True
+        self.assertTrue(rd[('depth', 'has_units')])
+        # ('depth', 'correct_units') should be False
+        self.assertFalse(rd[('depth', 'correct_units')])
+        # ('depth2', 'has_units') should be False
+        self.assertTrue(rd[('depth2', 'has_units')])
+        # ('depth2', 'correct_units') should be False
+        self.assertFalse(rd[('depth2', 'correct_units')])
+        
 
