@@ -3,6 +3,7 @@ from collections import defaultdict
 import numpy as np
 
 from compliance_checker.base import BaseCheck, check_has, score_group, Result, StandardNameTable, units_known, units_convertible
+from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 
 # copied from paegan
 # paegan may depend on these later
@@ -28,6 +29,7 @@ _possiblez = ["depth", "DEPTH",
            "siglay", "SIGLAY",
            "siglev", "SIGLEV",
            "sigma", "SIGMA",
+           "vertical", "VERTICAL",
           ]
 _possiblex = ["x", "X",
            "lon", "LON",
@@ -925,68 +927,229 @@ class CFCheck(BaseCheck):
 
         return ret_val
 
-    def check_vertical_coordinate(self, ds):
-        """
-        4.3 Variables representing dimensional height or depth axes must always explicitly include the units attribute;
-        there is no default value.
-
-        The attribute positive is required if the vertical axis units are not a valid unit of pressure. The positive
-        attribute may have the value up or down (case insensitive). This attribute may be applied to either coordinate
-        variables or auxillary coordinate variables that contain vertical coordinate data.
-
+    def _is_vertical_coordinate(self, var_name, var):
+        '''
+        Determines if a variable is a vertical coordinate variable
+        
+        4.3
         A vertical coordinate will be identifiable by: units of pressure; or the presence of the positive attribute with a
         value of up or down (case insensitive).  Optionally, the vertical type may be indicated additionally by providing
         the standard_name attribute with an appropriate value, and/or the axis attribute with the value Z.
+        '''
+        # Known name
+        satisfied = var_name.lower() in _possiblez 
+        satisfied |= getattr(var, 'standard_name', '') in _possiblez
+        # Is the axis set to Z?
+        satisfied |= getattr(var, 'axis', '').lower() == 'z'
+        is_pressure = units_convertible(getattr(var, 'units', '1'), 'dbar')
+        # Pressure defined or positive defined
+        satisfied |= is_pressure
+        if not is_pressure:
+            satisfied |= getattr(var,'positive', '').lower() in ('up', 'down')
+        return satisfied
+
+
+
+
+    def check_vertical_coordinate(self, ds):
         """
-        pass
+        4.3 Variables representing dimensional height or depth axes must always
+        explicitly include the units attribute; there is no default value.
+
+        The attribute positive is required if the vertical axis units are not a
+        valid unit of pressure. The positive attribute may have the value up or
+        down (case insensitive). This attribute may be applied to either
+        coordinate variables or auxillary coordinate variables that contain
+        vertical coordinate data.
+        
+        """
+        
+        ret_val = [] 
+        for k,v in ds.dataset.variables.iteritems(): 
+            if self._is_vertical_coordinate(k,v):
+                # Vertical variables MUST have units
+                has_units = hasattr(v, 'units') 
+                result = Result(BaseCheck.HIGH, \
+                                has_units,      \
+                                ('vertical', k, 'has_units'))
+                ret_val.append(result)
+
+                # If it's not pressure then it must have positive defined
+                if not has_units:
+                    result = Result(BaseCheck.HIGH, \
+                                    False,          \
+                                    ('vertical', k, 'correct_units'))
+                    ret_val.append(result)
+                    continue
+
+                # Do we have pressure?
+                is_pressure = units_convertible('dbar', v.units)
+                if is_pressure: 
+                    result = Result(BaseCheck.HIGH, \
+                                    True,           \
+                                    ('vertical', k, 'correct_units'))
+                # What about positive?
+                elif getattr(v,'positive', '').lower() in ('up', 'down'):
+                    result = Result(BaseCheck.HIGH, \
+                                    True,           \
+                                    ('vertical', k, 'correct_units'))
+                # Not-compliant
+                else:
+                    result = Result(BaseCheck.HIGH,                   \
+                                    False,                            \
+                                    ('vertical', k, 'correct_units'), \
+                                    ['vertical variable needs to define positive attribute'])
+                ret_val.append(result)
+        return ret_val
+
+        
 
     def check_dimensional_vertical_coordinate(self, ds):
         """
-        4.3.1 The units attribute for dimensional coordinates will be a string formatted as per the udunits.dat file.
-        The acceptable units for vertical (depth or height) coordinate variables are:
-        - units of pressure as listed in the file udunits.dat. For vertical axes the most commonly used of these
-          include include bar, millibar, decibar, atmosphere (atm), pascal (Pa), and hPa.
-        - units of length as listed in the file udunits.dat. For vertical axes the most commonly used of these include
-          meter (metre, m), and kilometer (km).
-        - other units listed in the file udunits.dat that may under certain circumstances reference vertical position
-          such as units of density or temperature.
+        4.3.1 The units attribute for dimensional coordinates will be a string
+        formatted as per the udunits.dat file.
+
+        The acceptable units for vertical (depth or height) coordinate variables
+        are:
+        - units of pressure as listed in the file udunits.dat. For vertical axes
+          the most commonly used of these include include bar, millibar,
+          decibar, atmosphere (atm), pascal (Pa), and hPa.
+        - units of length as listed in the file udunits.dat. For vertical axes
+          the most commonly used of these include meter (metre, m), and
+          kilometer (km).
+        - other units listed in the file udunits.dat that may under certain
+          circumstances reference vertical position such as units of density or
+          temperature.
 
         Plural forms are also acceptable.
         """
-        pass
+        ret_val = []
+        for k,v in ds.dataset.variables.iteritems():
+            # If this is not a vertical coordinate
+            if not self._is_vertical_coordinate(k,v):
+                continue
+
+            # If this is not height or depth
+            vertical_coordinates = ('height', 'depth')
+            if k not in vertical_coordinates and \
+                    getattr(v, 'standard_name', '') not in vertical_coordinates:
+                continue
+
+            # Satisfies 4.3.1
+            # Pressure or length is okay
+            is_pressure = units_convertible(getattr(v, 'units', '1'), 'dbar')
+            is_length   = units_convertible(getattr(v, 'units', '1'), 'm')
+            is_temp     = units_convertible(getattr(v, 'units', '1'), 'degrees_C')
+            is_density  = units_convertible(getattr(v, 'units', '1'), 'kg m-3')
+
+            if is_pressure or is_length:
+                result = Result(BaseCheck.HIGH, True,                     \
+                            ('dimensional_vertical', k, 'correct_units'), \
+                            ['dimensional vertical coordinate is pressure or length'])
+
+            # Temperature or Density are okay as well
+            elif is_temp or is_density:
+                result = Result(BaseCheck.HIGH, True,                     \
+                            ('dimensional_vertical', k, 'correct_units'), \
+                            ['dimensional vertical coordinate is temp or density'])
+            else:
+                result = Result(BaseCheck.HIGH, False,                    \
+                            ('dimensional_vertical', k, 'correct_units'), \
+                            ['incorrect vertical units'])
+            ret_val.append(result)
+
+        return ret_val
+                    
 
     def check_dimensionless_vertical_coordinate(self, ds):
         """
         4.3.2 The units attribute is not required for dimensionless coordinates.
 
-        The standard_name attribute associates a coordinate with its definition from Appendix D, Dimensionless
-        Vertical Coordinates. The definition provides a mapping between the dimensionless coordinate values and
-        dimensional values that can positively and uniquely indicate the location of the data.
+        The standard_name attribute associates a coordinate with its definition
+        from Appendix D, Dimensionless Vertical Coordinates. The definition
+        provides a mapping between the dimensionless coordinate values and
+        dimensional values that can positively and uniquely indicate the
+        location of the data.
 
-        A new attribute, formula_terms, is used to associate terms in the definitions with variables in a netCDF file.
-        To maintain backwards compatibility with COARDS the use of these attributes is not required, but is strongly recommended.
+        A new attribute, formula_terms, is used to associate terms in the
+        definitions with variables in a netCDF file.  To maintain backwards
+        compatibility with COARDS the use of these attributes is not required,
+        but is strongly recommended.  
         """
-        pass
+        ret_val = []
 
+        dimless = dict(dimless_vertical_coordinates)
+        for k,v in ds.dataset.variables.iteritems():
+            std_name = getattr(v, 'standard_name', '')
+            if std_name not in dimless:
+                continue
+            # Determine if the regex matches for formula_terms
+            valid_formula = re.match(dimless[std_name],  \
+                                     getattr(v, 'formula_terms', ''))
+
+            if valid_formula is not None:
+                result = Result(BaseCheck.MEDIUM, \
+                                True,             \
+                                ('dimensionless_vertical', k, 'formula_terms'))
+            else:
+                result = Result(BaseCheck.MEDIUM,                              \
+                                False,                                         \
+                                ('dimensionless_vertical', k, 'formula_terms'),\
+                                ['formula_terms missing'])
+            ret_val.append(result)
+
+            # Determine that each of the terms actually exists
+            # If formula_terms wasn't defined then this fails
+            if not valid_formula:
+                result = Result(BaseCheck.MEDIUM,                             \
+                                False,                                        \
+                                ('dimensionless_vertical', k, 'terms_exist'), \
+                                ['formula_terms not defined'])
+                ret_val.append(result)
+                continue
+
+            # Check the terms
+            missing_terms = []
+            groups = valid_formula.groups()
+            for i in xrange(1, len(groups), 2):
+                varname = groups[i]
+                if varname not in ds.dataset.variables:
+                    missing_terms.append(varname)
+            # Report the missing terms
+            result = Result(BaseCheck.MEDIUM,                             \
+                            not missing_terms,                            \
+                            ('dimensionless_vertical', k, 'terms_exist'), \
+                            ['%s missing' % i for i in missing_terms])
+
+            ret_val.append(result)
+                
+
+        return ret_val
     def check_time_coordinate(self, ds):
         """
-        4.4 Variables representing time must always explicitly include the units attribute; there is no default value.
+        4.4 Variables representing time must always explicitly include the units
+        attribute; there is no default value.
 
-        The units attribute takes a string value formatted as per the recommendations in the Udunits package.
+        The units attribute takes a string value formatted as per the
+        recommendations in the Udunits package.
 
-        The acceptable units for time are listed in the udunits.dat file. The most commonly used of these strings
-        (and their abbreviations) includes day (d), hour (hr, h), minute (min) and second (sec, s). Plural forms are
-        also acceptable. The reference time string (appearing after the identifier since) may include date alone; date and
-        time; or date, time, and time zone. The reference time is required. A reference time in year 0 has a special meaning
-        (see Section 7.4, "Climatological Statistics").
+        The acceptable units for time are listed in the udunits.dat file. The
+        most commonly used of these strings (and their abbreviations) includes
+        day (d), hour (hr, h), minute (min) and second (sec, s). Plural forms
+        are also acceptable. The reference time string (appearing after the
+        identifier since) may include date alone; date and time; or date, time,
+        and time zone. The reference time is required. A reference time in year
+        0 has a special meaning (see Section 7.4, "Climatological Statistics").
 
-        Recommend that the unit year be used with caution. It is not a calendar year.
-        For similar reasons the unit month should also be used with caution.
+        Recommend that the unit year be used with caution. It is not a calendar
+        year.  For similar reasons the unit month should also be used with
+        caution.
 
         A time coordinate is identifiable from its units string alone.
-        Optionally, the time coordinate may be indicated additionally by providing the standard_name attribute with an
-        appropriate value, and/or the axis attribute with the value T.
-        """
+        Optionally, the time coordinate may be indicated additionally by
+        providing the standard_name attribute with an appropriate value, and/or
+        the axis attribute with the value T.  
+        """ 
         pass
 
     def check_calendar(self, ds):
