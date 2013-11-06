@@ -1125,6 +1125,15 @@ class CFCheck(BaseCheck):
                 
 
         return ret_val
+
+    def _is_time_variable(self, varname, var):
+        '''
+        Identifies if a variable is represents time
+        '''
+        satisfied = varname.lower() == 'time'
+        satisfied |= getattr(var, 'standard_name', '') == 'time'
+        return satisfied
+
     def check_time_coordinate(self, ds):
         """
         4.4 Variables representing time must always explicitly include the units

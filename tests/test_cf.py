@@ -18,6 +18,11 @@ static_files = {
         'dimensionless' : 'test-data/dimensionless.nc',
         }
 
+class MockVariable(object):
+    '''
+    For mocking a dataset variable
+    '''
+    pass
 
 class TestCF(unittest.TestCase):
     # @see
@@ -195,7 +200,7 @@ class TestCF(unittest.TestCase):
         coordinate type.
         '''
         # Make something that I can attach attrs to
-        mock_variable = type('MockVariable', (object,), {})
+        mock_variable = MockVariable
 
         # Proper name/standard_name
         known_name = mock_variable()
@@ -331,5 +336,16 @@ class TestCF(unittest.TestCase):
         self.assertTrue(rd[('lev2', 'formula_terms')])
         # ('lev2', 'terms_exist') should be False
         self.assertFalse(rd[('lev2', 'terms_exist')])
+            
+    def test_is_time_variable(self):
+        var1 = MockVariable()
+        var1.standard_name = 'time'
+        self.assertTrue(self.cf._is_time_variable('not_time', var1))
+
+        var2 = MockVariable()
+        self.assertTrue(self.cf._is_time_variable('time', var2))
+
+        self.assertFalse(self.cf._is_time_variable('not_time', var2))
+
 
 
