@@ -212,3 +212,11 @@ def units_convertible(units1, units2, reftimeistime=True):
 
     return True
 
+def units_temporal(units):
+    r = False
+    try:
+        u = Unit('seconds since 1900-01-01')
+        r = u.are_convertible(str(units))
+    except UdunitsError:
+        return False
+    return r

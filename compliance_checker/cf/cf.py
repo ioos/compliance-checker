@@ -2,7 +2,7 @@ import re
 from collections import defaultdict
 import numpy as np
 
-from compliance_checker.base import BaseCheck, check_has, score_group, Result, StandardNameTable, units_known, units_convertible
+from compliance_checker.base import BaseCheck, check_has, score_group, Result, StandardNameTable, units_known, units_convertible, units_temporal
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 
 # copied from paegan
@@ -1132,6 +1132,8 @@ class CFCheck(BaseCheck):
         '''
         satisfied = varname.lower() == 'time'
         satisfied |= getattr(var, 'standard_name', '') == 'time'
+        satisfied |= getattr(var, 'axis', '') == 'T'
+        satisfied |= units_convertible('seconds since 1900-01-01', getattr(var, 'units', ''))
         return satisfied
 
     def check_time_coordinate(self, ds):
@@ -1159,7 +1161,36 @@ class CFCheck(BaseCheck):
         providing the standard_name attribute with an appropriate value, and/or
         the axis attribute with the value T.  
         """ 
-        pass
+
+        ret_val = []
+        for k,v in ds.dataset.variables.iteritems():
+            if not self._is_time_variable(k,v):
+                continue
+            # Has units
+            has_units = hasattr(v, 'units')
+            if not has_units:
+                result = Result(BaseCheck.HIGH, \
+                                False,          \
+                                ('time', k, 'has_units'))
+                ret_val.append(result)
+                result = Result(BaseCheck.HIGH, \
+                                False,          \
+                                ('time', k, 'correct_units'))
+                ret_val.append(result)
+                continue
+            # Correct and identifiable units
+            result = Result(BaseCheck.HIGH, \
+                            True,           \
+                            ('time', k, 'has_units'))
+            ret_val.append(result)
+            correct_units = units_temporal(v.units)
+            result = Result(BaseCheck.HIGH, \
+                            correct_units,  \
+                            ('time', k, 'correct_units'))
+            ret_val.append(result)
+
+        return ret_val
+
 
     def check_calendar(self, ds):
         """
