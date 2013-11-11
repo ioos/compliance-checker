@@ -1194,8 +1194,8 @@ class CFCheck(BaseCheck):
 
     def check_calendar(self, ds):
         """
-        4.4.1 In order to calculate a new date and time given a base date, base time and a time increment one
-        must know what calendar to use.
+        4.4.1 In order to calculate a new date and time given a base date, base
+        time and a time increment one must know what calendar to use.
 
         The values currently defined for calendar are:
         - gregorian or standard
@@ -1206,22 +1206,59 @@ class CFCheck(BaseCheck):
         - julian
         - none
 
-        The calendar attribute may be set to none in climate experiments that simulate a fixed time of year.
-        The time of year is indicated by the date in the reference time of the units attribute.
+        The calendar attribute may be set to none in climate experiments that
+        simulate a fixed time of year.
+        The time of year is indicated by the date in the reference time of the
+        units attribute.
 
-        If none of the calendars defined above applies, a non-standard calendar can be defined. The lengths of each
-        month are explicitly defined with the month_lengths attribute of the time axis.
+        If none of the calendars defined above applies, a non-standard calendar
+        can be defined. The lengths of each month are explicitly defined with
+        the month_lengths attribute of the time axis.
 
-        If leap years are included, then two other attributes of the time axis should also be defined:
+        If leap years are included, then two other attributes of the time axis
+        should also be defined:
 
         leap_year, leap_month
 
-        The calendar attribute is not required when a non-standard calendar is being used. It is sufficient to define
-        the calendar using the month_lengths attribute, along with leap_year, and leap_month as appropriate. However,
-        the calendar attribute is allowed to take non-standard values and in that case defining the non-standard calendar
+        The calendar attribute is not required when a non-standard calendar is
+        being used. It is sufficient to define the calendar using the
+        month_lengths attribute, along with leap_year, and leap_month as
+        appropriate. However, the calendar attribute is allowed to take
+        non-standard values and in that case defining the non-standard calendar
         using the appropriate attributes is required.
         """
-        pass
+        valid_calendars = [
+            'gregorian',
+            'standard',
+            'proleptic_gregorian',
+            'noleap',
+            '365_day',
+            'all_leap',
+            '366_day',
+            '360_day',
+            'julian',
+            'none'
+        ]
+
+        ret_val = []
+
+        for k,v in ds.dataset.variables.iteritems():
+            if not self._is_time_variable(k,v):
+                continue
+            has_calendar = hasattr(v, 'calendar')
+            result = Result(BaseCheck.LOW,  \
+                            has_calendar,   \
+                            ('time', k, 'has_calendar'))
+            ret_val.append(result)
+            valid_calendar = has_calendar and v.calendar in valid_calendars
+            result = Result(BaseCheck.LOW,  \
+                            valid_calendar, \
+                            ('time', k, 'valid_calendar'))
+            ret_val.append(result)
+
+        return ret_val
+        
+
 
     ###############################################################################
     #

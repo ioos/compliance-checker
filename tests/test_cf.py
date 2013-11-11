@@ -370,3 +370,17 @@ class TestCF(unittest.TestCase):
         self.assertTrue(rd[('bad_time_2', 'has_units')])
         self.assertFalse(rd[('bad_time_2', 'correct_units')])
 
+    def test_check_calendar(self):
+        dataset = self.get_pair(static_files['example-grid'])
+        results = self.cf.check_calendar(dataset)
+        for r in results:
+            self.assertTrue(r.value)
+
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_calendar(dataset)
+        rd = {r.name[1:] : r.value for r in results }
+        results = self.cf.check_time_coordinate(dataset)
+        self.assertFalse(rd[('bad_time_1', 'has_calendar')])
+        self.assertFalse(rd[('bad_time_1', 'valid_calendar')])
+        self.assertTrue(rd[('bad_time_2', 'has_calendar')])
+        self.assertFalse(rd[('bad_time_2', 'valid_calendar')])
