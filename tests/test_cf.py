@@ -347,5 +347,40 @@ class TestCF(unittest.TestCase):
 
         self.assertFalse(self.cf._is_time_variable('not_time', var2))
 
+        var3 = MockVariable()
+        var3.axis = 'T'
+        self.assertTrue(self.cf._is_time_variable('maybe_time', var3))
+
+        var4 = MockVariable()
+        var4.units = 'seconds since 1900-01-01'
+        self.assertTrue(self.cf._is_time_variable('maybe_time', var4))
+
+    def test_check_time_coordinate(self):
+        dataset = self.get_pair(static_files['example-grid'])
+        results = self.cf.check_time_coordinate(dataset)
+        for r in results:
+            self.assertTrue(r.value)
 
 
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_time_coordinate(dataset)
+        rd = {r.name[1:] : r.value for r in results }
+        results = self.cf.check_time_coordinate(dataset)
+        self.assertFalse(rd[('bad_time_1', 'has_units')])
+        self.assertTrue(rd[('bad_time_2', 'has_units')])
+        self.assertFalse(rd[('bad_time_2', 'correct_units')])
+
+    def test_check_calendar(self):
+        dataset = self.get_pair(static_files['example-grid'])
+        results = self.cf.check_calendar(dataset)
+        for r in results:
+            self.assertTrue(r.value)
+
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_calendar(dataset)
+        rd = {r.name[1:] : r.value for r in results }
+        results = self.cf.check_time_coordinate(dataset)
+        self.assertFalse(rd[('bad_time_1', 'has_calendar')])
+        self.assertFalse(rd[('bad_time_1', 'valid_calendar')])
+        self.assertTrue(rd[('bad_time_2', 'has_calendar')])
+        self.assertFalse(rd[('bad_time_2', 'valid_calendar')])
