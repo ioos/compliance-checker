@@ -365,7 +365,6 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_time_coordinate(dataset)
         rd = {r.name[1:] : r.value for r in results }
-        results = self.cf.check_time_coordinate(dataset)
         self.assertFalse(rd[('bad_time_1', 'has_units')])
         self.assertTrue(rd[('bad_time_2', 'has_units')])
         self.assertFalse(rd[('bad_time_2', 'correct_units')])
@@ -379,8 +378,22 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_calendar(dataset)
         rd = {r.name[1:] : r.value for r in results }
-        results = self.cf.check_time_coordinate(dataset)
         self.assertFalse(rd[('bad_time_1', 'has_calendar')])
         self.assertFalse(rd[('bad_time_1', 'valid_calendar')])
         self.assertTrue(rd[('bad_time_2', 'has_calendar')])
         self.assertFalse(rd[('bad_time_2', 'valid_calendar')])
+
+    def test_check_independent_axis_dimensions(self):
+        dataset = self.get_pair(static_files['example-grid'])
+        results = self.cf.check_independent_axis_dimensions(dataset)
+        for r in results:
+            self.assertTrue(r.value)
+
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_independent_axis_dimensions(dataset)
+        rd = {r.name[1:] : (r.value, r.msgs) for r in results }
+
+        value, msgs = rd[('column_temp', 'valid_coordinates')]
+        self.assertFalse(value)
+        self.assertIn('sigma is not a coordinate variable', msgs)
+

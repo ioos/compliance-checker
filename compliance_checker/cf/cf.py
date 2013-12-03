@@ -56,6 +56,8 @@ _possibley = ["y", "Y",
            "lat_psi", "LAT_PSI",
           ]
 
+_possibleaxis = _possiblet + _possiblez + _possiblex + _possibley
+
 def guess_dim_type(dimension):
     """
     Guesses the type of dimension of a variable X/Y/Z/T
@@ -108,6 +110,14 @@ def guess_coord_type(units, positive=None):
         return 'T'
 
     return None
+
+def is_variable(name, var):
+    dims = var.dimensions
+    if (name,) == dims:
+        # Coordinate Type
+        return False
+    # Probably a variable
+    return True
 
 def map_axes(dim_vars, reverse_map=False):
     """
@@ -1268,41 +1278,78 @@ class CFCheck(BaseCheck):
 
     def check_coordinate_systems(self, ds):
         """
-        5 All of a variable's spatiotemporal dimensions that are not latitude, longitude, vertical, or time dimensions are
-        required to be associated with the relevant latitude, longitude, vertical, or time coordinates via the new
-        coordinates attribute of the variable. The value of the coordinates attribute is a blank separated list of the
-        names of auxiliary coordinate variables.
+        5 All of a variable's spatiotemporal dimensions that are not latitude,
+        longitude, vertical, or time dimensions are required to be associated
+        with the relevant latitude, longitude, vertical, or time coordinates via
+        the new coordinates attribute of the variable. The value of the
+        coordinates attribute is a blank separated list of the names of
+        auxiliary coordinate variables.
 
-        The dimensions of an auxiliary coordinate variable must be a subset of the dimensions of the variable with
-        which the coordinate is associated, with two exceptions:
-        - String-valued coordinates (Section 6.1, "Labels") have a dimension for maximum string length
-        - In the ragged array representations of data (Chapter 9, Discrete Sampling Geometries), special methods are
-          needed to connect the data and coordinates
+        The dimensions of an auxiliary coordinate variable must be a subset of
+        the dimensions of the variable with which the coordinate is associated,
+        with two exceptions:
+        - String-valued coordinates (Section 6.1, "Labels") have a dimension for
+          maximum string length
+        - In the ragged array representations of data (Chapter 9, Discrete
+          Sampling Geometries), special methods are needed to connect the data
+          and coordinates
 
-        Recommend that the name of a multidimensional coordinate variable should not match the name of any of its dimensions
-        because that precludes supplying a coordinate variable for the dimension.
+        Recommend that the name of a multidimensional coordinate variable should
+        not match the name of any of its dimensions because that precludes
+        supplying a coordinate variable for the dimension.
 
-        Auxiliary coordinate variables may not be used as the only way to identify latitude and longitude coordinates that
-        could be identified using coordinate variables.
+        Auxiliary coordinate variables may not be used as the only way to
+        identify latitude and longitude coordinates that could be identified
+        using coordinate variables.
 
-        An application that is trying to find the latitude coordinate of a variable should always look first to see if any
-        of the variable's dimensions correspond to a latitude coordinate variable. If the latitude coordinate is not found
-        this way, then the auxiliary coordinate variables listed by the coordinates attribute should be checked. Note that it
-        is permissible, but optional, to list coordinate variables as well as auxiliary coordinate variables in the
-        coordinates attribute.
+        An application that is trying to find the latitude coordinate of a
+        variable should always look first to see if any of the variable's
+        dimensions correspond to a latitude coordinate variable. If the latitude
+        coordinate is not found this way, then the auxiliary coordinate
+        variables listed by the coordinates attribute should be checked. Note
+        that it is permissible, but optional, to list coordinate variables as
+        well as auxiliary coordinate variables in the coordinates attribute.
 
-        It is not permissible for a data variable to have both a coordinate variable and an auxiliary coordinate variable,
-        or more than one of either type of variable, having an axis attribute with any given value e.g. there must be no
-        more than one axis attribute for X for any data variable.
+        It is not permissible for a data variable to have both a coordinate
+        variable and an auxiliary coordinate variable, or more than one of
+        either type of variable, having an axis attribute with any given value
+        e.g. there must be no more than one axis attribute for X for any data
+        variable.
+
         """
         pass
 
     def check_independent_axis_dimensions(self, ds):
         """
-        5.1 When each of a variable's spatiotemporal dimensions is a latitude, longitude, vertical, or time dimension,
-        then each axis is identified by a coordinate variable.
+        5.1 When each of a variable's spatiotemporal dimensions is a latitude,
+        longitude, vertical, or time dimension, then each axis is identified by
+        a coordinate variable.
+
         """
-        pass
+        ret_val = []
+        for name,var in ds.dataset.variables.iteritems():
+            if is_variable(name, var):
+                # If each dimension that's an axis is a proper coordinate variable
+                # then this is a valid compliance
+                reasoning = []
+                valid_coordinate = True
+                for dim in var.dimensions:
+                    if dim in _possibleaxis and dim not in ds.dataset.variables:
+                        valid_coordinate = False
+                        reasoning.append('%s is not a coordinate variable' % dim)
+                    
+                if valid_coordinate:
+                    r = Result(BaseCheck.MEDIUM, \
+                               valid_coordinate, \
+                               ('var', name, 'valid_coordinates'))
+                else:
+                    r = Result(BaseCheck.MEDIUM,                   \
+                               valid_coordinate,                   \
+                               ('var', name, 'valid_coordinates'), \
+                               reasoning)
+                ret_val.append(r)
+        return ret_val
+                        
 
     def check_two_dimensional(self, ds):
         """
