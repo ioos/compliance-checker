@@ -16,6 +16,8 @@ static_files = {
         'badname'       : 'test-data/non-comp/badname.netcdf',
         'bad'           : 'test-data/non-comp/bad.nc',
         'dimensionless' : 'test-data/dimensionless.nc',
+        '2dim'          : 'test-data/2dim-grid.nc',
+        'bad2dim'       : 'test-data/non-comp/bad2dim.nc',
         }
 
 class MockVariable(object):
@@ -396,4 +398,25 @@ class TestCF(unittest.TestCase):
         value, msgs = rd[('column_temp', 'valid_coordinates')]
         self.assertFalse(value)
         self.assertIn('sigma is not a coordinate variable', msgs)
+
+    def test_check_two_dimensional(self):
+        dataset = self.get_pair(static_files['2dim'])
+        results = self.cf.check_two_dimensional(dataset)
+        for r in results:
+            self.assertTrue(r.value)
+
+        self.assertEquals(len(results), 1)
+
+
+        # Need the bad testing
+        dataset = self.get_pair(static_files['bad2dim'])
+        results = self.cf.check_two_dimensional(dataset)
+        rd = {r.name[1:] : (r.value, r.msgs) for r in results }
+        value, msgs = rd[('C', 'valid_nd_coordinates')]
+        self.assertIn("Coordinate lat_p's dimensions are not all coordinate variables", msgs)
+        self.assertIn("Coordinate lat_p's dimension, x, is not in variable C's dimensions", msgs)
+        self.assertFalse(value)
+        value, msgs = rd[('T', 'valid_nd_coordinates')]
+        self.assertIn("Coordinate lat not defined", msgs)
+        self.assertFalse(value)
 

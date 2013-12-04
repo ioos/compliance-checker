@@ -1353,10 +1353,51 @@ class CFCheck(BaseCheck):
 
     def check_two_dimensional(self, ds):
         """
-        5.2 The latitude and longitude coordinates of a horizontal grid that was not defined as a Cartesian product of
-        latitude and longitude axes, can sometimes be represented using two-dimensional coordinate variables.
+        5.2 The latitude and longitude coordinates of a horizontal grid that was
+        not defined as a Cartesian product of latitude and longitude axes, can
+        sometimes be represented using two-dimensional coordinate variables.
+        These variables are identified as coordinates by use of the coordinates
+        attribute.
+
+        For each variable, if the variable has a coordinates attribute:
+          for each coordinate defined, verify that the coordinate:
+            is either a coordinate variable OR comprises coordinate variables
+          
         """
-        pass
+        ret_val = []
+        coord_vars = []
+        for name,var in ds.dataset.variables.iteritems():
+            if (name,) == var.dimensions:
+                coord_vars.append(name)
+
+        for name,var in ds.dataset.variables.iteritems():
+            if hasattr(var, 'coordinates'):
+                coords = var.coordinates.split(' ')
+                valid = True
+                reasoning = []
+                for coord in coords:
+                    if coord in coord_vars: 
+                        # It's a proper coordinate variable
+                        continue
+                    coord_var = ds.dataset.variables.get(coord, None)
+                    if not coord_var:
+                        valid = False
+                        reasoning.append('Coordinate %s not defined' % coord)
+                        continue
+                    for cdim in coord_var.dimensions:
+                        if cdim not in coord_vars:
+                            valid = False
+                            reasoning.append("Coordinate %s's dimensions are not all coordinate variables" % coord)
+                        if cdim not in var.dimensions:
+                            valid = False
+                            reasoning.append("Coordinate %s's dimension, %s, is not in variable %s's dimensions" % (coord, cdim, name))
+                result = Result(BaseCheck.MEDIUM,                      \
+                                valid,                                 \
+                                ('var', name, 'valid_nd_coordinates'), \
+                                reasoning)
+                ret_val.append(result)
+        return ret_val
+
 
     def check_reduced_horizontal_grid(self, ds):
         """
