@@ -119,6 +119,7 @@ def is_variable(name, var):
     # Probably a variable
     return True
 
+
 def map_axes(dim_vars, reverse_map=False):
     """
     axis name       -> [dimension names]
@@ -1276,6 +1277,13 @@ class CFCheck(BaseCheck):
     #
     ###############################################################################
 
+    def _get_coord_vars(self, ds):
+        coord_vars = []
+        for name,var in ds.dataset.variables.iteritems():
+            if (name,) == var.dimensions:
+                coord_vars.append(name)
+        return coord_vars
+
     def check_coordinate_systems(self, ds):
         """
         5 All of a variable's spatiotemporal dimensions that are not latitude,
@@ -1317,6 +1325,7 @@ class CFCheck(BaseCheck):
         variable.
 
         """
+
         pass
 
     def check_independent_axis_dimensions(self, ds):
@@ -1364,12 +1373,9 @@ class CFCheck(BaseCheck):
             is either a coordinate variable OR comprises coordinate variables
           
         """
-        ret_val = []
-        coord_vars = []
-        for name,var in ds.dataset.variables.iteritems():
-            if (name,) == var.dimensions:
-                coord_vars.append(name)
 
+        ret_val = []
+        coord_vars = self._get_coord_vars(ds)
         for name,var in ds.dataset.variables.iteritems():
             if hasattr(var, 'coordinates'):
                 coords = var.coordinates.split(' ')
@@ -1401,41 +1407,106 @@ class CFCheck(BaseCheck):
 
     def check_reduced_horizontal_grid(self, ds):
         """
-        5.3 A "reduced" longitude-latitude grid is one in which the points are arranged along constant latitude lines
-        with the number of points on a latitude line decreasing toward the poles.
+        5.3 A "reduced" longitude-latitude grid is one in which the points are
+        arranged along constant latitude lines with the number of points on a
+        latitude line decreasing toward the poles.
 
-        Recommend that this type of gridded data be stored using the compression scheme described in Section 8.2,
-        "Compression by Gathering". The compressed latitude and longitude auxiliary coordinate variables are identified
-        by the coordinates attribute.
+        Recommend that this type of gridded data be stored using the compression
+        scheme described in Section 8.2, "Compression by Gathering". The
+        compressed latitude and longitude auxiliary coordinate variables are
+        identified by the coordinates attribute.
+
         """
-        pass
+        ret_val = []
+        coord_vars = self._get_coord_vars(ds)
+
+        for name, var in ds.dataset.variables.iteritems():
+            if name in coord_vars:
+                continue
+            if not hasattr(var, 'coordinates'):
+                continue
+
+            valid = True
+            reasoning = []
+
+            coords = var.coordinates.split(' ')
+            for coord in coords:
+                if coord not in ds.dataset.variables:
+                    valid = False
+                    reasoning.append("Coordinate %s is not a proper variable" % coord)
+                    continue
+
+                for dim_name in ds.dataset.variables[coord].dimensions:
+
+                    if dim_name not in var.dimensions:
+                        valid = False
+                        reasoning.append("Coordinate %s's dimension, %s, is not a dimension of %s" %(coord, dim_name, name))
+                        continue
+
+                    if dim_name not in coord_vars:
+                        valid = False
+                        reasoning.append("Coordinate %s's dimension, %s, is not a coordinate variable" % (coord, dim_name))
+                        continue
+
+                    dim = ds.dataset.variables[dim_name]
+                    if not hasattr(dim, 'compress'):
+                        valid = False
+                        reasoning.append("Coordinate %s's dimension, %s, does not define compress" % (coord, dim_name))
+                        continue
+
+                    compress_dims = dim.compress.split(' ')
+                    for cdim in compress_dims:
+                        if cdim not in ds.dataset.dimensions:
+                            valid = False
+                            reasoning.append("Dimension %s compresses non-existent dimension, %s" % (dim_name, cdim))
+                            continue
+            result = Result(BaseCheck.MEDIUM,                            \
+                            valid,                                       \
+                            ('var', name, 'is_reduced_horizontal_grid'), \
+                            reasoning)
+            ret_val.append(result)
+        return ret_val
+
+
 
     def check_horz_crfs_grid_mappings_projections(self, ds):
         """
-        5.6 When the coordinate variables for a horizontal grid are not longitude and latitude, it is required that the
-        true latitude and longitude coordinates be supplied via the coordinates attribute. If in addition it is desired
-        to describe the mapping between the given coordinate variables and the true latitude and longitude coordinates,
+        5.6 When the coordinate variables for a horizontal grid are not
+        longitude and latitude, it is required that the true latitude and
+        longitude coordinates be supplied via the coordinates attribute. If in
+        addition it is desired to describe the mapping between the given
+        coordinate variables and the true latitude and longitude coordinates,
         the attribute grid_mapping may be used to supply this description.
 
-        This attribute is attached to data variables so that variables with different mappings may be present in a single
-        file. The attribute takes a string value which is the name of another variable in the file that provides the
-        description of the mapping via a collection of attached attributes. This variable is called a grid mapping variable
-        and is of arbitrary type since it contains no data. Its purpose is to act as a container for the attributes that
-        define the mapping.
+        This attribute is attached to data variables so that variables with
+        different mappings may be present in a single file. The attribute takes
+        a string value which is the name of another variable in the file that
+        provides the description of the mapping via a collection of attached
+        attributes. This variable is called a grid mapping variable and is of
+        arbitrary type since it contains no data. Its purpose is to act as a
+        container for the attributes that define the mapping.
 
-        The one attribute that all grid mapping variables must have is grid_mapping_name which takes a string value that
-        contains the mapping's name. The other attributes that define a specific mapping depend on the value of
-        grid_mapping_name. The valid values of grid_mapping_name along with the attributes that provide specific map
-        parameter values are described in Appendix F, Grid Mappings.
+        The one attribute that all grid mapping variables must have is
+        grid_mapping_name which takes a string value that contains the mapping's
+        name. The other attributes that define a specific mapping depend on the
+        value of grid_mapping_name. The valid values of grid_mapping_name along
+        with the attributes that provide specific map parameter values are
+        described in Appendix F, Grid Mappings.
 
-        When the coordinate variables for a horizontal grid are longitude and latitude, a grid mapping variable with
-        grid_mapping_name of latitude_longitude may be used to specify the ellipsoid and prime meridian.
+        When the coordinate variables for a horizontal grid are longitude and
+        latitude, a grid mapping variable with grid_mapping_name of
+        latitude_longitude may be used to specify the ellipsoid and prime
+        meridian.
 
 
-        In order to make use of a grid mapping to directly calculate latitude and longitude values it is necessary to associate
-        the coordinate variables with the independent variables of the mapping. This is done by assigning a standard_name to the
-        coordinate variable. The appropriate values of the standard_name depend on the grid mapping and are given in Appendix F, Grid Mappings.
-        """
+        In order to make use of a grid mapping to directly calculate latitude
+        and longitude values it is necessary to associate the coordinate
+        variables with the independent variables of the mapping. This is done by
+        assigning a standard_name to the coordinate variable. The appropriate
+        values of the standard_name depend on the grid mapping and are given in
+        Appendix F, Grid Mappings.  
+        """ 
+       
         pass
 
     def check_scalar_coordinate_system(self, ds):

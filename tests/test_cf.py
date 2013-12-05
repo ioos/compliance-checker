@@ -18,6 +18,8 @@ static_files = {
         'dimensionless' : 'test-data/dimensionless.nc',
         '2dim'          : 'test-data/2dim-grid.nc',
         'bad2dim'       : 'test-data/non-comp/bad2dim.nc',
+        'rhgrid'        : 'test-data/rhgrid.nc',
+        'bad-rhgrid'    : 'test-data/non-comp/bad-rhgrid.nc'
         }
 
 class MockVariable(object):
@@ -419,4 +421,21 @@ class TestCF(unittest.TestCase):
         value, msgs = rd[('T', 'valid_nd_coordinates')]
         self.assertIn("Coordinate lat not defined", msgs)
         self.assertFalse(value)
+
+    def test_check_reduced_horizontal_grid(self):
+        dataset = self.get_pair(static_files['rhgrid'])
+        results = self.cf.check_reduced_horizontal_grid(dataset)
+        rd = { r.name[1] : r.value for r in results }
+        self.assertTrue(rd['PS'])
+
+        dataset = self.get_pair(static_files['bad-rhgrid'])
+        results = self.cf.check_reduced_horizontal_grid(dataset)
+        rd = { r.name[1] : (r.value, r.msgs) for r in results }
+
+        for name, (value, msg) in rd.iteritems():
+            self.assertFalse(value)
+
+        self.assertIn('Coordinate longitude is not a proper variable', rd['PSa'][1])
+        self.assertIn("Coordinate latitude's dimension, latdim, is not a dimension of PSb", rd['PSb'][1])
+        self.assertIn("Coordinate lon_i's dimension, ijgrid, does not define compress", rd['PSc'][1])
 
