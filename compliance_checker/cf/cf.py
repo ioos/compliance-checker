@@ -5,6 +5,8 @@ import numpy as np
 from compliance_checker.base import BaseCheck, check_has, score_group, Result, StandardNameTable, units_known, units_convertible, units_temporal
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 
+from netCDF4 import Dimension, Variable
+
 # copied from paegan
 # paegan may depend on these later
 _possiblet = ["time", "TIME", "Time",
@@ -1375,33 +1377,67 @@ class CFCheck(BaseCheck):
         """
 
         ret_val = []
-        coord_vars = self._get_coord_vars(ds)
         for name,var in ds.dataset.variables.iteritems():
-            if hasattr(var, 'coordinates'):
-                coords = var.coordinates.split(' ')
-                valid = True
-                reasoning = []
-                for coord in coords:
-                    if coord in coord_vars: 
-                        # It's a proper coordinate variable
-                        continue
-                    coord_var = ds.dataset.variables.get(coord, None)
-                    if not coord_var:
-                        valid = False
-                        reasoning.append('Coordinate %s not defined' % coord)
-                        continue
-                    for cdim in coord_var.dimensions:
-                        if cdim not in coord_vars:
-                            valid = False
-                            reasoning.append("Coordinate %s's dimensions are not all coordinate variables" % coord)
-                        if cdim not in var.dimensions:
-                            valid = False
-                            reasoning.append("Coordinate %s's dimension, %s, is not in variable %s's dimensions" % (coord, cdim, name))
-                result = Result(BaseCheck.MEDIUM,                      \
-                                valid,                                 \
-                                ('var', name, 'valid_nd_coordinates'), \
-                                reasoning)
-                ret_val.append(result)
+            g = NCGraph(ds.dataset, name, var)
+            if len(g.coords) != 2:
+                continue # Not a 2d horizontal grid
+            
+            #------------------------------------------------------------
+            # Check all the dims are coordinate variables
+            #------------------------------------------------------------
+            valid_dims = True
+            reasoning = []
+            for dim in g.dims.iterkeys():
+                if dim not in ds.dataset.variables:
+                    valid_2d = False
+                    reasoning.append("Variable %s's dimension, %s, is not a coordinate variable" % (name, dim))
+
+            result = Result(BaseCheck.HIGH,                             \
+                            valid_dims,                                 \
+                            ('var', name, '2d_hgrid_valid_dimensions'), \
+                            reasoning)
+            ret_val.append(result)
+            
+            #------------------------------------------------------------
+            # Check that the coordinates are correct
+            #------------------------------------------------------------
+            valid_2d = True
+            reasoning = []
+            for cname, coord in g.coords.iteritems():
+                if coord is None:
+                    valid_2d = False
+                    reasoning.append("Variable %s's coordinate, %s, is not a coordinate or auxiliary variable" %(name, cname))
+                    continue
+                for dim in coord.dims.iterkeys():
+                    if dim not in g.dims:
+                        valid_2d = False
+                        reasoning.append("Variable %s's coordinate, %s, does not share dimension %s with the variable" % (name, cname, dim))
+            result = Result(BaseCheck.MEDIUM,                   \
+                            valid_2d,                           \
+                            ('var', name, 'valid_coordinates'), \
+                            reasoning)
+            ret_val.append(result)
+
+            
+            #------------------------------------------------------------
+            # Can make lat/lon?
+            #------------------------------------------------------------
+
+            lat_check = False
+            lon_check = False
+    
+            for cname, coord in g.coords.iteritems():
+                if cname.lower() in ('lat', 'latitude'):
+                    lat_check = True
+                elif cname.lower() in ('lon', 'longitude'):
+                    lon_check = True
+
+            result = Result(BaseCheck.HIGH,          \
+                            lat_check and lon_check, \
+                            ('var', name, 'lat_lon_correct'))
+            ret_val.append(result)
+
+
         return ret_val
 
 
@@ -1469,7 +1505,7 @@ class CFCheck(BaseCheck):
 
 
 
-    def check_horz_crfs_grid_mappings_projections(self, ds):
+    def check_horz_crs_grid_mappings_projections(self, ds):
         """
         5.6 When the coordinate variables for a horizontal grid are not
         longitude and latitude, it is required that the true latitude and
@@ -1507,7 +1543,10 @@ class CFCheck(BaseCheck):
         Appendix F, Grid Mappings.  
         """ 
        
-        pass
+        ret_val = []
+
+        return ret_val
+
 
     def check_scalar_coordinate_system(self, ds):
         """
@@ -1914,4 +1953,94 @@ class CFCheck(BaseCheck):
         instance variable should also contain missing values.
         """
         pass
+
+
+class NCGraph:
+    def __init__(self, ds, name, nc_object):
+        self.name         = name
+        self.coords       = DotDict()
+        self.dims         = DotDict()
+        self.grid_mapping = DotDict()
+        self.obj          = nc_object
+        if isinstance(nc_object, Dimension):
+            self._type = 'dim'
+        elif isinstance(nc_object, Variable):
+            self._type = 'var'
+            for dim in nc_object.dimensions:
+                self.dims[dim] = NCGraph(ds, dim, ds.dimensions[dim])
+            if hasattr(nc_object, 'coordinates'):
+                coords = nc_object.coordinates.split(' ')
+                for coord in coords:
+                    if coord in ds.variables:
+                        self.coords[coord] = NCGraph(ds, coord, ds.variables[coord])
+                    else:
+                        self.coords[coord] = None
+            if hasattr(nc_object, 'grid_mapping'):
+                gm = nc_object.grid_mapping
+                self.grid_mapping[gm] = None
+                if gm in ds.variables:
+                    self.grid_mapping[gm] = NCGraph(ds, gm, ds.variables[gm])
+
+        else:
+            raise TypeError("unknown type %s" % repr(type(nc_object)))
+
+    def __getattr__(self, key):
+        if key in self.__dict__:
+            return self.__dict__[key]
+        return getattr(self.obj, key)
+            
+
+
+class DotDict(dict):
+    """
+    Subclass of dict that will recursively look up attributes with dot notation.
+    This is primarily for working with JSON-style data in a cleaner way like javascript.
+    Note that this will instantiate a number of child DotDicts when you first access attributes;
+    do not use in performance-critical parts of your code.
+    """
+
+    def __dir__(self):
+        return self.__dict__.keys() + self.keys()
+
+    def __getattr__(self, key):
+        """ Make attempts to lookup by nonexistent attributes also attempt key lookups. """
+        if self.has_key(key):
+            return self[key]
+        import sys
+        import dis
+        frame = sys._getframe(1)
+        if '\x00%c' % dis.opmap['STORE_ATTR'] in frame.f_code.co_code:
+            self[key] = DotDict()
+            return self[key]
+
+        raise AttributeError(key)
+
+    def __setattr__(self,key,value):
+        if key in dir(dict):
+            raise AttributeError('%s conflicts with builtin.' % key)
+        if isinstance(value, dict):
+            self[key] = DotDict(value)
+        else:
+            self[key] = value
+
+    def copy(self):
+        return deepcopy(self)
+
+    def get_safe(self, qual_key, default=None):
+        """
+        @brief Returns value of qualified key, such as "system.name" or None if not exists.
+                If default is given, returns the default. No exception thrown.
+        """
+        value = get_safe(self, qual_key)
+        if value is None:
+            value = default
+        return value
+
+    @classmethod
+    def fromkeys(cls, seq, value=None):
+        return DotDict(dict.fromkeys(seq, value))
+
+
+        
+
 
