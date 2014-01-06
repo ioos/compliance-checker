@@ -264,7 +264,10 @@ class CFCheck(BaseCheck):
         """
         2.1 Filename - NetCDF files should have the file name extension ".nc".
         """
-        return Result(BaseCheck.LOW, ds.dataset.filepath().endswith(".nc"), 'filename')
+        try:
+            return Result(BaseCheck.LOW, ds.dataset.filepath().endswith(".nc"), 'filename')
+        except ValueError: #This is 4.1.1 problem.  4.1.2 will not return a ValueError.
+            pass
 
     def check_data_types(self, ds):
         """
