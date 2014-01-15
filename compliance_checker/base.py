@@ -15,6 +15,7 @@ from lxml import etree
 from wicken.exceptions import DogmaGetterSetterException
 from udunitspy import Unit, UdunitsError, Converter
 
+
 class BaseCheck(object):
     HIGH   = 3
     MEDIUM = 2
@@ -40,6 +41,7 @@ class Result(object):
     weight of the check, any granular messages, or a hierarchy of results.
     """
     def __init__(self, weight=BaseCheck.MEDIUM, value=None, name=None, msgs=None, children=None):
+        
         self.weight = weight
         self.value  = value
         self.name   = name
@@ -47,8 +49,21 @@ class Result(object):
 
         self.children = children or []
 
-    def __repr__(self):
+
+
+    def __iter__(self):
+        self.count = 0
+        return iter([self.weight, self.value, self.name, self.msgs, self.children])
+
+   #def __next__(self):
+   #    if self.count == len(self.weight):
+   #        raise StopIteration
+   #    self.count = self.count+1
+   #    return self.count
+
+    def __not_repr__(self):
         ret = "%s (*%s): %s" % (self.name, self.weight, self.value)
+
         if len(self.msgs):
             if len(self.msgs) == 1:
                 ret += " (%s)" % self.msgs[0]
@@ -56,9 +71,9 @@ class Result(object):
                 ret += " (%d msgs)" % len(self.msgs)
 
         if len(self.children):
-            #ret += " (%d children)" % len(self.children)
+            ret += " (%d children)" % len(self.children)
             ret += "\n" + pprint.pformat(self.children)
-
+        #ret = (self.name, self.weight, self.value, self.msgs, self.children)
         return ret
 
 class StandardNameTable(object):
@@ -144,8 +159,10 @@ def check_has(priority=BaseCheck.HIGH):
                 if isinstance(l, tuple):
                     name, allowed = l
                     ret_val.append(Result(priority, std_check_in(ds.dogma, name, allowed), name))
+
                 else:
                     ret_val.append(Result(priority, std_check(ds.dogma, l), l))
+
 
             return ret_val
 
@@ -160,9 +177,11 @@ def fix_return_value(v, method_name=None):
     method_name = method_name.replace("check_", "")     # remove common check prefix
 
     if v is None or not isinstance(v, Result):
-        v = Result(value=v, name=method_name)
 
+        v = Result(value=v, name=method_name)
     v.name = v.name or method_name
+
+
     return v
 
 def score_group(group_name=None):
@@ -173,7 +192,6 @@ def score_group(group_name=None):
             if group_name != None and not isinstance(ret_val[0], tuple):
                 return tuple([(group_name, ret_val[0])] + list(ret_val[1:]))
             """
-
             # multiple returns
             if not isinstance(ret_val, list):
                 ret_val = [ret_val]
@@ -188,7 +206,10 @@ def score_group(group_name=None):
 
                 cur_grouping.insert(0, group_name)
 
+
+
                 return Result(r.weight, r.value, tuple(cur_grouping), r.msgs)
+
 
             ret_val = map(lambda x: fix_return_value(x, func.func_name), ret_val)
             ret_val = map(dogroup, ret_val)
