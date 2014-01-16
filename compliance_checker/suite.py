@@ -39,7 +39,7 @@ class CheckSuite(object):
 
         return [fix_return_value(val, check_method.im_func.func_name)]
 
-    def run(self, dataset_location, *args):
+    def run(self, dataset_location, criteria, tests_to_run, verbose, *args):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
@@ -47,24 +47,148 @@ class CheckSuite(object):
         """
 
         ret_val = {}
-
+        check_number = 0
         for a in args:
 
             ds = self.load_dataset(dataset_location, a.beliefs())
-
             a.setup(ds)
             checks = self._get_checks(a)
 
             vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, ds), checks)))
+            groups = self.scores(vals)
+            #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
+            score_list, fail_flag, check_number, limit = self.standard_output(criteria, check_number, groups, tests_to_run)
+            
 
-            # remove Nones? (aka skips)
+            if verbose:
+                self.verbose_output_generation(groups, verbose, score_list, limit)
+        return fail_flag
 
-            # transform to scores
-            scores = self.scores(vals)
+    def standard_output(self, criteria, check_number, groups, tests_to_run):
+        '''
+        Generates the Terminal Output for Standard cases
 
-            ret_val[a] = scores
+        Returns the dataset needed for the verbose output, as well as the failure flags.
+        '''
+        if criteria == 'normal':
+            limit = 2
+        elif criteria == 'strict':
+            limit = 1
+        elif criteria == 'lenient':
+            limit = 3
 
-        return ret_val
+        score_list = []
+        score_only_list= []
+
+        for v in range(len(groups)):
+            score_list.append([groups[v].name, groups[v].weight, groups[v].value, groups[v].children])
+            if groups[v].weight >= limit:
+                score_only_list.append(groups[v].value)
+
+        points = [x[0] for x in score_only_list]
+        out_of = [x[1] for x in score_only_list]
+
+        points = sum(points)
+        out_of = sum(out_of)
+
+        score_list.sort(key=lambda x: x[1], reverse=True)
+
+        fail_flag = 0
+
+        if points < out_of:
+            fail_flag = limit
+            print '\n'
+            print "-"*55
+            print "   The dataset scored %r out of %r required points" % (points, out_of)
+            print "            during the %s check" % tests_to_run[check_number]
+            print "      This test has passed under %s critera" % criteria
+            print "-"*55
+        check_number = check_number +1      
+        return [score_list, fail_flag, check_number, limit]
+
+
+    def verbose_output_generation(self, groups, verbose, score_list, limit):
+        '''
+        Generates the Terminal Output for Verbose cases
+        '''
+        
+        sub_tests = []
+        if verbose == 1:
+            print "\n"+"-"*55
+            print "The following tests failed:" 
+            priority_flag = 3
+
+            for x in range(len(score_list)):
+                if score_list[x][1] == 3 and limit <= 3 and priority_flag == 3:
+                    print '----High priority tests failed-----'
+                    print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                    priority_flag -= 1
+                elif score_list[x][1] == 2 and limit <= 2 and priority_flag == 2:
+                    print '----Medium priority tests failed-----'
+                    print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                    priority_flag -=1
+                elif score_list[x][1] == 1 and limit <= 1 and priority_flag == 1:
+                    print '----Low priority tests failed-----'
+                    print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                    priority_flag -= 1
+                if score_list[x][2][0] < score_list[x][2][1] and score_list[x][1] >= limit:
+                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
+                    print '-'*55
+
+        if verbose >= 2:
+            print "-"*55
+            print "Summary of all the checks performed:" 
+            
+            priority_flag = 3
+
+            self.print_routine(groups, 0, verbose, priority_flag)
+
+        pass
+
+
+    def print_routine(self, list_of_results, indent, verbose, priority_flag):
+        """
+        print routine performed
+        """
+        def weight_func(r):
+            """
+            Function that returns the weight, used for sorting by priority
+            """
+            return r.weight
+
+        #Sorting method used to properly sort the output by priority.
+        grouped_sorted = []
+        grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)        
+
+
+        #Loop over inoput
+        for res in grouped_sorted:
+            
+            #If statements to print the proper Headings
+            if res.weight == 3 and indent == 0 and priority_flag == 3:
+                print "\nHigh Priority"
+                print "-------------"
+                print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+
+                priority_flag -= 1
+            if res.weight == 2 and indent == 0 and priority_flag == 2:
+                print "\nMedium Priority"
+                print "---------------"
+                print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+
+                priority_flag -= 1
+            if res.weight ==1 and indent ==0 and priority_flag == 1:
+                print "\nLow Priority"
+                print "------------"
+                print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                priority_flag -= 1
+
+
+            print '%-40s:%s:%6s/%1s' % (indent*'    '+res.name, res.weight, res.value[0], res.value[1])
+            if res.children and verbose >1:
+                self.print_routine(res.children, indent+1, verbose-1, priority_flag)
+            if indent == 0:
+                print '-'*55
 
 
     def load_dataset(self, ds_str, belief_map):
@@ -82,32 +206,8 @@ class CheckSuite(object):
         """
         grouped = self._group_raw(raw_scores)
 
-        # score each top level item in groups
-        weights = [x.weight for x in grouped]
-        scores = [x.value for x in grouped]
+        return (grouped)
 
-        def score(acc, cur):
-            # cur is ((x, x), weight)
-            cs, weight = cur
-
-            # acc is (score, total possible)
-            cas, catotal = acc
-
-            pts = 0
-            if cs[1] == 0:
-                return acc  # effectively a skip @TODO keep track of that?
-
-            if cs[0] == cs[1]:
-                return (cas + (1 * weight), catotal + weight)
-            elif cs[0] == 0:
-                return (cas, catotal + weight)
-
-            # @TODO: could do cs[0] / cs[1] for exact pct points
-            return (cas + (0.5 * weight), catotal + weight)
-
-        cur_score = reduce(score, zip(scores, weights), (0, 0))
-
-        return (cur_score, grouped)
 
     def _group_raw(self, raw_scores, cur=None, level=1):
         """
@@ -115,7 +215,6 @@ class CheckSuite(object):
 
         Only top level items are tallied for scores.
         """
-        #print "_group_raw", level, cur, len(raw_scores), raw_scores[0]
 
         def build_group(label=None, weight=None, value=None, sub=None):
             label  = label
@@ -149,13 +248,17 @@ class CheckSuite(object):
             if isinstance(r.name, tuple) or isinstance(r.name, list):
                 return r.name[0:1][0]
             return r.name
+        
+
+
 
         grouped = itertools.groupby(sorted(raw_scores, key=group_func), key=group_func)
+
         ret_val = []
 
         for k, v in grouped:
+            
             v = list(v)
-            #print "group", k, level
 
             cv = self._group_raw(map(trim_groups, v), k, level+1)
             if len(cv):
@@ -169,7 +272,7 @@ class CheckSuite(object):
                 msgs = sum(map(lambda x: x.msgs, v), [])
 
             ret_val.append(Result(name=k, weight=max_weight, value=sum_scores, children=cv, msgs=msgs))
-
+        
         return ret_val
 
     def _translate_value(self, val):
