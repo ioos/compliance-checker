@@ -16,6 +16,10 @@ static_files = {
         'badname'       : 'test-data/non-comp/badname.netcdf',
         'bad'           : 'test-data/non-comp/bad.nc',
         'dimensionless' : 'test-data/dimensionless.nc',
+        '2dim'          : 'test-data/2dim-grid.nc',
+        'bad2dim'       : 'test-data/non-comp/bad2dim.nc',
+        'rhgrid'        : 'test-data/rhgrid.nc',
+        'bad-rhgrid'    : 'test-data/non-comp/bad-rhgrid.nc'
         }
 
 class MockVariable(object):
@@ -365,7 +369,6 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_time_coordinate(dataset)
         rd = {r.name[1:] : r.value for r in results }
-        results = self.cf.check_time_coordinate(dataset)
         self.assertFalse(rd[('bad_time_1', 'has_units')])
         self.assertTrue(rd[('bad_time_2', 'has_units')])
         self.assertFalse(rd[('bad_time_2', 'correct_units')])
@@ -379,8 +382,98 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_calendar(dataset)
         rd = {r.name[1:] : r.value for r in results }
-        results = self.cf.check_time_coordinate(dataset)
         self.assertFalse(rd[('bad_time_1', 'has_calendar')])
         self.assertFalse(rd[('bad_time_1', 'valid_calendar')])
         self.assertTrue(rd[('bad_time_2', 'has_calendar')])
         self.assertFalse(rd[('bad_time_2', 'valid_calendar')])
+
+    def test_check_independent_axis_dimensions(self):
+        dataset = self.get_pair(static_files['example-grid'])
+        results = self.cf.check_independent_axis_dimensions(dataset)
+        for r in results:
+            self.assertTrue(r.value)
+
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_independent_axis_dimensions(dataset)
+        rd = {r.name[1:] : (r.value, r.msgs) for r in results }
+
+        value, msgs = rd[('column_temp', 'valid_coordinates')]
+        self.assertFalse(value)
+        self.assertIn('sigma is not a coordinate variable', msgs)
+
+    def test_check_two_dimensional(self):
+        dataset = self.get_pair(static_files['2dim'])
+        results = self.cf.check_two_dimensional(dataset)
+        for r in results:
+            self.assertTrue(r.value)
+
+
+        # Need the bad testing
+        dataset = self.get_pair(static_files['bad2dim'])
+        results = self.cf.check_two_dimensional(dataset)
+        rd = {r.name[1:] : (r.value, r.msgs) for r in results }
+        value, msgs = rd[('C', 'lat_lon_correct')]
+        self.assertFalse(value)
+        value, msgs = rd[('C', 'valid_coordinates')]
+        self.assertIn("Variable C's coordinate, lat_p, does not share dimension x with the variable", msgs)
+        value, msgs = rd[('T', 'valid_coordinates')]
+        self.assertIn("Variable T's coordinate, lat, is not a coordinate or auxiliary variable", msgs)
+
+
+    def test_check_reduced_horizontal_grid(self):
+        dataset = self.get_pair(static_files['rhgrid'])
+        results = self.cf.check_reduced_horizontal_grid(dataset)
+        rd = { r.name[1] : r.value for r in results }
+        self.assertTrue(rd['PS'])
+
+        dataset = self.get_pair(static_files['bad-rhgrid'])
+        results = self.cf.check_reduced_horizontal_grid(dataset)
+        rd = { r.name[1] : (r.value, r.msgs) for r in results }
+
+        for name, (value, msg) in rd.iteritems():
+            self.assertFalse(value)
+
+        self.assertIn('Coordinate longitude is not a proper variable', rd['PSa'][1])
+        self.assertIn("Coordinate latitude's dimension, latdim, is not a dimension of PSb", rd['PSb'][1])
+        self.assertIn("Coordinate lon_i's dimension, ijgrid, does not define compress", rd['PSc'][1])
+
+def breakpoint(scope=None, global_scope=None):
+    import traceback
+    from IPython.config.loader import Config
+    ipy_config = Config()
+    ipy_config.PromptManager.in_template = '><> '
+    ipy_config.PromptManager.in2_template = '... '
+    ipy_config.PromptManager.out_template = '--> '
+    ipy_config.InteractiveShellEmbed.confirm_exit = False
+
+
+    # First import the embeddable shell class
+    from IPython.frontend.terminal.embed import InteractiveShellEmbed
+    from mock import patch
+    if scope is not None:
+        locals().update(scope)
+    if global_scope is not None:
+        globals().update(global_scope)
+
+
+
+    # Update namespace of interactive shell
+    # TODO: Cleanup namespace even further
+    # Now create an instance of the embeddable shell. The first argument is a
+    # string with options exactly as you would type them if you were starting
+    # IPython at the system command line. Any parameters you want to define for
+    # configuration can thus be specified here.
+    with patch("IPython.core.interactiveshell.InteractiveShell.init_virtualenv"):
+        ipshell = InteractiveShellEmbed(config=ipy_config,
+                banner1="Entering Breakpoint Shell",
+            exit_msg = 'Returning...')
+
+        stack = traceback.extract_stack(limit=2)
+        message = 'File %s, line %s, in %s' % stack[0][:-1]
+
+        try:
+            import growl
+            growl.growl('breakpoint', 'Ready')
+        except:
+            pass
+        ipshell('(%s) Breakpoint @ %s' % ('breakpoint', message))

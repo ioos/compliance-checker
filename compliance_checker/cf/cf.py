@@ -5,6 +5,8 @@ import numpy as np
 from compliance_checker.base import BaseCheck, check_has, score_group, Result, StandardNameTable, units_known, units_convertible, units_temporal
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 
+from netCDF4 import Dimension, Variable
+
 # copied from paegan
 # paegan may depend on these later
 _possiblet = ["time", "TIME", "Time",
@@ -55,6 +57,8 @@ _possibley = ["y", "Y",
            "lat_rho", "LAT_RHO",
            "lat_psi", "LAT_PSI",
           ]
+
+_possibleaxis = _possiblet + _possiblez + _possiblex + _possibley
 
 def guess_dim_type(dimension):
     """
@@ -108,6 +112,15 @@ def guess_coord_type(units, positive=None):
         return 'T'
 
     return None
+
+def is_variable(name, var):
+    dims = var.dimensions
+    if (name,) == dims:
+        # Coordinate Type
+        return False
+    # Probably a variable
+    return True
+
 
 def map_axes(dim_vars, reverse_map=False):
     """
@@ -1269,89 +1282,274 @@ class CFCheck(BaseCheck):
     #
     ###############################################################################
 
+    def _get_coord_vars(self, ds):
+        coord_vars = []
+        for name,var in ds.dataset.variables.iteritems():
+            if (name,) == var.dimensions:
+                coord_vars.append(name)
+        return coord_vars
+
     def check_coordinate_systems(self, ds):
         """
-        5 All of a variable's spatiotemporal dimensions that are not latitude, longitude, vertical, or time dimensions are
-        required to be associated with the relevant latitude, longitude, vertical, or time coordinates via the new
-        coordinates attribute of the variable. The value of the coordinates attribute is a blank separated list of the
-        names of auxiliary coordinate variables.
+        5 All of a variable's spatiotemporal dimensions that are not latitude,
+        longitude, vertical, or time dimensions are required to be associated
+        with the relevant latitude, longitude, vertical, or time coordinates via
+        the new coordinates attribute of the variable. The value of the
+        coordinates attribute is a blank separated list of the names of
+        auxiliary coordinate variables.
 
-        The dimensions of an auxiliary coordinate variable must be a subset of the dimensions of the variable with
-        which the coordinate is associated, with two exceptions:
-        - String-valued coordinates (Section 6.1, "Labels") have a dimension for maximum string length
-        - In the ragged array representations of data (Chapter 9, Discrete Sampling Geometries), special methods are
-          needed to connect the data and coordinates
+        The dimensions of an auxiliary coordinate variable must be a subset of
+        the dimensions of the variable with which the coordinate is associated,
+        with two exceptions:
+        - String-valued coordinates (Section 6.1, "Labels") have a dimension for
+          maximum string length
+        - In the ragged array representations of data (Chapter 9, Discrete
+          Sampling Geometries), special methods are needed to connect the data
+          and coordinates
 
-        Recommend that the name of a multidimensional coordinate variable should not match the name of any of its dimensions
-        because that precludes supplying a coordinate variable for the dimension.
+        Recommend that the name of a multidimensional coordinate variable should
+        not match the name of any of its dimensions because that precludes
+        supplying a coordinate variable for the dimension.
 
-        Auxiliary coordinate variables may not be used as the only way to identify latitude and longitude coordinates that
-        could be identified using coordinate variables.
+        Auxiliary coordinate variables may not be used as the only way to
+        identify latitude and longitude coordinates that could be identified
+        using coordinate variables.
 
-        An application that is trying to find the latitude coordinate of a variable should always look first to see if any
-        of the variable's dimensions correspond to a latitude coordinate variable. If the latitude coordinate is not found
-        this way, then the auxiliary coordinate variables listed by the coordinates attribute should be checked. Note that it
-        is permissible, but optional, to list coordinate variables as well as auxiliary coordinate variables in the
-        coordinates attribute.
+        An application that is trying to find the latitude coordinate of a
+        variable should always look first to see if any of the variable's
+        dimensions correspond to a latitude coordinate variable. If the latitude
+        coordinate is not found this way, then the auxiliary coordinate
+        variables listed by the coordinates attribute should be checked. Note
+        that it is permissible, but optional, to list coordinate variables as
+        well as auxiliary coordinate variables in the coordinates attribute.
 
-        It is not permissible for a data variable to have both a coordinate variable and an auxiliary coordinate variable,
-        or more than one of either type of variable, having an axis attribute with any given value e.g. there must be no
-        more than one axis attribute for X for any data variable.
+        It is not permissible for a data variable to have both a coordinate
+        variable and an auxiliary coordinate variable, or more than one of
+        either type of variable, having an axis attribute with any given value
+        e.g. there must be no more than one axis attribute for X for any data
+        variable.
+
         """
+
         pass
 
     def check_independent_axis_dimensions(self, ds):
         """
-        5.1 When each of a variable's spatiotemporal dimensions is a latitude, longitude, vertical, or time dimension,
-        then each axis is identified by a coordinate variable.
+        5.1 When each of a variable's spatiotemporal dimensions is a latitude,
+        longitude, vertical, or time dimension, then each axis is identified by
+        a coordinate variable.
+
         """
-        pass
+        ret_val = []
+        for name,var in ds.dataset.variables.iteritems():
+            if is_variable(name, var):
+                # If each dimension that's an axis is a proper coordinate variable
+                # then this is a valid compliance
+                reasoning = []
+                valid_coordinate = True
+                for dim in var.dimensions:
+                    if dim in _possibleaxis and dim not in ds.dataset.variables:
+                        valid_coordinate = False
+                        reasoning.append('%s is not a coordinate variable' % dim)
+                    
+                if valid_coordinate:
+                    r = Result(BaseCheck.MEDIUM, \
+                               valid_coordinate, \
+                               ('var', name, 'valid_coordinates'))
+                else:
+                    r = Result(BaseCheck.MEDIUM,                   \
+                               valid_coordinate,                   \
+                               ('var', name, 'valid_coordinates'), \
+                               reasoning)
+                ret_val.append(r)
+        return ret_val
+                        
 
     def check_two_dimensional(self, ds):
         """
-        5.2 The latitude and longitude coordinates of a horizontal grid that was not defined as a Cartesian product of
-        latitude and longitude axes, can sometimes be represented using two-dimensional coordinate variables.
+        5.2 The latitude and longitude coordinates of a horizontal grid that was
+        not defined as a Cartesian product of latitude and longitude axes, can
+        sometimes be represented using two-dimensional coordinate variables.
+        These variables are identified as coordinates by use of the coordinates
+        attribute.
+
+        For each variable, if the variable has a coordinates attribute:
+          for each coordinate defined, verify that the coordinate:
+            is either a coordinate variable OR comprises coordinate variables
+          
         """
-        pass
+
+        ret_val = []
+        for name,var in ds.dataset.variables.iteritems():
+            g = NCGraph(ds.dataset, name, var)
+            if len(g.coords) != 2:
+                continue # Not a 2d horizontal grid
+            
+            #------------------------------------------------------------
+            # Check all the dims are coordinate variables
+            #------------------------------------------------------------
+            valid_dims = True
+            reasoning = []
+            for dim in g.dims.iterkeys():
+                if dim not in ds.dataset.variables:
+                    valid_2d = False
+                    reasoning.append("Variable %s's dimension, %s, is not a coordinate variable" % (name, dim))
+
+            result = Result(BaseCheck.HIGH,                             \
+                            valid_dims,                                 \
+                            ('var', name, '2d_hgrid_valid_dimensions'), \
+                            reasoning)
+            ret_val.append(result)
+            
+            #------------------------------------------------------------
+            # Check that the coordinates are correct
+            #------------------------------------------------------------
+            valid_2d = True
+            reasoning = []
+            for cname, coord in g.coords.iteritems():
+                if coord is None:
+                    valid_2d = False
+                    reasoning.append("Variable %s's coordinate, %s, is not a coordinate or auxiliary variable" %(name, cname))
+                    continue
+                for dim in coord.dims.iterkeys():
+                    if dim not in g.dims:
+                        valid_2d = False
+                        reasoning.append("Variable %s's coordinate, %s, does not share dimension %s with the variable" % (name, cname, dim))
+            result = Result(BaseCheck.MEDIUM,                   \
+                            valid_2d,                           \
+                            ('var', name, 'valid_coordinates'), \
+                            reasoning)
+            ret_val.append(result)
+
+            
+            #------------------------------------------------------------
+            # Can make lat/lon?
+            #------------------------------------------------------------
+
+            lat_check = False
+            lon_check = False
+    
+            for cname, coord in g.coords.iteritems():
+                if cname.lower() in ('lat', 'latitude'):
+                    lat_check = True
+                elif cname.lower() in ('lon', 'longitude'):
+                    lon_check = True
+
+            result = Result(BaseCheck.HIGH,          \
+                            lat_check and lon_check, \
+                            ('var', name, 'lat_lon_correct'))
+            ret_val.append(result)
+
+
+        return ret_val
+
 
     def check_reduced_horizontal_grid(self, ds):
         """
-        5.3 A "reduced" longitude-latitude grid is one in which the points are arranged along constant latitude lines
-        with the number of points on a latitude line decreasing toward the poles.
+        5.3 A "reduced" longitude-latitude grid is one in which the points are
+        arranged along constant latitude lines with the number of points on a
+        latitude line decreasing toward the poles.
 
-        Recommend that this type of gridded data be stored using the compression scheme described in Section 8.2,
-        "Compression by Gathering". The compressed latitude and longitude auxiliary coordinate variables are identified
-        by the coordinates attribute.
-        """
-        pass
+        Recommend that this type of gridded data be stored using the compression
+        scheme described in Section 8.2, "Compression by Gathering". The
+        compressed latitude and longitude auxiliary coordinate variables are
+        identified by the coordinates attribute.
 
-    def check_horz_crfs_grid_mappings_projections(self, ds):
         """
-        5.6 When the coordinate variables for a horizontal grid are not longitude and latitude, it is required that the
-        true latitude and longitude coordinates be supplied via the coordinates attribute. If in addition it is desired
-        to describe the mapping between the given coordinate variables and the true latitude and longitude coordinates,
+        ret_val = []
+        coord_vars = self._get_coord_vars(ds)
+
+        for name, var in ds.dataset.variables.iteritems():
+            if name in coord_vars:
+                continue
+            if not hasattr(var, 'coordinates'):
+                continue
+
+            valid = True
+            reasoning = []
+
+            coords = var.coordinates.split(' ')
+            for coord in coords:
+                if coord not in ds.dataset.variables:
+                    valid = False
+                    reasoning.append("Coordinate %s is not a proper variable" % coord)
+                    continue
+
+                for dim_name in ds.dataset.variables[coord].dimensions:
+
+                    if dim_name not in var.dimensions:
+                        valid = False
+                        reasoning.append("Coordinate %s's dimension, %s, is not a dimension of %s" %(coord, dim_name, name))
+                        continue
+
+                    if dim_name not in coord_vars:
+                        valid = False
+                        reasoning.append("Coordinate %s's dimension, %s, is not a coordinate variable" % (coord, dim_name))
+                        continue
+
+                    dim = ds.dataset.variables[dim_name]
+                    if not hasattr(dim, 'compress'):
+                        valid = False
+                        reasoning.append("Coordinate %s's dimension, %s, does not define compress" % (coord, dim_name))
+                        continue
+
+                    compress_dims = dim.compress.split(' ')
+                    for cdim in compress_dims:
+                        if cdim not in ds.dataset.dimensions:
+                            valid = False
+                            reasoning.append("Dimension %s compresses non-existent dimension, %s" % (dim_name, cdim))
+                            continue
+            result = Result(BaseCheck.MEDIUM,                            \
+                            valid,                                       \
+                            ('var', name, 'is_reduced_horizontal_grid'), \
+                            reasoning)
+            ret_val.append(result)
+        return ret_val
+
+
+
+    def check_horz_crs_grid_mappings_projections(self, ds):
+        """
+        5.6 When the coordinate variables for a horizontal grid are not
+        longitude and latitude, it is required that the true latitude and
+        longitude coordinates be supplied via the coordinates attribute. If in
+        addition it is desired to describe the mapping between the given
+        coordinate variables and the true latitude and longitude coordinates,
         the attribute grid_mapping may be used to supply this description.
 
-        This attribute is attached to data variables so that variables with different mappings may be present in a single
-        file. The attribute takes a string value which is the name of another variable in the file that provides the
-        description of the mapping via a collection of attached attributes. This variable is called a grid mapping variable
-        and is of arbitrary type since it contains no data. Its purpose is to act as a container for the attributes that
-        define the mapping.
+        This attribute is attached to data variables so that variables with
+        different mappings may be present in a single file. The attribute takes
+        a string value which is the name of another variable in the file that
+        provides the description of the mapping via a collection of attached
+        attributes. This variable is called a grid mapping variable and is of
+        arbitrary type since it contains no data. Its purpose is to act as a
+        container for the attributes that define the mapping.
 
-        The one attribute that all grid mapping variables must have is grid_mapping_name which takes a string value that
-        contains the mapping's name. The other attributes that define a specific mapping depend on the value of
-        grid_mapping_name. The valid values of grid_mapping_name along with the attributes that provide specific map
-        parameter values are described in Appendix F, Grid Mappings.
+        The one attribute that all grid mapping variables must have is
+        grid_mapping_name which takes a string value that contains the mapping's
+        name. The other attributes that define a specific mapping depend on the
+        value of grid_mapping_name. The valid values of grid_mapping_name along
+        with the attributes that provide specific map parameter values are
+        described in Appendix F, Grid Mappings.
 
-        When the coordinate variables for a horizontal grid are longitude and latitude, a grid mapping variable with
-        grid_mapping_name of latitude_longitude may be used to specify the ellipsoid and prime meridian.
+        When the coordinate variables for a horizontal grid are longitude and
+        latitude, a grid mapping variable with grid_mapping_name of
+        latitude_longitude may be used to specify the ellipsoid and prime
+        meridian.
 
 
-        In order to make use of a grid mapping to directly calculate latitude and longitude values it is necessary to associate
-        the coordinate variables with the independent variables of the mapping. This is done by assigning a standard_name to the
-        coordinate variable. The appropriate values of the standard_name depend on the grid mapping and are given in Appendix F, Grid Mappings.
-        """
-        pass
+        In order to make use of a grid mapping to directly calculate latitude
+        and longitude values it is necessary to associate the coordinate
+        variables with the independent variables of the mapping. This is done by
+        assigning a standard_name to the coordinate variable. The appropriate
+        values of the standard_name depend on the grid mapping and are given in
+        Appendix F, Grid Mappings.  
+        """ 
+       
+        ret_val = []
+
+        return ret_val
+
 
     def check_scalar_coordinate_system(self, ds):
         """
@@ -1758,4 +1956,94 @@ class CFCheck(BaseCheck):
         instance variable should also contain missing values.
         """
         pass
+
+
+class NCGraph:
+    def __init__(self, ds, name, nc_object):
+        self.name         = name
+        self.coords       = DotDict()
+        self.dims         = DotDict()
+        self.grid_mapping = DotDict()
+        self.obj          = nc_object
+        if isinstance(nc_object, Dimension):
+            self._type = 'dim'
+        elif isinstance(nc_object, Variable):
+            self._type = 'var'
+            for dim in nc_object.dimensions:
+                self.dims[dim] = NCGraph(ds, dim, ds.dimensions[dim])
+            if hasattr(nc_object, 'coordinates'):
+                coords = nc_object.coordinates.split(' ')
+                for coord in coords:
+                    if coord in ds.variables:
+                        self.coords[coord] = NCGraph(ds, coord, ds.variables[coord])
+                    else:
+                        self.coords[coord] = None
+            if hasattr(nc_object, 'grid_mapping'):
+                gm = nc_object.grid_mapping
+                self.grid_mapping[gm] = None
+                if gm in ds.variables:
+                    self.grid_mapping[gm] = NCGraph(ds, gm, ds.variables[gm])
+
+        else:
+            raise TypeError("unknown type %s" % repr(type(nc_object)))
+
+    def __getattr__(self, key):
+        if key in self.__dict__:
+            return self.__dict__[key]
+        return getattr(self.obj, key)
+            
+
+
+class DotDict(dict):
+    """
+    Subclass of dict that will recursively look up attributes with dot notation.
+    This is primarily for working with JSON-style data in a cleaner way like javascript.
+    Note that this will instantiate a number of child DotDicts when you first access attributes;
+    do not use in performance-critical parts of your code.
+    """
+
+    def __dir__(self):
+        return self.__dict__.keys() + self.keys()
+
+    def __getattr__(self, key):
+        """ Make attempts to lookup by nonexistent attributes also attempt key lookups. """
+        if self.has_key(key):
+            return self[key]
+        import sys
+        import dis
+        frame = sys._getframe(1)
+        if '\x00%c' % dis.opmap['STORE_ATTR'] in frame.f_code.co_code:
+            self[key] = DotDict()
+            return self[key]
+
+        raise AttributeError(key)
+
+    def __setattr__(self,key,value):
+        if key in dir(dict):
+            raise AttributeError('%s conflicts with builtin.' % key)
+        if isinstance(value, dict):
+            self[key] = DotDict(value)
+        else:
+            self[key] = value
+
+    def copy(self):
+        return deepcopy(self)
+
+    def get_safe(self, qual_key, default=None):
+        """
+        @brief Returns value of qualified key, such as "system.name" or None if not exists.
+                If default is given, returns the default. No exception thrown.
+        """
+        value = get_safe(self, qual_key)
+        if value is None:
+            value = default
+        return value
+
+    @classmethod
+    def fromkeys(cls, seq, value=None):
+        return DotDict(dict.fromkeys(seq, value))
+
+
+        
+
 
