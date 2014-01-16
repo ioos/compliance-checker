@@ -14,14 +14,10 @@ def main(ds_loc, tests_to_run, verbose, dict_of_checks, criteria):
     if tests_to_run == 'all':
         tests_to_run = dict_of_checks.keys()
     
-    print chr(27) + "[2J"
     print "Running Compliance Checker on the dataset from: %s" % ds_loc
     tests_sent = [dict_of_checks[t]() for t in tests_to_run]
     fail_flag = cs.run(ds_loc, criteria, tests_to_run, verbose, *tests_sent) #Add more arguements if more checks are added
     return[fail_flag]
-
-
-    #out,fail_flag, score_list = cs.run(ds_loc, criteria, tests_to_run, verbose, *tests_sent) #Add more arguements if more checks are added
 
 
 

@@ -51,17 +51,7 @@ class Result(object):
 
 
 
-    def __iter__(self):
-        self.count = 0
-        return iter([self.weight, self.value, self.name, self.msgs, self.children])
-
-   #def __next__(self):
-   #    if self.count == len(self.weight):
-   #        raise StopIteration
-   #    self.count = self.count+1
-   #    return self.count
-
-    def __not_repr__(self):
+    def __repr__(self):
         ret = "%s (*%s): %s" % (self.name, self.weight, self.value)
 
         if len(self.msgs):
@@ -73,7 +63,6 @@ class Result(object):
         if len(self.children):
             ret += " (%d children)" % len(self.children)
             ret += "\n" + pprint.pformat(self.children)
-        #ret = (self.name, self.weight, self.value, self.msgs, self.children)
         return ret
 
 class StandardNameTable(object):

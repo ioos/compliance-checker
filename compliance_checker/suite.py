@@ -91,7 +91,6 @@ class CheckSuite(object):
         points = sum(points)
         out_of = sum(out_of)
 
-        score_list.sort(key=lambda x: x[0])
         score_list.sort(key=lambda x: x[1], reverse=True)
 
         fail_flag = 0
@@ -117,21 +116,21 @@ class CheckSuite(object):
         if verbose == 1:
             print "\n"+"-"*55
             print "The following tests failed:" 
-            priority_flag = 'rock'
+            priority_flag = 3
 
             for x in range(len(score_list)):
-                if score_list[x][1] == 3 and limit <= 3 and priority_flag == 'rock':
+                if score_list[x][1] == 3 and limit <= 3 and priority_flag == 3:
                     print '----High priority tests failed-----'
                     print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
-                    priority_flag = 'paper'
-                elif score_list[x][1] == 2 and limit <= 2 and priority_flag == 'paper':
+                    priority_flag -= 1
+                elif score_list[x][1] == 2 and limit <= 2 and priority_flag == 2:
                     print '----Medium priority tests failed-----'
                     print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
-                    priority_flag = 'scissors'
-                elif score_list[x][1] == 1 and limit <= 1 and priority_flag == 'scissors':
+                    priority_flag -=1
+                elif score_list[x][1] == 1 and limit <= 1 and priority_flag == 1:
                     print '----Low priority tests failed-----'
                     print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
-                    priority_flag = 'lizard'
+                    priority_flag -= 1
                 if score_list[x][2][0] < score_list[x][2][1] and score_list[x][1] >= limit:
                     print '%-40s:%s:%6s/%1s'  % (score_list[x][0], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
                     print '-'*55
@@ -140,9 +139,9 @@ class CheckSuite(object):
             print "-"*55
             print "Summary of all the checks performed:" 
             
-            priority_flag = 'rock'
+            priority_flag = 3
 
-            self.print_routine(groups, 0, verbose, 'rock')
+            self.print_routine(groups, 0, verbose, priority_flag)
 
         pass
 
@@ -166,23 +165,23 @@ class CheckSuite(object):
         for res in grouped_sorted:
             
             #If statements to print the proper Headings
-            if res.weight == 3 and indent == 0 and priority_flag == 'rock':
+            if res.weight == 3 and indent == 0 and priority_flag == 3:
                 print "\nHigh Priority"
                 print "-------------"
                 print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
 
-                priority_flag = 'paper'
-            if res.weight == 2 and indent == 0 and priority_flag == 'paper':
+                priority_flag -= 1
+            if res.weight == 2 and indent == 0 and priority_flag == 2:
                 print "\nMedium Priority"
                 print "---------------"
                 print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
 
-                priority_flag = 'scissors'
-            if res.weight ==1 and indent ==0 and priority_flag == 'scissors':
+                priority_flag -= 1
+            if res.weight ==1 and indent ==0 and priority_flag == 1:
                 print "\nLow Priority"
                 print "------------"
                 print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
-                priority_flag = 'null'
+                priority_flag -= 1
 
 
             print '%-40s:%s:%6s/%1s' % (indent*'    '+res.name, res.weight, res.value[0], res.value[1])
@@ -205,13 +204,7 @@ class CheckSuite(object):
         """
         Transforms raw scores from a single checker into a fully tallied and grouped scoreline.
         """
-
-
         grouped = self._group_raw(raw_scores)
-
-
-        #for v in grouped_sorted:
-            #grouped_sorted_order.append(v)
 
         return (grouped)
 
@@ -222,7 +215,6 @@ class CheckSuite(object):
 
         Only top level items are tallied for scores.
         """
-        #print "_group_raw", level, cur, len(raw_scores), raw_scores[0]
 
         def build_group(label=None, weight=None, value=None, sub=None):
             label  = label
@@ -253,8 +245,6 @@ class CheckSuite(object):
             """
             Slices off first element (if list/tuple) of classification or just returns it if scalar.
             """
-            #print r.name
-            #raw_input('ljaksdjflkjaklsjdfkljaslkdjfkljsdf')
             if isinstance(r.name, tuple) or isinstance(r.name, list):
                 return r.name[0:1][0]
             return r.name
@@ -269,7 +259,6 @@ class CheckSuite(object):
         for k, v in grouped:
             
             v = list(v)
-            #print "group", k, level
 
             cv = self._group_raw(map(trim_groups, v), k, level+1)
             if len(cv):
