@@ -2,6 +2,7 @@
 Compliance Checker suite runner
 """
 
+import json
 import inspect
 import itertools
 from netCDF4 import Dataset
@@ -48,6 +49,7 @@ class CheckSuite(object):
 
         ret_val = {}
         check_number = 0
+        json_dict = {}
         for a in args:
 
             ds = self.load_dataset(dataset_location, a.beliefs())
@@ -57,12 +59,30 @@ class CheckSuite(object):
             vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, ds), checks)))
             groups = self.scores(vals)
             #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
-            score_list, fail_flag, check_number, limit = self.standard_output(criteria, check_number, groups, tests_to_run)
+            score_list, fail_flag, check_number, limit, score_summary = self.standard_output(criteria, check_number, groups, tests_to_run)
             
+
+            json_test_list = []
+            json_test_list = self.json_formatting(groups, json_test_list)
+            json_dict[tests_to_run[check_number-1]] = {'score':score_summary, 'test':json_test_list}
+
+
+            print json.dumps(json_dict)
+
 
             if verbose:
                 self.verbose_output_generation(groups, verbose, score_list, limit)
+        
         return fail_flag
+
+    def json_formatting(self, groups, json_test_list, parent):
+
+        for res in groups:
+            json_test_list.append({'name': res.name, 'weight': res.weight, 'value': res.value})
+            #if res.children:
+                #self.json_formatting(res.children, json_test_list, res.name)
+        return [json_test_list] 
+
 
     def standard_output(self, criteria, check_number, groups, tests_to_run):
         '''
@@ -91,6 +111,8 @@ class CheckSuite(object):
         points = sum(points)
         out_of = sum(out_of)
 
+        score_summary = [points, out_of]
+
         score_list.sort(key=lambda x: x[1], reverse=True)
 
         fail_flag = 0
@@ -104,7 +126,7 @@ class CheckSuite(object):
             print "      This test has passed under %s critera" % criteria
             print "-"*55
         check_number = check_number +1      
-        return [score_list, fail_flag, check_number, limit]
+        return [score_list, fail_flag, check_number, limit, score_summary]
 
 
     def verbose_output_generation(self, groups, verbose, score_list, limit):
