@@ -2,6 +2,8 @@
 Compliance Checker suite runner
 """
 
+import json
+import pprint 
 import inspect
 import itertools
 from netCDF4 import Dataset
@@ -19,7 +21,9 @@ class DSPair(object):
         self.dataset = ds
         self.dogma = dogma
 
+
 class CheckSuite(object):
+
 
     def _get_checks(self, checkclass):
         """
@@ -39,7 +43,7 @@ class CheckSuite(object):
 
         return [fix_return_value(val, check_method.im_func.func_name)]
 
-    def run(self, dataset_location, criteria, tests_to_run, verbose, *args):
+    def run(self, dataset_location, criteria, tests_to_run, verbose, json_flag, *args):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
@@ -48,6 +52,7 @@ class CheckSuite(object):
 
         ret_val = {}
         check_number = 0
+        json_dict = {}
         for a in args:
 
             ds = self.load_dataset(dataset_location, a.beliefs())
@@ -56,15 +61,34 @@ class CheckSuite(object):
 
             vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, ds), checks)))
             groups = self.scores(vals)
+
             #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
-            score_list, fail_flag, check_number, limit = self.standard_output(criteria, check_number, groups, tests_to_run)
+            score_list, fail_flag, check_number, limit, score_summary = self.standard_output(criteria, check_number, groups, tests_to_run, json_flag)
             
+            if json_flag:
+                json_test_list = []
+                json_test_list = self.json_formatting(groups, json_test_list)
+                json_dict[tests_to_run[check_number-1]] = {'score':score_summary, 'test':json_test_list}
 
-            if verbose:
+            if verbose and not json_flag:
                 self.verbose_output_generation(groups, verbose, score_list, limit)
-        return fail_flag
+        
+        return fail_flag, json_dict
 
-    def standard_output(self, criteria, check_number, groups, tests_to_run):
+    def json_formatting(self, groups, json_test_list):
+        
+        def res2dict(r):
+            cl = []
+            if r.children:
+                cl = map(res2dict, r.children)
+            return {'name':r.name, 'value':r.value, 'weight' : r.weight, "children":cl}
+
+        json_test_list = map(res2dict, groups)
+
+        return json_test_list
+
+
+    def standard_output(self, criteria, check_number, groups, tests_to_run, json_flag):
         '''
         Generates the Terminal Output for Standard cases
 
@@ -91,20 +115,21 @@ class CheckSuite(object):
         points = sum(points)
         out_of = sum(out_of)
 
+        score_summary = [points, out_of]
+
         score_list.sort(key=lambda x: x[1], reverse=True)
 
         fail_flag = 0
 
-        if points < out_of:
+        if points < out_of and not json_flag:
             fail_flag = limit
             print '\n'
             print "-"*55
             print "   The dataset scored %r out of %r required points" % (points, out_of)
             print "            during the %s check" % tests_to_run[check_number]
-            print "      This test has passed under %s critera" % criteria
             print "-"*55
         check_number = check_number +1      
-        return [score_list, fail_flag, check_number, limit]
+        return [score_list, fail_flag, check_number, limit, score_summary]
 
 
     def verbose_output_generation(self, groups, verbose, score_list, limit):
@@ -161,7 +186,7 @@ class CheckSuite(object):
         grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)        
 
 
-        #Loop over inoput
+        #Loop over input
         for res in grouped_sorted:
             
             #If statements to print the proper Headings
