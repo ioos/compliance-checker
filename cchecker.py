@@ -8,7 +8,7 @@ from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.cf import CFBaseCheck
 from compliance_checker.ioos import IOOSBaseCheck
 
-def main(ds_loc, tests_to_run, verbose, dict_of_checks, criteria):
+def run_checker(ds_loc, tests_to_run, verbose, dict_of_checks, criteria):
         
     cs = CheckSuite()
     #if statement to determine if we are running all of the checks
@@ -20,12 +20,7 @@ def main(ds_loc, tests_to_run, verbose, dict_of_checks, criteria):
     fail_flag = cs.run(ds_loc, criteria, tests_to_run, verbose, *tests_sent) #Add more arguements if more checks are added
     return[fail_flag]
 
-
-
-
-
-if __name__ == "__main__":
-    
+def main():
     #Dictionary of checks
     check_dict = {
                     'cf' : CFBaseCheck,
@@ -44,9 +39,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 
-    main(args.dataset_location[0],
+    run_checker(args.dataset_location[0],
          args.test,
          args.verbose,
          check_dict,
          args.criteria)
 
+if __name__ == "__main__":
+    main()

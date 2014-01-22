@@ -1,0 +1,168 @@
+{
+  "comment": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:supplementalInformation\n", 
+    "desc": "Miscellaneous information about the data.\t"
+  }, 
+  "geospatial_vertical_max": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:verticalElement/gmd:EX_VerticalExtent/gmd:maximumValue/gco:Real\n", 
+    "desc": "Describes a simple latitude, longitude, and vertical bounding box. For a more detailed geospatial coverage, see the suggested geospatial attributes.\n"
+  }, 
+  "geospatial_lat_units": {
+    "query": "/gmi:MI_Metadata/gmd:spatialRepresentationInfo/gmd:MD_Georectified/gmd:axisDimensionProperties/gmd:MD_Dimension/gmd:resolution/gco:Measure/@uom\n", 
+    "desc": "Further refinement of the geospatial bounding box can be provided by using these units and resolution attributes.\n"
+  }, 
+  "geospatial_lon_units": {
+    "query": "/gmi:MI_Metadata/gmd:spatialRepresentationInfo/gmd:MD_Georectified/gmd:axisDimensionProperties/gmd:MD_Dimension/gmd:resolution/gco:Measure/@uom\n", 
+    "desc": "Further refinement of the geospatial bounding box can be provided by using these units and resolution attributes.\n"
+  }, 
+  "contributor_role": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode", 
+    "desc": "The role of any individuals or institutions that contributed to the creation of this data.\n"
+  }, 
+  "keywords": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gco:CharacterString\n", 
+    "desc": "A comma separated list of key words and phrases."
+  }, 
+  "publisher_name": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:individualName/gco:CharacterString\nCI_RoleCode=\"publisher\"\n", 
+    "desc": "The data publisher's name. The publisher may be an individual or an institution.\t"
+  }, 
+  "id": {
+    "query": "/gmi:MI_Metadata/gmd:fileIdentifier/gco:CharacterString", 
+    "desc": "The combination of the \"naming authority\" and the \"id\" should be a globally unique identifier for the dataset."
+  }, 
+  "naming_authority": {
+    "query": "/gmi:MI_Metadata/gmd:fileIdentifier/gco:CharacterString", 
+    "desc": "The combination of the \"naming authority\" and the \"id\" should be a globally unique identifier for the dataset."
+  }, 
+  "geospatial_lat_max": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/gco:Decimal\n", 
+    "desc": "Describes a simple latitude, longitude, and vertical bounding box. For a more detailed geospatial coverage, see the suggested geospatial attributes.\n"
+  }, 
+  "acknowledgment": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:credit/gco:CharacterString\n", 
+    "desc": "A place to acknowledge various type of support for the project that produced this data.\n"
+  }, 
+  "title": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString", 
+    "desc": "A short description of the dataset."
+  }, 
+  "standard_name_vocabulary": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:thesaurusName/gmd:CI_Citation/gmd:title/gco:CharacterString\n", 
+    "desc": "The name of the controlled vocabulary from which variable standard names are taken.\n"
+  }, 
+  "creator_email": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString\nCI_RoleCode=\"originator\"\n", 
+    "desc": "The data creator's email."
+  }, 
+  "publisher_url": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL\nCI_RoleCode=\"publisher\"\n", 
+    "desc": "The data publisher's URL. The publisher may be an individual or an institution.\t"
+  }, 
+  "creator_name": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:individualName/gco:CharacterString\nCI_RoleCode=\"originator\"", 
+    "desc": "The data creator's name."
+  }, 
+  "__source_mapping_type__": "ISO 19115-2", 
+  "time_coverage_duration": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/gml:TimePeriod/gml:beginPosition", 
+    "desc": "Describes the temporal coverage of the data as a time range.\t"
+  }, 
+  "publisher_email": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress/gco:CharacterString\nCI_RoleCode=\"publisher\"\n", 
+    "desc": "The data publisher's email. The publisher may be an individual or an institution.\t"
+  }, 
+  "keywords_vocabulary": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:thesaurusName/gmd:CI_Citation/gmd:title/gco:CharacterString\n", 
+    "desc": "If you are following a guideline for the words/phrases in your \"keywords\" attribute, put the name of that guideline here.\n"
+  }, 
+  "date_issued": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date\n/gmd:dateType/gmd:CI_DateTypeCode=\"publication\"", 
+    "desc": "The date on which this data was formally issued.\n"
+  }, 
+  "geospatial_lat_min": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/gco:Decimal\n", 
+    "desc": "Describes a simple latitude, longitude, and vertical bounding box. For a more detailed geospatial coverage, see the suggested geospatial attributes.\n"
+  }, 
+  "geospatial_lat_resolution": {
+    "query": "/gmi:MI_Metadata/gmd:spatialRepresentationInfo/gmd:MD_Georectified/gmd:axisDimensionProperties/gmd:MD_Dimension/gmd:resolution/gco:Measure\n", 
+    "desc": "Further refinement of the geospatial bounding box can be provided by using these units and resolution attributes.\n"
+  }, 
+  "time_coverage_start": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/gml:TimePeriod/gml:beginPosition\n", 
+    "desc": "Describes the temporal coverage of the data as a time range.\t"
+  }, 
+  "geospatial_vertical_positive": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:verticalElement/gmd:EX_VerticalExtent/gmd:verticalCRS\n", 
+    "desc": "Further refinement of the geospatial bounding box can be provided by using these units and resolution attributes.\n"
+  }, 
+  "creator_url": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL\nCI_RoleCode=\"originator\"\n", 
+    "desc": "The data creator's URL."
+  }, 
+  "__name__": "ACDD", 
+  "institution": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString\n", 
+    "desc": "The institution's name."
+  }, 
+  "geospatial_lon_max": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/gco:Decimal\n", 
+    "desc": "Describes a simple latitude, longitude, and vertical bounding box. For a more detailed geospatial coverage, see the suggested geospatial attributes.\n"
+  }, 
+  "geospatial_lon_min": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/gco:Decimal\n", 
+    "desc": "Describes a simple latitude, longitude, and vertical bounding box. For a more detailed geospatial coverage, see the suggested geospatial attributes.\n"
+  }, 
+  "geospatial_lon_resolution": {
+    "query": "/gmi:MI_Metadata/gmd:spatialRepresentationInfo/gmd:MD_Georectified/gmd:axisDimensionProperties/gmd:MD_Dimension/gmd:resolution/gco:Measure\n", 
+    "desc": "Further refinement of the geospatial bounding box can be provided by using these units and resolution attributes.\n"
+  }, 
+  "contributor_name": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:individualName/gco:CharacterString\n", 
+    "desc": "The name of any individuals or institutions that contributed to the creation of this data.\n"
+  }, 
+  "geospatial_vertical_resolution": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:verticalElement/gmd:EX_VerticalExtent/gmd:verticalCRS\n", 
+    "desc": "Further refinement of the geospatial bounding box can be provided by using these units and resolution attributes.\n"
+  }, 
+  "license": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:resourceConstraints/gmd:MD_LegalConstraints/gmd:useLimitation/gco:CharacterString\n", 
+    "desc": "Describe the restrictions to data access and distribution.\t"
+  }, 
+  "time_coverage_end": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/gml:TimePeriod/gml:endPosition\n", 
+    "desc": "Describes the temporal coverage of the data as a time range.\t"
+  }, 
+  "date_modified": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date\n/gmd:dateType/gmd:CI_DateTypeCode=\"revision\"", 
+    "desc": "The date on which this data was last modified.\n"
+  }, 
+  "summary": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:abstract/gco:CharacterString", 
+    "desc": "A paragraph describing the dataset."
+  }, 
+  "project": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:aggregationInfo/gmd:MD_AggregateInformation/gmd:aggregateDataSetName/gmd:CI_Citation/gmd:title/gco:CharacterString\nDS_AssociationTypeCode=\"largerWorkCitation\" and DS_InitiativeTypeCode=\"project\"", 
+    "desc": "The scientific project that produced the data.\n"
+  }, 
+  "cdm_data_type": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialRepresentationType/gmd:MD_SpatialRepresentationTypeCode", 
+    "desc": "The THREDDS data type appropriate for this dataset.\t"
+  }, 
+  "geospatial_vertical_min": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:verticalElement/gmd:EX_VerticalExtent/gmd:minimumValue/gco:Real\n", 
+    "desc": "Describes a simple latitude, longitude, and vertical bounding box. For a more detailed geospatial coverage, see the suggested geospatial attributes.\n"
+  }, 
+  "date_created": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date\n/gmd:dateType/gmd:CI_DateTypeCode=\"creation\"", 
+    "desc": "The date on which the data was created.\n"
+  }, 
+  "geospatial_vertical_units": {
+    "query": "/gmi:MI_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:verticalElement/gmd:EX_VerticalExtent/gmd:verticalCRS\n", 
+    "desc": "Further refinement of the geospatial bounding box can be provided by using these units and resolution attributes.\n"
+  }, 
+  "history": {
+    "query": "/gmi:MI_Metadata/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:statement/gco:CharacterString\n", 
+    "desc": "Provides an audit trail for modifications to the original data.\t"
+  }
+}
