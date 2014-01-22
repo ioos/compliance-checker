@@ -1,6 +1,7 @@
 import json
 import itertools
 from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSCheck, check_has, score_group, Result
+from pkgutil import get_data
 
 class IOOSBaseCheck(BaseCheck):
 
@@ -79,8 +80,8 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
     # belefs
     @classmethod
     def beliefs(cls):
-        with open("ioos-metamap-ncml.json") as f:
-            beliefs = json.load(f)
+        f = get_data("compliance_checker", "data/ioos-metamap-ncml.json")
+        beliefs = json.loads(f)
 
         # strip out metadata
         return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
@@ -89,8 +90,8 @@ class IOOSSOSCheck(BaseSOSCheck, IOOSBaseCheck):
     # beliefs
     @classmethod
     def beliefs(cls):
-        with open("ioos-metamap-sos-gc.json") as f:
-            beliefs = json.load(f)
+        f = get_data("compliance_checker", "data/ioos-metamap-sos-gc.json")
+        beliefs = json.loads(f)
 
         # strip out metadata
         return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
