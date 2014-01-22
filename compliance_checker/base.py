@@ -6,16 +6,11 @@ Compliance Checker
 
 from functools import wraps
 import collections
-import os
-import os.path
-import itertools
 import pprint
 
-from lxml import etree
 from wicken.netcdf_dogma import NetCDFDogma
 from wicken.xml_dogma import MultipleXmlDogma
 from wicken.exceptions import DogmaGetterSetterException
-from udunitspy import Unit, UdunitsError, Converter
 from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.namespaces import Namespaces
@@ -117,65 +112,6 @@ class Result(object):
             ret += "\n" + pprint.pformat(self.children)
         return ret
 
-class StandardNameTable(object):
-
-    class NameEntry(object):
-        def __init__(self, entrynode):
-            self.canonical_units = self._get(entrynode, 'canonical_units', True)
-            self.grib            = self._get(entrynode, 'grib')
-            self.amip            = self._get(entrynode, 'amip')
-            self.description     = self._get(entrynode, 'description')
-
-        def _get(self, entrynode, attrname, required=False):
-            vals = entrynode.xpath(attrname)
-            if len(vals) > 1:
-                raise StandardError("Multiple attrs (%s) found" % attrname)
-            elif required and len(vals) == 0:
-                raise StandardError("Required attr (%s) not found" % attrname)
-
-            return vals[0].text
-
-    def __init__(self, filename):
-        if not os.path.isfile(filename):
-            raise StandardError('File not found')
-
-        parser = etree.XMLParser(remove_blank_text=True)
-        self._tree = etree.parse(filename, parser)
-        self._root = self._tree.getroot()
-
-        # generate and save a list of all standard names in file
-        self._names = [node.get('id') for node in self._root.iter('entry')]
-        self._aliases = [node.get('id') for node in self._root.iter('alias')]
-
-    def __len__(self):
-        return len(self._names) + len(self._aliases)
-
-    def __getitem__(self, key):
-        if not (key in self._names or key in self._aliases):
-            raise KeyError("%s not found in standard name table" % key)
-
-        if key in self._aliases:
-            idx = self._aliases.index(key)
-            entryids = self._root.xpath('alias')[idx].xpath('entry_id')
-
-            if len(entryids) != 1:
-                raise StandardError("Inconsistency in standard name table, could not lookup alias for %s" % key)
-
-            key = entryids[0].text
-
-        if not key in self._names:
-            raise KeyError("%s not found in standard name table" % key)
-
-        idx = self._names.index(key)
-        entry = self.NameEntry(self._root.xpath('entry')[idx])
-        return entry
-
-    def __contains__(self, key):
-        return key in self._names or key in self._aliases
-
-    def __iter__(self):
-        return iter(itertools.chain(self._names, self._aliases))
-
 def std_check_in(dataset_dogma, name, allowed_vals):
     #return name in dataset_dogma.variables and dataset_dogma.variables[name] in allowed_vals
     try:
@@ -259,26 +195,3 @@ def score_group(group_name=None):
         return wraps(func)(_dec)
     return _inner
 
-def units_known(units):
-    try:
-        Unit(str(units))
-    except UdunitsError:
-        return False
-    return True
-
-def units_convertible(units1, units2, reftimeistime=True):
-    try:
-        Converter(str(units1), str(units2))
-    except UdunitsError:
-        return False
-
-    return True
-
-def units_temporal(units):
-    r = False
-    try:
-        u = Unit('seconds since 1900-01-01')
-        r = u.are_convertible(str(units))
-    except UdunitsError:
-        return False
-    return r

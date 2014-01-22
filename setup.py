@@ -52,7 +52,7 @@ setup(namespace_packages = ['compliance_checker'],
         ]
     },
     package_data         = {
-        'compliance_checker':['data/*.json'],
+        'compliance_checker':['data/*.json', 'data/*.xml'],
     }
 )
 

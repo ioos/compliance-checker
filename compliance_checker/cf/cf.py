@@ -2,9 +2,9 @@ import re
 from collections import defaultdict
 import numpy as np
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result, StandardNameTable, units_known, units_convertible, units_temporal
+from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
-from compliance_checker.cf.util import NCGraph
+from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal
 
 from netCDF4 import Dimension, Variable
 
