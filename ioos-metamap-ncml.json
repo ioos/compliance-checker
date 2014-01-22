@@ -1,0 +1,80 @@
+{
+  "__source_mapping_type__": "NetCDF CF NcML", 
+  "Service Contact Email": {
+    "query": "/nc:netcdf/nc:attribute[@name='publisher_email']/@value", 
+    "desc": "The contact information of the data service provider.  Contact information about particular platform operators or providers of particular datasets in the service should NOT go here"
+  }, 
+  "Variable Units*": {
+    "query": "/nc:netcdf/nc:variable/nc:attribute[@name='units']/@value", 
+    "desc": "Property 1 / Property 2?"
+  }, 
+  "Service Provider Name": {
+    "query": "/nc:netcdf/nc:attribute[@name='institution']/@value", 
+    "desc": "The name of the data service provider.  This may be the name of an RA or another institution.  This name is understood to be distinct from the owner or operator of the observing system/model that generated the data"
+  }, 
+  "Variable Names*": {
+    "query": "/nc:netcdf/nc:variable/nc:attribute[@name='standard_name']/@value", 
+    "desc": "Property 1 / Property 2?"
+  }, 
+  "Station Long Name": {
+    "query": "/nc:netcdf/nc:variable[@name='platform']/nc:attribute[@name='long_name']/@value", 
+    "desc": "The station long name is a longer description of the station.  There is no corresponding location for the station long name in the GC response, although it may be similar to the station description in the GC response"
+  }, 
+  "Station Short Name": {
+    "query": "/nc:netcdf/nc:variable[@name='platform']/nc:attribute[@name='short_name']/@value", 
+    "desc": "The station short name can be a alphanumeric station identifier, or a shorthand description of the station.  There is no corresponding location for the station short name in the GC response"
+  }, 
+  "Platform Sponsor": {
+    "query": "/nc:netcdf/nc:attribute[@name='acknowledgment']/@value", 
+    "desc": "A person, group, or organization\u2019s full or partial support of an IOOS activity, asset, model, or product."
+  }, 
+  "Station Publisher Email": {
+    "query": "/nc:netcdf/nc:attribute[@name='publisher_email']/@value", 
+    "desc": "The contact information of the publisher of the data from a particular platform.   This may be the same as the operator, but does not necessarily have to be.  This also may be the same as the service provider in the GC response, but does not necessarily have to be"
+  }, 
+  "Service Contact Name": {
+    "query": "/nc:netcdf/nc:attribute[@name='publisher_name']/@value", 
+    "desc": "The contact information of the data service provider.  Contact information about particular platform operators or providers of particular datasets in the service should NOT go here"
+  }, 
+  "Time Period": {
+    "query": "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:nc=\"http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2\">\n<xsl:output method=\"text\" indent=\"no\"/>\n    <xsl:template match=\"/\">\n       <xsl:apply-templates select=\"//nc:attribute[@name='time_coverage_start']\" /><xsl:text> </xsl:text><xsl:apply-templates select=\"//nc:attribute[@name='time_coverage_end']\" />\n    </xsl:template>\n    <xsl:template match=\"nc:attribute\">\n        <xsl:value-of select=\"@value\" /> \n    </xsl:template>\n</xsl:stylesheet>",
+    "desc": ""
+  }, 
+  "Altitude Units*": {
+    "query": "/nc:netcdf/nc:variable[@name='z']/nc:attribute[@name='units']/@value", 
+    "desc": "The units of the altitude/depth of a given sensor.  I hope we have a standard frame of reference (e.g. + is up).  The altitude is a attribute of the sensor not the variable"
+  }, 
+  "Data Format Template Version": {
+    "query": "/nc:netcdf/nc:attribute[@name='Conventions']/@value", 
+    "desc": "SOS/CF/etc Template Version"
+  }, 
+  "Station Publisher Name": {
+    "query": "/nc:netcdf/nc:attribute[@name='publisher_name']/@value", 
+    "desc": "The name of the publisher of the data from a particular platform via the data services using this term.  This may be the same as the operator, but does not necessarily have to be.  This also may be the same as the service provider in the GC response, but does not necessarily have to be"
+  }, 
+  "Platform Type": {
+    "query": "/nc:netcdf/nc:variable[@name='platform']/nc:attribute[@name='source']/@value", 
+    "desc": "A term describing the type of platform that houses the sensors (e.g. buoy, shore station, etc)"
+  }, 
+  "Station ID": {
+    "query": "/nc:netcdf/nc:variable[@name='platform']/nc:attribute[@name='ioos_name']/@value", 
+    "desc": "The urn which contains the station ID and the authority.  The GC Station ID and the DS Station ID urns should be identical. If the Station System Name urn is included, it should also be identical to the DS Station ID and thus the GC Station ID. The authority is located within the namespace."
+  }, 
+  "__name__": "IOOS", 
+  "Station Location Lat": {
+    "query": "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:nc=\"http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2\">\n<xsl:output method=\"text\" indent=\"no\"/>\n    <xsl:template match=\"/\">\n       <xsl:apply-templates select=\"//nc:attribute[@name='geospatial_lat_min']\" /><xsl:text> </xsl:text><xsl:apply-templates select=\"//nc:attribute[@name='geospatial_lat_max']\" />\n    </xsl:template>\n    <xsl:template match=\"nc:attribute\">\n        <xsl:value-of select=\"@value\" /> \n    </xsl:template>\n</xsl:stylesheet>", 
+    "desc": "Bounds for a network of stations, the point location of single stations, or a list of locations for trajectories "
+  }, 
+  "Station WMO ID": {
+    "query": "/nc:netcdf/nc:variable[@name='platform']/nc:attribute[@name='wmo_id']/@value", 
+    "desc": "The World Meteorological Organization (WMO) assigns a 5-character alpha-numeric station identifier to ocean platforms reporting on the Global Telecommunication System (GTS). WMO numbers are allocated depending upon deployment area, and platform type (i.e. drifting buoys, moored buoys, ocean reference sites, and profiling floats).  The WMO ID is an optional identifier that identifies the 5-character WMO ID or the NDBC/C-MAN ID, which is often the WMO ID or another 5-character deliniation.  http://www.ndbc.noaa.gov/staid.shtml"
+  }, 
+  "Station Location Lon": {
+    "query": "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:nc=\"http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2\">\n<xsl:output method=\"text\" indent=\"no\"/>\n    <xsl:template match=\"/\">\n       <xsl:apply-templates select=\"//nc:attribute[@name='geospatial_lon_min']\" /><xsl:text> </xsl:text><xsl:apply-templates select=\"//nc:attribute[@name='geospatial_lon_max']\" />\n    </xsl:template>\n    <xsl:template match=\"nc:attribute\">\n        <xsl:value-of select=\"@value\" /> \n    </xsl:template>\n</xsl:stylesheet>", 
+    "desc": "Bounds for a network of stations, the point location of single stations, or a list of locations for trajectories "
+  }, 
+  "Station Description": {
+    "query": "/nc:netcdf/nc:variable[@name='platform']/nc:attribute[@name='comment']/@value",
+    "desc" : ""
+  }
+}

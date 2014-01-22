@@ -1,16 +1,8 @@
 import json
 import itertools
-from compliance_checker.base import BaseCheck, check_has, score_group, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSCheck, check_has, score_group, Result
 
-class ioosCheck(BaseCheck):
-
-    @classmethod
-    def beliefs(cls):
-        with open("ioos-ncml.json") as f:
-            beliefs = json.load(f)
-
-        # strip out metadata
-        return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
+class IOOSBaseCheck(BaseCheck):
 
     ###############################################################################
     #
@@ -83,51 +75,24 @@ class ioosCheck(BaseCheck):
             'altitude_units'
                 ]
 
-    ###############################################################################
-    #
-    # HIGHLY RECOMMENDED VARIABLE ATTRS
-    #
-    ###############################################################################
+class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
+    # belefs
+    @classmethod
+    def beliefs(cls):
+        with open("ioos-metamap-ncml.json") as f:
+            beliefs = json.load(f)
 
-    def _get_vars(self, ds, attr_filter=None):
-        vars = ds.dogma._eval_xpath('//ncml:variable')
+        # strip out metadata
+        return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
 
-        if attr_filter is not None:
-            attrs = itertools.chain.from_iterable((v.xpath('ncml:attribute[@name="%s"]/@value' % attr_filter, namespaces=ds.dogma._namespaces) or [None] for v in vars))
-            names = (v.attrib.get('name', 'unknown') for v in vars)
+class IOOSSOSCheck(BaseSOSCheck, IOOSBaseCheck):
+    # beliefs
+    @classmethod
+    def beliefs(cls):
+        with open("ioos-metamap-sos-gc.json") as f:
+            beliefs = json.load(f)
 
-            attrs = zip(attrs, names)
+        # strip out metadata
+        return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
 
-            return attrs
-
-        return vars
-
-    @score_group('varattr')
-    def check_var_long_name(self, ds):
-        vars = self._get_vars(ds, #Variables])
-
-        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], #Variables])) for v in vars]
-        return retval
-
-    @score_group('varattr')
-    def check_var_standard_name(self, ds):
-        vars = self._get_vars(ds, #Variables) 
-
-        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], #Variables])) for v in vars]
-        return retval
-
-    @score_group('varattr')
-    def check_var_units(self, ds):
-        vars = self._get_vars(ds, #Variables])
-
-        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], #Variables])) for v in vars]
-        return retval
-
-    @score_group('varattr')
-    def check_var_coverage_content_type(self, ds):
-        vars = self._get_vars(ds, #Variables)
-        allowed = [#Variables]
-
-        retval = [Result(BaseCheck.HIGH, v[0] is not None and v[0] in allowed, (v[1], #Variables])) for v in vars]
-        return retval
 

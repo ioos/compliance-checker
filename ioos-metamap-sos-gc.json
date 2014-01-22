@@ -1,0 +1,36 @@
+{
+  "__source_mapping_type__": "SOS: GC", 
+  "Service Contact Email": {
+    "query": "/sos:Capabilities/ows:ServiceProvider/ows:ServiceContact/ows:ContactInfo/ows:Address/ows:ElectronicMailAddress", 
+    "desc": "The contact information of the data service provider.  Contact information about particular platform operators or providers of particular datasets in the service should NOT go here"
+  }, 
+  "Service Provider Name": {
+    "query": "/sos:Capabilities/ows:ServiceProvider/ows:ProviderName", 
+    "desc": "The name of the data service provider.  This may be the name of an RA or another institution.  This name is understood to be distinct from the owner or operator of the observing system/model that generated the data"
+  }, 
+  "Variable Names*": {
+    "query": "/sos:Capabilities/sos:Contents/sos:ObservationOfferingList/sos:ObservationOffering/sos:observedProperty[@xlink=URL_name_1]", 
+    "desc": "Property 1 / Property 2?"
+  }, 
+  "Service Type Name": {
+    "query": "/sos:Capabilities/ows:ServiceIdentification/ows:ServiceType", 
+    "desc": "The type and version of the data service"
+  }, 
+  "Service Type Version": {
+    "query": "/sos:Capabilities/ows:ServiceIdentification/ows:ServiceTypeVersion", 
+    "desc": "The type and version of the data service"
+  }, 
+  "Service Contact Name": {
+    "query": "/sos:Capabilities/ows:ServiceProvider/ows:ServiceContact/ows:IndividualName", 
+    "desc": "The contact information of the data service provider.  Contact information about particular platform operators or providers of particular datasets in the service should NOT go here"
+  }, 
+  "Data Format Template Version": {
+    "query": "/sos:Capabilities/ows:OperationsMetadata/ows:ExtendedCapabilities/gml:metaDataProperty[@xlink:title='ioosTemplateVersion']/gml:version", 
+    "desc": "SOS/CF/etc Template Version"
+  }, 
+  "__name__": "IOOS", 
+  "Service Title": {
+    "query": "/sos:Capabilities/ows:ServiceIdentification/ows:Title", 
+    "desc": "The RA (or federal partner) with which the provider of the data service is affiliated.  There are no implications from this very loose affiliation, especially including funding.  This is an attribute of the data service and not of any of the datasets served via this service. "
+  }
+}

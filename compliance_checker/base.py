@@ -12,14 +12,38 @@ import itertools
 import pprint
 
 from lxml import etree
+from wicken.netcdf_dogma import NetCDFDogma
+from wicken.xml_dogma import MultipleXmlDogma
 from wicken.exceptions import DogmaGetterSetterException
 from udunitspy import Unit, UdunitsError, Converter
+from netCDF4 import Dataset
+from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
+from owslib.namespaces import Namespaces
 
+def get_namespaces():
+    n = Namespaces()
+    ns = n.get_namespaces(["ogc","sml","gml","sos","swe","xlink"])
+    ns["ows"] = n.get_namespace("ows110")
+    return ns
+
+class DSPair(object):
+    """
+    Structure to hold a dataset/SOS instance and dogma pairing.
+
+    Passed to each check method.
+    """
+    dataset = None
+    dogma   = None
+    def __init__(self, ds, dogma):
+        self.dataset = ds
+        self.dogma = dogma
 
 class BaseCheck(object):
     HIGH   = 3
     MEDIUM = 2
     LOW    = 1
+
+    supported_ds = []
 
     @classmethod
     def beliefs(cls):
@@ -32,6 +56,34 @@ class BaseCheck(object):
         Automatically run when running a CheckSuite. Define this method in your Checker class.
         """
         pass
+
+    def load_datapair(self, ds):
+        """
+        Returns a DSPair object with the passed ds as one side and the proper Dogma object on the other.
+
+        Override this in your derived class.
+        """
+        raise NotImplementedError("Define this in your derived checker class")
+
+class BaseNCCheck(object):
+    """
+    Base Class for NetCDF Dataset supporting Check Suites.
+    """
+    supported_ds = [Dataset]
+
+    def load_datapair(self, ds):
+        data_object = NetCDFDogma('ds', self.beliefs(), ds)
+        return DSPair(ds, data_object)
+
+class BaseSOSCheck(object):
+    """
+    Base class for SOS supporting Check Suites.
+    """
+    supported_ds = [SensorObservationService_1_0_0]
+
+    def load_datapair(self, ds):
+        data_object = MultipleXmlDogma('sos', self.beliefs(), ds._capabilities, namespaces=get_namespaces())
+        return DSPair(ds, data_object)
 
 class Result(object):
     """

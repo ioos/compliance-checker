@@ -6,18 +6,9 @@ import inspect
 import itertools
 from netCDF4 import Dataset
 from lxml import etree as ET
-from wicken.netcdf_dogma import NetCDFDogma
 from compliance_checker.base import BaseCheck, fix_return_value, Result
-
-class DSPair(object):
-    '''
-    Structure to hold a dataset and dogma pairing
-    '''
-    dataset = None 
-    dogma   = None
-    def __init__(self, ds, dogma):
-        self.dataset = ds
-        self.dogma = dogma
+from owslib.sos import SensorObservationService
+from urlparse import urlparse
 
 class CheckSuite(object):
 
@@ -39,6 +30,28 @@ class CheckSuite(object):
 
         return [fix_return_value(val, check_method.im_func.func_name)]
 
+    def _get_valid_checkers(self, ds, args):
+        """
+        Returns a filtered list of valid checkers based on the ds object's type and
+        the user selected list of checks.
+        """
+        valid = []
+        all_checked = set(args)
+        checker_queue = set(args)
+
+        while len(checker_queue):
+            a = checker_queue.pop()
+            if type(ds) in a().supported_ds:
+                valid.append(a)
+
+            # add all to queue
+            for subc in a.__subclasses__():
+                if subc not in all_checked:
+                    all_checked.add(subc)
+                    checker_queue.add(subc)
+
+        return valid
+
     def run(self, dataset_location, criteria, tests_to_run, verbose, *args):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
@@ -46,15 +59,24 @@ class CheckSuite(object):
         Returns a dictionary mapping Checkers to their grouped scores.
         """
 
-        ret_val = {}
+        ret_val      = {}
         check_number = 0
-        for a in args:
+        fail_flag    = False
 
-            ds = self.load_dataset(dataset_location, a.beliefs())
-            a.setup(ds)
-            checks = self._get_checks(a)
+        ds           = self.load_dataset(dataset_location)
+        checkers     = self._get_valid_checkers(ds, args)
 
-            vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, ds), checks)))
+        if len(checkers) == 0:
+            print "No valid checkers found for tests '%s'" % ",".join(tests_to_run)
+
+        for checker_class in checkers:
+
+            checker = checker_class()   # @TODO: combine with load_datapair/setup
+            dsp = checker.load_datapair(ds)
+            checker.setup(dsp)
+            checks = self._get_checks(checker)
+
+            vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, dsp), checks)))
             groups = self.scores(vals)
             #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
             score_list, fail_flag, check_number, limit = self.standard_output(criteria, check_number, groups, tests_to_run)
@@ -133,10 +155,8 @@ class CheckSuite(object):
                     priority_flag -= 1
                 if score_list[x][2][0] < score_list[x][2][1] and score_list[x][1] >= limit:
                     print '%-40s:%s:%6s/%1s'  % (score_list[x][0], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
-                    print '-'*55
 
         if verbose >= 2:
-            print "-"*55
             print "Summary of all the checks performed:" 
             
             priority_flag = 3
@@ -187,18 +207,25 @@ class CheckSuite(object):
             print '%-40s:%s:%6s/%1s' % (indent*'    '+res.name, res.weight, res.value[0], res.value[1])
             if res.children and verbose >1:
                 self.print_routine(res.children, indent+1, verbose-1, priority_flag)
-            if indent == 0:
-                print '-'*55
 
 
-    def load_dataset(self, ds_str, belief_map):
+    def load_dataset(self, ds_str):
         """
-        Helper method to load a dataset.
+        Helper method to load a dataset or SOS endpoint.
         """
-        ds = Dataset(ds_str)
-        data_object = NetCDFDogma('ds', belief_map, ds)
+        ds = None
 
-        return DSPair(ds, data_object)
+        # try to figure out if this is a local NetCDF Dataset, a remote one, or an SOS endpoint
+        pr = urlparse(ds_str)
+        if pr.netloc:       # looks like a remote url
+            try:
+                ds = SensorObservationService(ds_str)
+            except Exception as e:
+                ds = Dataset(ds_str)
+        else:
+            ds = Dataset(ds_str)
+
+        return ds
 
     def scores(self, raw_scores):
         """
