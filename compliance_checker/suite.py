@@ -8,7 +8,9 @@ from netCDF4 import Dataset
 from lxml import etree as ET
 from compliance_checker.base import BaseCheck, fix_return_value, Result
 from owslib.sos import SensorObservationService
+from owslib.swe.sensor.sml import SensorML
 from urlparse import urlparse
+import requests
 
 class CheckSuite(object):
 
@@ -80,7 +82,6 @@ class CheckSuite(object):
             groups = self.scores(vals)
             #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
             score_list, fail_flag, check_number, limit = self.standard_output(criteria, check_number, groups, tests_to_run)
-            
 
             if verbose:
                 self.verbose_output_generation(groups, verbose, score_list, limit)
@@ -133,7 +134,6 @@ class CheckSuite(object):
         '''
         Generates the Terminal Output for Verbose cases
         '''
-        
         sub_tests = []
         if verbose == 1:
             print "\n"+"-"*55
@@ -153,8 +153,8 @@ class CheckSuite(object):
                     print '----Low priority tests failed-----'
                     print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
                     priority_flag -= 1
-                if score_list[x][2][0] < score_list[x][2][1] and score_list[x][1] >= limit:
-                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
+                #if score_list[x][2][0] < score_list[x][2][1] and score_list[x][1] >= limit:
+                print '%-40s:%s:%6s/%1s'  % (score_list[x][0], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
 
         if verbose >= 2:
             print "Summary of all the checks performed:" 
@@ -178,12 +178,11 @@ class CheckSuite(object):
 
         #Sorting method used to properly sort the output by priority.
         grouped_sorted = []
-        grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)        
+        grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)
 
 
         #Loop over inoput
         for res in grouped_sorted:
-            
             #If statements to print the proper Headings
             if res.weight == 3 and indent == 0 and priority_flag == 3:
                 print "\nHigh Priority"
@@ -211,18 +210,29 @@ class CheckSuite(object):
 
     def load_dataset(self, ds_str):
         """
-        Helper method to load a dataset or SOS endpoint.
+        Helper method to load a dataset or SOS GC/DS url.
         """
         ds = None
 
-        # try to figure out if this is a local NetCDF Dataset, a remote one, or an SOS endpoint
+        # try to figure out if this is a local NetCDF Dataset, a remote one, or an SOS GC/DS url
         pr = urlparse(ds_str)
         if pr.netloc:       # looks like a remote url
-            try:
-                ds = SensorObservationService(ds_str)
-            except Exception as e:
-                ds = Dataset(ds_str)
+            # @TODO: content-type mime, HEAD request
+            r = requests.get(ds_str)
+            r.raise_for_status()
+            doc = str(r.text)
         else:
+            raise StandardError("MAKE LOCAL WORK")
+
+        try:
+            root_el = ET.fromstring(doc)
+            if root_el.tag == "{http://www.opengis.net/sos/1.0}Capabilities":
+                ds = SensorObservationService(xml=root_el)
+
+            elif root_el.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
+                ds = SensorML(root_el)
+
+        except Exception as e:
             ds = Dataset(ds_str)
 
         return ds

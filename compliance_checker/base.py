@@ -13,6 +13,7 @@ from wicken.xml_dogma import MultipleXmlDogma
 from wicken.exceptions import DogmaGetterSetterException
 from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
+from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
 
 def get_namespaces():
@@ -70,14 +71,24 @@ class BaseNCCheck(object):
         data_object = NetCDFDogma('ds', self.beliefs(), ds)
         return DSPair(ds, data_object)
 
-class BaseSOSCheck(object):
+class BaseSOSGCCheck(object):
     """
-    Base class for SOS supporting Check Suites.
+    Base class for SOS-GetCapabilities supporting Check Suites.
     """
     supported_ds = [SensorObservationService_1_0_0]
 
     def load_datapair(self, ds):
-        data_object = MultipleXmlDogma('sos', self.beliefs(), ds._capabilities, namespaces=get_namespaces())
+        data_object = MultipleXmlDogma('sos-gc', self.beliefs(), ds._capabilities, namespaces=get_namespaces())
+        return DSPair(ds, data_object)
+
+class BaseSOSDSCheck(object):
+    """
+    Base class for SOS-DescribeSensor supporting Check Suites.
+    """
+    supported_ds = [SensorML]
+
+    def load_datapair(self, ds):
+        data_object = MultipleXmlDogma('sos-ds', self.beliefs(), ds._root, namespaces=get_namespaces())
         return DSPair(ds, data_object)
 
 class Result(object):
@@ -123,7 +134,12 @@ def std_check_in(dataset_dogma, name, allowed_vals):
 
 def std_check(dataset_dogma, name):
     #return name in dataset_dogma.variables
-    return hasattr(dataset_dogma, name)
+    if hasattr(dataset_dogma, name):
+        getattr(dataset_dogma, name)
+        return True
+
+    #raise StandardError("NO CAN DO %s" % name)
+    return False
 
 def check_has(priority=BaseCheck.HIGH):
 
