@@ -215,24 +215,48 @@ class CheckSuite(object):
         ds = None
 
         # try to figure out if this is a local NetCDF Dataset, a remote one, or an SOS GC/DS url
+        doc = None
         pr = urlparse(ds_str)
         if pr.netloc:       # looks like a remote url
-            # @TODO: content-type mime, HEAD request
-            r = requests.get(ds_str)
-            r.raise_for_status()
-            doc = str(r.text)
+            rhead = requests.head(ds_str)
+
+            # if we get a 400 here, it's likely a Dataset openable OpenDAP url
+            if rhead.status_code == 400:
+                pass
+            elif rhead.status_code == 200 and rhead.headers['content-type'] == 'text/xml':
+                # probably interesting, grab it
+                r = requests.get(ds_str)
+                r.raise_for_status()
+
+                doc = r.text
+            else:
+                raise StandardError("Could not understand response code %s and content-type %s" % (rhead.status_code, rhead.headers.get('content-type', 'none')))
         else:
-            raise StandardError("MAKE LOCAL WORK")
+            # do a cheap imitation of libmagic
+            # http://stackoverflow.com/a/7392391/84732
+            textchars = ''.join(map(chr, [7,8,9,10,12,13,27] + range(0x20, 0x100)))
+            is_binary_string = lambda bytes: bool(bytes.translate(None, textchars))
 
-        try:
-            root_el = ET.fromstring(doc)
-            if root_el.tag == "{http://www.opengis.net/sos/1.0}Capabilities":
-                ds = SensorObservationService(xml=root_el)
+            with open(ds_str) as f:
+                first_chunk = f.read(1024)
+                if is_binary_string(first_chunk):
+                    # likely netcdf file
+                    pass
+                else:
+                    f.seek(0)
+                    doc = "".join(f.readlines())
 
-            elif root_el.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
-                ds = SensorML(root_el)
+        if doc is not None:
+            xml_doc = ET.fromstring(str(doc))
+            if xml_doc.tag == "{http://www.opengis.net/sos/1.0}Capabilities":
+                ds = SensorObservationService(ds_str, xml=str(doc))
 
-        except Exception as e:
+            elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
+                ds = SensorML(xml_doc)
+            else:
+                raise StandardError("Unrecognized XML root element: %s" % xml_doc.tag)
+        else:
+            # no doc? try the dataset constructor
             ds = Dataset(ds_str)
 
         return ds
