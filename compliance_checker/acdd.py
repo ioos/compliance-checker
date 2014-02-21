@@ -1,16 +1,9 @@
 import json
 import itertools
-from compliance_checker.base import BaseCheck, check_has, score_group, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
+from pkgutil import get_data
 
-class ACDDCheck(BaseCheck):
-
-    @classmethod
-    def beliefs(cls):
-        with open("acdd-ncml.json") as f:
-            beliefs = json.load(f)
-
-        # strip out metadata
-        return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
+class ACDDBaseCheck(BaseCheck):
 
     ###############################################################################
     #
@@ -131,4 +124,13 @@ class ACDDCheck(BaseCheck):
 
         retval = [Result(BaseCheck.HIGH, v[0] is not None and v[0] in allowed, (v[1], "var_coverage_content_type")) for v in vars]
         return retval
+
+class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
+    @classmethod
+    def beliefs(cls):
+        f = get_data("compliance_checker", "data/acdd-ncml.json")
+        beliefs = json.loads(f)
+
+        # strip out metadata
+        return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
 

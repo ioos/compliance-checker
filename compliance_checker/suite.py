@@ -6,18 +6,11 @@ import inspect
 import itertools
 from netCDF4 import Dataset
 from lxml import etree as ET
-from wicken.netcdf_dogma import NetCDFDogma
 from compliance_checker.base import BaseCheck, fix_return_value, Result
-
-class DSPair(object):
-    '''
-    Structure to hold a dataset and dogma pairing
-    '''
-    dataset = None 
-    dogma   = None
-    def __init__(self, ds, dogma):
-        self.dataset = ds
-        self.dogma = dogma
+from owslib.sos import SensorObservationService
+from owslib.swe.sensor.sml import SensorML
+from urlparse import urlparse
+import requests
 
 class CheckSuite(object):
 
@@ -39,6 +32,28 @@ class CheckSuite(object):
 
         return [fix_return_value(val, check_method.im_func.func_name)]
 
+    def _get_valid_checkers(self, ds, args):
+        """
+        Returns a filtered list of valid checkers based on the ds object's type and
+        the user selected list of checks.
+        """
+        valid = []
+        all_checked = set(args)
+        checker_queue = set(args)
+
+        while len(checker_queue):
+            a = checker_queue.pop()
+            if type(ds) in a().supported_ds:
+                valid.append(a)
+
+            # add all to queue
+            for subc in a.__subclasses__():
+                if subc not in all_checked:
+                    all_checked.add(subc)
+                    checker_queue.add(subc)
+
+        return valid
+
     def run(self, dataset_location, criteria, tests_to_run, verbose, *args):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
@@ -46,19 +61,27 @@ class CheckSuite(object):
         Returns a dictionary mapping Checkers to their grouped scores.
         """
 
-        ret_val = {}
+        ret_val      = {}
         check_number = 0
-        for a in args:
+        fail_flag    = False
 
-            ds = self.load_dataset(dataset_location, a.beliefs())
-            a.setup(ds)
-            checks = self._get_checks(a)
+        ds           = self.load_dataset(dataset_location)
+        checkers     = self._get_valid_checkers(ds, args)
 
-            vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, ds), checks)))
+        if len(checkers) == 0:
+            print "No valid checkers found for tests '%s'" % ",".join(tests_to_run)
+
+        for checker_class in checkers:
+
+            checker = checker_class()   # @TODO: combine with load_datapair/setup
+            dsp = checker.load_datapair(ds)
+            checker.setup(dsp)
+            checks = self._get_checks(checker)
+
+            vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, dsp), checks)))
             groups = self.scores(vals)
             #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
             score_list, fail_flag, check_number, limit = self.standard_output(criteria, check_number, groups, tests_to_run)
-            
 
             if verbose:
                 self.verbose_output_generation(groups, verbose, score_list, limit)
@@ -111,7 +134,6 @@ class CheckSuite(object):
         '''
         Generates the Terminal Output for Verbose cases
         '''
-        
         sub_tests = []
         if verbose == 1:
             print "\n"+"-"*55
@@ -131,12 +153,10 @@ class CheckSuite(object):
                     print '----Low priority tests failed-----'
                     print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
                     priority_flag -= 1
-                if score_list[x][2][0] < score_list[x][2][1] and score_list[x][1] >= limit:
-                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
-                    print '-'*55
+                #if score_list[x][2][0] < score_list[x][2][1] and score_list[x][1] >= limit:
+                print '%-40s:%s:%6s/%1s'  % (score_list[x][0], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
 
         if verbose >= 2:
-            print "-"*55
             print "Summary of all the checks performed:" 
             
             priority_flag = 3
@@ -158,12 +178,11 @@ class CheckSuite(object):
 
         #Sorting method used to properly sort the output by priority.
         grouped_sorted = []
-        grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)        
+        grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)
 
 
         #Loop over inoput
         for res in grouped_sorted:
-            
             #If statements to print the proper Headings
             if res.weight == 3 and indent == 0 and priority_flag == 3:
                 print "\nHigh Priority"
@@ -187,18 +206,60 @@ class CheckSuite(object):
             print '%-40s:%s:%6s/%1s' % (indent*'    '+res.name, res.weight, res.value[0], res.value[1])
             if res.children and verbose >1:
                 self.print_routine(res.children, indent+1, verbose-1, priority_flag)
-            if indent == 0:
-                print '-'*55
 
 
-    def load_dataset(self, ds_str, belief_map):
+    def load_dataset(self, ds_str):
         """
-        Helper method to load a dataset.
+        Helper method to load a dataset or SOS GC/DS url.
         """
-        ds = Dataset(ds_str)
-        data_object = NetCDFDogma('ds', belief_map, ds)
+        ds = None
 
-        return DSPair(ds, data_object)
+        # try to figure out if this is a local NetCDF Dataset, a remote one, or an SOS GC/DS url
+        doc = None
+        pr = urlparse(ds_str)
+        if pr.netloc:       # looks like a remote url
+            rhead = requests.head(ds_str)
+
+            # if we get a 400 here, it's likely a Dataset openable OpenDAP url
+            if rhead.status_code == 400:
+                pass
+            elif rhead.status_code == 200 and rhead.headers['content-type'] == 'text/xml':
+                # probably interesting, grab it
+                r = requests.get(ds_str)
+                r.raise_for_status()
+
+                doc = r.text
+            else:
+                raise StandardError("Could not understand response code %s and content-type %s" % (rhead.status_code, rhead.headers.get('content-type', 'none')))
+        else:
+            # do a cheap imitation of libmagic
+            # http://stackoverflow.com/a/7392391/84732
+            textchars = ''.join(map(chr, [7,8,9,10,12,13,27] + range(0x20, 0x100)))
+            is_binary_string = lambda bytes: bool(bytes.translate(None, textchars))
+
+            with open(ds_str) as f:
+                first_chunk = f.read(1024)
+                if is_binary_string(first_chunk):
+                    # likely netcdf file
+                    pass
+                else:
+                    f.seek(0)
+                    doc = "".join(f.readlines())
+
+        if doc is not None:
+            xml_doc = ET.fromstring(str(doc))
+            if xml_doc.tag == "{http://www.opengis.net/sos/1.0}Capabilities":
+                ds = SensorObservationService(ds_str, xml=str(doc))
+
+            elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
+                ds = SensorML(xml_doc)
+            else:
+                raise StandardError("Unrecognized XML root element: %s" % xml_doc.tag)
+        else:
+            # no doc? try the dataset constructor
+            ds = Dataset(ds_str)
+
+        return ds
 
     def scores(self, raw_scores):
         """
