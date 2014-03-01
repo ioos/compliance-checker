@@ -22,8 +22,7 @@ class PyTest(TestCommand):
         errno = pytest.main(self.test_args)
         sys.exit(errno)
 
-setup(namespace_packages = ['compliance_checker'],
-    name                 = "compliance-checker",
+setup(name                 = "compliance-checker",
     version              = __version__,
     description          = "Checks Datasets and SOS endpoints for standards compliance",
     long_description     = readme(),
