@@ -15,6 +15,7 @@ from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
+from petulantbear.netcdf_etree import namespaces as pb_namespaces
 
 def get_namespaces():
     n = Namespaces()
@@ -68,7 +69,11 @@ class BaseNCCheck(object):
     supported_ds = [Dataset]
 
     def load_datapair(self, ds):
-        data_object = NetCDFDogma('ds', self.beliefs(), ds)
+        # allow ncml as well as nc prefixes
+        namespaces = pb_namespaces.copy()
+        namespaces['nc'] = namespaces['ncml']
+
+        data_object = NetCDFDogma('ds', self.beliefs(), ds, namespaces=namespaces)
         return DSPair(ds, data_object)
 
 class BaseSOSGCCheck(object):
