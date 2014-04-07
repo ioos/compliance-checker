@@ -153,8 +153,8 @@ class CheckSuite(object):
                     print '----Low priority tests failed-----'
                     print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
                     priority_flag -= 1
-                #if score_list[x][2][0] < score_list[x][2][1] and score_list[x][1] >= limit:
-                print '%-40s:%s:%6s/%1s'  % (score_list[x][0], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
+                if score_list[x][2][0] < score_list[x][2][1] and score_list[x][1] >= limit:
+                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
 
         if verbose >= 2:
             print "Summary of all the checks performed:" 
