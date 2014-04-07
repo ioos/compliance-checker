@@ -4,7 +4,7 @@
     "desc": "Miscellaneous information about the data.\t"
   }, 
   "time_coverage_resolution": {
-    "query": "//ncml:attribute[@name='time_coverage_resolution']/@value)", 
+    "query": "//ncml:attribute[@name='time_coverage_resolution']/@value", 
     "desc": "Describes the temporal coverage of the data as a time range.\t"
   }, 
   "geospatial_vertical_max": {
@@ -97,7 +97,7 @@
     "desc": "Further refinement of the geospatial bounding box can be provided by using these units and resolution attributes.\n"
   }, 
   "time_coverage_start": {
-    "query": "/ncml:netcdf/ncml:attribute[@name='time_coverage_start']/@value)", 
+    "query": "/ncml:netcdf/ncml:attribute[@name='time_coverage_start']/@value", 
     "desc": "Describes the temporal coverage of the data as a time range.\t"
   }, 
   "geospatial_vertical_positive": {
@@ -142,7 +142,7 @@
     "desc": "The date on which this data was last modified.\n"
   }, 
   "time_coverage_end": {
-    "query": "/ncml:netcdf/ncml:attribute[@name='time_coverage_end']/@value)", 
+    "query": "/ncml:netcdf/ncml:attribute[@name='time_coverage_end']/@value", 
     "desc": "Describes the temporal coverage of the data as a time range.\t"
   }, 
   "summary": {

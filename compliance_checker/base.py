@@ -70,8 +70,9 @@ class BaseNCCheck(object):
 
     def load_datapair(self, ds):
         # allow ncml as well as nc prefixes
-        namespaces = pb_namespaces.copy()
-        namespaces['nc'] = namespaces['ncml']
+        namespaces         = pb_namespaces.copy()
+        namespaces['nc']   = namespaces['ncml']
+        namespaces['ncml'] = namespaces['ncml']
 
         data_object = NetCDFDogma('ds', self.beliefs(), ds, namespaces=namespaces)
         return DSPair(ds, data_object)
