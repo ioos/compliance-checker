@@ -13,7 +13,17 @@ It currently supports the following sources and standards:
 
 ### Concepts & Terminology
 
+Each compliance standard is executed by a Check Suite, which functions similar to a Python standard Unit Test. A Check Suite runs one or more checks against a dataset, returning a list of Results which are then aggregated into a summary.
 
+Each Result has a (# passed / # total) score, a weight (HIGH/MEDIUM/LOW), a computer-readable name, an optional list of human-readable messages, and optionally a list of child Results.
+
+A single score is then calculated by aggregating on the names, then multiplying the score by the weight and summing them together.
+
+The computer-readable name field controls how Results are aggregated together - in order to prevent the overall score for a Check Suite varying on the number of variables, it is possible to *group* Results together via the name property. Grouped results will only add up to a single top-level entry.
+
+For example, ...
+
+See the Development section for more details on implementation.
 
 ### Usage
 
