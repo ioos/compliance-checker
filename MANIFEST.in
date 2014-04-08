@@ -1,0 +1,5 @@
+include *.txt
+include README.md
+include compliance_checker/data/*.json
+include compliance_checker/data/*.xml
+
