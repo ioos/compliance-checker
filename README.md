@@ -28,10 +28,10 @@ See the Development section for more details on implementation.
 ### Usage
 
 ```
-$ ./cchecker.py --help
-usage: cchecker.py [-h] [--test {acdd,cf,ioos} [{acdd,cf,ioos} ...]]
-                   [--criteria [{lenient,normal,strict}]] [--verbose]
-                   dataset_location
+$ compliance-checker --help
+usage: compliance-checker [-h] [--test {acdd,cf,ioos} [{acdd,cf,ioos} ...]]
+                          [--criteria [{lenient,normal,strict}]] [--verbose]
+                          dataset_location
 
 positional arguments:
   dataset_location      Defines the location of the dataset to be checked.
@@ -39,8 +39,8 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --test {acdd,cf,ioos} [{acdd,cf,ioos} ...], -t {acdd,cf,ioos} [{acdd,cf,ioos} ...], --test= {acdd,cf,ioos} [{acdd,cf,ioos} ...], -t= {acdd,cf,ioos} [{acdd,cf,ioos} ...]
-                        Select the Checks you want to perform. Either All, CF,
-                        or ACDD. Defaults to All.
+                        Select the Checks you want to perform. Either all
+                        (default), cf, ioos, or acdd.
   --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
                         Define the criteria for the checks. Either Strict,
                         Normal, or Lenient. Defaults to Normal.
@@ -75,7 +75,7 @@ time_coverage_duration                  :2:     0/1
 
 ### Installation
 
-To install locally, set up a virtual environment (recommend using virtualenv-burrito):
+To install locally, set up a virtual environment (recommend using [virtualenv-burrito](https://github.com/brainsik/virtualenv-burrito)):
 
 ```
 $ mkvirtualenv --no-site-packages compliance-checker
