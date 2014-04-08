@@ -48,7 +48,7 @@ optional arguments:
 ```
 
 ```
-$ ./cchecker.py --test=acdd test-data/ru07-20130824T170228_rt0.nc
+$ compliance-checker --test=acdd test-data/ru07-20130824T170228_rt0.nc
 Running Compliance Checker on the dataset from: test-data/ru07-20130824T170228_rt0.nc
 
 
@@ -58,7 +58,7 @@ Running Compliance Checker on the dataset from: test-data/ru07-20130824T170228_r
       This test has passed under normal critera
 -------------------------------------------------------
 
-$ ./cchecker.py -v --test=acdd test-data/ru07-20130824T170228_rt0.nc
+$ compliance-checker -v --test=acdd test-data/ru07-20130824T170228_rt0.nc
 Running Compliance Checker on the dataset from: test-data/ru07-20130824T170228_rt0.nc
 
 -------------------------------------------------------
@@ -82,18 +82,11 @@ $ mkvirtualenv --no-site-packages compliance-checker
 $ workon compliance-checker
 ```
 
-Get compliance checker source:
-
-```
-$ git clone git@github.com:ioos/compliance-checker.git
-$ cd compliance-checker
-```
-
-Install dependencies (you may need C dependencies for netCDF-python):
+Install dependencies (you may need C dependencies for netCDF-python), numpy must be installed on its own:
 
 ```
 $ pip install numpy
-$ pip install -r requirements.txt
+$ pip install compliance-checker
 ```
 
 ### Development
