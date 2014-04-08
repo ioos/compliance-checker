@@ -10,7 +10,9 @@ def test_suite():
     #ds = cs.load_dataset("/Users/asadeveloper/Downloads/hycom.ncml", ACDDCheck.beliefs)
     acdd = ACDDCheck()
 
-    vals = cs.run("/Users/asadeveloper/Downloads/sresa1b_ncar_ccsm3_0_run1_200001.nc", acdd)
+    # @TODO obviously need to update to package data'd datasets
+    ds = cs.load_dataset("/Users/asadeveloper/Downloads/sresa1b_ncar_ccsm3_0_run1_200001.nc")
+    vals = cs.run(ds, acdd)
 
     pprint(vals)
     assert acdd in vals

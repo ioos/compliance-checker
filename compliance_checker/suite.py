@@ -54,7 +54,7 @@ class CheckSuite(object):
 
         return valid
 
-    def run(self, dataset_location, criteria, tests_to_run, verbose, *args):
+    def run(self, ds, tests_to_run, *args):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
@@ -65,7 +65,6 @@ class CheckSuite(object):
         check_number = 0
         fail_flag    = False
 
-        ds           = self.load_dataset(dataset_location)
         checkers     = self._get_valid_checkers(ds, args)
 
         if len(checkers) == 0:
@@ -80,12 +79,10 @@ class CheckSuite(object):
 
             vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, dsp), checks)))
             groups = self.scores(vals)
-            #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
-            score_list, fail_flag, check_number, limit = self.standard_output(criteria, check_number, groups, tests_to_run)
 
-            if verbose:
-                self.verbose_output_generation(groups, verbose, score_list, limit)
-        return fail_flag
+            ret_val[checker_class] = groups
+
+        return ret_val
 
     def standard_output(self, criteria, check_number, groups, tests_to_run):
         '''

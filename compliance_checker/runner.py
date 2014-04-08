@@ -28,13 +28,27 @@ class ComplianceChecker(object):
 
         @returns                If the tests failed (based on the criteria)
         """
+        retval = True
+
         cs = CheckSuite()
         #if statement to determine if we are running all of the checks
         if not tests_to_run:
             tests_to_run = cls.checkers.keys()
 
         tests_sent = [v for k,v in cls.checkers.iteritems() if k in tests_to_run]
-        fail_flag = cs.run(ds_loc, criteria, tests_to_run, verbose, *tests_sent)
-        return fail_flag
 
+        ds = cs.load_dataset(ds_loc)
+        score_groups = cs.run(ds, tests_to_run, *tests_sent)
 
+        #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
+        # @TODO cleanup
+        for check_number, groups in enumerate(score_groups.itervalues()):
+            score_list, fail_flag, check_number, limit = cs.standard_output(criteria, check_number, groups, tests_to_run)
+
+            if not fail_flag:
+                retval = False
+
+            if verbose:
+                cs.verbose_output_generation(groups, verbose, score_list, limit)
+
+        return retval
