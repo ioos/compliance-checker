@@ -14,6 +14,8 @@ import requests
 
 class CheckSuite(object):
 
+    checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
+
     def _get_checks(self, checkclass):
         """
         Helper method to retreive check methods from a Checker class.
@@ -32,45 +34,50 @@ class CheckSuite(object):
 
         return [fix_return_value(val, check_method.im_func.func_name)]
 
-    def _get_valid_checkers(self, ds, args):
+    def _get_valid_checkers(self, ds, checker_names):
         """
-        Returns a filtered list of valid checkers based on the ds object's type and
-        the user selected list of checks.
+        Returns a filtered list of 2-tuples: (name, valid checker) based on the ds object's type and
+        the user selected names.
         """
+        if len(checker_names) == 0:
+            checker_names = self.checkers.keys()
+
+        args = [(name, self.checkers[name]) for name in checker_names if name in self.checkers]
         valid = []
-        all_checked = set(args)
+
+        all_checked = set([a[1] for a in args])  # only class types
         checker_queue = set(args)
 
         while len(checker_queue):
-            a = checker_queue.pop()
+            name, a = checker_queue.pop()
             if type(ds) in a().supported_ds:
-                valid.append(a)
+                valid.append((name, a))
 
             # add all to queue
             for subc in a.__subclasses__():
                 if subc not in all_checked:
                     all_checked.add(subc)
-                    checker_queue.add(subc)
+                    checker_queue.add((name, subc))
 
         return valid
 
-    def run(self, ds, tests_to_run, *args):
+    def run(self, ds, *checker_names):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
-        Returns a dictionary mapping Checkers to their grouped scores.
+        Returns a dictionary mapping checker names to their grouped scores.
         """
 
         ret_val      = {}
         check_number = 0
         fail_flag    = False
 
-        checkers     = self._get_valid_checkers(ds, args)
+        checkers     = self._get_valid_checkers(ds, checker_names)
 
         if len(checkers) == 0:
-            print "No valid checkers found for tests '%s'" % ",".join(tests_to_run)
+            print "No valid checkers found for tests '%s'" % ",".join(checker_names)
 
-        for checker_class in checkers:
+        for checker_name, checker_class in checkers:
 
             checker = checker_class()   # @TODO: combine with load_datapair/setup
             dsp = checker.load_datapair(ds)
@@ -80,11 +87,11 @@ class CheckSuite(object):
             vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, dsp), checks)))
             groups = self.scores(vals)
 
-            ret_val[checker_class] = groups
+            ret_val[checker_name] = groups
 
         return ret_val
 
-    def standard_output(self, criteria, check_number, groups, tests_to_run):
+    def standard_output(self, criteria, check_name, groups):
         '''
         Generates the Terminal Output for Standard cases
 
@@ -120,11 +127,10 @@ class CheckSuite(object):
             print '\n'
             print "-"*55
             print "   The dataset scored %r out of %r required points" % (points, out_of)
-            print "            during the %s check" % tests_to_run[check_number]
+            print "            during the %s check" % check_name
             print "      This test has passed under %s critera" % criteria
             print "-"*55
-        check_number = check_number +1      
-        return [score_list, fail_flag, check_number, limit]
+        return [score_list, fail_flag, limit]
 
 
     def verbose_output_generation(self, groups, verbose, score_list, limit):

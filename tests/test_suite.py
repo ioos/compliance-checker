@@ -1,18 +1,16 @@
-from compliance_checker.suite import CheckSuite
-from compliance_checker.acdd import ACDDCheck
+from compliance_checker.runner import ComplianceCheckerCheckSuite
 from compliance_checker.base import Result
 from netCDF4 import Dataset
 from pprint import pprint
 
 def test_suite():
-    cs = CheckSuite()
+    cs = ComplianceCheckerCheckSuite()
     #ds = cs.load_dataset("/Users/asadeveloper/Downloads/hycomglobalnavy_2012120300.nc", ACDDCheck.beliefs())
     #ds = cs.load_dataset("/Users/asadeveloper/Downloads/hycom.ncml", ACDDCheck.beliefs)
-    acdd = ACDDCheck()
 
     # @TODO obviously need to update to package data'd datasets
     ds = cs.load_dataset("/Users/asadeveloper/Downloads/sresa1b_ncar_ccsm3_0_run1_200001.nc")
-    vals = cs.run(ds, acdd)
+    vals = cs.run(ds, 'acdd')
 
     pprint(vals)
     assert acdd in vals
