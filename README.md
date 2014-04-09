@@ -25,7 +25,7 @@ For example, ...
 
 See the Development section for more details on implementation.
 
-### Usage
+### Usage (command line)
 
 ```
 $ compliance-checker --help
@@ -89,6 +89,16 @@ $ pip install numpy
 $ pip install compliance-checker
 ```
 
+### Usage (from Python code)
+
+```python
+from compliance_checker.runner import ComplianceCheckerCheckSuite
+
+cs = ComplianceCheckerCheckSuite()
+groups = cs.run(dataset, 'acdd')
+scores = groups['acdd']
+```
+
 ### Development
 
 The compliance-checker is designed to be simple and hackable to edit existing compliance suites or introduce new ones. See the [Development](https://github.com/ioos/compliance-checker/wiki/Development) wiki page for more information.
@@ -97,6 +107,4 @@ The compliance-checker is designed to be simple and hackable to edit existing co
 
 - Complete CF 1.6 checks
 - Improve text output
-- Improve integration usage with other Python applications
- 
 
