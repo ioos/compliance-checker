@@ -1,5 +1,5 @@
 import re
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import numpy as np
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
@@ -7,6 +7,7 @@ from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal
 
 from netCDF4 import Dimension, Variable
+
 
 # copied from paegan
 # paegan may depend on these later
@@ -1576,7 +1577,30 @@ class CFBaseCheck(BaseCheck):
         that the label values are standardized the variable that contains the labels must be given the standard_name
         attribute with the value region.
         """
-        pass
+        ret_val = []
+        reasoning = []
+        region_list = ["atlantic_ocean", "pacific_ocean"]
+        result = Result(BaseCheck.LOW,                            \
+                            False,                                       \
+                            ('var', 'region', 'geographic_region'), \
+                            reasoning)
+        
+        for name, var in ds.dataset.variables.iteritems():
+            if getattr(var, 'standard_name', '') == 'region':
+                if ds.variables[name][:] in region_list:
+                    reasoning.append('The Region Value is from the allowable list.')
+                    result = Result(BaseCheck.LOW,                            \
+                            True,                                       \
+                            ('var', name, 'geographic_region'), \
+                            reasoning)
+                else:
+                    reasoning.append('The Region Value is not from the allowable list.')
+                    result = Result(BaseCheck.LOW,                            \
+                            False,                                       \
+                            ('var', name, 'geographic_region'), \
+                            reasoning)
+        ret_val.append(result)
+        return ret_val
 
     def check_alternative_coordinates(self, ds):
         """
@@ -1585,7 +1609,34 @@ class CFBaseCheck(BaseCheck):
         sets of values have to be stored in auxiliary coordinate variables. For such alternative coordinate variables,
         there are no mandatory attributes, but they may have any of the attributes allowed for coordinate variables.
         """
-        pass
+        ret_val = []
+        reasoning = []
+        valid = ' '
+
+
+        for name, var in ds.dataset.variables.iteritems():
+            if getattr(var, 'coordinates', ''):
+                for dim in ds.dataset.dimensions.iterkeys():
+                    if dim != getattr(var, 'coordinates', ''):
+                        reasoning.append('The Alternative Coordinate system is not dervied from the Coordinate Variables and is not Dimensionalized by them.')
+                        valid = 'True'
+                        continue
+                    else:
+                        reasoning.append('The Alternative Coordinate system is dervied from the Coordinate Variables and is Dimensionalized by them.')
+                        valid = 'False'
+            if valid != ' ':
+                
+                if valid == 'True':
+                    valid = True
+                else:
+                    valid = False
+                result = Result(BaseCheck.MEDIUM,                            \
+                    valid,                                       \
+                            ('var', name, 'alternative_coordinates'), \
+                            reasoning)
+                ret_val.append(result)
+
+        return ret_val
 
     ###############################################################################
     #
@@ -1627,7 +1678,32 @@ class CFBaseCheck(BaseCheck):
             coordinate variables, and p the number of vertices of the cells. The vertices must be traversed anticlockwise in the
             lon-lat plane as viewed from above. The starting vertex is not specified.
         """
-        pass
+        ret_val = []
+        reasoning = []
+        valid = ' '
+
+        for name, var in ds.dataset.variables.iteritems():
+            for dim in var.dimensions:
+                if dim == name:
+                    if getattr(var, 'bounds', ''):
+                        bounds = getattr(var,'bounds','')
+                        if ds.dataset.variables[bounds].shape[-1] +1 == var.shape[-1]:
+                            valid = True
+                            reasoning.append('The shape of the Coordinate Variable is M x N Boundary Variable is M x N+1.')
+                        elif len(ds.dataset.variables[name].shape) + 1 == len(var.shape) and ds.dataset.variables[name].shape[-1] == 1:
+                            valid = True
+                            reasoning.append('The shape of the Coordinate Variable is M x N Boundary Variable is M x N x 1.')
+                        else:
+                            valid = False
+                            reasoning.append('The shape of the Boundary Variable is wrong.')
+                        result = Result(BaseCheck.MEDIUM,                            \
+                                    valid,                                       \
+                                    ('var', name, 'cell_boundaries'), \
+                                    reasoning)
+                        ret_val.append(result)
+
+
+        return ret_val
 
     def check_cell_measures(self, ds):
         """
@@ -1641,7 +1717,33 @@ class CFBaseCheck(BaseCheck):
 
         The variable must have a units attribute and may have other attributes such as a standard_name.
         """
-        pass
+        ret_val = []
+        reasoning = []
+        paragraph = []
+        for name, var in ds.dataset.variables.iteritems():
+            for dim in var.dimensions:
+                if getattr(var, 'cell_measures', ''):
+                    valid == False
+                    measures = getattr(var,'coordinates','')
+                    measures = measures.split(': ')
+                    if measures[0] not in ['area', 'volume']:
+                        continue
+                    for every, attri in ds.dataset.variables.iteritems():
+                        if every == measures[1]:
+                            for dimi in var.dimensions:
+                                if dimi in attri.dimensions:
+                                    reasoning.append('The measure variable complies with the restrictions.')
+                                    valid = True
+    
+                    result = Result(BaseCheck.MEDIUM,                            \
+                                    valid,                                       \
+                                    ('var', name, 'cell_boundaries'), \
+                                    reasoning)
+                    ret_val.append(result)
+
+
+        return ret_val
+
 
     def check_cell_methods(self, ds):
         """
@@ -1662,16 +1764,252 @@ class CFBaseCheck(BaseCheck):
         information would not be meaningful). It is especially recommended that cell_methods be explicitly specified for each
         spatio-temporal dimension and each spatio-temporal scalar coordinate variable.
         """
-        pass
+        
+        
+        #To be populated properly once available.
+        _areatype_names     = ["bare_ground","all_area_types", "clear_sky", "cloud", "floating_ice", "ice_free_sea", "lake_ice_or_sea_ice", "land", "land_ice","sea","sea_ice", "snow", "vegetation"]
+        
 
-    def check_cell_methods_for_multi_axes(self, ds):
+
+
+
+        ret_val = []
+        reasoning = []
+        paragraph = ''
+        named = ''
+        named_dict = OrderedDict()
+        names = list(ds.dataset.variables.iterkeys())
+        methods = ['point', 'sum', 'mean', 'maximum', 'minimum', 'mid_range', 'standard_deviation', 'variance', 'mode', 'median']
+        for name, var in ds.dataset.variables.iteritems():
+            if getattr(var, 'cell_methods', '') :
+                method = getattr(var, 'cell_methods', '')
+                
+                paragraph = re.split(r"(?<=:)\s|(?<=\s)\(",method)
+                
+                i = 0
+                while i < (len(paragraph)):
+                    if paragraph[i][-10:] == " interval:":
+                        paragraph[i] = paragraph[i][0:-10]
+                        paragraph.insert(i+1,"interval:")
+                        i = i+1
+                    if paragraph[i][-6:] == " area:":
+                        paragraph[i] = paragraph[i][0:-6]
+                        paragraph.insert(i+1,"area:")
+                        i = i+1
+                    if paragraph[i][-9:] == " comment:":
+                        paragraph[i] = paragraph[i][0:-9]
+                        paragraph.insert(i+1,"comment:")
+                        i = i+1
+                    i = i+1
+        
+                
+                dict_count = 0
+                for i in range(len(paragraph)-1):
+        
+                    if paragraph[i][-1] == ":":
+                        named = named +paragraph[i]
+                    if paragraph[i+1][-1] != ":":
+                        named_dict[str(dict_count)+named] = []
+                    if paragraph[i][-1] != ":":
+                        named_dict[str(dict_count)+named].append(paragraph[i])
+        
+                        dict_count = dict_count+1
+                        named = ''
+                named_dict[str(dict_count)+named].append(paragraph[i+1])
+                
+                
+    
+                valid_name_count = 0
+                total_name_count = 0
+                
+                #Checks if the name value of the 'name: method' pair is either a dimension of the variable, a standard_name, or a scalar_variable (which is         trumped by the standard_name requirement_
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                    for i in range(len(title)):
+                        if title[i].lower() in _areatype_names:
+                            valid_name_count = valid_name_count +1
+                        else:
+                            reasoning.append('The name field does not appear in the allowable types.')
+                                
+                for var_dim in ds.dataset.variables[name].dimensions:
+                    for each in named_dict.iterkeys():
+                        title = each[1:].split(':')
+                        for i in range(len(title)):
+                            if title[i].lower() == var_dim:
+                                valid_name_count = valid_name_count +1
+                            else:
+                                reasoning.append('The name field does not match the dimension.') 
+
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                
+                    for i in range(len(title)):
+                        if title[i] != '':
+                            total_name_count = total_name_count +1
+                        if title[i].lower() in ["interval", "area", "comment"] :
+                            valid_name_count = valid_name_count +1
+                        else:
+                            reasoning.append('The name field does not match the reserved words "interval", "area", or "comment".')
+
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_name_count, total_name_count),                                       \
+                        ('var', name, 'cell_methods_name'), \
+                        reasoning)
+                ret_val.append(result)
+
+                reasoning = []
+                            
+                #Checks if the method value of the 'name: method' pair is acceptable
+                methods = ['point', 'sum', 'mean', 'maximum', 'minimum', 'mid_range', 'standard_deviation', 'variance', 'mode', 'median']            
+                valid_method_count = 0
+                total_method_count = 0
+                
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                
+                    for i in range(len(title)):
+                        if title[i] not in ['interval', 'comment', 'area', '']:
+                            if title[i] != '':
+                                total_method_count = total_method_count +1
+                            if named_dict[each][0].strip() in methods:
+                                valid_method_count = valid_method_count+1
+                            else:
+                                reasoning.append('The method field does not match a valid method value.')
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_method_count, total_method_count),                                       \
+                        ('var', name, 'cell_methods_method'), \
+                        reasoning)
+                ret_val.append(result)            
+                
+                #Checks the format of the interval field
+                reasoning = []
+                valid_interval_count = 0
+                total_interval_count = 0
+                
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                
+                    for i in range(len(title)):
+                        if title[i] == 'interval':
+                            total_interval_count = total_interval_count +1
+                            if len(named_dict[each][0].split(" ")) == 2:
+                                valid_interval_count = valid_interval_count+1
+                            else:
+                                reasoning.append('The "interval: value units" format is not the correct length.')
+
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_interval_count, total_interval_count),                                       \
+                        ('var', name, 'cell_methods_interval'), \
+                        reasoning)
+                ret_val.append(result)    
+
+                #Checks the 'method where' formats
+                reasoning = []
+                valid_area_count = 0
+                total_area_count = 0
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                
+                    for i in range(len(title)):
+                        if title[i] == 'area':
+                            total_area_count = total_area_count +1
+                            area_data = named_dict[each][0].split(" ")
+                            if len(area_data) == 4:
+                                if area_data[0] in methods and area_data[1] == "where" and area_data[2] in _areatype_names:
+                                    valid_area_count = valid_area_count+1
+                                else:
+                                    reasoning.append('The "name: method where _areatype_names" format is not correct.')
+                            elif len(area_data) == 6:
+                                if area_data[0] in methods and area_data[1] == "where" and area_data[2] in _areatype_names and area_data[3] == "over" and       area_data[4] in _areatype_names :
+                                    valid_area_count = valid_area_count+1
+                                else:
+                                    reasoning.append('The "name: method where type over _areatype_names" format is not correct.')
+
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_area_count, total_area_count),                                       \
+                        ('var', name, 'cell_methods_area'), \
+                        reasoning)
+                ret_val.append(result)   
+        
+                #Checks the no coordinate case
+                reasoning = []
+                valid_no_coord_count = 0
+                total_no_coord_count = 0
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                
+                    for i in range(len(title)):
+                        if title[i].lower() in self._std_names and title[i].lower() not in ds.variables[name].dimensions and title[i].lower() not in getattr(var,"coordinates",""):
+                            if title[i] != '':
+                                total_no_coord_count = total_no_coord_count +1
+                            if named_dict[each][0].strip() in methods:
+                                valid_no_coord_count = valid_no_coord_count+1
+                            else:
+                                reasoning.append('The method is not in the a value provided in the allowable method list.')
+                                
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_no_coord_count, total_no_coord_count),                                       \
+                        ('var', name, 'cell_methods_no_coord'), \
+                        reasoning)
+                ret_val.append(result)   
+        #Checks the Climatology Variables - 7.4                               
+        reasoning = []
+        paragraph = []
+        total_climate_count = 0
+        valid_climate_count = 0
+        for name, var in ds.dataset.variables.iteritems():
+            if getattr(var, 'climatology', ''):
+                climate_dim = ds.dataset.variables[name].dimensions
+                clim_method = getattr(var, 'climatology', '')
+                
+        
+                
+                for each in climate.split(" "):
+                    paragraph.append(each)
+
+                total_climate_count = total_climate_count+ 1
+                for name_again, var_again in ds.dataset.variables.iteritems():
+                    if getattr(var_again,"cell_methods",""):
+                        climate = getattr(var, 'cell_methods', '')
+                        name_dim = ds.dataset.variables[name_again].dimensions
+                        if len(climate_dim)>0:
+                            if climate_dim[0] in name_dim:
+                                case1 = re.search(r"time: \w* within years time: \w* over years",climate)
+                                case2 = re.search(r"time: \w* within days time: \w* over days$",climate)
+                                case3 = re.search(r"time: \w* within days time: \w* over days time: \w* over years",climate)
+                        
+                        if (case1 or case2 or case3) and len(ds.variables[clim_method].shape) == 2 and ds.variables[clim_method].shape[1] == 2 and ds.variables[clim_method].shape[0] == ds.variables[name_again].shape[0] :
+                            
+                            valid_climate_count = 1
+                        if not (case1 or case2 or case3):
+                            reasoning.append('The "time: method within years/days over years/days" format is not correct.')
+
+                        if not (len(ds.variables[clim_method].shape) == 2 and ds.variables[clim_method].shape[1] == 2 and ds.variables[clim_method].shape[0] == ds.variables[name_again].shape[0]):
+                            reasoning.append('The dimensions of the climatology varaible is incorrect.')
+
+
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_climate_count, total_climate_count),                                       \
+                        ('var', name, 'cell_methods_climatology'), \
+                        reasoning)
+                ret_val.append(result)
+        
+        return ret_val
+
+
+
+    #def check_cell_methods_for_multi_axes(self, ds):
         """
         7.3.1 If a data value is representative of variation over a combination of axes, a single method should be prefixed by the
         names of all the dimensions involved (listed in any order, since in this case the order must be immaterial). 
-        """
-        pass
+        
+        There is no way to check this.  A warning should be posted explaining this method to the user!"
 
-    def check_spacing_and_extra_info(self, ds):
+        """
+
+
+
+    #def check_spacing_and_extra_info(self, ds):
         """
         7.3.2 To indicate more precisely how the cell method was applied, extra information may be included in parentheses ()
         after the identification of the method. This information includes standardized and non-standardized parts.
@@ -1694,9 +2032,10 @@ class CFBaseCheck(BaseCheck):
         coordinate variables be defined) to enable documentation of the method (through the cell_methods attribute) and its
         domain (through the cell_bounds attribute).
         """
-        pass
 
-    def check_stats_applying_to_portions_of_cells(self, ds):
+
+
+    #def check_stats_applying_to_portions_of_cells(self, ds):
         """
         7.3.3 By default, the statistical method indicated by cell_methods is assumed to have been evaluated over the entire
         horizontal area of the cell. Sometimes, however, it is useful to limit consideration to only a portion of a cell.
@@ -1707,19 +2046,18 @@ class CFBaseCheck(BaseCheck):
         cell_methods attribute may include a string of the form "name: method where type".
 
         The second convention is the more general. In this case, the cell_methods entry is of the form "name: method where
-        typevar". Here typevar is a string-valued auxiliary coordinate variable or string-valued scalar coordinate variable
-        with a standard_name of area_type. The variable typevar contains the name(s) of the selected portion(s) of the grid
+        _areatype_names". Here _areatype_names is a string-valued auxiliary coordinate variable or string-valued scalar coordinate variable
+        with a standard_name of area_type. The variable _areatype_names contains the name(s) of the selected portion(s) of the grid
         cell to which the method is applied. 
 
         If the method is mean, various ways of calculating the mean can be distinguished in the cell_methods attribute with
-        a string of the form "mean where type1 [over type2]". Here, type1 can be any of the possibilities allowed for typevar
+        a string of the form "mean where type1 [over type2]". Here, type1 can be any of the possibilities allowed for _areatype_names
         or type (as specified in the two paragraphs preceding above Example). The same options apply to type2, except it is
         not allowed to be the name of an auxiliary coordinate variable with a dimension greater than one (ignoring the
         dimension accommodating the maximum string length)
         """
-        pass
 
-    def check_cell_methods_with_no_coords(self, ds):
+    #def check_cell_methods_with_no_coords(self, ds):
         """
         7.3.4 To provide an indication that a particular cell method is relevant to the data without having to provide a
         precise description of the corresponding cell, the "name" that appears in a "name: method" pair may be an
@@ -1730,9 +2068,9 @@ class CFBaseCheck(BaseCheck):
         Recommend that whenever possible, cell bounds should be supplied by giving the variable a dimension of size one
         and attaching bounds to the associated coordinate variable.
         """
-        pass
+        
 
-    def check_climatological_statistics(self, ds):
+    #def check_climatological_statistics(self, ds):
         """
         7.4 A climatological time coordinate variable does not have a bounds attribute. Instead, it has a climatology
         attribute, which names a variable with dimensions (n,2), n being the dimension of the climatological time axis.
@@ -1751,7 +2089,7 @@ class CFBaseCheck(BaseCheck):
         The methods which can be specified are those listed in Appendix E, Cell Methods and each entry in the cell_methods
         attribute may also, contain non-standardised information in parentheses after the method. 
         """
-        pass
+        
 
     ###############################################################################
     #
