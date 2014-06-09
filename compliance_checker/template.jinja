@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Compliance Checker Results</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <style>
+
+
+
+.level0 {
+    background: #FFFFFF;
+    font-weight: bolder;
+}
+.level1 {
+    background: #F2F2F2;
+}
+.level2 {
+    background: #E6E6E6;
+    font-weight: lighter
+}
+.level3 {
+    background: #D8D8D8;
+}
+.level4 {
+    background: #BDBDBD;
+}
+.level5 {
+    background: #A4A4A4;
+}
+.cell-name {
+    width: 30%;
+}
+.cell-weight {
+    width: 10%;
+}
+.cell-value {
+    width: 10%;
+}
+.cell-messages {
+    width: 50%;
+}
+
+
+    </style>
+</head>
+
+<div class="container">
+<div class="table-responsive">
+    <h1>Compliance Checker Resutls</h1>
+    <table class = "table table-bordered table-width-limited" >
+        <tr>
+            <th>Test Name</th>
+            <th>Weight</th>
+            <th>Score</th>
+            <th>Reasoning </th>
+            
+        </tr> 
+{% for item in scores recursive %}
+        <tr>
+    {% if loop.depth ==1 %}
+
+            <th class="cell-name {{'level'}}{{(loop.depth - 1)}}">
+            {{item.name}}
+            </th>
+            <th class="cell-weight {{'level'}}{{(loop.depth - 1)}}">
+            {{ item.weight }}
+            </th>
+            <th class="cell-value {{'level'}}{{(loop.depth - 1)}}">
+            {{ item.value[0]}}/{{item.value[1]}}
+            </th>
+
+            {% if item.msgs %}
+                <th class="cell-messages {{'level'}}{{(loop.depth - 1)}}">{{item.msgs}} </th>
+            {% else %} 
+                <th class="cell-messages {{'level'}}{{(loop.depth - 1)}}"> </th>
+            {% endif %}
+            {% if item.children %}
+                    </tr>
+                    {{ loop(item.children)}}
+            {% endif %}
+    {% else %}
+            <td class="cell-name {{'level'}}{{(loop.depth - 1)}}">
+            {{item.name}}
+            </td>
+            <td class="cell-weight {{'level'}}{{(loop.depth - 1)}}">
+            {{ item.weight }}
+            </td>
+            <td class="cell-value {{'level'}}{{(loop.depth - 1)}}">
+            {{ item.value[0]}}/{{item.value[1]}}
+            </td>
+
+            {% if item.msgs %}
+                <td class="cell-messages {{'level'}}{{(loop.depth - 1)}}">{{item.msgs}} </td>
+            {% else %} 
+                <td class="cell-messages {{'level'}}{{(loop.depth - 1)}}"> </td>
+            {% endif %}
+            {% if item.children %}
+                    </tr>
+                {{ loop(item.children)}}
+            {% endif %}
+    {% endif %}
+
+
+        </tr>
+    </table>
+
+{% endfor %}
+</table>
+
+</div>
+</div>  
+</html>
