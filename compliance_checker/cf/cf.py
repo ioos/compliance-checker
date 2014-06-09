@@ -1,5 +1,5 @@
 import re
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import numpy as np
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
@@ -7,6 +7,7 @@ from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal
 
 from netCDF4 import Dimension, Variable
+
 
 # copied from paegan
 # paegan may depend on these later
@@ -45,6 +46,7 @@ _possiblex = ["x", "X",
            "longitude", "LONGITUDE",
            "lon_rho", "LON_RHO",
            "lon_psi", "LON_PSI",
+
           ]
 _possibley = ["y", "Y",
            "lat", "LAT",
@@ -57,6 +59,7 @@ _possibley = ["y", "Y",
            "latitude", "LATITUDE",
            "lat_rho", "LAT_RHO",
            "lat_psi", "LAT_PSI",
+
           ]
 
 _possibleaxis = _possiblet + _possiblez + _possiblex + _possibley
@@ -270,14 +273,7 @@ class CFBaseCheck(BaseCheck):
     #
     ###############################################################################
 
-    def check_filename_extension(self, ds):
-        """
-        2.1 Filename - NetCDF files should have the file name extension ".nc".
-        """
-        try:
-            return Result(BaseCheck.LOW, ds.dataset.filepath().endswith(".nc"), 'filename')
-        except ValueError: #This is 4.1.1 problem.  4.1.2 will not return a ValueError.
-            pass
+
 
     def check_data_types(self, ds):
         """
@@ -287,6 +283,7 @@ class CFBaseCheck(BaseCheck):
         total = len(ds.dataset.variables)
 
         for k, v in ds.dataset.variables.iteritems():
+            print v.datatype
             if v.datatype not in [np.character,
                                   np.dtype('b'),
                                   np.dtype('i4'),
@@ -357,8 +354,8 @@ class CFBaseCheck(BaseCheck):
         expected = ['T', 'Z', 'Y', 'X']
 
         for k, v in ds.dataset.variables.iteritems():
-            dclass = map(guess_dim_type, v.dimensions)
 
+            dclass = map(guess_dim_type, v.dimensions)
             # any nones should be before classified ones
             nones    = [i for i, x in enumerate(dclass) if x is None]
             nonnones = [i for i, x in enumerate(dclass) if x is not None]
@@ -376,16 +373,18 @@ class CFBaseCheck(BaseCheck):
         # there are two checks here per variable so totals must be doubled
         return Result(BaseCheck.LOW, (total*2 - len(fails), total*2), msgs=fails)
 
-    def check_dimension_single_value_applicable(self, ds):
+    #def check_dimension_single_value_applicable(self, ds):
         """
         2.4 When a single value of some coordinate applies to all the values in a variable, the recommended means of attaching this
         information to the variable is by use of a dimension of size unity with a one-element coordinate variable. It is also
         acceptable to use a scalar coordinate variable which eliminates the need for an associated size one dimension in the data
         variable.
         """
+
+
         #TODO: We need to identify a non-compliant example of this that can be verified, but I believe
-        #      that if the file is netCDF then this requirement may be met.
-        pass
+        #      that if the file is netCDF then this requirement may be met.  When we do we can reinsert this check
+        #pass
 
     def check_fill_value_outside_valid_range(self, ds):
         """
@@ -410,15 +409,28 @@ class CFBaseCheck(BaseCheck):
 
                 if v._FillValue >= rmin and v._FillValue <= rmax:
                     fails.append((k, "%s is between %s and %s" % (v._FillValue, rmin, rmax)))
+        if checked >= 1:
+            return Result(BaseCheck.HIGH, (checked - len(fails), checked), msgs=fails)
+        else:
+            return []
 
-        return Result(BaseCheck.HIGH, (checked - len(fails), checked), msgs=fails)
-
-    @check_has(BaseCheck.HIGH)
     def check_conventions_are_cf_16(self, ds):
         """
         2.6.1 the NUG defined global attribute Conventions to the string value "CF-1.6"
         """
-        return [("Conventions", ["CF-1.6"])]
+        #from debug import breakpoint
+        #breakpoint(locals(), globals())
+        if hasattr(ds.dataset, 'Conventions'):
+            if getattr(ds.dataset, 'Conventions', '') == 'CF-1.6':
+                valid = True
+                reasoning = ['Conventions field is "CF-1.6"']
+            else:
+                valid = False
+                reasoning = ['Conventions field is not "CF-1.6"']
+        else:
+            valid = False
+            reasoning = ['Conventions field is not present']
+        return Result(BaseCheck.HIGH, valid, 'conventions', msgs=reasoning)
 
     @score_group('convention_attrs')
     def check_convention_globals(self, ds):
@@ -484,8 +496,9 @@ class CFBaseCheck(BaseCheck):
 
             # skip climatological vars, boundary vars
             if v in self._find_clim_vars(ds) or \
-               v in self._find_boundary_vars(ds).itervalues():
-                continue
+               v in self._find_boundary_vars(ds).itervalues() or \
+               v.shape == ():
+               continue
 
             # skip string type vars
             if v.dtype.char == 'S':
@@ -494,6 +507,7 @@ class CFBaseCheck(BaseCheck):
             units = getattr(v, 'units', None)
 
             # 1) "units" attribute must be present
+
             presence = Result(BaseCheck.HIGH, units is not None, ('units', k, 'present'))
             ret_val.append(presence)
             if not presence.value:
@@ -537,14 +551,28 @@ class CFBaseCheck(BaseCheck):
 
             # 5) if a known std_name, use the units provided
             if std_name is not None and std_name in self._std_names:
+
                 std_units = self._std_names[std_name].canonical_units
 
                 #@TODO modifiers changes units
                 msgs = []
-                if units != std_units:
-                    msgs = ['units are %s, standard_name units should be %s' % (units, std_units)]
+                valid = True
 
-                ret_val.append(Result(BaseCheck.HIGH, units == std_units, ('units', k, 'standard_name'), msgs))
+                if units.split(" ")[0] in ['day', 'days', 'd', 'hour', 'hours', 'hr', 'hrs', 'h', 'year', 'years', 'minute', 'minutes', 'm', 'min', 'mins', 'second', 'seconds', 's', 'sec', 'secs']:
+                    if units.split(" ")[1] == 'since':
+                        std_units = units
+
+                if std_units == 'm' and units in ['meter', 'meters']:
+                    std_units = units
+
+                if units != std_units and units not in ['degrees_north', 'degree_N', 'degreeN', 'degreesN', 'degrees_east', 'degree_E', 'degreeE', 'degreesE'] :
+                    msgs = ['units are %s, standard_name units should be %s' % (units, std_units)]
+                    valid = False
+
+                #from debug import breakpoint
+                #breakpoint(locals(), globals())
+
+                ret_val.append(Result(BaseCheck.HIGH, valid, ('units', k, 'standard_name'), msgs))
 
             # 6) cell methods @TODO
             if hasattr(v, 'cell_methods'):
@@ -1286,7 +1314,7 @@ class CFBaseCheck(BaseCheck):
                 coord_vars.append(name)
         return coord_vars
 
-    def check_coordinate_systems(self, ds):
+    #def check_coordinate_systems(self, ds):
         """
         5 All of a variable's spatiotemporal dimensions that are not latitude,
         longitude, vertical, or time dimensions are required to be associated
@@ -1328,7 +1356,7 @@ class CFBaseCheck(BaseCheck):
 
         """
 
-        pass
+        #pass
 
     def check_independent_axis_dimensions(self, ds):
         """
@@ -1500,7 +1528,9 @@ class CFBaseCheck(BaseCheck):
                             valid,                                       \
                             ('var', name, 'is_reduced_horizontal_grid'), \
                             reasoning)
-            ret_val.append(result)
+            if valid == True:
+                ret_val.append(result)
+        
         return ret_val
 
 
@@ -1542,13 +1572,81 @@ class CFBaseCheck(BaseCheck):
         values of the standard_name depend on the grid mapping and are given in
         Appendix F, Grid Mappings.  
         """ 
-       
+        
+        
+        grid_mapping_dict = {
+                             'albers_conical_equal_area': [('longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                             'azimuthal_equidistant': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                             'lambert_cylindrical_equal_area': [('longitude_of_central_meridian', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel','scale_factor_at_projection_origin')],
+                             'lambert_azimuthal_equal_area': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                             'lambert_conformal_conic': [('standard_parallel', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                             'latitude_longitude': [(),(),('longitude', 'latitude')],
+                             'mercator': [('longitude_of_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate','projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
+                             'orthographic': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                             'polar_stereographic': [('straight_vertical_longitude_from_pole', 'latitude_of_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
+                             'rotated_latitude_longitude': [('grid_north_pole_latitude', 'grid_north_pole_longitude'),('north_pole_grid_longitude'),('grid_latitude', 'grid_longitude')],
+                             'stereographic':[('longitude_of_projection_origin', 'latitude_of_projection_origin', 'scale_factor_at_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate', 'projection_y_coordinate')],
+                             'transverse_mercator': [('scale_factor_at_central_meridian', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                             'vertical_perspective': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'perspective_point_height', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')]
+                             }
         ret_val = []
+        reasoning = []
+        valid_mapping_count = 0
+        total_mapping_count = 0
+
+        
+        for name, var in ds.dataset.variables.iteritems():
+
+            if getattr(var, 'grid_mapping_name', ''):
+                total_mapping_count = 1
+                
+                mapping = getattr(var, 'grid_mapping_name', '')
+                if mapping in grid_mapping_dict.iterkeys():
+                    valid_mapping_count = valid_mapping_count +1
+                else:
+                    reasoning.append('The grid_mapping_name attribute is not an accepted value.  See Appendix F.')
+                    
+                    
+                for each in grid_mapping_dict[mapping][0]:
+                    total_mapping_count = total_mapping_count + 1
+                    if each in dir(var):
+                        valid_capping_count = valid_mapping_count +1
+                    else:
+                        reasoning.append('The map parameters are not accepted values.  See Appendix F.')
+                
+                if len(grid_mapping_dict[mapping]) >=4:
+                    for each in grid_mapping_dict[mapping][3:]:
+                        every_flag = 0
+                        total_mapping_count = total_mapping_count + 1
+                        for every in each:
+                            if every in dir(var):
+                                valid_capping_count = valid_mapping_count + 1
+                                every_flag = every_flag +1
+                        
+                        if every_flag == 0:
+                            reasoning.append('Neither of the either/or parameters are present')
+                        if every_flag == 2:
+                            valid_capping_count = valid_mapping_count - 2
+                            reasoning.append('Both of the either/or parameters are present')
+                
+                total_mapping_count = total_mapping_count + len(grid_mapping_dict[mapping][1])
+                for name_again, each_again in ds.dataset.variables.iteritems():
+                    if name_again in grid_mapping_dict[mapping][1]:
+                        valid_mapping_count = valid_mapping_count + 1
+                
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_mapping_count, total_mapping_count),                                       \
+                        ('var', name, 'compressed_data'), \
+                        reasoning)
+
+                ret_val.append(result)
 
         return ret_val
+                
 
 
     def check_scalar_coordinate_system(self, ds):
+
         """
         5.7 When a variable has an associated coordinate which is single-valued, that coordinate may be represented as a
         scalar variable. Since there is no associated dimension these scalar coordinate variables should be attached to a
@@ -1558,7 +1656,36 @@ class CFBaseCheck(BaseCheck):
         reason we strongly recommend against using a name for a scalar coordinate variable that matches the name of any
         dimension in the file.
         """
-        pass
+        ret_val = []
+        reasoning = []
+        valid_scalar_coordinate_var = 0
+        total_scalar_coordinate_var = 0
+
+
+        for name, var in ds.dataset.variables.iteritems():
+            valid_scalar_coordinate_var = 0
+            total_scalar_coordinate_var = 0
+            if getattr(var, 'coordinates', ''):
+                for coordinate in getattr(var, 'coordinates', '').split(" "):
+                    if coordinate in ds.dataset.variables:
+                        if ds.dataset.variables[coordinate].shape == (1,):
+                            total_scalar_coordinate_var = total_scalar_coordinate_var + 1
+                            if coordinate not in ds.dataset.dimensions.keys():
+                                reasoning.append('The Scalar Coordinate system is of the right size and is not present in the variable list.')
+                                valid_scalar_coordinate_var = valid_scalar_coordinate_var + 1
+                            else:
+                                reasoning.append('The Scalar Coordinate system is of the right size but is present in the dimensions list, which is not allowed.')
+
+                if total_scalar_coordinate_var > 0:
+                    result = Result(BaseCheck.LOW,  \
+                                (valid_scalar_coordinate_var,total_scalar_coordinate_var),  \
+                                ('var', name, 'scalar_coordinates'), \
+                                reasoning)
+                    ret_val.append(result)
+
+        return ret_val
+
+        
 
     ###############################################################################
     #
@@ -1576,7 +1703,96 @@ class CFBaseCheck(BaseCheck):
         that the label values are standardized the variable that contains the labels must be given the standard_name
         attribute with the value region.
         """
-        pass
+        ret_val = []
+        reasoning = []
+        region_list = [
+                        'africa',
+                        'antarctica',
+                        'arabian_sea',
+                        'aral_sea',
+                        'arctic_ocean',
+                        'asia',
+                        'atlantic_ocean',
+                        'australia',
+                        'baltic_sea',
+                        'barents_opening',
+                        'barents_sea',
+                        'beaufort_sea',
+                        'bellingshausen_sea',
+                        'bering_sea',
+                        'bering_strait',
+                        'black_sea',
+                        'canadian_archipelago',
+                        'caribbean_sea',
+                        'caspian_sea',
+                        'central_america',
+                        'chukchi_sea',
+                        'contiguous_united_states',
+                        'denmark_strait',
+                        'drake_passage',
+                        'east_china_sea',
+                        'english_channel',
+                        'eurasia',
+                        'europe',
+                        'faroe_scotland_channel',
+                        'florida_bahamas_strait',
+                        'fram_strait',
+                        'global',
+                        'global_land',
+                        'global_ocean',
+                        'great_lakes',
+                        'greenland',
+                        'gulf_of_alaska',
+                        'gulf_of_mexico',
+                        'hudson_bay',
+                        'iceland_faroe_channel',
+                        'indian_ocean',
+                        'indonesian_throughflow',
+                        'indo_pacific_ocean',
+                        'irish_sea',
+                        'lake_baykal',
+                        'lake_chad',
+                        'lake_malawi',
+                        'lake_tanganyika',
+                        'lake_victoria',
+                        'mediterranean_sea',
+                        'mozambique_channel',
+                        'north_america',
+                        'north_sea',
+                        'norwegian_sea',
+                        'pacific_equatorial_undercurrent',
+                        'pacific_ocean',
+                        'persian_gulf',
+                        'red_sea',
+                        'ross_sea',
+                        'sea_of_japan',
+                        'sea_of_okhotsk',
+                        'south_america',
+                        'south_china_sea',
+                        'southern_ocean',
+                        'taiwan_luzon_straits',
+                        'weddell_sea',
+                        'windward_passage',
+                        'yellow_sea'
+                        ]
+
+        
+        for name, var in ds.dataset.variables.iteritems():
+            if getattr(var, 'standard_name', '') == 'region':
+                if ds.dataset.variables[name][:] in region_list:
+                    reasoning.append('The Region Value is from the allowable list.')
+                    result = Result(BaseCheck.LOW,                            \
+                            True,                                       \
+                            ('var', name, 'geographic_region'), \
+                            reasoning)
+                else:
+                    reasoning.append('The Region Value is not from the allowable list.')
+                    result = Result(BaseCheck.LOW,                            \
+                            False,                                       \
+                            ('var', name, 'geographic_region'), \
+                            reasoning)
+                ret_val.append(result)
+        return ret_val
 
     def check_alternative_coordinates(self, ds):
         """
@@ -1585,7 +1801,34 @@ class CFBaseCheck(BaseCheck):
         sets of values have to be stored in auxiliary coordinate variables. For such alternative coordinate variables,
         there are no mandatory attributes, but they may have any of the attributes allowed for coordinate variables.
         """
-        pass
+        ret_val = []
+        reasoning = []
+        valid_alt_coordinate_var = 0
+        total_alt_coordinate_var = 0
+
+
+        for name, var in ds.dataset.variables.iteritems():
+            valid_alt_coordinate_var = 0
+            total_alt_coordinate_var = 0
+            if getattr(var, 'coordinates', ''):
+                for coordinate in getattr(var, 'coordinates', '').split(' '):
+                    if coordinate in ds.dataset.variables and coordinate not in ds.dataset.dimensions:
+                        reasoning.append('The Alternative Coordinate system is not dervied from the Coordinate Variables and is not Dimensionalized by them.')
+                        total_alt_coordinate_var = total_alt_coordinate_var + 1
+                        valid_alt_coordinate_var = valid_alt_coordinate_var + 1
+                        continue
+                    elif coordinate not in ds.dataset.variables:
+                        reasoning.append('The Alternative Coordinate system is dervied from the Coordinate Variables and is Dimensionalized by them.')
+                        total_alt_coordinate_var = total_alt_coordinate_var + 1
+
+
+                result = Result(BaseCheck.MEDIUM,                            \
+                            (valid_alt_coordinate_var,total_alt_coordinate_var),                                       \
+                            ('var', name, 'alternative_coordinates'), \
+                            reasoning)
+                ret_val.append(result)
+
+        return ret_val
 
     ###############################################################################
     #
@@ -1627,7 +1870,32 @@ class CFBaseCheck(BaseCheck):
             coordinate variables, and p the number of vertices of the cells. The vertices must be traversed anticlockwise in the
             lon-lat plane as viewed from above. The starting vertex is not specified.
         """
-        pass
+        ret_val = []
+        reasoning = []
+        valid = ' '
+
+        for name, var in ds.dataset.variables.iteritems():
+            for dim in var.dimensions:
+                if dim == name:
+                    if getattr(var, 'bounds', ''):
+                        bounds = getattr(var,'bounds','')
+                        if ds.dataset.variables[bounds].shape[-1] +1 == var.shape[-1]:
+                            valid = True
+                            reasoning.append('The shape of the Coordinate Variable is M x N Boundary Variable is M x N+1.')
+                        elif len(ds.dataset.variables[name].shape) + 1 == len(var.shape) and ds.dataset.variables[name].shape[-1] == 1:
+                            valid = True
+                            reasoning.append('The shape of the Coordinate Variable is M x N Boundary Variable is M x N x 1.')
+                        else:
+                            valid = False
+                            reasoning.append('The shape of the Boundary Variable is wrong.')
+                        result = Result(BaseCheck.MEDIUM,                            \
+                                    valid,                                       \
+                                    ('var', name, 'cell_boundaries'), \
+                                    reasoning)
+                        ret_val.append(result)
+
+
+        return ret_val
 
     def check_cell_measures(self, ds):
         """
@@ -1641,7 +1909,40 @@ class CFBaseCheck(BaseCheck):
 
         The variable must have a units attribute and may have other attributes such as a standard_name.
         """
-        pass
+        ret_val = []
+        reasoning = []
+        paragraph = []
+        for name, var in ds.dataset.variables.iteritems():
+            for dim in var.dimensions:
+                if getattr(var, 'cell_measures', ''):
+                    measures = getattr(var,'coordinates','')
+                    measures = measures.split(': ')
+                    if measures[0] not in ['area', 'volume']:
+                        reasoning.append("The 'measures' field is not equal to 'area' or 'volume'.")
+                        return Result(BaseCheck.MEDIUM,                            \
+                                    False,                                       \
+                                    ('var', name, 'cell_measures'), \
+                                    reasoning)
+                    for every, attri in ds.dataset.variables.iteritems():
+                        if every == measures[1]:
+                            for dimi in attri.dimensions:
+                                if dimi in var.dimensions:
+                                    reasoning.append('The measure variable dimensions are a set or subset of the cell_measure variable.')
+                                    valid = True
+                                else:
+                                    reasoning.append('The measure variable dimensions are not a set or subset of the cell_measure variable.')
+                                    valid == False
+
+    
+                    result = Result(BaseCheck.MEDIUM,                            \
+                                    valid,                                       \
+                                    ('var', name, 'cell_measures'), \
+                                    reasoning)
+                    ret_val.append(result)
+
+
+        return ret_val
+
 
     def check_cell_methods(self, ds):
         """
@@ -1662,16 +1963,293 @@ class CFBaseCheck(BaseCheck):
         information would not be meaningful). It is especially recommended that cell_methods be explicitly specified for each
         spatio-temporal dimension and each spatio-temporal scalar coordinate variable.
         """
-        pass
+        
+        
+        _areatype_names     = ["bare_ground",
+                                "all_area_types", 
+                                "burnt_vegetation",
+                                "c3_plant_functional_types",
+                                "c4_plant_functional_types",
+                                "clear_sky", 
+                                "cloud", 
+                                "crops",
+                                "floating_ice", 
+                                "ice_free_land",
+                                "ice_free_sea", 
+                                "lake_ice_or_sea_ice", 
+                                "land", 
+                                "land_ice",
+                                "natural_grasses",
+                                "pastures",
+                                "primary_deciduous_trees",
+                                "primary_evergreen_trees",
+                                "sea",
+                                "sea_ice", 
+                                "secondary_deciduous_trees",
+                                "secondary_evergreen_trees",
+                                "shrubs"
+                                "snow", 
+                                "trees"
+                                "vegetation"]
+        methods = [ 'point',
+                    'sum',
+                    'mean',
+                    'maximum',
+                    'minimum',
+                    'mid_range',
+                    'standard_deviation',
+                    'variance',
+                    'mode',
+                    'median']
 
-    def check_cell_methods_for_multi_axes(self, ds):
+        ret_val = []
+        reasoning = []
+        paragraph = ''
+        named = ''
+        
+        names = list(ds.dataset.variables.iterkeys())
+        for name, var in ds.dataset.variables.iteritems():
+            named_dict = OrderedDict()
+            if getattr(var, 'cell_methods', '') :
+                method = getattr(var, 'cell_methods', '')
+                #Parse the cell_methods format.
+                paragraph = re.split(r"(?<=:)\s|(?<=\s)\(",method)
+                
+                i = 0
+                while i < (len(paragraph)):
+                    if paragraph[i][-10:] == " interval:":
+                        paragraph[i] = paragraph[i][0:-10]
+                        paragraph.insert(i+1,"interval:")
+                        i = i+1
+                    if paragraph[i][-6:] == " area:":
+                        paragraph[i] = paragraph[i][0:-6]
+                        paragraph.insert(i+1,"area:")
+                        i = i+1
+                    if paragraph[i][-9:] == " comment:":
+                        paragraph[i] = paragraph[i][0:-9]
+                        paragraph.insert(i+1,"comment:")
+                        i = i+1
+                    i = i+1
+        
+                
+                dict_count = 0
+                #Create a dict that holds each statement in the cell_method field
+                for i in range(len(paragraph)-1):
+        
+                    if paragraph[i][-1] == ":":
+                        named = named +paragraph[i]
+                    if paragraph[i+1][-1] != ":":
+                        named_dict[str(dict_count)+named] = []
+                    if paragraph[i][-1] != ":":
+                        named_dict[str(dict_count)+named].append(paragraph[i])
+        
+                        dict_count = dict_count+1
+                        named = ''
+                named_dict[str(dict_count)+named].append(paragraph[i+1])
+                
+                
+    
+                valid_name_count = 0
+                total_name_count = 0
+                
+                #Checks if the name value of the 'name: method' pair is either a dimension of the variable, a standard_name, or a scalar_variable (which is         trumped by the standard_name requirement_
+                
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                    for i in range(len(title)):
+                        if title[i].lower() in _areatype_names:
+                            valid_name_count = valid_name_count +1
+                            reasoning.append('The name field appears in the allowable types.')
+                        else:
+                            reasoning.append('The name field does not appear in the allowable types.')
+                                
+                for var_dim in ds.dataset.variables[name].dimensions:
+                    for each in named_dict.iterkeys():
+                        title = each[1:].split(':')
+                        for i in range(len(title)):
+                            if title[i].lower() == var_dim:
+                                valid_name_count = valid_name_count +1
+                                reasoning.append('The name field matches the dimension.') 
+                            else:
+                                reasoning.append('The name field does not match the dimension.') 
+
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                
+                    for i in range(len(title)):
+                        if title[i] != '':
+                            total_name_count = total_name_count +1
+                        if title[i].lower() in ["interval", "area", "comment"] :
+                            reasoning.append('The name field matches the reserved words "interval", "area", or "comment".')
+                            valid_name_count = valid_name_count +1
+                        else:
+                            reasoning.append('The name field does not match the reserved words "interval", "area", or "comment".')
+
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_name_count, total_name_count),                                       \
+                        ('var', name, 'cell_methods_name'), \
+                        reasoning)
+                ret_val.append(result)
+
+                reasoning = []
+                            
+                #Checks if the method value of the 'name: method' pair is acceptable
+                methods = ['point', 'sum', 'mean', 'maximum', 'minimum', 'mid_range', 'standard_deviation', 'variance', 'mode', 'median']            
+                valid_method_count = 0
+                total_method_count = 0
+                
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                
+                    for i in range(len(title)):
+                        if title[i] not in ['interval', 'comment', 'area', '']:
+                            if title[i] != '':
+                                total_method_count = total_method_count +1
+                            if named_dict[each][0].strip() in methods:
+                                valid_method_count = valid_method_count+1
+                                reasoning.append('The method field matches a valid method value.')
+                            else:
+                                reasoning.append('The method field does not match a valid method value.')
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_method_count, total_method_count),                                       \
+                        ('var', name, 'cell_methods_method'), \
+                        reasoning)
+                ret_val.append(result)            
+                
+                #Checks the format of the interval field
+                reasoning = []
+                valid_interval_count = 0
+                total_interval_count = 0
+                
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                
+                    for i in range(len(title)):
+                        if title[i] == 'interval':
+                            total_interval_count = total_interval_count +1
+                            if len(named_dict[each][0].split(" ")) == 2:
+                                valid_interval_count = valid_interval_count+1
+                                reasoning.append('The "interval: value units" format is the correct length.')
+                            else:
+                                reasoning.append('The "interval: value units" format is not the correct length.')
+
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_interval_count, total_interval_count),                                       \
+                        ('var', name, 'cell_methods_interval'), \
+                        reasoning)
+                ret_val.append(result)    
+
+                #Checks the 'method where' formats
+                reasoning = []
+                valid_area_count = 0
+                total_area_count = 0
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                
+                    for i in range(len(title)):
+                        if title[i] == 'area':
+                            total_area_count = total_area_count +1
+                            area_data = named_dict[each][0].split(" ")
+                            if len(area_data) == 4:
+                                if area_data[0] in methods and area_data[1] == "where" and area_data[2] in _areatype_names:
+                                    valid_area_count = valid_area_count+1
+                                    reasoning.append('The "name: method where _areatype_names" format is correct.')
+                                else:
+                                    reasoning.append('The "name: method where _areatype_names" format is not correct.')
+                            elif len(area_data) == 6:
+                                if area_data[0] in methods and area_data[1] == "where" and area_data[2] in _areatype_names and area_data[3] == "over" and       area_data[4] in _areatype_names :
+                                    valid_area_count = valid_area_count+1
+                                    reasoning.append('The "name: method where type over _areatype_names" format is correct.')
+                                else:
+                                    reasoning.append('The "name: method where type over _areatype_names" format is not correct.')
+
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_area_count, total_area_count),                                       \
+                        ('var', name, 'cell_methods_area'), \
+                        reasoning)
+                ret_val.append(result)   
+        
+                #Checks the no coordinate case
+                reasoning = []
+                valid_no_coord_count = 0
+                total_no_coord_count = 0
+                for each in named_dict.iterkeys():
+                    title = each[1:].split(':')
+                
+                    for i in range(len(title)):
+                        if title[i].lower() in self._std_names and title[i].lower() not in ds.dataset.variables[name].dimensions and title[i].lower() not in getattr(var,"coordinates",""):
+                            if title[i] != '':
+                                total_no_coord_count = total_no_coord_count +1
+                            if named_dict[each][0].strip() in methods:
+                                valid_no_coord_count = valid_no_coord_count+1
+                                reasoning.append('The method is in the a value provided in the allowable method list.')
+                            else:
+                                reasoning.append('The method is not in the a value provided in the allowable method list.')
+                                
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_no_coord_count, total_no_coord_count),                                       \
+                        ('var', name, 'cell_methods_no_coord'), \
+                        reasoning)
+                ret_val.append(result)   
+        #Checks the Climatology Variables - 7.4                               
+        reasoning = []
+        paragraph = []
+        total_climate_count = 0
+        valid_climate_count = 0
+        for name, var in ds.dataset.variables.iteritems():
+            if getattr(var, 'climatology', ''):
+                climate_dim = ds.dataset.variables[name].dimensions
+                clim_method = getattr(var, 'climatology', '')
+                
+        
+                
+                for each in climate.split(" "):
+                    paragraph.append(each)
+
+                total_climate_count = total_climate_count+ 1
+                for name_again, var_again in ds.dataset.variables.iteritems():
+                    if getattr(var_again,"cell_methods",""):
+                        climate = getattr(var, 'cell_methods', '')
+                        name_dim = ds.dataset.variables[name_again].dimensions
+                        if len(climate_dim)>0:
+                            if climate_dim[0] in name_dim:
+                                case1 = re.search(r"time: \w* within years time: \w* over years",climate)
+                                case2 = re.search(r"time: \w* within days time: \w* over days$",climate)
+                                case3 = re.search(r"time: \w* within days time: \w* over days time: \w* over years",climate)
+                        
+                        if (case1 or case2 or case3) and len(ds.dataset.variables[clim_method].shape) == 2 and ds.dataset.variables[clim_method].shape[1] == 2 and ds.dataset.variables[clim_method].shape[0] == ds.dataset.variables[name_again].shape[0] :
+                            
+                            valid_climate_count = 1
+                            reasoning.append('The "time: method within years/days over years/days" format is correct.')
+                        if not (case1 or case2 or case3):
+                            reasoning.append('The "time: method within years/days over years/days" format is not correct.')
+
+                        if not (len(ds.dataset.variables[clim_method].shape) == 2 and ds.dataset.variables[clim_method].shape[1] == 2 and ds.dataset.variables[clim_method].shape[0] == ds.dataset.variables[name_again].shape[0]):
+                            reasoning.append('The dimensions of the climatology varaible is incorrect.')
+
+
+                result = Result(BaseCheck.MEDIUM,                            \
+                        (valid_climate_count, total_climate_count),                                       \
+                        ('var', name, 'cell_methods_climatology'), \
+                        reasoning)
+                ret_val.append(result)
+        
+        return ret_val
+
+
+
+    #def check_cell_methods_for_multi_axes(self, ds):
         """
         7.3.1 If a data value is representative of variation over a combination of axes, a single method should be prefixed by the
         names of all the dimensions involved (listed in any order, since in this case the order must be immaterial). 
-        """
-        pass
+        
+        There is no way to check this.  A warning should be posted explaining this method to the user!"
 
-    def check_spacing_and_extra_info(self, ds):
+        """
+
+
+
+    #def check_spacing_and_extra_info(self, ds):
         """
         7.3.2 To indicate more precisely how the cell method was applied, extra information may be included in parentheses ()
         after the identification of the method. This information includes standardized and non-standardized parts.
@@ -1694,9 +2272,10 @@ class CFBaseCheck(BaseCheck):
         coordinate variables be defined) to enable documentation of the method (through the cell_methods attribute) and its
         domain (through the cell_bounds attribute).
         """
-        pass
 
-    def check_stats_applying_to_portions_of_cells(self, ds):
+
+
+    #def check_stats_applying_to_portions_of_cells(self, ds):
         """
         7.3.3 By default, the statistical method indicated by cell_methods is assumed to have been evaluated over the entire
         horizontal area of the cell. Sometimes, however, it is useful to limit consideration to only a portion of a cell.
@@ -1707,19 +2286,18 @@ class CFBaseCheck(BaseCheck):
         cell_methods attribute may include a string of the form "name: method where type".
 
         The second convention is the more general. In this case, the cell_methods entry is of the form "name: method where
-        typevar". Here typevar is a string-valued auxiliary coordinate variable or string-valued scalar coordinate variable
-        with a standard_name of area_type. The variable typevar contains the name(s) of the selected portion(s) of the grid
+        _areatype_names". Here _areatype_names is a string-valued auxiliary coordinate variable or string-valued scalar coordinate variable
+        with a standard_name of area_type. The variable _areatype_names contains the name(s) of the selected portion(s) of the grid
         cell to which the method is applied. 
 
         If the method is mean, various ways of calculating the mean can be distinguished in the cell_methods attribute with
-        a string of the form "mean where type1 [over type2]". Here, type1 can be any of the possibilities allowed for typevar
+        a string of the form "mean where type1 [over type2]". Here, type1 can be any of the possibilities allowed for _areatype_names
         or type (as specified in the two paragraphs preceding above Example). The same options apply to type2, except it is
         not allowed to be the name of an auxiliary coordinate variable with a dimension greater than one (ignoring the
         dimension accommodating the maximum string length)
         """
-        pass
 
-    def check_cell_methods_with_no_coords(self, ds):
+    #def check_cell_methods_with_no_coords(self, ds):
         """
         7.3.4 To provide an indication that a particular cell method is relevant to the data without having to provide a
         precise description of the corresponding cell, the "name" that appears in a "name: method" pair may be an
@@ -1730,9 +2308,9 @@ class CFBaseCheck(BaseCheck):
         Recommend that whenever possible, cell bounds should be supplied by giving the variable a dimension of size one
         and attaching bounds to the associated coordinate variable.
         """
-        pass
+        
 
-    def check_climatological_statistics(self, ds):
+    #def check_climatological_statistics(self, ds):
         """
         7.4 A climatological time coordinate variable does not have a bounds attribute. Instead, it has a climatology
         attribute, which names a variable with dimensions (n,2), n being the dimension of the climatological time axis.
@@ -1751,7 +2329,7 @@ class CFBaseCheck(BaseCheck):
         The methods which can be specified are those listed in Appendix E, Cell Methods and each entry in the cell_methods
         attribute may also, contain non-standardised information in parentheses after the method. 
         """
-        pass
+        
 
     ###############################################################################
     #
@@ -1777,7 +2355,54 @@ class CFBaseCheck(BaseCheck):
         When data to be packed contains missing values the attributes that indicate missing values (_FillValue, valid_min,
         valid_max, valid_range) must be of the same data type as the packed data.
         """
-        pass
+        
+        ret_val = []
+        reasoning = []
+        names = list(ds.dataset.variables.iterkeys())
+        for name, var in ds.dataset.variables.iteritems():
+            if getattr(var, 'add_offset', '') or getattr(var, 'scale_factor', ''):
+                valid = False
+                if getattr(var, 'add_offset', '') and getattr(var, 'scale_factor', ''):
+                    offset = getattr(var, 'add_offset', '')
+                    scale = getattr(var, 'scale_factor', '')
+                    if type(ds.dataset.variables[name][0]) == type(scale) == type(offset):
+                        valid = True
+                        reasoning.append("'add_offset' and 'scale_factor' both exist and match data type to the variable.")
+                        result = Result(BaseCheck.MEDIUM,                            \
+                                valid,                                       \
+                                ('var', name, 'packed_data'), \
+                                reasoning)
+                    elif type(scale) == type(offset) != type(ds.dataset.variables[name][0]):
+                        if type(scale) == type(float()) or type(scale) == type(int()) and str(type(ds.dataset.variables[name][0])) in ["<type 'numpy.int4'>", "<type 'numpy.int8'>", "<type 'numpy.int16'>"]:
+                           valid = True
+                           reasoning.append("'add_offset' and 'scale_factor' are both of type float or int and the data variable is of type byte, short, or int.")
+                           result = Result(BaseCheck.MEDIUM,                            \
+                                valid,                                       \
+                                ('var', name, 'packed_data'), \
+                                reasoning)
+                           ret_val.append(result)
+                        else: 
+                           valid = False
+                           reasoning.append("'add_offset' and 'scale_factor' are not of type float or int, or the data variable is not of type byte, short, or int.")
+                           result = Result(BaseCheck.MEDIUM,                            \
+                                valid,                                       \
+                                ('var', name, 'packed_data'), \
+                                reasoning)
+                           ret_val.append(result)     
+                    else:
+                        valid = False
+                        reasoning.append("'add_offset' and 'scale_factor' are not both of type float or int or the data variable is not of type byte, short, or int.")
+                        result = Result(BaseCheck.MEDIUM,                            \
+                                valid,                                       \
+                                ('var', name, 'packed_data'), \
+                                reasoning)
+                        ret_val.append(result) 
+
+
+
+        return ret_val
+
+        
 
     def check_compression(self, ds):
         """
@@ -1790,8 +2415,35 @@ class CFBaseCheck(BaseCheck):
         list of the dimensions which were affected by the compression in the order of the CDL declaration of the uncompressed
         array. 
         """
-        pass
+        ret_val = []
+        reasoning = []
 
+        for name, var in ds.dataset.variables.iteritems():
+            if getattr(var, 'compress', ''):
+                valid_form = False
+                valid_dim = False
+
+                if len(getattr(var, 'compress', '').split(" ")) >= 1:
+                    valid_form = True
+                    reasoning.append("The 'compress' attribute is in the form of a coordinate.")
+                else: 
+                    reasoning.append("The 'compress' attribute is not in the form of a coordinate.")
+
+                for name_again, var_again in ds.dataset.variables.iteritems():
+                
+                    if name in ds.dataset.variables[name].dimensions:
+                        valid_dim = True
+                        reasoning.append("The 'compress' attribute is a referenced dimension.")
+                    else:
+                        reasoning.append("The 'compress' attribute is not a referenced dimension.")
+
+                result = Result(BaseCheck.MEDIUM,                            \
+                                valid_form and valid_dim,                                       \
+                                ('var', name, 'compressed_data'), \
+                                reasoning)
+                ret_val.append(result)
+
+        return ret_val
     ###############################################################################
     #
     # CHAPTER 9: Discrete Sampling Geometries
@@ -1808,9 +2460,138 @@ class CFBaseCheck(BaseCheck):
         The space-time coordinates that are indicated for each feature are mandatory.  However a featureType may also include
         other space-time coordinates which are not mandatory (notably the z coordinate).
         """
+        flag = 0
+        x = ''
+        y = ''
+        z = ''
+        t = ''
+        
+        grid_mapping_dict = {
+                                     'albers_conical_equal_area': [('longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                                     'azimuthal_equidistant': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                                     'lambert_cylindrical_equal_area': [('longitude_of_central_meridian', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel','scale_factor_at_projection_origin')],
+                                     'lambert_azimuthal_equal_area': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                                     'lambert_conformal_conic': [('standard_parallel', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                                     'latitude_longitude': [(),(),('longitude', 'latitude')],
+                                     'mercator': [('longitude_of_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate','projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
+                                     'orthographic': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                                     'polar_stereographic': [('straight_vertical_longitude_from_pole', 'latitude_of_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
+                                     'rotated_latitude_longitude': [('grid_north_pole_latitude', 'grid_north_pole_longitude'),('north_pole_grid_longitude'),('grid_latitude', 'grid_longitude')],
+                                     'stereographic':[('longitude_of_projection_origin', 'latitude_of_projection_origin', 'scale_factor_at_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate', 'projection_y_coordinate')],
+                                     'transverse_mercator': [('scale_factor_at_central_meridian', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+                                     'vertical_perspective': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'perspective_point_height', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')]
+                                     }
+            
+        flag = 0    
+        for name,var in ds.dataset.variables.iteritems():
+            if getattr(var,"grid_mapping_name", ""):
+                #DO GRIDMAPPING CHECKS FOR X,Y,Z,T
+                flag = 1
+                for name_again, var_again in ds.dataset.variables.iteritems():
+                    if getattr(var_again,"standard_name","") == grid_mapping_dict[getattr(var,"grid_mapping_name", "")][2][0]:
+                        x = name_again
+                    if getattr(var_again,"standard_name","") == grid_mapping_dict[getattr(var,"grid_mapping_name", "")][2][1]:
+                        y = name_again
+        
+                        
+                    
+                
+ 
+        for name,var in ds.dataset.variables.iteritems():
+            #DO STANDARD SEARCH
+            if getattr(var,'units','').lower() in ['pa', 'kpa', 'mbar', 'bar', 'atm', 'hpa', 'dbar'] or getattr(var,'positive','') or getattr(var,'standard_name','') == 'z' or getattr(var,'axis','') ==  'z':
+                z = name
+            if name.lower() in ['lon', 'longitude'] and flag == 0:
+                x = name
+            elif name.lower()in ['lat', 'latitude'] and flag == 0:
+                y = name
+            elif name.lower() == 'time':
+                t = name
+                    
+            if getattr(var, '_CoordianteAxisType', ''):
+                axis_type = getattr(var, '_CoordianteAxisType', '')
+                if axis_type.lower() in ['lon', 'longitude'] and flag == 0:
+                    x = name
+                elif axis_type.lower()in ['lat', 'latitude'] and flag == 0:
+                    y = name
+                elif axis_type.lower() == 'time':
+                    t = name
+                                      
+        valid = False                
+        feature_types = []
+
+
+        #create shape size tuple
+        if z == '':
+            feature_tuple = (len(ds.dataset.variables[x].shape), len(ds.dataset.variables[y].shape), len(ds.dataset.variables[t].shape))
+        else:
+            feature_tuple = (len(ds.dataset.variables[x].shape), len(ds.dataset.variables[y].shape), len(ds.dataset.variables[t].shape), len(ds.dataset.variables[z].shape))
+
+
+
+        #point
+        if feature_tuple == (0,0,0):
+            for name,var in ds.dataset.variables.iteritems():
+                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
+                    feature_types.append('point')
+                    
+        #timeSeries
+        if feature_tuple == (0,0,1) or feature_tuple == (1,1,2) :
+            for name,var in ds.dataset.variables.iteritems():
+                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
+                    feature_types.append('timeSeries')
+
+        #trajectory or profile
+        if feature_tuple == (1,1,1) :
+            for name,var in ds.dataset.variables.iteritems():
+                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
+                    feature_types.append('point-or-trajectory')
+
+        #trajectory
+        if feature_tuple == (2,2,2) :
+            for name,var in ds.dataset.variables.iteritems():
+                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
+                    feature_types.append('trajectory')
+                    
+        #profile
+        if feature_tuple == (0,0,1,0) :
+            for name,var in ds.dataset.variables.iteritems():
+                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
+                    feature_types.append('profile')
+        
+        #timeseriesProfile
+        if feature_tuple == (0,0,2,1) or feature_tuple == (1,1,3,2) :
+            for name,var in ds.dataset.variables.iteritems():
+                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
+                   feature_types.append('timeSeriesProfile')  
+              
+        #profile or trajectoryProfile
+        if feature_tuple == (1,1,2,1) :
+            for name,var in ds.dataset.variables.iteritems():
+                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
+                   feature_types.append('profile-or-trajectoryProfile')
+
+        #trajectoryProfile
+        if  feature_tuple == (2,2,3,2) :
+            for name,var in ds.dataset.variables.iteritems():
+                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
+                   feature_types.append('trajectoryProfile')  
+
+        valid = all(x == feature_types[0] for x in feature_types)
+
+        return Result(BaseCheck.HIGH, valid)
+        
+
+
+
+
+
+
+
+
         pass
 
-    def check_collections_instances_and_elements(self, ds):
+    #def check_collections_instances_and_elements(self, ds):
         """
         9.2 The dimension with subscript i identifies a particular feature within a collection of features. It is called the
         instance dimension. One-dimensional variables in a Discrete Geometry CF file, which have only this dimension (such as
@@ -1828,7 +2609,10 @@ class CFBaseCheck(BaseCheck):
         If there is only a single feature to be stored in a data variable, there is no need for an instance dimension and it
         is permitted to omit it. 
         """
-        pass
+
+        ##There is no test here.  
+
+        #pass
 
     def check_orthogonal_multidim_array(self, ds):
         """
@@ -1840,7 +2624,23 @@ class CFBaseCheck(BaseCheck):
         features or more elements can be appended), then that dimension must be the outer dimension of the data variable
         i.e. the leading dimension in CDL.
         """
-        pass
+        ret_val = []
+        reasoning = []
+
+        for name,var in ds.dataset.variables.iteritems():
+            if not getattr(var,'count_variable','') and not getattr(var,'index_variable',''):
+                if getattr(var, '_FillValue', ''):
+                    if getattr(var, '_FillValue', '') in ds.dataset.variables[name][:]:
+                        pass
+                    else:
+                        reasoning.append('No _FillValue was used and there is no count_variable or index_variable field, so therefore it must be an orthogonal multidimensional array.')
+                        result = Result(BaseCheck.MEDIUM,                            \
+                                True,                                       \
+                                ('var', name, 'orthogonal_multidimensional'), \
+                                reasoning)
+                        ret_val.append(result)
+        return ret_val
+        
 
     def check_incomplete_multidim_array(self, ds):
         """
@@ -1851,10 +2651,28 @@ class CFBaseCheck(BaseCheck):
 
         Data variables have both an instance dimension and an element dimension.  The dimensions may be given in any order. 
         If there is a need for either the instance or an element dimension to be the netCDF unlimited dimension (so that more
-        features or more elements can be appended), then that dimension must be the outer dimension of the data variable
+        features or more elements can be appended), thlen that dimension must be the outer dimension of the data variable
         i.e. the leading dimension in CDL.
         """
-        pass
+
+        ret_val = []
+        reasoning = []
+        for name,var in ds.dataset.variables.iteritems():
+            if not getattr(var,'count_variable','') and not getattr(var,'index_variable',''):
+                if getattr(var, '_FillValue', ''):
+                    if getattr(var, '_FillValue', '') in ds.dataset.variables[name][:]:
+                        reasoning.append('A _FillValue was given and used and there is no count_variable or index_variable field, so therefore it must be an orthogonal multidimensional array.')
+                        result = Result(BaseCheck.MEDIUM,                            \
+                                True,                                       \
+                                ('var', name, 'ragged_multidimensional'), \
+                                reasoning)
+                        ret_val.append(result)
+                    else:
+                        pass
+
+        return ret_val
+        
+        
 
     def check_contiguous_ragged_array(self, ds):
         """
@@ -1872,7 +2690,19 @@ class CFBaseCheck(BaseCheck):
         same dimension (the sample dimension).   If the sample dimension is the netCDF unlimited dimension, new data can be
         appended to the file.  
         """
-        pass
+        ret_val = []
+        reasoning = []
+        for name,var in ds.dataset.variables.iteritems():
+            if getattr(var,'count_variable',''):
+                result = Result(BaseCheck.MEDIUM,                            \
+                        True,                                       \
+                        ('var', name, 'continuous_ragged'), \
+                        reasoning)
+                ret_val.append(result)
+            else:
+                pass
+
+        return ret_val
 
     def check_indexed_ragged_array(self, ds):
         """
@@ -1890,7 +2720,19 @@ class CFBaseCheck(BaseCheck):
         same dimension (the sample dimension).   If the sample dimension is the netCDF unlimited dimension, new data can be
         appended to the file.  
         """
-        pass
+        ret_val = []
+        reasoning = []
+        for name,var in ds.dataset.variables.iteritems():
+            if getattr(var,'index_variable',''):
+                result = Result(BaseCheck.MEDIUM,                            \
+                        True,                                       \
+                        ('var', name, 'continuous_ragged'), \
+                        reasoning)
+                ret_val.append(result)
+            else:
+                pass
+
+        return ret_val
 
     def check_feature_type(self, ds):
         """
@@ -1899,7 +2741,24 @@ class CFBaseCheck(BaseCheck):
 
         The value assigned to the featureType attribute is case-insensitive.
         """
-        pass
+        ret_val = []
+        reasoning=[]
+        feature_list = ['point', 'timeseries','trajectory','profile', 'timeseriesprofile','trajectoryprofile']
+        #from debug import breakpoint
+        #breakpoint(locals(), globals())
+        if getattr(ds.dataset, 'featureType', '').lower() in feature_list:
+            reasoning.append('The featureType is provided and is from the featureType list.')
+            result = Result(BaseCheck.MEDIUM,                            \
+                        True, 'feature_type',  
+                        reasoning)
+            ret_val.append(result)
+        elif getattr(ds.dataset, 'featureType', ''):
+            reasoning.append('The featureType is provided and is not from the featureType list.')
+            result = Result(BaseCheck.MEDIUM, 'feature_type',                            \
+                        False,
+                        reasoning)
+            ret_val.append(result)
+        return ret_val
 
     def check_coordinates_and_metadata(self, ds):
         """
@@ -1910,6 +2769,7 @@ class CFBaseCheck(BaseCheck):
 
         The coordinates attribute must be attached to every data variable to indicate the spatiotemporal coordinate variables
         that are needed to geo-locate the data.
+
 
         Where feasible a variable with the attribute cf_role should be included.  The only acceptable values of cf_role for
         Discrete Geometry CF data sets are timeseries_id, profile_id, and trajectory_id.   The variable carrying the cf_role
@@ -1936,8 +2796,66 @@ class CFBaseCheck(BaseCheck):
         specified in section 4.3.   The use of the attribute axis=Z is recommended for clarity.  A standard_name attribute
         that identifies the vertical coordinate is recommended.
         """
-        pass
+        ret_val = []
+        reasoning = []
 
+        name_list = []
+        non_data_list = []
+        data_list = []
+
+        for name,var in ds.dataset.variables.iteritems():
+
+
+            if var.dimensions and not getattr(var, 'cf_role', ''):
+                if var.dimensions != (name,):
+                    name_list.append(name)
+        for name,var in ds.dataset.variables.iteritems():
+            if getattr(var, 'coordinates', ''):
+                for each in getattr(var, 'coordinates', '').split(' '):
+                    if each in name_list:
+                        non_data_list.append(each)
+        data_list = [each for each in name_list if each not in non_data_list]
+
+
+        
+        for each in data_list:
+            if getattr(ds.dataset.variables[each], 'coordinates', ''):
+                reasoning.append('This data variable has an associated coordinates')
+                result = Result(BaseCheck.MEDIUM,                            \
+                            True,                                       \
+                            ('var', each, 'check_coordinates'), \
+                            reasoning)
+                ret_val.append(result)
+            else:
+                reasoning.append('This variable variable does not have an associated coordinates')
+                result = Result(BaseCheck.MEDIUM,                            \
+                            False,                                       \
+                            ('var', each, 'check_coordinates'), \
+                            reasoning)
+                ret_val.append(result)
+
+        role_list = [getattr(var, 'cf_role', '').split(' ') for name,var in ds.dataset.variables.iteritems() if getattr(var, 'cf_role', '')]
+        single_role = ['timeseries', 'profile', 'trajectory']
+        dual_role = ['timeSeriesProfile', 'trajectoryProfile']
+        if getattr(ds.dataset, 'featureType', '').lower() in single_role and len(role_list[0]) ==1:
+            valid = True
+        elif getattr(ds.dataset, 'featureType', '').lower() in dual_role and len(role_list[0]) ==2:
+            valid = True
+        else:
+            valid = False
+        result = Result(BaseCheck.MEDIUM,                            \
+                valid,                                       \
+                'check_cf_role', \
+                reasoning)
+        ret_val.append(result)
+
+        #from debug import breakpoint
+        #breakpoint(locals(), globals())
+
+
+
+
+        return ret_val
     def check_missing_data(self, ds):
         """
         9.6 Auxiliary coordinate variables (spatial and time) must contain missing values to indicate a void in data storage
@@ -1952,7 +2870,69 @@ class CFBaseCheck(BaseCheck):
         Similarly, for indices where the instance variable identified by cf_role contains a missing value indicator, all other
         instance variable should also contain missing values.
         """
-        pass
+
+
+        ret_val = []
+        
+        
+        name_list = []
+        aux_index_dict = {}
+        index_dict = {}
+        for name, var in ds.dataset.variables.iteritems():
+            name_list.append(name)
+        for name, var in ds.dataset.variables.iteritems():
+            reasoning = []
+            valid = False
+            aux_valid = False
+            
+            
+            for coordinate in getattr(var, 'coordinates', '').split(" "):
+                indices = []
+                if coordinate in name_list and coordinate not in ds.dataset.dimensions:
+                    if getattr(var, '_FillValue', ''):
+                        #print ds.dataset.variables[coordinate][:]
+                        indices = [i for i, x in enumerate(ds.dataset.variables[coordinate][:]) if (x == var._FillValue or x =='--' or x =='NaN')]
+                        aux_index_dict[name+'-'+coordinate] = indices
+                        
+                        
+            for coordinate in getattr(var, 'coordinates', '').split(" "):
+                if coordinate in name_list:
+                    indices = [i for i, x in enumerate(ds.dataset.variables[coordinate][:]) if (x == var._FillValue or x =='--' or x =='NaN')]
+                    index_dict[name+'-'+coordinate] = indices
+                    
+                    
+            if getattr(var, 'coordinates', ''):
+                
+                
+                indices = [i for i, x in enumerate(var[:]) if (var._FillValue in x or '--' in x or 'nan' in x or 'NaN' in x)]
+                index_dict[name+'-'+name] = indices
+                
+                
+            aux_index_list = []
+            for each in aux_index_dict:
+                aux_index_list.append(aux_index_dict[each])  
+            aux_valid = all(x == aux_index_list[0] for x in aux_index_list)
+            
+            
+            index_list = []
+            for each in index_dict:
+                index_list.append(index_dict[each])  
+            valid = all(x == aux_index_list[0] for x in index_list)
+            if aux_index_list == []:
+                valid = True
+                
+            if aux_valid == False:
+                reasoning.append('The auxillary coordinates do not ahve the same missing data locations')
+            if valid == False:
+                reasoning.append('The dimensions variables and/or data variables do not have the same missing data locations as the auxillary coordinates')
+            
+            
+            result = Result(BaseCheck.MEDIUM,                            \
+                valid and aux_valid,                                       \
+                ('var', name, 'missing_data'), \
+                reasoning)
+            ret_val.append(result)
+        return ret_val
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
     @classmethod
