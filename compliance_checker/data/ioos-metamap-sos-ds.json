@@ -15,8 +15,12 @@
     "desc": "The station short name can be a alphanumeric station identifier, or a shorthand description of the station.  There is no corresponding location for the station short name in the GC response"
   }, 
   "__name__": "IOOS", 
-  "Station Location Lat": {
-    "query": "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:gml=\"http://www.opengis.net/gml\">\n<xsl:output method=\"text\" indent=\"no\"/>\n    <xsl:template match=\"/\">\n       <xsl:apply-templates select=\"//gml:pos\" />\n    </xsl:template>\n    <xsl:template match=\"gml:pos\">\n        <xsl:value-of select=\"substring-before(text(), ' ')\" /><xsl:text> </xsl:text><xsl:value-of select=\"substring-before(text(), ' ')\" /> \n    </xsl:template>\n</xsl:stylesheet>", 
+  "Station Location": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:location/gml:Point[@srsName='http://www.opengis.net/def/crs/EPSG/0/4326']/gml:pos",
+    "desc": "Bounds for a network of stations, the point location of single stations, or a list of locations for trajectories "
+  }, 
+  "Network Station Locations*": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/sml:location/gml:Point/gml:pos",
     "desc": "Bounds for a network of stations, the point location of single stations, or a list of locations for trajectories "
   }, 
   "Station WMO ID": {
@@ -26,12 +30,12 @@
   "Sensor IDs*": {
     "query": "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/@gml:id"
   }, 
-  "Station Location Lon": {
-    "query": "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:gml=\"http://www.opengis.net/gml\">\n<xsl:output method=\"text\" indent=\"no\"/>\n    <xsl:template match=\"/\">\n       <xsl:apply-templates select=\"//gml:pos\" />\n    </xsl:template>\n    <xsl:template match=\"gml:pos\">\n        <xsl:value-of select=\"substring-after(text(), ' ')\" /><xsl:text> </xsl:text><xsl:value-of select=\"substring-after(text(), ' ')\" /> \n    </xsl:template>\n</xsl:stylesheet>", 
-    "desc": "Bounds for a network of stations, the point location of single stations, or a list of locations for trajectories "
+  "Platform Sponsor Name": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='sponsor']/sml:Term/sml:value", 
+    "desc": "A person, group, or organization\u2019s full or partial support of an IOOS activity, asset, model, or product."
   }, 
   "Platform Sponsor": {
-    "query": "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='sponsor']/sml:Term/sml:value", 
+    "query": "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='sponsor']/sml:Term/sml:codeSpace[@xlink:href='http://mmisw.org/ont/ioos/platform']", 
     "desc": "A person, group, or organization\u2019s full or partial support of an IOOS activity, asset, model, or product."
   }, 
   "Operator Name": {
@@ -41,18 +45,22 @@
   "Time Period": {
     "query": "/sml:SensorML/sml:member/sml:System/sml:capabilities[@name='observationTimeRange']/swe:DataRecord/swe:field[@name='observationTimeRange']/swe:TimeRange/swe:value"
   }, 
-  "Network ID": {
-    "query": "/sml:SensorML/sml:member/sml:System/sml:capabilities[@name='networkProcedures']/swe:SimpleDataRecord/gml:metaDataProperty/@xlink:href", 
-    "desc": "A unique identifier for a network or collection of stations, specified using a URN following IOOS conventions"
+  "Network Station Times*": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/sml:capabilities[@name='observationTimeRange']/swe:DataRecord/swe:field[@name='observationTimeRange']/swe:TimeRange/swe:value",
+    "desc": "Bounds for a network of stations, the point location of single stations, or a list of locations for trajectories "
   }, 
   "__source_mapping_type__": "SOS: DS", 
   "Sensor Names*": {
     "query": "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/@name"
   }, 
   "Platform Type": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='platformType']/sml:Term/sml:codeSpace[@xlink:href='http://mmisw.org/ont/ioos/platform']", 
+    "desc": "A term describing the type of platform that houses the sensors (e.g. buoy, shore station, etc)"
+  },
+  "Platform Type Name": {
     "query": "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='platformType']/sml:Term/sml:value", 
     "desc": "A term describing the type of platform that houses the sensors (e.g. buoy, shore station, etc)"
-  }, 
+  },
   "Data Format Template Version": {
     "query": "/sml:SensorML/sml:capabilities/swe:SimpleDataRecord/swe:field[@name='ioosTemplateVersion']/swe:Text/swe:value", 
     "desc": "SOS/CF/etc Template Version"
@@ -69,19 +77,80 @@
     "query": "/sml:SensorML/sml:member/sml:System/gml:description"
   }, 
   "Operator Email": {
-    "query": "/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/operator']/sml:ResponsibleParty/sml:contactInfo/address/sml:electronicMailAddress", 
+    "query": "/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/operator']/sml:ResponsibleParty/sml:contactInfo/sml:address/sml:electronicMailAddress", 
     "desc": "The contact information of the platform operator(s). May be the platform owner as well, but an owner role is not currently specified. Contact information about providers of particular datasets from the platform should NOT go here"
   }, 
+  "Operator Country": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/operator']/sml:ResponsibleParty/sml:contactInfo/sml:address/sml:country", 
+    "desc": "The contact information of the platform operator(s). May be the platform owner as well, but an owner role is not currently specified. Contact information about providers of particular datasets from the platform should NOT go here"
+  },  
   "Station Long Name": {
     "query": "/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='longName']/sml:Term/sml:value", 
     "desc": "The station long name is a longer description of the station.  There is no corresponding location for the station long name in the GC response, although it may be similar to the station description in the GC response"
   }, 
   "Station Publisher Email": {
-    "query": "/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/publisher']/sml:ResponsibleParty/sml:contactInfo/address/sml:electronicMailAddress", 
+    "query": "/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/publisher']/sml:ResponsibleParty/sml:contactInfo/sml:address/sml:electronicMailAddress", 
     "desc": "The contact information of the publisher of the data from a particular platform.   This may be the same as the operator, but does not necessarily have to be.  This also may be the same as the service provider in the GC response, but does not necessarily have to be"
   }, 
-  "Operator Sector": {
+  "Station Publisher country": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/publisher']/sml:ResponsibleParty/sml:contactInfo/sml:address/sml:country", 
+    "desc": "The contact information of the publisher of the data from a particular platform.   This may be the same as the operator, but does not necessarily have to be.  This also may be the same as the service provider in the GC response, but does not necessarily have to be"
+  },
+  "Operator Sector Name": {
     "query": "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='operatorSector']/sml:Term/sml:value", 
     "desc": "Societal sector that best describes the platform operator"
+  },
+  "Operator Sector": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='operatorSector']/sml:Term[@definition='http://mmisw.org/ont/ioos/definition/operatorSector']/sml:codeSpace[@xlink:href='http://mmisw.org/ont/ioos/sector']", 
+    "desc": "Societal sector that best describes the platform operator"
+  },
+  "ioosServiceMetadata": {
+    "query": "/sml:SensorML/sml:capabilities[@name='ioosServiceMetadata']/swe:SimpleDataRecord/swe:field[@name='ioosTemplateVersion']/swe:Text/swe:value", 
+    "desc": "SensorML document provides ioosTemplateVersion value"
+  }, 
+  "Epsg": {
+    "query": "/sml:SensorML/sml:member/sml:System/gml:boundedBy/gml:Envelope[@srsName='http://www.opengis.net/def/crs/EPSG/0/4326']", 
+    "desc": "Reference to EPSG::4326"
+  }, 
+  "Network ID": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='networkID']/sml:Term[@definition='http://mmisw.org/ont/ioos/definition/networkID']/sml:value", 
+    "desc": "SensorML document for a network of stations provides valid networkID identifier, and the networkID:"
+  }, 
+  "Short Name": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='shortName']/sml:Term[@definition='http://mmisw.org/ont/ioos/definition/shortName']/sml:value", 
+    "desc": "SensorML document for a network of stations provides valid Short Name identifier, and the Short Name:"
+  }, 
+  "Long Name": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='longName']/sml:Term[@definition='http://mmisw.org/ont/ioos/definition/longName']/sml:value", 
+    "desc": "SensorML document for a network of stations provides valid Long Name identifier, and the Long Name:"
+  }, 
+  "Parent Network": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='parentNetwork']/sml:Term[@definition='http://mmisw.org/ont/ioos/definition/parentNetwork']/sml:codeSpace[@xlink:href='http://mmisw.org/ont/ioos/organization']", 
+    "desc": "SensorML document for a network of stations provides valid Parent Network Classifier, and the Parent Networ:"
+  }, 
+  "Lower Corner": {
+    "query": "/sml:SensorML/sml:member/sml:System/gml:boundedBy/gml:Envelope[@srsName='http://www.opengis.net/def/crs/EPSG/0/4326']/gml:lowerCorner", 
+    "desc": "Reference to EPSG::4326"
+  }, 
+  "Upper Corner": {
+    "query": "/sml:SensorML/sml:member/sml:System/gml:boundedBy/gml:Envelope[@srsName='http://www.opengis.net/def/crs/EPSG/0/4326']/gml:upperCorner", 
+    "desc": "Reference to EPSG::4326"
+  }, 
+  "Components*": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component",
+    "desc": "Bounds for a network of stations, the point location of single stations, or a list of locations for trajectories "
+  }, 
+  "Components Output*": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/sml:outputs/sml:OutputList/sml:output",
+    "desc": "Bounds for a network of stations, the point location of single stations, or a list of locations for trajectories "
+  }, 
+  "Components Quantity*": {
+    "query": "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/sml:outputs/sml:OutputList/sml:output/swe:Quantity",
+    "desc": "Bounds for a network of stations, the point location of single stations, or a list of locations for trajectories "
   }
+
+
+
+
+
 }

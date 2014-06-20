@@ -161,7 +161,6 @@ def check_has(priority=BaseCheck.HIGH):
                 else:
                     ret_val.append(Result(priority, std_check(ds.dogma, l), l))
 
-
             return ret_val
 
         return wraps(func)(_dec)

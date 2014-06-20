@@ -17,8 +17,7 @@ def run_checker(ds_loc, tests_to_run, verbose, dict_of_checks, criteria):
     
     print "Running Compliance Checker on the dataset from: %s" % ds_loc
     tests_sent = [dict_of_checks[t] for t in tests_to_run]
-    fail_flag = cs.run(ds_loc, criteria, tests_to_run, verbose, *tests_sent) #Add more arguements if more checks are added
-    return[fail_flag]
+    pass_fail_flag = cs.run(ds_loc, criteria, tests_to_run, verbose, *tests_sent) #Add more arguements if more checks are added
 
 def main():
     #Dictionary of checks
@@ -43,7 +42,8 @@ def main():
          args.test,
          args.verbose,
          check_dict,
-         args.criteria)
+         args.criteria
+         )
 
 if __name__ == "__main__":
     main()
