@@ -88,7 +88,7 @@ class ACDDBaseCheck(BaseCheck):
 
         if attr_filter is not None:
             attrs = itertools.chain.from_iterable((v.xpath('ncml:attribute[@name="%s"]/@value' % attr_filter, namespaces=ds.dogma._namespaces) or [None] for v in vars))
-            names = (v.attrib.get('name', 'unknown') for v in vars)
+            names = (v.get('name', 'unknown') for v in vars)
 
             attrs = zip(attrs, names)
 
