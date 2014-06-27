@@ -33,7 +33,7 @@ _possiblez = ["depth", "DEPTH",
            "siglay", "SIGLAY",
            "siglev", "SIGLEV",
            "sigma", "SIGMA",
-           "vertical", "VERTICAL",
+           "vertical", "VERTICAL", "lev", "LEV", "level", "LEVEL"
           ]
 _possiblex = ["x", "X",
            "lon", "LON",
@@ -233,7 +233,6 @@ class CFBaseCheck(BaseCheck):
                 # check cell_methods
                 if hasattr(v, 'cell_methods'):
                     try:
-                        print "@TODO PARSE CELL METHODS"
                         cell_methods = parse_cell_methods(v.cell_methods)
                     except:
                         pass
@@ -283,15 +282,17 @@ class CFBaseCheck(BaseCheck):
         total = len(ds.dataset.variables)
 
         for k, v in ds.dataset.variables.iteritems():
-            print v.datatype
             if v.datatype not in [np.character,
                                   np.dtype('b'),
                                   np.dtype('i4'),
                                   np.int32,
                                   np.float32,
-                                  np.double]:
-                fails.append((k, v.datatype))
+                                  np.double,
+                                  'int16',
+                                  'float32'
+                                  ]:
 
+                fails.append(('The variable %s failed because the datatype is %s' %(k, v.datatype)))
         return Result(BaseCheck.HIGH, (total - len(fails), total), msgs=fails)
 
     def check_naming_conventions(self, ds):
@@ -305,9 +306,9 @@ class CFBaseCheck(BaseCheck):
 
         for k, v in ds.dataset.variables.iteritems():
             if not rname.match(k):
-                fails.append(k)
+                fails.append('Variable %s failed because it does not start with a letter, digit, or an underscore' %k)
 
-        return Result(BaseCheck.HIGH, (total - len(fails), total), '2.3 Variable names', fails)
+        return Result(BaseCheck.HIGH, (total - len(fails), total), 'Variable names', fails)
 
     def check_names_unique(self, ds):
         """
@@ -320,8 +321,7 @@ class CFBaseCheck(BaseCheck):
         for k in ds.dataset.variables:
             names[k.lower()] += 1
 
-        fails = [k for k,v in names.iteritems() if v > 1]
-
+        fails = ['Variables are not case sensitive.  Duplicate variables named: %s' %k for k,v in names.iteritems() if v > 1]
         return Result(BaseCheck.LOW, (total - len(fails), total), msgs=fails)
 
     def check_dimension_names(self, ds):
@@ -361,14 +361,14 @@ class CFBaseCheck(BaseCheck):
             nonnones = [i for i, x in enumerate(dclass) if x is not None]
 
             if len(nones) and len(nonnones) and max(nones) > min(nonnones):
-                fails.append((k, "non-space-time dimension after space-time-dimensions"))
+                fails.append("Variable %s has a non-space-time dimension after space-time-dimensions"%k)
 
             # classified ones should be in correct order
             nonnones = [expected.index(x) for x in dclass if x is not None]
             nonnones_sorted = sorted(nonnones)
 
             if nonnones != nonnones_sorted:
-                fails.append((k, "dimensions not in T Z Y X order"))
+                fails.append("The dimensions for %s are not in T Z Y X order"%k)
 
         # there are two checks here per variable so totals must be doubled
         return Result(BaseCheck.LOW, (total*2 - len(fails), total*2), msgs=fails)
@@ -507,35 +507,34 @@ class CFBaseCheck(BaseCheck):
             units = getattr(v, 'units', None)
 
             # 1) "units" attribute must be present
-
             presence = Result(BaseCheck.HIGH, units is not None, ('units', k, 'present'))
-            ret_val.append(presence)
             if not presence.value:
                 presence.msgs = ['units attribute required']
+                ret_val.append(presence)
                 continue
 
             # 2) units attribute must be a string
             astring = Result(BaseCheck.HIGH, isinstance(units, basestring), ('units', k, 'string'))
-            ret_val.append(astring)
             if not astring.value:
                 astring.msgs = ["units not a string (%s)" % type(units)]
+                ret_val.append(astring)
                 continue
 
             # now, units are present and string
             # 3) units are not deprecated
             resdeprecated = Result(BaseCheck.LOW, not units in deprecated, ('units', k, 'deprecated'))
-            ret_val.append(resdeprecated)
             if not resdeprecated.value:
                 resdeprecated.msgs = ['units (%s) is deprecated' % units]
+                ret_val.append(resdeprecated)
                 continue
 
             # 4) units are known
+
             knownu = Result(BaseCheck.HIGH, units_known(units), ('units', k, 'known'))
-            ret_val.append(knownu)
             if not knownu.value:
                 knownu.msgs = ['unknown units type (%s)' % units]
-                continue
-
+                ret_val.append(knownu)
+                #continue
             # units look ok so far, check against standard name / cell methods
             std_name = getattr(v, 'standard_name', None)
             std_name_modifier = None
@@ -543,6 +542,7 @@ class CFBaseCheck(BaseCheck):
             if isinstance(std_name, basestring):
                 if ' ' in std_name:
                     std_name, std_name_modifier = std_name.split(' ', 1)
+
 
             # if no standard name or cell_methods, nothing left to do
             if std_name is None and not hasattr(v, 'cell_methods'):
@@ -557,29 +557,34 @@ class CFBaseCheck(BaseCheck):
                 #@TODO modifiers changes units
                 msgs = []
                 valid = True
-
-                if units.split(" ")[0] in ['day', 'days', 'd', 'hour', 'hours', 'hr', 'hrs', 'h', 'year', 'years', 'minute', 'minutes', 'm', 'min', 'mins', 'second', 'seconds', 's', 'sec', 'secs']:
-                    if units.split(" ")[1] == 'since':
+                if units is not None:
+                    if units.split(" ")[0] in ['day', 'days', 'd', 'hour', 'hours', 'hr', 'hrs', 'h', 'year', 'years', 'minute', 'minutes', 'm', 'min', 'mins', 'second', 'seconds', 's', 'sec', 'secs']:
+                        if len(units.split(" "))>1:
+                            if units.split(" ")[1] == 'since':
+                                std_units = units
+                        else:
+                            std_units = units
+    
+                    if std_units == 'm' and units in ['meter', 'meters']:
                         std_units = units
-
-                if std_units == 'm' and units in ['meter', 'meters']:
-                    std_units = units
-
-                if units != std_units and units not in ['degrees_north', 'degree_N', 'degreeN', 'degreesN', 'degrees_east', 'degree_E', 'degreeE', 'degreesE'] :
-                    msgs = ['units are %s, standard_name units should be %s' % (units, std_units)]
+    
+                    if units != std_units and units not in ['degrees_north', 'degree_N', 'degreeN', 'degreesN', 'degrees_east', 'degree_E', 'degreeE', 'degreesE'] :
+                        msgs = ['units are %s, standard_name units should be %s' % (units, std_units)]
+                        valid = False
+                else:
                     valid = False
-
+                    msgs = ['The unit for variable %s in of type None.'%name]
                 #from debug import breakpoint
                 #breakpoint(locals(), globals())
 
                 ret_val.append(Result(BaseCheck.HIGH, valid, ('units', k, 'standard_name'), msgs))
 
-            # 6) cell methods @TODO
-            if hasattr(v, 'cell_methods'):
-                cell_methods = v.cell_methods
-
-                # placemarker for future check
-                ret_val.append(Result(BaseCheck.HIGH, False, ('units', k, 'cell_methods'), ['TODO: implement cell_methods check']))
+            # 6) cell methods @TODO -> Isnt this in the check_cell_methods section?
+            #if hasattr(v, 'cell_methods'):
+            #    cell_methods = v.cell_methods
+#
+            #    # placemarker for future check
+            #    ret_val.append(Result(BaseCheck.HIGH, False, ('units', k, 'cell_methods'), ['TODO: implement cell_methods check']))
 
         return ret_val
 
@@ -593,6 +598,7 @@ class CFBaseCheck(BaseCheck):
 
         for k, v in ds.dataset.variables.iteritems():
             std_name = getattr(v, 'standard_name', None)
+
             std_name_modifier = None
 
             # no standard name? is ok by the letter of the law
@@ -609,9 +615,9 @@ class CFBaseCheck(BaseCheck):
             in_table = std_name in self._std_names
 
             if not is_str:
-                msgs.append("%s is not a string (%s)" % (std_name, type(std_name)))
+                msgs.append("The standard name '%s' is not of type string.  It is type %s" % (std_name, type(std_name)))
             if not in_table:
-                msgs.append("%s is not in standard name table" % std_name)
+                msgs.append("The standard name '%s' is not in standard name table" % std_name)
 
             ret_val.append(Result(BaseCheck.HIGH, is_str and in_table, ('std_name', k, 'legal'), msgs))
 
@@ -913,16 +919,16 @@ class CFBaseCheck(BaseCheck):
         # 2 - also acceptable units
         # 3 - recommend units
         if not has_units:
-            result = Result(BaseCheck.MEDIUM, (0, 3), (coordinate, name, 'correct_units'))
+            result = Result(BaseCheck.MEDIUM, (0, 3), (coordinate, name, 'correct_units'), ['%s does not have units'%name])
             ret_val.append(result)
         elif has_units and var.units == recommended:
             result = Result(BaseCheck.MEDIUM, (3, 3), (coordinate, name, 'correct_units'))
             ret_val.append(result)
         elif has_units and var.units in acceptable:
-            result = Result(BaseCheck.MEDIUM, (2, 3), (coordinate, name, 'correct_units'))
+            result = Result(BaseCheck.MEDIUM, (2, 3), (coordinate, name, 'correct_units'), ['%s units are acceptable, but not recommended'%name])
             ret_val.append(result)
         else:
-            result = Result(BaseCheck.MEDIUM, (1, 3), (coordinate, name, 'correct_units'))
+            result = Result(BaseCheck.MEDIUM, (1, 3), (coordinate, name, 'correct_units'), ['%s does not have units'%name])
             ret_val.append(result)
         return ret_val
 
@@ -1019,7 +1025,7 @@ class CFBaseCheck(BaseCheck):
                 if not has_units:
                     result = Result(BaseCheck.HIGH, \
                                     False,          \
-                                    ('vertical', k, 'correct_units'))
+                                    ('vertical', k, 'correct_units'),['%s does not have units'%k])
                     ret_val.append(result)
                     continue
 
@@ -1212,11 +1218,11 @@ class CFBaseCheck(BaseCheck):
             if not has_units:
                 result = Result(BaseCheck.HIGH, \
                                 False,          \
-                                ('time', k, 'has_units'))
+                                ('time', k, 'has_units'),['%s does not have the correct units'%k])
                 ret_val.append(result)
                 result = Result(BaseCheck.HIGH, \
                                 False,          \
-                                ('time', k, 'correct_units'))
+                                ('time', k, 'correct_units'),['%s does not have the correct units'%k])
                 ret_val.append(result)
                 continue
             # Correct and identifiable units
@@ -1373,9 +1379,16 @@ class CFBaseCheck(BaseCheck):
                 reasoning = []
                 valid_coordinate = True
                 for dim in var.dimensions:
-                    if dim in _possibleaxis and dim not in ds.dataset.variables:
+                    #print ds.dataset.dimensions[dim]
+                    #from debug import breakpoint
+                    #breakpoint(locals(), globals()) 
+                    if dim not in _possibleaxis:
+                        break
+                    elif dim not in ds.dataset.variables:
                         valid_coordinate = False
                         reasoning.append('%s is not a coordinate variable' % dim)
+
+
                     
                 if valid_coordinate:
                     r = Result(BaseCheck.MEDIUM, \
@@ -1418,7 +1431,7 @@ class CFBaseCheck(BaseCheck):
             for dim in g.dims.iterkeys():
                 if dim not in ds.dataset.variables:
                     valid_2d = False
-                    reasoning.append("Variable %s's dimension, %s, is not a coordinate variable" % (name, dim))
+                    reasoning.append("Variable %s's dimension %s is not a coordinate variable" % (name, dim))
 
             result = Result(BaseCheck.HIGH,                             \
                             valid_dims,                                 \
@@ -1624,10 +1637,10 @@ class CFBaseCheck(BaseCheck):
                                 every_flag = every_flag +1
                         
                         if every_flag == 0:
-                            reasoning.append('Neither of the either/or parameters are present')
+                            reasoning.append('Neither of the "either/or" parameters are present')
                         if every_flag == 2:
                             valid_capping_count = valid_mapping_count - 2
-                            reasoning.append('Both of the either/or parameters are present')
+                            reasoning.append('Both of the "either/or" parameters are present')
                 
                 total_mapping_count = total_mapping_count + len(grid_mapping_dict[mapping][1])
                 for name_again, each_again in ds.dataset.variables.iteritems():
@@ -1813,12 +1826,12 @@ class CFBaseCheck(BaseCheck):
             if getattr(var, 'coordinates', ''):
                 for coordinate in getattr(var, 'coordinates', '').split(' '):
                     if coordinate in ds.dataset.variables and coordinate not in ds.dataset.dimensions:
-                        reasoning.append('The Alternative Coordinate system is not dervied from the Coordinate Variables and is not Dimensionalized by them.')
+                        reasoning.append('The Alternative Coordinate system for variable %s coordinate %s is not derived from the Coordinate Variables and is not Dimensionalized by them.' %(name, coordinate))
                         total_alt_coordinate_var = total_alt_coordinate_var + 1
                         valid_alt_coordinate_var = valid_alt_coordinate_var + 1
                         continue
                     elif coordinate not in ds.dataset.variables:
-                        reasoning.append('The Alternative Coordinate system is dervied from the Coordinate Variables and is Dimensionalized by them.')
+                        reasoning.append('The Alternative Coordinate system for variable %s coordinate %s is derived from the Coordinate Variables and is Dimensionalized by them.' %(name, coordinate))
                         total_alt_coordinate_var = total_alt_coordinate_var + 1
 
 
@@ -1879,12 +1892,22 @@ class CFBaseCheck(BaseCheck):
                 if dim == name:
                     if getattr(var, 'bounds', ''):
                         bounds = getattr(var,'bounds','')
-                        if ds.dataset.variables[bounds].shape[-1] +1 == var.shape[-1]:
+
+
+                        if len(ds.dataset.variables[bounds].shape) == len(var.shape):
+                            last_shape = ds.dataset.variables[bounds].shape[-1]
+                        elif len(ds.dataset.variables[bounds].shape) == len(var.shape)+1:
+                            last_shape = 1
+
+
+                        if ds.dataset.variables[bounds].shape[-1]  == last_shape + 1:
                             valid = True
                             reasoning.append('The shape of the Coordinate Variable is M x N Boundary Variable is M x N+1.')
-                        elif len(ds.dataset.variables[name].shape) + 1 == len(var.shape) and ds.dataset.variables[name].shape[-1] == 1:
+
+                        elif ds.dataset.variables[name].shape == var.shape[0:-1] and last_shape == 1:
                             valid = True
                             reasoning.append('The shape of the Coordinate Variable is M x N Boundary Variable is M x N x 1.')
+
                         else:
                             valid = False
                             reasoning.append('The shape of the Boundary Variable is wrong.')
@@ -1893,6 +1916,7 @@ class CFBaseCheck(BaseCheck):
                                     ('var', name, 'cell_boundaries'), \
                                     reasoning)
                         ret_val.append(result)
+                        reasoning = []
 
 
         return ret_val
@@ -2360,35 +2384,47 @@ class CFBaseCheck(BaseCheck):
         reasoning = []
         names = list(ds.dataset.variables.iterkeys())
         for name, var in ds.dataset.variables.iteritems():
-            if getattr(var, 'add_offset', '') or getattr(var, 'scale_factor', ''):
+            if hasattr(var, 'add_offset') or hasattr(var, 'scale_factor'):
                 valid = False
-                if getattr(var, 'add_offset', '') and getattr(var, 'scale_factor', ''):
+                if hasattr(var, 'add_offset') and hasattr(var, 'scale_factor'):
                     offset = getattr(var, 'add_offset', '')
                     scale = getattr(var, 'scale_factor', '')
-                    if type(ds.dataset.variables[name][0]) == type(scale) == type(offset):
+
+                    data_size = np.s_[ds.dataset.variables[name].size]
+                    data_type_check = np.reshape(ds.dataset.variables[name],data_size)[0]
+                    #, type(ds.dataset.variables[name][0,0,0]) ,type(scale), type(offset)
+                    for x in xrange(data_size):
+                        if type(np.reshape(ds.dataset.variables[name],data_size)[x]) != 'numpy.ma.core.MaskedConstant':
+                            data_type_check = np.reshape(ds.dataset.variables[name],data_size)[x]
+                            break
+                    if type(data_type_check) == type(scale) == type(offset):
                         valid = True
-                        reasoning.append("'add_offset' and 'scale_factor' both exist and match data type to the variable.")
+                        #reasoning.append("'add_offset' and 'scale_factor' both exist and match data type to the variable.")
                         result = Result(BaseCheck.MEDIUM,                            \
                                 valid,                                       \
                                 ('var', name, 'packed_data'), \
                                 reasoning)
-                    elif type(scale) == type(offset) != type(ds.dataset.variables[name][0]):
-                        if type(scale) == type(float()) or type(scale) == type(int()) and str(type(ds.dataset.variables[name][0])) in ["<type 'numpy.int4'>", "<type 'numpy.int8'>", "<type 'numpy.int16'>"]:
+                        reasoning = []
+                    elif type(scale) == type(offset) != type(np.reshape(ds.dataset.variables[name],data_size)[x]):
+                        if type(scale) in [float(), type(np.float32(1.)), int(), type(np.int16(1))]  and (type(np.reshape(ds.dataset.variables[name],data_size)[x])) in [type(np.int8(1)), type(np.int16(1)), int()]:
                            valid = True
-                           reasoning.append("'add_offset' and 'scale_factor' are both of type float or int and the data variable is of type byte, short, or int.")
+                           #reasoning.append("'add_offset' and 'scale_factor' are both of type float or int and the data variable is of type byte, short, or int.")
                            result = Result(BaseCheck.MEDIUM,                            \
                                 valid,                                       \
                                 ('var', name, 'packed_data'), \
                                 reasoning)
                            ret_val.append(result)
+                           reasoning = []
                         else: 
                            valid = False
+
                            reasoning.append("'add_offset' and 'scale_factor' are not of type float or int, or the data variable is not of type byte, short, or int.")
                            result = Result(BaseCheck.MEDIUM,                            \
                                 valid,                                       \
                                 ('var', name, 'packed_data'), \
                                 reasoning)
-                           ret_val.append(result)     
+                           ret_val.append(result) 
+                           reasoning = []    
                     else:
                         valid = False
                         reasoning.append("'add_offset' and 'scale_factor' are not both of type float or int or the data variable is not of type byte, short, or int.")
@@ -2397,6 +2433,7 @@ class CFBaseCheck(BaseCheck):
                                 ('var', name, 'packed_data'), \
                                 reasoning)
                         ret_val.append(result) 
+                        reasoning = []
 
 
 
@@ -2522,7 +2559,9 @@ class CFBaseCheck(BaseCheck):
 
 
         #create shape size tuple
-        if z == '':
+        if x =='' or y == '' or t == '':
+            return
+        elif z == '':
             feature_tuple = (len(ds.dataset.variables[x].shape), len(ds.dataset.variables[y].shape), len(ds.dataset.variables[t].shape))
         else:
             feature_tuple = (len(ds.dataset.variables[x].shape), len(ds.dataset.variables[y].shape), len(ds.dataset.variables[t].shape), len(ds.dataset.variables[z].shape))
@@ -2582,16 +2621,7 @@ class CFBaseCheck(BaseCheck):
         return Result(BaseCheck.HIGH, valid)
         
 
-
-
-
-
-
-
-
-        pass
-
-    #def check_collections_instances_and_elements(self, ds):
+    def check_collections_instances_and_elements(self, ds):
         """
         9.2 The dimension with subscript i identifies a particular feature within a collection of features. It is called the
         instance dimension. One-dimensional variables in a Discrete Geometry CF file, which have only this dimension (such as
@@ -2609,10 +2639,36 @@ class CFBaseCheck(BaseCheck):
         If there is only a single feature to be stored in a data variable, there is no need for an instance dimension and it
         is permitted to omit it. 
         """
+        ret_val = []
+        reasoning = []
 
-        ##There is no test here.  
+        instance_var_length = []
+        instance_var_name = []
 
-        #pass
+        for name,var in ds.dataset.variables.iteritems():
+            #Finds data variables
+            if hasattr(var, 'coordinates') or hasattr(var, 'axis'):
+                if var.shape:
+                    instance_var_length.append(var.shape[0])
+                else:
+                    instance_var_length.append(1)
+                instance_var_name.append(name)
+
+
+        for name,var in ds.dataset.dimensions.iteritems():
+            if len(var) in instance_var_length:
+                instance_var_length.append(len(var))
+                instance_var_name.append(name)
+
+        valid = all(x == instance_var_length[0] for x in instance_var_length)
+        retval = Result(BaseCheck.LOW, valid)
+        if valid == False:
+            retval.msgs = ['Not every dimension is an instance Dimension.']
+
+        return retval
+
+
+        pass
 
     def check_orthogonal_multidim_array(self, ds):
         """
@@ -2668,7 +2724,7 @@ class CFBaseCheck(BaseCheck):
                                 reasoning)
                         ret_val.append(result)
                     else:
-                        pass
+                        return []
 
         return ret_val
         
@@ -2694,13 +2750,14 @@ class CFBaseCheck(BaseCheck):
         reasoning = []
         for name,var in ds.dataset.variables.iteritems():
             if getattr(var,'count_variable',''):
+                reasoning.append('The count_variable is present, therefore the data is a contiguous ragged array.')
                 result = Result(BaseCheck.MEDIUM,                            \
                         True,                                       \
                         ('var', name, 'continuous_ragged'), \
                         reasoning)
                 ret_val.append(result)
             else:
-                pass
+                return []
 
         return ret_val
 
@@ -2724,13 +2781,14 @@ class CFBaseCheck(BaseCheck):
         reasoning = []
         for name,var in ds.dataset.variables.iteritems():
             if getattr(var,'index_variable',''):
+                reasoning.append('The index_variable is present, therefore the data is an indexed ragged array.')
                 result = Result(BaseCheck.MEDIUM,                            \
                         True,                                       \
                         ('var', name, 'continuous_ragged'), \
                         reasoning)
                 ret_val.append(result)
             else:
-                pass
+                return []
 
         return ret_val
 
@@ -2806,56 +2864,60 @@ class CFBaseCheck(BaseCheck):
         for name,var in ds.dataset.variables.iteritems():
 
 
-            if var.dimensions and not getattr(var, 'cf_role', ''):
+            if var.dimensions and not hasattr(var, 'cf_role'):
                 if var.dimensions != (name,):
                     name_list.append(name)
+
         for name,var in ds.dataset.variables.iteritems():
-            if getattr(var, 'coordinates', ''):
+            if hasattr(var, 'coordinates'):
                 for each in getattr(var, 'coordinates', '').split(' '):
                     if each in name_list:
                         non_data_list.append(each)
+
         data_list = [each for each in name_list if each not in non_data_list]
 
 
-        
         for each in data_list:
             if getattr(ds.dataset.variables[each], 'coordinates', ''):
-                reasoning.append('This data variable has an associated coordinates')
+                reasoning.append('The data variable %s has associated coordinates' %each)
                 result = Result(BaseCheck.MEDIUM,                            \
                             True,                                       \
                             ('var', each, 'check_coordinates'), \
                             reasoning)
                 ret_val.append(result)
+                reasoning = []
             else:
-                reasoning.append('This variable variable does not have an associated coordinates')
+                reasoning.append('The variable %s does not have associated coordinates' %each)
                 result = Result(BaseCheck.MEDIUM,                            \
                             False,                                       \
                             ('var', each, 'check_coordinates'), \
                             reasoning)
                 ret_val.append(result)
+                reasoning = []
 
-        role_list = [getattr(var, 'cf_role', '').split(' ') for name,var in ds.dataset.variables.iteritems() if getattr(var, 'cf_role', '')]
+        role_list = [getattr(var, 'cf_role', '').split(' ') for name,var in ds.dataset.variables.iteritems() if hasattr(var, 'cf_role')]
         single_role = ['timeseries', 'profile', 'trajectory']
-        dual_role = ['timeSeriesProfile', 'trajectoryProfile']
-        if getattr(ds.dataset, 'featureType', '').lower() in single_role and len(role_list[0]) ==1:
+        dual_role = ['timeseries', 'profile', 'trajectory','timeSeriesProfile', 'trajectoryProfile']
+        if getattr(ds.dataset, 'featureType', '').lower() in single_role and len(np.ravel(role_list)) == 1:
+            reasoning = []
             valid = True
-        elif getattr(ds.dataset, 'featureType', '').lower() in dual_role and len(role_list[0]) ==2:
+        elif getattr(ds.dataset, 'featureType', '').lower() in dual_role and len(np.ravel(role_list)) in [1,2]:
+            reasoning = []
             valid = True
         else:
             valid = False
+            reasoning = []
+            reasoning.append('The cf_role featureType is not properly defined.')
+
         result = Result(BaseCheck.MEDIUM,                            \
                 valid,                                       \
                 'check_cf_role', \
                 reasoning)
         ret_val.append(result)
 
-        #from debug import breakpoint
-        #breakpoint(locals(), globals())
-
-
-
-
         return ret_val
+
+
     def check_missing_data(self, ds):
         """
         9.6 Auxiliary coordinate variables (spatial and time) must contain missing values to indicate a void in data storage
@@ -2889,40 +2951,68 @@ class CFBaseCheck(BaseCheck):
             for coordinate in getattr(var, 'coordinates', '').split(" "):
                 indices = []
                 if coordinate in name_list and coordinate not in ds.dataset.dimensions:
-                    if getattr(var, '_FillValue', ''):
-                        #print ds.dataset.variables[coordinate][:]
-                        indices = [i for i, x in enumerate(ds.dataset.variables[coordinate][:]) if (x == var._FillValue or x =='--' or x =='NaN')]
+                    if hasattr(ds.dataset.variables[coordinate], '_FillValue'):
+                        if len(ds.dataset.variables[coordinate][:].shape) == 1 and ds.dataset.variables[coordinate][:].size > 1:
+                            indices = [i for i, x in enumerate(ds.dataset.variables[coordinate][:]) if (x == var._FillValue or x =='--' or x =='NaN')]
+                        elif ds.dataset.variables[coordinate][:].size == 1:
+                            if np.float(ds.dataset.variables[coordinate][:]) in [np.float(ds.dataset.variables[coordinate]._FillValue), '--','NaN']:
+                                index = [1]
+
                         aux_index_dict[name+'-'+coordinate] = indices
                         
                         
             for coordinate in getattr(var, 'coordinates', '').split(" "):
                 if coordinate in name_list:
-                    indices = [i for i, x in enumerate(ds.dataset.variables[coordinate][:]) if (x == var._FillValue or x =='--' or x =='NaN')]
-                    index_dict[name+'-'+coordinate] = indices
+                    if hasattr(ds.dataset.variables[coordinate], '_FillValue'):
+                        if len(ds.dataset.variables[coordinate][:].shape) == 1 and ds.dataset.variables[coordinate][:].size > 1:
+                            indices = [i for i, x in enumerate(ds.dataset.variables[coordinate][:]) if (x == var._FillValue or x =='--' or x =='NaN')]
+                        elif ds.dataset.variables[coordinate][:].size == 1:
+                            if np.float(ds.dataset.variables[coordinate][:]) in [np.float(ds.dataset.variables[coordinate]._FillValue), '--','NaN']:
+                                index = [1]
+                        index_dict[name+'-'+coordinate] = indices
                     
-                    
-            if getattr(var, 'coordinates', ''):
-                
-                
-                indices = [i for i, x in enumerate(var[:]) if (var._FillValue in x or '--' in x or 'nan' in x or 'NaN' in x)]
+            for coordinate in getattr(var, 'coordinates', '').split(" "):
+                if hasattr(var, 'coordinates') and hasattr(var, '_FillValue'):
+                    try:
+                        if len(ds.dataset.variables[coordinate][:].shape) == 1 and ds.dataset.variables[coordinate][:].size > 1:
+                            indices = [i for i, x in enumerate(var[:]) if (var._FillValue == x or '--' == x or 'nan' == x or 'NaN' == x)]
+                        elif ds.dataset.variables[coordinate][:].size == 1:
+                            index = [i for i, x in enumerate(var[:]) if np.float(x) in [np.float(var._FillValue), '--','NaN']]
+                        result = Result(BaseCheck.MEDIUM,                            \
+                            True,                                       \
+                            ('var', name, 'valid_coordinate_attibute'), \
+                            [])
+                        ret_val.append(result)
+                    except:
+                        result = Result(BaseCheck.MEDIUM,                            \
+                            False,                                       \
+                            ('var', name, 'valid_coordinate_attibute'), \
+                            ["The coordinate attribute is improperly defined with the coordinate %s , which does not exist"%coordinate])
+                        ret_val.append(result)
+
                 index_dict[name+'-'+name] = indices
                 
                 
             aux_index_list = []
             for each in aux_index_dict:
-                aux_index_list.append(aux_index_dict[each])  
-            aux_valid = all(x == aux_index_list[0] for x in aux_index_list)
+                aux_index_list.append(aux_index_dict[each])
+            if aux_index_list != []:  
+                aux_valid = all(x == aux_index_list[0] for x in aux_index_list)
+            else: 
+                aux_valid = True
             
             
             index_list = []
             for each in index_dict:
                 index_list.append(index_dict[each])  
-            valid = all(x == aux_index_list[0] for x in index_list)
-            if aux_index_list == []:
-                valid = True
+            if index_list != [] and aux_index_list != []:
+                valid = all(x == aux_index_list[0] for x in index_list)
+            else:
+                valid = aux_valid
+
                 
             if aux_valid == False:
-                reasoning.append('The auxillary coordinates do not ahve the same missing data locations')
+                reasoning.append('The auxillary coordinates do not have the same missing data locations')
             if valid == False:
                 reasoning.append('The dimensions variables and/or data variables do not have the same missing data locations as the auxillary coordinates')
             
