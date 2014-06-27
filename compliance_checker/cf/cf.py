@@ -418,8 +418,6 @@ class CFBaseCheck(BaseCheck):
         """
         2.6.1 the NUG defined global attribute Conventions to the string value "CF-1.6"
         """
-        #from debug import breakpoint
-        #breakpoint(locals(), globals())
         if hasattr(ds.dataset, 'Conventions'):
             if getattr(ds.dataset, 'Conventions', '') == 'CF-1.6':
                 valid = True
@@ -574,8 +572,6 @@ class CFBaseCheck(BaseCheck):
                 else:
                     valid = False
                     msgs = ['The unit for variable %s in of type None.'%name]
-                #from debug import breakpoint
-                #breakpoint(locals(), globals())
 
                 ret_val.append(Result(BaseCheck.HIGH, valid, ('units', k, 'standard_name'), msgs))
 
@@ -1379,9 +1375,6 @@ class CFBaseCheck(BaseCheck):
                 reasoning = []
                 valid_coordinate = True
                 for dim in var.dimensions:
-                    #print ds.dataset.dimensions[dim]
-                    #from debug import breakpoint
-                    #breakpoint(locals(), globals()) 
                     if dim not in _possibleaxis:
                         break
                     elif dim not in ds.dataset.variables:
@@ -1546,6 +1539,22 @@ class CFBaseCheck(BaseCheck):
         
         return ret_val
 
+    # grid mapping dictionary, appendix F
+    grid_mapping_dict = {
+        'albers_conical_equal_area': [('longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+        'azimuthal_equidistant': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+        'lambert_cylindrical_equal_area': [('longitude_of_central_meridian', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel','scale_factor_at_projection_origin')],
+        'lambert_azimuthal_equal_area': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+        'lambert_conformal_conic': [('standard_parallel', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+        'latitude_longitude': [(),(),('longitude', 'latitude')],
+        'mercator': [('longitude_of_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate','projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
+        'orthographic': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+        'polar_stereographic': [('straight_vertical_longitude_from_pole', 'latitude_of_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
+        'rotated_latitude_longitude': [('grid_north_pole_latitude', 'grid_north_pole_longitude'),('north_pole_grid_longitude'),('grid_latitude', 'grid_longitude')],
+        'stereographic':[('longitude_of_projection_origin', 'latitude_of_projection_origin', 'scale_factor_at_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate', 'projection_y_coordinate')],
+        'transverse_mercator': [('scale_factor_at_central_meridian', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
+        'vertical_perspective': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'perspective_point_height', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')]
+    }
 
 
     def check_horz_crs_grid_mappings_projections(self, ds):
@@ -1587,21 +1596,6 @@ class CFBaseCheck(BaseCheck):
         """ 
         
         
-        grid_mapping_dict = {
-                             'albers_conical_equal_area': [('longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                             'azimuthal_equidistant': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                             'lambert_cylindrical_equal_area': [('longitude_of_central_meridian', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel','scale_factor_at_projection_origin')],
-                             'lambert_azimuthal_equal_area': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                             'lambert_conformal_conic': [('standard_parallel', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                             'latitude_longitude': [(),(),('longitude', 'latitude')],
-                             'mercator': [('longitude_of_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate','projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
-                             'orthographic': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                             'polar_stereographic': [('straight_vertical_longitude_from_pole', 'latitude_of_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
-                             'rotated_latitude_longitude': [('grid_north_pole_latitude', 'grid_north_pole_longitude'),('north_pole_grid_longitude'),('grid_latitude', 'grid_longitude')],
-                             'stereographic':[('longitude_of_projection_origin', 'latitude_of_projection_origin', 'scale_factor_at_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate', 'projection_y_coordinate')],
-                             'transverse_mercator': [('scale_factor_at_central_meridian', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                             'vertical_perspective': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'perspective_point_height', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')]
-                             }
         ret_val = []
         reasoning = []
         valid_mapping_count = 0
@@ -1614,21 +1608,21 @@ class CFBaseCheck(BaseCheck):
                 total_mapping_count = 1
                 
                 mapping = getattr(var, 'grid_mapping_name', '')
-                if mapping in grid_mapping_dict.iterkeys():
+                if mapping in self.grid_mapping_dict.iterkeys():
                     valid_mapping_count = valid_mapping_count +1
                 else:
                     reasoning.append('The grid_mapping_name attribute is not an accepted value.  See Appendix F.')
                     
                     
-                for each in grid_mapping_dict[mapping][0]:
+                for each in self.grid_mapping_dict[mapping][0]:
                     total_mapping_count = total_mapping_count + 1
                     if each in dir(var):
                         valid_capping_count = valid_mapping_count +1
                     else:
                         reasoning.append('The map parameters are not accepted values.  See Appendix F.')
                 
-                if len(grid_mapping_dict[mapping]) >=4:
-                    for each in grid_mapping_dict[mapping][3:]:
+                if len(self.grid_mapping_dict[mapping]) >=4:
+                    for each in self.grid_mapping_dict[mapping][3:]:
                         every_flag = 0
                         total_mapping_count = total_mapping_count + 1
                         for every in each:
@@ -1642,9 +1636,9 @@ class CFBaseCheck(BaseCheck):
                             valid_capping_count = valid_mapping_count - 2
                             reasoning.append('Both of the "either/or" parameters are present')
                 
-                total_mapping_count = total_mapping_count + len(grid_mapping_dict[mapping][1])
+                total_mapping_count = total_mapping_count + len(self.grid_mapping_dict[mapping][1])
                 for name_again, each_again in ds.dataset.variables.iteritems():
-                    if name_again in grid_mapping_dict[mapping][1]:
+                    if name_again in self.grid_mapping_dict[mapping][1]:
                         valid_mapping_count = valid_mapping_count + 1
                 
                 result = Result(BaseCheck.MEDIUM,                            \
@@ -2502,32 +2496,16 @@ class CFBaseCheck(BaseCheck):
         y = ''
         z = ''
         t = ''
-        
-        grid_mapping_dict = {
-                                     'albers_conical_equal_area': [('longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                                     'azimuthal_equidistant': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                                     'lambert_cylindrical_equal_area': [('longitude_of_central_meridian', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel','scale_factor_at_projection_origin')],
-                                     'lambert_azimuthal_equal_area': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                                     'lambert_conformal_conic': [('standard_parallel', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                                     'latitude_longitude': [(),(),('longitude', 'latitude')],
-                                     'mercator': [('longitude_of_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate','projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
-                                     'orthographic': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                                     'polar_stereographic': [('straight_vertical_longitude_from_pole', 'latitude_of_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
-                                     'rotated_latitude_longitude': [('grid_north_pole_latitude', 'grid_north_pole_longitude'),('north_pole_grid_longitude'),('grid_latitude', 'grid_longitude')],
-                                     'stereographic':[('longitude_of_projection_origin', 'latitude_of_projection_origin', 'scale_factor_at_projection_origin', 'false_easting', 'false_northing'),(),('projection_x_coordinate', 'projection_y_coordinate')],
-                                     'transverse_mercator': [('scale_factor_at_central_meridian', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-                                     'vertical_perspective': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'perspective_point_height', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')]
-                                     }
-            
+
         flag = 0    
         for name,var in ds.dataset.variables.iteritems():
             if getattr(var,"grid_mapping_name", ""):
                 #DO GRIDMAPPING CHECKS FOR X,Y,Z,T
                 flag = 1
                 for name_again, var_again in ds.dataset.variables.iteritems():
-                    if getattr(var_again,"standard_name","") == grid_mapping_dict[getattr(var,"grid_mapping_name", "")][2][0]:
+                    if getattr(var_again,"standard_name","") == self.grid_mapping_dict[getattr(var,"grid_mapping_name", "")][2][0]:
                         x = name_again
-                    if getattr(var_again,"standard_name","") == grid_mapping_dict[getattr(var,"grid_mapping_name", "")][2][1]:
+                    if getattr(var_again,"standard_name","") == self.grid_mapping_dict[getattr(var,"grid_mapping_name", "")][2][1]:
                         y = name_again
         
                         
@@ -2802,8 +2780,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         reasoning=[]
         feature_list = ['point', 'timeseries','trajectory','profile', 'timeseriesprofile','trajectoryprofile']
-        #from debug import breakpoint
-        #breakpoint(locals(), globals())
+
         if getattr(ds.dataset, 'featureType', '').lower() in feature_list:
             reasoning.append('The featureType is provided and is from the featureType list.')
             result = Result(BaseCheck.MEDIUM,                            \
