@@ -11,6 +11,7 @@ from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from urlparse import urlparse
 import requests
+import textwrap
 
 class CheckSuite(object):
 
@@ -69,7 +70,6 @@ class CheckSuite(object):
         """
 
         ret_val      = {}
-        check_number = 0
         fail_flag    = False
 
         checkers     = self._get_valid_checkers(ds, checker_names)
@@ -91,18 +91,25 @@ class CheckSuite(object):
 
         return ret_val
 
-    def standard_output(self, criteria, check_name, groups):
-        '''
+    def passtree(self, groups, limit):
+        for r in groups:
+            if r.children:
+                x = passtree(r.children, limit)
+                if r.weight >= limit and x == False:
+                    return False
+
+            if r.weight >= limit and r.value[0] != r.value[1]:
+                return False
+
+        return True
+
+    def standard_output(self, limit, check_name, groups):
+        """
         Generates the Terminal Output for Standard cases
 
         Returns the dataset needed for the verbose output, as well as the failure flags.
-        '''
-        if criteria == 'normal':
-            limit = 2
-        elif criteria == 'strict':
-            limit = 1
-        elif criteria == 'lenient':
-            limit = 3
+        """
+
 
         score_list = []
         score_only_list= []
@@ -122,54 +129,91 @@ class CheckSuite(object):
 
         fail_flag = 0
 
+        fail_flag = limit
+        print '\n'
+        print "-"*80
+        print '{:^80}'.format("The dataset scored %r out of %r points" % (points, out_of))
+        print '{:^80}'.format("during the %s check" % check_name)
+        print "-"*80
+
+        return  [score_list, points, out_of]
+
+    def non_verbose_output_generation(self, score_list, limit, points, out_of):
+
         if points < out_of:
-            fail_flag = limit
+            print '{:^80}'.format("Scoring Breakdown:")
             print '\n'
-            print "-"*55
-            print "   The dataset scored %r out of %r required points" % (points, out_of)
-            print "            during the %s check" % check_name
-            print "      This test has passed under %s critera" % criteria
-            print "-"*55
-        return [score_list, fail_flag, limit]
+            priority_flag = 3
+            for x in range(len(score_list)):
+                if score_list[x][1] == 3 and limit <= 3 :
+                    if priority_flag ==3:
+                        print '{:^80}'.format("High Priority")
+                        print "-"*80
+                        print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                        priority_flag -= 1
+                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
+                
+                elif score_list[x][1] == 2 and limit <= 2 :
+                    if priority_flag ==2:
+                        print '\n'
+                        print '{:^80}'.format("Medium Priority")
+                        print "-"*80
+                        print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                        priority_flag -= 1
+                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
+                    
+                elif score_list[x][1] == 1 and limit == 1 :
+                    if priority_flag ==1:
+                        print '\n'
+                        print '{:^80}'.format("Low Priority")
+                        print "-"*80
+                        print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                        priority_flag -= 1
+                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
+                    
+                elif score_list[x][1] == 1 and limit == 1 and priority_flag == 2:
+                    print '{:^80}'.format('No medium priority tests present')
+                    print '-'*80
+                    priority_flag -= 1
+            #Catch All for pretty presentation
+            if priority_flag == 2 and limit == 2:
+                print '{:^80}'.format('No Medium priority tests present')
+                print '-'*80
+
+            if priority_flag == 2 and limit == 1:
+                print '{:^80}'.format('No Medium priority tests present')
+                print '-'*80
+                print ''
+                print '{:^80}'.format('No Low priority tests present')
+                print '-'*80
+
+            if priority_flag == 1 and limit == 1:
+                print '{:^80}'.format('No Low priority tests present')
+                print '-'*80
+        else: 
+            print "All tests passed!"
 
 
-    def verbose_output_generation(self, groups, verbose, score_list, limit):
+
+    def verbose_output_generation(self, groups, limit, points, out_of):
         '''
         Generates the Terminal Output for Verbose cases
         '''
-        sub_tests = []
-        if verbose == 1:
-            print "\n"+"-"*55
-            print "The following tests failed:" 
-            priority_flag = 3
-
-            for x in range(len(score_list)):
-                if score_list[x][1] == 3 and limit <= 3 and priority_flag == 3:
-                    print '----High priority tests failed-----'
-                    print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
-                    priority_flag -= 1
-                elif score_list[x][1] == 2 and limit <= 2 and priority_flag == 2:
-                    print '----Medium priority tests failed-----'
-                    print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
-                    priority_flag -=1
-                elif score_list[x][1] == 1 and limit <= 1 and priority_flag == 1:
-                    print '----Low priority tests failed-----'
-                    print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
-                    priority_flag -= 1
-                if score_list[x][2][0] < score_list[x][2][1] and score_list[x][1] >= limit:
-                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
-
-        if verbose >= 2:
-            print "Summary of all the checks performed:" 
-            
-            priority_flag = 3
-
-            self.print_routine(groups, 0, verbose, priority_flag)
+        priority_flag = 3
+        print '{:^80}'.format("Verbose Scoring Breakdown:"),
+        self.print_routine(groups, 0, priority_flag)
+        if points < out_of:
+            print "\n"+"\n"+'-'*80
+            print '{:^80}'.format('Reasoning for the failed tests given below:')
+            print '\n'
+            print '%s%37s:%10s:%8s' % ('Name','Priority', '  Score', 'Reasoning')
+            print "-"*80
+            self.reasoning_routine(groups, 0)
 
         pass
 
 
-    def print_routine(self, list_of_results, indent, verbose, priority_flag):
+    def print_routine(self, list_of_results, indent, priority_flag):
         """
         print routine performed
         """
@@ -183,32 +227,64 @@ class CheckSuite(object):
         grouped_sorted = []
         grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)
 
-
-        #Loop over inoput
+        #Loop over input
         for res in grouped_sorted:
             #If statements to print the proper Headings
             if res.weight == 3 and indent == 0 and priority_flag == 3:
-                print "\nHigh Priority"
-                print "-------------"
+                print '\n'
+                print '{:^80}'.format("High Priority")
+                print "-"*80
                 print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
 
                 priority_flag -= 1
             if res.weight == 2 and indent == 0 and priority_flag == 2:
-                print "\nMedium Priority"
-                print "---------------"
+                print '\n'
+                print '{:^80}'.format("Medium Priority")
+                print "-"*80
                 print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
 
                 priority_flag -= 1
             if res.weight ==1 and indent ==0 and priority_flag == 1:
-                print "\nLow Priority"
-                print "------------"
+                print '\n'
+                print '{:^80}'.format("Low Priority")
+                print "-"*80
                 print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
                 priority_flag -= 1
 
 
-            print '%-40s:%s:%6s/%1s' % (indent*'    '+res.name, res.weight, res.value[0], res.value[1])
-            if res.children and verbose >1:
-                self.print_routine(res.children, indent+1, verbose-1, priority_flag)
+            print '%-40s:%s:%s%6s/%1s' % ((indent*'    '+res.name)[0:39], res.weight, indent*'  ', res.value[0], res.value[1])
+            if res.children:
+                self.print_routine(res.children, indent+1, priority_flag)
+
+
+    def reasoning_routine(self, list_of_results, indent, line = True):
+        """
+        print routine performed
+        """
+        def weight_func(r):
+            """
+            Function that returns the weight, used for sorting by priority
+            """
+            return r.weight
+
+        #Sorting method used to properly sort the output by priority.
+        grouped_sorted = []
+        grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)
+
+        wrapper = textwrap.TextWrapper(initial_indent = '', width = 80, subsequent_indent = ' '*54)
+        for res in grouped_sorted:
+            if (res.value[0] != res.value[1]) and not res.msgs:
+                print '%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), ' ')
+            
+            if (res.value[0] != res.value[1]) and res.msgs:
+                print wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), str(res.msgs)))
+
+            if res.children:
+                self.reasoning_routine(res.children, indent+1, False)
+
+            if line and (res.value[0] != res.value[1]):
+                print '-'*80
+
 
 
     def load_dataset(self, ds_str):

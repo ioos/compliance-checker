@@ -38,15 +38,21 @@ class ComplianceChecker(object):
         ds = cs.load_dataset(ds_loc)
         score_groups = cs.run(ds, *checker_names)
 
+        if criteria == 'normal':
+            limit = 2
+        elif criteria == 'strict':
+            limit = 1
+        elif criteria == 'lenient':
+            limit = 3
+
         #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
         # @TODO cleanup
         for check_name, groups in score_groups.iteritems():
-            score_list, fail_flag, limit = cs.standard_output(criteria, check_name, groups)
+            score_list, check_number, points, out_of = cs.standard_output(limit, check_name, groups)
+            if not verbose:
+                cs.non_verbose_output_generation(score_list, limit, points, out_of)
+            else:
+                cs.verbose_output_generation(groups, limit, points, out_of)
 
-            if not fail_flag:
-                retval = False
+        return cs.passtree(groups, limit)
 
-            if verbose:
-                cs.verbose_output_generation(groups, verbose, score_list, limit)
-
-        return retval
