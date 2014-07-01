@@ -91,10 +91,11 @@ class CheckSuite(object):
 
         return ret_val
 
-    def passtree(self, groups, limit):
+    @classmethod
+    def passtree(cls, groups, limit):
         for r in groups:
             if r.children:
-                x = passtree(r.children, limit)
+                x = cls.passtree(r.children, limit)
                 if r.weight >= limit and x == False:
                     return False
 

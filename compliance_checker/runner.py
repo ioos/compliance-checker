@@ -48,7 +48,7 @@ class ComplianceChecker(object):
         #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
         # @TODO cleanup
         for check_name, groups in score_groups.iteritems():
-            score_list, check_number, points, out_of = cs.standard_output(limit, check_name, groups)
+            score_list, points, out_of = cs.standard_output(limit, check_name, groups)
             if not verbose:
                 cs.non_verbose_output_generation(score_list, limit, points, out_of)
             else:
