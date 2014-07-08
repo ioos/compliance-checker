@@ -283,6 +283,7 @@ class CFBaseCheck(BaseCheck):
 
         for k, v in ds.dataset.variables.iteritems():
             if v.datatype not in [np.character,
+                                  np.dtype('c'),
                                   np.dtype('b'),
                                   np.dtype('i4'),
                                   np.int32,
