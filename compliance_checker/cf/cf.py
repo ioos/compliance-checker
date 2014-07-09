@@ -2915,16 +2915,12 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         
         
-        name_list = []
-        dim_list = []
+        name_list = ds.dataset.variables.keys()
+        dim_list = ds.dataset.dimensions.keys()
 
         aux_index_dict = {}
         dim_index_dict = {}
 
-        for name, var in ds.dataset.variables.iteritems():
-            name_list.append(name)
-        for name, var in ds.dataset.dimensions.iteritems():
-            dim_list.append(name)
 
         for name, var in ds.dataset.variables.iteritems():
             reasoning = []
