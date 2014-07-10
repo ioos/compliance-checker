@@ -2930,27 +2930,20 @@ class CFBaseCheck(BaseCheck):
             if hasattr(var, 'coordinates'):
                 for coordinate in getattr(var, 'coordinates', '').split(" "):
                     indices = []
-                    #Finds Auxillary Coordinate Variable
                     if coordinate in name_list and coordinate not in dim_list:
-                        #Find if the Auxiliary Coordinate Variable is a single dimension non-scalar 
-                        #TODO: Multi-Dimension Auxiliary Coordinate Variable
-                        if len(ds.dataset.variables[coordinate][:].shape) == 1 and ds.dataset.variables[coordinate][:].size > 1:
-                            indices = [i for i, x in enumerate(ds.dataset.variables[coordinate][:]) if (x == var._FillValue or x =='--' or x =='NaN')]
-                        elif ds.dataset.variables[coordinate][:].size == 1:
-                            if np.float(ds.dataset.variables[coordinate][:]) in [np.float(ds.dataset.variables[coordinate]._FillValue), '--','NaN']:
-                                indices = []
+                        try:
+                            indices = np.where(ds.dataset.variables[coordinate] == var._FillValue).tolist()
+                        except:
+                            indices = np.where(ds.dataset.variables[coordinate] == var._FillValue)[0].tolist()
 
                         dim_index_dict[name+'-'+coordinate] = indices
                         aux_index_dict[name+'-'+coordinate] = indices
                             
                     elif coordinate in name_list and coordinate in dim_list:
-                        #Find if the Coordinate Variable is a single dimension non-scalar 
-                        #TODO: Multi-Dimension Coordinate Variable
-                        if len(ds.dataset.variables[coordinate][:].shape) == 1 and ds.dataset.variables[coordinate][:].size > 1:
-                            indices = [i for i, x in enumerate(ds.dataset.variables[coordinate][:]) if (x == var._FillValue or x =='--' or x =='NaN')]
-                        elif ds.dataset.variables[coordinate][:].size == 1:
-                            if np.float(ds.dataset.variables[coordinate][:]) in [np.float(ds.dataset.variables[coordinate]._FillValue), '--','NaN']:
-                                indices = []
+                        try:
+                            indices = np.where(ds.dataset.variables[coordinate] == var._FillValue).tolist()
+                        except:
+                            indices = np.where(ds.dataset.variables[coordinate] == var._FillValue)[0].tolist()
                         dim_index_dict[name+'-'+coordinate] = indices
                     else:
                         dim_index_dict[name+'-'+coordinate] = []
@@ -2980,13 +2973,15 @@ class CFBaseCheck(BaseCheck):
             if valid == False:
                 reasoning.append('The coordinate variables do not have the same missing data locations as the auxillary coordinates')
             
-
             #Check to see that all coordinate variable mising data is reflceted in the dataset
             valid_missing = True
             count = 0
 
             if hasattr(var, '_FillValue'):
-                x_indices = np.where(var==var._FillValue)
+                try:
+                    x_indices = np.where(var==var._FillValue).tolist()
+                except:
+                    x_indices = np.where(var==var._FillValue)[0].tolist()
                 for coordinate in getattr(var,'coordinates').split(" "):
                     coordinate_ind_list = dim_index_dict[name+'-'+coordinate]
                     valid_missing = all(each in x_indices[count] for each in coordinate_ind_list)
