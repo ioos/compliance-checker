@@ -1456,63 +1456,68 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         for name,var in ds.dataset.variables.iteritems():
             g = NCGraph(ds.dataset, name, var)
-            if len(g.coords) != 2:
-                continue # Not a 2d horizontal grid
-            
-            #------------------------------------------------------------
-            # Check all the dims are coordinate variables
-            #------------------------------------------------------------
-            valid_dims = True
-            reasoning = []
-            for dim in g.dims.iterkeys():
-                if dim not in ds.dataset.variables:
-                    valid_2d = False
-                    reasoning.append("Variable %s's dimension %s is not a coordinate variable" % (name, dim))
+            #Determine if 2-D coordinate variables (Lat and Lon are of shape (i,j)
+            for each in g.coords:
+                valid = g.coords[each].ndim == 2
 
-            result = Result(BaseCheck.HIGH,                             \
-                            valid_dims,                                 \
-                            ('var', name, '2d_hgrid_valid_dimensions'), \
-                            reasoning)
-            ret_val.append(result)
-            
-            #------------------------------------------------------------
-            # Check that the coordinates are correct
-            #------------------------------------------------------------
-            valid_2d = True
-            reasoning = []
-            for cname, coord in g.coords.iteritems():
-                if coord is None:
-                    valid_2d = False
-                    reasoning.append("Variable %s's coordinate, %s, is not a coordinate or auxiliary variable" %(name, cname))
-                    continue
-                for dim in coord.dims.iterkeys():
-                    if dim not in g.dims:
+            if len(g.coords) == 2 and valid:
+                #------------------------------------------------------------
+                # Check all the dims are coordinate variables
+                #------------------------------------------------------------
+                valid_dims = True
+                reasoning = []
+                for dim in g.dims.iterkeys():
+                    if dim not in ds.dataset.variables:
                         valid_2d = False
-                        reasoning.append("Variable %s's coordinate, %s, does not share dimension %s with the variable" % (name, cname, dim))
-            result = Result(BaseCheck.MEDIUM,                   \
-                            valid_2d,                           \
-                            ('var', name, 'valid_coordinates'), \
-                            reasoning)
-            ret_val.append(result)
-
-            
-            #------------------------------------------------------------
-            # Can make lat/lon?
-            #------------------------------------------------------------
-
-            lat_check = False
-            lon_check = False
+                        reasoning.append("Variable %s's dimension %s is not a coordinate variable" % (name, dim))
     
-            for cname, coord in g.coords.iteritems():
-                if cname.lower() in ('lat', 'latitude'):
-                    lat_check = True
-                elif cname.lower() in ('lon', 'longitude'):
-                    lon_check = True
+                result = Result(BaseCheck.HIGH,                             \
+                                valid_dims,                                 \
+                                ('var', name, '2d_hgrid_valid_dimensions'), \
+                                reasoning)
+                ret_val.append(result)
+                
+                #------------------------------------------------------------
+                # Check that the coordinates are correct
+                #------------------------------------------------------------
+                valid_2d = True
+                reasoning = []
+                for cname, coord in g.coords.iteritems():
+                    if coord is None:
+                        valid_2d = False
+                        reasoning.append("Variable %s's coordinate, %s, is not a coordinate or auxiliary variable" %(name, cname))
+                        continue
+                    for dim in coord.dims.iterkeys():
+                        if dim not in g.dims:
+                            valid_2d = False
+                            reasoning.append("Variable %s's coordinate, %s, does not share dimension %s with the variable" % (name, cname, dim))
+                result = Result(BaseCheck.MEDIUM,                   \
+                                valid_2d,                           \
+                                ('var', name, 'valid_coordinates'), \
+                                reasoning)
+                ret_val.append(result)
+    
+                
+                #------------------------------------------------------------
+                # Can make lat/lon?
+                #------------------------------------------------------------
+    
+                lat_check = False
+                lon_check = False
 
-            result = Result(BaseCheck.HIGH,          \
-                            lat_check and lon_check, \
-                            ('var', name, 'lat_lon_correct'))
-            ret_val.append(result)
+                for cname, coord in g.coords.iteritems():
+
+                    if coord.units in ['degrees_north', 'degree_north', 'degrees_N', 'degree_N', 'degreesN', 'degreeN']:
+                        lat_check = True
+                    elif coord.units in ['degrees_east', 'degree_east', 'degrees_E', 'degree_E', 'degreesE', 'degreeE']:
+                        lon_check = True
+    
+                result = Result(BaseCheck.HIGH,          \
+                                lat_check and lon_check, \
+                                ('var', name, 'lat_lon_correct'))
+                ret_val.append(result)
+            else:
+                continue # Not a 2d horizontal grid
 
 
         return ret_val
