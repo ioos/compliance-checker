@@ -64,6 +64,47 @@ _possibley = ["y", "Y",
 
 _possibleaxis = _possiblet + _possiblez + _possiblex + _possibley
 
+
+_possiblexunits = ['degrees_east',
+                    'degree_east',
+                    'degrees_E',
+                    'degree_E',
+                    'degreesE',
+                    'degreeE'
+                    ]
+
+_possibleyunits = ['degrees_north',
+                'degree_north',
+                'degrees_N',
+                'degree_N',
+                'degreesN',
+                'degreeN'
+                    ]
+
+_possibletunits = ['day', 
+                'days', 
+                'd', 
+                'hour', 
+                'hours', 
+                'hr', 
+                'hrs', 
+                'h', 
+                'year', 
+                'years', 
+                'minute', 
+                'minutes', 
+                'm', 
+                'min', 
+                'mins', 
+                'second', 
+                'seconds', 
+                's', 
+                'sec', 
+                'secs'
+                ]
+
+_possibleaxisunits =  _possiblexunits + _possibleyunits +_possibletunits
+
 def guess_dim_type(dimension):
     """
     Guesses the type of dimension of a variable X/Y/Z/T
@@ -1376,7 +1417,8 @@ class CFBaseCheck(BaseCheck):
                 reasoning = []
                 valid_coordinate = True
                 for dim in var.dimensions:
-                    if dim not in _possibleaxis:
+                    #Looks to see if the dimension name or unit is not in the alloweable lists.  
+                    if dim not in _possibleaxis or dim.units not in _possibleaxisunits or dim.units.split(" ")[0] not in _possibleaxisunits or hasattr(dim,'positive'):
                         break
                     elif dim not in ds.dataset.variables:
                         valid_coordinate = False
