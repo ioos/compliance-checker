@@ -1416,7 +1416,7 @@ class CFBaseCheck(BaseCheck):
             g = NCGraph(ds.dataset, name, var)
             #Determine if 2-D coordinate variables (Lat and Lon are of shape (i,j)
             for each in g.coords:
-                valid = len(g.coords[each].shape) == 2
+                valid = g.coords[each].ndim == 2
 
             if len(g.coords) == 2 and valid:
                 #------------------------------------------------------------
