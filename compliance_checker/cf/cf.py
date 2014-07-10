@@ -2571,8 +2571,8 @@ class CFBaseCheck(BaseCheck):
             elif name.lower() == 'time':
                 t = name
                     
-            if getattr(var, '_CoordianteAxisType', ''):
-                axis_type = getattr(var, '_CoordianteAxisType', '')
+            if getattr(var, '_CoordinateAxisType', ''):
+                axis_type = getattr(var, '_CoordinateAxisType', '')
                 if axis_type.lower() in ['lon', 'longitude'] and flag == 0:
                     x = name
                 elif axis_type.lower()in ['lat', 'latitude'] and flag == 0:
