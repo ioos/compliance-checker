@@ -1410,34 +1410,45 @@ class CFBaseCheck(BaseCheck):
 
         """
         ret_val = []
+
+        space_time_coord_var = []
+        #Check to find all space-time coordinate variables (Lat/Lon/Time/Height)
+        for each in  self._find_coord_vars(ds):
+            if str(each._name)  in _possibleaxis or each.units in _possibleaxisunits or each.units.split(" ")[0]  in _possibleaxisunits or hasattr(each,'positive'):
+                space_time_coord_var.append(each._name)
+
+        #Find all all space-time variables that are not coordinate variables
+        space_time_non_coord_var=[]
+        space_time_non_coord_var_dim = []
         for name,var in ds.dataset.variables.iteritems():
-            if is_variable(name, var):
-                # If each dimension that's an axis is a proper coordinate variable
-                # then this is a valid compliance
-                reasoning = []
-                valid_coordinate = True
-                for dim in var.dimensions:
-                    #Looks to see if the dimension name or unit is not in the alloweable lists.  
-                    if dim not in _possibleaxis or dim.units not in _possibleaxisunits or dim.units.split(" ")[0] not in _possibleaxisunits or hasattr(dim,'positive'):
-                        break
-                    elif dim not in ds.dataset.variables:
-                        valid_coordinate = False
-                        reasoning.append('%s is not a coordinate variable' % dim)
+            if hasattr(var,'units'):
+                if (var  in _possibleaxis or var.units in _possibleaxisunits or var.units.split(" ")[0]  in _possibleaxisunits or hasattr(var,'positive')) and name not in space_time_coord_var:
+                    space_time_non_coord_var.append(name)
+                    for every in var.dimensions:
+                        space_time_non_coord_var_dim.append(every)
 
+        #Looks to ensure that every dimension of each variable that is a space-time dimension has associated coordinate variables
+        for name,var in ds.dataset.variables.iteritems():
+            valid = ''
+            for each in var.dimensions:
+                if each in space_time_non_coord_var_dim:
+                    valid = False
+                    dim_name = each
+                    continue
+                elif each in space_time_coord_var:
+                    valid = True
 
-                    
-                if valid_coordinate:
-                    r = Result(BaseCheck.MEDIUM, \
-                               valid_coordinate, \
-                               ('var', name, 'valid_coordinates'))
-                else:
-                    r = Result(BaseCheck.MEDIUM,                   \
-                               valid_coordinate,                   \
-                               ('var', name, 'valid_coordinates'), \
-                               reasoning)
-                ret_val.append(r)
+            if valid == False :
+                ret_val.append(Result(BaseCheck.MEDIUM, \
+                               valid, \
+                               ('var', name, 'check_independent_axis_dimensions'),['The %s dimension for the variable %s does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.'%(dim_name,name)]))
+
+            if valid == True and name not in space_time_coord_var:
+                ret_val.append(Result(BaseCheck.MEDIUM, \
+                               valid, \
+                               ('var', name, 'check_independent_axis_dimensions')))
         return ret_val
-                        
+
 
     def check_two_dimensional(self, ds):
         """
