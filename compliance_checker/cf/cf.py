@@ -2645,56 +2645,6 @@ class CFBaseCheck(BaseCheck):
         valid = all(x == feature_types[0] for x in feature_types)
 
         return Result(BaseCheck.HIGH, valid)
-        
-
-    def check_collections_instances_and_elements(self, ds):
-        """
-        9.2 The dimension with subscript i identifies a particular feature within a collection of features. It is called the
-        instance dimension. One-dimensional variables in a Discrete Geometry CF file, which have only this dimension (such as
-        x(i) y(i) and z(i) for a timeseries), are instance variables. Instance variables provide the metadata that
-        differentiates individual features.
-
-        The subscripts o and p distinguish the data elements that compose a single feature. We refer to data values in a feature
-        as its elements, and to the dimensions of o and p as element dimensions. Each feature can have its own set of element
-        subscripts o and p.
-
-        Feature instances within a collection need not have the same numbers of elements. If the features do all have the same
-        number of elements, and the sequence of element coordinates is identical for all features, savings in simplicity and
-        space are achievable by storing only one copy of these coordinates. 
-
-        If there is only a single feature to be stored in a data variable, there is no need for an instance dimension and it
-        is permitted to omit it. 
-        """
-        ret_val = []
-        reasoning = []
-
-        instance_var_length = []
-        instance_var_name = []
-
-        for name,var in ds.dataset.variables.iteritems():
-            #Finds data variables
-            if hasattr(var, 'coordinates') or hasattr(var, 'axis'):
-                if var.shape:
-                    instance_var_length.append(var.shape[0])
-                else:
-                    instance_var_length.append(1)
-                instance_var_name.append(name)
-
-
-        for name,var in ds.dataset.dimensions.iteritems():
-            if len(var) in instance_var_length:
-                instance_var_length.append(len(var))
-                instance_var_name.append(name)
-
-        valid = all(x == instance_var_length[0] for x in instance_var_length)
-        retval = Result(BaseCheck.LOW, valid)
-        if valid == False:
-            retval.msgs = ['Not every dimension is an instance Dimension.']
-
-        return retval
-
-
-        pass
 
     def check_orthogonal_multidim_array(self, ds):
         """
