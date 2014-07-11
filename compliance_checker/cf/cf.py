@@ -2666,35 +2666,37 @@ class CFBaseCheck(BaseCheck):
         is permitted to omit it. 
         """
         ret_val = []
-        reasoning = []
+        instance_vars = {}
 
-        instance_var_length = []
-        instance_var_name = []
+        data_vars = {k:v for k,v in ds.dataset.variables.iteritems() if v not in self._find_coord_vars(ds)}
 
-        for name,var in ds.dataset.variables.iteritems():
-            #Finds data variables
-            if hasattr(var, 'coordinates') or hasattr(var, 'axis'):
-                if var.shape:
-                    instance_var_length.append(var.shape[0])
+        for name, var in data_vars.iteritems():
+            val = var.shape or (1,)
+            dims = getattr(var, 'coordinates', getattr(var, 'axis', "")).split(" ")
+
+            curscore = 0
+            msgs = []
+
+            # only validating the instance dimension aka [0]
+            if dims[0] in ds.dataset.dimensions:
+                curscore += 1
+                dimlen = len(ds.dataset.dimensions[dims[0]])
+
+                if dimlen == val[0]:
+                    curscore += 1
                 else:
-                    instance_var_length.append(1)
-                instance_var_name.append(name)
+                    msgs.append("Instance dimension \"%s\" of variable \"%s\" has length %d but variable has size %d" % (dims[0], name, dimlen, val[0]))
+            else:
+                msgs.append("Instance dimension \"%s\" of variable \"%s\" does not exist" % (dims[0], name))
 
+            ret = Result(BaseCheck.LOW,
+                         (curscore, 2),
+                         ('var', name, 'dsg_instance_dimension'),
+                         msgs)
 
-        for name,var in ds.dataset.dimensions.iteritems():
-            if len(var) in instance_var_length:
-                instance_var_length.append(len(var))
-                instance_var_name.append(name)
+            ret_val.append(ret)
 
-        valid = all(x == instance_var_length[0] for x in instance_var_length)
-        retval = Result(BaseCheck.LOW, valid)
-        if valid == False:
-            retval.msgs = ['Not every dimension is an instance Dimension.']
-
-        return retval
-
-
-        pass
+        return ret_val
 
     def check_orthogonal_multidim_array(self, ds):
         """
