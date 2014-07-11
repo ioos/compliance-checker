@@ -2668,11 +2668,16 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         instance_vars = {}
 
+        # @TODO: not really data vars, but data vars that are also DSG features
         data_vars = {k:v for k,v in ds.dataset.variables.iteritems() if v not in self._find_coord_vars(ds)}
 
         for name, var in data_vars.iteritems():
+            # skip vars without shape/dimensions
+            if not var.shape and not var.dimensions:
+                continue
+
             val = var.shape or (1,)
-            dims = getattr(var, 'coordinates', getattr(var, 'axis', "")).split(" ")
+            dims = var.dimensions
 
             curscore = 0
             msgs = []
