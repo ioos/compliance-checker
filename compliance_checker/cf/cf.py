@@ -2645,63 +2645,6 @@ class CFBaseCheck(BaseCheck):
         valid = all(x == feature_types[0] for x in feature_types)
 
         return Result(BaseCheck.HIGH, valid)
-        
-
-    def check_collections_instances_and_elements(self, ds):
-        """
-        9.2 The dimension with subscript i identifies a particular feature within a collection of features. It is called the
-        instance dimension. One-dimensional variables in a Discrete Geometry CF file, which have only this dimension (such as
-        x(i) y(i) and z(i) for a timeseries), are instance variables. Instance variables provide the metadata that
-        differentiates individual features.
-
-        The subscripts o and p distinguish the data elements that compose a single feature. We refer to data values in a feature
-        as its elements, and to the dimensions of o and p as element dimensions. Each feature can have its own set of element
-        subscripts o and p.
-
-        Feature instances within a collection need not have the same numbers of elements. If the features do all have the same
-        number of elements, and the sequence of element coordinates is identical for all features, savings in simplicity and
-        space are achievable by storing only one copy of these coordinates. 
-
-        If there is only a single feature to be stored in a data variable, there is no need for an instance dimension and it
-        is permitted to omit it. 
-        """
-        ret_val = []
-        instance_vars = {}
-
-        # @TODO: not really data vars, but data vars that are also DSG features
-        data_vars = {k:v for k,v in ds.dataset.variables.iteritems() if v not in self._find_coord_vars(ds)}
-
-        for name, var in data_vars.iteritems():
-            # skip vars without shape/dimensions
-            if not var.shape and not var.dimensions:
-                continue
-
-            val = var.shape or (1,)
-            dims = var.dimensions
-
-            curscore = 0
-            msgs = []
-
-            # only validating the instance dimension aka [0]
-            if dims[0] in ds.dataset.dimensions:
-                curscore += 1
-                dimlen = len(ds.dataset.dimensions[dims[0]])
-
-                if dimlen == val[0]:
-                    curscore += 1
-                else:
-                    msgs.append("Instance dimension \"%s\" of variable \"%s\" has length %d but variable has size %d" % (dims[0], name, dimlen, val[0]))
-            else:
-                msgs.append("Instance dimension \"%s\" of variable \"%s\" does not exist" % (dims[0], name))
-
-            ret = Result(BaseCheck.LOW,
-                         (curscore, 2),
-                         ('var', name, 'dsg_instance_dimension'),
-                         msgs)
-
-            ret_val.append(ret)
-
-        return ret_val
 
     def check_orthogonal_multidim_array(self, ds):
         """
