@@ -1434,7 +1434,7 @@ class CFBaseCheck(BaseCheck):
                 if each in space_time_non_coord_var_dim:
                     valid = False
                     dim_name = each
-                    continue
+                    break
                 elif each in space_time_coord_var:
                     valid = True
 
