@@ -200,11 +200,12 @@ class CFBaseCheck(BaseCheck):
     """
 
     def __init__(self):
-        self._coord_vars    = defaultdict(list)
-        self._clim_vars     = defaultdict(list)
-        self._boundary_vars = defaultdict(dict)
+        self._coord_vars     = defaultdict(list)
+        self._ancillary_vars = defaultdict(list)
+        self._clim_vars      = defaultdict(list)
+        self._boundary_vars  = defaultdict(dict)
 
-        self._std_names     = StandardNameTable('cf-standard-name-table.xml')
+        self._std_names      = StandardNameTable('cf-standard-name-table.xml')
 
     ################################################################################
     #
@@ -214,6 +215,7 @@ class CFBaseCheck(BaseCheck):
 
     def setup(self, ds):
         self._find_coord_vars(ds)
+        self._find_ancillary_vars(ds)
         self._find_clim_vars(ds)
         self._find_boundary_vars(ds)
 
@@ -234,6 +236,55 @@ class CFBaseCheck(BaseCheck):
                 self._coord_vars[ds].append(ds.dataset.variables[d])
 
         return self._coord_vars[ds]
+
+    def _find_ancillary_vars(self, ds, refresh=False):
+        """
+        Finds all ancillary variables in a dataset.
+
+        TODO: fully define
+
+        An ancillary variable generally is a metadata container and referenced from
+        other variables via a string reference in an attribute.
+
+        - via ancillary_variables (3.4)
+        - "grid mapping var" (5.6)
+        - TODO: more?
+
+        The result is cached by the passed in dataset object inside of this checker. Pass refresh=True
+        to redo the cached value.
+        """
+        if ds in self._ancillary_vars and not refresh:
+            return self._ancillary_vars[ds]
+
+        for name, var in ds.dataset.variables.iteritems():
+            if hasattr(var, 'ancillary_variables'):
+                for anc_name in var.ancillary_variables.split(" "):
+                    if anc_name in ds.dataset.variables:
+                        self._ancillary_vars[ds].append(ds.dataset.variables[anc_name])
+
+            if hasattr(var, 'grid_mapping'):
+                gm_name = var.grid_mapping
+                if gm_name in ds.dataset.variables:
+                    self._ancillary_vars[ds].append(ds.dataset.variables[gm_name])
+
+        return self._ancillary_vars
+
+    def _find_data_vars(self, ds):
+        """
+        Finds all variables that could be considered Data variables.
+
+        Returns a dictionary mapping name -> variable.
+
+        Excludes variables that are:
+            - coordinate variables
+            - ancillary variables
+            - no dimensions
+
+        Results are NOT CACHED.
+        """
+        return {k:v for k, v in ds.dataset.variables.iteritems() if v not in self._find_coord_vars(ds) \
+                                                                  and v not in self._find_ancillary_vars(ds) \
+                                                                  and v.dimensions}
 
     def _find_clim_vars(self, ds, refresh=False):
         """
