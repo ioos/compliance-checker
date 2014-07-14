@@ -1414,7 +1414,9 @@ class CFBaseCheck(BaseCheck):
         space_time_coord_var = []
         #Check to find all space-time coordinate variables (Lat/Lon/Time/Height)
         for each in  self._find_coord_vars(ds):
-            if str(each._name)  in _possibleaxis or each.units in _possibleaxisunits or each.units.split(" ")[0]  in _possibleaxisunits or hasattr(each,'positive'):
+            if str(each._name) in _possibleaxis \
+               or (hasattr(each, 'units') and (each.units in _possibleaxisunits or each.units.split(" ")[0]  in _possibleaxisunits)) \
+               or hasattr(each,'positive'):
                 space_time_coord_var.append(each._name)
 
         #Find all all space-time variables that are not coordinate variables
@@ -2990,10 +2992,13 @@ class CFBaseCheck(BaseCheck):
                     x_indices = np.where(var==var._FillValue).tolist()
                 except:
                     x_indices = np.where(var==var._FillValue)[0].tolist()
-                for coordinate in getattr(var,'coordinates').split(" "):
-                    coordinate_ind_list = dim_index_dict[name+'-'+coordinate]
-                    valid_missing = all(each in x_indices[count] for each in coordinate_ind_list)
-                    count = count+1
+
+                if hasattr(var, 'coordinates'):
+                    for coordinate in var.coordinates.split(" "):
+                        coordinate_ind_list = dim_index_dict[name+'-'+coordinate]
+                        valid_missing = all(each in x_indices[count] for each in coordinate_ind_list)
+                        count = count+1
+
                 if valid_missing == False:
                     reasoning.append('The data does not have the same missing data locations as the coordinates')
             
