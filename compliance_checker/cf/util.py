@@ -2,10 +2,7 @@ import os
 import os.path
 import itertools
 from lxml import etree
-try:
-    from udunitspy import Unit, UdunitsError, Converter
-except ImportError:
-    pass #disabled as CF is not working and udunits won't install on centos/rhel yet
+from udunitspy import Unit, UdunitsError, Converter
 from netCDF4 import Dimension, Variable
 from pkgutil import get_data
 

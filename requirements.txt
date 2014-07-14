@@ -1,5 +1,5 @@
 OWSLib>=0.8.3
 Wicken>=0.1.2
 lxml>=3.2.1
-#udunitspy==0.0.6
+udunitspy==0.0.6
 requests==2.2.1
