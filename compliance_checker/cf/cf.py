@@ -1882,19 +1882,18 @@ class CFBaseCheck(BaseCheck):
         reasoning = []
         valid = ' '
 
-        for name, var in ds.dataset.variables.iteritems():
-            if hasattr(var, 'bounds'):
+        boundary_vars = self._find_boundary_vars(ds)
+        for var in boundary_vars:
                 bounds = getattr(var,'bounds','')
-                print 'BOUNDS - %s'%bounds
                 if ds.dataset.variables[bounds].ndim == var.ndim + 1:
                     valid = True
                 else:
                     valid = False
                     reasoning.append('The number of dimensions of the Coordinate Variable is %s, but the number of dimensions of the Boundary Variable is %s.'%(var.ndim, ds.dataset.variables[bounds].ndim))
 
-                result = Result(BaseCheck.MEDIUM,                            \
-                            valid,                                       \
-                            ('var', name, 'cell_boundaries'), \
+                result = Result(BaseCheck.MEDIUM,                          
+                            valid,                                       
+                            ('var', var._name, 'cell_boundaries'), 
                             reasoning)
                 ret_val.append(result)
                 reasoning = []
