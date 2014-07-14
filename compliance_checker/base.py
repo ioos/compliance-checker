@@ -103,9 +103,11 @@ class Result(object):
 
     Stores such information as the check's value (True, False, a 2-tuple of (pass, total) or None for a skip),
     weight of the check, any granular messages, or a hierarchy of results.
+
+    Stores the checker instance and the check method that produced this result.
     """
-    def __init__(self, weight=BaseCheck.MEDIUM, value=None, name=None, msgs=None, children=None):
-        
+    def __init__(self, weight=BaseCheck.MEDIUM, value=None, name=None, msgs=None, children=None, checker=None, check_method=None):
+
         self.weight = weight
         self.value  = value
         self.name   = name
@@ -113,7 +115,8 @@ class Result(object):
 
         self.children = children or []
 
-
+        self.checker = checker
+        self.check_method = check_method
 
     def __repr__(self):
         ret = "%s (*%s): %s" % (self.name, self.weight, self.value)
@@ -169,17 +172,18 @@ def check_has(priority=BaseCheck.HIGH):
 
     return _inner
 
-def fix_return_value(v, method_name=None):
+def fix_return_value(v, method_name, method=None, checker=None):
     """
     Transforms scalar return values into Result.
     """
-    method_name = method_name.replace("check_", "")     # remove common check prefix
+    method_name = (method_name or method.im_func.func_name).replace("check_", "")     # remove common check prefix
 
     if v is None or not isinstance(v, Result):
-
         v = Result(value=v, name=method_name)
-    v.name = v.name or method_name
 
+    v.name         = v.name or method_name
+    v.checker      = checker
+    v.check_method = method
 
     return v
 
@@ -210,7 +214,7 @@ def score_group(group_name=None):
                 return Result(r.weight, r.value, tuple(cur_grouping), r.msgs)
 
 
-            ret_val = map(lambda x: fix_return_value(x, func.func_name), ret_val)
+            ret_val = map(lambda x: fix_return_value(x, func.func_name, func, s), ret_val)
             ret_val = map(dogroup, ret_val)
 
             return ret_val

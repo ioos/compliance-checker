@@ -31,9 +31,9 @@ class CheckSuite(object):
         val = check_method(ds)
 
         if isinstance(val, list):
-            return [fix_return_value(v, check_method.im_func.func_name) for v in val]
-            
-        return [fix_return_value(val, check_method.im_func.func_name)]
+            return [fix_return_value(v, check_method.im_func.func_name, check_method, check_method.im_self) for v in val]
+
+        return [fix_return_value(val, check_method.im_func.func_name, check_method, check_method.im_self)]
 
     def _get_valid_checkers(self, ds, checker_names):
         """
