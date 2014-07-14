@@ -1,3 +1,5 @@
+import traceback
+
 from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.cf import CFBaseCheck
 from compliance_checker.ioos import IOOSBaseCheck
@@ -47,8 +49,19 @@ class ComplianceChecker(object):
 
         #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
         # @TODO cleanup
-        for check_name, groups in score_groups.iteritems():
-            score_list, points, out_of = cs.standard_output(limit, check_name, groups)
+        for checker, rpair in score_groups.iteritems():
+            groups, errors = rpair
+
+            if len(errors):
+                print "The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker
+
+                for check_name, epair in errors.iteritems():
+                    print "%s.%s: %s" % (checker, check_name, epair[0].message)
+                    if verbose > 0:
+                        traceback.print_tb(epair[1].tb_next.tb_next)    # skip first two as they are noise from the running itself @TODO search for check_name
+                        print
+
+            score_list, points, out_of = cs.standard_output(limit, checker, groups)
             if not verbose:
                 cs.non_verbose_output_generation(score_list, limit, points, out_of)
             else:

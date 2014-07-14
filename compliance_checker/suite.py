@@ -2,6 +2,7 @@
 Compliance Checker suite runner
 """
 
+import sys
 import inspect
 import itertools
 from netCDF4 import Dataset
@@ -66,7 +67,7 @@ class CheckSuite(object):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
-        Returns a dictionary mapping checker names to their grouped scores.
+        Returns a dictionary mapping checker names to a 2-tuple of their grouped scores and errors/exceptions while running checks.
         """
 
         ret_val      = {}
@@ -79,15 +80,24 @@ class CheckSuite(object):
 
         for checker_name, checker_class in checkers:
 
-            checker = checker_class()   # @TODO: combine with load_datapair/setup
-            dsp = checker.load_datapair(ds)
+            checker            = checker_class()   # @TODO: combine with load_datapair/setup
+            dsp                = checker.load_datapair(ds)
             checker.setup(dsp)
-            checks = self._get_checks(checker)
 
-            vals = list(itertools.chain.from_iterable(map(lambda c: self._run_check(c, dsp), checks)))
+            checks             = self._get_checks(checker)
+            vals               = []
+            errs               = {}   # check method name -> (exc, traceback)
+
+            for c in checks:
+                try:
+                    vals.extend(self._run_check(c, dsp))
+                except Exception as e:
+                    errs[c.im_func.func_name] = (e, sys.exc_info()[2])
+
+            # score the results we got back
             groups = self.scores(vals)
 
-            ret_val[checker_name] = groups
+            ret_val[checker_name] = groups, errs
 
         return ret_val
 
