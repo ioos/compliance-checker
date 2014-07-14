@@ -1883,36 +1883,21 @@ class CFBaseCheck(BaseCheck):
         valid = ' '
 
         for name, var in ds.dataset.variables.iteritems():
-            for dim in var.dimensions:
-                if dim == name:
-                    if getattr(var, 'bounds', ''):
-                        bounds = getattr(var,'bounds','')
+            if hasattr(var, 'bounds'):
+                bounds = getattr(var,'bounds','')
+                print 'BOUNDS - %s'%bounds
+                if ds.dataset.variables[bounds].ndim == var.ndim + 1:
+                    valid = True
+                else:
+                    valid = False
+                    reasoning.append('The number of dimensions of the Coordinate Variable is %s, but the number of dimensions of the Boundary Variable is %s.'%(var.ndim, ds.dataset.variables[bounds].ndim))
 
-
-                        if len(ds.dataset.variables[bounds].shape) == len(var.shape):
-                            last_shape = ds.dataset.variables[bounds].shape[-1]
-                        elif len(ds.dataset.variables[bounds].shape) == len(var.shape)+1:
-                            last_shape = 1
-
-
-                        if ds.dataset.variables[bounds].shape[-1]  == last_shape + 1:
-                            valid = True
-                            reasoning.append('The shape of the Coordinate Variable is M x N Boundary Variable is M x N+1.')
-
-                        elif ds.dataset.variables[name].shape == var.shape[0:-1] and last_shape == 1:
-                            valid = True
-                            reasoning.append('The shape of the Coordinate Variable is M x N Boundary Variable is M x N x 1.')
-
-                        else:
-                            valid = False
-                            reasoning.append('The shape of the Boundary Variable is wrong.')
-                        result = Result(BaseCheck.MEDIUM,                            \
-                                    valid,                                       \
-                                    ('var', name, 'cell_boundaries'), \
-                                    reasoning)
-                        ret_val.append(result)
-                        reasoning = []
-
+                result = Result(BaseCheck.MEDIUM,                            \
+                            valid,                                       \
+                            ('var', name, 'cell_boundaries'), \
+                            reasoning)
+                ret_val.append(result)
+                reasoning = []
 
         return ret_val
 
