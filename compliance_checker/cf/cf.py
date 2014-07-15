@@ -999,7 +999,7 @@ class CFBaseCheck(BaseCheck):
     def _coord_has_units(self, name,coordinate, var, recommended, acceptable):
         ret_val = []
         has_units = hasattr(var, 'units')
-        result = Result(BaseCheck.HIGH, has_units, ('latitude', name, 'has_units'))
+        result = Result(BaseCheck.HIGH, has_units, (coordinate, name, 'has_units'))
         ret_val.append(result)
 
 
