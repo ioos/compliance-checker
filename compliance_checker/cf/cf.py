@@ -1787,7 +1787,6 @@ class CFBaseCheck(BaseCheck):
 
             for coordinate in getattr(var, 'coordinates', '').split(" "):
                 if coordinate in ds.dataset.variables:
-                    print name, coordinate
                     if ds.dataset.variables[coordinate].shape == (1,):
                         total_scalar_coordinate_var += 1
                         if coordinate not in ds.dataset.dimensions.keys():
