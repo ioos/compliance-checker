@@ -1790,10 +1790,8 @@ class CFBaseCheck(BaseCheck):
                     print name, coordinate
                     if ds.dataset.variables[coordinate].shape == (1,):
                         total_scalar_coordinate_var += 1
-                        print "TOTAL +1", total_scalar_coordinate_var
                         if coordinate not in ds.dataset.dimensions.keys():
                             valid_scalar_coordinate_var += 1
-                            print "VALID +1", valid_scalar_coordinate_var
                         else:
                             reasoning.append('Scalar coordinate var (%s) of var (%s) is correct size but is present in the dimensions list, which is not allowed.'% (coordinate, name))
 
