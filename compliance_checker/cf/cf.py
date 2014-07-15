@@ -1776,35 +1776,35 @@ class CFBaseCheck(BaseCheck):
         dimension in the file.
         """
         ret_val = []
-        reasoning = []
-        valid_scalar_coordinate_var = 0
-        total_scalar_coordinate_var = 0
-
 
         for name, var in ds.dataset.variables.iteritems():
             valid_scalar_coordinate_var = 0
             total_scalar_coordinate_var = 0
-            if getattr(var, 'coordinates', ''):
-                for coordinate in getattr(var, 'coordinates', '').split(" "):
-                    if coordinate in ds.dataset.variables:
-                        if ds.dataset.variables[coordinate].shape == (1,):
-                            total_scalar_coordinate_var = total_scalar_coordinate_var + 1
-                            if coordinate not in ds.dataset.dimensions.keys():
-                                reasoning.append('The Scalar Coordinate system is of the right size and is not present in the variable list.')
-                                valid_scalar_coordinate_var = valid_scalar_coordinate_var + 1
-                            else:
-                                reasoning.append('The Scalar Coordinate system is of the right size but is present in the dimensions list, which is not allowed.')
+            reasoning = []
 
-                if total_scalar_coordinate_var > 0:
-                    result = Result(BaseCheck.LOW,  \
-                                (valid_scalar_coordinate_var,total_scalar_coordinate_var),  \
-                                ('var', name, 'scalar_coordinates'), \
+            if not hasattr(var, 'coordinates'):
+                continue
+
+            for coordinate in getattr(var, 'coordinates', '').split(" "):
+                if coordinate in ds.dataset.variables:
+                    print name, coordinate
+                    if ds.dataset.variables[coordinate].shape == (1,):
+                        total_scalar_coordinate_var += 1
+                        print "TOTAL +1", total_scalar_coordinate_var
+                        if coordinate not in ds.dataset.dimensions.keys():
+                            valid_scalar_coordinate_var += 1
+                            print "VALID +1", valid_scalar_coordinate_var
+                        else:
+                            reasoning.append('Scalar coordinate var (%s) of var (%s) is correct size but is present in the dimensions list, which is not allowed.'% (coordinate, name))
+
+            if total_scalar_coordinate_var > 0:
+                result = Result(BaseCheck.MEDIUM,
+                                (valid_scalar_coordinate_var, total_scalar_coordinate_var),
+                                ('var', name, 'scalar_coordinates'),
                                 reasoning)
-                    ret_val.append(result)
+                ret_val.append(result)
 
         return ret_val
-
-        
 
     ###############################################################################
     #
