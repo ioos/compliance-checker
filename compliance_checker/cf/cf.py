@@ -1,4 +1,5 @@
 import re
+from functools import wraps
 from collections import defaultdict, OrderedDict
 import numpy as np
 
@@ -189,6 +190,17 @@ def map_axes(dim_vars, reverse_map=False):
 
     return dict(ret_val)
 
+# helper to see if we should do DSG tests
+def is_likely_dsg(func):
+    @wraps(func)
+    def _dec(s, ds):
+        if hasattr(ds.dataset, 'featureType'):
+            return func(s, ds)
+
+        # @TODO: skips if we have formalized skips
+        return None
+
+    return _dec
 
 class CFBaseCheck(BaseCheck):
     """
@@ -2571,6 +2583,7 @@ class CFBaseCheck(BaseCheck):
     #
     ###############################################################################
 
+    @is_likely_dsg
     def check_all_features_are_same_type(self, ds):
         """
         9.1 The features contained within a collection must always be of the same type; and all the collections in a CF file
@@ -2688,6 +2701,7 @@ class CFBaseCheck(BaseCheck):
 
         return Result(BaseCheck.HIGH, valid)
 
+    @is_likely_dsg
     def check_orthogonal_multidim_array(self, ds):
         """
         9.3.1 The orthogonal multidimensional array representation, the simplest representation, can be used if each feature
@@ -2715,7 +2729,7 @@ class CFBaseCheck(BaseCheck):
                         ret_val.append(result)
         return ret_val
         
-
+    @is_likely_dsg
     def check_incomplete_multidim_array(self, ds):
         """
         9.3.2 The incomplete multidimensional array representation can used if the features within a collection do not all have
@@ -2745,9 +2759,8 @@ class CFBaseCheck(BaseCheck):
                         return []
 
         return ret_val
-        
-        
 
+    @is_likely_dsg
     def check_contiguous_ragged_array(self, ds):
         """
         9.3.3 The contiguous ragged array representation can be used only if the size of each feature is known at the time
@@ -2779,6 +2792,7 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
+    @is_likely_dsg
     def check_indexed_ragged_array(self, ds):
         """
         9.3.4 The indexed ragged array representation stores the features interleaved along the sample dimension in the data
@@ -2810,6 +2824,7 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
+    @is_likely_dsg
     def check_feature_type(self, ds):
         """
         9.4 A global attribute, featureType, is required for all Discrete Geometry representations except the orthogonal
@@ -2835,6 +2850,7 @@ class CFBaseCheck(BaseCheck):
             ret_val.append(result)
         return ret_val
 
+    @is_likely_dsg
     def check_coordinates_and_metadata(self, ds):
         """
         9.5 Every feature within a Discrete Geometry CF file must be unambiguously associated with an extensible collection
@@ -2934,7 +2950,7 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
-
+    @is_likely_dsg
     def check_missing_data(self, ds):
         """
         9.6 Auxiliary coordinate variables (spatial and time) must contain missing values to indicate a void in data storage
