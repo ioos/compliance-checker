@@ -25,6 +25,10 @@ static_files = {
         'mapping'       : 'test-data/mapping.nc',
         'bad_region'    : 'test-data/bad_region.nc',
         'featureType'   : 'test-data/example-grid.nc',
+        'cont_ragged'   : 'test-data/cont_ragged.nc',
+        'index_ragged'  : 'test-data/index_ragged.nc',
+        'bad_missing_data'  : 'test-data/bad_missing_data.nc',
+
         }
 
 class MockVariable(object):
@@ -543,11 +547,8 @@ class TestCF(unittest.TestCase):
 
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_independent_axis_dimensions(dataset)
-        rd = {r.name[1:] : (r.value, r.msgs) for r in results }
-
-        value, msgs = rd[('column_temp', 'valid_coordinates')]
-        self.assertFalse(value)
-        self.assertIn('sigma is not a coordinate variable', msgs)
+        for each in results:
+            self.assertFalse(each.value)
 
     def test_check_two_dimensional(self):
         dataset = self.get_pair(static_files['2dim'])
@@ -559,13 +560,12 @@ class TestCF(unittest.TestCase):
         # Need the bad testing
         dataset = self.get_pair(static_files['bad2dim'])
         results = self.cf.check_two_dimensional(dataset)
-        rd = {r.name[1:] : (r.value, r.msgs) for r in results }
-        value, msgs = rd[('C', 'lat_lon_correct')]
-        self.assertFalse(value)
-        value, msgs = rd[('C', 'valid_coordinates')]
-        self.assertIn("Variable C's coordinate, lat_p, does not share dimension x with the variable", msgs)
-        value, msgs = rd[('T', 'valid_coordinates')]
-        self.assertIn("Variable T's coordinate, lat, is not a coordinate or auxiliary variable", msgs)
+        self.assertTrue(results[0].value)
+        self.assertFalse(results[1].value)
+        self.assertFalse(results[2].value)
+        self.assertTrue(results[3].value)
+        self.assertFalse(results[4].value)
+        self.assertTrue(results[5].value)
 
 
     def test_check_reduced_horizontal_grid(self):
@@ -603,8 +603,8 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['bad_region'])
         results = self.cf.check_geographic_region(dataset)
 
-        assert results[0].value == False
-        assert results[1].value == True
+        self.assertFalse(results[0].value)
+        self.assertTrue(results[1].value)
 
     def test_check_alternative_coordinates(self):
         dataset = self.get_pair(static_files['bad_data_type'])
@@ -644,6 +644,66 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['bad_data_type'])
         results = self.cf.check_all_features_are_same_type(dataset)
         self.assertFalse(results.value)   
+
+    def test_check_orthogonal_multidim_array(self):
+        dataset = self.get_pair(static_files['rutgers'])
+        results = self.cf.check_orthogonal_multidim_array(dataset)
+        for each in results:
+            self.assertTrue(each.value)
+
+    def test_check_incomplete_multidim_array(self):
+        dataset = self.get_pair(static_files['bad_data_type'])
+        results = self.cf.check_incomplete_multidim_array(dataset)
+        for each in results:
+            self.assertTrue(each.value)
+
+    def test_check_contiguous_ragged_array(self):
+        dataset = self.get_pair(static_files['cont_ragged'])
+        results = self.cf.check_contiguous_ragged_array(dataset)
+        for each in results:
+            self.assertTrue(each.value)
+
+    def test_check_indexed_ragged_array(self):
+        dataset = self.get_pair(static_files['index_ragged'])
+        results = self.cf.check_indexed_ragged_array(dataset)
+        for each in results:
+            self.assertTrue(each.value)
+
+
+    def test_check_feature_type(self):
+        dataset = self.get_pair(static_files['index_ragged'])
+        results = self.cf.check_feature_type(dataset)
+        self.assertTrue(results.value)
+
+        dataset = self.get_pair(static_files['bad_data_type'])
+        results = self.cf.check_feature_type(dataset)
+        self.assertFalse(results.value)
+
+
+
+    def test_check_coordinates_and_metadata(self):
+        dataset = self.get_pair(static_files['bad_data_type'])
+        results = self.cf.check_coordinates_and_metadata(dataset)
+        self.assertFalse(results[0].value)
+        self.assertTrue(results[1].value)
+        self.assertFalse(results[2].value)
+
+        dataset = self.get_pair(static_files['index_ragged'])
+        results = self.cf.check_coordinates_and_metadata(dataset)
+        self.assertTrue(results[-1].value)
+
+    def test_check_missing_data(self):
+        dataset = self.get_pair(static_files['index_ragged'])
+        results = self.cf.check_missing_data(dataset)
+        for each in results:
+            self.assertTrue(each.value)
+
+        dataset = self.get_pair(static_files['bad_missing_data'])
+        results = self.cf.check_missing_data(dataset)
+        for each in results:
+            self.assertFalse(each.value)
+
+
 
 def breakpoint(scope=None, global_scope=None):
     import traceback
