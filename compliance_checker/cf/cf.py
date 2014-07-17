@@ -1915,7 +1915,6 @@ class CFBaseCheck(BaseCheck):
         for name, var in ds.dataset.variables.iteritems():
             if getattr(var, 'standard_name', '') == 'region':
                 if ''.join(var[:]).lower() in region_list:
-                    reasoning.append('The Region Value is from the allowable list.')
                     result = Result(BaseCheck.LOW,                            \
                             True,                                       \
                             ('var', name, 'geographic_region'), \
@@ -2045,7 +2044,6 @@ class CFBaseCheck(BaseCheck):
                         if every == measures[1]:
                             for dimi in attri.dimensions:
                                 if dimi in var.dimensions:
-                                    reasoning.append('The measure variable dimensions are a set or subset of the cell_measure variable.')
                                     valid = True
                                 else:
                                     reasoning.append('The measure variable dimensions are not a set or subset of the cell_measure variable.')
@@ -2177,7 +2175,6 @@ class CFBaseCheck(BaseCheck):
                     for i in range(len(title)):
                         if title[i].lower() in _areatype_names:
                             valid_name_count = valid_name_count +1
-                            reasoning.append('The name field appears in the allowable types.')
                         else:
                             reasoning.append('The name field does not appear in the allowable types.')
                                 
@@ -2187,7 +2184,6 @@ class CFBaseCheck(BaseCheck):
                         for i in range(len(title)):
                             if title[i].lower() == var_dim:
                                 valid_name_count = valid_name_count +1
-                                reasoning.append('The name field matches the dimension.') 
                             else:
                                 reasoning.append('The name field does not match the dimension.') 
 
@@ -2198,7 +2194,6 @@ class CFBaseCheck(BaseCheck):
                         if title[i] != '':
                             total_name_count = total_name_count +1
                         if title[i].lower() in ["interval", "area", "comment"] :
-                            reasoning.append('The name field matches the reserved words "interval", "area", or "comment".')
                             valid_name_count = valid_name_count +1
                         else:
                             reasoning.append('The name field does not match the reserved words "interval", "area", or "comment".')
@@ -2225,7 +2220,6 @@ class CFBaseCheck(BaseCheck):
                                 total_method_count = total_method_count +1
                             if named_dict[each][0].strip() in methods:
                                 valid_method_count = valid_method_count+1
-                                reasoning.append('The method field matches a valid method value.')
                             else:
                                 reasoning.append('The method field does not match a valid method value.')
                 result = Result(BaseCheck.MEDIUM,                            \
@@ -2247,7 +2241,6 @@ class CFBaseCheck(BaseCheck):
                             total_interval_count = total_interval_count +1
                             if len(named_dict[each][0].split(" ")) == 2:
                                 valid_interval_count = valid_interval_count+1
-                                reasoning.append('The "interval: value units" format is the correct length.')
                             else:
                                 reasoning.append('The "interval: value units" format is not the correct length.')
 
@@ -2271,13 +2264,11 @@ class CFBaseCheck(BaseCheck):
                             if len(area_data) == 4:
                                 if area_data[0] in methods and area_data[1] == "where" and area_data[2] in _areatype_names:
                                     valid_area_count = valid_area_count+1
-                                    reasoning.append('The "name: method where _areatype_names" format is correct.')
                                 else:
                                     reasoning.append('The "name: method where _areatype_names" format is not correct.')
                             elif len(area_data) == 6:
                                 if area_data[0] in methods and area_data[1] == "where" and area_data[2] in _areatype_names and area_data[3] == "over" and       area_data[4] in _areatype_names :
                                     valid_area_count = valid_area_count+1
-                                    reasoning.append('The "name: method where type over _areatype_names" format is correct.')
                                 else:
                                     reasoning.append('The "name: method where type over _areatype_names" format is not correct.')
 
@@ -2300,7 +2291,6 @@ class CFBaseCheck(BaseCheck):
                                 total_no_coord_count = total_no_coord_count +1
                             if named_dict[each][0].strip() in methods:
                                 valid_no_coord_count = valid_no_coord_count+1
-                                reasoning.append('The method is in the a value provided in the allowable method list.')
                             else:
                                 reasoning.append('The method is not in the a value provided in the allowable method list.')
                                 
@@ -2338,7 +2328,6 @@ class CFBaseCheck(BaseCheck):
                         if (case1 or case2 or case3) and len(ds.dataset.variables[clim_method].shape) == 2 and ds.dataset.variables[clim_method].shape[1] == 2 and ds.dataset.variables[clim_method].shape[0] == ds.dataset.variables[name_again].shape[0] :
                             
                             valid_climate_count = 1
-                            reasoning.append('The "time: method within years/days over years/days" format is correct.')
                         if not (case1 or case2 or case3):
                             reasoning.append('The "time: method within years/days over years/days" format is not correct.')
 
@@ -2493,7 +2482,6 @@ class CFBaseCheck(BaseCheck):
                             break
                     if type(data_type_check) == type(scale) == type(offset):
                         valid = True
-                        #reasoning.append("'add_offset' and 'scale_factor' both exist and match data type to the variable.")
                         result = Result(BaseCheck.MEDIUM,                            \
                                 valid,                                       \
                                 ('var', name, 'packed_data'), \
@@ -2503,7 +2491,6 @@ class CFBaseCheck(BaseCheck):
                     elif type(scale) == type(offset) != type(np.reshape(ds.dataset.variables[name],data_size)[x]):
                         if type(scale) in [float(), type(np.float32(1.)), int(), type(np.int16(1))]  and (type(np.reshape(ds.dataset.variables[name],data_size)[x])) in [type(np.int8(1)), type(np.int16(1)), int()]:
                            valid = True
-                           #reasoning.append("'add_offset' and 'scale_factor' are both of type float or int and the data variable is of type byte, short, or int.")
                            result = Result(BaseCheck.MEDIUM,                            \
                                 valid,                                       \
                                 ('var', name, 'packed_data'), \
