@@ -203,6 +203,9 @@ def is_likely_dsg(func):
     return _dec
 
 class CFBaseCheck(BaseCheck):
+    @classmethod
+    def beliefs(cls): # @TODO
+        return {}
     """
     CF Convention Checker (1.6)
 
@@ -1658,9 +1661,10 @@ class CFBaseCheck(BaseCheck):
                             valid,                                       \
                             ('var', name, 'is_reduced_horizontal_grid'), \
                             reasoning)
-            if valid == True:
-                ret_val.append(result)
-        
+
+            ret_val.append(result)
+
+
         return ret_val
 
     # grid mapping dictionary, appendix F
@@ -1722,13 +1726,12 @@ class CFBaseCheck(BaseCheck):
         
         ret_val = []
         reasoning = []
-        valid_mapping_count = 0
-        total_mapping_count = 0
 
         
         for name, var in ds.dataset.variables.iteritems():
-
-            if getattr(var, 'grid_mapping_name', ''):
+            valid_mapping_count = 0
+            total_mapping_count = 0
+            if hasattr(var, 'grid_mapping_name'):
                 total_mapping_count = 1
                 
                 mapping = getattr(var, 'grid_mapping_name', '')
@@ -1741,7 +1744,7 @@ class CFBaseCheck(BaseCheck):
                 for each in self.grid_mapping_dict[mapping][0]:
                     total_mapping_count = total_mapping_count + 1
                     if each in dir(var):
-                        valid_capping_count = valid_mapping_count +1
+                        valid_mapping_count = valid_mapping_count +1
                     else:
                         reasoning.append('The map parameters are not accepted values.  See Appendix F.')
                 
@@ -1751,23 +1754,23 @@ class CFBaseCheck(BaseCheck):
                         total_mapping_count = total_mapping_count + 1
                         for every in each:
                             if every in dir(var):
-                                valid_capping_count = valid_mapping_count + 1
+                                valid_mapping_count = valid_mapping_count + 1
                                 every_flag = every_flag +1
                         
                         if every_flag == 0:
                             reasoning.append('Neither of the "either/or" parameters are present')
                         if every_flag == 2:
-                            valid_capping_count = valid_mapping_count - 2
-                            reasoning.append('Both of the "either/or" parameters are present')
+                            valid_mapping_count = valid_mapping_count - 2
                 
-                total_mapping_count = total_mapping_count + len(self.grid_mapping_dict[mapping][1])
-                for name_again, each_again in ds.dataset.variables.iteritems():
-                    if name_again in self.grid_mapping_dict[mapping][1]:
-                        valid_mapping_count = valid_mapping_count + 1
+                total_mapping_count = total_mapping_count + len(self.grid_mapping_dict[mapping][2])
+                for name_again, var_again in ds.dataset.variables.iteritems():
+                    if hasattr(var_again,'standard_name'):
+                        if var_again.standard_name in self.grid_mapping_dict[mapping][2]:
+                            valid_mapping_count = valid_mapping_count + 1
                 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_mapping_count, total_mapping_count),                                       \
-                        ('var', name, 'compressed_data'), \
+                        ('var', name, 'horz_crs_grid_mappings_projections'), \
                         reasoning)
 
                 ret_val.append(result)
@@ -1907,7 +1910,7 @@ class CFBaseCheck(BaseCheck):
         
         for name, var in ds.dataset.variables.iteritems():
             if getattr(var, 'standard_name', '') == 'region':
-                if ds.dataset.variables[name][:] in region_list:
+                if ''.join(var[:]).lower() in region_list:
                     reasoning.append('The Region Value is from the allowable list.')
                     result = Result(BaseCheck.LOW,                            \
                             True,                                       \
@@ -1933,27 +1936,18 @@ class CFBaseCheck(BaseCheck):
         reasoning = []
         valid_alt_coordinate_var = 0
         total_alt_coordinate_var = 0
-
+        coordinate_list = []
 
         for name, var in ds.dataset.variables.iteritems():
-            valid_alt_coordinate_var = 0
-            total_alt_coordinate_var = 0
-            if getattr(var, 'coordinates', ''):
+            if hasattr(var, 'coordinates'):
                 for coordinate in getattr(var, 'coordinates', '').split(' '):
-                    if coordinate in ds.dataset.variables and coordinate not in ds.dataset.dimensions:
-                        reasoning.append('The Alternative Coordinate system for variable %s coordinate %s is not derived from the Coordinate Variables and is not Dimensionalized by them.' %(name, coordinate))
-                        total_alt_coordinate_var = total_alt_coordinate_var + 1
-                        valid_alt_coordinate_var = valid_alt_coordinate_var + 1
-                        continue
-                    elif coordinate not in ds.dataset.variables:
-                        reasoning.append('The Alternative Coordinate system for variable %s coordinate %s is derived from the Coordinate Variables and is Dimensionalized by them.' %(name, coordinate))
-                        total_alt_coordinate_var = total_alt_coordinate_var + 1
-
-
-                result = Result(BaseCheck.MEDIUM,                            \
-                            (valid_alt_coordinate_var,total_alt_coordinate_var),                                       \
-                            ('var', name, 'alternative_coordinates'), \
-                            reasoning)
+                    coordinate_list.append(coordinate)
+        for name, var in ds.dataset.variables.iteritems():
+            if name in coordinate_list and var.ndim == 1 and name not in ds.dataset.dimensions:
+                result = Result(BaseCheck.MEDIUM,                            
+                    True,                                       
+                    ('var', name, 'alternative_coordinates')
+                    )
                 ret_val.append(result)
 
         return ret_val
@@ -2500,6 +2494,7 @@ class CFBaseCheck(BaseCheck):
                                 valid,                                       \
                                 ('var', name, 'packed_data'), \
                                 reasoning)
+                        ret_val.append(result)
                         reasoning = []
                     elif type(scale) == type(offset) != type(np.reshape(ds.dataset.variables[name],data_size)[x]):
                         if type(scale) in [float(), type(np.float32(1.)), int(), type(np.int16(1))]  and (type(np.reshape(ds.dataset.variables[name],data_size)[x])) in [type(np.int8(1)), type(np.int16(1)), int()]:
@@ -2549,30 +2544,27 @@ class CFBaseCheck(BaseCheck):
         array. 
         """
         ret_val = []
-        reasoning = []
-
+        
+        
         for name, var in ds.dataset.variables.iteritems():
-            if getattr(var, 'compress', ''):
-                valid_form = False
-                valid_dim = False
-
-                if len(getattr(var, 'compress', '').split(" ")) >= 1:
-                    valid_form = True
-                    reasoning.append("The 'compress' attribute is in the form of a coordinate.")
+            valid_dim = 0
+            valid_form = 0
+            reasoning = []
+            if hasattr(var, 'compress'):
+                totals = 2
+                if name in var.dimensions and var.ndim == 1: 
+                    valid_dim = 1
+                else:
+                    reasoning.append("The 'compress' attribute is not assigned to a coordinate variable.")
+                if all([each in ds.dataset.dimensions.keys() for each in getattr(var, 'compress', '').split(" ")]):
+                    valid_form = 1
                 else: 
                     reasoning.append("The 'compress' attribute is not in the form of a coordinate.")
 
-                for name_again, var_again in ds.dataset.variables.iteritems():
-                
-                    if name in ds.dataset.variables[name].dimensions:
-                        valid_dim = True
-                        reasoning.append("The 'compress' attribute is a referenced dimension.")
-                    else:
-                        reasoning.append("The 'compress' attribute is not a referenced dimension.")
 
-                result = Result(BaseCheck.MEDIUM,                            \
-                                valid_form and valid_dim,                                       \
-                                ('var', name, 'compressed_data'), \
+                result = Result(BaseCheck.MEDIUM,                            
+                                (valid_form +valid_dim, totals),                                      
+                                ('var', name, 'compressed_data'), 
                                 reasoning)
                 ret_val.append(result)
 
@@ -2599,9 +2591,9 @@ class CFBaseCheck(BaseCheck):
         y = ''
         z = ''
         t = ''
-
+    
         flag = 0    
-        for name,var in ds.dataset.variables.iteritems():
+        for var in self._find_coord_vars(ds):
             if getattr(var,"grid_mapping_name", ""):
                 #DO GRIDMAPPING CHECKS FOR X,Y,Z,T
                 flag = 1
@@ -2611,95 +2603,58 @@ class CFBaseCheck(BaseCheck):
                     if getattr(var_again,"standard_name","") == self.grid_mapping_dict[getattr(var,"grid_mapping_name", "")][2][1]:
                         y = name_again
         
-                        
-                    
-                
- 
-        for name,var in ds.dataset.variables.iteritems():
+        for var in self._find_coord_vars(ds):
             #DO STANDARD SEARCH
             if getattr(var,'units','').lower() in ['pa', 'kpa', 'mbar', 'bar', 'atm', 'hpa', 'dbar'] or getattr(var,'positive','') or getattr(var,'standard_name','') == 'z' or getattr(var,'axis','') ==  'z':
-                z = name
-            if name.lower() in ['lon', 'longitude'] and flag == 0:
-                x = name
-            elif name.lower()in ['lat', 'latitude'] and flag == 0:
-                y = name
-            elif name.lower() == 'time':
-                t = name
+                z = var._name
+            if var._name.lower() in ['lon', 'longitude'] and flag == 0:
+                x = var._name
+            elif var._name.lower()in ['lat', 'latitude'] and flag == 0:
+                y = var._name
+            elif var._name.lower() == 'time':
+                t = var._name
                     
             if getattr(var, '_CoordinateAxisType', ''):
                 axis_type = getattr(var, '_CoordinateAxisType', '')
                 if axis_type.lower() in ['lon', 'longitude'] and flag == 0:
-                    x = name
+                    x = var._name
                 elif axis_type.lower()in ['lat', 'latitude'] and flag == 0:
-                    y = name
+                    y = var._name
                 elif axis_type.lower() == 'time':
-                    t = name
+                    t = var._name
                                       
         valid = False                
-        feature_types = []
+        feature_tuple_list = []
 
 
         #create shape size tuple
         if x =='' or y == '' or t == '':
             return
         elif z == '':
-            feature_tuple = (len(ds.dataset.variables[x].shape), len(ds.dataset.variables[y].shape), len(ds.dataset.variables[t].shape))
+            feature_tuple = (ds.dataset.variables[x].ndim, ds.dataset.variables[y].ndim, ds.dataset.variables[t].ndim)
         else:
-            feature_tuple = (len(ds.dataset.variables[x].shape), len(ds.dataset.variables[y].shape), len(ds.dataset.variables[t].shape), len(ds.dataset.variables[z].shape))
+            feature_tuple = (ds.dataset.variables[x].ndim, ds.dataset.variables[y].ndim, ds.dataset.variables[t].ndim, ds.dataset.variables[z].ndim)
+    
+        feature_tuple_list.append(feature_tuple)
 
 
-
-        #point
-        if feature_tuple == (0,0,0):
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
-                    feature_types.append('point')
-                    
-        #timeSeries
-        if feature_tuple == (0,0,1) or feature_tuple == (1,1,2) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
-                    feature_types.append('timeSeries')
-
-        #trajectory or profile
-        if feature_tuple == (1,1,1) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
-                    feature_types.append('point-or-trajectory')
-
-        #trajectory
-        if feature_tuple == (2,2,2) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
-                    feature_types.append('trajectory')
-                    
-        #profile
-        if feature_tuple == (0,0,1,0) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
-                    feature_types.append('profile')
+        data_vars = [each for name,each in ds.dataset.variables.iteritems() if hasattr(each,'coordinates')]
         
-        #timeseriesProfile
-        if feature_tuple == (0,0,2,1) or feature_tuple == (1,1,3,2) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
-                   feature_types.append('timeSeriesProfile')  
-              
-        #profile or trajectoryProfile
-        if feature_tuple == (1,1,2,1) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
-                   feature_types.append('profile-or-trajectoryProfile')
+        for each in data_vars:
+            this_feature_tuple = tuple([ds.dataset.variables[every].ndim for every in each.dimensions])
+            feature_tuple_list.append(this_feature_tuple)
+                
 
-        #trajectoryProfile
-        if  feature_tuple == (2,2,3,2) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
-                   feature_types.append('trajectoryProfile')  
+        print feature_tuple_list
+    
 
-        valid = all(x == feature_types[0] for x in feature_types)
+        valid = all(x == feature_tuple_list[0] for x in feature_tuple_list)
 
+    
         return Result(BaseCheck.HIGH, valid)
+        
+
+
 
     @is_likely_dsg
     def check_orthogonal_multidim_array(self, ds):
