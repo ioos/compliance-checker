@@ -1535,9 +1535,13 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         for name,var in ds.dataset.variables.iteritems():
             g = NCGraph(ds.dataset, name, var)
+
             #Determine if 2-D coordinate variables (Lat and Lon are of shape (i,j)
             for each in g.coords:
-                valid = g.coords[each].ndim == 2
+                try:
+                    valid = g.coords[each].ndim == 2
+                except:
+                    valid = False
 
             if len(g.coords) == 2 and valid:
                 #------------------------------------------------------------
@@ -1547,7 +1551,7 @@ class CFBaseCheck(BaseCheck):
                 reasoning = []
                 for dim in g.dims.iterkeys():
                     if dim not in ds.dataset.variables:
-                        valid_2d = False
+                        valid_dims = False
                         reasoning.append("Variable %s's dimension %s is not a coordinate variable" % (name, dim))
     
                 result = Result(BaseCheck.HIGH,                             \
@@ -1586,9 +1590,9 @@ class CFBaseCheck(BaseCheck):
 
                 for cname, coord in g.coords.iteritems():
 
-                    if coord.units in ['degrees_north', 'degree_north', 'degrees_N', 'degree_N', 'degreesN', 'degreeN']:
+                    if coord != None and coord.units in ['degrees_north', 'degree_north', 'degrees_N', 'degree_N', 'degreesN', 'degreeN']:
                         lat_check = True
-                    elif coord.units in ['degrees_east', 'degree_east', 'degrees_E', 'degree_E', 'degreesE', 'degreeE']:
+                    elif coord != None and coord.units in ['degrees_east', 'degree_east', 'degrees_E', 'degree_E', 'degreesE', 'degreeE']:
                         lon_check = True
     
                 result = Result(BaseCheck.HIGH,          \
@@ -2643,10 +2647,7 @@ class CFBaseCheck(BaseCheck):
         for each in data_vars:
             this_feature_tuple = tuple([ds.dataset.variables[every].ndim for every in each.dimensions])
             feature_tuple_list.append(this_feature_tuple)
-                
-
-        print feature_tuple_list
-    
+                    
 
         valid = all(x == feature_tuple_list[0] for x in feature_tuple_list)
 
@@ -2671,17 +2672,16 @@ class CFBaseCheck(BaseCheck):
         reasoning = []
 
         for name,var in ds.dataset.variables.iteritems():
-            if not getattr(var,'count_variable','') and not getattr(var,'index_variable',''):
-                if getattr(var, '_FillValue', ''):
-                    if getattr(var, '_FillValue', '') in ds.dataset.variables[name][:]:
-                        pass
-                    else:
-                        reasoning.append('No _FillValue was used and there is no count_variable or index_variable field, so therefore it must be an orthogonal multidimensional array.')
-                        result = Result(BaseCheck.MEDIUM,                            \
+            reasoning = []
+            if not hasattr(var,'count_variable') and not hasattr(var,'index_variable'):
+                if hasattr(var, '_FillValue'):
+                    pass
+                else:
+                    result = Result(BaseCheck.MEDIUM,                            \
                                 True,                                       \
                                 ('var', name, 'orthogonal_multidimensional'), \
                                 reasoning)
-                        ret_val.append(result)
+                    ret_val.append(result)
         return ret_val
         
     @is_likely_dsg
@@ -2699,19 +2699,17 @@ class CFBaseCheck(BaseCheck):
         """
 
         ret_val = []
-        reasoning = []
         for name,var in ds.dataset.variables.iteritems():
-            if not getattr(var,'count_variable','') and not getattr(var,'index_variable',''):
-                if getattr(var, '_FillValue', ''):
-                    if getattr(var, '_FillValue', '') in ds.dataset.variables[name][:]:
-                        reasoning.append('A _FillValue was given and used and there is no count_variable or index_variable field, so therefore it must be an orthogonal multidimensional array.')
-                        result = Result(BaseCheck.MEDIUM,                            \
+            reasoning = []
+            if not hasattr(var,'count_variable') and not hasattr(var,'index_variable'):
+                if hasattr(var, '_FillValue'):
+                    result = Result(BaseCheck.MEDIUM,                            \
                                 True,                                       \
                                 ('var', name, 'ragged_multidimensional'), \
                                 reasoning)
-                        ret_val.append(result)
-                    else:
-                        return []
+                    ret_val.append(result)
+                else:
+                    pass
 
         return ret_val
 
@@ -2735,8 +2733,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         reasoning = []
         for name,var in ds.dataset.variables.iteritems():
-            if getattr(var,'count_variable',''):
-                reasoning.append('The count_variable is present, therefore the data is a contiguous ragged array.')
+            if getattr(var,'sample_dimension',''):
                 result = Result(BaseCheck.MEDIUM,                            \
                         True,                                       \
                         ('var', name, 'continuous_ragged'), \
@@ -2767,8 +2764,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         reasoning = []
         for name,var in ds.dataset.variables.iteritems():
-            if getattr(var,'index_variable',''):
-                reasoning.append('The index_variable is present, therefore the data is an indexed ragged array.')
+            if getattr(var,'instance_dimension',''):
                 result = Result(BaseCheck.MEDIUM,                            \
                         True,                                       \
                         ('var', name, 'continuous_ragged'), \
@@ -2787,23 +2783,19 @@ class CFBaseCheck(BaseCheck):
 
         The value assigned to the featureType attribute is case-insensitive.
         """
-        ret_val = []
         reasoning=[]
         feature_list = ['point', 'timeseries','trajectory','profile', 'timeseriesprofile','trajectoryprofile']
 
         if getattr(ds.dataset, 'featureType', '').lower() in feature_list:
-            reasoning.append('The featureType is provided and is from the featureType list.')
-            result = Result(BaseCheck.MEDIUM,                            \
+            return Result(BaseCheck.MEDIUM,                            
                         True, 'feature_type',  
                         reasoning)
-            ret_val.append(result)
+
         elif getattr(ds.dataset, 'featureType', ''):
             reasoning.append('The featureType is provided and is not from the featureType list.')
-            result = Result(BaseCheck.MEDIUM, 'feature_type',                            \
-                        False,
+            return Result(BaseCheck.MEDIUM, 
+                        False, 'feature_type',                            
                         reasoning)
-            ret_val.append(result)
-        return ret_val
 
     @is_likely_dsg
     def check_coordinates_and_metadata(self, ds):
@@ -2867,7 +2859,6 @@ class CFBaseCheck(BaseCheck):
 
         for each in data_list:
             if getattr(ds.dataset.variables[each], 'coordinates', ''):
-                reasoning.append('The data variable %s has associated coordinates' %each)
                 result = Result(BaseCheck.MEDIUM,                            \
                             True,                                       \
                             ('var', each, 'check_coordinates'), \
@@ -2921,93 +2912,90 @@ class CFBaseCheck(BaseCheck):
         instance variable should also contain missing values.
         """
 
-
         ret_val = []
         
         
         name_list = ds.dataset.variables.keys()
         dim_list = ds.dataset.dimensions.keys()
 
-        aux_index_dict = {}
-        dim_index_dict = {}
-
 
         for name, var in ds.dataset.variables.iteritems():
-            reasoning = []
-            valid = False
-            aux_valid = False
-            
-            if hasattr(var, 'coordinates'):
-                for coordinate in getattr(var, 'coordinates', '').split(" "):
-                    indices = []
-                    if coordinate in name_list and coordinate not in dim_list:
-                        try:
-                            indices = np.where(ds.dataset.variables[coordinate] == var._FillValue).tolist()
-                        except:
-                            indices = np.where(ds.dataset.variables[coordinate] == var._FillValue)[0].tolist()
-
-                        dim_index_dict[name+'-'+coordinate] = indices
-                        aux_index_dict[name+'-'+coordinate] = indices
-                            
-                    elif coordinate in name_list and coordinate in dim_list:
-                        try:
-                            indices = np.where(ds.dataset.variables[coordinate] == var._FillValue).tolist()
-                        except:
-                            indices = np.where(ds.dataset.variables[coordinate] == var._FillValue)[0].tolist()
-                        dim_index_dict[name+'-'+coordinate] = indices
-                    else:
-                        dim_index_dict[name+'-'+coordinate] = []
-    
-
-            #Check to see that all coordinate variable mising data locations are the same
-            aux_index_list = []
-            for each in aux_index_dict:
-                aux_index_list.append(aux_index_dict[each])
-            if aux_index_list != []:  
-                aux_valid = all(x == aux_index_list[0] for x in aux_index_list)
-            else: 
-                aux_valid = True
-            
-            #Check to see that all auxilliary coordinate variable missing data appears in the coordinate variables
-            dim_index_list = []
-            for each in dim_index_dict:
-                dim_index_list.append(dim_index_dict[each])  
-            if dim_index_list != []:
-                valid = all(x == dim_index_list[0] for x in dim_index_list)
-            else:
-                valid = True
-
+            if hasattr(var,'coordinates'):
+                aux_index_dict = {}
+                dim_index_dict = {}
+                reasoning = []
+                valid = False
+                aux_valid = False
                 
-            if aux_valid == False:
-                reasoning.append('The auxillary coordinates do not have the same missing data locations')
-            if valid == False:
-                reasoning.append('The coordinate variables do not have the same missing data locations as the auxillary coordinates')
-            
-            #Check to see that all coordinate variable mising data is reflceted in the dataset
-            valid_missing = True
-            count = 0
-
-            if hasattr(var, '_FillValue'):
-                try:
-                    x_indices = np.where(var==var._FillValue).tolist()
-                except:
-                    x_indices = np.where(var==var._FillValue)[0].tolist()
-
-                if hasattr(var, 'coordinates'):
+                if hasattr(var, '_FillValue'):
+                    for coordinate in getattr(var, 'coordinates', '').split(" "):
+                        indices = []
+                        if coordinate in name_list and coordinate not in dim_list:
+                            try:
+                                indices = np.where(ds.dataset.variables[coordinate] == var._FillValue).tolist()
+                            except:
+                                indices = np.where(ds.dataset.variables[coordinate] == var._FillValue)[0].tolist()
+    
+                            dim_index_dict[name+'-'+coordinate] = indices
+                            aux_index_dict[name+'-'+coordinate] = indices
+                                
+                        elif coordinate in name_list and coordinate in dim_list:
+                            try:
+                                indices = np.where(ds.dataset.variables[coordinate] == var._FillValue).tolist()
+                            except:
+                                indices = np.where(ds.dataset.variables[coordinate] == var._FillValue)[0].tolist()
+                            dim_index_dict[name+'-'+coordinate] = indices
+                        else:
+                            dim_index_dict[name+'-'+coordinate] = []
+        
+    
+                #Check to see that all coordinate variable mising data locations are the same
+                aux_index_list = []
+                for each in aux_index_dict:
+                    aux_index_list.append(aux_index_dict[each])
+                if aux_index_list != []:  
+                    aux_valid = all(x == aux_index_list[0] for x in aux_index_list)
+                else: 
+                    aux_valid = True
+                
+                #Check to see that all auxilliary coordinate variable missing data appears in the coordinate variables
+                dim_index_list = []
+                for each in dim_index_dict:
+                    dim_index_list.append(dim_index_dict[each])  
+                if dim_index_list != []:
+                    valid = all(x == dim_index_list[0] for x in dim_index_list)
+                else:
+                    valid = True
+    
+                    
+                if aux_valid == False:
+                    reasoning.append('The auxillary coordinates do not have the same missing data locations')
+                if valid == False:
+                    reasoning.append('The coordinate variables do not have the same missing data locations as the auxillary coordinates')
+                
+                #Check to see that all coordinate variable mising data is reflceted in the dataset
+                valid_missing = True
+                count = 0
+    
+                if hasattr(var, '_FillValue'):
+                    try:
+                        x_indices = np.where(var==var._FillValue).tolist()
+                    except:
+                        x_indices = np.where(var==var._FillValue)[0].tolist()
+    
                     for coordinate in var.coordinates.split(" "):
                         coordinate_ind_list = dim_index_dict[name+'-'+coordinate]
-                        valid_missing = all(each in x_indices[count] for each in coordinate_ind_list)
-                        count = count+1
-
-                if valid_missing == False:
-                    reasoning.append('The data does not have the same missing data locations as the coordinates')
-            
-
-            result = Result(BaseCheck.MEDIUM,                            \
-                valid and aux_valid and valid_missing,                                       \
-                ('var', name, 'missing_data'), \
-                reasoning)
-            ret_val.append(result)
+                        valid_missing = all(each in x_indices for each in coordinate_ind_list)
+    
+                    if valid_missing == False:
+                        reasoning.append('The data does not have the same missing data locations as the coordinates')
+                
+    
+                result = Result(BaseCheck.MEDIUM,                            \
+                    valid and aux_valid and valid_missing,                                       \
+                    ('var', name, 'missing_data'), \
+                    reasoning)
+                ret_val.append(result)
         return ret_val
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
