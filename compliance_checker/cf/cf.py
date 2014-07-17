@@ -1725,13 +1725,12 @@ class CFBaseCheck(BaseCheck):
         
         ret_val = []
         reasoning = []
-        valid_mapping_count = 0
-        total_mapping_count = 0
 
         
         for name, var in ds.dataset.variables.iteritems():
-
-            if getattr(var, 'grid_mapping_name', ''):
+            valid_mapping_count = 0
+            total_mapping_count = 0
+            if hasattr(var, 'grid_mapping_name'):
                 total_mapping_count = 1
                 
                 mapping = getattr(var, 'grid_mapping_name', '')
@@ -1744,7 +1743,7 @@ class CFBaseCheck(BaseCheck):
                 for each in self.grid_mapping_dict[mapping][0]:
                     total_mapping_count = total_mapping_count + 1
                     if each in dir(var):
-                        valid_capping_count = valid_mapping_count +1
+                        valid_mapping_count = valid_mapping_count +1
                     else:
                         reasoning.append('The map parameters are not accepted values.  See Appendix F.')
                 
@@ -1754,23 +1753,23 @@ class CFBaseCheck(BaseCheck):
                         total_mapping_count = total_mapping_count + 1
                         for every in each:
                             if every in dir(var):
-                                valid_capping_count = valid_mapping_count + 1
+                                valid_mapping_count = valid_mapping_count + 1
                                 every_flag = every_flag +1
                         
                         if every_flag == 0:
                             reasoning.append('Neither of the "either/or" parameters are present')
                         if every_flag == 2:
-                            valid_capping_count = valid_mapping_count - 2
-                            reasoning.append('Both of the "either/or" parameters are present')
+                            valid_mapping_count = valid_mapping_count - 2
                 
-                total_mapping_count = total_mapping_count + len(self.grid_mapping_dict[mapping][1])
-                for name_again, each_again in ds.dataset.variables.iteritems():
-                    if name_again in self.grid_mapping_dict[mapping][1]:
-                        valid_mapping_count = valid_mapping_count + 1
+                total_mapping_count = total_mapping_count + len(self.grid_mapping_dict[mapping][2])
+                for name_again, var_again in ds.dataset.variables.iteritems():
+                    if hasattr(var_again,'standard_name'):
+                        if var_again.standard_name in self.grid_mapping_dict[mapping][2]:
+                            valid_mapping_count = valid_mapping_count + 1
                 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_mapping_count, total_mapping_count),                                       \
-                        ('var', name, 'compressed_data'), \
+                        ('var', name, 'horz_crs_grid_mappings_projections'), \
                         reasoning)
 
                 ret_val.append(result)
