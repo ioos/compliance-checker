@@ -2493,6 +2493,7 @@ class CFBaseCheck(BaseCheck):
                                 valid,                                       \
                                 ('var', name, 'packed_data'), \
                                 reasoning)
+                        ret_val.append(result)
                         reasoning = []
                     elif type(scale) == type(offset) != type(np.reshape(ds.dataset.variables[name],data_size)[x]):
                         if type(scale) in [float(), type(np.float32(1.)), int(), type(np.int16(1))]  and (type(np.reshape(ds.dataset.variables[name],data_size)[x])) in [type(np.int8(1)), type(np.int16(1)), int()]:
