@@ -203,6 +203,9 @@ def is_likely_dsg(func):
     return _dec
 
 class CFBaseCheck(BaseCheck):
+    @classmethod
+    def beliefs(cls): # @TODO
+        return {}
     """
     CF Convention Checker (1.6)
 
