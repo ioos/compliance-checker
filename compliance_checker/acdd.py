@@ -96,25 +96,32 @@ class ACDDBaseCheck(BaseCheck):
 
         return vars
 
+    def _get_msg(self, vpair, attr):
+        vval, vname = vpair
+        if vval is None:
+            return ["Var %s missing attr %s" % (vname, attr)]
+
+        return []
+
     @score_group('varattr')
     def check_var_long_name(self, ds):
         vars = self._get_vars(ds, 'long_name')
 
-        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_long_name")) for v in vars]
+        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_long_name"), self._get_msg(v, 'long_name')) for v in vars]
         return retval
 
     @score_group('varattr')
     def check_var_standard_name(self, ds):
         vars = self._get_vars(ds, 'standard_name')
 
-        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_std_name")) for v in vars]
+        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_std_name"), self._get_msg(v, 'standard_name')) for v in vars]
         return retval
 
     @score_group('varattr')
     def check_var_units(self, ds):
         vars = self._get_vars(ds, 'units')
 
-        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_units")) for v in vars]
+        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_units"), self._get_msg(v, 'units')) for v in vars]
         return retval
 
     @score_group('varattr')
@@ -122,8 +129,28 @@ class ACDDBaseCheck(BaseCheck):
         vars = self._get_vars(ds, 'coverage_content_type')
         allowed = ['image','thematicClassification','physicalMeasurement','auxiliaryInformation','qualityInformation','referenceInformation','modelResult','coordinate']
 
-        retval = [Result(BaseCheck.HIGH, v[0] is not None and v[0] in allowed, (v[1], "var_coverage_content_type")) for v in vars]
-        return retval
+        ret_val = []
+        for v in vars:
+            vval, vname = v
+            msgs = []
+
+            count = 0
+            if vval is not None:
+                count += 1
+
+                if vval in allowed:
+                    count += 1
+                else:
+                    msgs.append("coverage_content_type present but value (%s) not in allowed values (%s)" % (vval, allowed))
+            else:
+                msgs.append("Var %s missing attr %s" % (vname, 'coverage_content_type'))
+
+            ret_val.append(Result(BaseCheck.HIGH,
+                                  (count, 2),
+                                  (v[1], "var_coverage_content_type"),
+                                  msgs))
+
+        return ret_val
 
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
     @classmethod
