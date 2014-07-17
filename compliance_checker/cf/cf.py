@@ -1661,9 +1661,10 @@ class CFBaseCheck(BaseCheck):
                             valid,                                       \
                             ('var', name, 'is_reduced_horizontal_grid'), \
                             reasoning)
-            if valid == True:
-                ret_val.append(result)
-        
+
+            ret_val.append(result)
+
+
         return ret_val
 
     # grid mapping dictionary, appendix F
