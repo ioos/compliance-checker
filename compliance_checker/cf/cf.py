@@ -2590,9 +2590,9 @@ class CFBaseCheck(BaseCheck):
         y = ''
         z = ''
         t = ''
-
+    
         flag = 0    
-        for name,var in ds.dataset.variables.iteritems():
+        for var in self._find_coord_vars(ds):
             if getattr(var,"grid_mapping_name", ""):
                 #DO GRIDMAPPING CHECKS FOR X,Y,Z,T
                 flag = 1
@@ -2602,95 +2602,58 @@ class CFBaseCheck(BaseCheck):
                     if getattr(var_again,"standard_name","") == self.grid_mapping_dict[getattr(var,"grid_mapping_name", "")][2][1]:
                         y = name_again
         
-                        
-                    
-                
- 
-        for name,var in ds.dataset.variables.iteritems():
+        for var in self._find_coord_vars(ds):
             #DO STANDARD SEARCH
             if getattr(var,'units','').lower() in ['pa', 'kpa', 'mbar', 'bar', 'atm', 'hpa', 'dbar'] or getattr(var,'positive','') or getattr(var,'standard_name','') == 'z' or getattr(var,'axis','') ==  'z':
-                z = name
-            if name.lower() in ['lon', 'longitude'] and flag == 0:
-                x = name
-            elif name.lower()in ['lat', 'latitude'] and flag == 0:
-                y = name
-            elif name.lower() == 'time':
-                t = name
+                z = var._name
+            if var._name.lower() in ['lon', 'longitude'] and flag == 0:
+                x = var._name
+            elif var._name.lower()in ['lat', 'latitude'] and flag == 0:
+                y = var._name
+            elif var._name.lower() == 'time':
+                t = var._name
                     
             if getattr(var, '_CoordinateAxisType', ''):
                 axis_type = getattr(var, '_CoordinateAxisType', '')
                 if axis_type.lower() in ['lon', 'longitude'] and flag == 0:
-                    x = name
+                    x = var._name
                 elif axis_type.lower()in ['lat', 'latitude'] and flag == 0:
-                    y = name
+                    y = var._name
                 elif axis_type.lower() == 'time':
-                    t = name
+                    t = var._name
                                       
         valid = False                
-        feature_types = []
+        feature_tuple_list = []
 
 
         #create shape size tuple
         if x =='' or y == '' or t == '':
             return
         elif z == '':
-            feature_tuple = (len(ds.dataset.variables[x].shape), len(ds.dataset.variables[y].shape), len(ds.dataset.variables[t].shape))
+            feature_tuple = (ds.dataset.variables[x].ndim, ds.dataset.variables[y].ndim, ds.dataset.variables[t].ndim)
         else:
-            feature_tuple = (len(ds.dataset.variables[x].shape), len(ds.dataset.variables[y].shape), len(ds.dataset.variables[t].shape), len(ds.dataset.variables[z].shape))
+            feature_tuple = (ds.dataset.variables[x].ndim, ds.dataset.variables[y].ndim, ds.dataset.variables[t].ndim, ds.dataset.variables[z].ndim)
+    
+        feature_tuple_list.append(feature_tuple)
 
 
-
-        #point
-        if feature_tuple == (0,0,0):
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
-                    feature_types.append('point')
-                    
-        #timeSeries
-        if feature_tuple == (0,0,1) or feature_tuple == (1,1,2) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
-                    feature_types.append('timeSeries')
-
-        #trajectory or profile
-        if feature_tuple == (1,1,1) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
-                    feature_types.append('point-or-trajectory')
-
-        #trajectory
-        if feature_tuple == (2,2,2) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t] and ds.dataset.variables[name].shape == ds.dataset.variables[t].shape:
-                    feature_types.append('trajectory')
-                    
-        #profile
-        if feature_tuple == (0,0,1,0) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
-                    feature_types.append('profile')
+        data_vars = [each for name,each in ds.dataset.variables.iteritems() if hasattr(each,'coordinates')]
         
-        #timeseriesProfile
-        if feature_tuple == (0,0,2,1) or feature_tuple == (1,1,3,2) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
-                   feature_types.append('timeSeriesProfile')  
-              
-        #profile or trajectoryProfile
-        if feature_tuple == (1,1,2,1) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
-                   feature_types.append('profile-or-trajectoryProfile')
+        for each in data_vars:
+            this_feature_tuple = tuple([ds.dataset.variables[every].ndim for every in each.dimensions])
+            feature_tuple_list.append(this_feature_tuple)
+                
 
-        #trajectoryProfile
-        if  feature_tuple == (2,2,3,2) :
-            for name,var in ds.dataset.variables.iteritems():
-                if name not in [x,y,t,z] and ds.dataset.variables[name].shape == ds.dataset.variables[z].shape:
-                   feature_types.append('trajectoryProfile')  
+        print feature_tuple_list
+    
 
-        valid = all(x == feature_types[0] for x in feature_types)
+        valid = all(x == feature_tuple_list[0] for x in feature_tuple_list)
 
+    
         return Result(BaseCheck.HIGH, valid)
+        
+
+
 
     @is_likely_dsg
     def check_orthogonal_multidim_array(self, ds):
