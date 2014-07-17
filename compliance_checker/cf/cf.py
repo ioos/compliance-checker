@@ -1935,27 +1935,18 @@ class CFBaseCheck(BaseCheck):
         reasoning = []
         valid_alt_coordinate_var = 0
         total_alt_coordinate_var = 0
-
+        coordinate_list = []
 
         for name, var in ds.dataset.variables.iteritems():
-            valid_alt_coordinate_var = 0
-            total_alt_coordinate_var = 0
-            if getattr(var, 'coordinates', ''):
+            if hasattr(var, 'coordinates'):
                 for coordinate in getattr(var, 'coordinates', '').split(' '):
-                    if coordinate in ds.dataset.variables and coordinate not in ds.dataset.dimensions:
-                        reasoning.append('The Alternative Coordinate system for variable %s coordinate %s is not derived from the Coordinate Variables and is not Dimensionalized by them.' %(name, coordinate))
-                        total_alt_coordinate_var = total_alt_coordinate_var + 1
-                        valid_alt_coordinate_var = valid_alt_coordinate_var + 1
-                        continue
-                    elif coordinate not in ds.dataset.variables:
-                        reasoning.append('The Alternative Coordinate system for variable %s coordinate %s is derived from the Coordinate Variables and is Dimensionalized by them.' %(name, coordinate))
-                        total_alt_coordinate_var = total_alt_coordinate_var + 1
-
-
-                result = Result(BaseCheck.MEDIUM,                            \
-                            (valid_alt_coordinate_var,total_alt_coordinate_var),                                       \
-                            ('var', name, 'alternative_coordinates'), \
-                            reasoning)
+                    coordinate_list.append(coordinate)
+        for name, var in ds.dataset.variables.iteritems():
+            if name in coordinate_list and var.ndim == 1 and name not in ds.dataset.dimensions:
+                result = Result(BaseCheck.MEDIUM,                            
+                    True,                                       
+                    ('var', name, 'alternative_coordinates')
+                    )
                 ret_val.append(result)
 
         return ret_val
