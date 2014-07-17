@@ -1909,7 +1909,7 @@ class CFBaseCheck(BaseCheck):
         
         for name, var in ds.dataset.variables.iteritems():
             if getattr(var, 'standard_name', '') == 'region':
-                if ds.dataset.variables[name][:] in region_list:
+                if ''.join(var[:]).lower() in region_list:
                     reasoning.append('The Region Value is from the allowable list.')
                     result = Result(BaseCheck.LOW,                            \
                             True,                                       \
