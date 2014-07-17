@@ -2543,30 +2543,27 @@ class CFBaseCheck(BaseCheck):
         array. 
         """
         ret_val = []
-        reasoning = []
-
+        
+        
         for name, var in ds.dataset.variables.iteritems():
-            if getattr(var, 'compress', ''):
-                valid_form = False
-                valid_dim = False
-
-                if len(getattr(var, 'compress', '').split(" ")) >= 1:
-                    valid_form = True
-                    reasoning.append("The 'compress' attribute is in the form of a coordinate.")
+            valid_dim = 0
+            valid_form = 0
+            reasoning = []
+            if hasattr(var, 'compress'):
+                totals = 2
+                if name in var.dimensions and var.ndim == 1: 
+                    valid_dim = 1
+                else:
+                    reasoning.append("The 'compress' attribute is not assigned to a coordinate variable.")
+                if all([each in ds.dataset.dimensions.keys() for each in getattr(var, 'compress', '').split(" ")]):
+                    valid_form = 1
                 else: 
                     reasoning.append("The 'compress' attribute is not in the form of a coordinate.")
 
-                for name_again, var_again in ds.dataset.variables.iteritems():
-                
-                    if name in ds.dataset.variables[name].dimensions:
-                        valid_dim = True
-                        reasoning.append("The 'compress' attribute is a referenced dimension.")
-                    else:
-                        reasoning.append("The 'compress' attribute is not a referenced dimension.")
 
-                result = Result(BaseCheck.MEDIUM,                            \
-                                valid_form and valid_dim,                                       \
-                                ('var', name, 'compressed_data'), \
+                result = Result(BaseCheck.MEDIUM,                            
+                                (valid_form +valid_dim, totals),                                      
+                                ('var', name, 'compressed_data'), 
                                 reasoning)
                 ret_val.append(result)
 
