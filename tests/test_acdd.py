@@ -1,6 +1,6 @@
 import pytest
 
-from compliance_checker.acdd import ACDDCheck
+from compliance_checker.acdd import ACDDBaseCheck
 from netCDF4 import Dataset
 
 """
