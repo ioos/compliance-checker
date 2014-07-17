@@ -133,21 +133,26 @@ class Result(object):
         return ret
 
 def std_check_in(dataset_dogma, name, allowed_vals):
-    #return name in dataset_dogma.variables and dataset_dogma.variables[name] in allowed_vals
+    """
+    Returns 0 if attr not present, 1 if present but not in correct value, 2 if good
+    """
+    if not hasattr(dataset_dogma, name):
+        return 0
+
+    ret_val = 1
     try:
-        return hasattr(dataset_dogma, name) and getattr(dataset_dogma, name) in allowed_vals
+        if getattr(dataset_dogma, name) in allowed_vals:
+            ret_val += 1
     except DogmaGetterSetterException:
         pass
 
-    return False
+    return ret_val
 
 def std_check(dataset_dogma, name):
-    #return name in dataset_dogma.variables
     if hasattr(dataset_dogma, name):
         getattr(dataset_dogma, name)
         return True
 
-    #raise StandardError("NO CAN DO %s" % name)
     return False
 
 def check_has(priority=BaseCheck.HIGH):
@@ -158,13 +163,22 @@ def check_has(priority=BaseCheck.HIGH):
 
             ret_val = []
             for l in list_vars:
+                msgs = []
                 if isinstance(l, tuple):
                     name, allowed = l
-                    ret_val.append(Result(priority, std_check_in(ds.dogma, name, allowed), name))
+                    res = std_check_in(ds.dogma, name, allowed)
+                    if res == 0:
+                        msgs.append("Attr %s not present" % name)
+                    elif res == 1:
+                        msgs.append("Attr %s present but not in expected value list (%s)" % (name, allowed))
+
+                    ret_val.append(Result(priority, (res, 2), name, msgs))
 
                 else:
-                    ret_val.append(Result(priority, std_check(ds.dogma, l), l))
-
+                    res = std_check(ds.dogma, l)
+                    if not res:
+                        msgs = ["Attr %s not present" % l]
+                    ret_val.append(Result(priority, res, l, msgs))
 
             return ret_val
 
