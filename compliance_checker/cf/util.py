@@ -1,10 +1,107 @@
 import os
 import os.path
 import itertools
+from collections import defaultdict
 from lxml import etree
 from udunitspy import Unit, UdunitsError, Converter
 from netCDF4 import Dimension, Variable
 from pkgutil import get_data
+
+# copied from paegan
+# paegan may depend on these later
+_possiblet = ["time", "TIME", "Time",
+           "t", "T",
+           "ocean_time", "OCEAN_TIME",
+           "jd", "JD",
+           "dn", "DN",
+           "times", "TIMES", "Times",
+           "mt", "MT",
+           "dt", "DT",
+          ]
+_possiblez = ["depth", "DEPTH",
+           "depths", "DEPTHS",
+           "height", "HEIGHT",
+           "altitude", "ALTITUDE",
+           "alt", "ALT", 
+           "Alt", "Altitude",
+           "h", "H",
+           "s_rho", "S_RHO",
+           "s_w", "S_W",
+           "z", "Z",
+           "siglay", "SIGLAY",
+           "siglev", "SIGLEV",
+           "sigma", "SIGMA",
+           "vertical", "VERTICAL", "lev", "LEV", "level", "LEVEL"
+          ]
+_possiblex = ["x", "X",
+           "lon", "LON",
+           "xlon", "XLON",
+           "lonx", "lonx",
+           "lon_u", "LON_U",
+           "lon_v", "LON_V",
+           "lonc", "LONC",
+           "Lon", "Longitude",
+           "longitude", "LONGITUDE",
+           "lon_rho", "LON_RHO",
+           "lon_psi", "LON_PSI",
+
+          ]
+_possibley = ["y", "Y",
+           "lat", "LAT",
+           "ylat", "YLAT",
+           "laty", "laty",
+           "lat_u", "LAT_U",
+           "lat_v", "LAT_V",
+           "latc", "LATC",
+           "Lat", "Latitude",
+           "latitude", "LATITUDE",
+           "lat_rho", "LAT_RHO",
+           "lat_psi", "LAT_PSI",
+
+          ]
+
+_possibleaxis = _possiblet + _possiblez + _possiblex + _possibley
+
+
+_possiblexunits = ['degrees_east',
+                    'degree_east',
+                    'degrees_E',
+                    'degree_E',
+                    'degreesE',
+                    'degreeE'
+                    ]
+
+_possibleyunits = ['degrees_north',
+                'degree_north',
+                'degrees_N',
+                'degree_N',
+                'degreesN',
+                'degreeN'
+                    ]
+
+_possibletunits = ['day', 
+                'days', 
+                'd', 
+                'hour', 
+                'hours', 
+                'hr', 
+                'hrs', 
+                'h', 
+                'year', 
+                'years', 
+                'minute', 
+                'minutes', 
+                'm', 
+                'min', 
+                'mins', 
+                'second', 
+                'seconds', 
+                's', 
+                'sec', 
+                'secs'
+                ]
+
+_possibleaxisunits =  _possiblexunits + _possibleyunits +_possibletunits
 
 class DotDict(dict):
     """
@@ -168,4 +265,71 @@ def units_temporal(units):
     except UdunitsError:
         return False
     return r
+
+def map_axes(dim_vars, reverse_map=False):
+    """
+    axis name       -> [dimension names]
+    dimension name  -> [axis_name], length 0 if reverse_map
+    """
+    ret_val = defaultdict(list)
+    axes = ['X', 'Y', 'Z', 'T']
+
+    for k, v in dim_vars.iteritems():
+        axis = getattr(v, 'axis', '')
+        if not axis:
+            continue
+
+        axis = axis.upper()
+        if axis in axes:
+            if reverse_map:
+                ret_val[k].append(axis)
+            else:
+                ret_val[axis].append(k)
+
+    return dict(ret_val)
+
+def find_coord_vars(ncds):
+    """
+    Finds all coordinate variables in a dataset.
+
+    A variable with the same name as a dimension is called a coordinate variable.
+    """
+    coord_vars = []
+
+    for d in ncds.dimensions:
+        if d in ncds.variables and ncds.variables[d].dimensions == (d,):
+            coord_vars.append(ncds.variables[d])
+
+    return coord_vars
+
+def is_time_variable(varname, var):
+    """
+    Identifies if a variable is represents time
+    """
+    satisfied = varname.lower() == 'time'
+    satisfied |= getattr(var, 'standard_name', '') == 'time'
+    satisfied |= getattr(var, 'axis', '') == 'T'
+    satisfied |= units_convertible('seconds since 1900-01-01', getattr(var, 'units', ''))
+    return satisfied
+
+def is_vertical_coordinate(var_name, var):
+    """
+    Determines if a variable is a vertical coordinate variable
+    
+    4.3
+    A vertical coordinate will be identifiable by: units of pressure; or the presence of the positive attribute with a
+    value of up or down (case insensitive).  Optionally, the vertical type may be indicated additionally by providing
+    the standard_name attribute with an appropriate value, and/or the axis attribute with the value Z.
+    """
+    # Known name
+    satisfied = var_name.lower() in _possiblez 
+    satisfied |= getattr(var, 'standard_name', '') in _possiblez
+    # Is the axis set to Z?
+    satisfied |= getattr(var, 'axis', '').lower() == 'z'
+    is_pressure = units_convertible(getattr(var, 'units', '1'), 'dbar')
+    # Pressure defined or positive defined
+    satisfied |= is_pressure
+    if not is_pressure:
+        satisfied |= getattr(var,'positive', '').lower() in ('up', 'down')
+    return satisfied
 

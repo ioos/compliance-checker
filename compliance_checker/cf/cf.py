@@ -5,106 +5,9 @@ import numpy as np
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
-from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal
+from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possiblexunits, _possibleyunits, _possibletunits, _possibleaxisunits
 
 from netCDF4 import Dimension, Variable
-
-
-# copied from paegan
-# paegan may depend on these later
-_possiblet = ["time", "TIME", "Time",
-           "t", "T",
-           "ocean_time", "OCEAN_TIME",
-           "jd", "JD",
-           "dn", "DN",
-           "times", "TIMES", "Times",
-           "mt", "MT",
-           "dt", "DT",
-          ]
-_possiblez = ["depth", "DEPTH",
-           "depths", "DEPTHS",
-           "height", "HEIGHT",
-           "altitude", "ALTITUDE",
-           "alt", "ALT", 
-           "Alt", "Altitude",
-           "h", "H",
-           "s_rho", "S_RHO",
-           "s_w", "S_W",
-           "z", "Z",
-           "siglay", "SIGLAY",
-           "siglev", "SIGLEV",
-           "sigma", "SIGMA",
-           "vertical", "VERTICAL", "lev", "LEV", "level", "LEVEL"
-          ]
-_possiblex = ["x", "X",
-           "lon", "LON",
-           "xlon", "XLON",
-           "lonx", "lonx",
-           "lon_u", "LON_U",
-           "lon_v", "LON_V",
-           "lonc", "LONC",
-           "Lon", "Longitude",
-           "longitude", "LONGITUDE",
-           "lon_rho", "LON_RHO",
-           "lon_psi", "LON_PSI",
-
-          ]
-_possibley = ["y", "Y",
-           "lat", "LAT",
-           "ylat", "YLAT",
-           "laty", "laty",
-           "lat_u", "LAT_U",
-           "lat_v", "LAT_V",
-           "latc", "LATC",
-           "Lat", "Latitude",
-           "latitude", "LATITUDE",
-           "lat_rho", "LAT_RHO",
-           "lat_psi", "LAT_PSI",
-
-          ]
-
-_possibleaxis = _possiblet + _possiblez + _possiblex + _possibley
-
-
-_possiblexunits = ['degrees_east',
-                    'degree_east',
-                    'degrees_E',
-                    'degree_E',
-                    'degreesE',
-                    'degreeE'
-                    ]
-
-_possibleyunits = ['degrees_north',
-                'degree_north',
-                'degrees_N',
-                'degree_N',
-                'degreesN',
-                'degreeN'
-                    ]
-
-_possibletunits = ['day', 
-                'days', 
-                'd', 
-                'hour', 
-                'hours', 
-                'hr', 
-                'hrs', 
-                'h', 
-                'year', 
-                'years', 
-                'minute', 
-                'minutes', 
-                'm', 
-                'min', 
-                'mins', 
-                'second', 
-                'seconds', 
-                's', 
-                'sec', 
-                'secs'
-                ]
-
-_possibleaxisunits =  _possiblexunits + _possibleyunits +_possibletunits
 
 def guess_dim_type(dimension):
     """
@@ -168,28 +71,6 @@ def is_variable(name, var):
     return True
 
 
-def map_axes(dim_vars, reverse_map=False):
-    """
-    axis name       -> [dimension names]
-    dimension name  -> [axis_name], length 0 if reverse_map
-    """
-    ret_val = defaultdict(list)
-    axes = ['X', 'Y', 'Z', 'T']
-
-    for k, v in dim_vars.iteritems():
-        axis = getattr(v, 'axis', '')
-        if not axis:
-            continue
-
-        axis = axis.upper()
-        if axis in axes:
-            if reverse_map:
-                ret_val[k].append(axis)
-            else:
-                ret_val[axis].append(k)
-
-    return dict(ret_val)
-
 # helper to see if we should do DSG tests
 def is_likely_dsg(func):
     @wraps(func)
@@ -246,9 +127,7 @@ class CFBaseCheck(BaseCheck):
         if ds in self._coord_vars and not refresh:
             return self._coord_vars[ds]
 
-        for d in ds.dataset.dimensions:
-            if d in ds.dataset.variables and ds.dataset.variables[d].dimensions == (d,):
-                self._coord_vars[ds].append(ds.dataset.variables[d])
+        self._coord_vars[ds] = find_coord_vars(ds.dataset)
 
         return self._coord_vars[ds]
 
@@ -1078,30 +957,6 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
-    def _is_vertical_coordinate(self, var_name, var):
-        '''
-        Determines if a variable is a vertical coordinate variable
-        
-        4.3
-        A vertical coordinate will be identifiable by: units of pressure; or the presence of the positive attribute with a
-        value of up or down (case insensitive).  Optionally, the vertical type may be indicated additionally by providing
-        the standard_name attribute with an appropriate value, and/or the axis attribute with the value Z.
-        '''
-        # Known name
-        satisfied = var_name.lower() in _possiblez 
-        satisfied |= getattr(var, 'standard_name', '') in _possiblez
-        # Is the axis set to Z?
-        satisfied |= getattr(var, 'axis', '').lower() == 'z'
-        is_pressure = units_convertible(getattr(var, 'units', '1'), 'dbar')
-        # Pressure defined or positive defined
-        satisfied |= is_pressure
-        if not is_pressure:
-            satisfied |= getattr(var,'positive', '').lower() in ('up', 'down')
-        return satisfied
-
-
-
-
     def check_vertical_coordinate(self, ds):
         """
         4.3 Variables representing dimensional height or depth axes must always
@@ -1117,7 +972,7 @@ class CFBaseCheck(BaseCheck):
         
         ret_val = [] 
         for k,v in ds.dataset.variables.iteritems(): 
-            if self._is_vertical_coordinate(k,v):
+            if is_vertical_coordinate(k,v):
                 # Vertical variables MUST have units
                 has_units = hasattr(v, 'units') 
                 result = Result(BaseCheck.HIGH, \
@@ -1177,7 +1032,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         for k,v in ds.dataset.variables.iteritems():
             # If this is not a vertical coordinate
-            if not self._is_vertical_coordinate(k,v):
+            if not is_vertical_coordinate(k,v):
                 continue
 
             # If this is not height or depth
@@ -1277,16 +1132,6 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
-    def _is_time_variable(self, varname, var):
-        '''
-        Identifies if a variable is represents time
-        '''
-        satisfied = varname.lower() == 'time'
-        satisfied |= getattr(var, 'standard_name', '') == 'time'
-        satisfied |= getattr(var, 'axis', '') == 'T'
-        satisfied |= units_convertible('seconds since 1900-01-01', getattr(var, 'units', ''))
-        return satisfied
-
     def check_time_coordinate(self, ds):
         """
         4.4 Variables representing time must always explicitly include the units
@@ -1315,7 +1160,7 @@ class CFBaseCheck(BaseCheck):
 
         ret_val = []
         for k,v in ds.dataset.variables.iteritems():
-            if not self._is_time_variable(k,v):
+            if not is_time_variable(k,v):
                 continue
             # Has units
             has_units = hasattr(v, 'units')
