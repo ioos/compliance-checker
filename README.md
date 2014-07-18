@@ -9,7 +9,7 @@ It currently supports the following sources and standards:
 | --------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------- |
 | [ACDD (1.1)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_%28ACDD%29)  | Complete                | -                               |
 | IOOS Asset Concept                                                                                  | -                       | GetCapabilities, DescribeSensor |
-| [CF (1.6)](http://cf-convention.github.io/1.6.html)                                                 | Complete                | -                               |
+| [CF (1.6)](http://cfconventions.org/Data/cf-convetions/cf-conventions-1.6/build/cf-conventions.html)                                                 | Complete                | -                               |
 
 ### Concepts & Terminology
 
