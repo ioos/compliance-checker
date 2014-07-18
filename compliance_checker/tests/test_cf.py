@@ -6,6 +6,7 @@ from compliance_checker.base import DSPair
 from wicken.netcdf_dogma import NetCDFDogma
 from netCDF4 import Dataset
 from tempfile import gettempdir
+from pkg_resources import resource_filename
 
 import unittest
 import os
@@ -13,23 +14,22 @@ import re
 
 
 static_files = {
-        'rutgers'       : 'test-data/ru07-20130824T170228_rt0.nc',
-        'example-grid'  : 'test-data/example-grid.nc',
-        'badname'       : 'test-data/non-comp/badname.netcdf',
-        'bad'           : 'test-data/non-comp/bad.nc',
-        'dimensionless' : 'test-data/dimensionless.nc',
-        '2dim'          : 'test-data/2dim-grid.nc',
-        'bad2dim'       : 'test-data/non-comp/bad2dim.nc',
-        'rhgrid'        : 'test-data/rhgrid.nc',
-        'bad-rhgrid'    : 'test-data/non-comp/bad-rhgrid.nc',
-        'bad_data_type' : 'test-data/bad_data_type.nc',
-        'mapping'       : 'test-data/mapping.nc',
-        'bad_region'    : 'test-data/bad_region.nc',
-        'featureType'   : 'test-data/example-grid.nc',
-        'cont_ragged'   : 'test-data/cont_ragged.nc',
-        'index_ragged'  : 'test-data/index_ragged.nc',
-        'bad_missing_data'  : 'test-data/bad_missing_data.nc',
-
+        'rutgers'          : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc'),
+        'example-grid'     : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
+        'badname'          : resource_filename('compliance_checker', 'tests/data/non-comp/badname.netcdf'),
+        'bad'              : resource_filename('compliance_checker', 'tests/data/non-comp/bad.nc'),
+        'dimensionless'    : resource_filename('compliance_checker', 'tests/data/dimensionless.nc'),
+        '2dim'             : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
+        'bad2dim'          : resource_filename('compliance_checker', 'tests/data/non-comp/bad2dim.nc'),
+        'rhgrid'           : resource_filename('compliance_checker', 'tests/data/rhgrid.nc'),
+        'bad-rhgrid'       : resource_filename('compliance_checker', 'tests/data/non-comp/bad-rhgrid.nc'),
+        'bad_data_type'    : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
+        'mapping'          : resource_filename('compliance_checker', 'tests/data/mapping.nc'),
+        'bad_region'       : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
+        'featureType'      : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
+        'cont_ragged'      : resource_filename('compliance_checker', 'tests/data/cont_ragged.nc'),
+        'index_ragged'     : resource_filename('compliance_checker', 'tests/data/index_ragged.nc'),
+        'bad_missing_data' : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc'),
         }
 
 class MockVariable(object):

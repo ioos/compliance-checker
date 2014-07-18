@@ -2,4 +2,6 @@ include *.txt
 include README.md
 include compliance_checker/data/*.json
 include compliance_checker/data/*.xml
+include compliance_checker/tests/data/*.nc
+include compliance_checker/tests/data/non-comp/*.nc
 

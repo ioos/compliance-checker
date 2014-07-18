@@ -51,7 +51,7 @@ setup(name                 = "compliance-checker",
         ]
     },
     package_data         = {
-        'compliance_checker':['data/*.json', 'data/*.xml'],
+        'compliance_checker':['data/*.json', 'data/*.xml', 'tests/data/*.nc', 'tests/data/non-comp/*.nc'],
     }
 )
 
