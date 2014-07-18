@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from compliance_checker.cf import CFBaseCheck, BaseCheck, dimless_vertical_coordinates
-from compliance_checker.cf.util import is_vertical_coordinate
+from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable
 from compliance_checker.base import DSPair
 from wicken.netcdf_dogma import NetCDFDogma
 from netCDF4 import Dataset
@@ -497,20 +497,20 @@ class TestCF(unittest.TestCase):
     def test_is_time_variable(self):
         var1 = MockVariable()
         var1.standard_name = 'time'
-        self.assertTrue(self.cf._is_time_variable('not_time', var1))
+        self.assertTrue(is_time_variable('not_time', var1))
 
         var2 = MockVariable()
-        self.assertTrue(self.cf._is_time_variable('time', var2))
+        self.assertTrue(is_time_variable('time', var2))
 
-        self.assertFalse(self.cf._is_time_variable('not_time', var2))
+        self.assertFalse(is_time_variable('not_time', var2))
 
         var3 = MockVariable()
         var3.axis = 'T'
-        self.assertTrue(self.cf._is_time_variable('maybe_time', var3))
+        self.assertTrue(is_time_variable('maybe_time', var3))
 
         var4 = MockVariable()
         var4.units = 'seconds since 1900-01-01'
-        self.assertTrue(self.cf._is_time_variable('maybe_time', var4))
+        self.assertTrue(is_time_variable('maybe_time', var4))
 
     def test_check_time_coordinate(self):
         dataset = self.get_pair(static_files['example-grid'])

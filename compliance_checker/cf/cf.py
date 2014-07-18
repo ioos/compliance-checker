@@ -1239,7 +1239,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
 
         for k,v in ds.dataset.variables.iteritems():
-            if not self._is_time_variable(k,v):
+            if not is_time_variable(k,v):
                 continue
             has_calendar = hasattr(v, 'calendar')
             result = Result(BaseCheck.LOW,  \
