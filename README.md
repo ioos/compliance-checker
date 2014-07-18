@@ -153,3 +153,5 @@ The compliance-checker is designed to be simple and hackable to edit existing co
 - Luke Campbell <lcampbell@asascience.com>
 
 And many more testers!
+
+Portions of the CF checker are based on Michael Decker's work, http://repositories.iek.fz-juelich.de/hg/CFchecker/
