@@ -9,7 +9,7 @@ It currently supports the following sources and standards:
 | --------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------- |
 | [ACDD (1.1)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_%28ACDD%29)  | Complete                | -                               |
 | IOOS Asset Concept                                                                                  | -                       | GetCapabilities, DescribeSensor |
-| [CF (1.6)](http://cf-convention.github.io/1.6.html)                                                 | Partial (chs 2-5)       | -                               |
+| [CF (1.6)](http://cf-convention.github.io/1.6.html)                                                 | Complete                | -                               |
 
 ### Concepts & Terminology
 
@@ -21,11 +21,11 @@ A single score is then calculated by aggregating on the names, then multiplying 
 
 The computer-readable name field controls how Results are aggregated together - in order to prevent the overall score for a Check Suite varying on the number of variables, it is possible to *group* Results together via the name property. Grouped results will only add up to a single top-level entry.
 
-For example, ...
-
-See the Development section for more details on implementation.
+See the [Development](//github.com/ioos/compliance-checker/wiki/Development) wiki page for more details on implementation.
 
 ### Usage (command line)
+
+The compliance-checker can work against local files (.nc files, .xml files of SOS GetCapabilities/DescribeSensor requests) or against remote URLs (OPeNDAP data URLs, SOS GetCapabilities/DescribeSensor URLs).
 
 ```
 $ compliance-checker --help
@@ -44,7 +44,7 @@ optional arguments:
   --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
                         Define the criteria for the checks. Either Strict,
                         Normal, or Lenient. Defaults to Normal.
-  --verbose, -v         Increase Output Verbosity
+  --verbose, -v         Increase output. May be specified up to three times.
 ```
 
 ```
@@ -58,19 +58,53 @@ Running Compliance Checker on the dataset from: test-data/ru07-20130824T170228_r
       This test has passed under normal critera
 -------------------------------------------------------
 
-$ compliance-checker -v --test=acdd test-data/ru07-20130824T170228_rt0.nc
-Running Compliance Checker on the dataset from: test-data/ru07-20130824T170228_rt0.nc
+$ compliance-checker --test=cf sss20140107.v2.0cap.nc
+Running Compliance Checker on the dataset from: sss20140107.v2.0cap.nc
 
--------------------------------------------------------
-The following tests failed:
-----High priority tests failed-----
+
+--------------------------------------------------------------------------------
+                     The dataset scored 12 out of 14 points
+                              during the cf check
+--------------------------------------------------------------------------------
+                               Scoring Breakdown:
+
+
+                                 High Priority
+--------------------------------------------------------------------------------
     Name                            :Priority: Score
-varattr                                 :3:    69/120
-----Medium priority tests failed-----
+Variable names                          :3:     3/3
+conventions                             :3:     0/1
+data_types                              :3:     3/3
+dimension_names                         :3:     3/3
+units                                   :3:     0/1
+
+
+                                Medium Priority
+--------------------------------------------------------------------------------
     Name                            :Priority: Score
-acknowledgement                         :2:     0/1
-cdm_data_type                           :2:     0/1
-time_coverage_duration                  :2:     0/1
+all_features_are_same_type              :2:     0/0
+contiguous_ragged_array                 :2:     0/0
+coordinate_type                         :2:     2/2
+coordinates_and_metadata                :2:     0/0
+feature_type                            :2:     0/0
+incomplete_multidim_array               :2:     0/0
+indexed_ragged_array                    :2:     0/0
+missing_data                            :2:     0/0
+orthogonal_multidim_array               :2:     0/0
+var                                     :2:     1/1
+
+
+--------------------------------------------------------------------------------
+                  Reasoning for the failed tests given below:
+
+
+Name                             Priority:     Score:Reasoning
+--------------------------------------------------------------------------------
+conventions                            :3:     0/ 1 : Conventions field is not
+                                                      present
+units                                  :3:     0/ 1 :
+    sss_cap                            :3:     0/ 1 :
+        known                          :3:     0/ 1 : unknown units type (PSU)
 ```
 
 ### Installation
@@ -82,7 +116,9 @@ $ mkvirtualenv --no-site-packages compliance-checker
 $ workon compliance-checker
 ```
 
-Install dependencies (you may need C dependencies for netCDF-python), numpy must be installed on its own:
+The Python dependencies require several underlying system packages that most package managers should have. See the [Installation](//github.com/ioos/compliance-checker/wiki/Installation) wiki page for more information.
+
+Install dependencies, numpy must be installed on its own:
 
 ```
 $ pip install numpy
@@ -105,6 +141,5 @@ The compliance-checker is designed to be simple and hackable to edit existing co
 
 ### Roadmap
 
-- Complete CF 1.6 checks
-- Improve text output
-
+- Improved text output (#12)
+- UGRID compliance (#33)
