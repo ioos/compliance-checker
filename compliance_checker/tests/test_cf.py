@@ -584,7 +584,7 @@ class TestCF(unittest.TestCase):
 
         self.assertIn('Coordinate longitude is not a proper variable', rd['PSa'][1])
         self.assertIn("Coordinate latitude's dimension, latdim, is not a dimension of PSb", rd['PSb'][1])
-        self.assertIn("Coordinate lon_i's dimension, ijgrid, does not define compress", rd['PSc'][1])
+        assert 'PSc' not in rd.keys()
 
 
     def test_check_horz_crs_grid_mappings_projections(self):

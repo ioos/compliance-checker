@@ -1474,40 +1474,45 @@ class CFBaseCheck(BaseCheck):
 
             valid = True
             reasoning = []
+            valid_in_variables = True
+            valid_dim = True
+            valid_coord = True
+            valid_cdim = True
 
             coords = var.coordinates.split(' ')
             for coord in coords:
+                is_reduced_horizontal_grid = True
                 if coord not in ds.dataset.variables:
-                    valid = False
+                    valid_in_variables = False
                     reasoning.append("Coordinate %s is not a proper variable" % coord)
                     continue
 
                 for dim_name in ds.dataset.variables[coord].dimensions:
 
                     if dim_name not in var.dimensions:
-                        valid = False
+                        valid_dim = False
                         reasoning.append("Coordinate %s's dimension, %s, is not a dimension of %s" %(coord, dim_name, name))
                         continue
 
                     if dim_name not in coord_vars:
-                        valid = False
+                        valid_coord = False
                         reasoning.append("Coordinate %s's dimension, %s, is not a coordinate variable" % (coord, dim_name))
                         continue
 
                     dim = ds.dataset.variables[dim_name]
                     if not hasattr(dim, 'compress'):
-                        valid = False
-                        reasoning.append("Coordinate %s's dimension, %s, does not define compress" % (coord, dim_name))
+                        is_reduced_horizontal_grid = False
                         continue
 
                     compress_dims = dim.compress.split(' ')
                     for cdim in compress_dims:
                         if cdim not in ds.dataset.dimensions:
-                            valid = False
+                            valid_cdim = False
                             reasoning.append("Dimension %s compresses non-existent dimension, %s" % (dim_name, cdim))
                             continue
-            result = Result(BaseCheck.MEDIUM,                            \
-                            valid,                                       \
+            if is_reduced_horizontal_grid == True:
+                result = Result(BaseCheck.MEDIUM,                            \
+                            (valid_in_variables and valid_dim and valid_coord and valid_cdim),                                       \
                             ('var', name, 'is_reduced_horizontal_grid'), \
                             reasoning)
 
