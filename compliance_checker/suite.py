@@ -149,7 +149,7 @@ class CheckSuite(object):
 
         return  [score_list, points, out_of]
 
-    def non_verbose_output_generation(self, score_list, limit, points, out_of):
+    def non_verbose_output_generation(self, score_list, groups, limit, points, out_of):
 
         if points < out_of:
             print '{:^80}'.format("Scoring Breakdown:")
@@ -201,6 +201,14 @@ class CheckSuite(object):
             if priority_flag == 1 and limit == 1:
                 print '{:^80}'.format('No Low priority tests present')
                 print '-'*80
+
+            print "\n"+"\n"+'-'*80
+            print '{:^80}'.format('Reasoning for the failed tests given below:')
+            print '\n'
+            print '%s%37s:%10s:%8s' % ('Name','Priority', '  Score', 'Reasoning')
+            print "-"*80
+            self.reasoning_routine(groups, 0)
+
         else: 
             print "All tests passed!"
 
@@ -288,15 +296,10 @@ class CheckSuite(object):
                 print '%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), ' ')
             
             if (res.value[0] != res.value[1]) and res.msgs:
-                print wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), str(res.msgs)))
+                print wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), str("\n".join(res.msgs))))
 
             if res.children:
                 self.reasoning_routine(res.children, indent+1, False)
-
-            if line and (res.value[0] != res.value[1]):
-                print '-'*80
-
-
 
     def load_dataset(self, ds_str):
         """

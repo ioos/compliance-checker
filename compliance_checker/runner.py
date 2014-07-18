@@ -63,7 +63,7 @@ class ComplianceChecker(object):
 
             score_list, points, out_of = cs.standard_output(limit, checker, groups)
             if not verbose:
-                cs.non_verbose_output_generation(score_list, limit, points, out_of)
+                cs.non_verbose_output_generation(score_list, groups, limit, points, out_of)
             else:
                 cs.verbose_output_generation(groups, limit, points, out_of)
 
