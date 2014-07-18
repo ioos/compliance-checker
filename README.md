@@ -145,3 +145,11 @@ The compliance-checker is designed to be simple and hackable to edit existing co
 
 - Improved text output (#12)
 - UGRID compliance (#33)
+
+### Contributors
+
+- Dave Foster <dfoster@asascience.com>
+- Dan Maher <dmaher@asascience.com>
+- Luke Campbell <lcampbell@asascience.com>
+
+And many more testers!
