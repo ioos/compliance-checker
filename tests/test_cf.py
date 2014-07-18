@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from compliance_checker.cf import CFBaseCheck, BaseCheck, dimless_vertical_coordinates
+from compliance_checker.cf.util import is_vertical_coordinate
 from compliance_checker.base import DSPair
 from wicken.netcdf_dogma import NetCDFDogma
 from netCDF4 import Dataset
@@ -361,23 +362,23 @@ class TestCF(unittest.TestCase):
         # Proper name/standard_name
         known_name = mock_variable()
         known_name.standard_name = 'depth'
-        self.assertTrue(self.cf._is_vertical_coordinate('not_known', known_name))
+        self.assertTrue(is_vertical_coordinate('not_known', known_name))
 
         # Proper Axis
         axis_set = mock_variable()
         axis_set.axis = 'Z'
-        self.assertTrue(self.cf._is_vertical_coordinate('not_known', axis_set))
+        self.assertTrue(is_vertical_coordinate('not_known', axis_set))
 
         # Proper units
         units_set = mock_variable()
         units_set.units = 'dbar'
-        self.assertTrue(self.cf._is_vertical_coordinate('not_known', units_set))
+        self.assertTrue(is_vertical_coordinate('not_known', units_set))
 
         # Proper units/positive
         positive = mock_variable()
         positive.units = 'm'
         positive.positive = 'up'
-        self.assertTrue(self.cf._is_vertical_coordinate('not_known', positive))
+        self.assertTrue(is_vertical_coordinate('not_known', positive))
 
     def test_vertical_coordinate(self):
         '''
