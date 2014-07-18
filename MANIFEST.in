@@ -1,5 +1,6 @@
 include *.txt
 include README.md
+include LICENSE
 include compliance_checker/data/*.json
 include compliance_checker/data/*.xml
 include compliance_checker/tests/data/*.nc
