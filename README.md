@@ -133,6 +133,7 @@ $ pip install compliance-checker
 from compliance_checker.runner import ComplianceCheckerCheckSuite
 
 cs = ComplianceCheckerCheckSuite()
+dataset = cs.load_dataset("/path/or/url/to/your/dataset")
 groups = cs.run(dataset, 'acdd')
 scores = groups['acdd']
 ```
