@@ -127,6 +127,8 @@ $ pip install numpy
 $ pip install compliance-checker
 ```
 
+Installing on Ubuntu? Check out the [Ubuntu Install Guide](doc/ubuntu-install-guide.md)
+
 ### Usage (from Python code)
 
 ```python
