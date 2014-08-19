@@ -127,7 +127,13 @@ $ pip install numpy
 $ pip install compliance-checker
 ```
 
+## MS-Windows
+
 IOOS Compliance Checker cannot be installed on MS-Windows systems.  The required `udunitspy` and `swig` packages are either broken or available for that OS (2014-08-18).
+
+## Ubuntu
+
+Installing on Ubuntu? Check out the [Ubuntu Install Guide](doc/ubuntu-install-guide.md)
 
 ### Usage (from Python code)
 
