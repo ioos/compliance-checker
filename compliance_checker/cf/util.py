@@ -250,12 +250,11 @@ def units_known(units):
     return True
 
 def units_convertible(units1, units2, reftimeistime=True):
-    try:
-        Converter(str(units1), str(units2))
-    except UdunitsError:
-        return False
-
-    return True
+    """Return True if a Unit representing the string units1 can be converted
+    to a Unit representing the string units2, else False."""
+    u1 = Unit(units1)
+    u2 = Unit(units2)
+    return u1.are_convertible(u2)
 
 def units_temporal(units):
     r = False
