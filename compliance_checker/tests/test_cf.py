@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from compliance_checker.cf import CFBaseCheck, BaseCheck, dimless_vertical_coordinates
-from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable
+from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible
 from compliance_checker.base import DSPair
 from wicken.netcdf_dogma import NetCDFDogma
 from netCDF4 import Dataset
@@ -87,7 +87,7 @@ class TestCF(unittest.TestCase):
         dogma = NetCDFDogma('nc', self.cf.beliefs(), nc_dataset)
         pair = DSPair(nc_dataset, dogma)
         return pair
-    
+
     #--------------------------------------------------------------------------------
     # Compliance Tests
     #--------------------------------------------------------------------------------
@@ -703,6 +703,14 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_missing_data(dataset)
         for each in results:
             self.assertFalse(each.value)
+
+    #--------------------------------------------------------------------------------
+    # Utility Method Tests
+    #--------------------------------------------------------------------------------
+
+    def test_temporal_unit_conversion(self):
+        self.assertTrue(units_convertible('hours', 'seconds'))
+        self.assertFalse(units_convertible('hours', 'hours since 2000-01-01'))
 
 
 
