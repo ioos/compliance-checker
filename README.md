@@ -379,6 +379,7 @@ conda create --file requirements.txt -n compliance-checker
 conda install compliance-checker    
 source activate compliance_checker    
 ```    
+     
 2. Test the installation using the following commands:     
 ```    
 compliance-checker --help    
