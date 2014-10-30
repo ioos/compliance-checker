@@ -11,7 +11,7 @@ It currently supports the following sources and standards:
 | IOOS Asset Concept                                                                                  | -                       | GetCapabilities, DescribeSensor |
 | [CF (1.6)](http://cfconventions.org/Data/cf-convetions/cf-conventions-1.6/build/cf-conventions.html)                                                 | Complete                | -                               |
 
-### Concepts & Terminology
+## Concepts & Terminology
 
 Each compliance standard is executed by a Check Suite, which functions similar to a Python standard Unit Test. A Check Suite runs one or more checks against a dataset, returning a list of Results which are then aggregated into a summary.
 
@@ -23,7 +23,7 @@ The computer-readable name field controls how Results are aggregated together - 
 
 See the [Development](//github.com/ioos/compliance-checker/wiki/Development) wiki page for more details on implementation.
 
-### Usage (command line)
+## Usage (command line)
 
 The compliance-checker can work against local files (.nc files, .xml files of SOS GetCapabilities/DescribeSensor requests) or against remote URLs (OPeNDAP data URLs, SOS GetCapabilities/DescribeSensor URLs).
 
@@ -346,12 +346,12 @@ units                                  :3:     0/ 1 :
         known                          :3:     0/ 1 : unknown units type (PSU)
 ```
 
-### Installation
+## Installation
 
 To install locally, set up a virtual environment (recommend using
 [virtualenv-burrito](https://github.com/brainsik/virtualenv-burrito);
-however, do not use virtualenv-burrito if you are using Anaconda python.
-Instructions for Anaconda appear below):
+however, do not use `virtualenv-burrito` if you are using Anaconda python.
+[Instructions for Anaconda](#anaconda) appear below):
 
 ```
 $ mkvirtualenv --no-site-packages compliance-checker
@@ -367,7 +367,7 @@ $ pip install numpy
 $ pip install compliance-checker
 ```
 
-#### Anaconda on linux
+### Anaconda on linux<a name="anaconda"/>
 
 Assuming you have a standard Anaconda installation, run the following:
 
