@@ -374,10 +374,10 @@ Assuming you have a standard Anaconda installation, run the following:
 1. From the compliance-checker top-level directory create the virtual
 environment (stay as far away from virtualenv's burrito as you possibly
 can):    
-	```    
-	 conda create --file requirements.txt -n compliance-checker    
-	 conda install compliance-checker    
-	source activate compliance_checker    
+	```     
+conda create --file requirements.txt -n compliance-checker    
+conda install compliance-checker    
+source activate compliance_checker    
 	```    
 2. Test the installation using the following commands:    
 	```    
