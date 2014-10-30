@@ -367,25 +367,25 @@ $ pip install numpy
 $ pip install compliance-checker
 ```
 
-###<a name="anaconda"/> Anaconda on linux
+###<a name="anaconda"></a> Anaconda on linux
 
 Assuming you have a standard Anaconda installation, run the following:
 
 1. From the compliance-checker top-level directory create the virtual
 environment (stay as far away from virtualenv's burrito as you possibly
 can):    
-```     
+	```     
 conda create --file requirements.txt -n compliance-checker    
 conda install compliance-checker    
 source activate compliance_checker    
-```    
+	```    
      
 2. Test the installation using the following commands:     
-```    
-compliance-checker --help    
-compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170228_rt0.nc    
-compliance-checker --test=cf compliance_checker/tests/data/sss20140107.v2.0cap.nc     
-```    
+	```    
+	compliance-checker --help    
+	compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170228_rt0.nc    
+	compliance-checker --test=cf compliance_checker/tests/data/sss20140107.v2.0cap.nc     
+	```    
 
 ### MS-Windows
 
@@ -408,23 +408,23 @@ scores = groups['acdd']
 
 ## Development
 
-The compliance-checker is designed to be simple and hackable to edit existing compliance suites or introduce new ones. See the [Development](https://github.com/ioos/compliance-checker/wiki/Development) wiki page for more information.
+The compliance-checker is designed to be simple and hackable to edit existing compliance suites or introduce new ones. See the [Development](https://github.com/ioos/compliance-checker/wiki/Development) wiki page for more information.  
 
 ## Roadmap
 
-- Improved text output (#12)
-- UGRID compliance (#33)
+- Improved text output (\#12)
+- UGRID compliance (\#33)
 
-## Contributors
+## Contributors    
 
 - Dave Foster <dfoster@asascience.com>
 - Dan Maher <dmaher@asascience.com>
 - Luke Campbell <lcampbell@asascience.com>
 
-And many more testers!
+And many more testers!    
 
-Portions of the CF checker are based on Michael Decker's work, http://repositories.iek.fz-juelich.de/hg/CFchecker/
-
+Portions of the CF checker are based on Michael Decker's work, http://repositories.iek.fz-juelich.de/hg/CFchecker/    
+ 
 <!--
    15  vim --version
    17  python --version
@@ -452,3 +452,5 @@ Portions of the CF checker are based on Michael Decker's work, http://repositori
   839  compliance-checker --test=acdd test-data/ru07-20130824T170228_rt0.nc
   
 -->
+
+
