@@ -375,9 +375,9 @@ Assuming you have a standard Anaconda installation, run the following:
 environment (stay as far away from virtualenv's burrito as you possibly
 can):    
 	```     
-conda create --file requirements.txt -n compliance-checker    
-conda install compliance-checker    
+conda create --file requirements.txt -n compliance_checker    
 source activate compliance_checker    
+conda install compliance-checker    
 	```    
      
 2. Test the installation using the following commands:     
