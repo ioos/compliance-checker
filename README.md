@@ -389,7 +389,28 @@ conda install compliance-checker
 
 ### MS-Windows
 
-IOOS Compliance Checker cannot be installed on MS-Windows systems.  The required `udunitspy` and `swig` packages are either broken or unavailable for that OS (2014-08-18).
+IOOS Compliance Checker cannot be directly installed on MS-Windows systems because the required `udunitspy` and `swig` packages are either broken or unavailable for that OS (2014-08-18). However, the Compliance Checker can be successfully installed on Linux that runs as a guest OS on a virtual platform, e.g. Oracle VirtualBox with Linux Mint. If Anaconda is the Python of choice for the virtual Linux machine, the 64bit Linux has to be used because no `udunitspy` is currently available for 32bit Linux.
+
+Before [creating the virtual environment and installing compliance-checker](https://github.com/ioos/compliance-checker#-anaconda-on-linux), the required channel locations should be added to the Anaconda configuartion file `.condarc`; without that the conda command fails to find the required packages. If that file does not exist it should be created in the Anaconda root directory with the following text (the comments with "#" prefix are optional):
+
+```
+# channel locations. These override conda defaults, i.e., conda will
+# search *only* the channels listed here, in the order given. Use "defaults" to
+# automatically include all default channels. Non-url channels will be
+# interpreted as binstar usernames (this can be changed by modifying the
+# channel_alias key; see below).
+channels:
+  - rsignell
+  - skellys
+  - moghimis
+  - defaults
+```
+
+If after that conda still cannot find the required packages, the `binstar` package should be installed:
+
+```
+conda install binstar
+```
 
 ### Ubuntu
 
