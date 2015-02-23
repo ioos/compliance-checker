@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import pprint
 import argparse
-
+import sys
 from compliance_checker.runner import ComplianceChecker, ComplianceCheckerCheckSuite
 
 def main():
@@ -15,10 +15,13 @@ def main():
 
     print "Running Compliance Checker on the dataset from: %s" % args.dataset_location[0]
 
-    ComplianceChecker.run_checker(args.dataset_location[0],
+    return_value = ComplianceChecker.run_checker(args.dataset_location[0],
                                   args.test,
                                   args.verbose,
                                   args.criteria)
+    if return_value is not True:
+        return 1
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
