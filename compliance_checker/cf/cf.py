@@ -595,14 +595,15 @@ class CFBaseCheck(BaseCheck):
                 if ' ' in std_name:
                     std_name, std_name_modifier = std_name.split(' ', 1)
 
-            # 1) standard name is a string and in standard name table
+            # 1) standard name is a string and in standard name table or an exception, see H.2
             msgs = []
             is_str = isinstance(std_name, basestring)
+            in_exception = std_name in ('platform_name', 'station_name', 'instrument_name')
             in_table = std_name in self._std_names
 
             if not is_str:
                 msgs.append("The standard name '%s' is not of type string.  It is type %s" % (std_name, type(std_name)))
-            if not in_table:
+            if not in_table and not in_exception:
                 msgs.append("The standard name '%s' is not in standard name table" % std_name)
 
             ret_val.append(Result(BaseCheck.HIGH, is_str and in_table, ('std_name', k, 'legal'), msgs))
@@ -1264,6 +1265,11 @@ class CFBaseCheck(BaseCheck):
     # CHAPTER 5: Coordinate Systems
     #
     ###############################################################################
+
+    def _is_station_var(self, var):
+        if getattr(var, 'standard_name', None) in ('platform_name', 'station_name', 'instrument_name'):
+            return True
+        return False
 
     def _get_coord_vars(self, ds):
         coord_vars = []
@@ -2683,8 +2689,7 @@ class CFBaseCheck(BaseCheck):
 
         for name,var in ds.dataset.variables.iteritems():
 
-
-            if var.dimensions and not hasattr(var, 'cf_role'):
+            if var.dimensions and not hasattr(var, 'cf_role') and not self._is_station_var(var):
                 if var.dimensions != (name,):
                     name_list.append(name)
 
