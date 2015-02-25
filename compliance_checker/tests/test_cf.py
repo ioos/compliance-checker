@@ -15,6 +15,8 @@ import re
 
 static_files = {
         'rutgers'          : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc'),
+        'conv_multi'       : resource_filename('compliance_checker', 'tests/data/conv_multi.nc'),
+        'conv_bad'         : resource_filename('compliance_checker', 'tests/data/conv_bad.nc'),
         'example-grid'     : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
         'badname'          : resource_filename('compliance_checker', 'tests/data/non-comp/badname.netcdf'),
         'bad'              : resource_filename('compliance_checker', 'tests/data/non-comp/bad.nc'),
@@ -173,11 +175,20 @@ class TestCF(unittest.TestCase):
         """
         2.6.1 the NUG defined global attribute Conventions to the string value "CF-1.6"
         """
+        # :Conventions = "CF-1.6"
         dataset = self.get_pair(static_files['rutgers'])
         result = self.cf.check_conventions_are_cf_16(dataset)
         self.assertTrue(result.value)
 
-        #TODO add fail case?
+        # :Conventions = "CF-1.6 ,ACDD" ;
+        dataset = self.get_pair(static_files['conv_multi'])
+        result = self.cf.check_conventions_are_cf_16(dataset)
+        self.assertTrue(result.value)
+
+        # :Conventions = "NoConvention"
+        dataset = self.get_pair(static_files['conv_bad'])
+        result = self.cf.check_conventions_are_cf_16(dataset)
+        self.assertFalse(result.value)
 
     def test_check_convention_globals(self):
         """
