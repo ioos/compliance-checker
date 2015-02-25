@@ -408,7 +408,7 @@ class CFBaseCheck(BaseCheck):
         valid_conventions = ['CF-1.0', 'CF-1.1', 'CF-1.2', 'CF-1.3',
                              'CF-1.4', 'CF-1.5', 'CF-1.6']
         if hasattr(ds.dataset, 'Conventions'):
-            conventions = getattr(ds.dataset, 'Conventions', '').split(',')
+            conventions = re.split(',|\s+', getattr(ds.dataset, 'Conventions', ''))
             if any((c.strip() in valid_conventions for c in conventions)):
                 valid = True
                 reasoning = ['Conventions field is "CF-1.x (x in 0-6)"']
