@@ -43,17 +43,47 @@ class GliderCheck(BaseNCCheck):
         Validates that lat and lon are valid timeseries variables
         '''
         level = BaseCheck.MEDIUM
-        out_of = 1
+        out_of = 26
         score = 0
         messages = []
-        if ('lat' in ds.dataset.variables and 'lon' in ds.dataset.variables):
-            test = ds.dataset.variables['lat'].dimensions == ('time',)
-            test &= ds.dataset.variables['lon'].dimensions == ('time',)
-            score = int(test)
+
+        test = 'lat' in ds.dataset.variables
+        score += int(test)
+        if not test:
+            messages.append('lat is a required variable')
+            return self.make_result(level, score, out_of, 'Lat and Lon are Time Series', messages)
+
+        test = 'lon' in ds.dataset.variables
+        score += int(test)
+        if not test:
+            messages.append('lon is a required variable')
+            return self.make_result(level, score, out_of, 'Lat and Lon are Time Series', messages)
+
+        required_coordinate_attributes = [
+            '_FillValue',
+            'ancillary_variables',
+            'comment',
+            'coordinate_reference_frame',
+            'long_name',
+            'observation_type',
+            'platform',
+            'reference',
+            'standard_name',
+            'units',
+            'valid_max',
+            'valid_min'
+        ]
+        for attribute in required_coordinate_attributes:
+            test = hasattr(ds.dataset.variables['lat'], attribute)
+            score += int(test)
             if not test:
-                messages.append('Latitude and Longitude do not use time as their only dimension') 
-        else:
-            messages.append('Latitude and Longitude were not found in the dataset')
+                messages.append('%s attribute is required for lat' % attribute)
+            
+            test = hasattr(ds.dataset.variables['lon'], attribute)
+            score += int(test)
+            if not test:
+                messages.append('%s attribute is required for lat' % attribute)
+
         return self.make_result(level, score, out_of, 'Lat and Lon are Time Series', messages)
 
     def check_variables(self, ds):
@@ -219,3 +249,144 @@ class GliderCheck(BaseNCCheck):
                     messages.append('%s variable is missing attribute %s' % (var, attribute))
 
         return self.make_result(level, score, out_of, 'Required Variable Attributes', messages)
+
+    def check_dimensions(self, ds):
+        '''
+        NetCDF files submitted by the individual glider operators contain 2
+        dimension variables:
+         - time
+         - traj
+        '''
+        level = BaseCheck.HIGH
+        score = 0
+        messages = []
+
+        required_dimensions = [
+            'time',
+            'traj_strlen'
+        ]
+        out_of = len(required_dimensions)
+
+        for dimension in ds.dataset.dimensions:
+            test =  dimension in required_dimensions
+            score += int(test)
+            if not test:
+                messages.append('%s is not a valid dimension' % dimension)
+        return self.make_result(level, score, out_of, 'Required Dimensions', messages)
+
+    def check_trajectory_variables(self, ds):
+        '''
+        The trajectory variable stores a character array that identifies the
+        deployment during which the data was gathered. This variable is used by
+        the DAC to aggregate all individual NetCDF profiles containing the same
+        trajectory value into a single trajectory profile data set. This value
+        should be a character array that uniquely identifies the deployment and
+        each individual NetCDF file from the deployment data set should have
+        the same value.
+        '''
+        level = BaseCheck.MEDIUM
+        out_of = 5
+        score = 0
+        messages = []
+
+        test = 'trajectory' in ds.dataset.variables
+        score += int(test)
+        if not test:
+            messages.append('trajectory variable not found')
+            return self.make_result(level, score, out_of, 'Trajectory Variable', messages)
+        test = ds.dataset.variables['trajectory'].dimensions == ('traj_strlen',)
+        score += int(test)
+        if not test:
+            messages.append('trajectory has an invalid dimension')
+        test = hasattr(ds.dataset.variables['trajectory'], 'cf_role')
+        score += int(test)
+        if not test:
+            messages.append('trajectory is missing cf_role')
+        test = hasattr(ds.dataset.variables['trajectory'], 'comment')
+        score += int(test)
+        if not test:
+            messages.append('trajectory is missing comment')
+        test = hasattr(ds.dataset.variables['trajectory'], 'long_name')
+        score += int(test)
+        if not test:
+            messages.append('trajectory is missing long_name')
+        return self.make_result(level, score, out_of, 'Trajectory Variable', messages)
+
+    def check_time_series_variables(self, ds):
+        '''
+        Verifies that the time coordinate variable is correct
+        '''
+
+        level = BaseCheck.HIGH
+        out_of = 17
+        score = 0
+        messages = []
+
+        test = 'time' in ds.dataset.variables
+        score += int(test)
+        if not test:
+            messages.append('Required coordinate variable time is missing')
+            return self.make_result(level, score, out_of, 'Time Series Variable', messages)
+
+        test = ds.dataset.variables['time'].dtype.str == '<f8'
+        score += int(test)
+        if not test:
+            messages.append('Invalid variable type for time, it should be float64')
+
+        test = ds.dataset.variables['time'].ancillary_variables == 'time_qc'
+        score += int(test)
+        if not test:
+            messages.append('Invalid ancillary_variables attribute for time, should be "time_qc"')
+
+        test = ds.dataset.variables['time'].calendar == 'gregorian'
+        score += int(test)
+        if not test:
+            messages.append('Invalid calendar for time, should be "gregorian"')
+
+        test = ds.dataset.variables['time'].long_name == 'Time'
+        score += int(test)
+        if not test:
+            messages.append('Invalid long_name for time, should be "Time"')
+
+        test = ds.dataset.variables['time'].observation_type == 'measured'
+        score += int(test)
+        if not test:
+            messages.append('Invalid observation_type for time, should be "measured"')
+
+        test = ds.dataset.variables['time'].standard_name == 'time'
+        score += int(test)
+        if not test:
+            messages.append('Invalid standard name for time, should be "time"')
+
+        test = hasattr(ds.dataset.variables['time'], 'units')
+        score += int(test)
+        if not test:
+            messages.append('No units defined for time')
+
+        test = hasattr(ds.dataset.variables['time'], '_FillValue')
+        score += int(test)
+        if not test:
+            messages.append('_FillValue is required for time')
+
+        test = 'time_qc' in ds.dataset.variables
+        score += int(test)
+        if not test:
+            messages.append('time_qc is not defined')
+            return self.make_result(level, score, out_of, 'Time Series Variable', messages)
+
+        required_time_qc_attributes = [
+            '_FillValue',
+            'flag_meanings',
+            'flag_values',
+            'long_name',
+            'standard_name',
+            'valid_max',
+            'valid_min'
+        ]
+        for attribute in required_time_qc_attributes:
+            test = hasattr(ds.dataset.variables['time_qc'], attribute)
+            score += int(test)
+            if not test:
+                messages.append('%s attribute is required for time_qc' % attribute)
+
+        return self.make_result(level, score, out_of, 'Time Series Variable', messages)
