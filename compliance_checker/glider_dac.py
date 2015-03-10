@@ -145,15 +145,30 @@ class GliderCheck(BaseNCCheck):
             'u_qc',
             'v_qc'
         ]
+
+        required_attributes = [
+            'flag_meanings',
+            'flag_values',
+            'long_name',
+            'standard_name',
+            'valid_max',
+            'valid_min'
+        ]
         level = BaseCheck.MEDIUM
         out_of = len(required_variables)
         score = 0
         messages = []
         for variable in required_variables:
             test = variable in ds.dataset.variables
-            score += int(test)
             if not test:
                 messages.append("%s is a required qc variable" % variable)
+                continue
+            for field in required_attributes:
+                if not hasattr(ds.dataset.variables[variable], field):
+                    messages.append('%s is missing attribute %s' % (variable, field))
+                    test = False
+                    break
+            score += int(test)
         return self.make_result(level, score, out_of, 'Required QC Variables', messages)
 
     def check_global_attributes(self, ds):
@@ -216,7 +231,6 @@ class GliderCheck(BaseNCCheck):
         score = 0
         messages = []
         primary_variables = [
-            'time',
             'lat',
             'lon',
             'pressure',
@@ -318,7 +332,7 @@ class GliderCheck(BaseNCCheck):
         '''
 
         level = BaseCheck.HIGH
-        out_of = 17
+        out_of = 16
         score = 0
         messages = []
 
@@ -363,11 +377,6 @@ class GliderCheck(BaseNCCheck):
         if not test:
             messages.append('No units defined for time')
 
-        test = hasattr(ds.dataset.variables['time'], '_FillValue')
-        score += int(test)
-        if not test:
-            messages.append('_FillValue is required for time')
-
         test = 'time_qc' in ds.dataset.variables
         score += int(test)
         if not test:
@@ -390,3 +399,66 @@ class GliderCheck(BaseNCCheck):
                 messages.append('%s attribute is required for time_qc' % attribute)
 
         return self.make_result(level, score, out_of, 'Time Series Variable', messages)
+
+    def check_depth_coordinates(self, ds):
+        '''
+        Verifies that the pressure coordinate/data variable is correct
+        '''
+
+        level = BaseCheck.HIGH
+        out_of = 34
+        score = 0
+        messages = []
+
+        coordinates = ['pressure', 'depth']
+
+        for coordinate in coordinates:
+            test = coordinate in ds.dataset.variables
+            score += int(test)
+
+            if not test:
+                messages.append('Required coordinate variable %s is missing' % coordinate)
+                return self.make_result(level, score, out_of, 'Depth/Pressure Variables', messages)
+
+        required_values = {
+        }
+
+        data_vars = { i: ds.dataset.variables[i] for i in coordinates}
+        for key, value in required_values.iteritems():
+            for data_var in data_vars:
+                if not hasattr(data_vars[data_var], key):
+                    messages.append('%s variable requires attribute %s with a value of %s' % (data_var, key, value))
+                    continue
+                if not test:
+                    messages.append('%s.%s != %s' % (data_var, key, value))
+                    continue
+                score += 1
+
+        required_attributes = [
+            '_FillValue',
+            'ancillary_variables',
+            'accuracy',
+            'ancillary_variables',
+            'comment',
+            'instrument',
+            'long_name',
+            'platform',
+            'positive',
+            'precision',
+            'reference_datum',
+            'resolution',
+            'standard_name',
+            'units',
+            'valid_max',
+            'valid_min'
+        ]
+
+        for field in required_attributes:
+            for data_var in data_vars:
+                if not hasattr(data_vars[data_var], field):
+                    messages.append('%s variable requires attribute %s' % (data_var, field))
+                    continue
+                score += 1
+
+        return self.make_result(level, score, out_of, 'Depth/Pressure Variables', messages)
+
