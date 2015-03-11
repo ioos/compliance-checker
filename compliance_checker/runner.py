@@ -4,15 +4,17 @@ from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.cf import CFBaseCheck
 from compliance_checker.ioos import IOOSBaseCheck
 from compliance_checker.suite import CheckSuite
+from compliance_checker.glider_dac import GliderCheck
 
 class ComplianceCheckerCheckSuite(CheckSuite):
     """
     CheckSuite that defines all the possible Checker classes for the application.
     """
     checkers = {
-        'cf' : CFBaseCheck,
-        'acdd' : ACDDBaseCheck,
-        'ioos' : IOOSBaseCheck,
+        'cf'        : CFBaseCheck,
+        'acdd'      : ACDDBaseCheck,
+        'ioos'      : IOOSBaseCheck,
+        'gliderdac' : GliderCheck
     }
 
 class ComplianceChecker(object):

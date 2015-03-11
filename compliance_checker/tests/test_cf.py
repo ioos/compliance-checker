@@ -31,7 +31,7 @@ static_files = {
         'featureType'      : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
         'cont_ragged'      : resource_filename('compliance_checker', 'tests/data/cont_ragged.nc'),
         'index_ragged'     : resource_filename('compliance_checker', 'tests/data/index_ragged.nc'),
-        'bad_missing_data' : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc'),
+        'bad_missing_data' : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc')
         }
 
 class MockVariable(object):

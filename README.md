@@ -406,6 +406,25 @@ groups = cs.run(dataset, 'acdd')
 scores = groups['acdd']
 ```
 
+
+## Usage (Command Line)
+
+```
+compliance-checker <data-source> -t [cf|acdd|ioos|gliderdac]
+```
+
+The compliance checker command line tool will print out (to STDOUT) the test
+results. The command line tool will also return 0 for a successful run and
+non-0 for a failure.
+
+## Available Test Suites
+
+- [CF 1.6](http://cfconventions.org/)
+- [ACDD](http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/metadata/DataDiscoveryAttConvention.html)
+- [IOOS](http://www.ioos.noaa.gov/data/contribute_data.html)
+- [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2)
+
+
 ## Development
 
 The compliance-checker is designed to be simple and hackable to edit existing compliance suites or introduce new ones. See the [Development](https://github.com/ioos/compliance-checker/wiki/Development) wiki page for more information.  
