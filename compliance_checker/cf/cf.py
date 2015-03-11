@@ -1487,6 +1487,7 @@ class CFBaseCheck(BaseCheck):
             valid_dim = True
             valid_coord = True
             valid_cdim = True
+            result = None
 
             coords = var.coordinates.split(' ')
             for coord in coords:
@@ -1524,8 +1525,9 @@ class CFBaseCheck(BaseCheck):
                             (valid_in_variables and valid_dim and valid_coord and valid_cdim),                                       \
                             ('var', name, 'is_reduced_horizontal_grid'), \
                             reasoning)
-
-            ret_val.append(result)
+            
+            if result:
+                ret_val.append(result)
 
 
         return ret_val
