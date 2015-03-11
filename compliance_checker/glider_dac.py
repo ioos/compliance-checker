@@ -7,6 +7,7 @@ https://github.com/ioos/ioosngdac/wiki
 '''
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result
+import numpy as np
 
 class GliderCheck(BaseNCCheck):
     @classmethod
@@ -462,3 +463,261 @@ class GliderCheck(BaseNCCheck):
 
         return self.make_result(level, score, out_of, 'Depth/Pressure Variables', messages)
 
+    def check_ctd_variables(self, ds):
+        '''
+        Verifies that the CTD Variables are the correct data type and contain
+        the correct metadata
+        '''
+
+        level = BaseCheck.HIGH
+        out_of = 56
+        score = 0
+        messages = []
+
+        variables = [
+            'temperature',
+            'conductivity',
+            'salinity',
+            'density'
+        ]
+
+        required_fields = [
+            'accuracy',
+            'ancillary_variables',
+            'instrument',
+            'long_name',
+            'observation_type',
+            'platform',
+            'precision',
+            'resolution',
+            'standard_name',
+            'units',
+            'valid_max',
+            'valid_min'
+        ]
+
+        for var in variables:
+            if var not in ds.dataset.variables:
+                messages.append('%s variable missing' % var)
+                continue
+            nc_var = ds.dataset.variables[var]
+
+            test = nc_var.dtype.str == '<f8'
+            score += int(test)
+            if not test:
+                messages.append('%s variable is incorrect data type')
+
+            for field in required_fields:
+                if not hasattr(nc_var, field):
+                    messages.append('%s variable is missing required attribute %s' % (var, field))
+                    continue
+                score += 1
+
+            score += 1
+        return self.make_result(level, score, out_of, 'CTD Variables', messages)
+
+
+    def check_profile_vars(self, ds):
+        '''
+        Verifies that the profile variables are the of the correct data type
+        and contain the correct metadata
+        '''
+
+        level = BaseCheck.MEDIUM
+        out_of = 74
+        score = 0
+        messages = []
+
+        data_struct = {
+            'profile_id' : {
+                'dtype' : '<i4',
+                'fields' : [
+                    '_FillValue',
+                    'comment',
+                    'long_name',
+                    'valid_min',
+                    'valid_max'
+                ]
+            },
+            'profile_time' : {
+                'dtype' : '<f8',
+                'fields' : [
+                    '_FillValue',
+                    'comment',
+                    'long_name',
+                    'observation_type',
+                    'platform',
+                    'standard_name',
+                    'units'
+                ]
+            },
+            'profile_lat' : {
+                'dtype' : '<f8',
+                'fields' : [
+                    '_FillValue',
+                    'comment',
+                    'long_name',
+                    'observation_type',
+                    'platform',
+                    'standard_name',
+                    'units',
+                    'valid_min',
+                    'valid_max'
+                ]
+            },
+            'profile_lon' : {
+                'dtype' : '<f8',
+                'fields' : [
+                    '_FillValue',
+                    'comment',
+                    'long_name',
+                    'observation_type',
+                    'platform',
+                    'standard_name',
+                    'units',
+                    'valid_min',
+                    'valid_max'
+                ]
+            },
+            'lat_uv' : {
+                'dtype' : '<f8',
+                'fields' : [
+                    '_FillValue',
+                    'comment',
+                    'long_name',
+                    'observation_type',
+                    'platform',
+                    'standard_name',
+                    'units',
+                    'valid_min',
+                    'valid_max'
+                ]
+            },
+            'lon_uv' : {
+                'dtype' : '<f8',
+                'fields' : [
+                    '_FillValue',
+                    'comment',
+                    'long_name',
+                    'observation_type',
+                    'platform',
+                    'standard_name',
+                    'units',
+                    'valid_min',
+                    'valid_max'
+                ]
+            },
+            'u' : {
+                'dtype' : '<f8',
+                'fields' : [
+                    '_FillValue',
+                    'comment',
+                    'long_name',
+                    'observation_type',
+                    'platform',
+                    'standard_name',
+                    'units',
+                    'valid_min',
+                    'valid_max'
+                ]
+            },
+            'v' : {
+                'dtype' : '<f8',
+                'fields' : [
+                    '_FillValue',
+                    'comment',
+                    'long_name',
+                    'observation_type',
+                    'platform',
+                    'standard_name',
+                    'units',
+                    'valid_min',
+                    'valid_max'
+                ]
+            }
+        }
+
+        for profile_var in data_struct:
+            test = profile_var in ds.dataset.variables
+            if not test:
+                messages.append("Required Variable %s is missing" % profile_var)
+                continue
+
+            nc_var = ds.dataset.variables[profile_var]
+            dtype = np.dtype(data_struct[profile_var]['dtype'])
+            test = nc_var.dtype.str == dtype.str
+            score += int(test)
+            if not test:
+                messages.append('%s variable has incorrect dtype, should be %s' % (profile_var, dtype.name))
+
+            for field in data_struct[profile_var]['fields']:
+                test = hasattr(nc_var, field)
+                if not test:
+                    messages.append('%s variable is missing required attribute %s' % (profile_var, field))
+                    continue
+                score += 1
+
+        return self.make_result(level, score, out_of, 'Profile Variables', messages)
+
+    def check_container_variables(self, ds):
+        '''
+        Verifies that the dimensionless container variables are the correct
+        data type and contain the required metadata
+        '''
+        
+        level = BaseCheck.MEDIUM
+        out_of = 19
+        score = 0
+        messages = []
+        
+        data_struct = {
+            'platform' : {
+                'dtype' : '<i4',
+                'fields' : [
+                    '_FillValue',
+                    'comment',
+                    'id',
+                    'instrument',
+                    'long_name',
+                    'type',
+                    'wmo_id'
+                ]
+            },
+            'instrument_ctd' : {
+                'dtype' : '<i4',
+                'fields' : [
+                    '_FillValue',
+                    'calibration_date',
+                    'calibration_report',
+                    'comment',
+                    'factory_calibrated',
+                    'long_name',
+                    'make_model',
+                    'platform',
+                    'serial_number',
+                    'type'
+                ]
+            }
+        }
+
+        for container_var in data_struct:
+            test = container_var in ds.dataset.variables
+            if not test:
+                messages.append("Required Variable %s is missing" % container_var)
+                continue
+
+            nc_var = ds.dataset.variables[container_var]
+            dtype = np.dtype(data_struct[container_var]['dtype'])
+            test = nc_var.dtype.str == dtype.str
+            score += int(test)
+            if not test:
+                messages.append('%s variable has incorrect dtype, should be %s' % (container_var, dtype.name))
+
+            for field in data_struct[container_var]['fields']:
+                test = hasattr(nc_var, field)
+                if not test:
+                    messages.append('%s variable is missing required attribute %s' % (container_var, field))
+                    continue
+                score += 1
+
+        return self.make_result(level, score, out_of, 'Container Variables', messages)

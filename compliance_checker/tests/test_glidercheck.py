@@ -8,6 +8,7 @@ import unittest
 static_files = {
     'glider_std': resource_filename('compliance_checker', 'tests/data/gliders/IOOS_Glider_NetCDF_v2.0.nc'),
     'bad_location': resource_filename('compliance_checker', 'tests/data/gliders/bad_location.nc'),
+    'bad_qc': resource_filename('compliance_checker', 'tests/data/gliders/bad_qc.nc'),
 }
 
 class TestGliderCheck(unittest.TestCase):
@@ -58,3 +59,34 @@ class TestGliderCheck(unittest.TestCase):
         result = self.check.check_locations(dataset)
         self.assertEquals(result.value, (0,1))
 
+    def test_ctd_fail(self):
+        '''
+        Ensures the ctd checks fail for temperature
+        '''
+        dataset = self.get_pair(static_files['bad_qc'])
+        result = self.check.check_ctd_variables(dataset)
+        self.assertEquals(result.value, (55,56))
+    
+    def test_ctd_vars(self):
+        '''
+        Ensures the ctd checks for the correct file
+        '''
+        dataset = self.get_pair(static_files['glider_std'])
+        result = self.check.check_ctd_variables(dataset)
+        self.assertEquals(result.value, (56,56))
+
+    def test_global_fail(self):
+        '''
+        Tests that the global checks fail where appropriate
+        '''
+        dataset = self.get_pair(static_files['bad_qc'])
+        result = self.check.check_global_attributes(dataset)
+        self.assertEquals(result.value, (31,33))
+
+    def test_global(self):
+        '''
+        Tests that the global checks work
+        '''
+        dataset = self.get_pair(static_files['glider_std'])
+        result = self.check.check_global_attributes(dataset)
+        self.assertEquals(result.value, (33,33))
