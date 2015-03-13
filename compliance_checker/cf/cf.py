@@ -491,11 +491,16 @@ class CFBaseCheck(BaseCheck):
             # skip string type vars
             if v.dtype.char == 'S':
                 continue
-
+            
+            # skip quality control vars
+            flag_values = getattr(v, 'flag_values', None)
+            if flag_values is not None:
+                continue
+            
             units = getattr(v, 'units', None)
 
             # 1) "units" attribute must be present
-            presence = Result(BaseCheck.HIGH, units is not None, ('units', k, 'present'))
+            presence = Result(BaseCheck.MEDIUM, units is not None, ('units', k, 'present'))
             if not presence.value:
                 presence.msgs = ['units attribute required']
                 ret_val.append(presence)
