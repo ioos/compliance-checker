@@ -1331,6 +1331,12 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
 
+        space_time_dim = []
+        #Check to find all space-time dimension (Lat/Lon/Time/Height)
+        for dimension in ds.dataset.dimensions:
+            if dimension in _possibleaxis:
+                space_time_dim.append(dimension)
+                        
         space_time_coord_var = []
         #Check to find all space-time coordinate variables (Lat/Lon/Time/Height)
         for each in  self._find_coord_vars(ds):
@@ -1340,7 +1346,7 @@ class CFBaseCheck(BaseCheck):
                 space_time_coord_var.append(each._name)
 
         #Find all all space-time variables that are not coordinate variables
-        space_time_non_coord_var=[]
+        ''' space_time_non_coord_var=[]
         space_time_non_coord_var_dim = []
         for name,var in ds.dataset.variables.iteritems():
             if hasattr(var,'units'):
@@ -1348,17 +1354,16 @@ class CFBaseCheck(BaseCheck):
                     space_time_non_coord_var.append(name)
                     for every in var.dimensions:
                         space_time_non_coord_var_dim.append(every)
-
+        '''
         #Looks to ensure that every dimension of each variable that is a space-time dimension has associated coordinate variables
         for name,var in ds.dataset.variables.iteritems():
             valid = ''
             for each in var.dimensions:
-                if each in space_time_non_coord_var_dim:
+                if each in space_time_dim and each in space_time_coord_var:
+                    valid =True
+                else:
                     valid = False
-                    dim_name = each
                     break
-                elif each in space_time_coord_var:
-                    valid = True
 
             if valid == False :
                 ret_val.append(Result(BaseCheck.MEDIUM, \
