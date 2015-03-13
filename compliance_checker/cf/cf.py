@@ -833,10 +833,22 @@ class CFBaseCheck(BaseCheck):
 
             ret_val.append(avr)
 
-            # 2) only coordinate vars are allowed to have axis set
-            acvr = Result(BaseCheck.HIGH, v in self._find_coord_vars(ds), ('axis', k, 'is_coordinate_var'))
+            # 2) only coordinate vars or auxiliary coordinate variable are allowed to have axis set
+            coord_vars = self._find_coord_vars(ds)
+            
+            auxiliary_coordinate_vars=[]
+            for name,var in ds.dataset.variables.iteritems():
+                if hasattr(var,'units'):
+                    if (var  in _possibleaxis or var.units in _possibleaxisunits or var.units.split(" ")[0]  in _possibleaxisunits or hasattr(var,'positive')) and var not in coord_vars:
+                        auxiliary_coordinate_vars.append(var)
+            
+            if v in coord_vars:
+                acvr = Result(BaseCheck.HIGH, True, ('axis', k, 'is_coordinate_var'))
+            elif v in auxiliary_coordinate_vars:
+                acvr = Result(BaseCheck.HIGH, True, ('axis', k, 'is_auxiliary_coordinate_var'))
+            
             if not acvr.value:
-                acvr.msgs = ['%s is not allowed to have an axis attr as it is not a coordinate var' % k]
+                acvr.msgs = ['%s is not allowed to have an axis attr as it is not a coordinate var or auxiliary_coordinate_var' % k]
 
             ret_val.append(acvr)
 
