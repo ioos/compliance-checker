@@ -814,9 +814,20 @@ class CFBaseCheck(BaseCheck):
         which stand for a longitude, latitude, vertical, or time axis respectively. Alternatively the standard_name
         attribute may be used for direct identification.
         """
-        ret_val = []
-        dim_to_axis = map_axes({k:v for k,v in ds.dataset.variables.iteritems() if v in self._find_coord_vars(ds)}, reverse_map=True)
-        data_vars = {k:v for k,v in ds.dataset.variables.iteritems() if v not in self._find_coord_vars(ds)}
+        ret_val     = []
+        coord_vars  = self._find_coord_vars(ds)
+        dim_to_axis = map_axes({k:v for k,v in ds.dataset.variables.iteritems() if v in coord_vars}, reverse_map=True)
+        data_vars   = {k:v for k,v in ds.dataset.variables.iteritems() if v not in coord_vars}
+
+        # find auxiliary coordinate variables via 'coordinates' attribute
+        auxiliary_coordinate_vars = []
+        for name, var in data_vars.iteritems():
+            if hasattr(var, 'coordinates'):
+                cv = var.coordinates.split(' ')
+
+                for c in cv:
+                    if c in ds.dataset.variables:
+                        auxiliary_coordinate_vars.append(ds.dataset.variables[c])
 
         for k, v in ds.dataset.variables.iteritems():
             axis = getattr(v, 'axis', None)
@@ -834,14 +845,6 @@ class CFBaseCheck(BaseCheck):
             ret_val.append(avr)
 
             # 2) only coordinate vars or auxiliary coordinate variable are allowed to have axis set
-            coord_vars = self._find_coord_vars(ds)
-
-            auxiliary_coordinate_vars=[]
-            for name,var in ds.dataset.variables.iteritems():
-                if hasattr(var,'units'):
-                    if (var  in _possibleaxis or var.units in _possibleaxisunits or var.units.split(" ")[0]  in _possibleaxisunits or hasattr(var,'positive')) and var not in coord_vars:
-                        auxiliary_coordinate_vars.append(var)
-
             if v in coord_vars or v in auxiliary_coordinate_vars:
                 acvr = Result(BaseCheck.HIGH, True, ('axis', k, 'is_coordinate_var'))
                 if v in auxiliary_coordinate_vars:
