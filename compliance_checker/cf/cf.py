@@ -1349,12 +1349,13 @@ class CFBaseCheck(BaseCheck):
         for name,var in ds.dataset.variables.iteritems():
             valid = ''
             for each in var.dimensions:
-                if each in space_time_dim and each in space_time_coord_var:
-                    valid =True
-                else:
-                    valid = False
-                    dim_name = each
-                    break
+                if each in space_time_dim:
+                    if each in space_time_coord_var:
+                        valid =True
+                    else:
+                        valid = False
+                        dim_name = each
+                        break
 
             if valid == False :
                 ret_val.append(Result(BaseCheck.MEDIUM, \
@@ -1365,7 +1366,6 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(Result(BaseCheck.MEDIUM, \
                                valid, \
                                ('var', name, 'check_independent_axis_dimensions')))
-        print ret_val
         
         return ret_val
 

@@ -559,8 +559,14 @@ class TestCF(unittest.TestCase):
 
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_independent_axis_dimensions(dataset)
+        
+        false_variable_name_list = ['lev1', 'lev2', 'bad_time_1', 'bad_time_2', 'column_temp']
+        
         for each in results:
-            self.assertFalse(each.value)
+            if each.name[1] in false_variable_name_list:
+                self.assertFalse(each.value)
+            else:
+                self.assertTrue(each.value)
 
     def test_check_two_dimensional(self):
         dataset = self.get_pair(static_files['2dim'])
