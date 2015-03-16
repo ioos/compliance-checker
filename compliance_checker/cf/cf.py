@@ -1353,6 +1353,7 @@ class CFBaseCheck(BaseCheck):
                     valid =True
                 else:
                     valid = False
+                    dim_name = each
                     break
 
             if valid == False :
@@ -1364,6 +1365,8 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(Result(BaseCheck.MEDIUM, \
                                valid, \
                                ('var', name, 'check_independent_axis_dimensions')))
+        print ret_val
+        
         return ret_val
 
 
