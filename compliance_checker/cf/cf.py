@@ -268,7 +268,7 @@ class CFBaseCheck(BaseCheck):
         total = len(ds.dataset.variables)
 
         for k, v in ds.dataset.variables.iteritems():
-            if v.datatype not in [np.character,
+            if v.dtype not in [np.character,
                                   np.dtype('c'),
                                   np.dtype('b'),
                                   np.dtype('i4'),
