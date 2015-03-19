@@ -493,8 +493,7 @@ class CFBaseCheck(BaseCheck):
                 continue
             
             # skip quality control vars
-            flag_values = getattr(v, 'flag_values', None)
-            if flag_values is not None:
+            if hasattr(v, 'flag_meanings'):
                 continue
             
             units = getattr(v, 'units', None)
