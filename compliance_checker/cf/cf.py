@@ -84,6 +84,9 @@ def is_likely_dsg(func):
     return _dec
 
 class CFBaseCheck(BaseCheck):
+    register_checker = True
+    name = 'cf'
+
     @classmethod
     def beliefs(cls): # @TODO
         return {}
