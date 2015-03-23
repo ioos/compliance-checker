@@ -9,16 +9,6 @@ from compliance_checker.ioos import IOOSBaseCheck
 from compliance_checker.suite import CheckSuite
 from compliance_checker.glider_dac import GliderCheck
 
-class ComplianceCheckerCheckSuite(CheckSuite):
-    """
-    CheckSuite that defines all the possible Checker classes for the application.
-    """
-    checkers = {
-        'cf'        : CFBaseCheck,
-        'acdd'      : ACDDBaseCheck,
-        'ioos'      : IOOSBaseCheck,
-        'gliderdac' : GliderCheck
-    }
 
 class ComplianceChecker(object):
     """
@@ -43,7 +33,7 @@ class ComplianceChecker(object):
         """
         retval = True
 
-        cs = ComplianceCheckerCheckSuite()
+        cs = CheckSuite()
         ds = cs.load_dataset(ds_loc)
         score_groups = cs.run(ds, *checker_names)
 

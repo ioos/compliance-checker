@@ -10,6 +10,9 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, Result
 import numpy as np
 
 class GliderCheck(BaseNCCheck):
+    register_checker = True
+    name = 'gliderdac'
+    
     @classmethod
     def beliefs(cls): 
         '''

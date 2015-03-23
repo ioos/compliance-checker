@@ -3,12 +3,16 @@ from __future__ import print_function
 import pprint
 import argparse
 import sys
-from compliance_checker.runner import ComplianceChecker, ComplianceCheckerCheckSuite
+from compliance_checker.runner import ComplianceChecker, CheckSuite
 from compliance_checker import __version__
 
 def main():
+    # Load all available checker classes
+    check_suite = CheckSuite()
+    check_suite.load_all_avaiable_checkers()
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--test', '-t', '--test=', '-t=', action='append', help= "Select the Checks you want to perform.",  choices=ComplianceCheckerCheckSuite.checkers.keys())
+    parser.add_argument('--test', '-t', '--test=', '-t=', action='append', help= "Select the Checks you want to perform.",  choices=CheckSuite.checkers.keys())
     parser.add_argument('--criteria', '-c', help="Define the criteria for the checks.  Either Strict, Normal, or Lenient.  Defaults to Normal.", nargs='?', default='normal', choices = ['lenient', 'normal', 'strict'])
     parser.add_argument('--verbose' , '-v', help="Increase output. May be specified up to three times.", action="count")
     parser.add_argument('-f', '--format', default='text', choices=['text', 'html', 'json'], help='Output format')
