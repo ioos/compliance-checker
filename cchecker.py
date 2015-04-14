@@ -9,7 +9,7 @@ from compliance_checker import __version__
 def main():
     # Load all available checker classes
     check_suite = CheckSuite()
-    check_suite.load_all_avaiable_checkers()
+    check_suite.load_all_available_checkers()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', '-t', '--test=', '-t=', action='append', help= "Select the Checks you want to perform.",  choices=CheckSuite.checkers.keys())
