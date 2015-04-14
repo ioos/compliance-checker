@@ -19,7 +19,7 @@ class CheckSuite(object):
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
 
     @classmethod
-    def get_all_sub_classes(cls, parent_calss):
+    def get_all_sub_classes(cls, parent_class):
         """
         Helper method to retrieve all sub checker classes. In order to register a
         checker class, the class must have both name and register_checker attributes.
@@ -27,7 +27,7 @@ class CheckSuite(object):
         a flag to indicate whether the checker is required to be registered.
         """
 
-        sub_classes = parent_calss.__subclasses__()
+        sub_classes = parent_class.__subclasses__()
 
         if len(sub_classes) == 0:
             return
@@ -40,7 +40,7 @@ class CheckSuite(object):
                 cls.get_all_sub_classes(sub_class)
 
     @classmethod
-    def load_all_avaiable_checkers(cls):
+    def load_all_available_checkers(cls):
         """
         Helper method to retrieve all sub checker classes derived from various
         base classes.

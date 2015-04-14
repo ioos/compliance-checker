@@ -7,7 +7,7 @@ from compliance_checker.runner import ComplianceChecker, CheckSuite
 def main():
     # Load all available checker classes
     check_suite = CheckSuite()
-    check_suite.load_all_avaiable_checkers()
+    check_suite.load_all_available_checkers()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset_location', nargs=1, help= "Defines the location of the dataset to be checked.")
