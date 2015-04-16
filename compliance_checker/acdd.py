@@ -11,6 +11,9 @@ from compliance_checker.cf.cf import _possiblexunits, _possibleyunits
 from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate
 
 class ACDDBaseCheck(BaseCheck):
+    
+    register_checker = True
+    name = 'acdd'
 
     ###############################################################################
     #

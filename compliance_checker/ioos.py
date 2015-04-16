@@ -4,7 +4,8 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, Base
 from pkgutil import get_data
 
 class IOOSBaseCheck(BaseCheck):
-    pass
+    register_checker = True
+    name = 'ioos'
 
 class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
     # belefs
