@@ -499,7 +499,7 @@ class CFBaseCheck(BaseCheck):
             units = getattr(v, 'units', None)
 
             # 1) "units" attribute must be present
-            presence = Result(BaseCheck.MEDIUM, units is not None, ('units', k, 'present'))
+            presence = Result(BaseCheck.HIGH, units is not None, ('units', k, 'present'))
             if not presence.value:
                 presence.msgs = ['units attribute required']
                 ret_val.append(presence)
