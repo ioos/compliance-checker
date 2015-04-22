@@ -491,7 +491,14 @@ class CFBaseCheck(BaseCheck):
             # skip string type vars
             if v.dtype.char == 'S':
                 continue
-
+            
+            # skip quality control vars
+            if hasattr(v, 'flag_meanings'):
+                continue
+            
+            if hasattr(v, 'standard_name') and 'status_flag' in v.standard_name:
+                continue
+            
             units = getattr(v, 'units', None)
 
             # 1) "units" attribute must be present
