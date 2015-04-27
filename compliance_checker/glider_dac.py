@@ -223,6 +223,19 @@ class GliderCheck(BaseNCCheck):
         
         return self.make_result(level, score, out_of, 'Required Global Attributes', messages)
 
+    def check_summary(self, ds):
+        level = BaseCheck.MEDIUM
+        out_of = 1
+        score = 0
+        messages = []
+        if hasattr(ds.dataset, 'summary') and ds.dataset.summary:
+            score += 1
+        else:
+            messages.append('Dataset must define summary')
+        return self.make_result(level, score, out_of, 'Summary defined', messages)
+
+
+
     def check_primary_variable_attributes(self, ds):
         '''
         Verifies that each primary variable has the necessary metadata
