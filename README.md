@@ -400,10 +400,9 @@ Before [creating the virtual environment and installing compliance-checker](http
 # interpreted as binstar usernames (this can be changed by modifying the
 # channel_alias key; see below).
 channels:
-  - rsignell
-  - skellys
-  - moghimis
   - defaults
+  - IOOS
+  
 ```
 
 If after that conda still cannot find the required packages, the `binstar` package should be installed:
