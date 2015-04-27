@@ -14,24 +14,25 @@ import re
 
 
 static_files = {
-        'rutgers'          : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc'),
-        'conv_multi'       : resource_filename('compliance_checker', 'tests/data/conv_multi.nc'),
-        'conv_bad'         : resource_filename('compliance_checker', 'tests/data/conv_bad.nc'),
-        'example-grid'     : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
-        'badname'          : resource_filename('compliance_checker', 'tests/data/non-comp/badname.netcdf'),
-        'bad'              : resource_filename('compliance_checker', 'tests/data/non-comp/bad.nc'),
-        'dimensionless'    : resource_filename('compliance_checker', 'tests/data/dimensionless.nc'),
-        '2dim'             : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
-        'bad2dim'          : resource_filename('compliance_checker', 'tests/data/non-comp/bad2dim.nc'),
-        'rhgrid'           : resource_filename('compliance_checker', 'tests/data/rhgrid.nc'),
-        'bad-rhgrid'       : resource_filename('compliance_checker', 'tests/data/non-comp/bad-rhgrid.nc'),
-        'bad_data_type'    : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
-        'mapping'          : resource_filename('compliance_checker', 'tests/data/mapping.nc'),
-        'bad_region'       : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
-        'featureType'      : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
-        'cont_ragged'      : resource_filename('compliance_checker', 'tests/data/cont_ragged.nc'),
-        'index_ragged'     : resource_filename('compliance_checker', 'tests/data/index_ragged.nc'),
-        'bad_missing_data' : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc'),
+        'rutgers'              : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc'),
+        'conv_multi'           : resource_filename('compliance_checker', 'tests/data/conv_multi.nc'),
+        'conv_bad'             : resource_filename('compliance_checker', 'tests/data/conv_bad.nc'),
+        'example-grid'         : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
+        'badname'              : resource_filename('compliance_checker', 'tests/data/non-comp/badname.netcdf'),
+        'bad'                  : resource_filename('compliance_checker', 'tests/data/non-comp/bad.nc'),
+        'dimensionless'        : resource_filename('compliance_checker', 'tests/data/dimensionless.nc'),
+        '2dim'                 : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
+        'bad2dim'              : resource_filename('compliance_checker', 'tests/data/non-comp/bad2dim.nc'),
+        'rhgrid'               : resource_filename('compliance_checker', 'tests/data/rhgrid.nc'),
+        'bad-rhgrid'           : resource_filename('compliance_checker', 'tests/data/non-comp/bad-rhgrid.nc'),
+        'bad_data_type'        : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
+        'mapping'              : resource_filename('compliance_checker', 'tests/data/mapping.nc'),
+        'bad_region'           : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
+        'featureType'          : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
+        'cont_ragged'          : resource_filename('compliance_checker', 'tests/data/cont_ragged.nc'),
+        'index_ragged'         : resource_filename('compliance_checker', 'tests/data/index_ragged.nc'),
+        'bad_missing_data'     : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc'),
+        'self-referencing-var' : resource_filename('compliance_checker', 'tests/data/self-referencing-var.nc')
         }
 
 class MockVariable(object):
@@ -579,6 +580,13 @@ class TestCF(unittest.TestCase):
         self.assertFalse(results[4].value)
         self.assertTrue(results[5].value)
 
+        # Test the self referencing variables
+        dataset = self.get_pair(static_files['self-referencing-var'])
+        try:
+            results = self.cf.check_two_dimensional(dataset)
+            self.assertTrue(True)
+        except:
+            self.assertTrue(False)
 
     def test_check_reduced_horizontal_grid(self):
         dataset = self.get_pair(static_files['rhgrid'])
