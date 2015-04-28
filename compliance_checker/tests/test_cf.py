@@ -584,7 +584,7 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['self-referencing-var'])
         try:
             results = self.cf.check_two_dimensional(dataset)
-            self.assertTrue(True)
+            self.assertFalse(results[0].value)
         except:
             self.assertTrue(False)
 
