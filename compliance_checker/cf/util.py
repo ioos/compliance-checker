@@ -7,6 +7,8 @@ from udunitspy import Unit, UdunitsError, Converter
 from netCDF4 import Dimension, Variable
 from pkgutil import get_data
 
+from compliance_checker.base import BaseCheck, Result
+
 # copied from paegan
 # paegan may depend on these later
 _possiblet = ["time", "TIME", "Time",
@@ -153,7 +155,8 @@ class DotDict(dict):
         return DotDict(dict.fromkeys(seq, value))
 
 class NCGraph:
-    def __init__(self, ds, name, nc_object):
+    def __init__(self, ds, name, nc_object, self_reference_variables):
+
         self.name         = name
         self.coords       = DotDict()
         self.dims         = DotDict()
@@ -164,12 +167,15 @@ class NCGraph:
         elif isinstance(nc_object, Variable):
             self._type = 'var'
             for dim in nc_object.dimensions:
-                self.dims[dim] = NCGraph(ds, dim, ds.dimensions[dim])
+                self.dims[dim] = NCGraph(ds, dim, ds.dimensions[dim], self_reference_variables)
             if hasattr(nc_object, 'coordinates'):
                 coords = nc_object.coordinates.split(' ')
                 for coord in coords:
                     if coord in ds.variables:
-                        self.coords[coord] = NCGraph(ds, coord, ds.variables[coord])
+                        if coord == nc_object.name:
+                            self_reference_variables.add(coord)
+                        else:
+                            self.coords[coord] = NCGraph(ds, coord, ds.variables[coord], self_reference_variables)
                     else:
                         self.coords[coord] = None
             if hasattr(nc_object, 'grid_mapping'):

@@ -8,6 +8,7 @@ from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possiblexunits, _possibleyunits, _possibletunits, _possibleaxisunits
 
 from netCDF4 import Dimension, Variable
+from sets import Set
 
 def guess_dim_type(dimension):
     """
@@ -1406,9 +1407,26 @@ class CFBaseCheck(BaseCheck):
           
         """
 
-        ret_val = []
+        ret_val = []        
+        reported_reference_variables = []
+        
         for name,var in ds.dataset.variables.iteritems():
-            g = NCGraph(ds.dataset, name, var)
+            self_reference_variables = Set()   
+            g = NCGraph(ds.dataset, name, var, self_reference_variables)
+                                    
+            reasoning = []            
+            
+            for self_reference_variable in self_reference_variables:
+                if not self_reference_variable in reported_reference_variables:
+                    reasoning.append("Variable %s's coordinate references itself" % (self_reference_variable))
+
+                    result = Result(BaseCheck.HIGH,\
+                            False,\
+                            ('var', self_reference_variable, 'coordinates_reference_itself'),\
+                            reasoning)
+                    ret_val.append(result)
+                    reported_reference_variables.append(self_reference_variable)                
+
 
             #Determine if 2-D coordinate variables (Lat and Lon are of shape (i,j)
             for each in g.coords:
@@ -1422,7 +1440,6 @@ class CFBaseCheck(BaseCheck):
                 # Check all the dims are coordinate variables
                 #------------------------------------------------------------
                 valid_dims = True
-                reasoning = []
                 for dim in g.dims.iterkeys():
                     if dim not in ds.dataset.variables:
                         valid_dims = False
@@ -1507,6 +1524,7 @@ class CFBaseCheck(BaseCheck):
             valid_dim = True
             valid_coord = True
             valid_cdim = True
+            result = None
 
             coords = var.coordinates.split(' ')
             for coord in coords:
@@ -1544,8 +1562,9 @@ class CFBaseCheck(BaseCheck):
                             (valid_in_variables and valid_dim and valid_coord and valid_cdim),                                       \
                             ('var', name, 'is_reduced_horizontal_grid'), \
                             reasoning)
-
-            ret_val.append(result)
+            
+            if result:
+                ret_val.append(result)
 
 
         return ret_val
