@@ -1,5 +1,7 @@
 # IOOS Compliance Checker
 
+[![Build Status](https://travis-ci.org/ioos/compliance-checker.svg)](https://travis-ci.org/ioos/compliance-checker)
+
 The IOOS Compliance Checker is a Python tool to check local/remote datasets against a variety of compliance standards. It is primarily a command-line tool (tested on OSX/Linux) and can also be used as a library import.
 
 It currently supports the following sources and standards:
