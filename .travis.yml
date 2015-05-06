@@ -1,0 +1,17 @@
+language: python
+
+env:
+    - CONDA="python=2.7"
+
+before_install:
+    - URL=http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+    - wget $URL -O miniconda.sh
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - conda update --yes conda
+    - conda config --add channels http://conda.binstar.org/ioos --force
+    - travis_retry conda create --yes -n test --file requirements.txt $CONDA
+    - source activate test
+
+script:
+    - py.test
