@@ -3,7 +3,7 @@ import os.path
 import itertools
 from collections import defaultdict
 from lxml import etree
-from cf_units import Unit
+from udunitspy import Unit, UdunitsError, Converter
 from netCDF4 import Dimension, Variable
 from pkgutil import get_data
 
@@ -24,7 +24,7 @@ _possiblez = ["depth", "DEPTH",
            "depths", "DEPTHS",
            "height", "HEIGHT",
            "altitude", "ALTITUDE",
-           "alt", "ALT",
+           "alt", "ALT", 
            "Alt", "Altitude",
            "h", "H",
            "s_rho", "S_RHO",
@@ -81,25 +81,25 @@ _possibleyunits = ['degrees_north',
                 'degreeN'
                     ]
 
-_possibletunits = ['day',
-                'days',
-                'd',
-                'hour',
-                'hours',
-                'hr',
-                'hrs',
-                'h',
-                'year',
-                'years',
-                'minute',
-                'minutes',
-                'm',
-                'min',
-                'mins',
-                'second',
-                'seconds',
-                's',
-                'sec',
+_possibletunits = ['day', 
+                'days', 
+                'd', 
+                'hour', 
+                'hours', 
+                'hr', 
+                'hrs', 
+                'h', 
+                'year', 
+                'years', 
+                'minute', 
+                'minutes', 
+                'm', 
+                'min', 
+                'mins', 
+                'second', 
+                'seconds', 
+                's', 
+                'sec', 
                 'secs'
                 ]
 
@@ -250,25 +250,31 @@ class StandardNameTable(object):
 
 def units_known(units):
     try:
-        Unit(units)
-    except ValueError:
+        Unit(str(units))
+    except UdunitsError:
         return False
     return True
-
 
 def units_convertible(units1, units2, reftimeistime=True):
     """Return True if a Unit representing the string units1 can be converted
     to a Unit representing the string units2, else False."""
     try:
-        u1 = Unit(units1)
-        u2 = Unit(units2)
-    except ValueError:
+        Converter(str(units1), str(units2))
+    except UdunitsError:
         return False
-    return u1.is_convertible(units2)
+
+    u1 = Unit(str(units1))
+    u2 = Unit(str(units2))
+    return u1.are_convertible(u2)
 
 def units_temporal(units):
-    u = Unit(units)
-    return u.is_time_reference()
+    r = False
+    try:
+        u = Unit('seconds since 1900-01-01')
+        r = u.are_convertible(str(units))
+    except UdunitsError:
+        return False
+    return r
 
 def map_axes(dim_vars, reverse_map=False):
     """
@@ -319,14 +325,14 @@ def is_time_variable(varname, var):
 def is_vertical_coordinate(var_name, var):
     """
     Determines if a variable is a vertical coordinate variable
-
+    
     4.3
     A vertical coordinate will be identifiable by: units of pressure; or the presence of the positive attribute with a
     value of up or down (case insensitive).  Optionally, the vertical type may be indicated additionally by providing
     the standard_name attribute with an appropriate value, and/or the axis attribute with the value Z.
     """
     # Known name
-    satisfied = var_name.lower() in _possiblez
+    satisfied = var_name.lower() in _possiblez 
     satisfied |= getattr(var, 'standard_name', '') in _possiblez
     # Is the axis set to Z?
     satisfied |= getattr(var, 'axis', '').lower() == 'z'

@@ -1,6 +1,6 @@
 OWSLib>=0.8.3
 Wicken>=0.1.2
 lxml>=3.2.1
-cf_units==0.1.0
+udunitspy==0.0.6
 requests>=2.2.1
 python-dateutil>=2.2
