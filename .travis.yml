@@ -14,4 +14,4 @@ before_install:
     - source activate test
 
 script:
-    - py.test
+    - python setup.py test
