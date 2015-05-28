@@ -1,14 +1,9 @@
 import traceback
 import sys
 import io
-
 from StringIO import StringIO
-from compliance_checker.acdd import ACDDBaseCheck
-from compliance_checker.cf import CFBaseCheck
-from compliance_checker.ioos import IOOSBaseCheck
-from compliance_checker.suite import CheckSuite
-from compliance_checker.glider_dac import GliderCheck
 
+from compliance_checker.suite import CheckSuite
 
 class ComplianceChecker(object):
     """
