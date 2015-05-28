@@ -296,7 +296,7 @@ class CheckSuite(object):
                 print '%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), ' ')
             
             if (res.value[0] != res.value[1]) and res.msgs:
-                print wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), str("\n".join(res.msgs))))
+                print wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), str(", ".join(res.msgs))))
 
             if res.children:
                 self.reasoning_routine(res.children, indent+1, False)

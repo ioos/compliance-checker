@@ -4,7 +4,7 @@ import numpy as np
 from pkgutil import get_data
 
 from dateutil.parser import parse as parse_dt
-from udunitspy import Unit
+from cf_units import Unit
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
 from compliance_checker.cf.cf import _possiblexunits, _possibleyunits
@@ -15,7 +15,7 @@ class ACDDBaseCheck(BaseCheck):
     ###############################################################################
     #
     # HIGHLY RECOMMENDED
-    # 
+    #
     ###############################################################################
 
     @check_has(BaseCheck.HIGH)

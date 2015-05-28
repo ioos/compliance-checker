@@ -8,6 +8,7 @@ from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possiblexunits, _possibleyunits, _possibletunits, _possibleaxisunits
 
 from netCDF4 import Dimension, Variable
+from sets import Set
 
 def guess_dim_type(dimension):
     """
@@ -268,7 +269,7 @@ class CFBaseCheck(BaseCheck):
         total = len(ds.dataset.variables)
 
         for k, v in ds.dataset.variables.iteritems():
-            if v.datatype not in [np.character,
+            if v.dtype not in [np.character,
                                   np.dtype('c'),
                                   np.dtype('b'),
                                   np.dtype('i4'),
@@ -408,7 +409,8 @@ class CFBaseCheck(BaseCheck):
         valid_conventions = ['CF-1.0', 'CF-1.1', 'CF-1.2', 'CF-1.3',
                              'CF-1.4', 'CF-1.5', 'CF-1.6']
         if hasattr(ds.dataset, 'Conventions'):
-            if getattr(ds.dataset, 'Conventions', '') in valid_conventions:
+            conventions = re.split(',|\s+', getattr(ds.dataset, 'Conventions', ''))
+            if any((c.strip() in valid_conventions for c in conventions)):
                 valid = True
                 reasoning = ['Conventions field is "CF-1.x (x in 0-6)"']
             else:
@@ -490,7 +492,14 @@ class CFBaseCheck(BaseCheck):
             # skip string type vars
             if v.dtype.char == 'S':
                 continue
-
+            
+            # skip quality control vars
+            if hasattr(v, 'flag_meanings'):
+                continue
+            
+            if hasattr(v, 'standard_name') and 'status_flag' in v.standard_name:
+                continue
+            
             units = getattr(v, 'units', None)
 
             # 1) "units" attribute must be present
@@ -594,14 +603,15 @@ class CFBaseCheck(BaseCheck):
                 if ' ' in std_name:
                     std_name, std_name_modifier = std_name.split(' ', 1)
 
-            # 1) standard name is a string and in standard name table
+            # 1) standard name is a string and in standard name table or an exception, see H.2
             msgs = []
             is_str = isinstance(std_name, basestring)
+            in_exception = std_name in ('platform_name', 'station_name', 'instrument_name')
             in_table = std_name in self._std_names
 
             if not is_str:
                 msgs.append("The standard name '%s' is not of type string.  It is type %s" % (std_name, type(std_name)))
-            if not in_table:
+            if not in_table and not in_exception:
                 msgs.append("The standard name '%s' is not in standard name table" % std_name)
 
             ret_val.append(Result(BaseCheck.HIGH, is_str and in_table, ('std_name', k, 'legal'), msgs))
@@ -812,9 +822,20 @@ class CFBaseCheck(BaseCheck):
         which stand for a longitude, latitude, vertical, or time axis respectively. Alternatively the standard_name
         attribute may be used for direct identification.
         """
-        ret_val = []
-        dim_to_axis = map_axes({k:v for k,v in ds.dataset.variables.iteritems() if v in self._find_coord_vars(ds)}, reverse_map=True)
-        data_vars = {k:v for k,v in ds.dataset.variables.iteritems() if v not in self._find_coord_vars(ds)}
+        ret_val     = []
+        coord_vars  = self._find_coord_vars(ds)
+        dim_to_axis = map_axes({k:v for k,v in ds.dataset.variables.iteritems() if v in coord_vars}, reverse_map=True)
+        data_vars   = {k:v for k,v in ds.dataset.variables.iteritems() if v not in coord_vars}
+
+        # find auxiliary coordinate variables via 'coordinates' attribute
+        auxiliary_coordinate_vars = []
+        for name, var in data_vars.iteritems():
+            if hasattr(var, 'coordinates'):
+                cv = var.coordinates.split(' ')
+
+                for c in cv:
+                    if c in ds.dataset.variables:
+                        auxiliary_coordinate_vars.append(ds.dataset.variables[c])
 
         for k, v in ds.dataset.variables.iteritems():
             axis = getattr(v, 'axis', None)
@@ -831,10 +852,14 @@ class CFBaseCheck(BaseCheck):
 
             ret_val.append(avr)
 
-            # 2) only coordinate vars are allowed to have axis set
-            acvr = Result(BaseCheck.HIGH, v in self._find_coord_vars(ds), ('axis', k, 'is_coordinate_var'))
-            if not acvr.value:
-                acvr.msgs = ['%s is not allowed to have an axis attr as it is not a coordinate var' % k]
+            # 2) only coordinate vars or auxiliary coordinate variable are allowed to have axis set
+            if v in coord_vars or v in auxiliary_coordinate_vars:
+                acvr = Result(BaseCheck.HIGH, True, ('axis', k, 'is_coordinate_var'))
+                if v in auxiliary_coordinate_vars:
+                    acvr.msgs = ["%s is an auxiliary coordinate var" % k]
+            else:
+                acvr = Result(BaseCheck.HIGH, False, ('axis', k, 'is_coordinate_var'))
+                acvr.msgs = ['%s is not allowed to have an axis attr as it is not a coordinate var or auxiliary_coordinate_var' % k]
 
             ret_val.append(acvr)
 
@@ -1264,6 +1289,11 @@ class CFBaseCheck(BaseCheck):
     #
     ###############################################################################
 
+    def _is_station_var(self, var):
+        if getattr(var, 'standard_name', None) in ('platform_name', 'station_name', 'instrument_name'):
+            return True
+        return False
+
     def _get_coord_vars(self, ds):
         coord_vars = []
         for name,var in ds.dataset.variables.iteritems():
@@ -1324,6 +1354,12 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
 
+        space_time_dim = []
+        #Check to find all space-time dimension (Lat/Lon/Time/Height)
+        for dimension in ds.dataset.dimensions:
+            if dimension in _possibleaxis:
+                space_time_dim.append(dimension)
+                        
         space_time_coord_var = []
         #Check to find all space-time coordinate variables (Lat/Lon/Time/Height)
         for each in  self._find_coord_vars(ds):
@@ -1332,26 +1368,17 @@ class CFBaseCheck(BaseCheck):
                or hasattr(each,'positive'):
                 space_time_coord_var.append(each._name)
 
-        #Find all all space-time variables that are not coordinate variables
-        space_time_non_coord_var=[]
-        space_time_non_coord_var_dim = []
-        for name,var in ds.dataset.variables.iteritems():
-            if hasattr(var,'units'):
-                if (var  in _possibleaxis or var.units in _possibleaxisunits or var.units.split(" ")[0]  in _possibleaxisunits or hasattr(var,'positive')) and name not in space_time_coord_var:
-                    space_time_non_coord_var.append(name)
-                    for every in var.dimensions:
-                        space_time_non_coord_var_dim.append(every)
-
         #Looks to ensure that every dimension of each variable that is a space-time dimension has associated coordinate variables
         for name,var in ds.dataset.variables.iteritems():
             valid = ''
             for each in var.dimensions:
-                if each in space_time_non_coord_var_dim:
-                    valid = False
-                    dim_name = each
-                    break
-                elif each in space_time_coord_var:
-                    valid = True
+                if each in space_time_dim:
+                    if each in space_time_coord_var:
+                        valid =True
+                    else:
+                        valid = False
+                        dim_name = each
+                        break
 
             if valid == False :
                 ret_val.append(Result(BaseCheck.MEDIUM, \
@@ -1362,6 +1389,7 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(Result(BaseCheck.MEDIUM, \
                                valid, \
                                ('var', name, 'check_independent_axis_dimensions')))
+        
         return ret_val
 
 
@@ -1379,9 +1407,26 @@ class CFBaseCheck(BaseCheck):
           
         """
 
-        ret_val = []
+        ret_val = []        
+        reported_reference_variables = []
+        
         for name,var in ds.dataset.variables.iteritems():
-            g = NCGraph(ds.dataset, name, var)
+            self_reference_variables = Set()   
+            g = NCGraph(ds.dataset, name, var, self_reference_variables)
+                                    
+            reasoning = []            
+            
+            for self_reference_variable in self_reference_variables:
+                if not self_reference_variable in reported_reference_variables:
+                    reasoning.append("Variable %s's coordinate references itself" % (self_reference_variable))
+
+                    result = Result(BaseCheck.HIGH,\
+                            False,\
+                            ('var', self_reference_variable, 'coordinates_reference_itself'),\
+                            reasoning)
+                    ret_val.append(result)
+                    reported_reference_variables.append(self_reference_variable)                
+
 
             #Determine if 2-D coordinate variables (Lat and Lon are of shape (i,j)
             for each in g.coords:
@@ -1395,7 +1440,6 @@ class CFBaseCheck(BaseCheck):
                 # Check all the dims are coordinate variables
                 #------------------------------------------------------------
                 valid_dims = True
-                reasoning = []
                 for dim in g.dims.iterkeys():
                     if dim not in ds.dataset.variables:
                         valid_dims = False
@@ -1480,6 +1524,7 @@ class CFBaseCheck(BaseCheck):
             valid_dim = True
             valid_coord = True
             valid_cdim = True
+            result = None
 
             coords = var.coordinates.split(' ')
             for coord in coords:
@@ -1517,8 +1562,9 @@ class CFBaseCheck(BaseCheck):
                             (valid_in_variables and valid_dim and valid_coord and valid_cdim),                                       \
                             ('var', name, 'is_reduced_horizontal_grid'), \
                             reasoning)
-
-            ret_val.append(result)
+            
+            if result:
+                ret_val.append(result)
 
 
         return ret_val
@@ -2682,8 +2728,7 @@ class CFBaseCheck(BaseCheck):
 
         for name,var in ds.dataset.variables.iteritems():
 
-
-            if var.dimensions and not hasattr(var, 'cf_role'):
+            if var.dimensions and not hasattr(var, 'cf_role') and not self._is_station_var(var):
                 if var.dimensions != (name,):
                     name_list.append(name)
 

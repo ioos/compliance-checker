@@ -1,5 +1,7 @@
 # IOOS Compliance Checker
 
+[![Build Status](https://travis-ci.org/ioos/compliance-checker.svg)](https://travis-ci.org/ioos/compliance-checker)
+
 The IOOS Compliance Checker is a Python tool to check local/remote datasets against a variety of compliance standards. It is primarily a command-line tool (tested on OSX/Linux) and can also be used as a library import.
 
 It currently supports the following sources and standards:
@@ -425,6 +427,25 @@ dataset = cs.load_dataset("/path/or/url/to/your/dataset")
 groups = cs.run(dataset, 'acdd')
 scores = groups['acdd']
 ```
+
+
+## Usage (Command Line)
+
+```
+compliance-checker <data-source> -t [cf|acdd|ioos|gliderdac]
+```
+
+The compliance checker command line tool will print out (to STDOUT) the test
+results. The command line tool will also return 0 for a successful run and
+non-0 for a failure.
+
+## Available Test Suites
+
+- [CF 1.6](http://cfconventions.org/)
+- [ACDD](http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/metadata/DataDiscoveryAttConvention.html)
+- [IOOS](http://www.ioos.noaa.gov/data/contribute_data.html)
+- [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2)
+
 
 ## Development
 
