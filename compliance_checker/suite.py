@@ -13,31 +13,11 @@ from owslib.swe.sensor.sml import SensorML
 from urlparse import urlparse
 import requests
 import textwrap
+import pkg_resources
 
 class CheckSuite(object):
 
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
-
-    @classmethod
-    def get_all_sub_classes(cls, parent_class):
-        """
-        Helper method to retrieve all sub checker classes. In order to register a
-        checker class, the class must have both name and register_checker attributes.
-        The name is used for the test option in the command. The register_checker is
-        a flag to indicate whether the checker is required to be registered.
-        """
-
-        sub_classes = parent_class.__subclasses__()
-
-        if len(sub_classes) == 0:
-            return
-        else:
-            for sub_class in sub_classes:
-                if hasattr(sub_class, "name") and hasattr(sub_class, "register_checker"):
-                    if sub_class.register_checker:
-                        if sub_class.name not in cls.checkers:
-                            cls.checkers[sub_class.name] = sub_class
-                cls.get_all_sub_classes(sub_class)
 
     @classmethod
     def load_all_available_checkers(cls):
@@ -45,8 +25,14 @@ class CheckSuite(object):
         Helper method to retrieve all sub checker classes derived from various
         base classes.
         """
-        cls.get_all_sub_classes(BaseCheck)
-        cls.get_all_sub_classes(BaseNCCheck)
+        from pkg_resources import working_set
+        for x in working_set.iter_entry_points('compliance_checker.suites'):
+            try:
+                xl = x.load()
+
+                cls.checkers[xl.name] = xl
+            except Exception as e:
+                print >>sys.stderr, "Could not load", x, ":", e
 
     def _get_checks(self, checkclass):
         """
