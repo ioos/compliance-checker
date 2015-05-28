@@ -6,12 +6,12 @@ The IOOS Compliance Checker is a Python tool to check local/remote datasets agai
 
 It currently supports the following sources and standards:
 
-
-| Standard                                                                                             | .nc/OPeNDAP             | SOS                             |
-| ---------------------------------------------------------------------------------------------------  | ----------------------- | ------------------------------- |
-| [ACDD (1.1)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_%28ACDD%29)   | Complete                | -                               |
-| IOOS Asset Concept                                                                                   | -                       | GetCapabilities, DescribeSensor |
-| [CF (1.6)](http://cfconventions.org/Data/cf-convetions/cf-conventions-1.6/build/cf-conventions.html) | Complete                | -                               |
+| Standard                                                                                             | Source                                                            | .nc/OPeNDAP             | SOS                             |
+| ---------------------------------------------------------------------------------------------------- | -----------                                                       | ----------------------- | ------------------------------- |
+| [ACDD (1.1)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_%28ACDD%29)   | Built-in                                                          | :white_check_mark:      | -                               |
+| [CF (1.6)](http://cfconventions.org/Data/cf-convetions/cf-conventions-1.6/build/cf-conventions.html) | Built-in                                                          | :white_check_mark:      | -                               |
+| IOOS Asset Concept                                                                                   | Built-in                                                          | -                       | GetCapabilities, DescribeSensor |
+| [Glider DAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2)              | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | :white_check_mark:      | -                               |
 
 ## Concepts & Terminology
 
@@ -447,8 +447,10 @@ non-0 for a failure.
 - [CF 1.6](http://cfconventions.org/)
 - [ACDD](http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/metadata/DataDiscoveryAttConvention.html)
 - [IOOS](http://www.ioos.noaa.gov/data/contribute_data.html)
-- [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2)
 
+## Available Test Suites as Plugins
+
+- [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2) - [link](https://github.com/ioos/cc-plugin-glider)
 
 ## Development
 
