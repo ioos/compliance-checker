@@ -330,7 +330,7 @@ class CheckSuite(object):
             textchars = ''.join(map(chr, [7,8,9,10,12,13,27] + range(0x20, 0x100)))
             is_binary_string = lambda bytes: bool(bytes.translate(None, textchars))
 
-            with open(ds_str) as f:
+            with open(ds_str, 'rb') as f:
                 first_chunk = f.read(1024)
                 if is_binary_string(first_chunk):
                     # likely netcdf file
