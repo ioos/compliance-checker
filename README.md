@@ -458,7 +458,7 @@ The compliance-checker is designed to be simple and hackable to edit existing co
 
 ## Contributors    
 
-- Dave Foster <dfoster@asascience.com>
+- Dave Foster <dave@axiomdatascience.com>
 - Dan Maher <dmaher@asascience.com>
 - Luke Campbell <lcampbell@asascience.com>
 
