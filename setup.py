@@ -53,7 +53,6 @@ setup(name                 = "compliance-checker",
             'cf = compliance_checker.cf.cf:CFBaseCheck',
             'acdd = compliance_checker.acdd:ACDDBaseCheck',
             'ioos = compliance_checker.ioos:IOOSBaseCheck',
-            'gliderdac = compliance_checker.glider_dac:GliderCheck',
         ]
     },
     package_data         = {
