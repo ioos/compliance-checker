@@ -32,7 +32,8 @@ static_files = {
         'cont_ragged'          : resource_filename('compliance_checker', 'tests/data/cont_ragged.nc'),
         'index_ragged'         : resource_filename('compliance_checker', 'tests/data/index_ragged.nc'),
         'bad_missing_data'     : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc'),
-        'self-referencing-var' : resource_filename('compliance_checker', 'tests/data/self-referencing-var.nc')
+        'self-referencing-var' : resource_filename('compliance_checker', 'tests/data/self-referencing-var.nc'),
+        'scalar_coordinate_variable' : resource_filename('compliance_checker', 'tests/data/scalar_coordinate_variable.nc')
         }
 
 class MockVariable(object):
@@ -621,9 +622,16 @@ class TestCF(unittest.TestCase):
 
 
     def test_check_scalar_coordinate_system(self):
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.get_pair(static_files['scalar_coordinate_variable'])
         results = self.cf.check_scalar_coordinate_system(dataset)
-        assert results[0].value == (1, 2)
+        self.assertEqual(len(results), 2)
+        for r in results:
+            if r.name[1] == 'HEIGHT':
+                self.assertEqual(r.value, (0, 1))
+            elif r.name[1] == 'DEPTH':
+                self.assertEqual(r.value, (2, 2))
+            else:
+                self.assertTrue(False, 'Unexpected variable in results of check_scalar_coordinate_system')
 
     def test_check_geographic_region(self):
         dataset = self.get_pair(static_files['bad_region'])
