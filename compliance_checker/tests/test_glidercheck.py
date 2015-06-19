@@ -9,6 +9,7 @@ static_files = {
     'glider_std': resource_filename('compliance_checker', 'tests/data/gliders/IOOS_Glider_NetCDF_v2.0.nc'),
     'bad_location': resource_filename('compliance_checker', 'tests/data/gliders/bad_location.nc'),
     'bad_qc': resource_filename('compliance_checker', 'tests/data/gliders/bad_qc.nc'),
+    'bad_metadata': resource_filename('compliance_checker', 'tests/data/gliders/bad_metadata.nc'),
 }
 
 class TestGliderCheck(unittest.TestCase):
@@ -81,7 +82,7 @@ class TestGliderCheck(unittest.TestCase):
         '''
         dataset = self.get_pair(static_files['bad_qc'])
         result = self.check.check_global_attributes(dataset)
-        self.assertEquals(result.value, (31,33))
+        self.assertEquals(result.value, (42,66))
 
     def test_global(self):
         '''
@@ -89,4 +90,13 @@ class TestGliderCheck(unittest.TestCase):
         '''
         dataset = self.get_pair(static_files['glider_std'])
         result = self.check.check_global_attributes(dataset)
-        self.assertEquals(result.value, (33,33))
+        self.assertEquals(result.value, (66,66))
+
+
+    def test_metadata(self):
+        '''
+        Tests that empty attributes fail
+        '''
+        dataset = self.get_pair(static_files['bad_metadata'])
+        result = self.check.check_global_attributes(dataset)
+        self.assertEquals(result.value, (42,66))

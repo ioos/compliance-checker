@@ -1,4 +1,4 @@
-netcdf IOOS_Glider_NetCDF_v2.0 {
+netcdf bad_qc {
 dimensions:
 	time = UNLIMITED ; // (0 currently)
 	traj_strlen = 20 ;
@@ -81,7 +81,6 @@ variables:
 		temperature:ancillary_variables = "temperature_qc" ;
 		temperature:instrument = "instrument_ctd" ;
 		temperature:long_name = "Temperature" ;
-		temperature:observation_type = "measured" ;
 		temperature:platform = "platform" ;
 		temperature:precision = " " ;
 		temperature:resolution = " " ;
@@ -240,14 +239,6 @@ variables:
 		time_qc:standard_name = "time status_flag" ;
 		time_qc:valid_max = 9b ;
 		time_qc:valid_min = 0b ;
-	byte lat_qc(time) ;
-		lat_qc:_FillValue = -127b ;
-		lat_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
-		lat_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
-		lat_qc:long_name = "lat Quality Flag" ;
-		lat_qc:standard_name = "latitude status_flag" ;
-		lat_qc:valid_max = 9b ;
-		lat_qc:valid_min = 0b ;
 	byte lon_qc(time) ;
 		lon_qc:_FillValue = -127b ;
 		lon_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
@@ -260,14 +251,10 @@ variables:
 		pressure_qc:_FillValue = -127b ;
 		pressure_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
 		pressure_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
-		pressure_qc:long_name = "pressure Quality Flag" ;
-		pressure_qc:standard_name = "sea_water_pressure status_flag" ;
 		pressure_qc:valid_max = 9b ;
 		pressure_qc:valid_min = 0b ;
 	byte depth_qc(time) ;
 		depth_qc:_FillValue = -127b ;
-		depth_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
-		depth_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
 		depth_qc:long_name = "depth Quality Flag" ;
 		depth_qc:standard_name = "depth status_flag" ;
 		depth_qc:valid_max = 9b ;
@@ -372,36 +359,34 @@ variables:
 // global attributes:
 		:Conventions = "CF-1.6, Unidata Dataset Discovery v1.0" ;
 		:Metadata_Conventions = "CF-1.6, Unidata Dataset Discovery v1.0" ;
-		:acknowledgment = "This deployment supported by the kind folks that wrote the compliance checker" ;
-		:comment = "This data is for testing the compliance checker only." ;
-		:contributor_name = "Developer" ;
-		:contributor_role = "developer" ;
-		:creator_email = "somedeveloper@email.com" ;
-		:creator_name = "developer" ;
-		:creator_url = "http://www.google.com/" ;
-		:date_created = "2014-04-01" ;
-		:date_issued = "2014-04-01" ;
-		:date_modified = "2014-04-01" ;
+		:acknowledgment = "This deployment supported by ..." ;
+		:contributor_name = " " ;
+		:contributor_role = " " ;
+		:creator_email = " " ;
+		:creator_name = " " ;
+		:creator_url = " " ;
+		:date_created = " " ;
+		:date_issued = " " ;
+		:date_modified = " " ;
 		:format_version = "IOOS_Glider_NetCDF_v2.0.nc" ;
-		:history = "Not much to speak of" ;
-		:id = "unique_id" ;
-		:institution = "RPS ASA" ;
+		:history = " " ;
+		:id = " " ;
 		:keywords = "AUVS > Autonomous Underwater Vehicles, Oceans > Ocean Pressure > Water Pressure, Oceans > Ocean Temperature > Water Temperature, Oceans > Salinity/Density > Conductivity, Oceans > Salinity/Density > Density, Oceans > Salinity/Density > Salinity" ;
 		:keywords_vocabulary = "GCMD Science Keywords" ;
 		:license = "This data may be redistributed and used without restriction.  Data provided as is with no expressed or implied assurance of quality assurance or quality control" ;
-		:metadata_link = "None" ;
+		:metadata_link = " " ;
 		:naming_authority = "edu.rutgers.marine" ;
 		:platform_type = "Slocum Glider" ;
-		:processing_level = "Processed and QCd" ;
-		:project = "GliderDAC v2" ;
-		:publisher_email = "developer@email.com" ;
-		:publisher_name = "A. Developer" ;
-		:publisher_url = "http://www.google.com/" ;
-		:references = "References go here" ;
-		:sea_name = "Sea of Dorne" ;
+		:processing_level = " " ;
+		:project = " " ;
+		:publisher_email = " " ;
+		:publisher_name = " " ;
+		:publisher_url = " " ;
+		:references = " " ;
+		:sea_name = " " ;
 		:source = "Observational data from a profiling glider" ;
 		:standard_name_vocabulary = "CF-v25" ;
 		:summary = "The Rutgers University Coastal Ocean Observation Lab has deployed autonomous underwater gliders around the world since 1990.  Gliders are small, free-swimming, unmanned vehicles that use changes in buoyancy to move vertically and horizontally through the water column in a saw-tooth pattern. They are deployed for days to several months and gather detailed information about the physical, chemical and biological processes of the world\'s The Slocum glider was designed and oceans. built by Teledyne Webb Research Corporation, Falmouth, MA, USA.  This dataset contains observational sub-surface profile data of the water-column." ;
-		:title = "Title goes here" ;
-		:wmo_id = "WMO NUMBER" ;
+		:title = " " ;
+		:wmo_id = " " ;
 }
