@@ -212,14 +212,25 @@ class GliderCheck(BaseNCCheck):
             'wmo_id'
         ]
         level = BaseCheck.MEDIUM
-        out_of = len(attribute_fields)
+        out_of = 0
         score = 0
         messages = []
         for field in attribute_fields:
-            test = hasattr(ds.dataset, field)
+            v = getattr(ds.dataset, field, '')
+            test = v != ''
             score += int(test)
+            out_of += 1
             if not test:
                 messages.append('%s global attribute is missing' % field)
+
+            if isinstance(v, basestring):
+                test = len(v.strip()) > 0
+            else:
+                test = True
+            score += int(test)
+            out_of += 1
+            if not test:
+                messages.append('%s global attribute can not be empty' % field)
         
         return self.make_result(level, score, out_of, 'Required Global Attributes', messages)
 
