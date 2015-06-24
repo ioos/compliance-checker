@@ -2360,66 +2360,67 @@ class CFBaseCheck(BaseCheck):
         When data to be packed contains missing values the attributes that indicate missing values (_FillValue, valid_min,
         valid_max, valid_range) must be of the same data type as the packed data.
         """
-        
         ret_val = []
         reasoning = []
-        names = list(ds.dataset.variables.iterkeys())
         for name, var in ds.dataset.variables.iteritems():
-            if hasattr(var, 'add_offset') or hasattr(var, 'scale_factor'):
+            if hasattr(var, 'add_offset') and hasattr(var, 'scale_factor'):
                 valid = False
-                if hasattr(var, 'add_offset') and hasattr(var, 'scale_factor'):
-                    offset = getattr(var, 'add_offset', '')
-                    scale = getattr(var, 'scale_factor', '')
+                valid_missing_variable = False
 
-                    data_size = np.s_[ds.dataset.variables[name].size]
-                    data_type_check = np.reshape(ds.dataset.variables[name],data_size)[0]
-                    #, type(ds.dataset.variables[name][0,0,0]) ,type(scale), type(offset)
-                    for x in xrange(data_size):
-                        if type(np.reshape(ds.dataset.variables[name],data_size)[x]) != 'numpy.ma.core.MaskedConstant':
-                            data_type_check = np.reshape(ds.dataset.variables[name],data_size)[x]
-                            break
-                    if type(data_type_check) == type(scale) == type(offset):
+                if hasattr(var.add_offset, 'dtype') and hasattr(var.scale_factor, 'dtype'):
+
+                    if var.dtype == var.add_offset.dtype == var.scale_factor.dtype:
                         valid = True
-                        result = Result(BaseCheck.MEDIUM,                            \
-                                valid,                                       \
-                                ('var', name, 'packed_data'), \
-                                reasoning)
-                        ret_val.append(result)
-                        reasoning = []
-                    elif type(scale) == type(offset) != type(np.reshape(ds.dataset.variables[name],data_size)[x]):
-                        if type(scale) in [float(), type(np.float32(1.)), int(), type(np.int16(1))]  and (type(np.reshape(ds.dataset.variables[name],data_size)[x])) in [type(np.int8(1)), type(np.int16(1)), int()]:
-                           valid = True
-                           result = Result(BaseCheck.MEDIUM,                            \
-                                valid,                                       \
-                                ('var', name, 'packed_data'), \
-                                reasoning)
-                           ret_val.append(result)
-                           reasoning = []
-                        else: 
-                           valid = False
+                    elif var.add_offset.dtype == var.add_offset.dtype and var.scale_factor.dtype != var.dtype:
+                        # Check both attribute types are type float or double
+                        if var.add_offset.dtype in [np.float, np.float16, np.float32, np.float64, np.float128]:
+                            # Check variable types must be byte, short or int
+                            if var.dtype in [np.int8, np.int16, np.int32, np.int64, int()]:
+                                valid = True
 
-                           reasoning.append("'add_offset' and 'scale_factor' are not of type float or int, or the data variable is not of type byte, short, or int.")
-                           result = Result(BaseCheck.MEDIUM,                            \
-                                valid,                                       \
-                                ('var', name, 'packed_data'), \
-                                reasoning)
-                           ret_val.append(result) 
-                           reasoning = []    
+                        if valid:
+                            valid_missing_variable = True
+                            # test further with  _FillValue , valid_min , valid_max , valid_range
+                            if hasattr(var, "_FillValue"):
+                                if var._FillValue.dtype !=  var.dtype:
+                                    valid = False
+                                    valid_missing_variable = False
+
+                            if hasattr(var, "valid_min"):
+                                if var.valid_min.dtype != var.dtype:
+                                    valid = False
+                                    valid_missing_variable = False
+                            if hasattr(var, "valid_max"):
+                                if var.valid_max.dtype != var.dtype:
+                                    valid = False
+                                    valid_missing_variable = False
+                            if hasattr(var, "valid_range"):
+                                if var.valid_range.dtype != var.dtype:
+                                    valid = False
+                                    valid_missing_variable = False
+
+                if valid:
+                    valid = True
+                    result = Result(BaseCheck.MEDIUM,\
+                                    valid,\
+                                    ('var', name, 'packed_data'),\
+                                    reasoning)
+                    ret_val.append(result)
+                    reasoning = []
+                else:
+                    if not valid_missing_variable:
+                        reasoning.append("'_FillValue', 'valid_min', 'valid_max', 'valid_range' are not same type of variable type.")
                     else:
-                        valid = False
                         reasoning.append("'add_offset' and 'scale_factor' are not both of type float or int or the data variable is not of type byte, short, or int.")
-                        result = Result(BaseCheck.MEDIUM,                            \
-                                valid,                                       \
-                                ('var', name, 'packed_data'), \
-                                reasoning)
-                        ret_val.append(result) 
-                        reasoning = []
 
-
+                    result = Result(BaseCheck.MEDIUM,\
+                                    valid,\
+                                    ('var', name, 'packed_data'),\
+                                    reasoning)
+                    ret_val.append(result)
+                    reasoning = []
 
         return ret_val
-
-        
 
     def check_compression(self, ds):
         """
