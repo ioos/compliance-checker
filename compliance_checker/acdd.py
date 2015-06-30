@@ -34,7 +34,7 @@ class ACDDBaseCheck(BaseCheck):
             'id',
             'naming_authority',
             'keywords_vocabulary',
-            ('cdm_data_type', ['vector', 'grid', 'textTable', 'tin', 'stereoModel', 'video']),
+            ('cdm_data_type', ['Grid', 'Image', 'Point', 'Radial', 'Station', 'Swath', 'Trajectory']),
             'history',
             'comment',
             'date_created',
@@ -44,7 +44,7 @@ class ACDDBaseCheck(BaseCheck):
             'institution',
             'project',
             'processing_level',
-            'acknowledgement',
+            'acknowledgment',
             'geospatial_lat_min',
             'geospatial_lat_max',
             'geospatial_lon_min',
@@ -69,7 +69,7 @@ class ACDDBaseCheck(BaseCheck):
     def check_suggested(self, ds):
         return [
             'contributor_name',
-            ('contributor_role', ['principalInvestigator', 'author']),
+            'contributor_role',
             'publisher_name',       # publisher,dataCenter
             'publisher_url',        # publisher
             'publisher_email',      # publisher
@@ -131,34 +131,6 @@ class ACDDBaseCheck(BaseCheck):
         retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_units"), self._get_msg(v, 'units')) for v in vars]
         return retval
 
-    @score_group('varattr')
-    def check_var_coverage_content_type(self, ds):
-        vars = self._get_vars(ds, 'coverage_content_type')
-        allowed = ['image','thematicClassification','physicalMeasurement','auxiliaryInformation','qualityInformation','referenceInformation','modelResult','coordinate']
-
-        ret_val = []
-        for v in vars:
-            vval, vname = v
-            msgs = []
-
-            count = 0
-            if vval is not None:
-                count += 1
-
-                if vval in allowed:
-                    count += 1
-                else:
-                    msgs.append("coverage_content_type present but value (%s) not in allowed values (%s)" % (vval, allowed))
-            else:
-                msgs.append("Var %s missing attr %s" % (vname, 'coverage_content_type'))
-
-            ret_val.append(Result(BaseCheck.HIGH,
-                                  (count, 2),
-                                  (v[1], "var_coverage_content_type"),
-                                  msgs))
-
-        return ret_val
-
     ###############################################################################
     #
     # DATA EXTENTS MATCHING ATTRIBUTES
@@ -204,7 +176,7 @@ class ACDDBaseCheck(BaseCheck):
             return Result(BaseCheck.MEDIUM,
                           False,
                           'geospatial_lat_extents_match',
-                          'Could not find lat variable to test extent of geospatial_lat_min/max, see CF-1.6 spec chapter 4.1')
+                          ['Could not find lat variable to test extent of geospatial_lat_min/max, see CF-1.6 spec chapter 4.1'])
 
         # sort by criteria passed
         final_lats = sorted(lat_vars, key=lambda x: lat_vars[x], reverse=True)
@@ -267,7 +239,7 @@ class ACDDBaseCheck(BaseCheck):
             return Result(BaseCheck.MEDIUM,
                           False,
                           'geospatial_lon_extents_match',
-                          'Could not find lon variable to test extent of geospatial_lon_min/max, see CF-1.6 spec chapter 4.2')
+                          ['Could not find lon variable to test extent of geospatial_lon_min/max, see CF-1.6 spec chapter 4.2'])
 
         # sort by criteria passed
         final_lons = sorted(lon_vars, key=lambda x: lon_vars[x], reverse=True)
@@ -306,9 +278,9 @@ class ACDDBaseCheck(BaseCheck):
 
         if len(v_vars) == 0:
             return Result(BaseCheck.MEDIUM,
-                          False,
+                           False,
                           'geospatial_vertical_extents_match',
-                          'Could not find vertical variable to test extent of geospatial_vertical_min/geospatial_vertical_max, see CF-1.6 spec chapter 4.3')
+                          ['Could not find vertical variable to test extent of geospatial_vertical_min/geospatial_vertical_max, see CF-1.6 spec chapter 4.3'])
 
         obs_mins = {var._name:np.nanmin(var) for var in v_vars if not np.isnan(var).all()}
         obs_maxs = {var._name:np.nanmax(var) for var in v_vars if not np.isnan(var).all()}
@@ -348,7 +320,7 @@ class ACDDBaseCheck(BaseCheck):
             return Result(BaseCheck.MEDIUM,
                           False,
                           'time_coverage_extents_match',
-                          'Could not find time variable to test extent of time_coverage_start/time_coverage_end, see CF-1.6 spec chapter 4.4')
+                          ['Could not find time variable to test extent of time_coverage_start/time_coverage_end, see CF-1.6 spec chapter 4.4'])
 
         obs_mins = {var._name:Unit(str(var.units)).get_converter("seconds since 1970-01-01").evaluate(np.nanmin(var)) for var in t_vars}
         obs_maxs = {var._name:Unit(str(var.units)).get_converter("seconds since 1970-01-01").evaluate(np.nanmax(var)) for var in t_vars}
