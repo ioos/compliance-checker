@@ -33,7 +33,8 @@ static_files = {
         'index_ragged'         : resource_filename('compliance_checker', 'tests/data/index_ragged.nc'),
         'bad_missing_data'     : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc'),
         'self-referencing-var' : resource_filename('compliance_checker', 'tests/data/self-referencing-var.nc'),
-        'scalar_coordinate_variable' : resource_filename('compliance_checker', 'tests/data/scalar_coordinate_variable.nc')
+        'scalar_coordinate_variable' : resource_filename('compliance_checker', 'tests/data/scalar_coordinate_variable.nc'),
+        'coordinates_and_metadata' : resource_filename('compliance_checker', 'tests/data/coordinates_and_metadata.nc')
         }
 
 class MockVariable(object):
@@ -725,6 +726,12 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['index_ragged'])
         results = self.cf.check_coordinates_and_metadata(dataset)
         self.assertTrue(results[-1].value)
+
+        dataset = self.get_pair(static_files['coordinates_and_metadata'])
+        results = self.cf.check_coordinates_and_metadata(dataset)
+        self.assertTrue(len(results) == 2)
+        self.assertFalse(results[0].value)
+        self.assertFalse(results[1].value)
 
     def test_check_missing_data(self):
         dataset = self.get_pair(static_files['index_ragged'])

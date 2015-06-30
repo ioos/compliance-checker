@@ -2738,8 +2738,11 @@ class CFBaseCheck(BaseCheck):
                     if each in name_list:
                         non_data_list.append(each)
 
-        data_list = [each for each in name_list if each not in non_data_list]
+            if hasattr(var, 'ancillary_variables'):
+                for each in getattr(var, 'ancillary_variables', '').split(' '):
+                    non_data_list.append(each)
 
+        data_list = [each for each in name_list if each not in non_data_list]
 
         for each in data_list:
             if getattr(ds.dataset.variables[each], 'coordinates', ''):
