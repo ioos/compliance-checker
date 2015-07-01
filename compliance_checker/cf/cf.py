@@ -499,6 +499,10 @@ class CFBaseCheck(BaseCheck):
             
             if hasattr(v, 'standard_name') and 'status_flag' in v.standard_name:
                 continue
+
+            # skip DSG cf_role
+            if hasattr(v, "cf_role"):
+                continue
             
             units = getattr(v, 'units', None)
 
