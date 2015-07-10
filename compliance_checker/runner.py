@@ -55,7 +55,7 @@ class ComplianceChecker(object):
             groups = cls.stdout_output(cs, score_groups, verbose, limit)
 
         elif output_filename != 'stdout' and output_format == 'html':
-            groups = cls.html_output(cs, score_groups, output_filename, verbose, limit, ds_loc)
+            groups = cls.html_output(cs, score_groups, output_filename, ds_loc)
 
         else:
             raise TypeError('Invalid format %s' % output_format)
@@ -68,7 +68,10 @@ class ComplianceChecker(object):
         Calls output routine to display results in terminal, including scoring.
         Goes to verbose function if called by user.
 
-        :param list score_groups: Score as returned by the compliance checker suite
+        @param cs           Compliance Checker Suite
+        @param score_groups List of results
+        @param verbose      Integer value for verbosity level
+        @param limit        Integer value for limiting output
         '''
         for checker, rpair in score_groups.iteritems():
             groups, errors = rpair
@@ -90,11 +93,16 @@ class ComplianceChecker(object):
         return groups
 
     @classmethod
-    def html_output(cls, cs, score_groups, output_filename, verbose, limit, ds_loc):
+    def html_output(cls, cs, score_groups, output_filename, ds_loc):
         '''
+        Generates rendered HTML output for the compliance score(s)
+        @param cs              Compliance Checker Suite
+        @param score_groups    List of results
+        @param output_filename The file path to output to
+        @param ds_loc          Location of the source dataset
         '''
         for checker, rpair in score_groups.iteritems():
             groups, errors = rpair
-            cs.html_output(limit, checker, groups, output_filename, ds_loc)
+            cs.html_output(checker, groups, output_filename, ds_loc)
         return groups
 

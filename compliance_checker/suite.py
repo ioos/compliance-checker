@@ -114,7 +114,15 @@ class CheckSuite(object):
 
         return True
 
-    def html_output(self, limit, check_name, groups, output_filename, source_name):
+    def html_output(self, check_name, groups, output_filename, source_name):
+        '''
+        Renders an HTML file using Jinja2 and saves the output to the file specified.
+
+        @param check_name      The test which was run
+        @param groups          List of results from compliance checker
+        @param output_filename Path to file to save output
+        @param source_name     Source of the dataset, used for title
+        '''
         from jinja2 import Environment, PackageLoader
         self.j2 = Environment(loader=PackageLoader('compliance_checker', 'data/templates'))
         template = self.j2.get_template('ccheck.html.j2')
@@ -128,6 +136,8 @@ class CheckSuite(object):
         low_priorities    = []
         all_priorities    = []
 
+        # For each result, bin them into the appropriate category, put them all
+        # into the all_priorities category and add up the point values
         for res in groups:
             template_vars['scored_points'] += res.value[0]
             template_vars['possible_points'] += res.value[1]
@@ -138,6 +148,9 @@ class CheckSuite(object):
             else:
                 low_priorities.append(res)
             all_priorities.append(res)
+            # Some results have children
+            # We don't render children inline with the top three tables, but we
+            # do total the points and display the messages
             for child in res.children:
                 template_vars['scored_points'] += child.value[0]
                 template_vars['possible_points'] += child.value[1]
