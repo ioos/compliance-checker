@@ -6,22 +6,27 @@ from compliance_checker.runner import ComplianceChecker, ComplianceCheckerCheckS
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('dataset_location', nargs=1, help= "Defines the location of the dataset to be checked.")
-    parser.add_argument('--test', '-t', '--test=', '-t=', help= "Select the Checks you want to perform.  Either all (default), cf, ioos, or acdd.", nargs='+', default=[], choices=ComplianceCheckerCheckSuite.checkers.keys())
+    parser.add_argument('--test', '-t', '--test=', '-t=', action='append', help= "Select the Checks you want to perform.",  choices=ComplianceCheckerCheckSuite.checkers.keys())
     parser.add_argument('--criteria', '-c', help="Define the criteria for the checks.  Either Strict, Normal, or Lenient.  Defaults to Normal.", nargs='?', default='normal', choices = ['lenient', 'normal', 'strict'])
     parser.add_argument('--verbose' , '-v', help="Increase output. May be specified up to three times.", action="count")
+    parser.add_argument('dataset_location', nargs='+', help= "Defines the location of the dataset to be checked.")
 
     args = parser.parse_args()
+    args.test = args.test or ['acdd']
 
-    print "Running Compliance Checker on the dataset from: %s" % args.dataset_location[0]
+    return_values = []
+    for dataset in args.dataset_location:
+        print "Running Compliance Checker on the dataset from: %s" % dataset
+        return_value = ComplianceChecker.run_checker(args.dataset_location[0],
+                                      args.test,
+                                      args.verbose,
+                                      args.criteria)
+        return_values.append(return_value)
 
-    return_value = ComplianceChecker.run_checker(args.dataset_location[0],
-                                  args.test,
-                                  args.verbose,
-                                  args.criteria)
-    if return_value is not True:
-        return 1
-    return 0
+
+    if all(return_values):
+        return 0
+    return 1
 
 if __name__ == "__main__":
     sys.exit(main())
