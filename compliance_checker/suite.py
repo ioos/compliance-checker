@@ -114,14 +114,75 @@ class CheckSuite(object):
 
         return True
 
-    def standard_output(self, limit, check_name, groups):
-        """
-        Generates the Terminal Output for Standard cases
+    def html_output(self, check_name, groups, file_object, source_name):
+        '''
+        Renders an HTML file using Jinja2 and saves the output to the file specified.
 
-        Returns the dataset needed for the verbose output, as well as the failure flags.
-        """
+        @param check_name      The test which was run
+        @param groups          List of results from compliance checker
+        @param output_filename Path to file to save output
+        @param source_name     Source of the dataset, used for title
+        '''
+        from jinja2 import Environment, PackageLoader
+        self.j2 = Environment(loader=PackageLoader('compliance_checker', 'data/templates'))
+        template = self.j2.get_template('ccheck.html.j2')
+
+        template_vars = {}
+
+        template_vars['scored_points'] = 0
+        template_vars['possible_points'] = 0
+        high_priorities   = []
+        medium_priorities = []
+        low_priorities    = []
+        all_priorities    = []
+
+        template_vars['high_count']   = 0
+        template_vars['medium_count'] = 0
+        template_vars['low_count']    = 0
+
+        def named_function(result):
+            for child in result.children:
+                template_vars['scored_points'] += child.value[0]
+                template_vars['possible_points'] += child.value[1]
+                all_priorities.append(child)
+                named_function(child)
 
 
+
+        # For each result, bin them into the appropriate category, put them all
+        # into the all_priorities category and add up the point values
+        for res in groups:
+            template_vars['scored_points'] += res.value[0]
+            template_vars['possible_points'] += res.value[1]
+            if res.weight == 3:
+                high_priorities.append(res)
+                if res.value[0] < res.value[1]:
+                    template_vars['high_count'] += 1
+            elif res.weight == 2:
+                medium_priorities.append(res)
+                if res.value[0] < res.value[1]:
+                    template_vars['medium_count'] += 1
+            else:
+                low_priorities.append(res)
+                if res.value[0] < res.value[1]:
+                    template_vars['low_count'] += 1
+            all_priorities.append(res)
+            # Some results have children
+            # We don't render children inline with the top three tables, but we
+            # do total the points and display the messages
+            named_function(res)
+
+        template_vars['high_priorities']   = high_priorities
+        template_vars['medium_priorities'] = medium_priorities
+        template_vars['low_priorities']    = low_priorities
+        template_vars['all_priorities']    = all_priorities
+        template_vars['testname']          = check_name
+        template_vars['source_name']       = source_name
+
+        buf = template.render(**template_vars)
+        file_object.write(buf)
+
+    def get_points(self, groups, limit):
         score_list = []
         score_only_list= []
 
@@ -136,7 +197,16 @@ class CheckSuite(object):
         points = sum(points)
         out_of = sum(out_of)
 
-        score_list.sort(key=lambda x: x[1], reverse=True)
+        return score_list, points, out_of
+
+
+    def standard_output(self, limit, check_name, groups):
+        """
+        Generates the Terminal Output for Standard cases
+
+        Returns the dataset needed for the verbose output, as well as the failure flags.
+        """
+        score_list, points, out_of = self.get_points(groups, limit)
 
         fail_flag = 0
 
