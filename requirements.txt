@@ -5,4 +5,4 @@ lxml>=3.2.1
 cf_units==0.1.0
 requests>=2.2.1
 python-dateutil>=2.2
-Jinja2==2.7.3
+Jinja2>=2.7.3

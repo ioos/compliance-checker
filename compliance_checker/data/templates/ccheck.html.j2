@@ -5,9 +5,9 @@
     <meta name="description" content="IOOS Compliance Checker Results">
     <title>Compliance Checker</title>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <style>
 .navbar-custom {
   background-color: #c6d4e1;
@@ -145,6 +145,15 @@ thead .cpriority {
 thead .ccorrection {
   width: 70%;
 }
+.table-collapse a{
+  color: #333;
+}
+
+.table-collapse a:hover {
+  color: #777;
+  text-decoration: none;
+
+}
     </style>
 
   </head>
@@ -183,82 +192,94 @@ thead .ccorrection {
           </h4>
         </div>
         <div class="col-md-12">
-          <h4>High Priority</h4>
-          <table class="table">
-            <thead>
-              <tr>
-                <th class="tname">Name</th>
-                <th class="tpriority">Priority</th>
-                <th class="tscore">Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for score in high_priorities -%}
-              {% if score.value[0] < score.value[1] -%}
-              <tr class="bad-score">
-              {% else -%}
-              <tr>
-              {% endif -%}
+          <div class="table-collapse">
+            <a data-target="high-priority-table" href="#"><h4>High Priority <i class="glyphicon glyphicon-collapse-up"></i></h4></a>
+          </div>
+          <div class="high-priority-table collapse in">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="tname">Name</th>
+                  <th class="tpriority">Priority</th>
+                  <th class="tscore">Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for score in high_priorities -%}
+                {% if score.value[0] < score.value[1] -%}
+                <tr class="bad-score">
+                {% else -%}
+                <tr>
+                {% endif -%}
 
-                <td>{{score.name}}</td>
-                <td>{{score.weight}}</td>
-                <td>{{score.value[0]}}/{{score.value[1]}}</td>
-              </tr>
-              {% endfor -%}
-            </tbody>
-          </table>
+                  <td>{{score.name}}</td>
+                  <td>{{score.weight}}</td>
+                  <td>{{score.value[0]}}/{{score.value[1]}}</td>
+                </tr>
+                {% endfor -%}
+              </tbody>
+            </table>
+          </div> <!-- .high-priority-table -->
         </div> <!-- .col-md-12 -->
         <div class="col-md-12">
-          <h4>Medium Priority</h4>
-          <table class="table">
-            <thead>
-              <tr>
-                <th class="tname">Name</th>
-                <th class="tpriority">Priority</th>
-                <th class="tscore">Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for score in medium_priorities -%}
-              {% if score.value[0] < score.value[1] -%}
-              <tr class="bad-score">
-              {% else -%}
-              <tr>
-              {% endif -%}
+          <div class="table-collapse">
+            <a data-target="medium-priority-table" href="#"><h4>Medium Priority <i class="glyphicon glyphicon-collapse-up"></i></h4></a>
+          </div> <!-- .table-collapse -->
+          <div class="medium-priority-table collapse in">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="tname">Name</th>
+                  <th class="tpriority">Priority</th>
+                  <th class="tscore">Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for score in medium_priorities -%}
+                {% if score.value[0] < score.value[1] -%}
+                <tr class="bad-score">
+                {% else -%}
+                <tr>
+                {% endif -%}
 
-                <td>{{score.name}}</td>
-                <td>{{score.weight}}</td>
-                <td>{{score.value[0]}}/{{score.value[1]}}</td>
-              </tr>
-              {% endfor -%}
-            </tbody>
-          </table>
+                  <td>{{score.name}}</td>
+                  <td>{{score.weight}}</td>
+                  <td>{{score.value[0]}}/{{score.value[1]}}</td>
+                </tr>
+                {% endfor -%}
+              </tbody>
+            </table>
+          </div> <!-- .medium-priority-table -->
         </div> <!-- .col-md-12 -->
         <div class="col-md-12">
-          <h4>Low Priority</h4>
-          <table class="table">
-            <thead>
-              <tr>
-                <th class="tname">Name</th>
-                <th class="tpriority">Priority</th>
-                <th class="tscore">Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for score in low_priorities -%}
-              {% if score.value[0] < score.value[1] -%}
-              <tr class="bad-score">
-              {% else -%}
-              <tr>
-              {% endif -%}
+          <div class="table-collapse">
+            <a data-target="low-priority-table" href="#"><h4>Low Priority <i class="glyphicon glyphicon-collapse-up"></i></h4></a>
+          </div> <!-- .table-collapse -->
+          <div class="low-priority-table collapse in">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="tname">Name</th>
+                  <th class="tpriority">Priority</th>
+                  <th class="tscore">Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for score in low_priorities -%}
+                {% if score.value[0] < score.value[1] -%}
+                <tr class="bad-score">
+                {% else -%}
+                <tr>
+                {% endif -%}
 
-                <td>{{score.name}}</td>
-                <td>{{score.weight}}</td>
-                <td>{{score.value[0]}}/{{score.value[1]}}</td>
-              </tr>
-              {% endfor -%}
-            </tbody>
-          </table>
+                  <td>{{score.name}}</td>
+                  <td>{{score.weight}}</td>
+                  <td>{{score.value[0]}}/{{score.value[1]}}</td>
+                </tr>
+                {% endfor -%}
+              </tbody>
+            </table>
+          </div>
         </div> <!-- .col-md-12 -->
         <div class="col-md-12">
           <h4>Corrective Actions</h4>
@@ -285,5 +306,23 @@ thead .ccorrection {
         </div> <!-- .col-md-12 -->
       </div> <!-- .row -->
     </div> <!-- .container -->
+    <script type="text/javascript">
+$(document).ready(function() {
+    $('.high-priority-table').collapse({toggle: false});
+    $('.table-collapse').click(function(e) {
+      e.preventDefault();
+      console.log("Collapse this table");
+      $('.' + $(e.target).parent().data('target')).collapse('toggle');
+      var glyph = $(e.target).find('.glyphicon');
+      if(glyph.hasClass('glyphicon-collapse-up')) {
+        glyph.removeClass('glyphicon-collapse-up');
+        glyph.addClass('glyphicon-collapse-down');
+      } else {
+        glyph.removeClass('glyphicon-collapse-down');
+        glyph.addClass('glyphicon-collapse-up');
+      }
+    });
+});
+    </script>
   </body>
 </html>
