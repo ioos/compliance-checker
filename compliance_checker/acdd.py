@@ -322,8 +322,8 @@ class ACDDBaseCheck(BaseCheck):
                           'time_coverage_extents_match',
                           ['Could not find time variable to test extent of time_coverage_start/time_coverage_end, see CF-1.6 spec chapter 4.4'])
 
-        obs_mins = {var._name:Unit(str(var.units)).get_converter("seconds since 1970-01-01").evaluate(np.nanmin(var)) for var in t_vars}
-        obs_maxs = {var._name:Unit(str(var.units)).get_converter("seconds since 1970-01-01").evaluate(np.nanmax(var)) for var in t_vars}
+        obs_mins = {var._name:Unit(str(var.units)).convert(np.nanmin(var), "seconds since 1970-01-01") for var in t_vars}
+        obs_maxs = {var._name:Unit(str(var.units)).convert(np.nanmax(var), "seconds since 1970-01-01") for var in t_vars}
 
         min_pass = any((np.isclose(t_min, min_val) for min_val in obs_mins.itervalues()))
         max_pass = any((np.isclose(t_max, max_val) for max_val in obs_maxs.itervalues()))
