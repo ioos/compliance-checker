@@ -51,10 +51,10 @@ class ComplianceChecker(object):
         elif criteria == 'lenient':
             limit = 3
 
-        if output_filename == 'stdout' and output_format == 'stdout':
+        if output_filename == '-' and output_format == 'text':
             groups = cls.stdout_output(cs, score_groups, verbose, limit)
 
-        elif output_filename != 'stdout' and output_format == 'html':
+        elif output_filename != '-' and output_format == 'html':
             groups = cls.html_output(cs, score_groups, output_filename, ds_loc)
 
         else:
