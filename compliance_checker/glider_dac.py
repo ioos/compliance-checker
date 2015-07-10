@@ -529,7 +529,7 @@ class GliderCheck(BaseNCCheck):
             test = nc_var.dtype.str == '<f8'
             score += int(test)
             if not test:
-                messages.append('%s variable is incorrect data type')
+                messages.append('%s variable is incorrect data type' % var)
 
             for field in required_fields:
                 if not hasattr(nc_var, field):
