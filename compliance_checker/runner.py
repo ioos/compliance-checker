@@ -1,5 +1,6 @@
 import traceback
 
+from StringIO import StringIO
 from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.cf import CFBaseCheck
 from compliance_checker.ioos import IOOSBaseCheck
@@ -54,7 +55,7 @@ class ComplianceChecker(object):
         if output_filename == '-' and output_format == 'text':
             groups = cls.stdout_output(cs, score_groups, verbose, limit)
 
-        elif output_filename != '-' and output_format == 'html':
+        elif output_format == 'html':
             groups = cls.html_output(cs, score_groups, output_filename, ds_loc)
 
         else:
@@ -103,6 +104,14 @@ class ComplianceChecker(object):
         '''
         for checker, rpair in score_groups.iteritems():
             groups, errors = rpair
-            cs.html_output(checker, groups, output_filename, ds_loc)
+            if output_filename == '-':
+                f = StringIO()
+                cs.html_output(checker, groups, f, ds_loc)
+                f.seek(0)
+                print f.read()
+            else:
+                with open(output_filename, 'w') as f:
+                    cs.html_output(checker, groups, f, ds_loc)
+
         return groups
 

@@ -114,7 +114,7 @@ class CheckSuite(object):
 
         return True
 
-    def html_output(self, check_name, groups, output_filename, source_name):
+    def html_output(self, check_name, groups, file_object, source_name):
         '''
         Renders an HTML file using Jinja2 and saves the output to the file specified.
 
@@ -164,8 +164,7 @@ class CheckSuite(object):
         template_vars['source_name']       = source_name
 
         buf = template.render(**template_vars)
-        with open(output_filename, 'w') as f:
-            f.write(buf)
+        file_object.write(buf)
 
     def get_points(self, groups, limit):
         score_list = []
