@@ -136,6 +136,19 @@ class CheckSuite(object):
         low_priorities    = []
         all_priorities    = []
 
+        template_vars['high_count']   = 0
+        template_vars['medium_count'] = 0
+        template_vars['low_count']    = 0
+
+        def named_function(result):
+            for child in result.children:
+                template_vars['scored_points'] += child.value[0]
+                template_vars['possible_points'] += child.value[1]
+                all_priorities.append(child)
+                named_function(child)
+
+
+
         # For each result, bin them into the appropriate category, put them all
         # into the all_priorities category and add up the point values
         for res in groups:
@@ -143,18 +156,21 @@ class CheckSuite(object):
             template_vars['possible_points'] += res.value[1]
             if res.weight == 3:
                 high_priorities.append(res)
+                if res.value[0] < res.value[1]:
+                    template_vars['high_count'] += 1
             elif res.weight == 2:
                 medium_priorities.append(res)
+                if res.value[0] < res.value[1]:
+                    template_vars['medium_count'] += 1
             else:
                 low_priorities.append(res)
+                if res.value[0] < res.value[1]:
+                    template_vars['low_count'] += 1
             all_priorities.append(res)
             # Some results have children
             # We don't render children inline with the top three tables, but we
             # do total the points and display the messages
-            for child in res.children:
-                template_vars['scored_points'] += child.value[0]
-                template_vars['possible_points'] += child.value[1]
-                all_priorities.append(child)
+            named_function(res)
 
         template_vars['high_priorities']   = high_priorities
         template_vars['medium_priorities'] = medium_priorities

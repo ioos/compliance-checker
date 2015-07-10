@@ -145,6 +145,13 @@ thead .cpriority {
 thead .ccorrection {
   width: 70%;
 }
+
+.table-collapse {
+  display: inline;
+  font-size: 18px;
+  font-weight: bold;
+}
+
 .table-collapse a{
   color: #333;
 }
@@ -152,7 +159,14 @@ thead .ccorrection {
 .table-collapse a:hover {
   color: #777;
   text-decoration: none;
+}
 
+.failures {
+  display: inline;
+}
+
+.label-as-badge {
+  border-radius: 1em;
 }
     </style>
 
@@ -193,14 +207,18 @@ thead .ccorrection {
         </div>
         <div class="col-md-12">
           <div class="table-collapse">
-            <a data-target="high-priority-table" href="#"><h4>High Priority <i class="glyphicon glyphicon-collapse-up"></i></h4></a>
+            <a data-target="high-priority-table" href="#">High Priority <i class="glyphicon glyphicon-collapse-up"></i></a>
           </div>
+          {% if high_count -%}
+          <div class="failures">
+            | <span class="label label-danger label-as-badge">{{ high_count }}</span>
+          </div>
+          {% endif -%}
           <div class="high-priority-table collapse in">
             <table class="table">
               <thead>
                 <tr>
                   <th class="tname">Name</th>
-                  <th class="tpriority">Priority</th>
                   <th class="tscore">Score</th>
                 </tr>
               </thead>
@@ -213,7 +231,6 @@ thead .ccorrection {
                 {% endif -%}
 
                   <td>{{score.name}}</td>
-                  <td>{{score.weight}}</td>
                   <td>{{score.value[0]}}/{{score.value[1]}}</td>
                 </tr>
                 {% endfor -%}
@@ -223,14 +240,18 @@ thead .ccorrection {
         </div> <!-- .col-md-12 -->
         <div class="col-md-12">
           <div class="table-collapse">
-            <a data-target="medium-priority-table" href="#"><h4>Medium Priority <i class="glyphicon glyphicon-collapse-up"></i></h4></a>
-          </div> <!-- .table-collapse -->
+            <a data-target="medium-priority-table" href="#">Medium Priority <i class="glyphicon glyphicon-collapse-up"></i></a>
+          </div>
+          {% if medium_count -%}
+          <div class="failures">
+            | <span class="label label-danger label-as-badge">{{ medium_count }}</span>
+          </div>
+          {% endif -%}
           <div class="medium-priority-table collapse in">
             <table class="table">
               <thead>
                 <tr>
                   <th class="tname">Name</th>
-                  <th class="tpriority">Priority</th>
                   <th class="tscore">Score</th>
                 </tr>
               </thead>
@@ -243,7 +264,6 @@ thead .ccorrection {
                 {% endif -%}
 
                   <td>{{score.name}}</td>
-                  <td>{{score.weight}}</td>
                   <td>{{score.value[0]}}/{{score.value[1]}}</td>
                 </tr>
                 {% endfor -%}
@@ -253,14 +273,18 @@ thead .ccorrection {
         </div> <!-- .col-md-12 -->
         <div class="col-md-12">
           <div class="table-collapse">
-            <a data-target="low-priority-table" href="#"><h4>Low Priority <i class="glyphicon glyphicon-collapse-up"></i></h4></a>
-          </div> <!-- .table-collapse -->
+            <a data-target="low-priority-table" href="#">Low Priority <i class="glyphicon glyphicon-collapse-up"></i></a>
+          </div>
+          {% if low_count -%}
+          <div class="failures">
+            | <span class="label label-danger label-as-badge">{{ low_count }}</span>
+          </div>
+          {% endif -%}
           <div class="low-priority-table collapse in">
             <table class="table">
               <thead>
                 <tr>
                   <th class="tname">Name</th>
-                  <th class="tpriority">Priority</th>
                   <th class="tscore">Score</th>
                 </tr>
               </thead>
@@ -273,7 +297,6 @@ thead .ccorrection {
                 {% endif -%}
 
                   <td>{{score.name}}</td>
-                  <td>{{score.weight}}</td>
                   <td>{{score.value[0]}}/{{score.value[1]}}</td>
                 </tr>
                 {% endfor -%}
@@ -286,9 +309,9 @@ thead .ccorrection {
           <table class="table">
             <thead>
               <tr>
-                <td class="cname">Name</td>
-                <td class="cpriority">Priority</td>
-                <td class="ccorrection">Corrective action</td>
+                <th class="cname">Name</td>
+                <th class="cpriority">Priority</td>
+                <th class="ccorrection">Corrective action</td>
               </tr>
             </thead>
             <tbody>
@@ -312,7 +335,7 @@ $(document).ready(function() {
     $('.table-collapse').click(function(e) {
       e.preventDefault();
       console.log("Collapse this table");
-      $('.' + $(e.target).parent().data('target')).collapse('toggle');
+      $('.' + $(e.target).data('target')).collapse('toggle');
       var glyph = $(e.target).find('.glyphicon');
       if(glyph.hasClass('glyphicon-collapse-up')) {
         glyph.removeClass('glyphicon-collapse-up');
