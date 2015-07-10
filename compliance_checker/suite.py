@@ -114,14 +114,47 @@ class CheckSuite(object):
 
         return True
 
-    def standard_output(self, limit, check_name, groups):
-        """
-        Generates the Terminal Output for Standard cases
+    def html_output(self, limit, check_name, groups, output_filename, source_name):
+        from jinja2 import Environment, PackageLoader
+        self.j2 = Environment(loader=PackageLoader('compliance_checker', 'data/templates'))
+        template = self.j2.get_template('ccheck.html.j2')
 
-        Returns the dataset needed for the verbose output, as well as the failure flags.
-        """
+        template_vars = {}
 
+        template_vars['scored_points'] = 0
+        template_vars['possible_points'] = 0
+        high_priorities   = []
+        medium_priorities = []
+        low_priorities    = []
+        all_priorities    = []
 
+        for res in groups:
+            template_vars['scored_points'] += res.value[0]
+            template_vars['possible_points'] += res.value[1]
+            if res.weight == 3:
+                high_priorities.append(res)
+            elif res.weight == 2:
+                medium_priorities.append(res)
+            else:
+                low_priorities.append(res)
+            all_priorities.append(res)
+            for child in res.children:
+                template_vars['scored_points'] += child.value[0]
+                template_vars['possible_points'] += child.value[1]
+                all_priorities.append(child)
+
+        template_vars['high_priorities']   = high_priorities
+        template_vars['medium_priorities'] = medium_priorities
+        template_vars['low_priorities']    = low_priorities
+        template_vars['all_priorities']    = all_priorities
+        template_vars['testname']          = check_name
+        template_vars['source_name']       = source_name
+
+        buf = template.render(**template_vars)
+        with open(output_filename, 'w') as f:
+            f.write(buf)
+
+    def get_points(self, groups, limit):
         score_list = []
         score_only_list= []
 
@@ -136,7 +169,16 @@ class CheckSuite(object):
         points = sum(points)
         out_of = sum(out_of)
 
-        score_list.sort(key=lambda x: x[1], reverse=True)
+        return score_list, points, out_of
+
+
+    def standard_output(self, limit, check_name, groups):
+        """
+        Generates the Terminal Output for Standard cases
+
+        Returns the dataset needed for the verbose output, as well as the failure flags.
+        """
+        score_list, points, out_of = self.get_points(groups, limit)
 
         fail_flag = 0
 
