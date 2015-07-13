@@ -1,8 +1,10 @@
 OWSLib>=0.8.3
+petulant-bear>=0.1.3
 Wicken>=0.1.2
 lxml>=3.2.1
 udunitspy==0.0.6
 requests>=2.2.1
 python-dateutil>=2.2
 setuptools>=15.0
+Jinja2>=2.7.3
 

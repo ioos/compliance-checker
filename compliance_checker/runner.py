@@ -1,5 +1,6 @@
 import traceback
 
+from StringIO import StringIO
 from compliance_checker.suite import CheckSuite
 
 class ComplianceChecker(object):
@@ -10,7 +11,7 @@ class ComplianceChecker(object):
     the command line or can be used via import.
     """
     @classmethod
-    def run_checker(cls, ds_loc, checker_names, verbose, criteria):
+    def run_checker(cls, ds_loc, checker_names, verbose, criteria, output_filename='stdout', output_format='stdout'):
         """
         Static check runner.
 
@@ -18,6 +19,8 @@ class ComplianceChecker(object):
         @param  checker_names    List of string names to run, should match keys of checkers dict (empty list means run all)
         @param  verbose         Verbosity of the output (0, 1, 2)
         @param  criteria        Determines failure (lenient, normal, strict)
+        @param  output_filename Path to the file for output
+        @param  output_format   Format of the output
 
         @returns                If the tests failed (based on the criteria)
         """
@@ -34,8 +37,28 @@ class ComplianceChecker(object):
         elif criteria == 'lenient':
             limit = 3
 
-        #Calls output routine to display results in terminal, including scoring.  Goes to verbose function if called by user.
-        # @TODO cleanup
+        if output_filename == '-' and output_format == 'text':
+            groups = cls.stdout_output(cs, score_groups, verbose, limit)
+
+        elif output_format == 'html':
+            groups = cls.html_output(cs, score_groups, output_filename, ds_loc)
+
+        else:
+            raise TypeError('Invalid format %s' % output_format)
+
+        return cs.passtree(groups, limit)
+
+    @classmethod
+    def stdout_output(cls, cs, score_groups, verbose, limit):
+        '''
+        Calls output routine to display results in terminal, including scoring.
+        Goes to verbose function if called by user.
+
+        @param cs           Compliance Checker Suite
+        @param score_groups List of results
+        @param verbose      Integer value for verbosity level
+        @param limit        Integer value for limiting output
+        '''
         for checker, rpair in score_groups.iteritems():
             groups, errors = rpair
 
@@ -53,6 +76,27 @@ class ComplianceChecker(object):
                 cs.non_verbose_output_generation(score_list, groups, limit, points, out_of)
             else:
                 cs.verbose_output_generation(groups, limit, points, out_of)
+        return groups
 
-        return cs.passtree(groups, limit)
+    @classmethod
+    def html_output(cls, cs, score_groups, output_filename, ds_loc):
+        '''
+        Generates rendered HTML output for the compliance score(s)
+        @param cs              Compliance Checker Suite
+        @param score_groups    List of results
+        @param output_filename The file path to output to
+        @param ds_loc          Location of the source dataset
+        '''
+        for checker, rpair in score_groups.iteritems():
+            groups, errors = rpair
+            if output_filename == '-':
+                f = StringIO()
+                cs.html_output(checker, groups, f, ds_loc)
+                f.seek(0)
+                print f.read()
+            else:
+                with open(output_filename, 'w') as f:
+                    cs.html_output(checker, groups, f, ds_loc)
+
+        return groups
 

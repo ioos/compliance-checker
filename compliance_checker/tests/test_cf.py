@@ -14,24 +14,27 @@ import re
 
 
 static_files = {
-        'rutgers'          : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc'),
-        'conv_multi'       : resource_filename('compliance_checker', 'tests/data/conv_multi.nc'),
-        'conv_bad'         : resource_filename('compliance_checker', 'tests/data/conv_bad.nc'),
-        'example-grid'     : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
-        'badname'          : resource_filename('compliance_checker', 'tests/data/non-comp/badname.netcdf'),
-        'bad'              : resource_filename('compliance_checker', 'tests/data/non-comp/bad.nc'),
-        'dimensionless'    : resource_filename('compliance_checker', 'tests/data/dimensionless.nc'),
-        '2dim'             : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
-        'bad2dim'          : resource_filename('compliance_checker', 'tests/data/non-comp/bad2dim.nc'),
-        'rhgrid'           : resource_filename('compliance_checker', 'tests/data/rhgrid.nc'),
-        'bad-rhgrid'       : resource_filename('compliance_checker', 'tests/data/non-comp/bad-rhgrid.nc'),
-        'bad_data_type'    : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
-        'mapping'          : resource_filename('compliance_checker', 'tests/data/mapping.nc'),
-        'bad_region'       : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
-        'featureType'      : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
-        'cont_ragged'      : resource_filename('compliance_checker', 'tests/data/cont_ragged.nc'),
-        'index_ragged'     : resource_filename('compliance_checker', 'tests/data/index_ragged.nc'),
-        'bad_missing_data' : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc')
+        'rutgers'              : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc'),
+        'conv_multi'           : resource_filename('compliance_checker', 'tests/data/conv_multi.nc'),
+        'conv_bad'             : resource_filename('compliance_checker', 'tests/data/conv_bad.nc'),
+        'example-grid'         : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
+        'badname'              : resource_filename('compliance_checker', 'tests/data/non-comp/badname.netcdf'),
+        'bad'                  : resource_filename('compliance_checker', 'tests/data/non-comp/bad.nc'),
+        'dimensionless'        : resource_filename('compliance_checker', 'tests/data/dimensionless.nc'),
+        '2dim'                 : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
+        'bad2dim'              : resource_filename('compliance_checker', 'tests/data/non-comp/bad2dim.nc'),
+        'rhgrid'               : resource_filename('compliance_checker', 'tests/data/rhgrid.nc'),
+        'bad-rhgrid'           : resource_filename('compliance_checker', 'tests/data/non-comp/bad-rhgrid.nc'),
+        'bad_data_type'        : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
+        'mapping'              : resource_filename('compliance_checker', 'tests/data/mapping.nc'),
+        'bad_region'           : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
+        'featureType'          : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
+        'cont_ragged'          : resource_filename('compliance_checker', 'tests/data/cont_ragged.nc'),
+        'index_ragged'         : resource_filename('compliance_checker', 'tests/data/index_ragged.nc'),
+        'bad_missing_data'     : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc'),
+        'self-referencing-var' : resource_filename('compliance_checker', 'tests/data/self-referencing-var.nc'),
+        'scalar_coordinate_variable' : resource_filename('compliance_checker', 'tests/data/scalar_coordinate_variable.nc'),
+        'coordinates_and_metadata' : resource_filename('compliance_checker', 'tests/data/coordinates_and_metadata.nc')
         }
 
 class MockVariable(object):
@@ -709,6 +712,12 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['index_ragged'])
         results = self.cf.check_coordinates_and_metadata(dataset)
         self.assertTrue(results[-1].value)
+
+        dataset = self.get_pair(static_files['coordinates_and_metadata'])
+        results = self.cf.check_coordinates_and_metadata(dataset)
+        self.assertTrue(len(results) == 2)
+        self.assertFalse(results[0].value)
+        self.assertFalse(results[1].value)
 
     def test_check_missing_data(self):
         dataset = self.get_pair(static_files['index_ragged'])

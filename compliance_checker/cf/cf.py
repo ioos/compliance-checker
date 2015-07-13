@@ -495,6 +495,17 @@ class CFBaseCheck(BaseCheck):
             if v.dtype.char == 'S':
                 continue
 
+            # skip quality control vars
+            if hasattr(v, 'flag_meanings'):
+                continue
+
+            if hasattr(v, 'standard_name') and 'status_flag' in v.standard_name:
+                continue
+
+            # skip DSG cf_role
+            if hasattr(v, "cf_role"):
+                continue
+
             units = getattr(v, 'units', None)
 
             # 1) "units" attribute must be present
@@ -2715,8 +2726,11 @@ class CFBaseCheck(BaseCheck):
                     if each in name_list:
                         non_data_list.append(each)
 
-        data_list = [each for each in name_list if each not in non_data_list]
+            if hasattr(var, 'ancillary_variables'):
+                for each in getattr(var, 'ancillary_variables', '').split(' '):
+                    non_data_list.append(each)
 
+        data_list = [each for each in name_list if each not in non_data_list]
 
         for each in data_list:
             if getattr(ds.dataset.variables[each], 'coordinates', ''):

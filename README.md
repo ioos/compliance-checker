@@ -31,23 +31,26 @@ The compliance-checker can work against local files (.nc files, .xml files of SO
 > **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPenDAP URL, please be sure the size is reasonable!
 
 ```
-$ compliance-checker --help
-usage: compliance-checker [-h] [--test {acdd,cf,ioos} [{acdd,cf,ioos} ...]]
-                          [--criteria [{lenient,normal,strict}]] [--verbose]
-                          dataset_location
+usage: cchecker.py [-h] [--test {gliderdac,acdd,cf,ioos}]
+                   [--criteria [{lenient,normal,strict}]] [--verbose]
+                   [-f {stdout,html}] [-o OUTPUT]
+                   dataset_location [dataset_location ...]
 
 positional arguments:
   dataset_location      Defines the location of the dataset to be checked.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --test {acdd,cf,ioos} [{acdd,cf,ioos} ...], -t {acdd,cf,ioos} [{acdd,cf,ioos} ...], --test= {acdd,cf,ioos} [{acdd,cf,ioos} ...], -t= {acdd,cf,ioos} [{acdd,cf,ioos} ...]
-                        Select the Checks you want to perform. Either all
-                        (default), cf, ioos, or acdd.
+  --test {gliderdac,acdd,cf,ioos}, -t {gliderdac,acdd,cf,ioos}, --test= {gliderdac,acdd,cf,ioos}, -t= {gliderdac,acdd,cf,ioos}
+                        Select the Checks you want to perform.
   --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
                         Define the criteria for the checks. Either Strict,
                         Normal, or Lenient. Defaults to Normal.
   --verbose, -v         Increase output. May be specified up to three times.
+  -f {stdout,html}, --format {stdout,html}
+                        Output format
+  -o OUTPUT, --output OUTPUT
+                        Output filename
 ```
 
 ```
