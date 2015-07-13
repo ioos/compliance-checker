@@ -82,7 +82,7 @@ class TestGliderCheck(unittest.TestCase):
         '''
         dataset = self.get_pair(static_files['bad_qc'])
         result = self.check.check_global_attributes(dataset)
-        self.assertEquals(result.value, (42,66))
+        self.assertEquals(result.value, (41,64))
 
     def test_global(self):
         '''
@@ -90,7 +90,7 @@ class TestGliderCheck(unittest.TestCase):
         '''
         dataset = self.get_pair(static_files['glider_std'])
         result = self.check.check_global_attributes(dataset)
-        self.assertEquals(result.value, (66,66))
+        self.assertEquals(result.value, (64,64))
 
 
     def test_metadata(self):
@@ -99,4 +99,4 @@ class TestGliderCheck(unittest.TestCase):
         '''
         dataset = self.get_pair(static_files['bad_metadata'])
         result = self.check.check_global_attributes(dataset)
-        self.assertEquals(result.value, (42,66))
+        self.assertEquals(result.value, (41,64))
