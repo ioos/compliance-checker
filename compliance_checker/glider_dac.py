@@ -554,6 +554,30 @@ class GliderCheck(BaseNCCheck):
             score += 1
         return self.make_result(level, score, out_of, 'CTD Variables', messages)
 
+    def check_standard_names(self, ds):
+        '''
+        Verifies that the standard names are correct.
+        '''
+        level = BaseCheck.MEDIUM
+        out_of = 1
+        score = 0
+        messages = []
+        std_names = {
+            'salinity' : 'sea_water_practical_salinity'
+        }
+
+        for var in std_names:
+            if var not in ds.dataset.variables:
+                messages.append("Can't verify standard name for %s: %s is missing." % (var, var))
+                continue
+            nc_var = ds.dataset.variables[var]
+            test = getattr(nc_var, 'standard_name', None) == std_names[var]
+            score += int(test)
+            if not test:
+                messages.append("Invalid standard name for %s: %s" % (var, std_names[var]))
+
+        return self.make_result(level, score, out_of, 'Standard Names', messages)
+
 
     def check_profile_vars(self, ds):
         '''

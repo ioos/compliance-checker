@@ -100,3 +100,16 @@ class TestGliderCheck(unittest.TestCase):
         dataset = self.get_pair(static_files['bad_metadata'])
         result = self.check.check_global_attributes(dataset)
         self.assertEquals(result.value, (41,64))
+
+    def test_standard_names(self):
+        '''
+        Tests that the standard names succeed/fail
+        '''
+
+        dataset = self.get_pair(static_files['bad_metadata'])
+        result = self.check.check_standard_names(dataset)
+        self.assertEquals(result.value, (0, 1))
+        
+        dataset = self.get_pair(static_files['glider_std'])
+        result = self.check.check_standard_names(dataset)
+        self.assertEquals(result.value, (1, 1))
