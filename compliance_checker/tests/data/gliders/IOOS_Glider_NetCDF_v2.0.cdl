@@ -113,7 +113,7 @@ variables:
 		salinity:platform = "platform" ;
 		salinity:precision = " " ;
 		salinity:resolution = " " ;
-		salinity:standard_name = "sea_water_salinity" ;
+		salinity:standard_name = "sea_water_practical_salinity" ;
 		salinity:units = "1e-3" ;
 		salinity:valid_max = 40. ;
 		salinity:valid_min = 0. ;
