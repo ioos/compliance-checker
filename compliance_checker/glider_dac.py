@@ -574,7 +574,7 @@ class GliderCheck(BaseNCCheck):
             test = getattr(nc_var, 'standard_name', None) == std_names[var]
             score += int(test)
             if not test:
-                messages.append("Invalid standard name for %s: %s" % (var, std_names[var]))
+                messages.append("Invalid standard name for %s: %s" % (var, getattr(nc_var, 'standard_name', '')))
 
         return self.make_result(level, score, out_of, 'Standard Names', messages)
 
