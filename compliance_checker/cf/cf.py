@@ -490,7 +490,7 @@ class CFBaseCheck(BaseCheck):
                continue
 
             # skip string type vars
-            if v.dtype.char == 'S':
+            if (isinstance(v.dtype, type) and issubclass(v.dtype, basestring)) or v.dtype.char == 'S':
                 continue
             
             # skip quality control vars
