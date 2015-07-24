@@ -386,16 +386,18 @@ class CFBaseCheck(BaseCheck):
 
                 if 'valid_range' in attrs:
                     rmin, rmax = v.valid_range
+                    spec_by = 'valid_range'
                 elif 'valid_min' in attrs and 'valid_max' in attrs:
                     rmin = v.valid_min
                     rmax = v.valid_max
+                    spec_by = 'valid_min/valid_max'
                 else:
                     continue
 
                 valid     = not (v._FillValue >= rmin and v._FillValue <= rmax)
                 reasoning = []
                 if not valid:
-                    reasoning = ["%s must not be between %s and %s" % (v._FillValue, rmin, rmax)]
+                    reasoning = ["%s must not be between %s and %s as specified by %s" % (v._FillValue, rmin, rmax, spec_by)]
 
                 ret.append(Result(BaseCheck.HIGH, valid, ('fill_value', k, 'outside_valid_range'), msgs=reasoning))
 
