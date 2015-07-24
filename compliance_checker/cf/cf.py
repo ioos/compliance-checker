@@ -397,7 +397,7 @@ class CFBaseCheck(BaseCheck):
                 valid     = not (v._FillValue >= rmin and v._FillValue <= rmax)
                 reasoning = []
                 if not valid:
-                    reasoning = ["%s must not be between %s and %s as specified by %s" % (v._FillValue, rmin, rmax, spec_by)]
+                    reasoning = ["%s must not be in valid range (%s to %s) as specified by %s" % (v._FillValue, rmin, rmax, spec_by)]
 
                 ret.append(Result(BaseCheck.HIGH, valid, ('fill_value', k, 'outside_valid_range'), msgs=reasoning))
 
