@@ -2368,7 +2368,7 @@ class CFBaseCheck(BaseCheck):
             if not (add_offset or scale_factor):
                 continue
 
-            valid = False
+            valid = True
             reasoning = []
 
             # if only one of these attributes is defined, assume they
@@ -2380,17 +2380,19 @@ class CFBaseCheck(BaseCheck):
 
             if hasattr(add_offset, 'dtype') and hasattr(scale_factor, 'dtype'):
 
-                if var.dtype == add_offset.dtype == scale_factor.dtype:
-                    valid = True
-                elif add_offset.dtype == add_offset.dtype and scale_factor.dtype != var.dtype:
-                    # Check both attribute types are type float or double
-                    if add_offset.dtype in [np.float, np.float16, np.float32, np.float64, np.float128]:
-                        # Check variable types must be byte, short or int
-                        if var.dtype in [np.int, np.int8, np.int16, np.int32, np.int64]:
-                            valid = True
-
-            if not valid:
-                reasoning.append("'add_offset' and 'scale_factor' are not both of type float or int or the data variable is not of type byte, short, or int.")
+                if add_offset.dtype != scale_factor.dtype:
+                    valid = False
+                    reasoning.append("Attributes add_offset and scale_factor have different data type.")
+                elif scale_factor.dtype != var.dtype:
+                    # Check both attributes are type float or double
+                    if not scale_factor.dtype in [np.float, np.float16, np.float32, np.float64, np.float128]:
+                        valid = False
+                        reasoning.append("Attributes add_offset and scale_factor are not of type float or double.")
+                    else:
+                        # Check variable type is byte, short or int
+                        if not var.dtype in [np.int, np.int8, np.int16, np.int32, np.int64]:
+                            valid = False
+                            reasoning.append("Variable is not of type byte, short, or int.")
 
             result = Result(BaseCheck.MEDIUM, valid, ('var', name, 'packed_data'), reasoning)
             ret_val.append(result)
