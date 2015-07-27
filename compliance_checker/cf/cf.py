@@ -2387,7 +2387,7 @@ class CFBaseCheck(BaseCheck):
                     # Check both attribute types are type float or double
                     if add_offset.dtype in [np.float, np.float16, np.float32, np.float64, np.float128]:
                         # Check variable types must be byte, short or int
-                        if var.dtype in [np.int8, np.int16, np.int32, np.int64, int()]:
+                        if var.dtype in [np.int, np.int8, np.int16, np.int32, np.int64]:
                             valid = True
 
                     if valid:
