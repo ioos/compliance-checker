@@ -648,8 +648,10 @@ class TestCF(unittest.TestCase):
     def test_check_packed_data(self):
         dataset = self.get_pair(static_files['bad_data_type'])
         results = self.cf.check_packed_data(dataset)
+        self.assertEqual(len(results), 3)
         self.assertFalse(results[0].value)
         self.assertTrue(results[1].value)
+        self.assertFalse(results[2].value)
 
 
     def test_check_compression(self):
