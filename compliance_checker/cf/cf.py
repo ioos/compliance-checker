@@ -2378,21 +2378,19 @@ class CFBaseCheck(BaseCheck):
             if not scale_factor:
                 scale_factor = add_offset
 
-            if hasattr(add_offset, 'dtype') and hasattr(scale_factor, 'dtype'):
-
-                if add_offset.dtype != scale_factor.dtype:
+            if type(add_offset) != type(scale_factor):
+                valid = False
+                reasoning.append("Attributes add_offset and scale_factor have different data type.")
+            elif type(scale_factor) != var.dtype:
+                # Check both attributes are type float or double
+                if not type(scale_factor) in [np.float, np.float16, np.float32, np.float64, np.float128]:
                     valid = False
-                    reasoning.append("Attributes add_offset and scale_factor have different data type.")
-                elif scale_factor.dtype != var.dtype:
-                    # Check both attributes are type float or double
-                    if not scale_factor.dtype in [np.float, np.float16, np.float32, np.float64, np.float128]:
+                    reasoning.append("Attributes add_offset and scale_factor are not of type float or double.")
+                else:
+                    # Check variable type is byte, short or int
+                    if not var.dtype in [np.int, np.int8, np.int16, np.int32, np.int64]:
                         valid = False
-                        reasoning.append("Attributes add_offset and scale_factor are not of type float or double.")
-                    else:
-                        # Check variable type is byte, short or int
-                        if not var.dtype in [np.int, np.int8, np.int16, np.int32, np.int64]:
-                            valid = False
-                            reasoning.append("Variable is not of type byte, short, or int.")
+                        reasoning.append("Variable is not of type byte, short, or int.")
 
             result = Result(BaseCheck.MEDIUM, valid, ('var', name, 'packed_data'), reasoning)
             ret_val.append(result)
