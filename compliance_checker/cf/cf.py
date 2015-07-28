@@ -2767,7 +2767,7 @@ class CFBaseCheck(BaseCheck):
 
         role_list = [getattr(var, 'cf_role', '').split(' ') for name,var in ds.dataset.variables.iteritems() if hasattr(var, 'cf_role')]
         single_role = ['timeseries', 'profile', 'trajectory']
-        dual_role = ['timeseries', 'profile', 'trajectory','timeSeriesProfile', 'trajectoryProfile']
+        dual_role = ['timeseries', 'profile', 'trajectory','timeseriesprofile', 'trajectoryprofile']
         if getattr(ds.dataset, 'featureType', '').lower() in single_role and len(np.ravel(role_list)) == 1:
             reasoning = []
             valid = True
