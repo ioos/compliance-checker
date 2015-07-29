@@ -2419,9 +2419,8 @@ class CFBaseCheck(BaseCheck):
                     reasoning.append("Type of valid_range attribute (%s) does not match variable type (%s)" %\
                                      (var.valid_range.dtype, var.dtype))
 
-            if not valid:
-                result = Result(BaseCheck.MEDIUM, False, ('var', name, 'packed_data'), reasoning)
-                ret_val.append(result)
+            result = Result(BaseCheck.MEDIUM, valid, ('var', name, 'fillvalue_valid_range_attributes'), reasoning)
+            ret_val.append(result)
 
         return ret_val
 
