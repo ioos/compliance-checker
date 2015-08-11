@@ -171,8 +171,9 @@ class TestCF(unittest.TestCase):
         """
 
         dataset = self.get_pair(static_files['bad_data_type'])
-        result = self.cf.check_fill_value_outside_valid_range(dataset)
-        assert result.value == (1, 2)
+        results = self.cf.check_fill_value_outside_valid_range(dataset)
+        assert sum((result.value for result in results)) == 1
+        assert len(results) == 2
 
     def test_check_conventions_are_cf_16(self):
         """

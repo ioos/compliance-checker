@@ -378,8 +378,7 @@ class CFBaseCheck(BaseCheck):
         """
         2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
         """
-        fails = []
-        checked = 0
+        ret = []
 
         for k, v in ds.dataset.variables.iteritems():
             if hasattr(v, '_FillValue'):
@@ -387,20 +386,22 @@ class CFBaseCheck(BaseCheck):
 
                 if 'valid_range' in attrs:
                     rmin, rmax = v.valid_range
+                    spec_by = 'valid_range'
                 elif 'valid_min' in attrs and 'valid_max' in attrs:
                     rmin = v.valid_min
                     rmax = v.valid_max
+                    spec_by = 'valid_min/valid_max'
                 else:
                     continue
 
-                checked += 1
+                valid     = not (v._FillValue >= rmin and v._FillValue <= rmax)
+                reasoning = []
+                if not valid:
+                    reasoning = ["%s must not be in valid range (%s to %s) as specified by %s" % (v._FillValue, rmin, rmax, spec_by)]
 
-                if v._FillValue >= rmin and v._FillValue <= rmax:
-                    fails.append((k, "%s is between %s and %s" % (v._FillValue, rmin, rmax)))
-        if checked >= 1:
-            return Result(BaseCheck.HIGH, (checked - len(fails), checked), msgs=fails)
-        else:
-            return []
+                ret.append(Result(BaseCheck.HIGH, valid, ('_FillValue', k, 'outside_valid_range'), msgs=reasoning))
+
+        return ret
 
     def check_conventions_are_cf_16(self, ds):
         """
