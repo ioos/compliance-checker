@@ -452,7 +452,13 @@ non-0 for a failure.
 
 ## Development
 
-The compliance-checker is designed to be simple and hackable to edit existing compliance suites or introduce new ones. See the [Development](https://github.com/ioos/compliance-checker/wiki/Development) wiki page for more information.  
+The compliance-checker is designed to be simple and hackable to edit existing compliance suites or introduce new ones. See the [Development](https://github.com/ioos/compliance-checker/wiki/Development) wiki page for more information. 
+
+## Resource materials
+
+[Compliance checker Webinar](
+https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e6034)
+
 
 ## Roadmap
 
