@@ -1273,16 +1273,26 @@ class CFBaseCheck(BaseCheck):
         for k,v in ds.dataset.variables.iteritems():
             if not is_time_variable(k,v):
                 continue
+            reasoning = None
             has_calendar = hasattr(v, 'calendar')
+            if not has_calendar:
+                reasoning = ['Variable %s should have a calendar attribute' % k]
             result = Result(BaseCheck.LOW,  \
                             has_calendar,   \
-                            ('time', k, 'has_calendar'))
+                            ('time', k, 'has_calendar'),  \
+                            reasoning)
             ret_val.append(result)
-            valid_calendar = has_calendar and v.calendar in valid_calendars
-            result = Result(BaseCheck.LOW,  \
-                            valid_calendar, \
-                            ('time', k, 'valid_calendar'))
-            ret_val.append(result)
+
+            if has_calendar:
+                reasoning = None
+                valid_calendar = v.calendar in valid_calendars
+                if not valid_calendar:
+                    reasoning = ["'%s' is not a valid calendar" % v.calendar]
+                    result = Result(BaseCheck.LOW,  \
+                                    valid_calendar, \
+                                    ('time', k, 'valid_calendar'),  \
+                                    reasoning)
+                ret_val.append(result)
 
         return ret_val
         
