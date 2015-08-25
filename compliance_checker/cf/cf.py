@@ -1199,11 +1199,7 @@ class CFBaseCheck(BaseCheck):
             if not has_units:
                 result = Result(BaseCheck.HIGH, \
                                 False,          \
-                                ('time', k, 'has_units'),['%s does not have the correct units'%k])
-                ret_val.append(result)
-                result = Result(BaseCheck.HIGH, \
-                                False,          \
-                                ('time', k, 'correct_units'),['%s does not have the correct units'%k])
+                                ('time', k, 'has_units'),['%s does not have units'%k])
                 ret_val.append(result)
                 continue
             # Correct and identifiable units
