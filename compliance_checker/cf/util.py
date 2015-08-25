@@ -267,7 +267,10 @@ def units_convertible(units1, units2, reftimeistime=True):
     return u1.is_convertible(units2)
 
 def units_temporal(units):
-    u = Unit(units)
+    try:
+        u = Unit(units)
+    except ValueError:
+        return False
     return u.is_time_reference()
 
 def map_axes(dim_vars, reverse_map=False):
