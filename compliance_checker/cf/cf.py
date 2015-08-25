@@ -1212,9 +1212,13 @@ class CFBaseCheck(BaseCheck):
                             ('time', k, 'has_units'))
             ret_val.append(result)
             correct_units = units_temporal(v.units)
+            reasoning = None
+            if not correct_units:
+                reasoning = ['%s doesn not have correct time units' % k]
             result = Result(BaseCheck.HIGH, \
                             correct_units,  \
-                            ('time', k, 'correct_units'))
+                            ('time', k, 'correct_units'),  \
+                            reasoning)
             ret_val.append(result)
 
         return ret_val
