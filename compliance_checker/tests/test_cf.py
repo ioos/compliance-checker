@@ -551,7 +551,6 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_calendar(dataset)
         rd = {r.name[1:] : r.value for r in results }
         self.assertFalse(rd[('bad_time_1', 'has_calendar')])
-        self.assertFalse(rd[('bad_time_1', 'valid_calendar')])
         self.assertTrue(rd[('bad_time_2', 'has_calendar')])
         self.assertFalse(rd[('bad_time_2', 'valid_calendar')])
 
