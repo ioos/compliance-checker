@@ -58,6 +58,9 @@ class ComplianceChecker(object):
         elif output_format == 'html':
             groups = cls.html_output(cs, score_groups, output_filename, ds_loc)
 
+        elif output_format == 'json':
+            groups = cls.json_output(cs, score_groups, output_filename, ds_loc)
+
         else:
             raise TypeError('Invalid format %s' % output_format)
 
@@ -112,6 +115,28 @@ class ComplianceChecker(object):
             else:
                 with open(output_filename, 'w') as f:
                     cs.html_output(checker, groups, f, ds_loc)
+
+        return groups
+
+    @classmethod
+    def json_output(cls, cs, score_groups, output_filename, ds_loc):
+        '''
+        Generates JSON output for the ocmpliance score(s)
+        @param cs              Compliance Checker Suite
+        @param score_groups    List of results
+        @param output_filename The file path to output to
+        @param ds_loc          Location of the source dataset
+        '''
+        for checker, rpair in score_groups.iteritems():
+            groups, errors = rpair
+            if output_filename == '-':
+                f = StringIO()
+                cs.json_output(checker, groups, f, ds_loc)
+                f.seek(0)
+                print f.read()
+            else:
+                with open(output_filename, 'w') as f:
+                    cs.json_output(checker, groups, f, ds_loc)
 
         return groups
 

@@ -224,14 +224,14 @@ thead .ccorrection {
               </thead>
               <tbody>
                 {% for score in high_priorities -%}
-                {% if score.value[0] < score.value[1] -%}
+                {% if score['value'][0] < score['value'][1] -%}
                 <tr class="bad-score">
                 {% else -%}
                 <tr>
                 {% endif -%}
 
-                  <td>{{score.name}}</td>
-                  <td>{{score.value[0]}}/{{score.value[1]}}</td>
+                  <td>{{score['name']}}</td>
+                  <td>{{score['value'][0]}}/{{score['value'][1]}}</td>
                 </tr>
                 {% endfor -%}
               </tbody>
@@ -257,14 +257,14 @@ thead .ccorrection {
               </thead>
               <tbody>
                 {% for score in medium_priorities -%}
-                {% if score.value[0] < score.value[1] -%}
+                {% if score['value'][0] < score['value'][1] -%}
                 <tr class="bad-score">
                 {% else -%}
                 <tr>
                 {% endif -%}
 
-                  <td>{{score.name}}</td>
-                  <td>{{score.value[0]}}/{{score.value[1]}}</td>
+                  <td>{{score['name']}}</td>
+                  <td>{{score['value'][0]}}/{{score['value'][1]}}</td>
                 </tr>
                 {% endfor -%}
               </tbody>
@@ -290,14 +290,14 @@ thead .ccorrection {
               </thead>
               <tbody>
                 {% for score in low_priorities -%}
-                {% if score.value[0] < score.value[1] -%}
+                {% if score['value'][0] < score['value'][1] -%}
                 <tr class="bad-score">
                 {% else -%}
                 <tr>
                 {% endif -%}
 
-                  <td>{{score.name}}</td>
-                  <td>{{score.value[0]}}/{{score.value[1]}}</td>
+                  <td>{{score['name']}}</td>
+                  <td>{{score['value'][0]}}/{{score['value'][1]}}</td>
                 </tr>
                 {% endfor -%}
               </tbody>
@@ -316,10 +316,10 @@ thead .ccorrection {
             </thead>
             <tbody>
             {% for result in all_priorities -%}
-              {% for msg in result.msgs -%}
+              {% for msg in result['msgs']-%}
                 <tr>
-                  <td>{{result.name}}</td>
-                  <td>{{result.weight}}</td>
+                  <td>{{result['name']}}</td>
+                  <td>{{result['weight']}}</td>
                   <td>{{msg}}</td>
                 </tr>
               {% endfor -%}

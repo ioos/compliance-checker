@@ -5,12 +5,14 @@ Compliance Checker suite runner
 import sys
 import inspect
 import itertools
+import json
 from netCDF4 import Dataset
 from lxml import etree as ET
 from compliance_checker.base import BaseCheck, fix_return_value, Result
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from urlparse import urlparse
+from datetime import datetime
 import requests
 import textwrap
 
@@ -114,36 +116,45 @@ class CheckSuite(object):
 
         return True
 
-    def html_output(self, check_name, groups, file_object, source_name):
+    def build_structure(self, check_name, groups, source_name):
         '''
-        Renders an HTML file using Jinja2 and saves the output to the file specified.
+        Comiles the checks, results and scores into an aggregate structure which looks like:
+            
+            {
+              "scored_points": 396,
+              "low_count": 0,
+              "possible_points": 400,
+              "testname": "gliderdac",
+              "medium_count": 2,
+              "source_name": ".//rutgers/ru01-20140120T1444/ru01-20140120T1649.nc",
+              "high_count": 0,
+              "all_priorities" : [...],
+              "high_priorities": [...],
+              "medium_priorities" : [...],
+              "low_priorities" : [...]
+            }
 
-        @param check_name      The test which was run
-        @param groups          List of results from compliance checker
-        @param output_filename Path to file to save output
-        @param source_name     Source of the dataset, used for title
+        @param check_name  The test which was run
+        @param groups      List of results from compliance checker
+        @param source_name Source of the dataset, used for title
         '''
-        from jinja2 import Environment, PackageLoader
-        self.j2 = Environment(loader=PackageLoader('compliance_checker', 'data/templates'))
-        template = self.j2.get_template('ccheck.html.j2')
+        aggregates = {}
 
-        template_vars = {}
-
-        template_vars['scored_points'] = 0
-        template_vars['possible_points'] = 0
+        aggregates['scored_points'] = 0
+        aggregates['possible_points'] = 0
         high_priorities   = []
         medium_priorities = []
         low_priorities    = []
         all_priorities    = []
 
-        template_vars['high_count']   = 0
-        template_vars['medium_count'] = 0
-        template_vars['low_count']    = 0
+        aggregates['high_count']   = 0
+        aggregates['medium_count'] = 0
+        aggregates['low_count']    = 0
 
         def named_function(result):
             for child in result.children:
-                template_vars['scored_points'] += child.value[0]
-                template_vars['possible_points'] += child.value[1]
+                aggregates['scored_points'] += child.value[0]
+                aggregates['possible_points'] += child.value[1]
                 all_priorities.append(child)
                 named_function(child)
 
@@ -152,32 +163,82 @@ class CheckSuite(object):
         # For each result, bin them into the appropriate category, put them all
         # into the all_priorities category and add up the point values
         for res in groups:
-            template_vars['scored_points'] += res.value[0]
-            template_vars['possible_points'] += res.value[1]
+            aggregates['scored_points'] += res.value[0]
+            aggregates['possible_points'] += res.value[1]
             if res.weight == 3:
                 high_priorities.append(res)
                 if res.value[0] < res.value[1]:
-                    template_vars['high_count'] += 1
+                    aggregates['high_count'] += 1
             elif res.weight == 2:
                 medium_priorities.append(res)
                 if res.value[0] < res.value[1]:
-                    template_vars['medium_count'] += 1
+                    aggregates['medium_count'] += 1
             else:
                 low_priorities.append(res)
                 if res.value[0] < res.value[1]:
-                    template_vars['low_count'] += 1
+                    aggregates['low_count'] += 1
             all_priorities.append(res)
             # Some results have children
             # We don't render children inline with the top three tables, but we
             # do total the points and display the messages
             named_function(res)
 
-        template_vars['high_priorities']   = high_priorities
-        template_vars['medium_priorities'] = medium_priorities
-        template_vars['low_priorities']    = low_priorities
-        template_vars['all_priorities']    = all_priorities
-        template_vars['testname']          = check_name
-        template_vars['source_name']       = source_name
+        aggregates['high_priorities']   = high_priorities
+        aggregates['medium_priorities'] = medium_priorities
+        aggregates['low_priorities']    = low_priorities
+        aggregates['all_priorities']    = all_priorities
+        aggregates['testname']          = check_name
+        aggregates['source_name']       = source_name
+        return aggregates
+
+    def json_output(self, check_name, groups, file_object, source_name):
+        '''
+        Builds the results into a JSON structure and writes it to the file buffer.
+
+        @param check_name      The test which was run
+        @param groups          List of results from compliance checker
+        @param output_filename Path to file to save output
+        @param file_object     A python file object where the output should be written to
+        @param source_name     Source of the dataset, used for title
+        '''
+        aggregates = self.build_structure(check_name, groups, source_name)
+        aggregates = self.serialize(aggregates)
+        json_string = json.dumps(aggregates)
+        file_object.write(json_string)
+        return
+
+    def serialize(self, o):
+        '''
+        Returns a safe serializable object that can be serialized into JSON.
+
+        @param o Python object to serialize
+        '''
+        if isinstance(o, (list, tuple)):
+            return [self.serialize(i) for i in o]
+        if isinstance(o, dict):
+            return {k: self.serialize(v) for k,v in o.iteritems()}
+        if isinstance(o, datetime):
+            return o.isoformat()
+        if isinstance(o, Result):
+            return self.serialize(o.serialize())
+        return o
+
+
+    def html_output(self, check_name, groups, file_object, source_name):
+        '''
+        Renders an HTML file using Jinja2 and saves the output to the file specified.
+
+        @param check_name      The test which was run
+        @param groups          List of results from compliance checker
+        @param output_filename Path to file to save output
+        @param file_object     A python file object where the output should be written to
+        @param source_name     Source of the dataset, used for title
+        '''
+        from jinja2 import Environment, PackageLoader
+        self.j2 = Environment(loader=PackageLoader('compliance_checker', 'data/templates'))
+        template = self.j2.get_template('ccheck.html.j2')
+
+        template_vars = self.build_structure(check_name, groups, source_name)
 
         buf = template.render(**template_vars)
         file_object.write(buf)
