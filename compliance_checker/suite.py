@@ -118,7 +118,7 @@ class CheckSuite(object):
 
     def build_structure(self, check_name, groups, source_name):
         '''
-        Comiles the checks, results and scores into an aggregate structure which looks like:
+        Compiles the checks, results and scores into an aggregate structure which looks like:
             
             {
               "scored_points": 396,
