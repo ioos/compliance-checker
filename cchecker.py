@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import pprint
 import argparse
 import sys
@@ -19,7 +20,7 @@ def main():
     return_values = []
     for dataset in args.dataset_location:
         if args.format != 'json':
-            print "Running Compliance Checker on the dataset from: %s" % dataset
+            print("Running Compliance Checker on the dataset from: %s" % dataset, file=sys.stderr)
         return_value = ComplianceChecker.run_checker(args.dataset_location[0],
                                       args.test,
                                       args.verbose,
