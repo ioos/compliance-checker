@@ -132,6 +132,19 @@ class Result(object):
             ret += "\n" + pprint.pformat(self.children)
         return ret
 
+    def serialize(self):
+        '''
+        Returns a serializable dictionary that represents the result object
+        '''
+        return {
+            'name' : self.name,
+            'weight' : self.weight,
+            'value' : self.value,
+            'msgs' : self.msgs,
+            'children' : [i.serialize() for i in self.children]
+        }
+
+
 def std_check_in(dataset_dogma, name, allowed_vals):
     """
     Returns 0 if attr not present, 1 if present but not in correct value, 2 if good
