@@ -2035,81 +2035,38 @@ class CFBaseCheck(BaseCheck):
         reasoning = []
         paragraph = ''
         named = ''
+
+        pvars = re.compile('\(.*?\)|(\w*?):')
+
+        psep = re.compile('((?P<var>\w+): (?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) ?(?P<over>over (?P<otypevar>\w+))?| ?)(?P<brace>\(((?P<brace_wunit>\w+): (\d+) (?P<unit>\w+)|(?P<brace_opt>\w+): (\w+))\))*)')
         
         names = list(ds.dataset.variables.iterkeys())
         for name, var in ds.dataset.variables.iteritems():
             named_dict = OrderedDict()
             if getattr(var, 'cell_methods', '') :
                 method = getattr(var, 'cell_methods', '')
-                #Parse the cell_methods format.
-                paragraph = re.split(r"(?<=:)\s|(?<=\s)\(",method)
-                
-                i = 0
-                while i < (len(paragraph)):
-                    if paragraph[i][-10:] == " interval:":
-                        paragraph[i] = paragraph[i][0:-10]
-                        paragraph.insert(i+1,"interval:")
-                        i = i+1
-                    if paragraph[i][-6:] == " area:":
-                        paragraph[i] = paragraph[i][0:-6]
-                        paragraph.insert(i+1,"area:")
-                        i = i+1
-                    if paragraph[i][-9:] == " comment:":
-                        paragraph[i] = paragraph[i][0:-9]
-                        paragraph.insert(i+1,"comment:")
-                        i = i+1
-                    i = i+1
-        
-                
-                dict_count = 0
-                #Create a dict that holds each statement in the cell_method field
-                for i in range(len(paragraph)-1):
-        
-                    if paragraph[i][-1] == ":":
-                        named = named +paragraph[i]
-                    if paragraph[i+1][-1] != ":":
-                        named_dict[str(dict_count)+named] = []
-                    if paragraph[i][-1] != ":":
-                        named_dict[str(dict_count)+named].append(paragraph[i])
-        
-                        dict_count = dict_count+1
-                        named = ''
-                named_dict[str(dict_count)+named].append(paragraph[i+1])
-                
-                
-    
-                valid_name_count = 0
-                total_name_count = 0
-                
-                #Checks if the name value of the 'name: method' pair is either a dimension of the variable, a standard_name, or a scalar_variable (which is         trumped by the standard_name requirement_
-                
-                for each in named_dict.iterkeys():
-                    title = each[1:].split(':')
-                    for i in range(len(title)):
-                        if title[i].lower() in _areatype_names:
-                            valid_name_count = valid_name_count +1
-                        else:
-                            reasoning.append('The name field does not appear in the allowable types.')
-                                
-                for var_dim in ds.dataset.variables[name].dimensions:
-                    for each in named_dict.iterkeys():
-                        title = each[1:].split(':')
-                        for i in range(len(title)):
-                            if title[i].lower() == var_dim:
-                                valid_name_count = valid_name_count +1
-                            else:
-                                reasoning.append('The name field does not match the dimension.') 
 
-                for each in named_dict.iterkeys():
-                    title = each[1:].split(':')
-                
-                    for i in range(len(title)):
-                        if title[i] != '':
-                            total_name_count = total_name_count +1
-                        if title[i].lower() in ["interval", "area", "comment"] :
-                            valid_name_count = valid_name_count +1
-                        else:
-                            reasoning.append('The name field does not match the reserved words "interval", "area", or "comment".')
+                total_name_count = 0
+                cell_dims = []
+                for match in re.finditer(pvars, method):
+                    if (match.groups()[0] is not None):
+                        cell_dims.append(match.groups()[0])
+                        total_name_count = total_name_count + 1
+
+                #print "cell_methods_check: number DIMs", total_name_count
+
+                # check that the name is valid
+                valid_name_count = 0
+                for match in re.finditer(psep, method):
+                    #print 'dict ', match.groupdict()
+                    if match.group('var') in ds.dataset.variables[name].dimensions:
+                        valid_name_count = valid_name_count + 1
+                    elif match.group('var') == 'area':
+                        valid_name_count = valid_name_count + 1
+                    elif match.group('var') in getattr(var,"coordinates",""):
+                        valid_name_count = valid_name_count + 1
+                    else:
+                        reasoning.append('The name field does not match a dimension, area or coordinate.') 
 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_name_count, total_name_count),                                       \
@@ -2117,73 +2074,65 @@ class CFBaseCheck(BaseCheck):
                         reasoning)
                 ret_val.append(result)
 
-                reasoning = []
-                            
                 #Checks if the method value of the 'name: method' pair is acceptable
+                reasoning = []
                 methods = ['point', 'sum', 'mean', 'maximum', 'minimum', 'mid_range', 'standard_deviation', 'variance', 'mode', 'median']            
+
                 valid_method_count = 0
-                total_method_count = 0
-                
-                for each in named_dict.iterkeys():
-                    title = each[1:].split(':')
-                
-                    for i in range(len(title)):
-                        if title[i] not in ['interval', 'comment', 'area', '']:
-                            if title[i] != '':
-                                total_method_count = total_method_count +1
-                            if named_dict[each][0].strip() in methods:
-                                valid_method_count = valid_method_count+1
-                            else:
-                                reasoning.append('The method field does not match a valid method value.')
+                for match in re.finditer(psep, method):
+                    #print 'dict ', match.groupdict()
+                    if match.group('method') in methods:
+                        valid_method_count = valid_method_count + 1
+                    else:
+                        reasoning.append('The method field does not match a valid method value.')
+
+                total_method_count = total_name_count # all dims must have a valid method
+
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_method_count, total_method_count),                                       \
                         ('var', name, 'cell_methods_method'), \
                         reasoning)
                 ret_val.append(result)            
-                
-                #Checks the format of the interval field
+
+                # check the method modifier 'name: method (modifier)'
                 reasoning = []
-                valid_interval_count = 0
-                total_interval_count = 0
-                
-                for each in named_dict.iterkeys():
-                    title = each[1:].split(':')
-                
-                    for i in range(len(title)):
-                        if title[i] == 'interval':
-                            total_interval_count = total_interval_count +1
-                            if len(named_dict[each][0].split(" ")) == 2:
-                                valid_interval_count = valid_interval_count+1
-                            else:
-                                reasoning.append('The "interval: value units" format is not the correct length.')
+                valid_brace_count = 0
+                total_brace_count = 0
+
+                for match in re.finditer(psep, method):
+                    if match.group('brace') is not None:
+                        total_brace_count = total_brace_count + 1
+                        if match.group('brace_wunit') == 'interval':
+                            valid_brace_count = valid_brace_count + 1
+                        elif match.group('brace_wunit') in ['comment', 'area']:
+                            valid_brace_count = valid_brace_count + 1
+                        else:
+                            reasoning.append('The method modifier not valid.')
 
                 result = Result(BaseCheck.MEDIUM,                            \
-                        (valid_interval_count, total_interval_count),                                       \
-                        ('var', name, 'cell_methods_interval'), \
+                        (valid_brace_count, total_brace_count),                                       \
+                        ('var', name, 'cell_methods_method_modifier'), \
                         reasoning)
-                ret_val.append(result)    
-
+                ret_val.append(result)            
+                
                 #Checks the 'method where' formats
                 reasoning = []
                 valid_area_count = 0
                 total_area_count = 0
-                for each in named_dict.iterkeys():
-                    title = each[1:].split(':')
-                
-                    for i in range(len(title)):
-                        if title[i] == 'area':
-                            total_area_count = total_area_count +1
-                            area_data = named_dict[each][0].split(" ")
-                            if len(area_data) == 4:
-                                if area_data[0] in methods and area_data[1] == "where" and area_data[2] in _areatype_names:
-                                    valid_area_count = valid_area_count+1
+
+                for match in re.finditer(psep, method):
+                    if len(match.group('where')) != 0:
+                        if match.group('wtypevar') in _areatype_names:
+                            total_area_count = total_area_count + 1
+                            if match.group('otypevar') is not None:
+                                if match.group('otypevar') in _areatype_names:
+                                    valid_area_count = valid_area_count + 1
                                 else:
-                                    reasoning.append('The "name: method where _areatype_names" format is not correct.')
-                            elif len(area_data) == 6:
-                                if area_data[0] in methods and area_data[1] == "where" and area_data[2] in _areatype_names and area_data[3] == "over" and       area_data[4] in _areatype_names :
-                                    valid_area_count = valid_area_count+1
-                                else:
-                                    reasoning.append('The "name: method where type over _areatype_names" format is not correct.')
+                                    reasoning.append('The "name: method where type over _areatype_names" ('+match.group('otypevar')+') format is not correct.')
+                            else:
+                                    valid_area_count = valid_area_count + 1
+                        else:
+                            reasoning.append('The "name: method where _areatype_names" ('+match.group('wvartype')+') format is not correct.')
 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_area_count, total_area_count),                                       \
@@ -2191,27 +2140,6 @@ class CFBaseCheck(BaseCheck):
                         reasoning)
                 ret_val.append(result)   
         
-                #Checks the no coordinate case
-                reasoning = []
-                valid_no_coord_count = 0
-                total_no_coord_count = 0
-                for each in named_dict.iterkeys():
-                    title = each[1:].split(':')
-                
-                    for i in range(len(title)):
-                        if title[i].lower() in self._std_names and title[i].lower() not in ds.dataset.variables[name].dimensions and title[i].lower() not in getattr(var,"coordinates",""):
-                            if title[i] != '':
-                                total_no_coord_count = total_no_coord_count +1
-                            if named_dict[each][0].strip() in methods:
-                                valid_no_coord_count = valid_no_coord_count+1
-                            else:
-                                reasoning.append('The method is not in the a value provided in the allowable method list.')
-                                
-                result = Result(BaseCheck.MEDIUM,                            \
-                        (valid_no_coord_count, total_no_coord_count),                                       \
-                        ('var', name, 'cell_methods_no_coord'), \
-                        reasoning)
-                ret_val.append(result)   
         #Checks the Climatology Variables - 7.4                               
         reasoning = []
         paragraph = []
