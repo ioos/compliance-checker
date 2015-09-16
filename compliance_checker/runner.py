@@ -1,4 +1,5 @@
 import traceback
+import sys
 
 from StringIO import StringIO
 from compliance_checker.acdd import ACDDBaseCheck
@@ -64,7 +65,9 @@ class ComplianceChecker(object):
         else:
             raise TypeError('Invalid format %s' % output_format)
 
-        return cs.passtree(groups, limit)
+        errors_occurred = cls.check_errors(score_groups, verbose)
+
+        return cs.passtree(groups, limit), errors_occurred
 
     @classmethod
     def stdout_output(cls, cs, score_groups, verbose, limit):
@@ -79,16 +82,6 @@ class ComplianceChecker(object):
         '''
         for checker, rpair in score_groups.iteritems():
             groups, errors = rpair
-
-            if len(errors):
-                print "The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker
-
-                for check_name, epair in errors.iteritems():
-                    print "%s.%s: %s" % (checker, check_name, epair[0].message)
-                    if verbose > 0:
-                        traceback.print_tb(epair[1].tb_next.tb_next)    # skip first two as they are noise from the running itself @TODO search for check_name
-                        print
-
             score_list, points, out_of = cs.standard_output(limit, checker, groups)
             if not verbose:
                 cs.non_verbose_output_generation(score_list, groups, limit, points, out_of)
@@ -140,3 +133,25 @@ class ComplianceChecker(object):
 
         return groups
 
+    @classmethod
+    def check_errors(cls, score_groups, verbose):
+        '''
+        Reports any errors (exceptions) that occurred during checking to stderr.
+        Goes to verbose function if called by user.
+
+        @param score_groups List of results
+        @param verbose      Integer value for verbosity level
+        '''
+        errors_occurred = False
+        for checker, rpair in score_groups.iteritems():
+            groups, errors = rpair
+            if len(errors):
+                errors_occurred = True
+                print >>sys.stderr, "WARNING: The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker
+                for check_name, epair in errors.iteritems():
+                    print >>sys.stderr, "%s.%s: %s" % (checker, check_name, epair[0].message)
+                    if verbose > 0:
+                        traceback.print_tb(epair[1].tb_next.tb_next)    # skip first two as they are noise from the running itself @TODO search for check_name
+                        print >>sys.stderr
+
+        return errors_occurred
