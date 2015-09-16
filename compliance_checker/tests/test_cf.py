@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from compliance_checker.suite import CheckSuite
 from compliance_checker.cf import CFBaseCheck, BaseCheck, dimless_vertical_coordinates
 from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal
 from compliance_checker.base import DSPair
@@ -14,27 +15,28 @@ import re
 
 
 static_files = {
-        'rutgers'              : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc'),
-        'conv_multi'           : resource_filename('compliance_checker', 'tests/data/conv_multi.nc'),
-        'conv_bad'             : resource_filename('compliance_checker', 'tests/data/conv_bad.nc'),
-        'example-grid'         : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
-        'badname'              : resource_filename('compliance_checker', 'tests/data/non-comp/badname.netcdf'),
-        'bad'                  : resource_filename('compliance_checker', 'tests/data/non-comp/bad.nc'),
-        'dimensionless'        : resource_filename('compliance_checker', 'tests/data/dimensionless.nc'),
-        '2dim'                 : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
-        'bad2dim'              : resource_filename('compliance_checker', 'tests/data/non-comp/bad2dim.nc'),
-        'rhgrid'               : resource_filename('compliance_checker', 'tests/data/rhgrid.nc'),
-        'bad-rhgrid'           : resource_filename('compliance_checker', 'tests/data/non-comp/bad-rhgrid.nc'),
-        'bad_data_type'        : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
-        'mapping'              : resource_filename('compliance_checker', 'tests/data/mapping.nc'),
-        'bad_region'           : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
-        'featureType'          : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
-        'cont_ragged'          : resource_filename('compliance_checker', 'tests/data/cont_ragged.nc'),
-        'index_ragged'         : resource_filename('compliance_checker', 'tests/data/index_ragged.nc'),
-        'bad_missing_data'     : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc'),
-        'self-referencing-var' : resource_filename('compliance_checker', 'tests/data/self-referencing-var.nc'),
+        'rutgers'                    : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc'),
+        'conv_multi'                 : resource_filename('compliance_checker', 'tests/data/conv_multi.nc'),
+        'conv_bad'                   : resource_filename('compliance_checker', 'tests/data/conv_bad.nc'),
+        'example-grid'               : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
+        'badname'                    : resource_filename('compliance_checker', 'tests/data/non-comp/badname.netcdf'),
+        'bad'                        : resource_filename('compliance_checker', 'tests/data/non-comp/bad.nc'),
+        'dimensionless'              : resource_filename('compliance_checker', 'tests/data/dimensionless.nc'),
+        '2dim'                       : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
+        'bad2dim'                    : resource_filename('compliance_checker', 'tests/data/non-comp/bad2dim.nc'),
+        'rhgrid'                     : resource_filename('compliance_checker', 'tests/data/rhgrid.nc'),
+        'bad-rhgrid'                 : resource_filename('compliance_checker', 'tests/data/non-comp/bad-rhgrid.nc'),
+        'bad_data_type'              : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
+        'mapping'                    : resource_filename('compliance_checker', 'tests/data/mapping.nc'),
+        'bad_region'                 : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
+        'featureType'                : resource_filename('compliance_checker', 'tests/data/example-grid.nc'),
+        'cont_ragged'                : resource_filename('compliance_checker', 'tests/data/cont_ragged.nc'),
+        'index_ragged'               : resource_filename('compliance_checker', 'tests/data/index_ragged.nc'),
+        'bad_missing_data'           : resource_filename('compliance_checker', 'tests/data/bad_missing_data.nc'),
+        'self-referencing-var'       : resource_filename('compliance_checker', 'tests/data/self-referencing-var.nc'),
         'scalar_coordinate_variable' : resource_filename('compliance_checker', 'tests/data/scalar_coordinate_variable.nc'),
-        'coordinates_and_metadata' : resource_filename('compliance_checker', 'tests/data/coordinates_and_metadata.nc')
+        'coordinates_and_metadata'   : resource_filename('compliance_checker', 'tests/data/coordinates_and_metadata.nc'),
+        'ints64'                    : resource_filename('compliance_checker', 'tests/data/ints64.nc'),
         }
 
 class MockVariable(object):
@@ -747,6 +749,15 @@ class TestCF(unittest.TestCase):
         for each in results:
             self.assertFalse(each.value)
 
+    def test_64bit(self):
+        dataset = self.get_pair(static_files['ints64'])
+        suite = CheckSuite()
+        suite.checkers = {
+            'cf'        : CFBaseCheck
+        }
+        suite.run(dataset, 'cf')
+
+
     #--------------------------------------------------------------------------------
     # Utility Method Tests
     #--------------------------------------------------------------------------------
@@ -759,6 +770,7 @@ class TestCF(unittest.TestCase):
         self.assertTrue(units_temporal('hours since 2000-01-01'))
         self.assertFalse(units_temporal('hours'))
         self.assertFalse(units_temporal('days since the big bang'))
+
 
 
 def breakpoint(scope=None, global_scope=None):
