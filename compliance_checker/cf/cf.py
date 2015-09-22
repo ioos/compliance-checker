@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import re
 from functools import wraps
 from collections import defaultdict, OrderedDict
@@ -281,7 +283,7 @@ class CFBaseCheck(BaseCheck):
                                   ]:
 
                 fails.append(('The variable %s failed because the datatype is %s' %(k, v.datatype)))
-        return Result(BaseCheck.HIGH, (total - len(fails), total), msgs=fails)
+        return Result(BaseCheck.HIGH, (total - len(fails), total),u'§2.2 Valid netCDF data types', msgs=fails)
 
     def check_naming_conventions(self, ds):
         """
@@ -296,7 +298,7 @@ class CFBaseCheck(BaseCheck):
             if not rname.match(k):
                 fails.append('Variable %s failed because it does not start with a letter, digit, or an underscore' %k)
 
-        return Result(BaseCheck.HIGH, (total - len(fails), total), 'Variable names', fails)
+        return Result(BaseCheck.HIGH, (total - len(fails), total), u'§2.3 Legal variable names', fails)
 
     def check_names_unique(self, ds):
         """
@@ -310,7 +312,7 @@ class CFBaseCheck(BaseCheck):
             names[k.lower()] += 1
 
         fails = ['Variables are not case sensitive.  Duplicate variables named: %s' %k for k,v in names.iteritems() if v > 1]
-        return Result(BaseCheck.LOW, (total - len(fails), total), msgs=fails)
+        return Result(BaseCheck.LOW, (total - len(fails), total), u'§2.3 Unique variable names', msgs=fails)
 
     def check_dimension_names(self, ds):
         """
@@ -327,7 +329,7 @@ class CFBaseCheck(BaseCheck):
             cur_fails = [(k, kk) for kk, vv in dims.iteritems() if vv > 1]
             fails.extend(cur_fails)
 
-        return Result(BaseCheck.HIGH, (total - len(fails), total), msgs=fails)
+        return Result(BaseCheck.HIGH, (total - len(fails), total), u'§2.4 Unique dimensions', msgs=fails)
 
     def check_dimension_order(self, ds):
         """
@@ -359,7 +361,7 @@ class CFBaseCheck(BaseCheck):
                 fails.append("The dimensions for %s are not in T Z Y X order"%k)
 
         # there are two checks here per variable so totals must be doubled
-        return Result(BaseCheck.LOW, (total*2 - len(fails), total*2), msgs=fails)
+        return Result(BaseCheck.LOW, (total*2 - len(fails), total*2), u'§2.4 Dimension order', msgs=fails)
 
     #def check_dimension_single_value_applicable(self, ds):
         """
@@ -399,7 +401,7 @@ class CFBaseCheck(BaseCheck):
                 if not valid:
                     reasoning = ["%s must not be in valid range (%s to %s) as specified by %s" % (v._FillValue, rmin, rmax, spec_by)]
 
-                ret.append(Result(BaseCheck.HIGH, valid, ('_FillValue', k, 'outside_valid_range'), msgs=reasoning))
+                ret.append(Result(BaseCheck.HIGH, valid, (u'§2.5.1 _FillValue outside of valid range', k), msgs=reasoning))
 
         return ret
 
@@ -420,9 +422,9 @@ class CFBaseCheck(BaseCheck):
         else:
             valid = False
             reasoning = ['Conventions field is not present']
-        return Result(BaseCheck.HIGH, valid, 'conventions', msgs=reasoning)
+        return Result(BaseCheck.HIGH, valid, u'§2.6.1 Global Attribute Conventions includes CF-1.6', msgs=reasoning)
 
-    @score_group('convention_attrs')
+    @score_group(u'§2.6.2 Convention Attributes')
     def check_convention_globals(self, ds):
         """
         2.6.2 title/history global attributes, must be strings. Do not need to exist.
@@ -432,11 +434,11 @@ class CFBaseCheck(BaseCheck):
 
         for a in attrs:
             if hasattr(ds.dataset, a):
-                ret.append(Result(BaseCheck.HIGH, isinstance(getattr(ds.dataset, a), basestring), ('global', a)))
+                ret.append(Result(BaseCheck.HIGH, isinstance(getattr(ds.dataset, a), basestring), (u'§2.6.2 Title/history global attributes', a)))
 
         return ret
 
-    @score_group('convention_attrs')
+    @score_group(u'§2.6.2 Convention Attributes')
     def check_convention_possibly_var_attrs(self, ds):
         """
         2.6.2 institution, source, references, and comment, either global or assigned to individual variables.
@@ -453,7 +455,7 @@ class CFBaseCheck(BaseCheck):
             vattrs = v.ncattrs()
             for a in attrs:
                 if a in vattrs:
-                    ret.append(Result(BaseCheck.HIGH, isinstance(getattr(v, a), basestring), (k, a)))
+                    ret.append(Result(BaseCheck.HIGH, isinstance(getattr(v, a), basestring), (u'§2.6.2 Description of file contents', a)))
 
         return ret
 
@@ -576,7 +578,7 @@ class CFBaseCheck(BaseCheck):
                     valid = False
                     msgs = ['The unit for variable %s in of type None.'%name]
 
-                ret_val.append(Result(BaseCheck.HIGH, valid, ('units', k, 'standard_name'), msgs))
+                ret_val.append(Result(BaseCheck.HIGH, valid, (u'§3.1 Variables contain valid units for the standard_name', k, 'standard_name'), msgs))
 
             # 6) cell methods @TODO -> Isnt this in the check_cell_methods section?
             #if hasattr(v, 'cell_methods'):
@@ -619,7 +621,7 @@ class CFBaseCheck(BaseCheck):
             if not in_table and not in_exception:
                 msgs.append("The standard name '%s' is not in standard name table" % std_name)
 
-            ret_val.append(Result(BaseCheck.HIGH, is_str and in_table, ('std_name', k, 'legal'), msgs))
+            ret_val.append(Result(BaseCheck.HIGH, is_str and in_table, (u'§3.3 Standard Names', k, 'legal'), msgs))
 
             # 2) optional - if modifiers, should be in table
             if std_name_modifier:
@@ -632,7 +634,7 @@ class CFBaseCheck(BaseCheck):
                 if not std_name_modifier in allowed:
                     msgs.append("modifier (%s) not allowed" % std_name_modifier)
 
-                ret_val.append(Result(BaseCheck.HIGH, std_name_modifier in allowed, ('std_name', k, 'modifier'), msgs))
+                ret_val.append(Result(BaseCheck.HIGH, std_name_modifier in allowed, (u'§3.3 Standard Names', k, 'modifier'), msgs))
 
         return ret_val
 
@@ -652,7 +654,7 @@ class CFBaseCheck(BaseCheck):
                 continue
 
             # should be a string, splittable, and each should exist
-            anc_result = Result(BaseCheck.HIGH, name=('ancillary', k))
+            anc_result = Result(BaseCheck.HIGH, name=(u'§3.4 Ancillary Variables', k))
             msgs = []
 
             if not isinstance(anc, basestring):
@@ -710,14 +712,14 @@ class CFBaseCheck(BaseCheck):
 
             # 1) flags_values attribute must have same type as variable to which it is attached
             if flag_values is not None:
-                fvr = Result(BaseCheck.HIGH, flag_values.dtype == v.dtype, name=('flags', k, 'flag_values_type'))
+                fvr = Result(BaseCheck.HIGH, flag_values.dtype == v.dtype, name=(u'§3.5 Flags and flag attributes', k, 'flag_values_type'))
                 if not fvr.value:
                     fvr.msgs = ['flag_values attr does not have same type as var (fv: %s, v: %s)' % (flag_values.dtype, v.dtype)]
 
                 ret_val.append(fvr)
 
                 # 2) if flag_values, must have flag_meanings
-                fmr = Result(BaseCheck.HIGH, flag_meanings is not None, name=('flags', k, 'flag_meanings_present'))
+                fmr = Result(BaseCheck.HIGH, flag_meanings is not None, name=(u'§3.5 Flags and flag attributes', k, 'flag_meanings_present'))
                 if not fmr.value:
                     fmr.msgs = ['flag_meanings must be present']
 
@@ -725,7 +727,7 @@ class CFBaseCheck(BaseCheck):
 
                 # 8) flag_values attribute values must be mutually exclusive
                 fvset = set(flag_values)
-                fvsr = Result(BaseCheck.HIGH, len(fvset) == len(flag_values), ('flags', k, 'flag_values_mutually_exclusive'))
+                fvsr = Result(BaseCheck.HIGH, len(fvset) == len(flag_values), (u'§3.5 Flags and flag attributes', k, 'flag_values_mutually_exclusive'))
                 if not fvsr.value:
                     fvsr.msgs = ['repeated items in flag_values']
 
@@ -733,7 +735,7 @@ class CFBaseCheck(BaseCheck):
 
             # 3) type of flag_meanings is a string, blank separated list of words
             if flag_meanings is not None:
-                fmt = Result(BaseCheck.HIGH, isinstance(flag_meanings, basestring), name=('flags', k, 'flag_meanings_type'))
+                fmt = Result(BaseCheck.HIGH, isinstance(flag_meanings, basestring), name=(u'§3.5 Flags and flag attributes', k, 'flag_meanings_type'))
                 if not fmt.value:
                     fmt.msgs = ['flag_meanings must be a string']
 
@@ -751,13 +753,13 @@ class CFBaseCheck(BaseCheck):
                     else:
                         msgs.append("flag_meaning %s of var %s is incorrectly named" % (fm, k))
 
-                ret_val.append(Result(BaseCheck.HIGH, (ok_count, len(meanings)), name=('flags', k, 'flag_meanings_names'), msgs=msgs))
+                ret_val.append(Result(BaseCheck.HIGH, (ok_count, len(meanings)), name=(u'§3.5 Flags and flag attributes', k, 'flag_meanings_names'), msgs=msgs))
 
                 # now that we've split meanings up, check length vs values/masks
 
                 # 4) number of flag_values must equal number of meanings
                 if flag_values is not None:
-                    fvfmr = Result(BaseCheck.HIGH, len(flag_values) == len(meanings), ('flags', k, 'flag_values_equal_meanings'))
+                    fvfmr = Result(BaseCheck.HIGH, len(flag_values) == len(meanings), (u'§3.5 Flags and flag attributes', k, 'flag_values_equal_meanings'))
                     if not fvfmr.value:
                         fvfmr.msgs = ['flag_values length (%d) not equal to flag_meanings length (%d)' % (len(flag_values), len(meanings))]
 
@@ -765,7 +767,7 @@ class CFBaseCheck(BaseCheck):
 
                 # 5) number of flag_masks must equal number of meanings
                 if flag_masks is not None:
-                    fmfmr = Result(BaseCheck.HIGH, len(flag_masks) == len(meanings), ('flags', k, 'flag_masks_equal_meanings'))
+                    fmfmr = Result(BaseCheck.HIGH, len(flag_masks) == len(meanings), (u'§3.5 Flags and flag attributes', k, 'flag_masks_equal_meanings'))
                     if not fmfmr.value:
                         fmfmr.msgs = ['flag_masks length (%d) not equal to flag_meanings length (%d)' % (len(flag_masks), len(meanings))]
 
@@ -792,7 +794,7 @@ class CFBaseCheck(BaseCheck):
                 else:
                     msgs.append("variable not of appropriate type to have flag_masks (%s)" % (v.dtype))
 
-                ret_val.append(Result(BaseCheck.HIGH, (ok_count, 2), ('flags', k, 'flag_masks_type'), msgs=msgs))
+                ret_val.append(Result(BaseCheck.HIGH, (ok_count, 2), (u'§3.5 Flags and flag attributes', k, 'flag_masks_type'), msgs=msgs))
 
                 # 7) the flag_masks attribute values must be non-zero
                 zeros = [x for x in flag_masks if x == 0]
@@ -800,14 +802,14 @@ class CFBaseCheck(BaseCheck):
                 if len(zeros):
                     msgs = ['flag_masks attribute values contains a zero']
 
-                ret_val.append(Result(BaseCheck.HIGH, len(zeros) != 0, ('flags', k, 'flag_masks_zeros'), msgs=msgs))
+                ret_val.append(Result(BaseCheck.HIGH, len(zeros) != 0, (u'§3.5 Flags and flag attributes', k, 'flag_masks_zeros'), msgs=msgs))
 
             # 9) when both defined, boolean AND of each entry in flag_values with corresponding entry in flag_masks
             #    should equal the flags_value entry
             if flag_values is not None and flag_masks is not None:
                 allv = map(lambda a, b: a & b == a, zip(flag_values, flag_masks))
 
-                allvr = Result(BaseCheck.MEDIUM, all(allv), ('flags', k, 'flag_masks_with_values'))
+                allvr = Result(BaseCheck.MEDIUM, all(allv), (u'§3.5 Flags and flag attributes', k, 'flag_masks_with_values'))
                 if not allvr.value:
                     allvr.msgs = ["flag masks and flag values combined don't equal flag value"]
 
@@ -851,7 +853,7 @@ class CFBaseCheck(BaseCheck):
             # 1) axis must be X, Y, Z, or T
             axis_valid = axis in ['X', 'Y', 'Z', 'T']
 
-            avr = Result(BaseCheck.HIGH, axis_valid, ('axis', k, 'valid_value'))
+            avr = Result(BaseCheck.HIGH, axis_valid, (u'§4 Axis attributes and coordinate variables', k, 'valid_value'))
             if not axis_valid:
                 avr.msgs = ['axis value (%s) is not valid' % axis]
 
@@ -859,11 +861,11 @@ class CFBaseCheck(BaseCheck):
 
             # 2) only coordinate vars or auxiliary coordinate variable are allowed to have axis set
             if v in coord_vars or v in auxiliary_coordinate_vars:
-                acvr = Result(BaseCheck.HIGH, True, ('axis', k, 'is_coordinate_var'))
+                acvr = Result(BaseCheck.HIGH, True, (u'§4 Axis attributes and coordinate variables', k, 'is_coordinate_var'))
                 if v in auxiliary_coordinate_vars:
                     acvr.msgs = ["%s is an auxiliary coordinate var" % k]
             else:
-                acvr = Result(BaseCheck.HIGH, False, ('axis', k, 'is_coordinate_var'))
+                acvr = Result(BaseCheck.HIGH, False, (u'§4 Axis attributes and coordinate variables', k, 'is_coordinate_var'))
                 acvr.msgs = ['%s is not allowed to have an axis attr as it is not a coordinate var or auxiliary_coordinate_var' % k]
 
             ret_val.append(acvr)
@@ -871,7 +873,7 @@ class CFBaseCheck(BaseCheck):
             # 3) must be consistent with coordinate type deduced from units and positive
             axis_type = guess_coord_type(getattr(v, 'units', None), getattr(v, 'positive', None))
             if axis_type is not None:
-                atr = Result(BaseCheck.HIGH, axis_type == axis, ('axis', k, 'consistent_with_coord_type'))
+                atr = Result(BaseCheck.HIGH, axis_type == axis, (u'§4 Axis attributes and coordinate variables', k, 'consistent_with_coord_type'))
                 if not atr.value:
                     atr.msgs = ['%s guessed type (%s) is not consistent with coord type (%s)' % (k, axis_type, axis)]
 
@@ -886,7 +888,7 @@ class CFBaseCheck(BaseCheck):
 
                 dups = {kk:vv for kk,vv in dups.iteritems() if vv > 1}
 
-                coores = Result(BaseCheck.HIGH, len(dups) == 0, ('axis', k, 'does_not_depend_on_mult_coord_vars'))
+                coores = Result(BaseCheck.HIGH, len(dups) == 0, (u'§4 Axis attributes and coordinate variables', k, 'does_not_depend_on_mult_coord_vars'))
                 if not coores.value:
                     coores.msgs = []
                     for kk, vv in dups.iteritems():
@@ -911,7 +913,7 @@ class CFBaseCheck(BaseCheck):
         for k,v in ds.dataset.dimensions.iteritems():
             if k.lower() in known_coordinate_names:
                 valid = k in ds.dataset.variables
-                result = Result(BaseCheck.MEDIUM, valid, ('coordinate_type', k, 'var_for_coordinate_type'))
+                result = Result(BaseCheck.MEDIUM, valid, (u'§4 Coordinate Variables', k, 'var_for_coordinate_type'))
                 if not valid:
                     result.msgs = ['No coordinate variable for coordinate type %s' % k]
 
@@ -925,7 +927,7 @@ class CFBaseCheck(BaseCheck):
     def _coord_has_units(self, name,coordinate, var, recommended, acceptable):
         ret_val = []
         has_units = hasattr(var, 'units')
-        result = Result(BaseCheck.HIGH, has_units, (coordinate, name, 'has_units'))
+        result = Result(BaseCheck.HIGH, has_units, (u'§4 Coordinate Variable %s contains valid attributes' % coordinate, name, 'has_units'))
         ret_val.append(result)
 
 
@@ -934,16 +936,16 @@ class CFBaseCheck(BaseCheck):
         # 2 - also acceptable units
         # 3 - recommend units
         if not has_units:
-            result = Result(BaseCheck.MEDIUM, (0, 3), (coordinate, name, 'correct_units'), ['%s does not have units'%name])
+            result = Result(BaseCheck.MEDIUM, (0, 3), (u'§4.1 Coordinates representing %s' % coordinate, name, 'correct_units'), ['%s does not have units'%name])
             ret_val.append(result)
         elif has_units and var.units == recommended:
-            result = Result(BaseCheck.MEDIUM, (3, 3), (coordinate, name, 'correct_units'))
+            result = Result(BaseCheck.MEDIUM, (3, 3), (u'§4.1 Coordinates representing %s' % coordinate, name, 'correct_units'))
             ret_val.append(result)
         elif has_units and var.units in acceptable:
-            result = Result(BaseCheck.MEDIUM, (2, 3), (coordinate, name, 'correct_units'), ['%s units are acceptable, but not recommended'%name])
+            result = Result(BaseCheck.MEDIUM, (2, 3), (u'§4.1 Coordinates representing %s' % coordinate, name, 'correct_units'), ['%s units are acceptable, but not recommended'%name])
             ret_val.append(result)
         else:
-            result = Result(BaseCheck.MEDIUM, (1, 3), (coordinate, name, 'correct_units'), ['%s does not have units'%name])
+            result = Result(BaseCheck.MEDIUM, (1, 3), (u'§4.1 Coordinates representing %s' % coordinate, name, 'correct_units'), ['%s does not have units'%name])
             ret_val.append(result)
         return ret_val
 
@@ -1009,14 +1011,14 @@ class CFBaseCheck(BaseCheck):
                 has_units = hasattr(v, 'units') 
                 result = Result(BaseCheck.HIGH, \
                                 has_units,      \
-                                ('vertical', k, 'has_units'))
+                                (u'§4.3 Vertical coordinates contain valid attributes', k, 'has_units'))
                 ret_val.append(result)
 
                 # If it's not pressure then it must have positive defined
                 if not has_units:
                     result = Result(BaseCheck.HIGH, \
                                     False,          \
-                                    ('vertical', k, 'correct_units'),['%s does not have units'%k])
+                                    (u'§4.3 Vertical coordinates contain valid attributes', k, 'correct_units'),['%s does not have units'%k])
                     ret_val.append(result)
                     continue
 
@@ -1025,17 +1027,17 @@ class CFBaseCheck(BaseCheck):
                 if is_pressure: 
                     result = Result(BaseCheck.HIGH, \
                                     True,           \
-                                    ('vertical', k, 'correct_units'))
+                                    (u'§4.3 Vertical coordinates contain valid attributes', k, 'correct_units'))
                 # What about positive?
                 elif getattr(v,'positive', '').lower() in ('up', 'down'):
                     result = Result(BaseCheck.HIGH, \
                                     True,           \
-                                    ('vertical', k, 'correct_units'))
+                                    (u'§4.3 Vertical coordinates contain valid attributes', k, 'correct_units'))
                 # Not-compliant
                 else:
                     result = Result(BaseCheck.HIGH,                   \
                                     False,                            \
-                                    ('vertical', k, 'correct_units'), \
+                                    (u'§4.3 Vertical coordinates contain valid attributes', k, 'correct_units'), \
                                     ['vertical variable needs to define positive attribute'])
                 ret_val.append(result)
         return ret_val
@@ -1082,17 +1084,17 @@ class CFBaseCheck(BaseCheck):
 
             if is_pressure or is_length:
                 result = Result(BaseCheck.HIGH, True,                     \
-                            ('dimensional_vertical', k, 'correct_units'), \
+                            (u'§4.3.1 Vertical dimension coordinates contain valid attributes', k, 'correct_units'), \
                             ['dimensional vertical coordinate is pressure or length'])
 
             # Temperature or Density are okay as well
             elif is_temp or is_density:
                 result = Result(BaseCheck.HIGH, True,                     \
-                            ('dimensional_vertical', k, 'correct_units'), \
+                            (u'§4.3.1 Vertical dimension coordinates contain valid attributes', k, 'correct_units'), \
                             ['dimensional vertical coordinate is temp or density'])
             else:
                 result = Result(BaseCheck.HIGH, False,                    \
-                            ('dimensional_vertical', k, 'correct_units'), \
+                            (u'§4.3.1 Vertical dimension coordinates contain valid attributes', k, 'correct_units'), \
                             ['incorrect vertical units'])
             ret_val.append(result)
 
@@ -1128,11 +1130,11 @@ class CFBaseCheck(BaseCheck):
             if valid_formula is not None:
                 result = Result(BaseCheck.MEDIUM, \
                                 True,             \
-                                ('dimensionless_vertical', k, 'formula_terms'))
+                                (u'§4.3.2 Dimensionless Coordinates and formula_terms', k, 'formula_terms'))
             else:
                 result = Result(BaseCheck.MEDIUM,                              \
                                 False,                                         \
-                                ('dimensionless_vertical', k, 'formula_terms'),\
+                                (u'§4.3.2 Dimensionless Coordinates and formula_terms', k, 'formula_terms'),\
                                 ['formula_terms missing'])
             ret_val.append(result)
 
@@ -1141,7 +1143,7 @@ class CFBaseCheck(BaseCheck):
             if not valid_formula:
                 result = Result(BaseCheck.MEDIUM,                             \
                                 False,                                        \
-                                ('dimensionless_vertical', k, 'terms_exist'), \
+                                (u'§4.3.2 Dimensionless Coordinates and formula_terms', k, 'terms_exist'), \
                                 ['formula_terms not defined'])
                 ret_val.append(result)
                 continue
@@ -1156,7 +1158,7 @@ class CFBaseCheck(BaseCheck):
             # Report the missing terms
             result = Result(BaseCheck.MEDIUM,                             \
                             not missing_terms,                            \
-                            ('dimensionless_vertical', k, 'terms_exist'), \
+                            (u'§4.3.2 Dimensionless Coordinates and formula_terms', k, 'terms_exist'), \
                             ['%s missing' % i for i in missing_terms])
 
             ret_val.append(result)
@@ -1199,13 +1201,13 @@ class CFBaseCheck(BaseCheck):
             if not has_units:
                 result = Result(BaseCheck.HIGH, \
                                 False,          \
-                                ('time', k, 'has_units'),['%s does not have units'%k])
+                                (u'§4.4 Time coordinate variable and attributes', k, 'has_units'),['%s does not have units'%k])
                 ret_val.append(result)
                 continue
             # Correct and identifiable units
             result = Result(BaseCheck.HIGH, \
                             True,           \
-                            ('time', k, 'has_units'))
+                            (u'§4.4 Time coordinate variable and attributes', k, 'has_units'))
             ret_val.append(result)
             correct_units = units_temporal(v.units)
             reasoning = None
@@ -1213,7 +1215,7 @@ class CFBaseCheck(BaseCheck):
                 reasoning = ['%s doesn not have correct time units' % k]
             result = Result(BaseCheck.HIGH, \
                             correct_units,  \
-                            ('time', k, 'correct_units'),  \
+                            (u'§4.4 Time coordinate variable and attributes', k, 'correct_units'),  \
                             reasoning)
             ret_val.append(result)
 
@@ -1279,7 +1281,7 @@ class CFBaseCheck(BaseCheck):
                 reasoning = ['Variable %s should have a calendar attribute' % k]
             result = Result(BaseCheck.LOW,  \
                             has_calendar,   \
-                            ('time', k, 'has_calendar'),  \
+                            (u'§4.4.1 Time and calendar', k, 'has_calendar'),  \
                             reasoning)
             ret_val.append(result)
 
@@ -1290,7 +1292,7 @@ class CFBaseCheck(BaseCheck):
                     reasoning = ["'%s' is not a valid calendar" % v.calendar]
                     result = Result(BaseCheck.LOW,  \
                                     valid_calendar, \
-                                    ('time', k, 'valid_calendar'),  \
+                                    (u'§4.4.1 Time and calendar', k, 'valid_calendar'),  \
                                     reasoning)
                 ret_val.append(result)
 
@@ -1398,12 +1400,12 @@ class CFBaseCheck(BaseCheck):
             if valid == False :
                 ret_val.append(Result(BaseCheck.MEDIUM, \
                                valid, \
-                               ('var', name, 'check_independent_axis_dimensions'),['The %s dimension for the variable %s does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.'%(dim_name,name)]))
+                               (u'§5.1 Geophysical variables contain valid dimensions', name, 'check_independent_axis_dimensions'),['The %s dimension for the variable %s does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.'%(dim_name,name)]))
 
             if valid == True and name not in space_time_coord_var:
                 ret_val.append(Result(BaseCheck.MEDIUM, \
                                valid, \
-                               ('var', name, 'check_independent_axis_dimensions')))
+                               (u'§5.1 Geophysical variables contain valid dimensions', name, 'check_independent_axis_dimensions')))
         
         return ret_val
 
@@ -1437,7 +1439,7 @@ class CFBaseCheck(BaseCheck):
 
                     result = Result(BaseCheck.HIGH,\
                             False,\
-                            ('var', self_reference_variable, 'coordinates_reference_itself'),\
+                            (u'§5.2 Latitude and longitude coordinates of a horizontal grid', self_reference_variable, 'coordinates_reference_itself'),\
                             reasoning)
                     ret_val.append(result)
                     reported_reference_variables.append(self_reference_variable)                
@@ -1462,7 +1464,7 @@ class CFBaseCheck(BaseCheck):
     
                 result = Result(BaseCheck.HIGH,                             \
                                 valid_dims,                                 \
-                                ('var', name, '2d_hgrid_valid_dimensions'), \
+                                (u'§5.2 Latitude and longitude coordinates of a horizontal grid', name, '2d_hgrid_valid_dimensions'), \
                                 reasoning)
                 ret_val.append(result)
                 
@@ -1482,7 +1484,7 @@ class CFBaseCheck(BaseCheck):
                             reasoning.append("Variable %s's coordinate, %s, does not share dimension %s with the variable" % (name, cname, dim))
                 result = Result(BaseCheck.MEDIUM,                   \
                                 valid_2d,                           \
-                                ('var', name, 'valid_coordinates'), \
+                                (u'§5.2 Latitude and longitude coordinates of a horizontal grid', name, 'valid_coordinates'), \
                                 reasoning)
                 ret_val.append(result)
     
@@ -1503,7 +1505,7 @@ class CFBaseCheck(BaseCheck):
     
                 result = Result(BaseCheck.HIGH,          \
                                 lat_check and lon_check, \
-                                ('var', name, 'lat_lon_correct'))
+                                (u'§5.2 Latitude and longitude coordinates of a horizontal grid', name, 'lat_lon_correct'))
                 ret_val.append(result)
             else:
                 continue # Not a 2d horizontal grid
@@ -1575,7 +1577,7 @@ class CFBaseCheck(BaseCheck):
             if is_reduced_horizontal_grid == True:
                 result = Result(BaseCheck.MEDIUM,                            \
                             (valid_in_variables and valid_dim and valid_coord and valid_cdim),                                       \
-                            ('var', name, 'is_reduced_horizontal_grid'), \
+                            (u'§5.3 Is reduced horizontal grid', name, 'is_reduced_horizontal_grid'), \
                             reasoning)
             
             if result:
@@ -1687,7 +1689,7 @@ class CFBaseCheck(BaseCheck):
                 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_mapping_count, total_mapping_count),                                       \
-                        ('var', name, 'horz_crs_grid_mappings_projections'), \
+                        (u'§5.6 Grid mapping projection present', name, 'horz_crs_grid_mappings_projections'), \
                         reasoning)
 
                 ret_val.append(result)
@@ -1729,7 +1731,7 @@ class CFBaseCheck(BaseCheck):
             if total_scalar_coordinate_var > 0:
                 result = Result(BaseCheck.MEDIUM,
                                 (valid_scalar_coordinate_var, total_scalar_coordinate_var),
-                                ('var', name, 'scalar_coordinates'),
+                                (u'§5.7 Scalar coordinate variables', name, 'scalar_coordinates'),
                                 reasoning)
                 ret_val.append(result)
 
@@ -1830,13 +1832,13 @@ class CFBaseCheck(BaseCheck):
                 if ''.join(var[:]).lower() in region_list:
                     result = Result(BaseCheck.LOW,                            \
                             True,                                       \
-                            ('var', name, 'geographic_region'), \
+                            (u'§6.1.1 Geographic region specified', name, 'geographic_region'), \
                             reasoning)
                 else:
                     reasoning.append('The Region Value is not from the allowable list.')
                     result = Result(BaseCheck.LOW,                            \
                             False,                                       \
-                            ('var', name, 'geographic_region'), \
+                            (u'§6.1.1 Geographic region specified', name, 'geographic_region'), \
                             reasoning)
                 ret_val.append(result)
         return ret_val
@@ -1862,7 +1864,7 @@ class CFBaseCheck(BaseCheck):
             if name in coordinate_list and var.ndim == 1 and name not in ds.dataset.dimensions:
                 result = Result(BaseCheck.MEDIUM,                            
                     True,                                       
-                    ('var', name, 'alternative_coordinates')
+                    (u'§6.2 Alternative Coordinates', name, 'alternative_coordinates')
                     )
                 ret_val.append(result)
 
@@ -1920,7 +1922,7 @@ class CFBaseCheck(BaseCheck):
 
                 result = Result(BaseCheck.MEDIUM,                          
                             valid,                                       
-                            ('var', cvar._name, 'cell_boundaries'), 
+                            (u'§7.1 Cell boundaries', cvar._name, 'cell_boundaries'), 
                             reasoning)
                 ret_val.append(result)
                 reasoning = []
@@ -1951,7 +1953,7 @@ class CFBaseCheck(BaseCheck):
                         reasoning.append("The 'measures' field is not equal to 'area' or 'volume'.")
                         return Result(BaseCheck.MEDIUM,                            \
                                     False,                                       \
-                                    ('var', name, 'cell_measures'), \
+                                    (u'§7.2 Cell measures', name, 'cell_measures'), \
                                     reasoning)
                     for every, attri in ds.dataset.variables.iteritems():
                         if every == measures[1]:
@@ -1965,7 +1967,7 @@ class CFBaseCheck(BaseCheck):
     
                     result = Result(BaseCheck.MEDIUM,                            \
                                     valid,                                       \
-                                    ('var', name, 'cell_measures'), \
+                                    (u'§7.2 Cell measures', name, 'cell_measures'), \
                                     reasoning)
                     ret_val.append(result)
 
@@ -2070,7 +2072,7 @@ class CFBaseCheck(BaseCheck):
 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_name_count, total_name_count),                                       \
-                        ('var', name, 'cell_methods_name'), \
+                        (u'§7.3 Cell Methods', name, 'cell_methods_name'), \
                         reasoning)
                 ret_val.append(result)
 
@@ -2090,7 +2092,7 @@ class CFBaseCheck(BaseCheck):
 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_method_count, total_method_count),                                       \
-                        ('var', name, 'cell_methods_method'), \
+                        (u'§7.3 Cell Methods', name, 'cell_methods_method'), \
                         reasoning)
                 ret_val.append(result)            
 
@@ -2111,7 +2113,7 @@ class CFBaseCheck(BaseCheck):
 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_brace_count, total_brace_count),                                       \
-                        ('var', name, 'cell_methods_method_modifier'), \
+                        (u'§7.3 Cell Methods', name, 'cell_methods_method_modifier'), \
                         reasoning)
                 ret_val.append(result)            
                 
@@ -2136,7 +2138,7 @@ class CFBaseCheck(BaseCheck):
 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_area_count, total_area_count),                                       \
-                        ('var', name, 'cell_methods_area'), \
+                        (u'§7.3 Cell Methods', name, 'cell_methods_area'), \
                         reasoning)
                 ret_val.append(result)   
         
@@ -2178,7 +2180,7 @@ class CFBaseCheck(BaseCheck):
 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_climate_count, total_climate_count),                                       \
-                        ('var', name, 'cell_methods_climatology'), \
+                        (u'§7.3 Cell Methods', name, 'cell_methods_climatology'), \
                         reasoning)
                 ret_val.append(result)
         
@@ -2335,7 +2337,7 @@ class CFBaseCheck(BaseCheck):
                         valid = False
                         reasoning.append("Variable is not of type byte, short, or int.")
 
-            result = Result(BaseCheck.MEDIUM, valid, ('var', name, 'packed_data'), reasoning)
+            result = Result(BaseCheck.MEDIUM, valid, (u'§8.1 Packed Data', name, 'packed_data'), reasoning)
             ret_val.append(result)
             reasoning = []
 
@@ -2362,7 +2364,7 @@ class CFBaseCheck(BaseCheck):
                     reasoning.append("Type of valid_range attribute (%s) does not match variable type (%s)" %\
                                      (var.valid_range.dtype, var.dtype))
 
-            result = Result(BaseCheck.MEDIUM, valid, ('var', name, 'fillvalue_valid_range_attributes'), reasoning)
+            result = Result(BaseCheck.MEDIUM, valid, (u'§8.1 Packed Data', name, 'fillvalue_valid_range_attributes'), reasoning)
             ret_val.append(result)
 
         return ret_val
@@ -2407,7 +2409,7 @@ class CFBaseCheck(BaseCheck):
 
                 result = Result(BaseCheck.MEDIUM,                            
                                 (valid_form +valid_dim, totals),                                      
-                                ('var', name, 'compressed_data'), 
+                                (u'§8.2 Dataset Compression', name, 'compressed_data'), 
                                 reasoning)
                 ret_val.append(result)
 
@@ -2491,7 +2493,7 @@ class CFBaseCheck(BaseCheck):
         valid = all(x == feature_tuple_list[0] for x in feature_tuple_list)
 
     
-        return Result(BaseCheck.HIGH, valid)
+        return Result(BaseCheck.HIGH, valid, name='§9.1 Feature Types')
         
 
 
@@ -2518,7 +2520,7 @@ class CFBaseCheck(BaseCheck):
                 else:
                     result = Result(BaseCheck.MEDIUM,                            \
                                 True,                                       \
-                                ('var', name, 'orthogonal_multidimensional'), \
+                                (u'§9.3.1 Orthogonal Multidimensional Array', name, 'orthogonal_multidimensional'), \
                                 reasoning)
                     ret_val.append(result)
         return ret_val
@@ -2544,7 +2546,7 @@ class CFBaseCheck(BaseCheck):
                 if hasattr(var, '_FillValue'):
                     result = Result(BaseCheck.MEDIUM,                            \
                                 True,                                       \
-                                ('var', name, 'ragged_multidimensional'), \
+                                (u'§9.3.2 Incomplete Multidimensional Array', name, 'ragged_multidimensional'), \
                                 reasoning)
                     ret_val.append(result)
                 else:
@@ -2575,7 +2577,7 @@ class CFBaseCheck(BaseCheck):
             if getattr(var,'sample_dimension',''):
                 result = Result(BaseCheck.MEDIUM,                            \
                         True,                                       \
-                        ('var', name, 'continuous_ragged'), \
+                        (u'§9.3.3 Continuous ragged array', name, 'continuous_ragged'), \
                         reasoning)
                 ret_val.append(result)
             else:
@@ -2606,7 +2608,7 @@ class CFBaseCheck(BaseCheck):
             if getattr(var,'instance_dimension',''):
                 result = Result(BaseCheck.MEDIUM,                            \
                         True,                                       \
-                        ('var', name, 'continuous_ragged'), \
+                        (u'§9.3.4 Indexed ragged array', name, 'continuous_ragged'), \
                         reasoning)
                 ret_val.append(result)
             else:
@@ -2627,13 +2629,13 @@ class CFBaseCheck(BaseCheck):
 
         if getattr(ds.dataset, 'featureType', '').lower() in feature_list:
             return Result(BaseCheck.MEDIUM,                            
-                        True, 'feature_type',  
+                        True, u'§9.4 featureType attribute',  
                         reasoning)
 
         elif getattr(ds.dataset, 'featureType', ''):
             reasoning.append('The featureType is provided and is not from the featureType list.')
             return Result(BaseCheck.MEDIUM, 
-                        False, 'feature_type',                            
+                        False, u'§9.4 featureType attribute',                            
                         reasoning)
 
     @is_likely_dsg
@@ -2702,7 +2704,7 @@ class CFBaseCheck(BaseCheck):
             if getattr(ds.dataset.variables[each], 'coordinates', ''):
                 result = Result(BaseCheck.MEDIUM,                            \
                             True,                                       \
-                            ('var', each, 'check_coordinates'), \
+                            (u'§9.5 Discrete Geometry', each, 'check_coordinates'), \
                             reasoning)
                 ret_val.append(result)
                 reasoning = []
@@ -2710,7 +2712,7 @@ class CFBaseCheck(BaseCheck):
                 reasoning.append('The variable %s does not have associated coordinates' %each)
                 result = Result(BaseCheck.MEDIUM,                            \
                             False,                                       \
-                            ('var', each, 'check_coordinates'), \
+                            (u'§9.5 Discrete Geometry', each, 'check_coordinates'), \
                             reasoning)
                 ret_val.append(result)
                 reasoning = []
@@ -2731,7 +2733,7 @@ class CFBaseCheck(BaseCheck):
 
         result = Result(BaseCheck.MEDIUM,                            \
                 valid,                                       \
-                'check_cf_role', \
+                u'§9.5 Discrete Geometry', \
                 reasoning)
         ret_val.append(result)
 
@@ -2758,7 +2760,6 @@ class CFBaseCheck(BaseCheck):
         
         name_list = ds.dataset.variables.keys()
         dim_list = ds.dataset.dimensions.keys()
-
 
         for name, var in ds.dataset.variables.iteritems():
             if hasattr(var,'coordinates'):
@@ -2816,7 +2817,6 @@ class CFBaseCheck(BaseCheck):
                 
                 #Check to see that all coordinate variable mising data is reflceted in the dataset
                 valid_missing = True
-                count = 0
     
                 if hasattr(var, '_FillValue'):
                     try:
@@ -2832,9 +2832,10 @@ class CFBaseCheck(BaseCheck):
                         reasoning.append('The data does not have the same missing data locations as the coordinates')
                 
     
-                result = Result(BaseCheck.MEDIUM,                            \
-                    valid and aux_valid and valid_missing,                                       \
-                    ('var', name, 'missing_data'), \
+                count = int(valid) + int(aux_valid) + int(valid_missing)
+                result = Result(BaseCheck.MEDIUM,
+                    valid and aux_valid and valid_missing,
+                    (u'§9.6 Missing Data', name, 'missing_data'),
                     reasoning)
                 ret_val.append(result)
         return ret_val
