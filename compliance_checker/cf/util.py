@@ -262,13 +262,11 @@ def units_convertible(units1, units2, reftimeistime=True):
     return u1.are_convertible(u2)
 
 def units_temporal(units):
-    r = False
     try:
-        u = Unit('seconds since 1900-01-01')
-        r = u.are_convertible(str(units))
-    except UdunitsError:
+        u = Unit(units)
+    except ValueError:
         return False
-    return r
+    return u.is_time_reference()
 
 def map_axes(dim_vars, reverse_map=False):
     """
