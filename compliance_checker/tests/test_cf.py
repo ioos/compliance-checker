@@ -590,13 +590,6 @@ class TestCF(unittest.TestCase):
         self.assertFalse(results[4].value)
         self.assertTrue(results[5].value)
 
-        # Test the self referencing variables
-        dataset = self.get_pair(static_files['self-referencing-var'])
-        try:
-            results = self.cf.check_two_dimensional(dataset)
-            self.assertFalse(results[0].value)
-        except:
-            self.assertTrue(False)
 
     def test_check_reduced_horizontal_grid(self):
         dataset = self.get_pair(static_files['rhgrid'])
@@ -625,16 +618,9 @@ class TestCF(unittest.TestCase):
 
 
     def test_check_scalar_coordinate_system(self):
-        dataset = self.get_pair(static_files['scalar_coordinate_variable'])
+        dataset = self.get_pair(static_files['bad_data_type'])
         results = self.cf.check_scalar_coordinate_system(dataset)
-        self.assertEqual(len(results), 2)
-        for r in results:
-            if r.name[1] == 'HEIGHT':
-                self.assertEqual(r.value, (0, 1))
-            elif r.name[1] == 'DEPTH':
-                self.assertEqual(r.value, (2, 2))
-            else:
-                self.assertTrue(False, 'Unexpected variable in results of check_scalar_coordinate_system')
+        assert results[0].value == (1, 2)
 
     def test_check_geographic_region(self):
         dataset = self.get_pair(static_files['bad_region'])

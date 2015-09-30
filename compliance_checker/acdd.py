@@ -4,18 +4,21 @@ import numpy as np
 from pkgutil import get_data
 
 from dateutil.parser import parse as parse_dt
-from cf_units import Unit
+from udunitspy import Unit
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
 from compliance_checker.cf.cf import _possiblexunits, _possibleyunits
 from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate
 
 class ACDDBaseCheck(BaseCheck):
+    
+    register_checker = True
+    name = 'acdd'
 
     ###############################################################################
     #
     # HIGHLY RECOMMENDED
-    #
+    # 
     ###############################################################################
 
     @check_has(BaseCheck.HIGH)

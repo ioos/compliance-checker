@@ -28,7 +28,7 @@ setup(name                 = "compliance-checker",
     long_description     = readme(),
     license              = 'Apache License 2.0',
     author               = "Dave Foster",
-    author_email         = "dave@axiomdatascience.com",
+    author_email         = "dfoster@asascience.com",
     url                  = "https://github.com/ioos/compliance-checker",
     packages             = find_packages(),
     install_requires     = reqs,
@@ -48,6 +48,11 @@ setup(name                 = "compliance-checker",
     entry_points         = {
         'console_scripts': [
             'compliance-checker = cchecker:main'
+        ],
+        'compliance_checker.suites': [
+            'cf = compliance_checker.cf.cf:CFBaseCheck',
+            'acdd = compliance_checker.acdd:ACDDBaseCheck',
+            'ioos = compliance_checker.ioos:IOOSBaseCheck',
         ]
     },
     package_data         = {

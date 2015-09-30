@@ -8,17 +8,33 @@ import itertools
 import json
 from netCDF4 import Dataset
 from lxml import etree as ET
-from compliance_checker.base import BaseCheck, fix_return_value, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, fix_return_value, Result
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from urlparse import urlparse
 from datetime import datetime
 import requests
 import textwrap
+import pkg_resources
 
 class CheckSuite(object):
 
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
+
+    @classmethod
+    def load_all_available_checkers(cls):
+        """
+        Helper method to retrieve all sub checker classes derived from various
+        base classes.
+        """
+        from pkg_resources import working_set
+        for x in working_set.iter_entry_points('compliance_checker.suites'):
+            try:
+                xl = x.load()
+
+                cls.checkers[xl.name] = xl
+            except Exception as e:
+                print >>sys.stderr, "Could not load", x, ":", e
 
     def _get_checks(self, checkclass):
         """
@@ -461,7 +477,7 @@ class CheckSuite(object):
             textchars = ''.join(map(chr, [7,8,9,10,12,13,27] + range(0x20, 0x100)))
             is_binary_string = lambda bytes: bool(bytes.translate(None, textchars))
 
-            with open(ds_str, 'rb') as f:
+            with open(ds_str) as f:
                 first_chunk = f.read(1024)
                 if is_binary_string(first_chunk):
                     # likely netcdf file

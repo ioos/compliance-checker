@@ -8,7 +8,6 @@ from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possiblexunits, _possibleyunits, _possibletunits, _possibleaxisunits
 
 from netCDF4 import Dimension, Variable
-from sets import Set
 
 def guess_dim_type(dimension):
     """
@@ -85,6 +84,9 @@ def is_likely_dsg(func):
     return _dec
 
 class CFBaseCheck(BaseCheck):
+    register_checker = True
+    name = 'cf'
+
     @classmethod
     def beliefs(cls): # @TODO
         return {}
@@ -493,18 +495,18 @@ class CFBaseCheck(BaseCheck):
             # skip string type vars
             if (isinstance(v.dtype, type) and issubclass(v.dtype, basestring)) or v.dtype.char == 'S':
                 continue
-            
+
             # skip quality control vars
             if hasattr(v, 'flag_meanings'):
                 continue
-            
+
             if hasattr(v, 'standard_name') and 'status_flag' in v.standard_name:
                 continue
 
             # skip DSG cf_role
             if hasattr(v, "cf_role"):
                 continue
-            
+
             units = getattr(v, 'units', None)
 
             # 1) "units" attribute must be present
@@ -1422,26 +1424,9 @@ class CFBaseCheck(BaseCheck):
           
         """
 
-        ret_val = []        
-        reported_reference_variables = []
-        
+        ret_val = []
         for name,var in ds.dataset.variables.iteritems():
-            self_reference_variables = Set()   
-            g = NCGraph(ds.dataset, name, var, self_reference_variables)
-                                    
-            reasoning = []            
-            
-            for self_reference_variable in self_reference_variables:
-                if not self_reference_variable in reported_reference_variables:
-                    reasoning.append("Variable %s's coordinate references itself" % (self_reference_variable))
-
-                    result = Result(BaseCheck.HIGH,\
-                            False,\
-                            ('var', self_reference_variable, 'coordinates_reference_itself'),\
-                            reasoning)
-                    ret_val.append(result)
-                    reported_reference_variables.append(self_reference_variable)                
-
+            g = NCGraph(ds.dataset, name, var)
 
             #Determine if 2-D coordinate variables (Lat and Lon are of shape (i,j)
             for each in g.coords:
@@ -1455,6 +1440,7 @@ class CFBaseCheck(BaseCheck):
                 # Check all the dims are coordinate variables
                 #------------------------------------------------------------
                 valid_dims = True
+                reasoning = []
                 for dim in g.dims.iterkeys():
                     if dim not in ds.dataset.variables:
                         valid_dims = False
@@ -1539,7 +1525,6 @@ class CFBaseCheck(BaseCheck):
             valid_dim = True
             valid_coord = True
             valid_cdim = True
-            result = None
 
             coords = var.coordinates.split(' ')
             for coord in coords:
@@ -1577,9 +1562,8 @@ class CFBaseCheck(BaseCheck):
                             (valid_in_variables and valid_dim and valid_coord and valid_cdim),                                       \
                             ('var', name, 'is_reduced_horizontal_grid'), \
                             reasoning)
-            
-            if result:
-                ret_val.append(result)
+
+            ret_val.append(result)
 
 
         return ret_val
@@ -1719,7 +1703,7 @@ class CFBaseCheck(BaseCheck):
 
             for coordinate in getattr(var, 'coordinates', '').split(" "):
                 if coordinate in ds.dataset.variables:
-                    if ds.dataset.variables[coordinate].shape == ():
+                    if ds.dataset.variables[coordinate].shape == (1,):
                         total_scalar_coordinate_var += 1
                         if coordinate not in ds.dataset.dimensions.keys():
                             valid_scalar_coordinate_var += 1

@@ -1,17 +1,16 @@
 # IOOS Compliance Checker
 
-[![Build Status](https://travis-ci.org/ioos/compliance-checker.svg)](https://travis-ci.org/ioos/compliance-checker)
-
 The IOOS Compliance Checker is a Python tool to check local/remote datasets against a variety of compliance standards. It is primarily a command-line tool (tested on OSX/Linux) and can also be used as a library import.
 
 It currently supports the following sources and standards:
 
 
-| Standard                                                                                             | .nc/OPeNDAP             | SOS                             |
-| ---------------------------------------------------------------------------------------------------  | ----------------------- | ------------------------------- |
-| [ACDD (1.1)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_%28ACDD%29)   | Complete                | -                               |
-| IOOS Asset Concept                                                                                   | -                       | GetCapabilities, DescribeSensor |
-| [CF (1.6)](http://cfconventions.org/Data/cf-convetions/cf-conventions-1.6/build/cf-conventions.html) | Complete                | -                               |
+| Standard                                                                                             | Source                                                            | .nc/OPeNDAP | SOS                             |
+| ---------------------------------------------------------------------------------------------------- | -----------                                                       | ------      | ------------------------------- |
+| [ACDD (1.1)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_%28ACDD%29)   | Built-in                                                          | X           | -                               |
+| [CF (1.6)](http://cfconventions.org/Data/cf-convetions/cf-conventions-1.6/build/cf-conventions.html) | Built-in                                                          | X           | -                               |
+| IOOS Asset Concept                                                                                   | Built-in                                                          | -           | GetCapabilities, DescribeSensor |
+| [Glider DAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2)              | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | X           | -                               |
 
 ## Concepts & Terminology
 
@@ -394,27 +393,7 @@ conda install compliance-checker
 
 ### MS-Windows
 
-IOOS Compliance Checker cannot be directly installed on MS-Windows systems because the required `udunitspy` and `swig` packages are either broken or unavailable for that OS (2014-08-18). However, the Compliance Checker can be successfully installed on Linux that runs as a guest OS on a virtual platform, e.g. Oracle VirtualBox with Linux Mint. If Anaconda is the Python of choice for the virtual Linux machine, the 64bit Linux has to be used because no `udunitspy` is currently available for 32bit Linux.
-
-Before [creating the virtual environment and installing compliance-checker](https://github.com/ioos/compliance-checker#-anaconda-on-linux), the channel locations should be updated in the Anaconda configuration file `.condarc`; without that the `conda` command fails to find the required packages. If that file does not exist it should be created in the Anaconda root directory with the following text (the comments with "#" prefix are optional):
-
-```
-# channel locations. These override conda defaults, i.e., conda will
-# search *only* the channels listed here, in the order given. Use "defaults" to
-# automatically include all default channels. Non-url channels will be
-# interpreted as binstar usernames (this can be changed by modifying the
-# channel_alias key; see below).
-channels:
-  - defaults
-  - IOOS
-  
-```
-
-If after that conda still cannot find the required packages, the `binstar` package should be installed:
-
-```
-conda install binstar
-```
+IOOS Compliance Checker cannot be installed on MS-Windows systems.  The required `udunitspy` and `swig` packages are either broken or unavailable for that OS (2014-08-18).
 
 ### Ubuntu
 
@@ -447,8 +426,10 @@ non-0 for a failure.
 - [CF 1.6](http://cfconventions.org/)
 - [ACDD](http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/metadata/DataDiscoveryAttConvention.html)
 - [IOOS](http://www.ioos.noaa.gov/data/contribute_data.html)
-- [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2)
 
+## Available Test Suites as Plugins
+
+- [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2) - [link](https://github.com/ioos/cc-plugin-glider)
 
 ## Development
 
@@ -467,7 +448,7 @@ https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e603
 
 ## Contributors    
 
-- Dave Foster <dave@axiomdatascience.com>
+- Dave Foster <dfoster@asascience.com>
 - Dan Maher <dmaher@asascience.com>
 - Luke Campbell <lcampbell@asascience.com>
 
