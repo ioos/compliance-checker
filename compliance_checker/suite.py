@@ -116,7 +116,7 @@ class CheckSuite(object):
 
         return True
 
-    def build_structure(self, check_name, groups, source_name):
+    def build_structure(self, check_name, groups, source_name, limit=1):
         '''
         Compiles the checks, results and scores into an aggregate structure which looks like:
             
@@ -153,8 +153,6 @@ class CheckSuite(object):
 
         def named_function(result):
             for child in result.children:
-                aggregates['scored_points'] += child.value[0]
-                aggregates['possible_points'] += child.value[1]
                 all_priorities.append(child)
                 named_function(child)
 
@@ -163,6 +161,8 @@ class CheckSuite(object):
         # For each result, bin them into the appropriate category, put them all
         # into the all_priorities category and add up the point values
         for res in groups:
+            if res.weight < limit:
+                continue
             aggregates['scored_points'] += res.value[0]
             aggregates['possible_points'] += res.value[1]
             if res.weight == 3:
@@ -191,7 +191,7 @@ class CheckSuite(object):
         aggregates['source_name']       = source_name
         return aggregates
 
-    def json_output(self, check_name, groups, file_object, source_name):
+    def json_output(self, check_name, groups, file_object, source_name, limit):
         '''
         Builds the results into a JSON structure and writes it to the file buffer.
 
@@ -200,11 +200,12 @@ class CheckSuite(object):
         @param output_filename Path to file to save output
         @param file_object     A python file object where the output should be written to
         @param source_name     Source of the dataset, used for title
+        @param limit           Integer value for limiting output
         '''
-        aggregates = self.build_structure(check_name, groups, source_name)
+        aggregates = self.build_structure(check_name, groups, source_name, limit)
         aggregates = self.serialize(aggregates)
-        json_string = json.dumps(aggregates)
-        file_object.write(json_string)
+        json_string = json.dumps(aggregates, ensure_ascii=False)
+        file_object.write(unicode(json_string))
         return
 
     def serialize(self, o):
@@ -224,7 +225,7 @@ class CheckSuite(object):
         return o
 
 
-    def html_output(self, check_name, groups, file_object, source_name):
+    def html_output(self, check_name, groups, file_object, source_name, limit):
         '''
         Renders an HTML file using Jinja2 and saves the output to the file specified.
 
@@ -233,15 +234,16 @@ class CheckSuite(object):
         @param output_filename Path to file to save output
         @param file_object     A python file object where the output should be written to
         @param source_name     Source of the dataset, used for title
+        @param limit           Integer value for limiting output
         '''
         from jinja2 import Environment, PackageLoader
         self.j2 = Environment(loader=PackageLoader('compliance_checker', 'data/templates'))
         template = self.j2.get_template('ccheck.html.j2')
 
-        template_vars = self.build_structure(check_name, groups, source_name)
+        template_vars = self.build_structure(check_name, groups, source_name, limit)
 
         buf = template.render(**template_vars)
-        file_object.write(buf)
+        file_object.write(unicode(buf))
 
     def get_points(self, groups, limit):
         score_list = []
@@ -268,10 +270,6 @@ class CheckSuite(object):
         Returns the dataset needed for the verbose output, as well as the failure flags.
         """
         score_list, points, out_of = self.get_points(groups, limit)
-
-        fail_flag = 0
-
-        fail_flag = limit
         print '\n'
         print "-"*80
         print '{:^80}'.format("The dataset scored %r out of %r points" % (points, out_of))

@@ -1,5 +1,6 @@
 import traceback
 import sys
+import io
 
 from StringIO import StringIO
 from compliance_checker.acdd import ACDDBaseCheck
@@ -57,10 +58,10 @@ class ComplianceChecker(object):
             groups = cls.stdout_output(cs, score_groups, verbose, limit)
 
         elif output_format == 'html':
-            groups = cls.html_output(cs, score_groups, output_filename, ds_loc)
+            groups = cls.html_output(cs, score_groups, output_filename, ds_loc, limit)
 
         elif output_format == 'json':
-            groups = cls.json_output(cs, score_groups, output_filename, ds_loc)
+            groups = cls.json_output(cs, score_groups, output_filename, ds_loc, limit)
 
         else:
             raise TypeError('Invalid format %s' % output_format)
@@ -90,35 +91,37 @@ class ComplianceChecker(object):
         return groups
 
     @classmethod
-    def html_output(cls, cs, score_groups, output_filename, ds_loc):
+    def html_output(cls, cs, score_groups, output_filename, ds_loc, limit):
         '''
         Generates rendered HTML output for the compliance score(s)
         @param cs              Compliance Checker Suite
         @param score_groups    List of results
         @param output_filename The file path to output to
         @param ds_loc          Location of the source dataset
+        @param limit           Integer value for limiting output
         '''
         for checker, rpair in score_groups.iteritems():
             groups, errors = rpair
             if output_filename == '-':
                 f = StringIO()
-                cs.html_output(checker, groups, f, ds_loc)
+                cs.html_output(checker, groups, f, ds_loc, limit)
                 f.seek(0)
                 print f.read()
             else:
-                with open(output_filename, 'w') as f:
-                    cs.html_output(checker, groups, f, ds_loc)
+                with io.open(output_filename, 'w', encoding='utf8') as f:
+                    cs.html_output(checker, groups, f, ds_loc, limit)
 
         return groups
 
     @classmethod
-    def json_output(cls, cs, score_groups, output_filename, ds_loc):
+    def json_output(cls, cs, score_groups, output_filename, ds_loc, limit):
         '''
         Generates JSON output for the ocmpliance score(s)
         @param cs              Compliance Checker Suite
         @param score_groups    List of results
         @param output_filename The file path to output to
         @param ds_loc          Location of the source dataset
+        @param limit           Integer value for limiting output
         '''
         for checker, rpair in score_groups.iteritems():
             groups, errors = rpair
@@ -128,8 +131,8 @@ class ComplianceChecker(object):
                 f.seek(0)
                 print f.read()
             else:
-                with open(output_filename, 'w') as f:
-                    cs.json_output(checker, groups, f, ds_loc)
+                with io.open(output_filename, 'w', encoding='utf8') as f:
+                    cs.json_output(checker, groups, f, ds_loc, limit)
 
         return groups
 
