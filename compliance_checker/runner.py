@@ -79,7 +79,7 @@ class ComplianceChecker(object):
         @param cs           Compliance Checker Suite
         @param score_groups List of results
         @param verbose      Integer value for verbosity level
-        @param limit        Integer value for limiting output
+        @param limit        The degree of strictness, 1 being the strictest, and going up from there.
         '''
         for checker, rpair in score_groups.iteritems():
             groups, errors = rpair
@@ -98,7 +98,7 @@ class ComplianceChecker(object):
         @param score_groups    List of results
         @param output_filename The file path to output to
         @param ds_loc          Location of the source dataset
-        @param limit           Integer value for limiting output
+        @param limit           The degree of strictness, 1 being the strictest, and going up from there.
         '''
         for checker, rpair in score_groups.iteritems():
             groups, errors = rpair
@@ -121,7 +121,7 @@ class ComplianceChecker(object):
         @param score_groups    List of results
         @param output_filename The file path to output to
         @param ds_loc          Location of the source dataset
-        @param limit           Integer value for limiting output
+        @param limit           The degree of strictness, 1 being the strictest, and going up from there.
         '''
         for checker, rpair in score_groups.iteritems():
             groups, errors = rpair
