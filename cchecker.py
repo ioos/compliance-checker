@@ -4,6 +4,7 @@ import pprint
 import argparse
 import sys
 from compliance_checker.runner import ComplianceChecker, ComplianceCheckerCheckSuite
+from compliance_checker import __version__
 
 def main():
     parser = argparse.ArgumentParser()
@@ -12,10 +13,15 @@ def main():
     parser.add_argument('--verbose' , '-v', help="Increase output. May be specified up to three times.", action="count")
     parser.add_argument('-f', '--format', default='text', choices=['text', 'html', 'json'], help='Output format')
     parser.add_argument('-o', '--output', default='-', action='store', help='Output filename')
-    parser.add_argument('dataset_location', nargs='+', help= "Defines the location of the dataset to be checked.")
+    parser.add_argument('-V', '--version', action='store_true', help='Display the IOOS Compliance Checker version information.')
+    parser.add_argument('dataset_location', nargs='*', help= "Defines the location of the dataset to be checked.")
 
     args = parser.parse_args()
     args.test = args.test or ['acdd']
+
+    if args.version:
+        print("IOOS compliance checker version %s" % __version__)
+        return 0
 
     return_values = []
     had_errors = []

@@ -10,6 +10,8 @@ from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, 
 from netCDF4 import Dimension, Variable
 from sets import Set
 
+__stdname_table__="v29"
+
 def guess_dim_type(dimension):
     """
     Guesses the type of dimension of a variable X/Y/Z/T
