@@ -727,6 +727,14 @@ class CFBaseCheck(BaseCheck):
 
                 ret_val.append(fmr)
 
+                # flag_values must be a list (array), not just a single value
+                result_name = (u'§3.5 Flags and flag attributes', k, 'flag_values_is_list')
+                fvlist = Result(BaseCheck.HIGH, not np.isscalar(flag_values), result_name)
+                if not fvlist.value:
+                    fvlist.msgs = ['flag_values must be a list']
+                    # convert to an array so the remaining checks can be applied
+                    flag_values = np.array([flag_values])
+
                 # 8) flag_values attribute values must be mutually exclusive
                 fvset = set(flag_values)
                 fvsr = Result(BaseCheck.HIGH, len(fvset) == len(flag_values), (u'§3.5 Flags and flag attributes', k, 'flag_values_mutually_exclusive'))
