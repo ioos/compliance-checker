@@ -48,6 +48,11 @@ setup(name                 = "compliance-checker",
     entry_points         = {
         'console_scripts': [
             'compliance-checker = cchecker:main'
+        ],
+        'compliance_checker.suites': [
+            'cf = compliance_checker.cf.cf:CFBaseCheck',
+            'acdd = compliance_checker.acdd:ACDDBaseCheck',
+            'ioos = compliance_checker.ioos:IOOSBaseCheck',
         ]
     },
     package_data         = {

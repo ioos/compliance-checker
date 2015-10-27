@@ -6,3 +6,5 @@ cf_units==0.1.1
 requests>=2.2.1
 python-dateutil>=2.2
 Jinja2>=2.7.3
+setuptools>=15.0
+
