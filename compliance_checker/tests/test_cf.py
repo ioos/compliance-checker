@@ -36,7 +36,8 @@ static_files = {
         'self-referencing-var'       : resource_filename('compliance_checker', 'tests/data/self-referencing-var.nc'),
         'scalar_coordinate_variable' : resource_filename('compliance_checker', 'tests/data/scalar_coordinate_variable.nc'),
         'coordinates_and_metadata'   : resource_filename('compliance_checker', 'tests/data/coordinates_and_metadata.nc'),
-        'ints64'                    : resource_filename('compliance_checker', 'tests/data/ints64.nc'),
+        'ints64'                     : resource_filename('compliance_checker', 'tests/data/ints64.nc'),
+        'units_check'                : resource_filename('compliance_checker', 'tests/data/units_check.nc'),
         }
 
 class MockVariable(object):
@@ -748,6 +749,20 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_missing_data(dataset)
         for each in results:
             self.assertFalse(each.value)
+
+    def test_check_units(self):
+        '''
+        Ensure that container variables are not checked for units but geophysical variables are
+        '''
+        dataset = self.get_pair(static_files['units_check'])
+        results = self.cf.check_units(dataset)
+        for result in results:
+            title, violator, group = result.name
+            assert violator in ('time', 'latitude', 'longitude', 'temperature')
+            # I know this line is redundant but I like it to be explicitly listed here
+            # for clarity
+            assert violator not in ('crs', 'platform')
+
 
     def test_64bit(self):
         dataset = self.get_pair(static_files['ints64'])
