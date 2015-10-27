@@ -112,24 +112,60 @@ class ACDDBaseCheck(BaseCheck):
 
     @score_group('varattr')
     def check_var_long_name(self, ds):
-        vars = self._get_vars(ds, 'long_name')
+        results = []
+        # We don't check certain container variables for units
+        platform_variable_name = getattr(ds.dataset, 'platform', None)
+        for variable in ds.dataset.variables:
+            msgs = []
+            if variable in ('crs', platform_variable_name):
+                continue
+            # If the variable is a QC flag, we don't need units
+            long_name = getattr(ds.dataset.variables[variable], 'long_name', None)
+            check = long_name is not None
+            if not check:
+                msgs.append("Var %s missing attr long_name" % variable)
+            results.append(Result(BaseCheck.HIGH, check, (variable, "var_std_name"), msgs))
 
-        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_long_name"), self._get_msg(v, 'long_name')) for v in vars]
-        return retval
+        return results
 
     @score_group('varattr')
     def check_var_standard_name(self, ds):
-        vars = self._get_vars(ds, 'standard_name')
+        results = []
+        # We don't check certain container variables for units
+        platform_variable_name = getattr(ds.dataset, 'platform', None)
+        for variable in ds.dataset.variables:
+            msgs = []
+            if variable in ('crs', platform_variable_name):
+                continue
+            # If the variable is a QC flag, we don't need units
+            std_name = getattr(ds.dataset.variables[variable], 'standard_name', None)
+            check = std_name is not None
+            if not check:
+                msgs.append("Var %s missing attr standard_name" % variable)
+            results.append(Result(BaseCheck.HIGH, check, (variable, "var_std_name"), msgs))
 
-        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_std_name"), self._get_msg(v, 'standard_name')) for v in vars]
-        return retval
+        return results
 
     @score_group('varattr')
     def check_var_units(self, ds):
-        vars = self._get_vars(ds, 'units')
+        results = []
+        # We don't check certain container variables for units
+        platform_variable_name = getattr(ds.dataset, 'platform', None)
+        for variable in ds.dataset.variables:
+            msgs = []
+            if variable in ('crs', platform_variable_name):
+                continue
+            # If the variable is a QC flag, we don't need units
+            std_name = getattr(ds.dataset.variables[variable], 'standard_name', None)
+            if std_name is not None:
+                if 'status_flag' in std_name:
+                    continue
+            check = hasattr(ds.dataset.variables[variable], 'units')
+            if not check:
+                msgs.append("Var %s missing attr units" % variable)
+            results.append(Result(BaseCheck.HIGH, check, (variable, "var_units"), msgs))
 
-        retval = [Result(BaseCheck.HIGH, v[0] is not None, (v[1], "var_units"), self._get_msg(v, 'units')) for v in vars]
-        return retval
+        return results
 
     ###############################################################################
     #
