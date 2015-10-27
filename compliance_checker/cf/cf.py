@@ -488,13 +488,16 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
 
         deprecated = ['level', 'layer', 'sigma_level']
+        clim_vars = self._find_clim_vars(ds)
+        boundary_vars = self._find_boundary_vars(ds).itervalues()
+        container_vars = self._find_container_variables(ds)
 
         for k, v in ds.dataset.variables.iteritems():
 
             # skip climatological vars, boundary vars
-            if v in self._find_clim_vars(ds) or \
-               v in self._find_boundary_vars(ds).itervalues() or \
-               v.shape == ():
+            if v in clim_vars or \
+               v in boundary_vars or \
+               k in container_vars:
                continue
 
             # skip string type vars
@@ -515,14 +518,14 @@ class CFBaseCheck(BaseCheck):
             units = getattr(v, 'units', None)
 
             # 1) "units" attribute must be present
-            presence = Result(BaseCheck.HIGH, units is not None, ('units', k, 'present'))
+            presence = Result(BaseCheck.HIGH, units is not None, ('§3.1 Variables contain units', k, 'units'))
             if not presence.value:
                 presence.msgs = ['units attribute required']
                 ret_val.append(presence)
                 continue
 
             # 2) units attribute must be a string
-            astring = Result(BaseCheck.HIGH, isinstance(units, basestring), ('units', k, 'string'))
+            astring = Result(BaseCheck.HIGH, isinstance(units, basestring), ('§3.1 units attribute is a string', k, 'units'))
             if not astring.value:
                 astring.msgs = ["units not a string (%s)" % type(units)]
                 ret_val.append(astring)
@@ -530,7 +533,7 @@ class CFBaseCheck(BaseCheck):
 
             # now, units are present and string
             # 3) units are not deprecated
-            resdeprecated = Result(BaseCheck.LOW, not units in deprecated, ('units', k, 'deprecated'))
+            resdeprecated = Result(BaseCheck.LOW, not units in deprecated, ('§3.1 Variables contain valid units', k, 'units'))
             if not resdeprecated.value:
                 resdeprecated.msgs = ['units (%s) is deprecated' % units]
                 ret_val.append(resdeprecated)
@@ -538,7 +541,7 @@ class CFBaseCheck(BaseCheck):
 
             # 4) units are known
 
-            knownu = Result(BaseCheck.HIGH, units_known(units), ('units', k, 'known'))
+            knownu = Result(BaseCheck.HIGH, units_known(units), ('§3.1 Variables contain valid CF Units', k, 'units'))
             if not knownu.value:
                 knownu.msgs = ['unknown units type (%s)' % units]
                 ret_val.append(knownu)
@@ -2852,6 +2855,23 @@ class CFBaseCheck(BaseCheck):
                     reasoning)
                 ret_val.append(result)
         return ret_val
+
+    def _find_container_variables(self, ds):
+        container_vars = []
+        platform_name = getattr(ds.dataset, 'platform', None)
+        if platform_name is not None:
+            container_vars.append(platform_name)
+        for k, v in ds.dataset.variables.iteritems():
+            if k in ('crs', 'instrument', 'station'):
+                if not v.shape: # Empty dimension
+                    container_vars.append(k)
+            platform_name = getattr(v, 'platform', None)
+            if platform_name is not None:
+                container_vars.append(platform_name)
+            instrument_name = getattr(v, 'instrument_name', None)
+            if instrument_name is not None:
+                container_vars.append(instrument_name)
+        return list(set(container_vars))
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
     @classmethod
