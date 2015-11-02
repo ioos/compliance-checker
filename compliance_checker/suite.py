@@ -179,6 +179,10 @@ class CheckSuite(object):
         for res in groups:
             if res.weight < limit:
                 continue
+            # If the result has 0 possible points, then it was not valid for
+            # this dataset and contains no meaningful information
+            if res.value[1] == 0:
+                continue
             aggregates['scored_points'] += res.value[0]
             aggregates['possible_points'] += res.value[1]
             if res.weight == 3:
@@ -545,8 +549,11 @@ class CheckSuite(object):
             Slices off first element (if list/tuple) of classification or just returns it if scalar.
             """
             if isinstance(r.name, tuple) or isinstance(r.name, list):
-                return r.name[0:1][0]
-            return r.name
+                retval = r.name[0:1][0]
+            else:
+                retval = r.name
+            retval = retval.encode('ascii', 'ignore')
+            return retval
         
 
 
