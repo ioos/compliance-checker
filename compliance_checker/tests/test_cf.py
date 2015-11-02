@@ -39,6 +39,7 @@ static_files = {
         'ints64'                     : resource_filename('compliance_checker', 'tests/data/ints64.nc'),
         'units_check'                : resource_filename('compliance_checker', 'tests/data/units_check.nc'),
         'self_referencing'           : resource_filename('compliance_checker', 'tests/data/non-comp/self_referencing.nc'),
+        'time_units'                 : resource_filename('compliance_checker', 'tests/data/non-comp/time_units.nc'),
         }
 
 class MockVariable(object):
@@ -795,6 +796,14 @@ class TestCF(unittest.TestCase):
             'cf'        : CFBaseCheck
         }
         suite.run(dataset, 'cf')
+
+    def test_time_units(self):
+        dataset = self.get_pair(static_files['time_units'])
+        results = self.cf.check_units(dataset)
+        scored, out_of, messages = self.get_results(results)
+        assert u'units are days since 1970-01-01, standard_name units should be K' in messages
+        assert scored == 1
+        assert out_of == 2
 
 
     #--------------------------------------------------------------------------------

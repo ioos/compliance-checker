@@ -581,7 +581,7 @@ class CFBaseCheck(BaseCheck):
                 msgs = []
                 valid = True
                 if units is not None:
-                    if units.split(" ")[0] in [u'day', u'days', u'd', u'hour', u'hours', u'hr', u'hrs', u'h', u'year', u'years', u'minute', u'minutes', u'm', u'min', u'mins', u'second', u'seconds', u's', u'sec', u'secs']:
+                    if std_name == 'time' and units.split(" ")[0] in [u'day', u'days', u'd', u'hour', u'hours', u'hr', u'hrs', u'h', u'year', u'years', u'minute', u'minutes', u'm', u'min', u'mins', u'second', u'seconds', u's', u'sec', u'secs']:
                         if len(units.split(" "))>1:
                             if units.split(" ")[1] == u'since':
                                 std_units = units
