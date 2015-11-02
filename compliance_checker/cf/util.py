@@ -155,37 +155,63 @@ class DotDict(dict):
         return DotDict(dict.fromkeys(seq, value))
 
 class NCGraph:
-    def __init__(self, ds, name, nc_object, self_reference_variables):
+    def __init__(self, ds, name, nc_object, self_reference_variables, reference_map=None):
 
+        self.ds           = ds
         self.name         = name
         self.coords       = DotDict()
         self.dims         = DotDict()
         self.grid_mapping = DotDict()
         self.obj          = nc_object
+
+        self.reference_variables = self_reference_variables
+        self.reference_map = reference_map or {}
+
+        self.reference_map[name] = self
+
         if isinstance(nc_object, Dimension):
             self._type = 'dim'
+
         elif isinstance(nc_object, Variable):
             self._type = 'var'
-            for dim in nc_object.dimensions:
-                self.dims[dim] = NCGraph(ds, dim, ds.dimensions[dim], self_reference_variables)
-            if hasattr(nc_object, 'coordinates'):
-                coords = nc_object.coordinates.split(' ')
-                for coord in coords:
-                    if coord in ds.variables:
-                        if coord == nc_object.name:
-                            self_reference_variables.add(coord)
-                        else:
-                            self.coords[coord] = NCGraph(ds, coord, ds.variables[coord], self_reference_variables)
-                    else:
-                        self.coords[coord] = None
-            if hasattr(nc_object, 'grid_mapping'):
-                gm = nc_object.grid_mapping
-                self.grid_mapping[gm] = None
-                if gm in ds.variables:
-                    self.grid_mapping[gm] = NCGraph(ds, gm, ds.variables[gm])
+
+            self.get_references()
 
         else:
             raise TypeError("unknown type %s" % repr(type(nc_object)))
+
+    def get_references(self):
+        for dim in self.obj.dimensions:
+            self.dims[dim] = self.get_dimension(dim)
+
+        if hasattr(self.obj, 'coordinates'):
+            coords = self.obj.coordinates.split(' ')
+            for coord in coords:
+                self.coords[coord] = self.get_coordinate(coord)
+
+        if hasattr(self.obj, 'grid_mapping'):
+            gm = self.obj.grid_mapping
+            self.grid_mapping[gm] = self.get_grid_mapping(gm)
+
+    def get_dimension(self, dim):
+        if dim in self.reference_map:
+            return self.reference_map[dim]
+        NCGraph(self.ds, dim, self.ds.dimensions[dim], self.reference_variables, self.reference_map)
+
+    def get_coordinate(self, coord):
+        if coord not in self.ds.variables:
+            return
+        if coord in self.reference_map:
+            self.reference_variables.add(self.obj.name)
+            return self.reference_map[coord]
+        return NCGraph(self.ds, coord, self.ds.variables[coord], self.reference_variables, self.reference_map)
+
+    def get_grid_mapping(self, gm):
+        if gm not in ds.variables:
+            return
+        if gm in self.reference_map:
+            return self.reference_map[gm]
+        return NCGraph(ds, gm, ds.variables[gm], self.reference_map)
 
     def __getattr__(self, key):
         if key in self.__dict__:
