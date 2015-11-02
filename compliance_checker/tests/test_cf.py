@@ -96,6 +96,28 @@ class TestCF(unittest.TestCase):
         pair = DSPair(nc_dataset, dogma)
         return pair
 
+    def get_results(self, results):
+        '''
+        Returns a tuple of the value scored, possible, and a list of messages
+        in the result set.
+        '''
+        out_of = 0
+        scored = 0
+        for r in results:
+            if isinstance(r.value, tuple):
+                out_of += r.value[1]
+                scored += r.value[0]
+            else:
+                out_of += 1
+                scored += int(r.value)
+
+        # Store the messages
+        messages = []
+        for r in results:
+            messages.extend(r.msgs)
+
+        return scored, out_of, messages
+
     #--------------------------------------------------------------------------------
     # Compliance Tests
     #--------------------------------------------------------------------------------
@@ -279,7 +301,6 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['bad_data_type'])
         result = self.cf.check_coordinate_vars_for_all_coordinate_types(dataset)
         for each in result:
-            print each
             self.assertTrue(each.value)
 
     def test_check_coordinate_axis_attr(self):
@@ -292,7 +313,6 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['bad_data_type'])
         result = self.cf.check_coordinate_axis_attr(dataset)
         for each in result:
-            print each
             if each.name[1] in ['time', 'latitude']:
                 self.assertTrue(each.value)
             if each.name[1] in ['salinity']:
@@ -316,22 +336,16 @@ class TestCF(unittest.TestCase):
         # Verify non-compliance
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_latitude(dataset)
-        # Store the results in a dict
-        rd = {}
-        for r in results:
-            rd[r.name[1:]] = r.value
-        # ('lat', 'has_units') should be False
-        self.assertFalse(rd[('lat', 'has_units')])
-        # ('lat', 'correct_units') should be (0,3)
-        self.assertEquals(rd[('lat', 'correct_units')], (0,3))
-        # ('lat_uv', 'has_units') should be True
-        self.assertTrue(rd[('lat_uv', 'has_units')])
-        # ('lat_uv', 'correct_units') should be (2,3)
-        self.assertEquals(rd[('lat_uv', 'correct_units')], (2,3))
-        # ('lat_like', 'has_units') should be True
-        self.assertTrue(rd[('lat_like', 'has_units')])
-        # ('lat_like', 'correct_units') should be (1,3)
-        self.assertEquals(rd[('lat_like', 'correct_units')], (1,3))
+
+        scored, out_of, messages = self.get_results(results)
+
+
+        assert 'lat does not have units attribute' in messages
+        assert 'lat_uv units are acceptable, but not recommended' in messages
+        assert 'lat_like does not have units attribute' in messages
+
+        assert scored == 5
+        assert out_of == 12
         
 
     def test_longitude(self):
@@ -350,22 +364,15 @@ class TestCF(unittest.TestCase):
         # Verify non-compliance
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_longitude(dataset)
-        # Store the results in a dict
-        rd = {}
-        for r in results:
-            rd[r.name[1:]] = r.value
-        # ('lon', 'has_units') should be False
-        self.assertFalse(rd[('lon', 'has_units')])
-        # ('lon', 'correct_units') should be (0,3)
-        self.assertEquals(rd[('lon', 'correct_units')], (0,3))
-        # ('lon_uv', 'has_units') should be True
-        self.assertTrue(rd[('lon_uv', 'has_units')])
-        # ('lon_uv', 'correct_units') should be (2,3)
-        self.assertEquals(rd[('lon_uv', 'correct_units')], (2,3))
-        # ('lon_like', 'has_units') should be True
-        self.assertTrue(rd[('lon_like', 'has_units')])
-        # ('lon_like', 'correct_units') should be (1,3)
-        self.assertEquals(rd[('lon_like', 'correct_units')], (1,3))
+
+        scored, out_of, messages = self.get_results(results)
+
+        assert 'lon does not have units attribute' in messages
+        assert 'lon_uv units are acceptable, but not recommended' in messages
+        assert 'lon_like does not have units attribute' in messages
+
+        assert scored == 5
+        assert out_of == 12
 
     def test_is_vertical_coordinate(self):
         '''
@@ -413,21 +420,11 @@ class TestCF(unittest.TestCase):
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_vertical_coordinate(dataset)
         
-        # Store the results by the tuple
-        rd = { r.name[1:] : r.value for r in results }
-        # ('height', 'has_units') should be False
-        self.assertFalse(rd[('height', 'has_units')])
-        # ('height', 'correct_units') should be False
-        self.assertFalse(rd[('height', 'correct_units')])
-        # ('depth', 'has_units') should be True
-        self.assertTrue(rd[('depth', 'has_units')])
-        # ('depth', 'correct_units') should be False
-        self.assertFalse(rd[('depth', 'correct_units')])
-        # ('depth2', 'has_units') should be False
-        self.assertTrue(rd[('depth2', 'has_units')])
-        # ('depth2', 'correct_units') should be False
-        self.assertFalse(rd[('depth2', 'correct_units')])
-        
+        scored, out_of, messages = self.get_results(results)
+
+        assert 'height does not have units' in messages
+        assert 'vertical variable depth needs to define positive attribute'
+        assert 'vertical variable depth2 needs to define positive attribute'
 
     def test_vertical_dimension(self):
         '''
@@ -502,15 +499,17 @@ class TestCF(unittest.TestCase):
         # Check negative compliance
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_dimensionless_vertical_coordinate(dataset)
-        rd = { r.name[1:] : r.value for r in results }
-        
-        # ('lev1', 'formula_terms') should be False
-        self.assertFalse(rd[('lev1', 'formula_terms')])
-        
-        # ('lev2', 'formula_terms') should be True
-        self.assertTrue(rd[('lev2', 'formula_terms')])
-        # ('lev2', 'terms_exist') should be False
-        self.assertFalse(rd[('lev2', 'terms_exist')])
+
+        scored, out_of, messages = self.get_results(results)
+
+        assert u'formula_terms missing from dimensionless coordinate lev1' in messages
+        assert u'formula_terms not defined for dimensionless coordinate lev1' in messages
+        assert u'var1 missing for dimensionless coordinate lev2' in messages
+        assert u'var2 missing for dimensionless coordinate lev2' in messages
+        assert u'var3 missing for dimensionless coordinate lev2' in messages
+        assert scored == 1
+        assert out_of == 4
+
             
     def test_is_time_variable(self):
         var1 = MockVariable()
@@ -539,10 +538,14 @@ class TestCF(unittest.TestCase):
 
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_time_coordinate(dataset)
-        rd = {r.name[1:] : r.value for r in results }
-        self.assertFalse(rd[('bad_time_1', 'has_units')])
-        self.assertTrue(rd[('bad_time_2', 'has_units')])
-        self.assertFalse(rd[('bad_time_2', 'correct_units')])
+
+        scored, out_of, messages = self.get_results(results)
+
+        assert u'bad_time_1 does not have units' in messages
+        assert u'bad_time_2 doesn not have correct time units' in messages
+        assert scored == 1
+        assert out_of == 3
+
 
     def test_check_calendar(self):
         dataset = self.get_pair(static_files['example-grid'])
@@ -552,10 +555,10 @@ class TestCF(unittest.TestCase):
 
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_calendar(dataset)
-        rd = {r.name[1:] : r.value for r in results }
-        self.assertFalse(rd[('bad_time_1', 'has_calendar')])
-        self.assertTrue(rd[('bad_time_2', 'has_calendar')])
-        self.assertFalse(rd[('bad_time_2', 'valid_calendar')])
+        scored, out_of, messages = self.get_results(results)
+
+        assert u'Variable bad_time_1 should have a calendar attribute' in messages
+        assert u"Variable bad_time_2 should have a valid calendar: 'nope' is not a valid calendar" in messages
 
     def test_check_independent_axis_dimensions(self):
         dataset = self.get_pair(static_files['example-grid'])
@@ -565,14 +568,20 @@ class TestCF(unittest.TestCase):
 
         dataset = self.get_pair(static_files['bad'])
         results = self.cf.check_independent_axis_dimensions(dataset)
-        
-        false_variable_name_list = ['lev1', 'lev2', 'bad_time_1', 'bad_time_2', 'column_temp']
-        
-        for each in results:
-            if each.name[1] in false_variable_name_list:
-                self.assertFalse(each.value)
-            else:
-                self.assertTrue(each.value)
+
+        scored, out_of, messages = self.get_results(results)
+        assert u'The lev dimension for the variable lev1 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
+                in messages
+        assert u'The lev dimension for the variable lev2 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
+                in messages
+        assert u'The time dimension for the variable bad_time_1 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
+                in messages
+        assert u'The time dimension for the variable bad_time_2 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
+                in messages
+        assert u'The time dimension for the variable column_temp does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
+                in messages
+        assert scored == 6
+        assert out_of == 11
 
     def test_check_two_dimensional(self):
         dataset = self.get_pair(static_files['2dim'])
@@ -756,12 +765,14 @@ class TestCF(unittest.TestCase):
         '''
         dataset = self.get_pair(static_files['units_check'])
         results = self.cf.check_units(dataset)
-        for result in results:
-            title, violator, group = result.name
-            assert violator in ('time', 'latitude', 'longitude', 'temperature')
-            # I know this line is redundant but I like it to be explicitly listed here
-            # for clarity
-            assert violator not in ('crs', 'platform')
+
+        # We don't keep track of the variables names for checks that passed, so
+        # we can make a strict assertion about how many checks were performed
+        # and if there were errors, which there shouldn't be.
+        scored, out_of, messages = self.get_results(results)
+        assert scored == 4
+        assert out_of == 4
+        assert messages == []
 
 
     def test_64bit(self):

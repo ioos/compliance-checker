@@ -179,6 +179,10 @@ class CheckSuite(object):
         for res in groups:
             if res.weight < limit:
                 continue
+            # If the result has 0 possible points, then it was not valid for
+            # this dataset and contains no meaningful information
+            if res.value[1] == 0:
+                continue
             aggregates['scored_points'] += res.value[0]
             aggregates['possible_points'] += res.value[1]
             if res.weight == 3:
@@ -438,10 +442,10 @@ class CheckSuite(object):
         wrapper = textwrap.TextWrapper(initial_indent = '', width = 80, subsequent_indent = ' '*54)
         for res in grouped_sorted:
             if (res.value[0] != res.value[1]) and not res.msgs:
-                print '%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), ' ')
+                print '%-39s:%1s:%6s/%2s : %s' %(unicode(indent*'    '+res.name)[0:39], res.weight, unicode(res.value[0]), unicode(res.value[1]), ' ')
             
             if (res.value[0] != res.value[1]) and res.msgs:
-                print wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), str(", ".join(res.msgs))))
+                print wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(unicode(indent*'    '+res.name)[0:39], res.weight, unicode(res.value[0]), unicode(res.value[1]), unicode(", ".join(res.msgs))))
 
             if res.children:
                 self.reasoning_routine(res.children, indent+1, False)
@@ -545,8 +549,11 @@ class CheckSuite(object):
             Slices off first element (if list/tuple) of classification or just returns it if scalar.
             """
             if isinstance(r.name, tuple) or isinstance(r.name, list):
-                return r.name[0:1][0]
-            return r.name
+                retval = r.name[0:1][0]
+            else:
+                retval = r.name
+            retval = retval.encode('ascii', 'ignore')
+            return retval
         
 
 
