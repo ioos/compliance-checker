@@ -331,8 +331,10 @@ class CFBaseCheck(BaseCheck):
             for d in v.dimensions:
                 dims[d] += 1
 
-            cur_fails = [(k, kk) for kk, vv in dims.iteritems() if vv > 1]
-            fails.extend(cur_fails)
+            for dimension, count in dims.iteritems():
+                if count > 1:
+                    fails.append("%s has two or more dimensions named %s" % (k, dimension))
+
 
         return Result(BaseCheck.HIGH, (total - len(fails), total), u'§2.4 Unique dimensions', msgs=fails)
 
