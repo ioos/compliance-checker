@@ -563,7 +563,7 @@ class TestCF(unittest.TestCase):
 
     def test_self_referencing(self):
         '''
-        This test captures a check where a coordaintes have circular references
+        This test captures a check where a coordinate has circular references
         '''
         dataset = self.get_pair(static_files['self_referencing'])
         results = self.cf.check_two_dimensional(dataset)
