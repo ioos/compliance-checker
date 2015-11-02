@@ -38,6 +38,7 @@ static_files = {
         'coordinates_and_metadata'   : resource_filename('compliance_checker', 'tests/data/coordinates_and_metadata.nc'),
         'ints64'                     : resource_filename('compliance_checker', 'tests/data/ints64.nc'),
         'units_check'                : resource_filename('compliance_checker', 'tests/data/units_check.nc'),
+        'self_referencing'           : resource_filename('compliance_checker', 'tests/data/non-comp/self_referencing.nc'),
         }
 
 class MockVariable(object):
@@ -559,6 +560,18 @@ class TestCF(unittest.TestCase):
 
         assert u'Variable bad_time_1 should have a calendar attribute' in messages
         assert u"Variable bad_time_2 should have a valid calendar: 'nope' is not a valid calendar" in messages
+
+    def test_self_referencing(self):
+        '''
+        This test captures a check where a coordaintes have circular references
+        '''
+        dataset = self.get_pair(static_files['self_referencing'])
+        results = self.cf.check_two_dimensional(dataset)
+
+        scored, out_of, messages = self.get_results(results)
+        assert u"Variable TEMP_H's coordinate references itself" in messages
+        assert scored == 0
+        assert out_of == 44
 
     def test_check_independent_axis_dimensions(self):
         dataset = self.get_pair(static_files['example-grid'])

@@ -12,6 +12,16 @@ from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, 
 from netCDF4 import Dimension, Variable
 from sets import Set
 
+def print_exceptions(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            from traceback import print_exc
+            print_exc()
+    return wrapper
+
 __stdname_table__="v29"
 
 def guess_dim_type(dimension):
@@ -1441,7 +1451,6 @@ class CFBaseCheck(BaseCheck):
             is either a coordinate variable OR comprises coordinate variables
           
         """
-
         ret_val = []        
         reported_reference_variables = []
         
