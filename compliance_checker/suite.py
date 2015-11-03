@@ -549,7 +549,10 @@ class CheckSuite(object):
             Slices off first element (if list/tuple) of classification or just returns it if scalar.
             """
             if isinstance(r.name, tuple) or isinstance(r.name, list):
-                retval = r.name[0:1][0]
+                if len(r.name) == 0:
+                    retval = ''
+                else:
+                    retval = r.name[0:1][0]
             else:
                 retval = r.name
             retval = retval.encode('ascii', 'ignore')
