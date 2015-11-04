@@ -278,6 +278,16 @@ class TestCF(unittest.TestCase):
             self.assertFalse(each.value)  
 
 
+    def test_check_flags(self):
+        dataset = self.get_pair(static_files['self_referencing'])
+        results = self.cf.check_flags(dataset)
+        scored, out_of, messages = self.get_results(results)
+
+        self.assertEqual(scored, 46)
+        self.assertEqual(out_of, 59)
+        self.assertEqual(messages.count(u'flag_values must be a list'), 6)
+        self.assertEqual(messages.count(u'flag_values attr does not have same type as var (fv: int8, v: int16)'), 6)
+        self.assertEqual(messages.count(u'flag_values attr does not have same type as var (fv: <U1, v: int16)'), 1)
 
 
     def test_check_units(self):
