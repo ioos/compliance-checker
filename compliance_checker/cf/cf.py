@@ -730,8 +730,17 @@ class CFBaseCheck(BaseCheck):
             if not (flag_values is not None or flag_masks is not None):
                 continue
 
-            # 1) flags_values attribute must have same type as variable to which it is attached
             if flag_values is not None:
+                # flag_values must be a list (array), not just a single value
+                result_name = u'§3.5 Flags and flag attributes'
+                fvlist = Result(BaseCheck.HIGH, isinstance(flag_values, np.ndarray), result_name)
+                if not fvlist.value:
+                    fvlist.msgs = [u'flag_values must be a list']
+                    # convert to an array so the remaining checks can be applied
+                    flag_values = np.array([flag_values])
+                ret_val.append(fvlist)
+
+                # 1) flags_values attribute must have same type as variable to which it is attached
                 fvr = Result(BaseCheck.HIGH, flag_values.dtype == v.dtype, name=u'§3.5 Flags and flag attributes')
                 if not fvr.value:
                     fvr.msgs = [u'flag_values attr does not have same type as var (fv: %s, v: %s)' % (flag_values.dtype, v.dtype)]
@@ -744,14 +753,6 @@ class CFBaseCheck(BaseCheck):
                     fmr.msgs = [u'flag_meanings must be present']
 
                 ret_val.append(fmr)
-
-                # flag_values must be a list (array), not just a single value
-                result_name = u'§3.5 Flags and flag attributes'
-                fvlist = Result(BaseCheck.HIGH, not np.isscalar(flag_values), result_name)
-                if not fvlist.value:
-                    fvlist.msgs = [u'flag_values must be a list']
-                    # convert to an array so the remaining checks can be applied
-                    flag_values = np.array([flag_values])
 
                 # 8) flag_values attribute values must be mutually exclusive
                 fvset = set(flag_values)
