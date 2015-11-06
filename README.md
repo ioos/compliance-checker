@@ -32,7 +32,7 @@ The compliance-checker can work against local files (.nc files, .xml files of SO
 > **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPenDAP URL, please be sure the size is reasonable!
 
 ```
-usage: cchecker.py [-h] [--test {gliderdac,acdd,cf,ioos}]
+usage: compliance-checker [-h] [--test {gliderdac,acdd,cf,ioos}]
                    [--criteria [{lenient,normal,strict}]] [--verbose]
                    [-f {stdout,html}] [-o OUTPUT]
                    dataset_location [dataset_location ...]
