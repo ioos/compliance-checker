@@ -530,14 +530,14 @@ class CFBaseCheck(BaseCheck):
             units = getattr(v, u'units', None)
 
             # 1) "units" attribute must be present
-            presence = Result(BaseCheck.HIGH, units is not None, u'§3.1 Variables contain units')
+            presence = Result(BaseCheck.HIGH, units is not None, (u'§3.1 Variables contain units', k))
             if not presence.value:
                 presence.msgs = [u'units attribute is required for %s' % k]
                 ret_val.append(presence)
                 continue
 
             # 2) units attribute must be a string
-            astring = Result(BaseCheck.HIGH, isinstance(units, basestring), u'§3.1 units attribute is a string')
+            astring = Result(BaseCheck.HIGH, isinstance(units, basestring), (u'§3.1 units attribute is a string', k))
             if not astring.value:
                 astring.msgs = ["units not a string (%s) for %s" % (type(units), k)]
                 ret_val.append(astring)
@@ -545,7 +545,7 @@ class CFBaseCheck(BaseCheck):
 
             # now, units are present and string
             # 3) units are not deprecated
-            resdeprecated = Result(BaseCheck.LOW, not units in deprecated, u'§3.1 Variables contain valid units')
+            resdeprecated = Result(BaseCheck.LOW, not units in deprecated, (u'§3.1 Variables contain valid units', k))
             if not resdeprecated.value:
                 resdeprecated.msgs = [u'units (%s) is deprecated for %s' % (units, k)]
                 ret_val.append(resdeprecated)
@@ -553,7 +553,7 @@ class CFBaseCheck(BaseCheck):
 
             # 4) units are known
 
-            knownu = Result(BaseCheck.HIGH, units_known(units), u'§3.1 Variables contain valid CF Units')
+            knownu = Result(BaseCheck.HIGH, units_known(units), (u'§3.1 Variables contain valid CF Units', k))
             if not knownu.value:
                 knownu.msgs = [u'unknown units type (%s) for %s' % (units, k)]
                 ret_val.append(knownu)
@@ -598,7 +598,7 @@ class CFBaseCheck(BaseCheck):
                     valid = False
                     msgs = [u'The unit for variable %s in of type None.'%name]
 
-                ret_val.append(Result(BaseCheck.HIGH, valid, u'§3.1 Variables contain valid units for the standard_name', msgs))
+                ret_val.append(Result(BaseCheck.HIGH, valid, (u'§3.1 Variables contain valid units for the standard_name', k), msgs))
 
             # 6) cell methods @TODO -> Isnt this in the check_cell_methods section?
             #if hasattr(v, 'cell_methods'):
@@ -641,7 +641,7 @@ class CFBaseCheck(BaseCheck):
             if not in_table and not in_exception:
                 msgs.append("The standard name '%s' is not in standard name table" % std_name)
 
-            ret_val.append(Result(BaseCheck.HIGH, is_str and in_table, u'§3.3 Standard Names', msgs))
+            ret_val.append(Result(BaseCheck.HIGH, is_str and in_table, (u'§3.3 Standard Names', k), msgs))
 
             # 2) optional - if modifiers, should be in table
             if std_name_modifier:
@@ -654,7 +654,7 @@ class CFBaseCheck(BaseCheck):
                 if not std_name_modifier in allowed:
                     msgs.append("modifier (%s) not allowed" % std_name_modifier)
 
-                ret_val.append(Result(BaseCheck.HIGH, std_name_modifier in allowed, u'§3.3 Standard Names', msgs))
+                ret_val.append(Result(BaseCheck.HIGH, std_name_modifier in allowed, (u'§3.3 Standard Names', k), msgs))
 
         return ret_val
 
@@ -730,9 +730,10 @@ class CFBaseCheck(BaseCheck):
             if not (flag_values is not None or flag_masks is not None):
                 continue
 
+            result_name = (u'§3.5 Flags and flag attributes', k)
+
             if flag_values is not None:
                 # flag_values must be a list (array), not just a single value
-                result_name = u'§3.5 Flags and flag attributes'
                 fvlist = Result(BaseCheck.HIGH, isinstance(flag_values, np.ndarray), result_name)
                 if not fvlist.value:
                     fvlist.msgs = [u'flag_values must be a list']
@@ -741,14 +742,14 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(fvlist)
 
                 # 1) flags_values attribute must have same type as variable to which it is attached
-                fvr = Result(BaseCheck.HIGH, flag_values.dtype == v.dtype, name=u'§3.5 Flags and flag attributes')
+                fvr = Result(BaseCheck.HIGH, flag_values.dtype == v.dtype, result_name)
                 if not fvr.value:
                     fvr.msgs = [u'flag_values attr does not have same type as var (fv: %s, v: %s)' % (flag_values.dtype, v.dtype)]
 
                 ret_val.append(fvr)
 
                 # 2) if flag_values, must have flag_meanings
-                fmr = Result(BaseCheck.HIGH, flag_meanings is not None, name=u'§3.5 Flags and flag attributes')
+                fmr = Result(BaseCheck.HIGH, flag_meanings is not None, result_name)
                 if not fmr.value:
                     fmr.msgs = [u'flag_meanings must be present']
 
@@ -756,7 +757,7 @@ class CFBaseCheck(BaseCheck):
 
                 # 8) flag_values attribute values must be mutually exclusive
                 fvset = set(flag_values)
-                fvsr = Result(BaseCheck.HIGH, len(fvset) == len(flag_values), u'§3.5 Flags and flag attributes')
+                fvsr = Result(BaseCheck.HIGH, len(fvset) == len(flag_values), result_name)
                 if not fvsr.value:
                     fvsr.msgs = [u'repeated items in flag_values']
 
@@ -764,7 +765,7 @@ class CFBaseCheck(BaseCheck):
 
             # 3) type of flag_meanings is a string, blank separated list of words
             if flag_meanings is not None:
-                fmt = Result(BaseCheck.HIGH, isinstance(flag_meanings, basestring), name=u'§3.5 Flags and flag attributes')
+                fmt = Result(BaseCheck.HIGH, isinstance(flag_meanings, basestring), result_name)
                 if not fmt.value:
                     fmt.msgs = [u'flag_meanings must be a string']
 
@@ -782,13 +783,13 @@ class CFBaseCheck(BaseCheck):
                     else:
                         msgs.append("flag_meaning %s of var %s is incorrectly named" % (fm, k))
 
-                ret_val.append(Result(BaseCheck.HIGH, (ok_count, len(meanings)), name=u'§3.5 Flags and flag attributes', msgs=msgs))
+                ret_val.append(Result(BaseCheck.HIGH, (ok_count, len(meanings)), result_name, msgs=msgs))
 
                 # now that we've split meanings up, check length vs values/masks
 
                 # 4) number of flag_values must equal number of meanings
                 if flag_values is not None:
-                    fvfmr = Result(BaseCheck.HIGH, len(flag_values) == len(meanings), u'§3.5 Flags and flag attributes')
+                    fvfmr = Result(BaseCheck.HIGH, len(flag_values) == len(meanings), result_name)
                     if not fvfmr.value:
                         fvfmr.msgs = [u'flag_values length (%d) not equal to flag_meanings length (%d)' % (len(flag_values), len(meanings))]
 
@@ -796,7 +797,7 @@ class CFBaseCheck(BaseCheck):
 
                 # 5) number of flag_masks must equal number of meanings
                 if flag_masks is not None:
-                    fmfmr = Result(BaseCheck.HIGH, len(flag_masks) == len(meanings), u'§3.5 Flags and flag attributes')
+                    fmfmr = Result(BaseCheck.HIGH, len(flag_masks) == len(meanings), result_name)
                     if not fmfmr.value:
                         fmfmr.msgs = [u'flag_masks length (%d) not equal to flag_meanings length (%d)' % (len(flag_masks), len(meanings))]
 
@@ -823,7 +824,7 @@ class CFBaseCheck(BaseCheck):
                 else:
                     msgs.append("variable not of appropriate type to have flag_masks (%s)" % (v.dtype))
 
-                ret_val.append(Result(BaseCheck.HIGH, (ok_count, 2), u'§3.5 Flags and flag attributes', msgs=msgs))
+                ret_val.append(Result(BaseCheck.HIGH, (ok_count, 2), result_name, msgs=msgs))
 
                 # 7) the flag_masks attribute values must be non-zero
                 zeros = [x for x in flag_masks if x == 0]
@@ -831,14 +832,14 @@ class CFBaseCheck(BaseCheck):
                 if len(zeros):
                     msgs = [u'flag_masks attribute values contains a zero']
 
-                ret_val.append(Result(BaseCheck.HIGH, len(zeros) != 0, u'§3.5 Flags and flag attributes', msgs=msgs))
+                ret_val.append(Result(BaseCheck.HIGH, len(zeros) != 0, result_name, msgs=msgs))
 
             # 9) when both defined, boolean AND of each entry in flag_values with corresponding entry in flag_masks
             #    should equal the flags_value entry
             if flag_values is not None and flag_masks is not None:
                 allv = map(lambda a, b: a & b == a, zip(flag_values, flag_masks))
 
-                allvr = Result(BaseCheck.MEDIUM, all(allv), u'§3.5 Flags and flag attributes')
+                allvr = Result(BaseCheck.MEDIUM, all(allv), result_name)
                 if not allvr.value:
                     allvr.msgs = ["flag masks and flag values combined don't equal flag value"]
 
