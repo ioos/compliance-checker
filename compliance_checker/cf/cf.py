@@ -117,6 +117,7 @@ class CFBaseCheck(BaseCheck):
         self._coord_vars     = defaultdict(list)
         self._ancillary_vars = defaultdict(list)
         self._clim_vars      = defaultdict(list)
+        self._metadata_vars  = defaultdict(list)
         self._boundary_vars  = defaultdict(dict)
 
         self._std_names      = StandardNameTable(u'cf-standard-name-table.xml')
@@ -132,6 +133,7 @@ class CFBaseCheck(BaseCheck):
         self._find_ancillary_vars(ds)
         self._find_clim_vars(ds)
         self._find_boundary_vars(ds)
+        self._find_metadata_vars(ds)
 
     def _find_coord_vars(self, ds, refresh=False):
         """
@@ -181,6 +183,32 @@ class CFBaseCheck(BaseCheck):
 
         return self._ancillary_vars
 
+    def _find_metadata_vars(self, ds, refresh=False):
+        '''
+        Finds all variables that could be considered purely metadata
+
+        Returns a list of netCDF variable instances for those that are likely metadata variables
+        '''
+        if ds in self._metadata_vars and not refresh:
+            return self._metadata_vars[ds]
+
+        for name, var in ds.dataset.variables.iteritems():
+
+            if name in self._find_ancillary_vars(ds) or name in self._find_coord_vars(ds):
+                continue
+
+            if name in (u'platform_name', u'station_name', u'instrument_name', u'station_id', u'platform_id', u'surface_altitude'):
+                self._metadata_vars[ds].append(var)
+
+            elif getattr(var, 'cf_role', None) == 'timeseries_id':
+                self._metadata_vars[ds].append(var)
+
+            elif len(var.dimensions) == 0:
+                self._metadata_vars[ds].append(var)
+
+        return self._metadata_vars[ds]
+
+
     def _find_data_vars(self, ds):
         """
         Finds all variables that could be considered Data variables.
@@ -190,13 +218,25 @@ class CFBaseCheck(BaseCheck):
         Excludes variables that are:
             - coordinate variables
             - ancillary variables
-            - no dimensions
+            - dimensionless
+            - metadata variables
 
         Results are NOT CACHED.
         """
-        return {k:v for k, v in ds.dataset.variables.iteritems() if v not in self._find_coord_vars(ds) \
-                                                                  and v not in self._find_ancillary_vars(ds) \
-                                                                  and v.dimensions}
+        candidates = {}
+        for var_name, variable in ds.dataset.variables.iteritems():
+
+            if variable in self._find_coord_vars(ds):
+                continue
+            if variable in self._find_ancillary_vars(ds):
+                continue
+            if variable in self._find_metadata_vars(ds):
+                continue
+            if not variable.dimensions:
+                continue
+            candidates[var_name] = variable
+
+        return candidates
 
     def _find_clim_vars(self, ds, refresh=False):
         """
@@ -2510,17 +2550,28 @@ class CFBaseCheck(BaseCheck):
         feature_tuple_list.append(feature_tuple)
 
 
-        data_vars = [each for name,each in ds.dataset.variables.iteritems() if hasattr(each,u'coordinates')]
-        
-        for each in data_vars:
-            this_feature_tuple = tuple([ds.dataset.variables[every].ndim for every in each.dimensions])
-            feature_tuple_list.append(this_feature_tuple)
-                    
+        data_vars = self._find_data_vars(ds)
 
-        valid = all(x == feature_tuple_list[0] for x in feature_tuple_list)
+        feature_map = {}
+        for var_name, variable in data_vars.iteritems():
+            feature = variable.dimensions
+            feature_map[var_name] = feature
+
+
+        features = feature_map.values()
+        valid = all((features[0] == feature for feature in features))
+        reasoning = []
+        if not valid:
+            reasoning.append("At least one of the variables has a different feature type than the rest of the variables.")
+            feature_mess = []
+            for var_name, feature in feature_map.iteritems():
+                feature_mess.append("%s(%s)" % (var_name, ', '.join(feature) ))
+            reasoning.append(' '.join(feature_mess))
+
+
 
     
-        return Result(BaseCheck.HIGH, valid, name=u'§9.1 Feature Types')
+        return Result(BaseCheck.HIGH, valid, u'§9.1 Feature Types are all the same', reasoning)
         
 
 
