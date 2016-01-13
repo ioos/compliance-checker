@@ -9,7 +9,7 @@ It currently supports the following sources and standards:
 | Standard                                                                                             | Source                                                            | .nc/OPeNDAP | SOS                             |
 | ---------------------------------------------------------------------------------------------------- | -----------                                                       | ------      | ------------------------------- |
 | [ACDD (1.1)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_%28ACDD%29)   | Built-in                                                          | X           | -                               |
-| [CF (1.6)](http://cfconventions.org/Data/cf-convetions/cf-conventions-1.6/build/cf-conventions.html) | Built-in                                                          | X           | -                               |
+| [CF (1.6)](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html)                       | Built-in                                                          | X           | -                               |
 | IOOS Asset Concept                                                                                   | Built-in                                                          | -           | GetCapabilities, DescribeSensor |
 | [Glider DAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2)              | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | X           | -                               |
 
