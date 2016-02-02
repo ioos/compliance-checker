@@ -1,8 +1,6 @@
 from compliance_checker.glider_dac import GliderCheck
 from pkg_resources import resource_filename
 from netCDF4 import Dataset
-from compliance_checker.base import DSPair
-from wicken.netcdf_dogma import NetCDFDogma
 import unittest
 
 static_files = {
@@ -29,17 +27,17 @@ class TestGliderCheck(unittest.TestCase):
             return "%s ( %s )" % (name[-1], '.'.join(name[:-2]) + ":" + '.'.join(name[-2:]))
     __str__ = __repr__
     
-    def get_pair(self, nc_dataset):
+    def load_dataset(self, nc_dataset):
         '''
         Return a pairwise object for the dataset
         '''
         print nc_dataset
-        if isinstance(nc_dataset, basestring):
-            nc_dataset = Dataset(nc_dataset, 'r')
-            self.addCleanup(nc_dataset.close)
-        dogma = NetCDFDogma('nc', self.check.beliefs(), nc_dataset)
-        pair = DSPair(nc_dataset, dogma)
-        return pair
+        if not isinstance(nc_dataset, basestring):
+            raise ValueError("nc_dataset must be string")
+
+        nc_dataset = Dataset(nc_dataset, 'r')
+        self.addCleanup(nc_dataset.close)
+        return nc_dataset
     
     def setUp(self):
         self.check = GliderCheck()
@@ -48,7 +46,7 @@ class TestGliderCheck(unittest.TestCase):
         '''
         Checks that a file with the proper lat and lon do work
         '''
-        dataset = self.get_pair(static_files['glider_std'])
+        dataset = self.load_dataset(static_files['glider_std'])
         result = self.check.check_locations(dataset)
         self.assertTrue(result.value)
 
@@ -56,7 +54,7 @@ class TestGliderCheck(unittest.TestCase):
         '''
         Ensures the checks fail for location
         '''
-        dataset = self.get_pair(static_files['bad_location'])
+        dataset = self.load_dataset(static_files['bad_location'])
         result = self.check.check_locations(dataset)
         self.assertEquals(result.value, (0,1))
 
@@ -64,7 +62,7 @@ class TestGliderCheck(unittest.TestCase):
         '''
         Ensures the ctd checks fail for temperature
         '''
-        dataset = self.get_pair(static_files['bad_qc'])
+        dataset = self.load_dataset(static_files['bad_qc'])
         result = self.check.check_ctd_variables(dataset)
         self.assertEquals(result.value, (55,56))
     
@@ -72,7 +70,7 @@ class TestGliderCheck(unittest.TestCase):
         '''
         Ensures the ctd checks for the correct file
         '''
-        dataset = self.get_pair(static_files['glider_std'])
+        dataset = self.load_dataset(static_files['glider_std'])
         result = self.check.check_ctd_variables(dataset)
         self.assertEquals(result.value, (56,56))
 
@@ -80,7 +78,7 @@ class TestGliderCheck(unittest.TestCase):
         '''
         Tests that the global checks fail where appropriate
         '''
-        dataset = self.get_pair(static_files['bad_qc'])
+        dataset = self.load_dataset(static_files['bad_qc'])
         result = self.check.check_global_attributes(dataset)
         self.assertEquals(result.value, (41,64))
 
@@ -88,7 +86,7 @@ class TestGliderCheck(unittest.TestCase):
         '''
         Tests that the global checks work
         '''
-        dataset = self.get_pair(static_files['glider_std'])
+        dataset = self.load_dataset(static_files['glider_std'])
         result = self.check.check_global_attributes(dataset)
         self.assertEquals(result.value, (64,64))
 
@@ -97,7 +95,7 @@ class TestGliderCheck(unittest.TestCase):
         '''
         Tests that empty attributes fail
         '''
-        dataset = self.get_pair(static_files['bad_metadata'])
+        dataset = self.load_dataset(static_files['bad_metadata'])
         result = self.check.check_global_attributes(dataset)
         self.assertEquals(result.value, (41,64))
 
@@ -106,10 +104,10 @@ class TestGliderCheck(unittest.TestCase):
         Tests that the standard names succeed/fail
         '''
 
-        dataset = self.get_pair(static_files['bad_metadata'])
+        dataset = self.load_dataset(static_files['bad_metadata'])
         result = self.check.check_standard_names(dataset)
         self.assertEquals(result.value, (0, 1))
         
-        dataset = self.get_pair(static_files['glider_std'])
+        dataset = self.load_dataset(static_files['glider_std'])
         result = self.check.check_standard_names(dataset)
         self.assertEquals(result.value, (1, 1))

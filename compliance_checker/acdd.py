@@ -114,13 +114,13 @@ class ACDDBaseCheck(BaseCheck):
     def check_var_long_name(self, ds):
         results = []
         # We don't check certain container variables for units
-        platform_variable_name = getattr(ds.dataset, 'platform', None)
-        for variable in ds.dataset.variables:
+        platform_variable_name = getattr(ds, 'platform', None)
+        for variable in ds.variables:
             msgs = []
             if variable in ('crs', platform_variable_name):
                 continue
             # If the variable is a QC flag, we don't need units
-            long_name = getattr(ds.dataset.variables[variable], 'long_name', None)
+            long_name = getattr(ds.variables[variable], 'long_name', None)
             check = long_name is not None
             if not check:
                 msgs.append("Var %s missing attr long_name" % variable)
@@ -132,13 +132,13 @@ class ACDDBaseCheck(BaseCheck):
     def check_var_standard_name(self, ds):
         results = []
         # We don't check certain container variables for units
-        platform_variable_name = getattr(ds.dataset, 'platform', None)
-        for variable in ds.dataset.variables:
+        platform_variable_name = getattr(ds, 'platform', None)
+        for variable in ds.variables:
             msgs = []
             if variable in ('crs', platform_variable_name):
                 continue
             # If the variable is a QC flag, we don't need units
-            std_name = getattr(ds.dataset.variables[variable], 'standard_name', None)
+            std_name = getattr(ds.variables[variable], 'standard_name', None)
             check = std_name is not None
             if not check:
                 msgs.append("Var %s missing attr standard_name" % variable)
@@ -150,17 +150,17 @@ class ACDDBaseCheck(BaseCheck):
     def check_var_units(self, ds):
         results = []
         # We don't check certain container variables for units
-        platform_variable_name = getattr(ds.dataset, 'platform', None)
-        for variable in ds.dataset.variables:
+        platform_variable_name = getattr(ds, 'platform', None)
+        for variable in ds.variables:
             msgs = []
             if variable in ('crs', platform_variable_name):
                 continue
             # If the variable is a QC flag, we don't need units
-            std_name = getattr(ds.dataset.variables[variable], 'standard_name', None)
+            std_name = getattr(ds.variables[variable], 'standard_name', None)
             if std_name is not None:
                 if 'status_flag' in std_name:
                     continue
-            check = hasattr(ds.dataset.variables[variable], 'units')
+            check = hasattr(ds.variables[variable], 'units')
             if not check:
                 msgs.append("Var %s missing attr units" % variable)
             results.append(Result(BaseCheck.HIGH, check, (variable, "var_units"), msgs))
@@ -177,15 +177,15 @@ class ACDDBaseCheck(BaseCheck):
         """
         Check that the values of geospatial_lat_min/geospatial_lat_max approximately match the data.
         """
-        if not (hasattr(ds.dataset, 'geospatial_lat_min') and hasattr(ds.dataset, 'geospatial_lat_max')):
+        if not (hasattr(ds, 'geospatial_lat_min') and hasattr(ds, 'geospatial_lat_max')):
             return
 
-        lat_min = ds.dataset.geospatial_lat_min
-        lat_max = ds.dataset.geospatial_lat_max
+        lat_min = ds.geospatial_lat_min
+        lat_max = ds.geospatial_lat_max
 
         # identify lat var(s) as per CF 4.1
         lat_vars = {}       # var -> number of criteria passed
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
 
             # must have units
             if not hasattr(var, 'units'):
@@ -240,15 +240,15 @@ class ACDDBaseCheck(BaseCheck):
         """
         Check that the values of geospatial_lon_min/geospatial_lon_max approximately match the data.
         """
-        if not (hasattr(ds.dataset, 'geospatial_lon_min') and hasattr(ds.dataset, 'geospatial_lon_max')):
+        if not (hasattr(ds, 'geospatial_lon_min') and hasattr(ds, 'geospatial_lon_max')):
             return
 
-        lon_min = ds.dataset.geospatial_lon_min
-        lon_max = ds.dataset.geospatial_lon_max
+        lon_min = ds.geospatial_lon_min
+        lon_max = ds.geospatial_lon_max
 
         # identify lon var(s) as per CF 4.2
         lon_vars = {}       # var -> number of criteria passed
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
 
             # must have units
             if not hasattr(var, 'units'):
@@ -303,14 +303,14 @@ class ACDDBaseCheck(BaseCheck):
         """
         Check that the values of geospatial_vertical_min/geospatial_vertical_max approximately match the data.
         """
-        if not (hasattr(ds.dataset, 'geospatial_vertical_min') and hasattr(ds.dataset, 'geospatial_vertical_max')):
+        if not (hasattr(ds, 'geospatial_vertical_min') and hasattr(ds, 'geospatial_vertical_max')):
             return
 
-        vert_min = ds.dataset.geospatial_vertical_min
-        vert_max = ds.dataset.geospatial_vertical_max
+        vert_min = ds.geospatial_vertical_min
+        vert_max = ds.geospatial_vertical_max
 
         # identify vertical vars as per CF 4.3
-        v_vars = [var for name, var in ds.dataset.variables.iteritems() if is_vertical_coordinate(name, var)]
+        v_vars = [var for name, var in ds.variables.iteritems() if is_vertical_coordinate(name, var)]
 
         if len(v_vars) == 0:
             return Result(BaseCheck.MEDIUM,
@@ -342,15 +342,15 @@ class ACDDBaseCheck(BaseCheck):
         """
         Check that the values of time_coverage_start/time_coverage_end approximately match the data.
         """
-        if not (hasattr(ds.dataset, 'time_coverage_start') and hasattr(ds.dataset, 'time_coverage_end')):
+        if not (hasattr(ds, 'time_coverage_start') and hasattr(ds, 'time_coverage_end')):
             return
 
         epoch = parse_dt("1970-01-01 00:00:00 UTC")
-        t_min = (parse_dt(ds.dataset.time_coverage_start) - epoch).total_seconds()
-        t_max = (parse_dt(ds.dataset.time_coverage_end) - epoch).total_seconds()
+        t_min = (parse_dt(ds.time_coverage_start) - epoch).total_seconds()
+        t_max = (parse_dt(ds.time_coverage_end) - epoch).total_seconds()
 
         # identify t vars as per CF 4.4
-        t_vars = [var for name, var in ds.dataset.variables.iteritems() if is_time_variable(name, var)]
+        t_vars = [var for name, var in ds.variables.iteritems() if is_time_variable(name, var)]
 
         if len(t_vars) == 0:
             return Result(BaseCheck.MEDIUM,
@@ -378,11 +378,5 @@ class ACDDBaseCheck(BaseCheck):
                       msgs)
 
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
-    @classmethod
-    def beliefs(cls):
-        f = get_data("compliance_checker", "data/acdd-ncml.json")
-        beliefs = json.loads(f)
-
-        # strip out metadata
-        return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
+    pass
 

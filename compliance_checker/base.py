@@ -8,14 +8,12 @@ from functools import wraps
 import collections
 import pprint
 
-from wicken.netcdf_dogma import NetCDFDogma
-from wicken.xml_dogma import MultipleXmlDogma
-from wicken.exceptions import DogmaGetterSetterException
+#from wicken.xml_dogma import MultipleXmlDogma
+#from wicken.exceptions import DogmaGetterSetterException
 from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
-from petulantbear.netcdf_etree import namespaces as pb_namespaces
 
 def get_namespaces():
     n = Namespaces()
@@ -23,28 +21,12 @@ def get_namespaces():
     ns["ows"] = n.get_namespace("ows110")
     return ns
 
-class DSPair(object):
-    """
-    Structure to hold a dataset/SOS instance and dogma pairing.
-
-    Passed to each check method.
-    """
-    dataset = None
-    dogma   = None
-    def __init__(self, ds, dogma):
-        self.dataset = ds
-        self.dogma = dogma
-
 class BaseCheck(object):
     HIGH   = 3
     MEDIUM = 2
     LOW    = 1
 
     supported_ds = []
-
-    @classmethod
-    def beliefs(cls):
-        raise NotImplementedError("Define this in your derived Checker class")
 
     def setup(self, ds):
         """
@@ -54,28 +36,29 @@ class BaseCheck(object):
         """
         pass
 
-    def load_datapair(self, ds):
-        """
-        Returns a DSPair object with the passed ds as one side and the proper Dogma object on the other.
-
-        Override this in your derived class.
-        """
-        raise NotImplementedError("Define this in your derived checker class")
-
 class BaseNCCheck(object):
     """
     Base Class for NetCDF Dataset supporting Check Suites.
     """
     supported_ds = [Dataset]
 
-    def load_datapair(self, ds):
-        # allow ncml as well as nc prefixes
-        namespaces         = pb_namespaces.copy()
-        namespaces['nc']   = namespaces['ncml']
-        namespaces['ncml'] = namespaces['ncml']
+    @classmethod
+    def std_check_in(cls, dataset, name, allowed_vals):
+        """
+        Returns 0 if attr not present, 1 if present but not in correct value, 2 if good
+        """
+        if not name in dataset.ncattrs():
+            return 0
 
-        data_object = NetCDFDogma('ds', self.beliefs(), ds, namespaces=namespaces)
-        return DSPair(ds, data_object)
+        ret_val = 1
+        if dataset.getncattr(name) in allowed_vals:
+            ret_val += 1
+
+        return ret_val
+
+    @classmethod
+    def std_check(cls, dataset, name):
+        return name in dataset.ncattrs()
 
 class BaseSOSGCCheck(object):
     """
@@ -145,25 +128,25 @@ class Result(object):
         }
 
 
-def std_check_in(dataset_dogma, name, allowed_vals):
+def std_check_in(dataset, name, allowed_vals):
     """
     Returns 0 if attr not present, 1 if present but not in correct value, 2 if good
     """
-    if not hasattr(dataset_dogma, name):
+    if not hasattr(dataset, name):
         return 0
 
     ret_val = 1
     try:
-        if getattr(dataset_dogma, name) in allowed_vals:
+        if getattr(dataset, name) in allowed_vals:
             ret_val += 1
     except DogmaGetterSetterException:
         pass
 
     return ret_val
 
-def std_check(dataset_dogma, name):
-    if hasattr(dataset_dogma, name):
-        getattr(dataset_dogma, name)
+def std_check(dataset, name):
+    if hasattr(dataset, name):
+        getattr(dataset, name)
         return True
 
     return False
@@ -179,7 +162,7 @@ def check_has(priority=BaseCheck.HIGH):
                 msgs = []
                 if isinstance(l, tuple):
                     name, allowed = l
-                    res = std_check_in(ds.dogma, name, allowed)
+                    res = s.std_check_in(ds, name, allowed)
                     if res == 0:
                         msgs.append("Attr %s not present" % name)
                     elif res == 1:
@@ -188,7 +171,7 @@ def check_has(priority=BaseCheck.HIGH):
                     ret_val.append(Result(priority, (res, 2), name, msgs))
 
                 else:
-                    res = std_check(ds.dogma, l)
+                    res = s.std_check(ds, l)
                     if not res:
                         msgs = ["Attr %s not present" % l]
                     ret_val.append(Result(priority, res, l, msgs))
