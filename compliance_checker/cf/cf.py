@@ -192,7 +192,7 @@ class CFBaseCheck(BaseCheck):
         if ds in self._metadata_vars and not refresh:
             return self._metadata_vars[ds]
 
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
 
             if name in self._find_ancillary_vars(ds) or name in self._find_coord_vars(ds):
                 continue
@@ -2920,10 +2920,10 @@ class CFBaseCheck(BaseCheck):
 
     def _find_container_variables(self, ds):
         container_vars = []
-        platform_name = getattr(ds.dataset, u'platform', None)
+        platform_name = getattr(ds, u'platform', None)
         if platform_name is not None:
             container_vars.append(platform_name)
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             if k in (u'crs', u'instrument', u'station'):
                 if not v.shape: # Empty dimension
                     container_vars.append(k)

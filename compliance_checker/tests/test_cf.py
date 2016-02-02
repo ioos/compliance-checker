@@ -277,7 +277,7 @@ class TestCF(unittest.TestCase):
 
 
     def test_check_flags(self):
-        dataset = self.get_pair(static_files['self_referencing'])
+        dataset = self.load_dataset(static_files['self_referencing'])
         results = self.cf.check_flags(dataset)
         scored, out_of, messages = self.get_results(results)
 
@@ -574,7 +574,7 @@ class TestCF(unittest.TestCase):
         '''
         This test captures a check where a coordinate has circular references
         '''
-        dataset = self.get_pair(static_files['self_referencing'])
+        dataset = self.load_dataset(static_files['self_referencing'])
         results = self.cf.check_two_dimensional(dataset)
 
         scored, out_of, messages = self.get_results(results)
@@ -785,7 +785,7 @@ class TestCF(unittest.TestCase):
         '''
         Ensure that container variables are not checked for units but geophysical variables are
         '''
-        dataset = self.get_pair(static_files['units_check'])
+        dataset = self.load_dataset(static_files['units_check'])
         results = self.cf.check_units(dataset)
 
         # We don't keep track of the variables names for checks that passed, so
@@ -806,7 +806,7 @@ class TestCF(unittest.TestCase):
         suite.run(dataset, 'cf')
 
     def test_time_units(self):
-        dataset = self.get_pair(static_files['time_units'])
+        dataset = self.load_dataset(static_files['time_units'])
         results = self.cf.check_units(dataset)
         scored, out_of, messages = self.get_results(results)
         assert u'units are days since 1970-01-01, standard_name units should be K' in messages
