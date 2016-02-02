@@ -4,6 +4,9 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, Base
 from pkgutil import get_data
 
 class IOOSBaseCheck(BaseCheck):
+    register_checker = True
+    name = 'ioos'
+
     @classmethod
     def _has_attr(cls, ds, attr, concept_name, priority=BaseCheck.HIGH):
         """

@@ -8,17 +8,33 @@ import itertools
 import json
 from netCDF4 import Dataset
 from lxml import etree as ET
-from compliance_checker.base import BaseCheck, fix_return_value, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, fix_return_value, Result
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from urlparse import urlparse
 from datetime import datetime
 import requests
 import textwrap
+import pkg_resources
 
 class CheckSuite(object):
 
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
+
+    @classmethod
+    def load_all_available_checkers(cls):
+        """
+        Helper method to retrieve all sub checker classes derived from various
+        base classes.
+        """
+        from pkg_resources import working_set
+        for x in working_set.iter_entry_points('compliance_checker.suites'):
+            try:
+                xl = x.load()
+
+                cls.checkers[xl.name] = xl
+            except Exception as e:
+                print >>sys.stderr, "Could not load", x, ":", e
 
     def _get_checks(self, checkclass):
         """
@@ -161,6 +177,10 @@ class CheckSuite(object):
         # into the all_priorities category and add up the point values
         for res in groups:
             if res.weight < limit:
+                continue
+            # If the result has 0 possible points, then it was not valid for
+            # this dataset and contains no meaningful information
+            if res.value[1] == 0:
                 continue
             aggregates['scored_points'] += res.value[0]
             aggregates['possible_points'] += res.value[1]
@@ -421,10 +441,10 @@ class CheckSuite(object):
         wrapper = textwrap.TextWrapper(initial_indent = '', width = 80, subsequent_indent = ' '*54)
         for res in grouped_sorted:
             if (res.value[0] != res.value[1]) and not res.msgs:
-                print '%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), ' ')
+                print '%-39s:%1s:%6s/%2s : %s' %(unicode(indent*'    '+res.name)[0:39], res.weight, unicode(res.value[0]), unicode(res.value[1]), ' ')
             
             if (res.value[0] != res.value[1]) and res.msgs:
-                print wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), str(", ".join(res.msgs))))
+                print wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(unicode(indent*'    '+res.name)[0:39], res.weight, unicode(res.value[0]), unicode(res.value[1]), unicode(", ".join(res.msgs))))
 
             if res.children:
                 self.reasoning_routine(res.children, indent+1, False)
@@ -528,8 +548,16 @@ class CheckSuite(object):
             Slices off first element (if list/tuple) of classification or just returns it if scalar.
             """
             if isinstance(r.name, tuple) or isinstance(r.name, list):
-                return r.name[0:1][0]
-            return r.name
+                if len(r.name) == 0:
+                    retval = ''
+                else:
+                    retval = r.name[0:1][0]
+            else:
+                retval = r.name
+            retval = retval.encode('ascii', 'ignore')
+            return retval
+        
+
 
         grouped = itertools.groupby(sorted(raw_scores, key=group_func), key=group_func)
 
