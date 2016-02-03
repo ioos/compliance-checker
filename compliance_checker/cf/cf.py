@@ -406,8 +406,11 @@ class CFBaseCheck(BaseCheck):
             # any nones should be before classified ones
             nones    = [i for i, x in enumerate(dclass) if x is None]
             nonnones = [i for i, x in enumerate(dclass) if x is not None]
-
-            if len(nones) and len(nonnones) and max(nones) > min(nonnones):
+            '''
+            Documenting for clarification:
+            This next line of code says "If there is a non-space-time dimension and there is a space time dimension and the location of the non-space-time is before the location of the space-time dimension, fail test"
+            '''
+            if len(nones) and len(nonnones) and max(nones) < min(nonnones):
                 fails.append("Variable %s has a non-space-time dimension after space-time-dimensions"%k)
 
             # classified ones should be in correct order
