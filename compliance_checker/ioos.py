@@ -1,7 +1,5 @@
-import json
 import itertools
 from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, score_group, Result
-from pkgutil import get_data
 
 class IOOSBaseCheck(BaseCheck):
     register_checker = True
@@ -21,14 +19,6 @@ class IOOSBaseCheck(BaseCheck):
         return Result(priority, val, concept_name, msgs)
 
 class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
-    # belefs
-    @classmethod
-    def beliefs(cls):
-        f = get_data("compliance_checker", "data/ioos-metamap-ncml.json")
-        beliefs = json.loads(f)
-
-        # strip out metadata
-        return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
 
     @classmethod
     def _has_var_attr(cls, dataset, vname, attr, concept_name, priority=BaseCheck.HIGH):
@@ -175,14 +165,6 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
         return Result(BaseCheck.LOW, (0, 0), 'Altitude Units', ["Dataset has no 'z' variable"])
 
 class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
-    # beliefs
-    @classmethod
-    def beliefs(cls):
-        f = get_data("compliance_checker", "data/ioos-metamap-sos-gc.json")
-        beliefs = json.loads(f)
-
-        # strip out metadata
-        return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
 
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
@@ -212,14 +194,6 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
         ]
 
 class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseCheck):
-    # beliefs
-    @classmethod
-    def beliefs(cls):
-        f = get_data("compliance_checker", "data/ioos-metamap-sos-ds.json")
-        beliefs = json.loads(f)
-
-        # strip out metadata
-        return {k:v for k,v in beliefs.iteritems() if not k.startswith("__")}
 
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
