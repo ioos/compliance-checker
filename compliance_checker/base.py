@@ -8,8 +8,6 @@ from functools import wraps
 import collections
 import pprint
 
-#from wicken.xml_dogma import MultipleXmlDogma
-#from wicken.exceptions import DogmaGetterSetterException
 from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
