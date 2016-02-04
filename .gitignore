@@ -4,4 +4,4 @@
 build
 dist
 compliance_checker.egg-info
-
+.cache

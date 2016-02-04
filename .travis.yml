@@ -14,7 +14,8 @@ before_install:
     - conda config --add channels ioos --force
     - travis_retry conda create --yes -n test --file requirements.txt $CONDA
     - travis_retry conda install --yes pytest
+    - travis_retry pip install pylama
     - source activate test
 
 script:
-    - python setup.py test
+    - py.test --pylama -s -rxs -v
