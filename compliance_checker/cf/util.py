@@ -169,7 +169,7 @@ def get_safe(dict_instance, keypath, default=None):
         return default
 
 
-class NCGraph:
+class NCGraph(object):
 
     def __init__(self, ds, name, nc_object, self_reference_variables, reference_map=None):
 
