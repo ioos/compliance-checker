@@ -9,6 +9,11 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 def print_exceptions(f):
     @wraps(f)
@@ -491,7 +496,7 @@ class CFBaseCheck(BaseCheck):
 
         for a in attrs:
             if hasattr(ds, a):
-                ret.append(Result(BaseCheck.HIGH, isinstance(getattr(ds, a), str), ('§2.6.2 Title/history global attributes', a)))
+                ret.append(Result(BaseCheck.HIGH, isinstance(getattr(ds, a), basestring), ('§2.6.2 Title/history global attributes', a)))
 
         return ret
 
@@ -512,7 +517,7 @@ class CFBaseCheck(BaseCheck):
             vattrs = v.ncattrs()
             for a in attrs:
                 if a in vattrs:
-                    ret.append(Result(BaseCheck.HIGH, isinstance(getattr(v, a), str), ('§2.6.2 Description of file contents', a)))
+                    ret.append(Result(BaseCheck.HIGH, isinstance(getattr(v, a), basestring), ('§2.6.2 Description of file contents', a)))
 
         return ret
 
@@ -805,7 +810,7 @@ class CFBaseCheck(BaseCheck):
 
             # 3) type of flag_meanings is a string, blank separated list of words
             if flag_meanings is not None:
-                fmt = Result(BaseCheck.HIGH, isinstance(flag_meanings, str), name='§3.5 Flags and flag attributes')
+                fmt = Result(BaseCheck.HIGH, isinstance(flag_meanings, basestring), name='§3.5 Flags and flag attributes')
                 if not fmt.value:
                     fmt.msgs = ['flag_meanings must be a string']
 
