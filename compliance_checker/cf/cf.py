@@ -590,7 +590,7 @@ class CFBaseCheck(BaseCheck):
 
             # now, units are present and string
             # 3) units are not deprecated
-            resdeprecated = Result(BaseCheck.LOW, not units in deprecated, '§3.1 Variables contain valid units')
+            resdeprecated = Result(BaseCheck.LOW, units not in deprecated, '§3.1 Variables contain valid units')
             if not resdeprecated.value:
                 resdeprecated.msgs = ['units (%s) is deprecated for %s' % (units, k)]
                 ret_val.append(resdeprecated)
@@ -613,7 +613,7 @@ class CFBaseCheck(BaseCheck):
 
             # if no standard name or cell_methods, nothing left to do
             if std_name is None and not hasattr(v, 'cell_methods'):
-                #ret_val.append(Result(BaseCheck.HIGH, True, ('units', k, 'ok')))
+                # ret_val.append(Result(BaseCheck.HIGH, True, ('units', k, 'ok')))
                 continue
 
             # 5) if a known std_name, use the units provided
@@ -621,7 +621,7 @@ class CFBaseCheck(BaseCheck):
 
                 std_units = self._std_names[std_name].canonical_units
 
-                #@TODO modifiers changes units
+                # @TODO modifiers changes units
                 msgs = []
                 valid = True
                 if units is not None:
@@ -990,7 +990,7 @@ class CFBaseCheck(BaseCheck):
 
                 ret_val.append(result)
 
-        #@TODO: Additional verifiable requirements
+        # @TODO: Additional verifiable requirements
 
         return ret_val
 
@@ -1510,9 +1510,9 @@ class CFBaseCheck(BaseCheck):
                     valid = False
 
             if len(g.coords) == 2 and valid:
-                #------------------------------------------------------------
+                # ------------------------------------------------------------
                 # Check all the dims are coordinate variables
-                #------------------------------------------------------------
+                # ------------------------------------------------------------
                 valid_dims = True
                 for dim in g.dims.keys():
                     if dim not in ds.variables:
@@ -1525,9 +1525,9 @@ class CFBaseCheck(BaseCheck):
                                 reasoning)
                 ret_val.append(result)
 
-                #------------------------------------------------------------
+                # ------------------------------------------------------------
                 # Check that the coordinates are correct
-                #------------------------------------------------------------
+                # ------------------------------------------------------------
                 valid_2d = True
                 reasoning = []
                 for cname, coord in g.coords.items():
@@ -1545,9 +1545,9 @@ class CFBaseCheck(BaseCheck):
                                 reasoning)
                 ret_val.append(result)
 
-                #------------------------------------------------------------
+                # ------------------------------------------------------------
                 # Can make lat/lon?
-                #------------------------------------------------------------
+                # ------------------------------------------------------------
 
                 lat_check = False
                 lon_check = False
