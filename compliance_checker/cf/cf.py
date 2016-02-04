@@ -543,12 +543,14 @@ class CFBaseCheck(BaseCheck):
         clim_vars = self._find_clim_vars(ds)
         boundary_vars = self._find_boundary_vars(ds).itervalues()
         container_vars = self._find_container_variables(ds)
+        metadata_vars = self._find_metadata_vars(ds)
 
         for k, v in ds.dataset.variables.iteritems():
 
             # skip climatological vars, boundary vars
             if v in clim_vars or \
                v in boundary_vars or \
+               v in metadata_vars or \
                k in container_vars:
                continue
 
