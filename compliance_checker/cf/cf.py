@@ -472,7 +472,7 @@ class CFBaseCheck(BaseCheck):
             conventions = re.split(',|\s+', getattr(ds.dataset, 'Conventions', ''))
             if any((c.strip() in valid_conventions for c in conventions)):
                 valid = True
-                reasoning = [u'Conventions field is "CF-1.x (x in 0-6)"']
+                reasoning = []
             else:
                 valid = False
                 reasoning = [u'Conventions field is not "CF-1.x (x in 0-6)"']
@@ -931,8 +931,6 @@ class CFBaseCheck(BaseCheck):
             # 2) only coordinate vars or auxiliary coordinate variable are allowed to have axis set
             if v in coord_vars or v in auxiliary_coordinate_vars:
                 acvr = Result(BaseCheck.HIGH, True, u'§4 Axis attributes and coordinate variables')
-                if v in auxiliary_coordinate_vars:
-                    acvr.msgs = ["%s is an auxiliary coordinate var" % k]
             else:
                 acvr = Result(BaseCheck.HIGH, False, u'§4 Axis attributes and coordinate variables')
                 acvr.msgs = [u'%s is not allowed to have an axis attr as it is not a coordinate var or auxiliary_coordinate_var' % k]
@@ -1154,13 +1152,13 @@ class CFBaseCheck(BaseCheck):
             if is_pressure or is_length:
                 result = Result(BaseCheck.HIGH, True,                     \
                             u'§4.3.1 Vertical dimension coordinates contain valid attributes', \
-                            [u'dimensional vertical coordinate is pressure or length'])
+                            [])
 
             # Temperature or Density are okay as well
             elif is_temp or is_density:
                 result = Result(BaseCheck.HIGH, True,                     \
                             u'§4.3.1 Vertical dimension coordinates contain valid attributes', \
-                            [u'dimensional vertical coordinate is temp or density'])
+                            [])
             else:
                 result = Result(BaseCheck.HIGH, False,                    \
                             u'§4.3.1 Vertical dimension coordinates contain valid attributes', \
