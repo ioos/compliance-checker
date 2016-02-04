@@ -212,7 +212,7 @@ class NCGraph:
     def get_dimension(self, dim):
         if dim in self.reference_map:
             return self.reference_map[dim]
-        NCGraph(self.ds, dim, self.ds.dimensions[dim], self.reference_variables, self.reference_map)
+        return NCGraph(self.ds, dim, self.ds.dimensions[dim], self.reference_variables, self.reference_map)
 
     def get_coordinate(self, coord):
         if coord not in self.ds.variables:
