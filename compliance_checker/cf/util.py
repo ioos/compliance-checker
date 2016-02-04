@@ -293,7 +293,7 @@ def units_convertible(units1, units2, reftimeistime=True):
         u2 = Unit(units2)
     except ValueError:
         return False
-    return u1.is_convertible(units2)
+    return u1.is_convertible(u2)
 
 
 def units_temporal(units):
