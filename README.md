@@ -472,6 +472,7 @@ https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e603
 - Dave Foster <dave@axiomdatascience.com>
 - Dan Maher <dmaher@asascience.com>
 - Luke Campbell <lcampbell@asascience.com>
+- [Kyle Wilcox](https://github.com/kwilcox) <kyle@axiomdatascience.com>
 
 And many more testers!    
 
