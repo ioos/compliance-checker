@@ -106,20 +106,17 @@ class Result(object):
         self.check_method = check_method
 
     def __repr__(self):
-        ret = "%s (*%s): %s" % (self.name, self.weight, self.value)
+        ret = '{} (*{}): {}'.format(self.name, self.weight, self.value)
 
         if len(self.msgs):
             if len(self.msgs) == 1:
-                ret += " (%s)" % self.msgs[0]
+                ret += ' ({})'.format(self.msgs[0])
             else:
-                ret += " (%d msgs)" % len(self.msgs)
+                ret += ' ({!d} msgs)'.format(len(self.msgs))
 
         if len(self.children):
-            ret += " (%d children)" % len(self.children)
-            ret += "\n" + pprint.pformat(self.children)
-        # BUG: Python 2.7 does not allow repr to return unicode strings so we
-        # have to coerce it into ascii.
-        ret = ret.encode('ascii', 'ignore')
+            ret += ' ({!d} children)'.format(len(self.children))
+            ret += '\n' + pprint.pformat(self.children)
         return ret
 
     def serialize(self):
