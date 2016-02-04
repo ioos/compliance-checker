@@ -1999,7 +1999,7 @@ class CFBaseCheck(BaseCheck):
                                     valid = True
                                 else:
                                     reasoning.append('The measure variable dimensions are not a set or subset of the cell_measure variable.')
-                                    valid == False
+                                    valid = False
 
                     result = Result(BaseCheck.MEDIUM,
                                     valid,
