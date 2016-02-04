@@ -287,7 +287,7 @@ class TestCF(unittest.TestCase):
         self.assertEqual(messages.count('flag_values attr does not have same type as var (fv: int8, v: int16)'), 6)
         self.assertEqual(messages.count('flag_values attr does not have same type as var (fv: <U1, v: int16)'), 1)
 
-    def test_check_units(self):
+    def test_check_bad_units(self):
 
         dataset = self.load_dataset(static_files['2dim'])
         result = self.cf.check_units(dataset)
@@ -764,7 +764,7 @@ class TestCF(unittest.TestCase):
         for each in results:
             self.assertFalse(each.value)
 
-    def test_check_units_2(self):
+    def test_check_units(self):
         '''
         Ensure that container variables are not checked for units but geophysical variables are
         '''
