@@ -9,8 +9,6 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
 
-from sets import Set
-
 
 def print_exceptions(f):
     @wraps(f)
@@ -571,7 +569,7 @@ class CFBaseCheck(BaseCheck):
             if hasattr(v, "cf_role"):
                 continue
 
-            units = getattr(v, 'units', None)
+            units = str(getattr(v, 'units', None))
 
             # 1) "units" attribute must be present
             presence = Result(BaseCheck.HIGH, units is not None, '§3.1 Variables contain units')
@@ -1485,7 +1483,7 @@ class CFBaseCheck(BaseCheck):
         reported_reference_variables = []
 
         for name, var in ds.variables.items():
-            self_reference_variables = Set()
+            self_reference_variables = set()
             g = NCGraph(ds, name, var, self_reference_variables)
 
             reasoning = []
@@ -1872,7 +1870,7 @@ class CFBaseCheck(BaseCheck):
 
         for name, var in ds.variables.items():
             if getattr(var, 'standard_name', '') == 'region':
-                if ''.join(var[:]).lower() in region_list:
+                if ''.join(var[:].astype(str)).lower() in region_list:
                     result = Result(BaseCheck.LOW,
                                     True,
                                     ('§6.1.1 Geographic region specified', name, 'geographic_region'),

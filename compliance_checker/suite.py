@@ -12,7 +12,10 @@ from lxml import etree as ET
 from compliance_checker.base import fix_return_value, Result
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
-from urllib.parse import urlparse
+try:
+    from urlparse import urlparse
+except:
+    from urllib.parse import urlparse
 from datetime import datetime
 import requests
 import textwrap
@@ -467,7 +470,9 @@ class CheckSuite(object):
                 # do a cheap imitation of libmagic
                 # http://stackoverflow.com/a/7392391/84732
                 textchars = ''.join(map(chr, [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))))
-                return bool(bytes.translate(None, textchars))
+                if sys.version_info >= (3, ):
+                    textchars = textchars.encode()
+                return bool(bts.translate(None, textchars))
 
             with open(ds_str, 'rb') as f:
                 first_chunk = f.read(1024)
@@ -544,7 +549,6 @@ class CheckSuite(object):
                     retval = r.name[0:1][0]
             else:
                 retval = r.name
-            retval = retval.encode('ascii', 'ignore')
             return retval
 
         grouped = itertools.groupby(sorted(raw_scores, key=group_func), key=group_func)

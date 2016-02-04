@@ -5,8 +5,7 @@ from dateutil.parser import parse as parse_dt
 from cf_units import Unit
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
-from compliance_checker.cf.cf import _possiblexunits, _possibleyunits
-from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate
+from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate, _possiblexunits, _possibleyunits
 
 
 class ACDDBaseCheck(BaseCheck):

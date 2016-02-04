@@ -1,11 +1,6 @@
 from __future__ import with_statement
-import sys
-
 from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
-
 from compliance_checker import __version__
-
 
 def readme():
     with open('README.md') as f:
