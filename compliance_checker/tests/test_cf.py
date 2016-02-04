@@ -3,8 +3,6 @@
 from compliance_checker.suite import CheckSuite
 from compliance_checker.cf import CFBaseCheck, BaseCheck, dimless_vertical_coordinates
 from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal
-from compliance_checker.base import DSPair
-from wicken.netcdf_dogma import NetCDFDogma
 from netCDF4 import Dataset
 from tempfile import gettempdir
 from pkg_resources import resource_filename
@@ -87,16 +85,16 @@ class TestCF(unittest.TestCase):
         self.addCleanup(nc.close)
         return nc
 
-    def get_pair(self, nc_dataset):
+    def load_dataset(self, nc_dataset):
         '''
-        Return a pairwise object for the dataset
+        Return a loaded NC Dataset for the given path
         '''
-        if isinstance(nc_dataset, basestring):
-            nc_dataset = Dataset(nc_dataset, 'r')
-            self.addCleanup(nc_dataset.close)
-        dogma = NetCDFDogma('nc', self.cf.beliefs(), nc_dataset)
-        pair = DSPair(nc_dataset, dogma)
-        return pair
+        if not isinstance(nc_dataset, basestring):
+            raise ValueError("nc_dataset should be a string")
+
+        nc_dataset = Dataset(nc_dataset, 'r')
+        self.addCleanup(nc_dataset.close)
+        return nc_dataset
 
     def get_results(self, results):
         '''
@@ -128,12 +126,12 @@ class TestCF(unittest.TestCase):
         """
         2.2 The netCDF data types char, byte, short, int, float or real, and double are all acceptable
         """
-        dataset = self.get_pair(static_files['rutgers'])
+        dataset = self.load_dataset(static_files['rutgers'])
         result = self.cf.check_data_types(dataset)
         self.assertTrue(result.value)
 
 
-        dpair = self.get_pair(static_files['bad_data_type'])
+        dpair = self.load_dataset(static_files['bad_data_type'])
         result = self.cf.check_data_types(dpair)
         assert result.value == (5, 6)
 
@@ -144,16 +142,16 @@ class TestCF(unittest.TestCase):
 
         Variable, dimension and attribute names should begin with a letter and be composed of letters, digits, and underscores.
         '''
-        dataset = self.get_pair(static_files['rutgers'])
+        dataset = self.load_dataset(static_files['rutgers'])
         result = self.cf.check_naming_conventions(dataset)
-        num_var = len(dataset.dataset.variables)
+        num_var = len(dataset.variables)
         
         expected = (num_var,) * 2
         self.assertEquals(result.value, expected)
 
-        dataset = self.get_pair(static_files['bad'])
+        dataset = self.load_dataset(static_files['bad'])
         result = self.cf.check_naming_conventions(dataset)
-        num_var = len(dataset.dataset.variables)
+        num_var = len(dataset.variables)
         expected = (num_var-1, num_var)
         self.assertEquals(result.value, expected)
         assert '_poor_dim' in result.msgs [0]
@@ -162,10 +160,10 @@ class TestCF(unittest.TestCase):
         """
         2.3 names should not be distinguished purely by case, i.e., if case is disregarded, no two names should be the same.
         """
-        dataset = self.get_pair(static_files['rutgers'])
+        dataset = self.load_dataset(static_files['rutgers'])
         result = self.cf.check_names_unique(dataset)
 
-        num_var = len(dataset.dataset.variables)
+        num_var = len(dataset.variables)
         expected = (num_var,) * 2
 
         self.assertEquals(result.value, expected)
@@ -177,7 +175,7 @@ class TestCF(unittest.TestCase):
         2.4 A variable may have any number of dimensions, including zero, and the dimensions must all have different names.
         """
 
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         result = self.cf.check_dimension_names(dataset)
         assert result.value == (5, 6)
 
@@ -188,7 +186,7 @@ class TestCF(unittest.TestCase):
         then X in the CDL definition corresponding to the file. All other dimensions should, whenever possible, be placed to the
         left of the spatiotemporal dimensions.
         """
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         result = self.cf.check_dimension_order(dataset)
         assert result.value == (11, 12)
 
@@ -197,7 +195,7 @@ class TestCF(unittest.TestCase):
         2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
         """
 
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         results = self.cf.check_fill_value_outside_valid_range(dataset)
         assert sum((result.value for result in results)) == 1
         assert len(results) == 2
@@ -207,17 +205,17 @@ class TestCF(unittest.TestCase):
         2.6.1 the NUG defined global attribute Conventions to the string value "CF-1.6"
         """
         # :Conventions = "CF-1.6"
-        dataset = self.get_pair(static_files['rutgers'])
+        dataset = self.load_dataset(static_files['rutgers'])
         result = self.cf.check_conventions_are_cf_16(dataset)
         self.assertTrue(result.value)
 
         # :Conventions = "CF-1.6 ,ACDD" ;
-        dataset = self.get_pair(static_files['conv_multi'])
+        dataset = self.load_dataset(static_files['conv_multi'])
         result = self.cf.check_conventions_are_cf_16(dataset)
         self.assertTrue(result.value)
 
         # :Conventions = "NoConvention"
-        dataset = self.get_pair(static_files['conv_bad'])
+        dataset = self.load_dataset(static_files['conv_bad'])
         result = self.cf.check_conventions_are_cf_16(dataset)
         self.assertFalse(result.value)
 
@@ -226,12 +224,12 @@ class TestCF(unittest.TestCase):
         2.6.2 title/history global attributes, must be strings. Do not need to exist.
         """
         #check for pass
-        dataset = self.get_pair(static_files['rutgers'])
+        dataset = self.load_dataset(static_files['rutgers'])
         result = self.cf.check_convention_globals(dataset)
         for each in result:
             self.assertTrue(each.value)
         #check if it doesn't exist that we pass
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         result = self.cf.check_convention_globals(dataset)
         for each in result:
             self.assertTrue(each.value)
@@ -251,12 +249,12 @@ class TestCF(unittest.TestCase):
         - if std name specified, must be consistent with standard name table, must also be consistent with a
           specified cell_methods attribute if present
         """
-        dataset = self.get_pair(static_files['rutgers'])
+        dataset = self.load_dataset(static_files['rutgers'])
         result = self.cf.check_convention_possibly_var_attrs(dataset)
         for each in result:
             self.assertTrue(each.value)
 
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         result = self.cf.check_convention_possibly_var_attrs(dataset)
         for each in result:
             self.assertFalse(each.value)  
@@ -267,19 +265,19 @@ class TestCF(unittest.TestCase):
         string value comprised of a standard name optionally followed by one or more blanks and a
         standard name modifier
         """
-        dataset = self.get_pair(static_files['2dim'])
+        dataset = self.load_dataset(static_files['2dim'])
         result = self.cf.check_standard_name(dataset)
         for each in result:
             self.assertTrue(each.value)
 
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         result = self.cf.check_standard_name(dataset)
         for each in result:
             self.assertFalse(each.value)  
 
 
     def test_check_flags(self):
-        dataset = self.get_pair(static_files['self_referencing'])
+        dataset = self.load_dataset(static_files['self_referencing'])
         results = self.cf.check_flags(dataset)
         scored, out_of, messages = self.get_results(results)
 
@@ -292,12 +290,12 @@ class TestCF(unittest.TestCase):
 
     def test_check_units(self):
 
-        dataset = self.get_pair(static_files['2dim'])
+        dataset = self.load_dataset(static_files['2dim'])
         result = self.cf.check_units(dataset)
         for each in result:
             self.assertTrue(each.value)
 
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         result = self.cf.check_units(dataset)
         for each in result:
             self.assertFalse(each.value)  
@@ -310,19 +308,19 @@ class TestCF(unittest.TestCase):
 
         We strongly recommend that coordinate variables be used for all coordinate types whenever they are applicable.
         '''
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         result = self.cf.check_coordinate_vars_for_all_coordinate_types(dataset)
         for each in result:
             self.assertTrue(each.value)
 
     def test_check_coordinate_axis_attr(self):
 
-        dataset = self.get_pair(static_files['2dim'])
+        dataset = self.load_dataset(static_files['2dim'])
         result = self.cf.check_coordinate_axis_attr(dataset)
         for each in result:
             self.assertTrue(each.value)
 
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         result = self.cf.check_coordinate_axis_attr(dataset)
         for each in result:
             if each.name[1] in ['time', 'latitude']:
@@ -337,7 +335,7 @@ class TestCF(unittest.TestCase):
         Section 4.1 Latitude Coordinate
         '''
         # Check compliance
-        dataset = self.get_pair(static_files['example-grid'])
+        dataset = self.load_dataset(static_files['example-grid'])
         results = self.cf.check_latitude(dataset)
         for r in results:
             if isinstance(r.value, tuple):
@@ -346,7 +344,7 @@ class TestCF(unittest.TestCase):
                 self.assertTrue(r.value)
         
         # Verify non-compliance
-        dataset = self.get_pair(static_files['bad'])
+        dataset = self.load_dataset(static_files['bad'])
         results = self.cf.check_latitude(dataset)
 
         scored, out_of, messages = self.get_results(results)
@@ -365,7 +363,7 @@ class TestCF(unittest.TestCase):
         Section 4.2 Longitude Coordinate
         '''
         # Check compliance
-        dataset = self.get_pair(static_files['example-grid'])
+        dataset = self.load_dataset(static_files['example-grid'])
         results = self.cf.check_longitude(dataset)
         for r in results:
             if isinstance(r.value, tuple):
@@ -374,7 +372,7 @@ class TestCF(unittest.TestCase):
                 self.assertTrue(r.value)
         
         # Verify non-compliance
-        dataset = self.get_pair(static_files['bad'])
+        dataset = self.load_dataset(static_files['bad'])
         results = self.cf.check_longitude(dataset)
 
         scored, out_of, messages = self.get_results(results)
@@ -423,13 +421,13 @@ class TestCF(unittest.TestCase):
         '''
         # Check compliance
 
-        dataset = self.get_pair(static_files['example-grid'])
+        dataset = self.load_dataset(static_files['example-grid'])
         results = self.cf.check_vertical_coordinate(dataset)
         for r in results:
             self.assertTrue(r.value)
 
         # Check non-compliance
-        dataset = self.get_pair(static_files['bad'])
+        dataset = self.load_dataset(static_files['bad'])
         results = self.cf.check_vertical_coordinate(dataset)
         
         scored, out_of, messages = self.get_results(results)
@@ -443,13 +441,13 @@ class TestCF(unittest.TestCase):
         Section 4.3.1 Dimensional Vertical Coordinate
         '''
         # Check for compliance
-        dataset = self.get_pair(static_files['example-grid'])
+        dataset = self.load_dataset(static_files['example-grid'])
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
         for r in results:
             self.assertTrue(r.value)
 
         # Check for non-compliance
-        dataset = self.get_pair(static_files['bad'])
+        dataset = self.load_dataset(static_files['bad'])
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
         for r in results:
             self.assertFalse(r.value)
@@ -503,13 +501,13 @@ class TestCF(unittest.TestCase):
         Section 4.3.2
         '''
         # Check affirmative compliance
-        dataset = self.get_pair(static_files['dimensionless'])
+        dataset = self.load_dataset(static_files['dimensionless'])
         results = self.cf.check_dimensionless_vertical_coordinate(dataset)
         for r in results:
             self.assertTrue(r.value)
 
         # Check negative compliance
-        dataset = self.get_pair(static_files['bad'])
+        dataset = self.load_dataset(static_files['bad'])
         results = self.cf.check_dimensionless_vertical_coordinate(dataset)
 
         scored, out_of, messages = self.get_results(results)
@@ -542,13 +540,13 @@ class TestCF(unittest.TestCase):
         self.assertTrue(is_time_variable('maybe_time', var4))
 
     def test_check_time_coordinate(self):
-        dataset = self.get_pair(static_files['example-grid'])
+        dataset = self.load_dataset(static_files['example-grid'])
         results = self.cf.check_time_coordinate(dataset)
         for r in results:
             self.assertTrue(r.value)
 
 
-        dataset = self.get_pair(static_files['bad'])
+        dataset = self.load_dataset(static_files['bad'])
         results = self.cf.check_time_coordinate(dataset)
 
         scored, out_of, messages = self.get_results(results)
@@ -560,12 +558,12 @@ class TestCF(unittest.TestCase):
 
 
     def test_check_calendar(self):
-        dataset = self.get_pair(static_files['example-grid'])
+        dataset = self.load_dataset(static_files['example-grid'])
         results = self.cf.check_calendar(dataset)
         for r in results:
             self.assertTrue(r.value)
 
-        dataset = self.get_pair(static_files['bad'])
+        dataset = self.load_dataset(static_files['bad'])
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = self.get_results(results)
 
@@ -576,7 +574,7 @@ class TestCF(unittest.TestCase):
         '''
         This test captures a check where a coordinate has circular references
         '''
-        dataset = self.get_pair(static_files['self_referencing'])
+        dataset = self.load_dataset(static_files['self_referencing'])
         results = self.cf.check_two_dimensional(dataset)
 
         scored, out_of, messages = self.get_results(results)
@@ -585,12 +583,12 @@ class TestCF(unittest.TestCase):
         assert out_of == 44
 
     def test_check_independent_axis_dimensions(self):
-        dataset = self.get_pair(static_files['example-grid'])
+        dataset = self.load_dataset(static_files['example-grid'])
         results = self.cf.check_independent_axis_dimensions(dataset)
         for r in results:
             self.assertTrue(r.value)
 
-        dataset = self.get_pair(static_files['bad'])
+        dataset = self.load_dataset(static_files['bad'])
         results = self.cf.check_independent_axis_dimensions(dataset)
 
         scored, out_of, messages = self.get_results(results)
@@ -608,14 +606,14 @@ class TestCF(unittest.TestCase):
         assert out_of == 11
 
     def test_check_two_dimensional(self):
-        dataset = self.get_pair(static_files['2dim'])
+        dataset = self.load_dataset(static_files['2dim'])
         results = self.cf.check_two_dimensional(dataset)
         for r in results:
             self.assertTrue(r.value)
 
 
         # Need the bad testing
-        dataset = self.get_pair(static_files['bad2dim'])
+        dataset = self.load_dataset(static_files['bad2dim'])
         results = self.cf.check_two_dimensional(dataset)
         self.assertTrue(results[0].value)
         self.assertFalse(results[1].value)
@@ -625,7 +623,7 @@ class TestCF(unittest.TestCase):
         self.assertTrue(results[5].value)
 
         # Test the self referencing variables
-        dataset = self.get_pair(static_files['self-referencing-var'])
+        dataset = self.load_dataset(static_files['self-referencing-var'])
         try:
             results = self.cf.check_two_dimensional(dataset)
             self.assertFalse(results[0].value)
@@ -633,12 +631,12 @@ class TestCF(unittest.TestCase):
             self.assertTrue(False)
 
     def test_check_reduced_horizontal_grid(self):
-        dataset = self.get_pair(static_files['rhgrid'])
+        dataset = self.load_dataset(static_files['rhgrid'])
         results = self.cf.check_reduced_horizontal_grid(dataset)
         rd = { r.name[1] : r.value for r in results }
         self.assertTrue(rd['PS'])
 
-        dataset = self.get_pair(static_files['bad-rhgrid'])
+        dataset = self.load_dataset(static_files['bad-rhgrid'])
         results = self.cf.check_reduced_horizontal_grid(dataset)
         rd = { r.name[1] : (r.value, r.msgs) for r in results }
 
@@ -651,7 +649,7 @@ class TestCF(unittest.TestCase):
 
 
     def test_check_horz_crs_grid_mappings_projections(self):
-        dataset = self.get_pair(static_files['mapping'])
+        dataset = self.load_dataset(static_files['mapping'])
         results = self.cf.check_horz_crs_grid_mappings_projections(dataset)
         rd = { r.name[1] : r.value for r in results }
         assert rd['wgs84'] == (3, 3)
@@ -659,7 +657,7 @@ class TestCF(unittest.TestCase):
 
 
     def test_check_scalar_coordinate_system(self):
-        dataset = self.get_pair(static_files['scalar_coordinate_variable'])
+        dataset = self.load_dataset(static_files['scalar_coordinate_variable'])
         results = self.cf.check_scalar_coordinate_system(dataset)
         self.assertEqual(len(results), 2)
         for r in results:
@@ -671,27 +669,27 @@ class TestCF(unittest.TestCase):
                 self.assertTrue(False, 'Unexpected variable in results of check_scalar_coordinate_system')
 
     def test_check_geographic_region(self):
-        dataset = self.get_pair(static_files['bad_region'])
+        dataset = self.load_dataset(static_files['bad_region'])
         results = self.cf.check_geographic_region(dataset)
 
         self.assertFalse(results[0].value)
         self.assertTrue(results[1].value)
 
     def test_check_alternative_coordinates(self):
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         results = self.cf.check_alternative_coordinates(dataset)
         self.assertTrue(results[0].value)
 
 
     #def test_check_cell_boundaries(self):
-    #    dataset = self.get_pair(static_files['bad_data_type'])
+    #    dataset = self.load_dataset(static_files['bad_data_type'])
     #    results = self.cf.check_cell_boundaries(dataset)
     #    print results
     #    self.assertTrue(results[0].value)
 
 
     def test_check_packed_data(self):
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         results = self.cf.check_packed_data(dataset)
         self.assertEqual(len(results), 4)
         self.assertFalse(results[0].value)
@@ -701,84 +699,84 @@ class TestCF(unittest.TestCase):
 
 
     def test_check_compression(self):
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         results = self.cf.check_compression(dataset)
         assert results[0].value == (2,2)
         assert results[1].value == (0,2)
 
     def test_check_all_features_are_same_type(self):
-        dataset = self.get_pair(static_files['rutgers'])
+        dataset = self.load_dataset(static_files['rutgers'])
         results = self.cf.check_all_features_are_same_type(dataset)
         assert results == None
 
-        dataset = self.get_pair(static_files['featureType'])
+        dataset = self.load_dataset(static_files['featureType'])
         results = self.cf.check_all_features_are_same_type(dataset)
         self.assertTrue(results.value)     
 
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         results = self.cf.check_all_features_are_same_type(dataset)
         self.assertFalse(results.value)   
 
     def test_check_orthogonal_multidim_array(self):
-        dataset = self.get_pair(static_files['rutgers'])
+        dataset = self.load_dataset(static_files['rutgers'])
         results = self.cf.check_orthogonal_multidim_array(dataset)
         for each in results:
             self.assertTrue(each.value)
 
     def test_check_incomplete_multidim_array(self):
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         results = self.cf.check_incomplete_multidim_array(dataset)
         for each in results:
             self.assertTrue(each.value)
 
     def test_check_contiguous_ragged_array(self):
-        dataset = self.get_pair(static_files['cont_ragged'])
+        dataset = self.load_dataset(static_files['cont_ragged'])
         results = self.cf.check_contiguous_ragged_array(dataset)
         for each in results:
             self.assertTrue(each.value)
 
     def test_check_indexed_ragged_array(self):
-        dataset = self.get_pair(static_files['index_ragged'])
+        dataset = self.load_dataset(static_files['index_ragged'])
         results = self.cf.check_indexed_ragged_array(dataset)
         for each in results:
             self.assertTrue(each.value)
 
 
     def test_check_feature_type(self):
-        dataset = self.get_pair(static_files['index_ragged'])
+        dataset = self.load_dataset(static_files['index_ragged'])
         results = self.cf.check_feature_type(dataset)
         self.assertTrue(results.value)
 
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         results = self.cf.check_feature_type(dataset)
         self.assertFalse(results.value)
 
 
 
     def test_check_coordinates_and_metadata(self):
-        dataset = self.get_pair(static_files['bad_data_type'])
+        dataset = self.load_dataset(static_files['bad_data_type'])
         results = self.cf.check_coordinates_and_metadata(dataset)
         self.assertFalse(results[0].value)
         self.assertTrue(results[1].value)
         self.assertFalse(results[2].value)
 
-        dataset = self.get_pair(static_files['index_ragged'])
+        dataset = self.load_dataset(static_files['index_ragged'])
         results = self.cf.check_coordinates_and_metadata(dataset)
         self.assertTrue(results[-1].value)
 
-        dataset = self.get_pair(static_files['coordinates_and_metadata'])
+        dataset = self.load_dataset(static_files['coordinates_and_metadata'])
         results = self.cf.check_coordinates_and_metadata(dataset)
         self.assertTrue(len(results) == 2)
         self.assertFalse(results[0].value)
         self.assertFalse(results[1].value)
 
     def test_check_missing_data(self):
-        dataset = self.get_pair(static_files['index_ragged'])
+        dataset = self.load_dataset(static_files['index_ragged'])
         results = self.cf.check_missing_data(dataset)
         for each in results:
             self.assertTrue(each.value)
 
-        dataset = self.get_pair(static_files['bad_missing_data'])
+        dataset = self.load_dataset(static_files['bad_missing_data'])
         results = self.cf.check_missing_data(dataset)
         for each in results:
             self.assertFalse(each.value)
@@ -787,7 +785,7 @@ class TestCF(unittest.TestCase):
         '''
         Ensure that container variables are not checked for units but geophysical variables are
         '''
-        dataset = self.get_pair(static_files['units_check'])
+        dataset = self.load_dataset(static_files['units_check'])
         results = self.cf.check_units(dataset)
 
         # We don't keep track of the variables names for checks that passed, so
@@ -800,7 +798,7 @@ class TestCF(unittest.TestCase):
 
 
     def test_64bit(self):
-        dataset = self.get_pair(static_files['ints64'])
+        dataset = self.load_dataset(static_files['ints64'])
         suite = CheckSuite()
         suite.checkers = {
             'cf'        : CFBaseCheck
@@ -808,7 +806,7 @@ class TestCF(unittest.TestCase):
         suite.run(dataset, 'cf')
 
     def test_time_units(self):
-        dataset = self.get_pair(static_files['time_units'])
+        dataset = self.load_dataset(static_files['time_units'])
         results = self.cf.check_units(dataset)
         scored, out_of, messages = self.get_results(results)
         assert u'units are days since 1970-01-01, standard_name units should be K' in messages

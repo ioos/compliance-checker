@@ -90,7 +90,7 @@ def is_variable(name, var):
 def is_likely_dsg(func):
     @wraps(func)
     def _dec(s, ds):
-        if hasattr(ds.dataset, u'featureType'):
+        if hasattr(ds, u'featureType'):
             return func(s, ds)
 
         # @TODO: skips if we have formalized skips
@@ -147,7 +147,7 @@ class CFBaseCheck(BaseCheck):
         if ds in self._coord_vars and not refresh:
             return self._coord_vars[ds]
 
-        self._coord_vars[ds] = find_coord_vars(ds.dataset)
+        self._coord_vars[ds] = find_coord_vars(ds)
 
         return self._coord_vars[ds]
 
@@ -170,16 +170,16 @@ class CFBaseCheck(BaseCheck):
         if ds in self._ancillary_vars and not refresh:
             return self._ancillary_vars[ds]
 
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
             if hasattr(var, u'ancillary_variables'):
                 for anc_name in var.ancillary_variables.split(" "):
-                    if anc_name in ds.dataset.variables:
-                        self._ancillary_vars[ds].append(ds.dataset.variables[anc_name])
+                    if anc_name in ds.variables:
+                        self._ancillary_vars[ds].append(ds.variables[anc_name])
 
             if hasattr(var, u'grid_mapping'):
                 gm_name = var.grid_mapping
-                if gm_name in ds.dataset.variables:
-                    self._ancillary_vars[ds].append(ds.dataset.variables[gm_name])
+                if gm_name in ds.variables:
+                    self._ancillary_vars[ds].append(ds.variables[gm_name])
 
         return self._ancillary_vars
 
@@ -192,7 +192,7 @@ class CFBaseCheck(BaseCheck):
         if ds in self._metadata_vars and not refresh:
             return self._metadata_vars[ds]
 
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
 
             if name in self._find_ancillary_vars(ds) or name in self._find_coord_vars(ds):
                 continue
@@ -224,7 +224,7 @@ class CFBaseCheck(BaseCheck):
         Results are NOT CACHED.
         """
         candidates = {}
-        for var_name, variable in ds.dataset.variables.iteritems():
+        for var_name, variable in ds.variables.iteritems():
 
             if variable in self._find_coord_vars(ds):
                 continue
@@ -258,7 +258,7 @@ class CFBaseCheck(BaseCheck):
         # find all time dimension variables
         time_vars = [v for v in coord_vars if guess_dim_type(v.dimensions[0]) == u'T']
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             is_cvar = False
 
             if v in coord_vars:
@@ -281,7 +281,7 @@ class CFBaseCheck(BaseCheck):
                     except:
                         pass
 
-        dvars = set(ds.dataset.variables.itervalues()) - set(coord_vars)
+        dvars = set(ds.variables.itervalues()) - set(coord_vars)
         for dim in c_time:
             for v in dvars:
                 if dim in v.dimensions:
@@ -302,10 +302,10 @@ class CFBaseCheck(BaseCheck):
 
         b_vars = {}
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             bounds = getattr(v, u'bounds', None)
-            if bounds is not None and isinstance(bounds, basestring) and bounds in ds.dataset.variables:
-                b_vars[v] = ds.dataset.variables[bounds]
+            if bounds is not None and isinstance(bounds, basestring) and bounds in ds.variables:
+                b_vars[v] = ds.variables[bounds]
 
         self._boundary_vars[ds] = b_vars
         return b_vars
@@ -323,9 +323,9 @@ class CFBaseCheck(BaseCheck):
         2.2 The netCDF data types char, byte, short, int, float or real, and double are all acceptable
         """
         fails = []
-        total = len(ds.dataset.variables)
+        total = len(ds.variables)
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             if v.dtype not in [np.character,
                                   np.dtype('c'),
                                   np.dtype('b'),
@@ -345,11 +345,11 @@ class CFBaseCheck(BaseCheck):
         2.3 Variable, dimension and attribute names should begin with a letter and be composed of letters, digits, and underscores. 
         """
         fails = []
-        total = len(ds.dataset.variables)
+        total = len(ds.variables)
 
         rname = re.compile("[A-Za-z][A-Za-z0-9_]*")
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             if not rname.match(k):
                 fails.append(u'Variable %s failed because it does not start with a letter, digit, or an underscore' %k)
 
@@ -360,10 +360,10 @@ class CFBaseCheck(BaseCheck):
         2.3 names should not be distinguished purely by case, i.e., if case is disregarded, no two names should be the same.
         """
         fails = []
-        total = len(ds.dataset.variables)
+        total = len(ds.variables)
         names = defaultdict(int)
 
-        for k in ds.dataset.variables:
+        for k in ds.variables:
             names[k.lower()] += 1
 
         fails = [u'Variables are not case sensitive.  Duplicate variables named: %s' %k for k,v in names.iteritems() if v > 1]
@@ -374,9 +374,9 @@ class CFBaseCheck(BaseCheck):
         2.4 A variable may have any number of dimensions, including zero, and the dimensions must all have different names.
         """
         fails = []
-        total = len(ds.dataset.variables)
+        total = len(ds.variables)
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             dims = defaultdict(int)
             for d in v.dimensions:
                 dims[d] += 1
@@ -396,11 +396,11 @@ class CFBaseCheck(BaseCheck):
         left of the spatiotemporal dimensions.
         """
         fails = []
-        total = len(ds.dataset.variables)
+        total = len(ds.variables)
 
         expected = [u'T', u'Z', u'Y', u'X']
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
 
             dclass = map(guess_dim_type, v.dimensions)
             # any nones should be before classified ones
@@ -442,7 +442,7 @@ class CFBaseCheck(BaseCheck):
         """
         ret = []
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             if hasattr(v, u'_FillValue'):
                 attrs = v.ncattrs()
 
@@ -471,8 +471,8 @@ class CFBaseCheck(BaseCheck):
         """
         valid_conventions = [u'CF-1.0', u'CF-1.1', u'CF-1.2', u'CF-1.3',
                              u'CF-1.4', u'CF-1.5', u'CF-1.6']
-        if hasattr(ds.dataset, u'Conventions'):
-            conventions = re.split(',|\s+', getattr(ds.dataset, 'Conventions', ''))
+        if hasattr(ds, u'Conventions'):
+            conventions = re.split(',|\s+', getattr(ds, 'Conventions', ''))
             if any((c.strip() in valid_conventions for c in conventions)):
                 valid = True
                 reasoning = []
@@ -493,8 +493,8 @@ class CFBaseCheck(BaseCheck):
         ret = []
 
         for a in attrs:
-            if hasattr(ds.dataset, a):
-                ret.append(Result(BaseCheck.HIGH, isinstance(getattr(ds.dataset, a), basestring), (u'§2.6.2 Title/history global attributes', a)))
+            if hasattr(ds, a):
+                ret.append(Result(BaseCheck.HIGH, isinstance(getattr(ds, a), basestring), (u'§2.6.2 Title/history global attributes', a)))
 
         return ret
 
@@ -511,7 +511,7 @@ class CFBaseCheck(BaseCheck):
         # check attrs on global ds
 
         # can't predetermine total - we only report attrs we find
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             vattrs = v.ncattrs()
             for a in attrs:
                 if a in vattrs:
@@ -547,7 +547,7 @@ class CFBaseCheck(BaseCheck):
         boundary_vars = self._find_boundary_vars(ds).itervalues()
         container_vars = self._find_container_variables(ds)
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
 
             # skip climatological vars, boundary vars
             if v in clim_vars or \
@@ -660,7 +660,7 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             std_name = getattr(v, u'standard_name', None)
 
             std_name_modifier = None
@@ -711,7 +711,7 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             anc = getattr(v, u'ancillary_variables', None)
             if anc is None:
                 continue
@@ -730,7 +730,7 @@ class CFBaseCheck(BaseCheck):
             existing = 0
 
             for a in ancs:
-                if a in ds.dataset.variables:
+                if a in ds.variables:
                     existing += 1
                 else:
                     msgs.append("ancillary var %s does not exist" % a)
@@ -764,7 +764,7 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
 
             flag_values   = getattr(v, "flag_values", None)
             flag_masks    = getattr(v, "flag_masks", None)
@@ -903,8 +903,8 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val     = []
         coord_vars  = self._find_coord_vars(ds)
-        dim_to_axis = map_axes({k:v for k,v in ds.dataset.variables.iteritems() if v in coord_vars}, reverse_map=True)
-        data_vars   = {k:v for k,v in ds.dataset.variables.iteritems() if v not in coord_vars}
+        dim_to_axis = map_axes({k:v for k,v in ds.variables.iteritems() if v in coord_vars}, reverse_map=True)
+        data_vars   = {k:v for k,v in ds.variables.iteritems() if v not in coord_vars}
 
         # find auxiliary coordinate variables via 'coordinates' attribute
         auxiliary_coordinate_vars = []
@@ -913,10 +913,10 @@ class CFBaseCheck(BaseCheck):
                 cv = var.coordinates.split(u' ')
 
                 for c in cv:
-                    if c in ds.dataset.variables:
-                        auxiliary_coordinate_vars.append(ds.dataset.variables[c])
+                    if c in ds.variables:
+                        auxiliary_coordinate_vars.append(ds.variables[c])
 
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             axis = getattr(v, u'axis', None)
 
             if axis is None:
@@ -980,9 +980,9 @@ class CFBaseCheck(BaseCheck):
                                   u'latitude' , u'lat'   , u'y',
                                   u'vertical' , u'height', u'z',
                                   u'time'               , u't')
-        for k,v in ds.dataset.dimensions.iteritems():
+        for k,v in ds.dimensions.iteritems():
             if k.lower() in known_coordinate_names:
-                valid = k in ds.dataset.variables
+                valid = k in ds.variables
                 result = Result(BaseCheck.MEDIUM, valid, u'§4 Coordinate Variables')
                 if not valid:
                     result.msgs = [u'No coordinate variable for coordinate type %s' % k]
@@ -1032,7 +1032,7 @@ class CFBaseCheck(BaseCheck):
         recommended = u'degrees_north'
         acceptable = [u'degree_north', u'degree_N', u'degrees_N', u'degreeN', u'degreesN']
     
-        for k,v in ds.dataset.variables.iteritems():
+        for k,v in ds.variables.iteritems():
             if k == u'latitude' or getattr(v, u'standard_name', None) == u'latitude':
                 results = self._coord_has_units(k, u'latitude', v, recommended, acceptable)
                 ret_val.extend(results)
@@ -1053,7 +1053,7 @@ class CFBaseCheck(BaseCheck):
         recommended = u'degrees_east'
         acceptable = [u'degree_east', u'degree_E', u'degrees_E', u'degreeE', u'degreesE']
     
-        for k,v in ds.dataset.variables.iteritems():
+        for k,v in ds.variables.iteritems():
             if k == u'longitude' or getattr(v, u'standard_name', None) == u'longitude':
                 results = self._coord_has_units(k, u'longitude', v, recommended, acceptable)
                 ret_val.extend(results)
@@ -1075,7 +1075,7 @@ class CFBaseCheck(BaseCheck):
         """
         
         ret_val = [] 
-        for k,v in ds.dataset.variables.iteritems(): 
+        for k,v in ds.variables.iteritems(): 
             if is_vertical_coordinate(k,v):
                 # Vertical variables MUST have units
                 has_units = hasattr(v, u'units') 
@@ -1134,7 +1134,7 @@ class CFBaseCheck(BaseCheck):
         Plural forms are also acceptable.
         """
         ret_val = []
-        for k,v in ds.dataset.variables.iteritems():
+        for k,v in ds.variables.iteritems():
             # If this is not a vertical coordinate
             if not is_vertical_coordinate(k,v):
                 continue
@@ -1189,7 +1189,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
 
         dimless = dict(dimless_vertical_coordinates)
-        for k,v in ds.dataset.variables.iteritems():
+        for k,v in ds.variables.iteritems():
             std_name = getattr(v, u'standard_name', u'')
             if std_name not in dimless:
                 continue
@@ -1223,7 +1223,7 @@ class CFBaseCheck(BaseCheck):
             groups = valid_formula.groups()
             for i in xrange(1, len(groups), 2):
                 varname = groups[i]
-                if varname not in ds.dataset.variables:
+                if varname not in ds.variables:
                     missing_terms.append(varname)
             # Report the missing terms
             result = Result(BaseCheck.MEDIUM,                             \
@@ -1263,7 +1263,7 @@ class CFBaseCheck(BaseCheck):
         """ 
 
         ret_val = []
-        for k,v in ds.dataset.variables.iteritems():
+        for k,v in ds.variables.iteritems():
             if not is_time_variable(k,v):
                 continue
             # Has units
@@ -1342,7 +1342,7 @@ class CFBaseCheck(BaseCheck):
 
         ret_val = []
 
-        for k,v in ds.dataset.variables.iteritems():
+        for k,v in ds.variables.iteritems():
             if not is_time_variable(k,v):
                 continue
             reasoning = None
@@ -1383,7 +1383,7 @@ class CFBaseCheck(BaseCheck):
 
     def _get_coord_vars(self, ds):
         coord_vars = []
-        for name,var in ds.dataset.variables.iteritems():
+        for name,var in ds.variables.iteritems():
             if (name,) == var.dimensions:
                 coord_vars.append(name)
         return coord_vars
@@ -1443,7 +1443,7 @@ class CFBaseCheck(BaseCheck):
 
         space_time_dim = []
         #Check to find all space-time dimension (Lat/Lon/Time/Height)
-        for dimension in ds.dataset.dimensions:
+        for dimension in ds.dimensions:
             if dimension in _possibleaxis:
                 space_time_dim.append(dimension)
                         
@@ -1456,7 +1456,7 @@ class CFBaseCheck(BaseCheck):
                 space_time_coord_var.append(each._name)
 
         #Looks to ensure that every dimension of each variable that is a space-time dimension has associated coordinate variables
-        for name,var in ds.dataset.variables.iteritems():
+        for name,var in ds.variables.iteritems():
             valid = u''
             for each in var.dimensions:
                 if each in space_time_dim:
@@ -1496,9 +1496,9 @@ class CFBaseCheck(BaseCheck):
         ret_val = []        
         reported_reference_variables = []
         
-        for name,var in ds.dataset.variables.iteritems():
+        for name,var in ds.variables.iteritems():
             self_reference_variables = Set()   
-            g = NCGraph(ds.dataset, name, var, self_reference_variables)
+            g = NCGraph(ds, name, var, self_reference_variables)
                                     
             reasoning = []            
             
@@ -1527,7 +1527,7 @@ class CFBaseCheck(BaseCheck):
                 #------------------------------------------------------------
                 valid_dims = True
                 for dim in g.dims.iterkeys():
-                    if dim not in ds.dataset.variables:
+                    if dim not in ds.variables:
                         valid_dims = False
                         reasoning.append("Variable %s's dimension %s is not a coordinate variable" % (name, dim))
     
@@ -1598,7 +1598,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         coord_vars = self._get_coord_vars(ds)
 
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
             if name in coord_vars:
                 continue
             if not hasattr(var, u'coordinates'):
@@ -1615,12 +1615,12 @@ class CFBaseCheck(BaseCheck):
             coords = var.coordinates.split(u' ')
             for coord in coords:
                 is_reduced_horizontal_grid = True
-                if coord not in ds.dataset.variables:
+                if coord not in ds.variables:
                     valid_in_variables = False
                     reasoning.append("Coordinate %s is not a proper variable" % coord)
                     continue
 
-                for dim_name in ds.dataset.variables[coord].dimensions:
+                for dim_name in ds.variables[coord].dimensions:
 
                     if dim_name not in var.dimensions:
                         valid_dim = False
@@ -1632,14 +1632,14 @@ class CFBaseCheck(BaseCheck):
                         reasoning.append("Coordinate %s's dimension, %s, is not a coordinate variable" % (coord, dim_name))
                         continue
 
-                    dim = ds.dataset.variables[dim_name]
+                    dim = ds.variables[dim_name]
                     if not hasattr(dim, u'compress'):
                         is_reduced_horizontal_grid = False
                         continue
 
                     compress_dims = dim.compress.split(u' ')
                     for cdim in compress_dims:
-                        if cdim not in ds.dataset.dimensions:
+                        if cdim not in ds.dimensions:
                             valid_cdim = False
                             reasoning.append("Dimension %s compresses non-existent dimension, %s" % (dim_name, cdim))
                             continue
@@ -1716,7 +1716,7 @@ class CFBaseCheck(BaseCheck):
         reasoning = []
 
         
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
             valid_mapping_count = 0
             total_mapping_count = 0
             if hasattr(var, u'grid_mapping_name'):
@@ -1751,7 +1751,7 @@ class CFBaseCheck(BaseCheck):
                             valid_mapping_count = valid_mapping_count - 2
                 
                 total_mapping_count = total_mapping_count + len(self.grid_mapping_dict[mapping][2])
-                for name_again, var_again in ds.dataset.variables.iteritems():
+                for name_again, var_again in ds.variables.iteritems():
                     if hasattr(var_again,u'standard_name'):
                         if var_again.standard_name in self.grid_mapping_dict[mapping][2]:
                             valid_mapping_count = valid_mapping_count + 1
@@ -1780,7 +1780,7 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
 
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
             valid_scalar_coordinate_var = 0
             total_scalar_coordinate_var = 0
             reasoning = []
@@ -1789,10 +1789,10 @@ class CFBaseCheck(BaseCheck):
                 continue
 
             for coordinate in getattr(var, u'coordinates', u'').split(" "):
-                if coordinate in ds.dataset.variables:
-                    if ds.dataset.variables[coordinate].shape == ():
+                if coordinate in ds.variables:
+                    if ds.variables[coordinate].shape == ():
                         total_scalar_coordinate_var += 1
-                        if coordinate not in ds.dataset.dimensions.keys():
+                        if coordinate not in ds.dimensions.keys():
                             valid_scalar_coordinate_var += 1
                         else:
                             reasoning.append(u'Scalar coordinate var (%s) of var (%s) is correct size but is present in the dimensions list, which is not allowed.'% (coordinate, name))
@@ -1896,7 +1896,7 @@ class CFBaseCheck(BaseCheck):
                         ]
 
         
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
             if getattr(var, u'standard_name', u'') == u'region':
                 if u''.join(var[:]).lower() in region_list:
                     result = Result(BaseCheck.LOW,                            \
@@ -1925,12 +1925,12 @@ class CFBaseCheck(BaseCheck):
         total_alt_coordinate_var = 0
         coordinate_list = []
 
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
             if hasattr(var, u'coordinates'):
                 for coordinate in getattr(var, u'coordinates', u'').split(u' '):
                     coordinate_list.append(coordinate)
-        for name, var in ds.dataset.variables.iteritems():
-            if name in coordinate_list and var.ndim == 1 and name not in ds.dataset.dimensions:
+        for name, var in ds.variables.iteritems():
+            if name in coordinate_list and var.ndim == 1 and name not in ds.dimensions:
                 result = Result(BaseCheck.MEDIUM,                            
                     True,                                       
                     (u'§6.2 Alternative Coordinates', name, u'alternative_coordinates')
@@ -2013,7 +2013,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         reasoning = []
         paragraph = []
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
             for dim in var.dimensions:
                 if getattr(var, u'cell_measures', u''):
                     measures = getattr(var,u'coordinates',u'')
@@ -2024,7 +2024,7 @@ class CFBaseCheck(BaseCheck):
                                     False,                                       \
                                     (u'§7.2 Cell measures', name, u'cell_measures'), \
                                     reasoning)
-                    for every, attri in ds.dataset.variables.iteritems():
+                    for every, attri in ds.variables.iteritems():
                         if every == measures[1]:
                             for dimi in attri.dimensions:
                                 if dimi in var.dimensions:
@@ -2111,8 +2111,8 @@ class CFBaseCheck(BaseCheck):
 
         psep = re.compile('((?P<var>\w+): (?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) ?(?P<over>over (?P<otypevar>\w+))?| ?)(?P<brace>\(((?P<brace_wunit>\w+): (\d+) (?P<unit>\w+)|(?P<brace_opt>\w+): (\w+))\))*)')
         
-        names = list(ds.dataset.variables.iterkeys())
-        for name, var in ds.dataset.variables.iteritems():
+        names = list(ds.variables.iterkeys())
+        for name, var in ds.variables.iteritems():
             named_dict = OrderedDict()
             if getattr(var, u'cell_methods', u'') :
                 method = getattr(var, u'cell_methods', u'')
@@ -2130,7 +2130,7 @@ class CFBaseCheck(BaseCheck):
                 valid_name_count = 0
                 for match in re.finditer(psep, method):
                     #print 'dict ', match.groupdict()
-                    if match.group(u'var') in ds.dataset.variables[name].dimensions:
+                    if match.group(u'var') in ds.variables[name].dimensions:
                         valid_name_count = valid_name_count + 1
                     elif match.group(u'var') == u'area':
                         valid_name_count = valid_name_count + 1
@@ -2216,9 +2216,9 @@ class CFBaseCheck(BaseCheck):
         paragraph = []
         total_climate_count = 0
         valid_climate_count = 0
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
             if getattr(var, u'climatology', u''):
-                climate_dim = ds.dataset.variables[name].dimensions
+                climate_dim = ds.variables[name].dimensions
                 clim_method = getattr(var, u'climatology', u'')
                 
         
@@ -2227,25 +2227,24 @@ class CFBaseCheck(BaseCheck):
                     paragraph.append(each)
 
                 total_climate_count = total_climate_count+ 1
-                for name_again, var_again in ds.dataset.variables.iteritems():
+                for name_again, var_again in ds.variables.iteritems():
                     if getattr(var_again,"cell_methods",""):
                         climate = getattr(var, u'cell_methods', u'')
-                        name_dim = ds.dataset.variables[name_again].dimensions
+                        name_dim = ds.variables[name_again].dimensions
                         if len(climate_dim)>0:
                             if climate_dim[0] in name_dim:
                                 case1 = re.search(r"time: \w* within years time: \w* over years",climate)
                                 case2 = re.search(r"time: \w* within days time: \w* over days$",climate)
                                 case3 = re.search(r"time: \w* within days time: \w* over days time: \w* over years",climate)
                         
-                        if (case1 or case2 or case3) and len(ds.dataset.variables[clim_method].shape) == 2 and ds.dataset.variables[clim_method].shape[1] == 2 and ds.dataset.variables[clim_method].shape[0] == ds.dataset.variables[name_again].shape[0] :
+                        if (case1 or case2 or case3) and len(ds.variables[clim_method].shape) == 2 and ds.variables[clim_method].shape[1] == 2 and ds.variables[clim_method].shape[0] == ds.variables[name_again].shape[0] :
                             
                             valid_climate_count = 1
                         if not (case1 or case2 or case3):
                             reasoning.append(u'The "time: method within years/days over years/days" format is not correct.')
 
-                        if not (len(ds.dataset.variables[clim_method].shape) == 2 and ds.dataset.variables[clim_method].shape[1] == 2 and ds.dataset.variables[clim_method].shape[0] == ds.dataset.variables[name_again].shape[0]):
+                        if not (len(ds.variables[clim_method].shape) == 2 and ds.variables[clim_method].shape[1] == 2 and ds.variables[clim_method].shape[0] == ds.variables[name_again].shape[0]):
                             reasoning.append(u'The dimensions of the climatology varaible is incorrect.')
-
 
                 result = Result(BaseCheck.MEDIUM,                            \
                         (valid_climate_count, total_climate_count),                                       \
@@ -2375,7 +2374,7 @@ class CFBaseCheck(BaseCheck):
         valid_max, valid_range) must be of the same data type as the packed data.
         """
         ret_val = []
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
 
             add_offset = getattr(var, u'add_offset', None)
             scale_factor = getattr(var, u'scale_factor', None)
@@ -2460,7 +2459,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         
         
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
             valid_dim = 0
             valid_form = 0
             reasoning = []
@@ -2470,7 +2469,7 @@ class CFBaseCheck(BaseCheck):
                     valid_dim = 1
                 else:
                     reasoning.append("The 'compress' attribute is not assigned to a coordinate variable.")
-                if all([each in ds.dataset.dimensions.keys() for each in getattr(var, u'compress', u'').split(" ")]):
+                if all([each in ds.dimensions.keys() for each in getattr(var, u'compress', u'').split(" ")]):
                     valid_form = 1
                 else: 
                     reasoning.append("The 'compress' attribute is not in the form of a coordinate.")
@@ -2511,7 +2510,7 @@ class CFBaseCheck(BaseCheck):
             if getattr(var,"grid_mapping_name", ""):
                 #DO GRIDMAPPING CHECKS FOR X,Y,Z,T
                 flag = 1
-                for name_again, var_again in ds.dataset.variables.iteritems():
+                for name_again, var_again in ds.variables.iteritems():
                     if getattr(var_again,"standard_name","") == self.grid_mapping_dict[getattr(var,"grid_mapping_name", "")][2][0]:
                         x = name_again
                     if getattr(var_again,"standard_name","") == self.grid_mapping_dict[getattr(var,"grid_mapping_name", "")][2][1]:
@@ -2545,9 +2544,9 @@ class CFBaseCheck(BaseCheck):
         if x ==u'' or y == u'' or t == u'':
             return
         elif z == u'':
-            feature_tuple = (ds.dataset.variables[x].ndim, ds.dataset.variables[y].ndim, ds.dataset.variables[t].ndim)
+            feature_tuple = (ds.variables[x].ndim, ds.variables[y].ndim, ds.variables[t].ndim)
         else:
-            feature_tuple = (ds.dataset.variables[x].ndim, ds.dataset.variables[y].ndim, ds.dataset.variables[t].ndim, ds.dataset.variables[z].ndim)
+            feature_tuple = (ds.variables[x].ndim, ds.variables[y].ndim, ds.variables[t].ndim, ds.variables[z].ndim)
     
         feature_tuple_list.append(feature_tuple)
 
@@ -2592,7 +2591,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         reasoning = []
 
-        for name,var in ds.dataset.variables.iteritems():
+        for name,var in ds.variables.iteritems():
             reasoning = []
             if not hasattr(var,u'count_variable') and not hasattr(var,u'index_variable'):
                 if hasattr(var, u'_FillValue'):
@@ -2620,7 +2619,7 @@ class CFBaseCheck(BaseCheck):
         """
 
         ret_val = []
-        for name,var in ds.dataset.variables.iteritems():
+        for name,var in ds.variables.iteritems():
             reasoning = []
             if not hasattr(var,u'count_variable') and not hasattr(var,u'index_variable'):
                 if hasattr(var, u'_FillValue'):
@@ -2653,7 +2652,7 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
         reasoning = []
-        for name,var in ds.dataset.variables.iteritems():
+        for name,var in ds.variables.iteritems():
             if getattr(var,u'sample_dimension',''):
                 result = Result(BaseCheck.MEDIUM,                            \
                         True,                                       \
@@ -2684,7 +2683,7 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
         reasoning = []
-        for name,var in ds.dataset.variables.iteritems():
+        for name,var in ds.variables.iteritems():
             if getattr(var,u'instance_dimension',u''):
                 result = Result(BaseCheck.MEDIUM,                            \
                         True,                                       \
@@ -2707,12 +2706,12 @@ class CFBaseCheck(BaseCheck):
         reasoning=[]
         feature_list = [u'point', u'timeseries',u'trajectory',u'profile', u'timeseriesprofile',u'trajectoryprofile']
 
-        if getattr(ds.dataset, u'featureType', u'').lower() in feature_list:
+        if getattr(ds, u'featureType', u'').lower() in feature_list:
             return Result(BaseCheck.MEDIUM,                            
                         True, u'§9.4 featureType attribute',  
                         reasoning)
 
-        elif getattr(ds.dataset, u'featureType', u''):
+        elif getattr(ds, u'featureType', u''):
             reasoning.append(u'The featureType is provided and is not from the featureType list.')
             return Result(BaseCheck.MEDIUM, 
                         False, u'§9.4 featureType attribute',                            
@@ -2762,13 +2761,13 @@ class CFBaseCheck(BaseCheck):
         non_data_list = []
         data_list = []
 
-        for name,var in ds.dataset.variables.iteritems():
+        for name,var in ds.variables.iteritems():
 
             if var.dimensions and not hasattr(var, u'cf_role') and not self._is_station_var(var):
                 if var.dimensions != (name,):
                     name_list.append(name)
 
-        for name,var in ds.dataset.variables.iteritems():
+        for name,var in ds.variables.iteritems():
             if hasattr(var, u'coordinates'):
                 for each in getattr(var, u'coordinates', u'').split(u' '):
                     if each in name_list:
@@ -2781,7 +2780,7 @@ class CFBaseCheck(BaseCheck):
         data_list = [each for each in name_list if each not in non_data_list]
 
         for each in data_list:
-            if getattr(ds.dataset.variables[each], u'coordinates', u''):
+            if getattr(ds.variables[each], u'coordinates', u''):
                 result = Result(BaseCheck.MEDIUM,                            \
                             True,                                       \
                             (u'§9.5 Discrete Geometry', each, u'check_coordinates'), \
@@ -2797,13 +2796,13 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(result)
                 reasoning = []
 
-        role_list = [getattr(var, u'cf_role', u'').split(u' ') for name,var in ds.dataset.variables.iteritems() if hasattr(var, u'cf_role')]
+        role_list = [getattr(var, u'cf_role', u'').split(u' ') for name,var in ds.variables.iteritems() if hasattr(var, u'cf_role')]
         single_role = [u'timeseries', u'profile', u'trajectory']
         dual_role = [u'timeseries', u'profile', u'trajectory',u'timeseriesprofile', u'trajectoryprofile']
-        if getattr(ds.dataset, u'featureType', u'').lower() in single_role and len(np.ravel(role_list)) == 1:
+        if getattr(ds, u'featureType', u'').lower() in single_role and len(np.ravel(role_list)) == 1:
             reasoning = []
             valid = True
-        elif getattr(ds.dataset, u'featureType', u'').lower() in dual_role and len(np.ravel(role_list)) in [1,2]:
+        elif getattr(ds, u'featureType', u'').lower() in dual_role and len(np.ravel(role_list)) in [1,2]:
             reasoning = []
             valid = True
         else:
@@ -2813,7 +2812,7 @@ class CFBaseCheck(BaseCheck):
 
         result = Result(BaseCheck.MEDIUM,                            \
                 valid,                                       \
-                u'§9.5 Discrete Geometry', \
+                (u'§9.5 Discrete Geometry', 'dataset'), \
                 reasoning)
         ret_val.append(result)
 
@@ -2838,10 +2837,10 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         
         
-        name_list = ds.dataset.variables.keys()
-        dim_list = ds.dataset.dimensions.keys()
+        name_list = ds.variables.keys()
+        dim_list = ds.dimensions.keys()
 
-        for name, var in ds.dataset.variables.iteritems():
+        for name, var in ds.variables.iteritems():
             if hasattr(var,u'coordinates'):
                 aux_index_dict = {}
                 dim_index_dict = {}
@@ -2854,18 +2853,18 @@ class CFBaseCheck(BaseCheck):
                         indices = []
                         if coordinate in name_list and coordinate not in dim_list:
                             try:
-                                indices = np.where(ds.dataset.variables[coordinate] == var._FillValue).tolist()
+                                indices = np.where(ds.variables[coordinate] == var._FillValue).tolist()
                             except:
-                                indices = np.where(ds.dataset.variables[coordinate] == var._FillValue)[0].tolist()
+                                indices = np.where(ds.variables[coordinate] == var._FillValue)[0].tolist()
     
                             dim_index_dict[name+u'-'+coordinate] = indices
                             aux_index_dict[name+u'-'+coordinate] = indices
                                 
                         elif coordinate in name_list and coordinate in dim_list:
                             try:
-                                indices = np.where(ds.dataset.variables[coordinate] == var._FillValue).tolist()
+                                indices = np.where(ds.variables[coordinate] == var._FillValue).tolist()
                             except:
-                                indices = np.where(ds.dataset.variables[coordinate] == var._FillValue)[0].tolist()
+                                indices = np.where(ds.variables[coordinate] == var._FillValue)[0].tolist()
                             dim_index_dict[name+u'-'+coordinate] = indices
                         else:
                             dim_index_dict[name+u'-'+coordinate] = []
@@ -2922,10 +2921,10 @@ class CFBaseCheck(BaseCheck):
 
     def _find_container_variables(self, ds):
         container_vars = []
-        platform_name = getattr(ds.dataset, u'platform', None)
+        platform_name = getattr(ds, u'platform', None)
         if platform_name is not None:
             container_vars.append(platform_name)
-        for k, v in ds.dataset.variables.iteritems():
+        for k, v in ds.variables.iteritems():
             if k in (u'crs', u'instrument', u'station'):
                 if not v.shape: # Empty dimension
                     container_vars.append(k)

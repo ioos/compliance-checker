@@ -98,9 +98,8 @@ class CheckSuite(object):
 
         for checker_name, checker_class in checkers:
 
-            checker            = checker_class()   # @TODO: combine with load_datapair/setup
-            dsp                = checker.load_datapair(ds)
-            checker.setup(dsp)
+            checker = checker_class()
+            checker.setup(ds)
 
             checks             = self._get_checks(checker)
             vals               = []
@@ -108,7 +107,7 @@ class CheckSuite(object):
 
             for c in checks:
                 try:
-                    vals.extend(self._run_check(c, dsp))
+                    vals.extend(self._run_check(c, ds))
                 except Exception as e:
                     errs[c.im_func.func_name] = (e, sys.exc_info()[2])
 
@@ -558,7 +557,6 @@ class CheckSuite(object):
             retval = retval.encode('ascii', 'ignore')
             return retval
         
-
 
 
         grouped = itertools.groupby(sorted(raw_scores, key=group_func), key=group_func)
