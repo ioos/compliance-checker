@@ -89,7 +89,7 @@ class TestCF(unittest.TestCase):
         '''
         Return a loaded NC Dataset for the given path
         '''
-        if not isinstance(nc_dataset, basestring):
+        if not isinstance(nc_dataset, str):
             raise ValueError("nc_dataset should be a string")
 
         nc_dataset = Dataset(nc_dataset, 'r')
@@ -147,13 +147,13 @@ class TestCF(unittest.TestCase):
         num_var = len(dataset.variables)
         
         expected = (num_var,) * 2
-        self.assertEquals(result.value, expected)
+        self.assertEqual(result.value, expected)
 
         dataset = self.load_dataset(static_files['bad'])
         result = self.cf.check_naming_conventions(dataset)
         num_var = len(dataset.variables)
         expected = (num_var-1, num_var)
-        self.assertEquals(result.value, expected)
+        self.assertEqual(result.value, expected)
         assert '_poor_dim' in result.msgs [0]
 
     def test_check_names_unique(self):
@@ -166,7 +166,7 @@ class TestCF(unittest.TestCase):
         num_var = len(dataset.variables)
         expected = (num_var,) * 2
 
-        self.assertEquals(result.value, expected)
+        self.assertEqual(result.value, expected)
 
         #TODO: Add bad unique names to bad.nc
 
@@ -283,9 +283,9 @@ class TestCF(unittest.TestCase):
 
         self.assertEqual(scored, 46)
         self.assertEqual(out_of, 59)
-        self.assertEqual(messages.count(u'flag_values must be a list'), 6)
-        self.assertEqual(messages.count(u'flag_values attr does not have same type as var (fv: int8, v: int16)'), 6)
-        self.assertEqual(messages.count(u'flag_values attr does not have same type as var (fv: <U1, v: int16)'), 1)
+        self.assertEqual(messages.count('flag_values must be a list'), 6)
+        self.assertEqual(messages.count('flag_values attr does not have same type as var (fv: int8, v: int16)'), 6)
+        self.assertEqual(messages.count('flag_values attr does not have same type as var (fv: <U1, v: int16)'), 1)
 
 
     def test_check_bad_units(self):
@@ -339,7 +339,7 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_latitude(dataset)
         for r in results:
             if isinstance(r.value, tuple):
-                self.assertEquals(r.value[0], r.value[1])
+                self.assertEqual(r.value[0], r.value[1])
             else:
                 self.assertTrue(r.value)
         
@@ -367,7 +367,7 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_longitude(dataset)
         for r in results:
             if isinstance(r.value, tuple):
-                self.assertEquals(r.value[0], r.value[1])
+                self.assertEqual(r.value[0], r.value[1])
             else:
                 self.assertTrue(r.value)
         
@@ -512,11 +512,11 @@ class TestCF(unittest.TestCase):
 
         scored, out_of, messages = self.get_results(results)
 
-        assert u'formula_terms missing from dimensionless coordinate lev1' in messages
-        assert u'formula_terms not defined for dimensionless coordinate lev1' in messages
-        assert u'var1 missing for dimensionless coordinate lev2' in messages
-        assert u'var2 missing for dimensionless coordinate lev2' in messages
-        assert u'var3 missing for dimensionless coordinate lev2' in messages
+        assert 'formula_terms missing from dimensionless coordinate lev1' in messages
+        assert 'formula_terms not defined for dimensionless coordinate lev1' in messages
+        assert 'var1 missing for dimensionless coordinate lev2' in messages
+        assert 'var2 missing for dimensionless coordinate lev2' in messages
+        assert 'var3 missing for dimensionless coordinate lev2' in messages
         assert scored == 1
         assert out_of == 4
 
@@ -551,8 +551,8 @@ class TestCF(unittest.TestCase):
 
         scored, out_of, messages = self.get_results(results)
 
-        assert u'bad_time_1 does not have units' in messages
-        assert u'bad_time_2 doesn not have correct time units' in messages
+        assert 'bad_time_1 does not have units' in messages
+        assert 'bad_time_2 doesn not have correct time units' in messages
         assert scored == 1
         assert out_of == 3
 
@@ -567,8 +567,8 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = self.get_results(results)
 
-        assert u'Variable bad_time_1 should have a calendar attribute' in messages
-        assert u"Variable bad_time_2 should have a valid calendar: 'nope' is not a valid calendar" in messages
+        assert 'Variable bad_time_1 should have a calendar attribute' in messages
+        assert "Variable bad_time_2 should have a valid calendar: 'nope' is not a valid calendar" in messages
 
     def test_self_referencing(self):
         '''
@@ -578,7 +578,7 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_two_dimensional(dataset)
 
         scored, out_of, messages = self.get_results(results)
-        assert u"Variable TEMP_H's coordinate references itself" in messages
+        assert "Variable TEMP_H's coordinate references itself" in messages
         assert scored == 0
         assert out_of == 44
 
@@ -592,15 +592,15 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_independent_axis_dimensions(dataset)
 
         scored, out_of, messages = self.get_results(results)
-        assert u'The lev dimension for the variable lev1 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
+        assert 'The lev dimension for the variable lev1 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
                 in messages
-        assert u'The lev dimension for the variable lev2 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
+        assert 'The lev dimension for the variable lev2 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
                 in messages
-        assert u'The time dimension for the variable bad_time_1 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
+        assert 'The time dimension for the variable bad_time_1 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
                 in messages
-        assert u'The time dimension for the variable bad_time_2 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
+        assert 'The time dimension for the variable bad_time_2 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
                 in messages
-        assert u'The time dimension for the variable column_temp does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
+        assert 'The time dimension for the variable column_temp does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
                 in messages
         assert scored == 6
         assert out_of == 11
@@ -640,12 +640,12 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_reduced_horizontal_grid(dataset)
         rd = { r.name[1] : (r.value, r.msgs) for r in results }
 
-        for name, (value, msg) in rd.iteritems():
+        for name, (value, msg) in rd.items():
             self.assertFalse(value)
 
         self.assertIn('Coordinate longitude is not a proper variable', rd['PSa'][1])
         self.assertIn("Coordinate latitude's dimension, latdim, is not a dimension of PSb", rd['PSb'][1])
-        assert 'PSc' not in rd.keys()
+        assert 'PSc' not in list(rd.keys())
 
 
     def test_check_horz_crs_grid_mappings_projections(self):
@@ -809,7 +809,7 @@ class TestCF(unittest.TestCase):
         dataset = self.load_dataset(static_files['time_units'])
         results = self.cf.check_units(dataset)
         scored, out_of, messages = self.get_results(results)
-        assert u'units are days since 1970-01-01, standard_name units should be K' in messages
+        assert 'units are days since 1970-01-01, standard_name units should be K' in messages
         assert scored == 1
         assert out_of == 2
 

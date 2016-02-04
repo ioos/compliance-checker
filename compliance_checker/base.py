@@ -100,17 +100,17 @@ class Result(object):
         self.check_method = check_method
 
     def __repr__(self):
-        ret = u"%s (*%s): %s" % (self.name, self.weight, self.value)
+        ret = "%s (*%s): %s" % (self.name, self.weight, self.value)
 
         if len(self.msgs):
             if len(self.msgs) == 1:
-                ret += u" (%s)" % self.msgs[0]
+                ret += " (%s)" % self.msgs[0]
             else:
-                ret += u" (%d msgs)" % len(self.msgs)
+                ret += " (%d msgs)" % len(self.msgs)
 
         if len(self.children):
-            ret += u" (%d children)" % len(self.children)
-            ret += u"\n" + pprint.pformat(self.children)
+            ret += " (%d children)" % len(self.children)
+            ret += "\n" + pprint.pformat(self.children)
         ## BUG: Python 2.7 does not allow repr to return unicode strings so we
         ## have to coerce it into ascii. 
         ret = ret.encode('ascii', 'ignore')
@@ -187,7 +187,7 @@ def fix_return_value(v, method_name, method=None, checker=None):
     """
     Transforms scalar return values into Result.
     """
-    method_name = (method_name or method.im_func.func_name).replace("check_", "")     # remove common check prefix
+    method_name = (method_name or method.__func__.__name__).replace("check_", "")     # remove common check prefix
 
     if v is None or not isinstance(v, Result):
         v = Result(value=v, name=method_name)
@@ -225,8 +225,8 @@ def score_group(group_name=None):
                 return Result(r.weight, r.value, tuple(cur_grouping), r.msgs)
 
 
-            ret_val = map(lambda x: fix_return_value(x, func.func_name, func, s), ret_val)
-            ret_val = map(dogroup, ret_val)
+            ret_val = [fix_return_value(x, func.__name__, func, s) for x in ret_val]
+            ret_val = list(map(dogroup, ret_val))
 
             return ret_val
         return wraps(func)(_dec)

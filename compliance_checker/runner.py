@@ -1,7 +1,7 @@
 import traceback
 import sys
 import io
-from StringIO import StringIO
+from io import StringIO
 
 from compliance_checker.suite import CheckSuite
 
@@ -66,7 +66,7 @@ class ComplianceChecker(object):
         @param verbose      Integer value for verbosity level
         @param limit        The degree of strictness, 1 being the strictest, and going up from there.
         '''
-        for checker, rpair in score_groups.iteritems():
+        for checker, rpair in score_groups.items():
             groups, errors = rpair
             score_list, points, out_of = cs.standard_output(limit, checker, groups)
             if not verbose:
@@ -85,13 +85,13 @@ class ComplianceChecker(object):
         @param ds_loc          Location of the source dataset
         @param limit           The degree of strictness, 1 being the strictest, and going up from there.
         '''
-        for checker, rpair in score_groups.iteritems():
+        for checker, rpair in score_groups.items():
             groups, errors = rpair
             if output_filename == '-':
                 f = StringIO()
                 cs.html_output(checker, groups, f, ds_loc, limit)
                 f.seek(0)
-                print f.read()
+                print(f.read())
             else:
                 with io.open(output_filename, 'w', encoding='utf8') as f:
                     cs.html_output(checker, groups, f, ds_loc, limit)
@@ -108,13 +108,13 @@ class ComplianceChecker(object):
         @param ds_loc          Location of the source dataset
         @param limit           The degree of strictness, 1 being the strictest, and going up from there.
         '''
-        for checker, rpair in score_groups.iteritems():
+        for checker, rpair in score_groups.items():
             groups, errors = rpair
             if output_filename == '-':
                 f = StringIO()
                 cs.json_output(checker, groups, f, ds_loc)
                 f.seek(0)
-                print f.read()
+                print(f.read())
             else:
                 with io.open(output_filename, 'w', encoding='utf8') as f:
                     cs.json_output(checker, groups, f, ds_loc, limit)
@@ -131,15 +131,15 @@ class ComplianceChecker(object):
         @param verbose      Integer value for verbosity level
         '''
         errors_occurred = False
-        for checker, rpair in score_groups.iteritems():
+        for checker, rpair in score_groups.items():
             groups, errors = rpair
             if len(errors):
                 errors_occurred = True
-                print >>sys.stderr, "WARNING: The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker
-                for check_name, epair in errors.iteritems():
-                    print >>sys.stderr, "%s.%s: %s" % (checker, check_name, epair[0].message)
+                print("WARNING: The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker, file=sys.stderr)
+                for check_name, epair in errors.items():
+                    print("%s.%s: %s" % (checker, check_name, epair[0].message), file=sys.stderr)
                     if verbose > 0:
                         traceback.print_tb(epair[1].tb_next.tb_next)    # skip first two as they are noise from the running itself @TODO search for check_name
-                        print >>sys.stderr
+                        print(file=sys.stderr)
 
         return errors_occurred

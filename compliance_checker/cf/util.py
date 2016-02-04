@@ -114,11 +114,11 @@ class DotDict(dict):
     """
 
     def __dir__(self):
-        return self.__dict__.keys() + self.keys()
+        return list(self.__dict__.keys()) + list(self.keys())
 
     def __getattr__(self, key):
         """ Make attempts to lookup by nonexistent attributes also attempt key lookups. """
-        if self.has_key(key):
+        if key in self:
             return self[key]
         import sys
         import dis
@@ -230,9 +230,9 @@ class StandardNameTable(object):
         def _get(self, entrynode, attrname, required=False):
             vals = entrynode.xpath(attrname)
             if len(vals) > 1:
-                raise StandardError("Multiple attrs (%s) found" % attrname)
+                raise Exception("Multiple attrs (%s) found" % attrname)
             elif required and len(vals) == 0:
-                raise StandardError("Required attr (%s) not found" % attrname)
+                raise Exception("Required attr (%s) not found" % attrname)
 
             return vals[0].text
 
@@ -257,7 +257,7 @@ class StandardNameTable(object):
             entryids = self._root.xpath('alias')[idx].xpath('entry_id')
 
             if len(entryids) != 1:
-                raise StandardError("Inconsistency in standard name table, could not lookup alias for %s" % key)
+                raise Exception("Inconsistency in standard name table, could not lookup alias for %s" % key)
 
             key = entryids[0].text
 
@@ -307,7 +307,7 @@ def map_axes(dim_vars, reverse_map=False):
     ret_val = defaultdict(list)
     axes = ['X', 'Y', 'Z', 'T']
 
-    for k, v in dim_vars.iteritems():
+    for k, v in dim_vars.items():
         axis = getattr(v, 'axis', '')
         if not axis:
             continue

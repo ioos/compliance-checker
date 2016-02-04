@@ -11,7 +11,7 @@ from lxml import etree as ET
 from compliance_checker.base import BaseCheck, BaseNCCheck, fix_return_value, Result
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
-from urlparse import urlparse
+from urllib.parse import urlparse
 from datetime import datetime
 import requests
 import textwrap
@@ -34,7 +34,7 @@ class CheckSuite(object):
 
                 cls.checkers[xl.name] = xl
             except Exception as e:
-                print >>sys.stderr, "Could not load", x, ":", e
+                print("Could not load", x, ":", e, file=sys.stderr)
 
     def _get_checks(self, checkclass):
         """
@@ -50,9 +50,9 @@ class CheckSuite(object):
         val = check_method(ds)
 
         if isinstance(val, list):
-            return [fix_return_value(v, check_method.im_func.func_name, check_method, check_method.im_self) for v in val]
+            return [fix_return_value(v, check_method.__func__.__name__, check_method, check_method.__self__) for v in val]
 
-        return [fix_return_value(val, check_method.im_func.func_name, check_method, check_method.im_self)]
+        return [fix_return_value(val, check_method.__func__.__name__, check_method, check_method.__self__)]
 
     def _get_valid_checkers(self, ds, checker_names):
         """
@@ -60,7 +60,7 @@ class CheckSuite(object):
         the user selected names.
         """
         if len(checker_names) == 0:
-            checker_names = self.checkers.keys()
+            checker_names = list(self.checkers.keys())
 
         args = [(name, self.checkers[name]) for name in checker_names if name in self.checkers]
         valid = []
@@ -94,7 +94,7 @@ class CheckSuite(object):
         checkers     = self._get_valid_checkers(ds, checker_names)
 
         if len(checkers) == 0:
-            print "No valid checkers found for tests '%s'" % ",".join(checker_names)
+            print("No valid checkers found for tests '%s'" % ",".join(checker_names))
 
         for checker_name, checker_class in checkers:
 
@@ -109,7 +109,7 @@ class CheckSuite(object):
                 try:
                     vals.extend(self._run_check(c, ds))
                 except Exception as e:
-                    errs[c.im_func.func_name] = (e, sys.exc_info()[2])
+                    errs[c.__func__.__name__] = (e, sys.exc_info()[2])
 
             # score the results we got back
             groups = self.scores(vals)
@@ -224,7 +224,7 @@ class CheckSuite(object):
         aggregates = self.build_structure(check_name, groups, source_name, limit)
         aggregates = self.serialize(aggregates)
         json_string = json.dumps(aggregates, ensure_ascii=False)
-        file_object.write(unicode(json_string))
+        file_object.write(str(json_string))
         return
 
     def serialize(self, o):
@@ -236,7 +236,7 @@ class CheckSuite(object):
         if isinstance(o, (list, tuple)):
             return [self.serialize(i) for i in o]
         if isinstance(o, dict):
-            return {k: self.serialize(v) for k,v in o.iteritems()}
+            return {k: self.serialize(v) for k,v in o.items()}
         if isinstance(o, datetime):
             return o.isoformat()
         if isinstance(o, Result):
@@ -262,7 +262,7 @@ class CheckSuite(object):
         template_vars = self.build_structure(check_name, groups, source_name, limit)
 
         buf = template.render(**template_vars)
-        file_object.write(unicode(buf))
+        file_object.write(str(buf))
 
     def get_points(self, groups, limit):
         score_list = []
@@ -289,76 +289,76 @@ class CheckSuite(object):
         Returns the dataset needed for the verbose output, as well as the failure flags.
         """
         score_list, points, out_of = self.get_points(groups, limit)
-        print '\n'
-        print "-"*80
-        print '{:^80}'.format("The dataset scored %r out of %r points" % (points, out_of))
-        print '{:^80}'.format("during the %s check" % check_name)
-        print "-"*80
+        print('\n')
+        print("-"*80)
+        print('{:^80}'.format("The dataset scored %r out of %r points" % (points, out_of)))
+        print('{:^80}'.format("during the %s check" % check_name))
+        print("-"*80)
 
         return  [score_list, points, out_of]
 
     def non_verbose_output_generation(self, score_list, groups, limit, points, out_of):
 
         if points < out_of:
-            print '{:^80}'.format("Scoring Breakdown:")
-            print '\n'
+            print('{:^80}'.format("Scoring Breakdown:"))
+            print('\n')
             priority_flag = 3
             for x in range(len(score_list)):
                 if score_list[x][1] == 3 and limit <= 3 :
                     if priority_flag ==3:
-                        print '{:^80}'.format("High Priority")
-                        print "-"*80
-                        print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                        print('{:^80}'.format("High Priority"))
+                        print("-"*80)
+                        print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
                         priority_flag -= 1
-                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
+                    print('%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
                 
                 elif score_list[x][1] == 2 and limit <= 2 :
                     if priority_flag ==2:
-                        print '\n'
-                        print '{:^80}'.format("Medium Priority")
-                        print "-"*80
-                        print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                        print('\n')
+                        print('{:^80}'.format("Medium Priority"))
+                        print("-"*80)
+                        print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
                         priority_flag -= 1
-                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
+                    print('%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
                     
                 elif score_list[x][1] == 1 and limit == 1 :
                     if priority_flag ==1:
-                        print '\n'
-                        print '{:^80}'.format("Low Priority")
-                        print "-"*80
-                        print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                        print('\n')
+                        print('{:^80}'.format("Low Priority"))
+                        print("-"*80)
+                        print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
                         priority_flag -= 1
-                    print '%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1])
+                    print('%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
                     
                 elif score_list[x][1] == 1 and limit == 1 and priority_flag == 2:
-                    print '{:^80}'.format('No medium priority tests present')
-                    print '-'*80
+                    print('{:^80}'.format('No medium priority tests present'))
+                    print('-'*80)
                     priority_flag -= 1
             #Catch All for pretty presentation
             if priority_flag == 2 and limit == 2:
-                print '{:^80}'.format('No Medium priority tests present')
-                print '-'*80
+                print('{:^80}'.format('No Medium priority tests present'))
+                print('-'*80)
 
             if priority_flag == 2 and limit == 1:
-                print '{:^80}'.format('No Medium priority tests present')
-                print '-'*80
-                print ''
-                print '{:^80}'.format('No Low priority tests present')
-                print '-'*80
+                print('{:^80}'.format('No Medium priority tests present'))
+                print('-'*80)
+                print('')
+                print('{:^80}'.format('No Low priority tests present'))
+                print('-'*80)
 
             if priority_flag == 1 and limit == 1:
-                print '{:^80}'.format('No Low priority tests present')
-                print '-'*80
+                print('{:^80}'.format('No Low priority tests present'))
+                print('-'*80)
 
-            print "\n"+"\n"+'-'*80
-            print '{:^80}'.format('Reasoning for the failed tests given below:')
-            print '\n'
-            print '%s%37s:%10s:%8s' % ('Name','Priority', '  Score', 'Reasoning')
-            print "-"*80
+            print("\n"+"\n"+'-'*80)
+            print('{:^80}'.format('Reasoning for the failed tests given below:'))
+            print('\n')
+            print('%s%37s:%10s:%8s' % ('Name','Priority', '  Score', 'Reasoning'))
+            print("-"*80)
             self.reasoning_routine(groups, 0)
 
         else: 
-            print "All tests passed!"
+            print("All tests passed!")
 
 
 
@@ -367,14 +367,14 @@ class CheckSuite(object):
         Generates the Terminal Output for Verbose cases
         '''
         priority_flag = 3
-        print '{:^80}'.format("Verbose Scoring Breakdown:"),
+        print('{:^80}'.format("Verbose Scoring Breakdown:"), end=' ')
         self.print_routine(groups, 0, priority_flag)
         if points < out_of:
-            print "\n"+"\n"+'-'*80
-            print '{:^80}'.format('Reasoning for the failed tests given below:')
-            print '\n'
-            print '%s%37s:%10s:%8s' % ('Name','Priority', '  Score', 'Reasoning')
-            print "-"*80
+            print("\n"+"\n"+'-'*80)
+            print('{:^80}'.format('Reasoning for the failed tests given below:'))
+            print('\n')
+            print('%s%37s:%10s:%8s' % ('Name','Priority', '  Score', 'Reasoning'))
+            print("-"*80)
             self.reasoning_routine(groups, 0)
 
         pass
@@ -398,28 +398,28 @@ class CheckSuite(object):
         for res in grouped_sorted:
             #If statements to print the proper Headings
             if res.weight == 3 and indent == 0 and priority_flag == 3:
-                print '\n'
-                print '{:^80}'.format("High Priority")
-                print "-"*80
-                print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                print('\n')
+                print('{:^80}'.format("High Priority"))
+                print("-"*80)
+                print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
 
                 priority_flag -= 1
             if res.weight == 2 and indent == 0 and priority_flag == 2:
-                print '\n'
-                print '{:^80}'.format("Medium Priority")
-                print "-"*80
-                print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                print('\n')
+                print('{:^80}'.format("Medium Priority"))
+                print("-"*80)
+                print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
 
                 priority_flag -= 1
             if res.weight ==1 and indent ==0 and priority_flag == 1:
-                print '\n'
-                print '{:^80}'.format("Low Priority")
-                print "-"*80
-                print '%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score')
+                print('\n')
+                print('{:^80}'.format("Low Priority"))
+                print("-"*80)
+                print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
                 priority_flag -= 1
 
 
-            print '%-40s:%s:%s%6s/%1s' % ((indent*'    '+res.name)[0:39], res.weight, indent*'  ', res.value[0], res.value[1])
+            print('%-40s:%s:%s%6s/%1s' % ((indent*'    '+res.name)[0:39], res.weight, indent*'  ', res.value[0], res.value[1]))
             if res.children:
                 self.print_routine(res.children, indent+1, priority_flag)
 
@@ -441,10 +441,10 @@ class CheckSuite(object):
         wrapper = textwrap.TextWrapper(initial_indent = '', width = 80, subsequent_indent = ' '*54)
         for res in grouped_sorted:
             if (res.value[0] != res.value[1]) and not res.msgs:
-                print '%-39s:%1s:%6s/%2s : %s' %(unicode(indent*'    '+res.name)[0:39], res.weight, unicode(res.value[0]), unicode(res.value[1]), ' ')
+                print('%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), ' '))
             
             if (res.value[0] != res.value[1]) and res.msgs:
-                print wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(unicode(indent*'    '+res.name)[0:39], res.weight, unicode(res.value[0]), unicode(res.value[1]), unicode(", ".join(res.msgs))))
+                print(wrapper.fill('%-39s:%1s:%6s/%2s : %s' %(str(indent*'    '+res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), str(", ".join(res.msgs)))))
 
             if res.children:
                 self.reasoning_routine(res.children, indent+1, False)
@@ -471,11 +471,11 @@ class CheckSuite(object):
 
                 doc = r.text
             else:
-                raise StandardError("Could not understand response code %s and content-type %s" % (rhead.status_code, rhead.headers.get('content-type', 'none')))
+                raise Exception("Could not understand response code %s and content-type %s" % (rhead.status_code, rhead.headers.get('content-type', 'none')))
         else:
             # do a cheap imitation of libmagic
             # http://stackoverflow.com/a/7392391/84732
-            textchars = ''.join(map(chr, [7,8,9,10,12,13,27] + range(0x20, 0x100)))
+            textchars = ''.join(map(chr, [7,8,9,10,12,13,27] + list(range(0x20, 0x100))))
             is_binary_string = lambda bytes: bool(bytes.translate(None, textchars))
 
             with open(ds_str, 'rb') as f:
@@ -495,7 +495,7 @@ class CheckSuite(object):
             elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
                 ds = SensorML(xml_doc)
             else:
-                raise StandardError("Unrecognized XML root element: %s" % xml_doc.tag)
+                raise Exception("Unrecognized XML root element: %s" % xml_doc.tag)
         else:
             # no doc? try the dataset constructor
             ds = Dataset(ds_str)
@@ -539,7 +539,7 @@ class CheckSuite(object):
 
         # CHECK FOR TERMINAL CONDITION: all raw_scores.name are single length
         # @TODO could have a problem here with scalar name, but probably still works
-        terminal = map(lambda x: len(x.name), raw_scores)
+        terminal = [len(x.name) for x in raw_scores]
         if terminal == [0] * len(raw_scores):
             return []
 
@@ -567,16 +567,16 @@ class CheckSuite(object):
             
             v = list(v)
 
-            cv = self._group_raw(map(trim_groups, v), k, level+1)
+            cv = self._group_raw(list(map(trim_groups, v)), k, level+1)
             if len(cv):
                 # if this node has children, max weight of children + sum of all the scores
-                max_weight = max(map(lambda x: x.weight, cv))
-                sum_scores = tuple(map(sum, zip(*(map(lambda x: x.value, cv)))))
+                max_weight = max([x.weight for x in cv])
+                sum_scores = tuple(map(sum, list(zip(*([x.value for x in cv])))))
                 msgs = []
             else:
-                max_weight = max(map(lambda x: x.weight, v))
-                sum_scores = tuple(map(sum, zip(*(map(lambda x: self._translate_value(x.value), v)))))
-                msgs = sum(map(lambda x: x.msgs, v), [])
+                max_weight = max([x.weight for x in v])
+                sum_scores = tuple(map(sum, list(zip(*([self._translate_value(x.value) for x in v])))))
+                msgs = sum([x.msgs for x in v], [])
 
             ret_val.append(Result(name=k, weight=max_weight, value=sum_scores, children=cv, msgs=msgs))
         

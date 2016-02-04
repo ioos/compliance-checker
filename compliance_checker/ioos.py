@@ -126,7 +126,7 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
         msgs = []
         count = 0
 
-        for k, v in ds.variables.iteritems():
+        for k, v in ds.variables.items():
             if 'standard_name' in v.ncattrs():
                 count += 1
             else:
@@ -141,7 +141,7 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
         msgs = []
         count = 0
 
-        for k, v in ds.variables.iteritems():
+        for k, v in ds.variables.items():
             if 'units' in v.ncattrs():
                 count += 1
             else:
