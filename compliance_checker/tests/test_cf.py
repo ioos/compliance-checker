@@ -602,15 +602,18 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_two_dimensional(dataset)
         for r in results:
             self.assertTrue(r.value)
-
         # Need the bad testing
         dataset = self.load_dataset(static_files['bad2dim'])
         results = self.cf.check_two_dimensional(dataset)
+
         self.assertTrue(results[0].value)
         self.assertFalse(results[1].value)
+        self.assertIn('lat, is not a coordinate or auxiliary variable', results[1].msgs[0])
         self.assertFalse(results[2].value)
+        self.assertIn('coordinate lat is not a correct lat/lon variable', results[2].msgs[0])
         self.assertTrue(results[3].value)
         self.assertFalse(results[4].value)
+        self.assertIn('lat_p, does not share dimension x with the variable', results[4].msgs[0])
         self.assertTrue(results[5].value)
 
         # Test the self referencing variables

@@ -1505,17 +1505,22 @@ class CFBaseCheck(BaseCheck):
                     reported_reference_variables.append(self_reference_variable)
 
             # Determine if 2-D coordinate variables (Lat and Lon are of shape (i,j)
-            for each in g.coords:
+            valid = True
+            for _, graph in g.coords.items():
                 try:
-                    valid = g.coords[each].ndim == 2
-                except:
+                    assert graph.ndim == 2
+                except AssertionError:
                     valid = False
+                except AttributeError:
+                    # When graph is None
+                    pass
 
-            if len(g.coords) == 2 and valid:
+            if len(g.coords) == 2 and valid is True:
                 # ------------------------------------------------------------
                 # Check all the dims are coordinate variables
                 # ------------------------------------------------------------
                 valid_dims = True
+                reasoning = []
                 for dim in g.dims.keys():
                     if dim not in ds.variables:
                         valid_dims = False
@@ -1546,24 +1551,26 @@ class CFBaseCheck(BaseCheck):
                                 ('§5.2 Latitude and longitude coordinates of a horizontal grid', name, 'valid_coordinates'),
                                 reasoning)
                 ret_val.append(result)
-
                 # ------------------------------------------------------------
                 # Can make lat/lon?
                 # ------------------------------------------------------------
 
                 lat_check = False
                 lon_check = False
-
+                reasoning = []
                 for cname, coord in g.coords.items():
 
                     if coord is not None and coord.units in ['degrees_north', 'degree_north', 'degrees_N', 'degree_N', 'degreesN', 'degreeN']:
                         lat_check = True
                     elif coord is not None and coord.units in ['degrees_east', 'degree_east', 'degrees_E', 'degree_E', 'degreesE', 'degreeE']:
                         lon_check = True
+                    else:
+                        reasoning.append("coordinate {} is not a correct lat/lon variable".format(cname))
 
                 result = Result(BaseCheck.HIGH,
                                 lat_check and lon_check,
-                                ('§5.2 Latitude and longitude coordinates of a horizontal grid', name, 'lat_lon_correct'))
+                                ('§5.2 Latitude and longitude coordinates of a horizontal grid', name, 'lat_lon_correct'),
+                                reasoning)
                 ret_val.append(result)
             else:
                 continue  # Not a 2d horizontal grid
