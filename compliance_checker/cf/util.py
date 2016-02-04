@@ -12,98 +12,99 @@ from compliance_checker.base import BaseCheck, Result
 # copied from paegan
 # paegan may depend on these later
 _possiblet = ["time", "TIME", "Time",
-           "t", "T",
-           "ocean_time", "OCEAN_TIME",
-           "jd", "JD",
-           "dn", "DN",
-           "times", "TIMES", "Times",
-           "mt", "MT",
-           "dt", "DT",
-          ]
+              "t", "T",
+              "ocean_time", "OCEAN_TIME",
+              "jd", "JD",
+              "dn", "DN",
+              "times", "TIMES", "Times",
+              "mt", "MT",
+              "dt", "DT",
+              ]
 _possiblez = ["depth", "DEPTH",
-           "depths", "DEPTHS",
-           "height", "HEIGHT",
-           "altitude", "ALTITUDE",
-           "alt", "ALT",
-           "Alt", "Altitude",
-           "h", "H",
-           "s_rho", "S_RHO",
-           "s_w", "S_W",
-           "z", "Z",
-           "siglay", "SIGLAY",
-           "siglev", "SIGLEV",
-           "sigma", "SIGMA",
-           "vertical", "VERTICAL", "lev", "LEV", "level", "LEVEL"
-          ]
+              "depths", "DEPTHS",
+              "height", "HEIGHT",
+              "altitude", "ALTITUDE",
+              "alt", "ALT",
+              "Alt", "Altitude",
+              "h", "H",
+              "s_rho", "S_RHO",
+              "s_w", "S_W",
+              "z", "Z",
+              "siglay", "SIGLAY",
+              "siglev", "SIGLEV",
+              "sigma", "SIGMA",
+              "vertical", "VERTICAL", "lev", "LEV", "level", "LEVEL"
+              ]
 _possiblex = ["x", "X",
-           "lon", "LON",
-           "xlon", "XLON",
-           "lonx", "lonx",
-           "lon_u", "LON_U",
-           "lon_v", "LON_V",
-           "lonc", "LONC",
-           "Lon", "Longitude",
-           "longitude", "LONGITUDE",
-           "lon_rho", "LON_RHO",
-           "lon_psi", "LON_PSI",
+              "lon", "LON",
+              "xlon", "XLON",
+              "lonx", "lonx",
+              "lon_u", "LON_U",
+              "lon_v", "LON_V",
+              "lonc", "LONC",
+              "Lon", "Longitude",
+              "longitude", "LONGITUDE",
+              "lon_rho", "LON_RHO",
+              "lon_psi", "LON_PSI",
 
-          ]
+              ]
 _possibley = ["y", "Y",
-           "lat", "LAT",
-           "ylat", "YLAT",
-           "laty", "laty",
-           "lat_u", "LAT_U",
-           "lat_v", "LAT_V",
-           "latc", "LATC",
-           "Lat", "Latitude",
-           "latitude", "LATITUDE",
-           "lat_rho", "LAT_RHO",
-           "lat_psi", "LAT_PSI",
+              "lat", "LAT",
+              "ylat", "YLAT",
+              "laty", "laty",
+              "lat_u", "LAT_U",
+              "lat_v", "LAT_V",
+              "latc", "LATC",
+              "Lat", "Latitude",
+              "latitude", "LATITUDE",
+              "lat_rho", "LAT_RHO",
+              "lat_psi", "LAT_PSI",
 
-          ]
+              ]
 
 _possibleaxis = _possiblet + _possiblez + _possiblex + _possibley
 
 
 _possiblexunits = ['degrees_east',
-                    'degree_east',
-                    'degrees_E',
-                    'degree_E',
-                    'degreesE',
-                    'degreeE'
-                    ]
+                   'degree_east',
+                   'degrees_E',
+                   'degree_E',
+                   'degreesE',
+                   'degreeE'
+                   ]
 
 _possibleyunits = ['degrees_north',
-                'degree_north',
-                'degrees_N',
-                'degree_N',
-                'degreesN',
-                'degreeN'
-                    ]
+                   'degree_north',
+                   'degrees_N',
+                   'degree_N',
+                   'degreesN',
+                   'degreeN'
+                   ]
 
 _possibletunits = ['day',
-                'days',
-                'd',
-                'hour',
-                'hours',
-                'hr',
-                'hrs',
-                'h',
-                'year',
-                'years',
-                'minute',
-                'minutes',
-                'm',
-                'min',
-                'mins',
-                'second',
-                'seconds',
-                's',
-                'sec',
-                'secs'
-                ]
+                   'days',
+                   'd',
+                   'hour',
+                   'hours',
+                   'hr',
+                   'hrs',
+                   'h',
+                   'year',
+                   'years',
+                   'minute',
+                   'minutes',
+                   'm',
+                   'min',
+                   'mins',
+                   'second',
+                   'seconds',
+                   's',
+                   'sec',
+                   'secs'
+                   ]
 
-_possibleaxisunits =  _possiblexunits + _possibleyunits +_possibletunits
+_possibleaxisunits = _possiblexunits + _possibleyunits + _possibletunits
+
 
 class DotDict(dict):
     """
@@ -129,7 +130,7 @@ class DotDict(dict):
 
         raise AttributeError(key)
 
-    def __setattr__(self,key,value):
+    def __setattr__(self, key, value):
         if key in dir(dict):
             raise AttributeError('%s conflicts with builtin.' % key)
         if isinstance(value, dict):
@@ -154,7 +155,9 @@ class DotDict(dict):
     def fromkeys(cls, seq, value=None):
         return DotDict(dict.fromkeys(seq, value))
 
+
 class NCGraph:
+
     def __init__(self, ds, name, nc_object, self_reference_variables, reference_map=None):
 
         self.ds           = ds
@@ -218,9 +221,11 @@ class NCGraph:
             return self.__dict__[key]
         return getattr(self.obj, key)
 
+
 class StandardNameTable(object):
 
     class NameEntry(object):
+
         def __init__(self, entrynode):
             self.canonical_units = self._get(entrynode, 'canonical_units', True)
             self.grib            = self._get(entrynode, 'grib')
@@ -274,6 +279,7 @@ class StandardNameTable(object):
     def __iter__(self):
         return iter(itertools.chain(self._names, self._aliases))
 
+
 def units_known(units):
     try:
         Unit(units)
@@ -292,12 +298,14 @@ def units_convertible(units1, units2, reftimeistime=True):
         return False
     return u1.is_convertible(units2)
 
+
 def units_temporal(units):
     try:
         u = Unit(units)
     except ValueError:
         return False
     return u.is_time_reference()
+
 
 def map_axes(dim_vars, reverse_map=False):
     """
@@ -321,6 +329,7 @@ def map_axes(dim_vars, reverse_map=False):
 
     return dict(ret_val)
 
+
 def find_coord_vars(ncds):
     """
     Finds all coordinate variables in a dataset.
@@ -335,6 +344,7 @@ def find_coord_vars(ncds):
 
     return coord_vars
 
+
 def is_time_variable(varname, var):
     """
     Identifies if a variable is represents time
@@ -344,6 +354,7 @@ def is_time_variable(varname, var):
     satisfied |= getattr(var, 'axis', '') == 'T'
     satisfied |= units_convertible('seconds since 1900-01-01', getattr(var, 'units', ''))
     return satisfied
+
 
 def is_vertical_coordinate(var_name, var):
     """
@@ -363,6 +374,5 @@ def is_vertical_coordinate(var_name, var):
     # Pressure defined or positive defined
     satisfied |= is_pressure
     if not is_pressure:
-        satisfied |= getattr(var,'positive', '').lower() in ('up', 'down')
+        satisfied |= getattr(var, 'positive', '').lower() in ('up', 'down')
     return satisfied
-

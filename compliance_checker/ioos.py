@@ -1,6 +1,7 @@
 import itertools
 from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, score_group, Result
 
+
 class IOOSBaseCheck(BaseCheck):
     register_checker = True
     name = 'ioos'
@@ -17,6 +18,7 @@ class IOOSBaseCheck(BaseCheck):
             msgs.append("Attr '{}' (IOOS concept: '{}') not found in dataset".format(attr, concept_name))
 
         return Result(priority, val, concept_name, msgs)
+
 
 class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
 
@@ -159,10 +161,11 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
             msgs = []
             val = 'units' in ds.variables['z'].ncattrs()
             if not val:
-                msgs.append("Variable 'z' has no units attr") 
+                msgs.append("Variable 'z' has no units attr")
             return Result(BaseCheck.LOW, val, 'Altitude Units', msgs)
-        
+
         return Result(BaseCheck.LOW, (0, 0), 'Altitude Units', ["Dataset has no 'z' variable"])
+
 
 class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
 
@@ -192,6 +195,7 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
         return [
             'altitude_units'
         ]
+
 
 class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseCheck):
 

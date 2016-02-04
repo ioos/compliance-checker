@@ -5,6 +5,7 @@ from io import StringIO
 
 from compliance_checker.suite import CheckSuite
 
+
 class ComplianceChecker(object):
     """
     Compliance Checker runner class.

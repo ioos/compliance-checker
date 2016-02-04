@@ -5,14 +5,16 @@ from compliance_checker.suite import CheckSuite
 import unittest
 
 static_files = {
-        '2dim'                       : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
-        'bad_region'                 : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
-        'bad_data_type'              : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
+    '2dim'                       : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
+    'bad_region'                 : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
+    'bad_data_type'              : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
 }
+
 
 class TestSuite(unittest.TestCase):
     # @see
     # http://www.saltycrane.com/blog/2012/07/how-prevent-nose-unittest-using-docstring-when-verbosity-2/
+
     def shortDescription(self):
         return None
 
@@ -26,8 +28,6 @@ class TestSuite(unittest.TestCase):
         else:
             return "%s ( %s )" % (name[-1], '.'.join(name[:-2]) + ":" + '.'.join(name[-2:]))
     __str__ = __repr__
-
-
 
     def test_suite(self):
         cs = CheckSuite()
