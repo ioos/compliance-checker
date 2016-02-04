@@ -465,10 +465,11 @@ class CheckSuite(object):
             else:
                 raise Exception("Could not understand response code %s and content-type %s" % (rhead.status_code, rhead.headers.get('content-type', 'none')))
         else:
-            # do a cheap imitation of libmagic
-            # http://stackoverflow.com/a/7392391/84732
-            textchars = ''.join(map(chr, [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))))
-            is_binary_string = lambda bytes: bool(bytes.translate(None, textchars))
+            def is_binary_string(bts):
+                # do a cheap imitation of libmagic
+                # http://stackoverflow.com/a/7392391/84732
+                textchars = ''.join(map(chr, [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))))
+                return bool(bytes.translate(None, textchars))
 
             with open(ds_str, 'rb') as f:
                 first_chunk = f.read(1024)
