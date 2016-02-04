@@ -4,6 +4,8 @@ sudo: false
 
 env:
     - CONDA="python=2.7"
+    - CONDA="python=3.4"
+    - CONDA="python=3.5"
 
 before_install:
     - URL=http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
@@ -13,9 +15,9 @@ before_install:
     - conda update --yes --all
     - conda config --add channels ioos --force
     - travis_retry conda create --yes -n test --file requirements.txt $CONDA
-    - travis_retry conda install --yes pytest
-    - travis_retry pip install pylama
+    - travis_retry conda install -n test --yes pytest flake8
     - source activate test
 
 script:
-    - py.test --pylama -s -rxs -v
+    - py.test -s -rxs -v
+    - flake8 --ignore=E501,E251,E221,E201,E202,E203 -qq --statistics . || true
