@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import traceback
 import sys
 import io
@@ -27,8 +29,6 @@ class ComplianceChecker(object):
 
         @returns                If the tests failed (based on the criteria)
         """
-        retval = True
-
         cs = CheckSuite()
         ds = cs.load_dataset(ds_loc)
         score_groups = cs.run(ds, *checker_names)

@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 import re
 from functools import wraps
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 import numpy as np
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
-from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possiblexunits, _possibleyunits, _possibletunits, _possibleaxisunits
+from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
 
-from netCDF4 import Dimension, Variable
 from sets import Set
 
 
@@ -1589,7 +1588,6 @@ class CFBaseCheck(BaseCheck):
             if not hasattr(var, 'coordinates'):
                 continue
 
-            valid = True
             reasoning = []
             valid_in_variables = True
             valid_dim = True
@@ -1896,9 +1894,6 @@ class CFBaseCheck(BaseCheck):
         there are no mandatory attributes, but they may have any of the attributes allowed for coordinate variables.
         """
         ret_val = []
-        reasoning = []
-        valid_alt_coordinate_var = 0
-        total_alt_coordinate_var = 0
         coordinate_list = []
 
         for name, var in ds.variables.items():
@@ -2076,15 +2071,10 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         reasoning = []
         paragraph = ''
-        named = ''
-
         pvars = re.compile('\(.*?\)|(\w*?):')
-
         psep = re.compile('((?P<var>\w+): (?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) ?(?P<over>over (?P<otypevar>\w+))?| ?)(?P<brace>\(((?P<brace_wunit>\w+): (\d+) (?P<unit>\w+)|(?P<brace_opt>\w+): (\w+))\))*)')
 
-        names = list(ds.variables.keys())
         for name, var in ds.variables.items():
-            named_dict = OrderedDict()
             if getattr(var, 'cell_methods', '') :
                 method = getattr(var, 'cell_methods', '')
 
@@ -2848,7 +2838,6 @@ class CFBaseCheck(BaseCheck):
                     if valid_missing is False:
                         reasoning.append('The data does not have the same missing data locations as the coordinates')
 
-                count = int(valid) + int(aux_valid) + int(valid_missing)
                 result = Result(BaseCheck.MEDIUM,
                                 valid and aux_valid and valid_missing,
                                 ('§9.6 Missing Data', name, 'missing_data'),

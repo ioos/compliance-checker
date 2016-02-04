@@ -16,7 +16,6 @@ included, when applicable, with any grid mapping.
 We have used the FGDC "Content Standard for Digital Geospatial Metadata" [FGDC]
 as a guide in choosing the values for grid_mapping_name and the attribute names
 for the parameters describing map projections.
-
 '''
 
 grid_mapping_names = [

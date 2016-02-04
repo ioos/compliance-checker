@@ -1,5 +1,4 @@
-import itertools
-from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, score_group, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, Result
 
 
 class IOOSBaseCheck(BaseCheck):

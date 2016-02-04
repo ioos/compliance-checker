@@ -5,7 +5,6 @@ Compliance Checker
 """
 
 from functools import wraps
-import collections
 import pprint
 
 from netCDF4 import Dataset

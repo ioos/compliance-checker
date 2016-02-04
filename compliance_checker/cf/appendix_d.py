@@ -19,8 +19,7 @@ to illustrate the indices that might be present in the file variables. For
 example, a vertical coordinate whose definition contains a time index is not
 necessarily time dependent in all netCDF files. Also, the definitions are given
 in general forms that may be simplified by omitting certain terms. A term that
-is omitted from the formula_terms attribute should be assumed to be zero.  
-
+is omitted from the formula_terms attribute should be assumed to be zero.
 '''
 
 # a list of tuples

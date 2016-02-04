@@ -1,6 +1,7 @@
 """
 Compliance Checker suite runner
 """
+from __future__ import print_function
 
 import sys
 import inspect
@@ -8,14 +9,13 @@ import itertools
 import json
 from netCDF4 import Dataset
 from lxml import etree as ET
-from compliance_checker.base import BaseCheck, BaseNCCheck, fix_return_value, Result
+from compliance_checker.base import fix_return_value, Result
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from urllib.parse import urlparse
 from datetime import datetime
 import requests
 import textwrap
-import pkg_resources
 
 
 class CheckSuite(object):
@@ -89,10 +89,8 @@ class CheckSuite(object):
         Returns a dictionary mapping checker names to a 2-tuple of their grouped scores and errors/exceptions while running checks.
         """
 
-        ret_val      = {}
-        fail_flag    = False
-
-        checkers     = self._get_valid_checkers(ds, checker_names)
+        ret_val  = {}
+        checkers = self._get_valid_checkers(ds, checker_names)
 
         if len(checkers) == 0:
             print("No valid checkers found for tests '%s'" % ",".join(checker_names))
