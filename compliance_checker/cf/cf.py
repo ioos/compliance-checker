@@ -1150,14 +1150,14 @@ class CFBaseCheck(BaseCheck):
             is_density  = units_convertible(getattr(v, 'units', '1'), 'kg m-3')
 
             if is_pressure or is_length:
-                result = Result(BaseCheck.HIGH, True,                     \
-                                '§4.3.1 Vertical dimension coordinates contain valid attributes', \
+                result = Result(BaseCheck.HIGH, True,
+                                '§4.3.1 Vertical dimension coordinates contain valid attributes',
                                 [])
 
             # Temperature or Density are okay as well
             elif is_temp or is_density:
-                result = Result(BaseCheck.HIGH, True,                     \
-                                '§4.3.1 Vertical dimension coordinates contain valid attributes', \
+                result = Result(BaseCheck.HIGH, True,
+                                '§4.3.1 Vertical dimension coordinates contain valid attributes',
                                 [])
             else:
                 result = Result(BaseCheck.HIGH, False,

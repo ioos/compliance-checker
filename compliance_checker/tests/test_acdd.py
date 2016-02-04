@@ -11,4 +11,4 @@ def test_acdd():
 
     ds = Dataset("/Users/asadeveloper/Downloads/hycomglobalnavy_2012120300.nc")
     acdd = ACDDCheck()
-    assert True == acdd.check_high(ds)
+    assert acdd.check_high(ds) is True

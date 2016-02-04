@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import pprint
 import argparse
 import sys
 from compliance_checker.runner import ComplianceChecker, CheckSuite
