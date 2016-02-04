@@ -207,11 +207,11 @@ class NCGraph:
         return NCGraph(self.ds, coord, self.ds.variables[coord], self.reference_variables, self.reference_map)
 
     def get_grid_mapping(self, gm):
-        if gm not in ds.variables:
+        if gm not in self.ds.variables:
             return
         if gm in self.reference_map:
             return self.reference_map[gm]
-        return NCGraph(ds, gm, ds.variables[gm], self.reference_map)
+        return NCGraph(self.ds, gm, self.ds.variables[gm], self.reference_map)
 
     def __getattr__(self, key):
         if key in self.__dict__:
