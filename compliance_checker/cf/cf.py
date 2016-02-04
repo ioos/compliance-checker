@@ -203,7 +203,7 @@ class CFBaseCheck(BaseCheck):
             elif getattr(var, 'cf_role', None) == 'timeseries_id':
                 self._metadata_vars[ds].append(var)
 
-            elif len(var.dimensions) == 0:
+            elif getattr(var, 'standard_name', None) is None and len(var.dimensions) == 0:
                 self._metadata_vars[ds].append(var)
 
         return self._metadata_vars[ds]
