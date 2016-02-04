@@ -48,7 +48,7 @@ class BaseNCCheck(object):
         """
         Returns 0 if attr not present, 1 if present but not in correct value, 2 if good
         """
-        if not name in dataset.ncattrs():
+        if name not in dataset.ncattrs():
             return 0
 
         ret_val = 1

@@ -695,7 +695,7 @@ class CFBaseCheck(BaseCheck):
                            'status_flag']
 
                 msgs = []
-                if not std_name_modifier in allowed:
+                if std_name_modifier not in allowed:
                     msgs.append("modifier (%s) not allowed" % std_name_modifier)
 
                 ret_val.append(Result(BaseCheck.HIGH, std_name_modifier in allowed, '§3.3 Standard Names', msgs))
@@ -1441,7 +1441,7 @@ class CFBaseCheck(BaseCheck):
         # Check to find all space-time coordinate variables (Lat/Lon/Time/Height)
         for each in self._find_coord_vars(ds):
             if str(each._name) in _possibleaxis \
-               or (hasattr(each, 'units') and (each.units in _possibleaxisunits or each.units.split(" ")[0]  in _possibleaxisunits)) \
+               or (hasattr(each, 'units') and (each.units in _possibleaxisunits or each.units.split(" ")[0] in _possibleaxisunits)) \
                or hasattr(each, 'positive'):
                 space_time_coord_var.append(each._name)
 
@@ -1457,12 +1457,12 @@ class CFBaseCheck(BaseCheck):
                         dim_name = each
                         break
 
-            if valid == False :
+            if valid is False :
                 ret_val.append(Result(BaseCheck.MEDIUM,
                                       valid,
                                       '§5.1 Geophysical variables contain valid dimensions', ['The %s dimension for the variable %s does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' % (dim_name, name)]))
 
-            if valid == True and name not in space_time_coord_var:
+            if valid is True and name not in space_time_coord_var:
                 ret_val.append(Result(BaseCheck.MEDIUM,
                                       valid,
                                       '§5.1 Geophysical variables contain valid dimensions'))
@@ -1492,7 +1492,7 @@ class CFBaseCheck(BaseCheck):
             reasoning = []
 
             for self_reference_variable in self_reference_variables:
-                if not self_reference_variable in reported_reference_variables:
+                if self_reference_variable not in reported_reference_variables:
                     reasoning.append("Variable %s's coordinate references itself" % (self_reference_variable))
 
                     result = Result(BaseCheck.HIGH,
@@ -1554,9 +1554,9 @@ class CFBaseCheck(BaseCheck):
 
                 for cname, coord in g.coords.items():
 
-                    if coord != None and coord.units in ['degrees_north', 'degree_north', 'degrees_N', 'degree_N', 'degreesN', 'degreeN']:
+                    if coord is not None and coord.units in ['degrees_north', 'degree_north', 'degrees_N', 'degree_N', 'degreesN', 'degreeN']:
                         lat_check = True
-                    elif coord != None and coord.units in ['degrees_east', 'degree_east', 'degrees_E', 'degree_E', 'degreesE', 'degreeE']:
+                    elif coord is not None and coord.units in ['degrees_east', 'degree_east', 'degrees_E', 'degree_E', 'degreesE', 'degreeE']:
                         lon_check = True
 
                 result = Result(BaseCheck.HIGH,
@@ -1628,7 +1628,7 @@ class CFBaseCheck(BaseCheck):
                             valid_cdim = False
                             reasoning.append("Dimension %s compresses non-existent dimension, %s" % (dim_name, cdim))
                             continue
-            if is_reduced_horizontal_grid == True:
+            if is_reduced_horizontal_grid is True:
                 result = Result(BaseCheck.MEDIUM,
                                 (valid_in_variables and valid_dim and valid_coord and valid_cdim),
                                 ('§5.3 Is reduced horizontal grid', name, 'is_reduced_horizontal_grid'),
@@ -1988,7 +1988,6 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
         reasoning = []
-        paragraph = []
         for name, var in ds.variables.items():
             for dim in var.dimensions:
                 if getattr(var, 'cell_measures', ''):
@@ -2363,7 +2362,7 @@ class CFBaseCheck(BaseCheck):
                     reasoning.append("Attributes add_offset and scale_factor are not of type float or double.")
                 else:
                     # Check variable type is byte, short or int
-                    if not var.dtype in [np.int, np.int8, np.int16, np.int32, np.int64]:
+                    if var.dtype not in [np.int, np.int8, np.int16, np.int32, np.int64]:
                         valid = False
                         reasoning.append("Variable is not of type byte, short, or int.")
 
@@ -2828,9 +2827,9 @@ class CFBaseCheck(BaseCheck):
                 else:
                     valid = True
 
-                if aux_valid == False:
+                if aux_valid is False:
                     reasoning.append('The auxillary coordinates do not have the same missing data locations')
-                if valid == False:
+                if valid is False:
                     reasoning.append('The coordinate variables do not have the same missing data locations as the auxillary coordinates')
 
                 # Check to see that all coordinate variable mising data is reflceted in the dataset
@@ -2846,7 +2845,7 @@ class CFBaseCheck(BaseCheck):
                         coordinate_ind_list = dim_index_dict[name + '-' + coordinate]
                         valid_missing = all(each in x_indices for each in coordinate_ind_list)
 
-                    if valid_missing == False:
+                    if valid_missing is False:
                         reasoning.append('The data does not have the same missing data locations as the coordinates')
 
                 count = int(valid) + int(aux_valid) + int(valid_missing)

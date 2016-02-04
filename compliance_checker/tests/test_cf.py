@@ -764,7 +764,7 @@ class TestCF(unittest.TestCase):
         for each in results:
             self.assertFalse(each.value)
 
-    def test_check_units(self):
+    def test_check_units_2(self):
         '''
         Ensure that container variables are not checked for units but geophysical variables are
         '''

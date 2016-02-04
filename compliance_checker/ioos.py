@@ -29,12 +29,12 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
         """
         val = True
         msgs = []
-        if not vname in dataset.variables:
+        if vname not in dataset.variables:
             val = False
             msgs.append("Variable '{}' not present while checking for attr '{}' for IOOS concept: '{}'".format(vname, attr, concept_name))
         else:
             v = dataset.variables[vname]
-            if not attr in v.ncattrs():
+            if attr not in v.ncattrs():
                 val = False
                 msgs.append("Attr '{}' not present on var '{}' while checking for IOOS concept: '{}'".format(attr, vname, concept_name))
 

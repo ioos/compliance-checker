@@ -1,4 +1,3 @@
-from compliance_checker.cf import cf
 from compliance_checker import acdd
 from pkg_resources import resource_filename
 from compliance_checker.suite import CheckSuite
@@ -36,7 +35,7 @@ class TestSuite(unittest.TestCase):
         vals = cs.run(ds, 'acdd')
 
         # run no longer returns the summed score, so this test.. just runs
-        #assert vals['acdd'][0] == (43.5, 78)
+        # assert vals['acdd'][0] == (43.5, 78)
 
     def test_unicode_formatting(self):
         cs = CheckSuite()

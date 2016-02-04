@@ -124,7 +124,7 @@ class CheckSuite(object):
         for r in groups:
             if r.children:
                 x = cls.passtree(r.children, limit)
-                if r.weight >= limit and x == False:
+                if r.weight >= limit and x is False:
                     return False
 
             if r.weight >= limit and r.value[0] != r.value[1]:
@@ -576,9 +576,9 @@ class CheckSuite(object):
         Turns shorthand True/False/None checks into full scores (1, 1)/(0, 1)/(0, 0).
         Leaves full scores alone.
         """
-        if val == True:
+        if val is True:
             return (1, 1)
-        elif val == False:
+        elif val is False:
             return (0, 1)
         elif val is None:
             return (0, 0)

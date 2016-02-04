@@ -1,13 +1,10 @@
-import os
-import os.path
 import itertools
+from copy import deepcopy
 from collections import defaultdict
 from lxml import etree
 from cf_units import Unit
 from netCDF4 import Dimension, Variable
 from pkgutil import get_data
-
-from compliance_checker.base import BaseCheck, Result
 
 # copied from paegan
 # paegan may depend on these later
@@ -266,7 +263,7 @@ class StandardNameTable(object):
 
             key = entryids[0].text
 
-        if not key in self._names:
+        if key not in self._names:
             raise KeyError("%s not found in standard name table" % key)
 
         idx = self._names.index(key)
