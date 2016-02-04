@@ -153,6 +153,22 @@ class DotDict(dict):
         return DotDict(dict.fromkeys(seq, value))
 
 
+def get_safe(dict_instance, keypath, default=None):
+    """
+    Returns a value with in a nested dict structure from a dot separated
+    path expression such as "system.server.host" or a list of key entries
+    @retval Value if found or None
+    """
+    try:
+        obj = dict_instance
+        keylist = keypath if type(keypath) is list else keypath.split('.')
+        for key in keylist:
+            obj = obj[key]
+        return obj
+    except Exception:
+        return default
+
+
 class NCGraph:
 
     def __init__(self, ds, name, nc_object, self_reference_variables, reference_map=None):
