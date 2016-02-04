@@ -288,7 +288,7 @@ class TestCF(unittest.TestCase):
         self.assertEqual(messages.count(u'flag_values attr does not have same type as var (fv: <U1, v: int16)'), 1)
 
 
-    def test_check_units(self):
+    def test_check_bad_units(self):
 
         dataset = self.load_dataset(static_files['2dim'])
         result = self.cf.check_units(dataset)
