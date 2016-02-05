@@ -642,7 +642,7 @@ class CFBaseCheck(BaseCheck):
                         valid = False
                 else:
                     valid = False
-                    msgs = ['The unit for variable %s is of type None.'.format(v.name)]
+                    msgs = ['The unit for variable {} is of type None.'.format(v.name)]
 
                 ret_val.append(Result(BaseCheck.HIGH, valid, '§3.1 Variables contain valid units for the standard_name', msgs))
 
