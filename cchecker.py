@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-from __future__ import print_function
-import pprint
+
 import argparse
 import sys
 from compliance_checker.runner import ComplianceChecker, CheckSuite
 from compliance_checker import __version__
+
 
 def main():
     # Load all available checker classes
@@ -12,7 +12,7 @@ def main():
     check_suite.load_all_available_checkers()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--test', '-t', '--test=', '-t=', action='append', help= "Select the Checks you want to perform.",  choices=check_suite.checkers.keys())
+    parser.add_argument('--test', '-t', '--test=', '-t=', action='append', help="Select the Checks you want to perform.", choices=list(check_suite.checkers.keys()))
     parser.add_argument('--criteria', '-c', help="Define the criteria for the checks.  Either Strict, Normal, or Lenient.  Defaults to Normal.", nargs='?', default='normal', choices = ['lenient', 'normal', 'strict'])
     parser.add_argument('--verbose' , '-v', help="Increase output. May be specified up to three times.", action="count")
     parser.add_argument('-f', '--format', default='text', choices=['text', 'html', 'json'], help='Output format')
@@ -33,11 +33,11 @@ def main():
         if args.format != 'json':
             print("Running Compliance Checker on the dataset from: %s" % dataset, file=sys.stderr)
         return_value, errors = ComplianceChecker.run_checker(args.dataset_location[0],
-                                      args.test,
-                                      args.verbose,
-                                      args.criteria,
-                                      args.output,
-                                      args.format)
+                                                             args.test,
+                                                             args.verbose,
+                                                             args.criteria,
+                                                             args.output,
+                                                             args.format)
         return_values.append(return_value)
         had_errors.append(errors)
 

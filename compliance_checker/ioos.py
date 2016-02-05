@@ -1,5 +1,5 @@
-import itertools
-from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, score_group, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, Result
+
 
 class IOOSBaseCheck(BaseCheck):
     register_checker = True
@@ -18,6 +18,7 @@ class IOOSBaseCheck(BaseCheck):
 
         return Result(priority, val, concept_name, msgs)
 
+
 class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
 
     @classmethod
@@ -27,12 +28,12 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
         """
         val = True
         msgs = []
-        if not vname in dataset.variables:
+        if vname not in dataset.variables:
             val = False
             msgs.append("Variable '{}' not present while checking for attr '{}' for IOOS concept: '{}'".format(vname, attr, concept_name))
         else:
             v = dataset.variables[vname]
-            if not attr in v.ncattrs():
+            if attr not in v.ncattrs():
                 val = False
                 msgs.append("Attr '{}' not present on var '{}' while checking for IOOS concept: '{}'".format(attr, vname, concept_name))
 
@@ -126,7 +127,7 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
         msgs = []
         count = 0
 
-        for k, v in ds.variables.iteritems():
+        for k, v in ds.variables.items():
             if 'standard_name' in v.ncattrs():
                 count += 1
             else:
@@ -141,7 +142,7 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
         msgs = []
         count = 0
 
-        for k, v in ds.variables.iteritems():
+        for k, v in ds.variables.items():
             if 'units' in v.ncattrs():
                 count += 1
             else:
@@ -159,10 +160,11 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
             msgs = []
             val = 'units' in ds.variables['z'].ncattrs()
             if not val:
-                msgs.append("Variable 'z' has no units attr") 
+                msgs.append("Variable 'z' has no units attr")
             return Result(BaseCheck.LOW, val, 'Altitude Units', msgs)
-        
+
         return Result(BaseCheck.LOW, (0, 0), 'Altitude Units', ["Dataset has no 'z' variable"])
+
 
 class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
 
@@ -192,6 +194,7 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
         return [
             'altitude_units'
         ]
+
 
 class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseCheck):
 

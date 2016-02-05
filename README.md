@@ -454,7 +454,19 @@ non-0 for a failure.
 
 ## Development
 
-The compliance-checker is designed to be simple and hackable to edit existing compliance suites or introduce new ones. See the [Development](https://github.com/ioos/compliance-checker/wiki/Development) wiki page for more information. 
+The compliance-checker is designed to be simple and hackable to edit existing compliance suites or introduce new ones. See the [Development](https://github.com/ioos/compliance-checker/wiki/Development) wiki page for more information.
+
+#### Testing
+
+Please run any new code through `flake8` and `pep8`. You can easily do this by using `pylama` (config is already setup in `pytest.ini`).
+
+```bash
+$ pip install pylama
+$ py.test --pylama
+```
+
+Take a look at the failed tests and fix accordingly. Travis does not run with the `--pylama` flag so you MUSt do this yourself!
+
 
 ## Resource materials
 
@@ -472,6 +484,7 @@ https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e603
 - Dave Foster <dave@axiomdatascience.com>
 - Dan Maher <dmaher@asascience.com>
 - Luke Campbell <lcampbell@asascience.com>
+- [Kyle Wilcox](https://github.com/kwilcox) <kyle@axiomdatascience.com>
 
 And many more testers!    
 

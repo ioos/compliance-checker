@@ -5,7 +5,6 @@ Compliance Checker
 """
 
 from functools import wraps
-import collections
 import pprint
 
 from netCDF4 import Dataset
@@ -13,11 +12,13 @@ from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
 
+
 def get_namespaces():
     n = Namespaces()
-    ns = n.get_namespaces(["ogc","sml","gml","sos","swe","xlink"])
+    ns = n.get_namespaces(["ogc", "sml", "gml", "sos", "swe", "xlink"])
     ns["ows"] = n.get_namespace("ows110")
     return ns
+
 
 class BaseCheck(object):
     HIGH   = 3
@@ -34,6 +35,7 @@ class BaseCheck(object):
         """
         pass
 
+
 class BaseNCCheck(object):
     """
     Base Class for NetCDF Dataset supporting Check Suites.
@@ -45,7 +47,7 @@ class BaseNCCheck(object):
         """
         Returns 0 if attr not present, 1 if present but not in correct value, 2 if good
         """
-        if not name in dataset.ncattrs():
+        if name not in dataset.ncattrs():
             return 0
 
         ret_val = 1
@@ -58,6 +60,7 @@ class BaseNCCheck(object):
     def std_check(cls, dataset, name):
         return name in dataset.ncattrs()
 
+
 class BaseSOSGCCheck(object):
     """
     Base class for SOS-GetCapabilities supporting Check Suites.
@@ -67,6 +70,7 @@ class BaseSOSGCCheck(object):
     def load_datapair(self, ds):
         data_object = MultipleXmlDogma('sos-gc', self.beliefs(), ds._capabilities, namespaces=get_namespaces())
         return DSPair(ds, data_object)
+
 
 class BaseSOSDSCheck(object):
     """
@@ -78,6 +82,7 @@ class BaseSOSDSCheck(object):
         data_object = MultipleXmlDogma('sos-ds', self.beliefs(), ds._root, namespaces=get_namespaces())
         return DSPair(ds, data_object)
 
+
 class Result(object):
     """
     Holds the result of a check method.
@@ -87,6 +92,7 @@ class Result(object):
 
     Stores the checker instance and the check method that produced this result.
     """
+
     def __init__(self, weight=BaseCheck.MEDIUM, value=None, name=None, msgs=None, children=None, checker=None, check_method=None):
 
         self.weight = weight
@@ -100,20 +106,17 @@ class Result(object):
         self.check_method = check_method
 
     def __repr__(self):
-        ret = u"%s (*%s): %s" % (self.name, self.weight, self.value)
+        ret = '{} (*{}): {}'.format(self.name, self.weight, self.value)
 
         if len(self.msgs):
             if len(self.msgs) == 1:
-                ret += u" (%s)" % self.msgs[0]
+                ret += ' ({})'.format(self.msgs[0])
             else:
-                ret += u" (%d msgs)" % len(self.msgs)
+                ret += ' ({!d} msgs)'.format(len(self.msgs))
 
         if len(self.children):
-            ret += u" (%d children)" % len(self.children)
-            ret += u"\n" + pprint.pformat(self.children)
-        ## BUG: Python 2.7 does not allow repr to return unicode strings so we
-        ## have to coerce it into ascii. 
-        ret = ret.encode('ascii', 'ignore')
+            ret += ' ({!d} children)'.format(len(self.children))
+            ret += '\n' + pprint.pformat(self.children)
         return ret
 
     def serialize(self):
@@ -145,12 +148,14 @@ def std_check_in(dataset, name, allowed_vals):
 
     return ret_val
 
+
 def std_check(dataset, name):
     if hasattr(dataset, name):
         getattr(dataset, name)
         return True
 
     return False
+
 
 def check_has(priority=BaseCheck.HIGH):
 
@@ -183,11 +188,12 @@ def check_has(priority=BaseCheck.HIGH):
 
     return _inner
 
+
 def fix_return_value(v, method_name, method=None, checker=None):
     """
     Transforms scalar return values into Result.
     """
-    method_name = (method_name or method.im_func.func_name).replace("check_", "")     # remove common check prefix
+    method_name = (method_name or method.__func__.__name__).replace("check_", "")     # remove common check prefix
 
     if v is None or not isinstance(v, Result):
         v = Result(value=v, name=method_name)
@@ -197,6 +203,7 @@ def fix_return_value(v, method_name, method=None, checker=None):
     v.check_method = method
 
     return v
+
 
 def score_group(group_name=None):
     def _inner(func):
@@ -220,15 +227,11 @@ def score_group(group_name=None):
 
                 cur_grouping.insert(0, group_name)
 
-
-
                 return Result(r.weight, r.value, tuple(cur_grouping), r.msgs)
 
-
-            ret_val = map(lambda x: fix_return_value(x, func.func_name, func, s), ret_val)
-            ret_val = map(dogroup, ret_val)
+            ret_val = [fix_return_value(x, func.__name__, func, s) for x in ret_val]
+            ret_val = list(map(dogroup, ret_val))
 
             return ret_val
         return wraps(func)(_dec)
     return _inner
-

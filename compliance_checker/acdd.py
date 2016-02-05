@@ -5,8 +5,8 @@ from dateutil.parser import parse as parse_dt
 from cf_units import Unit
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
-from compliance_checker.cf.cf import _possiblexunits, _possibleyunits
-from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate
+from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate, _possiblexunits, _possibleyunits
+
 
 class ACDDBaseCheck(BaseCheck):
 
@@ -98,7 +98,7 @@ class ACDDBaseCheck(BaseCheck):
             attrs = itertools.chain.from_iterable((v.xpath('ncml:attribute[@name="%s"]/@value' % attr_filter, namespaces=ds.dogma._namespaces) or [None] for v in vars))
             names = (v.get('name', 'unknown') for v in vars)
 
-            attrs = zip(attrs, names)
+            attrs = list(zip(attrs, names))
 
             return attrs
 
@@ -186,7 +186,7 @@ class ACDDBaseCheck(BaseCheck):
 
         # identify lat var(s) as per CF 4.1
         lat_vars = {}       # var -> number of criteria passed
-        for name, var in ds.variables.iteritems():
+        for name, var in ds.variables.items():
 
             # must have units
             if not hasattr(var, 'units'):
@@ -207,7 +207,7 @@ class ACDDBaseCheck(BaseCheck):
                 lat_vars[var] += 1
 
         # trim out any zeros
-        lat_vars = {k:v for k, v in lat_vars.iteritems() if v > 0}
+        lat_vars = {k: v for k, v in lat_vars.items() if v > 0}
 
         if len(lat_vars) == 0:
             return Result(BaseCheck.MEDIUM,
@@ -218,11 +218,11 @@ class ACDDBaseCheck(BaseCheck):
         # sort by criteria passed
         final_lats = sorted(lat_vars, key=lambda x: lat_vars[x], reverse=True)
 
-        obs_mins = {var._name:np.nanmin(var) for var in final_lats if not np.isnan(var).all()}
-        obs_maxs = {var._name:np.nanmax(var) for var in final_lats if not np.isnan(var).all()}
+        obs_mins = {var._name: np.nanmin(var) for var in final_lats if not np.isnan(var).all()}
+        obs_maxs = {var._name: np.nanmax(var) for var in final_lats if not np.isnan(var).all()}
 
-        min_pass = any((np.isclose(lat_min, min_val) for min_val in obs_mins.itervalues()))
-        max_pass = any((np.isclose(lat_max, max_val) for max_val in obs_maxs.itervalues()))
+        min_pass = any((np.isclose(lat_min, min_val) for min_val in obs_mins.values()))
+        max_pass = any((np.isclose(lat_max, max_val) for max_val in obs_maxs.values()))
 
         allpass = sum((min_pass, max_pass))
 
@@ -249,7 +249,7 @@ class ACDDBaseCheck(BaseCheck):
 
         # identify lon var(s) as per CF 4.2
         lon_vars = {}       # var -> number of criteria passed
-        for name, var in ds.variables.iteritems():
+        for name, var in ds.variables.items():
 
             # must have units
             if not hasattr(var, 'units'):
@@ -270,7 +270,7 @@ class ACDDBaseCheck(BaseCheck):
                 lon_vars[var] += 1
 
         # trim out any zeros
-        lon_vars = {k:v for k, v in lon_vars.iteritems() if v > 0}
+        lon_vars = {k: v for k, v in lon_vars.items() if v > 0}
 
         if len(lon_vars) == 0:
             return Result(BaseCheck.MEDIUM,
@@ -281,11 +281,11 @@ class ACDDBaseCheck(BaseCheck):
         # sort by criteria passed
         final_lons = sorted(lon_vars, key=lambda x: lon_vars[x], reverse=True)
 
-        obs_mins = {var._name:np.nanmin(var) for var in final_lons if not np.isnan(var).all()}
-        obs_maxs = {var._name:np.nanmax(var) for var in final_lons if not np.isnan(var).all()}
+        obs_mins = {var._name: np.nanmin(var) for var in final_lons if not np.isnan(var).all()}
+        obs_maxs = {var._name: np.nanmax(var) for var in final_lons if not np.isnan(var).all()}
 
-        min_pass = any((np.isclose(lon_min, min_val) for min_val in obs_mins.itervalues()))
-        max_pass = any((np.isclose(lon_max, max_val) for max_val in obs_maxs.itervalues()))
+        min_pass = any((np.isclose(lon_min, min_val) for min_val in obs_mins.values()))
+        max_pass = any((np.isclose(lon_max, max_val) for max_val in obs_maxs.values()))
 
         allpass = sum((min_pass, max_pass))
 
@@ -311,19 +311,19 @@ class ACDDBaseCheck(BaseCheck):
         vert_max = ds.geospatial_vertical_max
 
         # identify vertical vars as per CF 4.3
-        v_vars = [var for name, var in ds.variables.iteritems() if is_vertical_coordinate(name, var)]
+        v_vars = [var for name, var in ds.variables.items() if is_vertical_coordinate(name, var)]
 
         if len(v_vars) == 0:
             return Result(BaseCheck.MEDIUM,
-                           False,
+                          False,
                           'geospatial_vertical_extents_match',
                           ['Could not find vertical variable to test extent of geospatial_vertical_min/geospatial_vertical_max, see CF-1.6 spec chapter 4.3'])
 
-        obs_mins = {var._name:np.nanmin(var) for var in v_vars if not np.isnan(var).all()}
-        obs_maxs = {var._name:np.nanmax(var) for var in v_vars if not np.isnan(var).all()}
+        obs_mins = {var._name: np.nanmin(var) for var in v_vars if not np.isnan(var).all()}
+        obs_maxs = {var._name: np.nanmax(var) for var in v_vars if not np.isnan(var).all()}
 
-        min_pass = any((np.isclose(vert_min, min_val) for min_val in obs_mins.itervalues()))
-        max_pass = any((np.isclose(vert_max, max_val) for max_val in obs_maxs.itervalues()))
+        min_pass = any((np.isclose(vert_min, min_val) for min_val in obs_mins.values()))
+        max_pass = any((np.isclose(vert_max, max_val) for max_val in obs_maxs.values()))
 
         allpass = sum((min_pass, max_pass))
 
@@ -338,7 +338,6 @@ class ACDDBaseCheck(BaseCheck):
                       'geospatial_vertical_extents_match',
                       msgs)
 
-
     def check_time_extents(self, ds):
         """
         Check that the values of time_coverage_start/time_coverage_end approximately match the data.
@@ -351,7 +350,7 @@ class ACDDBaseCheck(BaseCheck):
         t_max = (parse_dt(ds.time_coverage_end) - epoch).total_seconds()
 
         # identify t vars as per CF 4.4
-        t_vars = [var for name, var in ds.variables.iteritems() if is_time_variable(name, var)]
+        t_vars = [var for name, var in ds.variables.items() if is_time_variable(name, var)]
 
         if len(t_vars) == 0:
             return Result(BaseCheck.MEDIUM,
@@ -359,11 +358,11 @@ class ACDDBaseCheck(BaseCheck):
                           'time_coverage_extents_match',
                           ['Could not find time variable to test extent of time_coverage_start/time_coverage_end, see CF-1.6 spec chapter 4.4'])
 
-        obs_mins = {var._name:Unit(str(var.units)).convert(np.nanmin(var), "seconds since 1970-01-01") for var in t_vars}
-        obs_maxs = {var._name:Unit(str(var.units)).convert(np.nanmax(var), "seconds since 1970-01-01") for var in t_vars}
+        obs_mins = {var._name: Unit(str(var.units)).convert(np.nanmin(var), "seconds since 1970-01-01") for var in t_vars}
+        obs_maxs = {var._name: Unit(str(var.units)).convert(np.nanmax(var), "seconds since 1970-01-01") for var in t_vars}
 
-        min_pass = any((np.isclose(t_min, min_val) for min_val in obs_mins.itervalues()))
-        max_pass = any((np.isclose(t_max, max_val) for max_val in obs_maxs.itervalues()))
+        min_pass = any((np.isclose(t_min, min_val) for min_val in obs_mins.values()))
+        max_pass = any((np.isclose(t_max, max_val) for max_val in obs_maxs.values()))
 
         allpass = sum((min_pass, max_pass))
 
@@ -378,6 +377,6 @@ class ACDDBaseCheck(BaseCheck):
                       'time_coverage_extents_match',
                       msgs)
 
+
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
     pass
-

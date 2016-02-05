@@ -1,18 +1,19 @@
-from compliance_checker.cf import cf
 from compliance_checker import acdd
 from pkg_resources import resource_filename
 from compliance_checker.suite import CheckSuite
 import unittest
 
 static_files = {
-        '2dim'                       : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
-        'bad_region'                 : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
-        'bad_data_type'              : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
+    '2dim'                       : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
+    'bad_region'                 : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
+    'bad_data_type'              : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
 }
+
 
 class TestSuite(unittest.TestCase):
     # @see
     # http://www.saltycrane.com/blog/2012/07/how-prevent-nose-unittest-using-docstring-when-verbosity-2/
+
     def shortDescription(self):
         return None
 
@@ -27,8 +28,6 @@ class TestSuite(unittest.TestCase):
             return "%s ( %s )" % (name[-1], '.'.join(name[:-2]) + ":" + '.'.join(name[-2:]))
     __str__ = __repr__
 
-
-
     def test_suite(self):
         cs = CheckSuite()
         cs.load_all_available_checkers()
@@ -36,7 +35,7 @@ class TestSuite(unittest.TestCase):
         vals = cs.run(ds, 'acdd')
 
         # run no longer returns the summed score, so this test.. just runs
-        #assert vals['acdd'][0] == (43.5, 78)
+        # assert vals['acdd'][0] == (43.5, 78)
 
     def test_unicode_formatting(self):
         cs = CheckSuite()
@@ -45,7 +44,7 @@ class TestSuite(unittest.TestCase):
         score_groups = cs.run(ds, 'cf')
 
         limit = 2
-        for checker, rpair in score_groups.iteritems():
+        for checker, rpair in score_groups.items():
             groups, errors = rpair
             score_list, points, out_of = cs.standard_output(limit, checker, groups)
             # This asserts that print is able to generate all of the unicode output
@@ -60,7 +59,7 @@ class TestSuite(unittest.TestCase):
         score_groups = cs.run(ds, 'cf')
 
         limit = 2
-        for checker, rpair in score_groups.iteritems():
+        for checker, rpair in score_groups.items():
             groups, errors = rpair
             score_list, points, out_of = cs.standard_output(limit, checker, groups)
             # This asserts that print is able to generate all of the unicode output

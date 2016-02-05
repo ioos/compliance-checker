@@ -1,6 +1,7 @@
 *.pyc
 .*.swp
+*.bak
 build
 dist
 compliance_checker.egg-info
-
+.cache
