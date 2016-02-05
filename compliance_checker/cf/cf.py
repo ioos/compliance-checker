@@ -854,11 +854,9 @@ class CFBaseCheck(BaseCheck):
                 ok_count = 0
 
                 same_type = flag_masks.dtype == v.dtype
-                type_ok = v.dtype in [np.character,
-                                      np.dtype('b'),
-                                      np.dtype('i4'),
-                                      np.int32]
-
+                type_ok = (np.issubdtype(v.dtype, int) or
+                           np.issubdtype(v.dtype, 'S') or
+                           np.issubdtype(v.dtype, 'b'))
                 if same_type:
                     ok_count += 1
                 else:
