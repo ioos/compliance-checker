@@ -672,13 +672,13 @@ class CFBaseCheck(BaseCheck):
             if std_name is None:
                 continue
 
-            if isinstance(std_name, str):
+            if isinstance(std_name, basestring):
                 if ' ' in std_name:
                     std_name, std_name_modifier = std_name.split(' ', 1)
 
             # 1) standard name is a string and in standard name table or an exception, see H.2
             msgs = []
-            is_str = isinstance(std_name, str)
+            is_str = isinstance(std_name, basestring)
             in_exception = std_name in ('platform_name', 'station_name', 'instrument_name')
             in_table = std_name in self._std_names
 
