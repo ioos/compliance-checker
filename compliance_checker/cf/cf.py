@@ -471,8 +471,8 @@ class CFBaseCheck(BaseCheck):
         """
         2.6.1 the NUG defined global attribute Conventions to the string value "CF-1.6"
         """
-        valid_conventions = ['CF-1.0', 'CF-1.1', 'CF-1.2', 'CF-1.3',
-                             'CF-1.4', 'CF-1.5', 'CF-1.6']
+
+        valid_conventions = ['CF-1.6']
         if hasattr(ds, 'Conventions'):
             conventions = re.split(',|\s+', getattr(ds, 'Conventions', ''))
             if any((c.strip() in valid_conventions for c in conventions)):
@@ -480,7 +480,7 @@ class CFBaseCheck(BaseCheck):
                 reasoning = []
             else:
                 valid = False
-                reasoning = ['Conventions field is not "CF-1.x (x in 0-6)"']
+                reasoning = ['Conventions field is not "CF-1.6"']
         else:
             valid = False
             reasoning = ['Conventions field is not present']
