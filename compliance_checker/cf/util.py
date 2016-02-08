@@ -218,7 +218,8 @@ class NCGraph(object):
         if coord not in self.ds.variables:
             return
         if coord in self.reference_map:
-            self.reference_variables.add(self.obj.name)
+            if self.obj.name == coord:
+                self.reference_variables.add(self.obj.name)
             return self.reference_map[coord]
         return NCGraph(self.ds, coord, self.ds.variables[coord], self.reference_variables, self.reference_map)
 
@@ -227,7 +228,7 @@ class NCGraph(object):
             return
         if gm in self.reference_map:
             return self.reference_map[gm]
-        return NCGraph(self.ds, gm, self.ds.variables[gm], self.reference_map)
+        return NCGraph(self.ds, gm, self.ds.variables[gm], self.reference_variables, self.reference_map)
 
     def __getattr__(self, key):
         if key in self.__dict__:

@@ -1,0 +1,403 @@
+netcdf \3051B-A {
+dimensions:
+	time = UNLIMITED ; // (40 currently)
+	maxStrlen64 = 64 ;
+variables:
+	char feature_type_instance(maxStrlen64) ;
+		feature_type_instance:cf_role = "timeseries_id" ;
+		feature_type_instance:long_name = "Identifier for each feature type instance" ;
+	double latitude ;
+		latitude:units = "degrees_north" ;
+		latitude:standard_name = "latitude" ;
+		latitude:long_name = "sensor latitude" ;
+	double longitude ;
+		longitude:units = "degrees_east" ;
+		longitude:standard_name = "longitude" ;
+		longitude:long_name = "sensor longitude" ;
+	double time(time) ;
+		time:units = "seconds since 1970-01-01T00:00:00Z" ;
+		time:standard_name = "time" ;
+		time:long_name = "time of measurement" ;
+		time:calendar = "gregorian" ;
+		time:_ChunkSizes = 1000 ;
+	double z ;
+		z:_FillValue = -9999.9 ;
+		z:grid_mapping = "crs" ;
+		z:long_name = "z of the sensor relative to the water surface" ;
+		z:standard_name = "height" ;
+		z:positive = "up" ;
+		z:units = "m" ;
+		z:axis = "Z" ;
+	int crs ;
+		crs:inverse_flattening = 298.257223563 ;
+		crs:long_name = "http://www.opengis.net/def/crs/EPSG/0/4326" ;
+		crs:grid_mapping_name = "latitude_longitude" ;
+		crs:epsg_code = "EPSG:4326" ;
+		crs:semi_major_axis = 6378137. ;
+	int platform ;
+		platform:ioos_code = "3051B-A" ;
+		platform:short_name = "CAPE_COD_BAY - 3051B-A.cdf" ;
+		platform:long_name = "3051B-A" ;
+		platform:definition = "http://mmisw.org/ont/ioos/definition/stationID" ;
+	double CD_310(time) ;
+		CD_310:_FillValue = -9999.9 ;
+		CD_310:coordinates = "time z latitude longitude" ;
+		CD_310:epic_code = 310 ;
+		CD_310:code = "R" ;
+		CD_310:sensor_depth = -28.6000003814697 ;
+		CD_310:generic_name = "vdir" ;
+		CD_310:FORTRAN_format = "f8.2" ;
+		CD_310:long_name = "Current direction" ;
+		CD_310:standard_name = "direction_of_sea_water_velocity" ;
+		CD_310:actual_min = 4.8613f ;
+		CD_310:units = "degree" ;
+		CD_310:serial_number = "SD-003" ;
+		CD_310:actual_max = 358.189f ;
+		CD_310:grid_mapping = "crs" ;
+		CD_310:_ChunkSizes = 1000 ;
+	double CS_300(time) ;
+		CS_300:_FillValue = -9999.9 ;
+		CS_300:coordinates = "time z latitude longitude" ;
+		CS_300:epic_code = 300 ;
+		CS_300:code = "R" ;
+		CS_300:sensor_depth = -28.6000003814697 ;
+		CS_300:generic_name = "vspd" ;
+		CS_300:FORTRAN_format = "f8.2" ;
+		CS_300:long_name = "Current speed" ;
+		CS_300:standard_name = "sea_water_speed" ;
+		CS_300:actual_min = 2.68941f ;
+		CS_300:units = "m/s" ;
+		CS_300:serial_number = "SD-003" ;
+		CS_300:actual_max = 16.7648f ;
+		CS_300:grid_mapping = "crs" ;
+		CS_300:_ChunkSizes = 1000 ;
+	double C_50(time) ;
+		C_50:_FillValue = -9999.9 ;
+		C_50:coordinates = "time z latitude longitude" ;
+		C_50:epic_code = 50 ;
+		C_50:comment = "not translated from mhos" ;
+		C_50:code = "R" ;
+		C_50:sensor_depth = -28.6000003814697 ;
+		C_50:generic_name = "con" ;
+		C_50:FORTRAN_format = " " ;
+		C_50:long_name = "Conductivity" ;
+		C_50:standard_name = "sea_water_electrical_conductivity" ;
+		C_50:actual_min = 30.4927f ;
+		C_50:units = "S/m" ;
+		C_50:serial_number = "C-228" ;
+		C_50:actual_max = 30.9131f ;
+		C_50:grid_mapping = "crs" ;
+		C_50:_ChunkSizes = 1000 ;
+	double P_4022(time) ;
+		P_4022:_FillValue = -9999.9 ;
+		P_4022:coordinates = "time z latitude longitude" ;
+		P_4022:epic_code = 4022 ;
+		P_4022:code = "R" ;
+		P_4022:sensor_depth = -28.6000003814697 ;
+		P_4022:generic_name = "pres" ;
+		P_4022:FORTRAN_format = "f10.3" ;
+		P_4022:long_name = "Sea Water Pressure (interval)" ;
+		P_4022:standard_name = "sea_water_pressure" ;
+		P_4022:actual_min = 3943.59f ;
+		P_4022:units = "dbar" ;
+		P_4022:serial_number = "P-1558" ;
+		P_4022:actual_max = 4228.21f ;
+		P_4022:grid_mapping = "crs" ;
+		P_4022:_ChunkSizes = 1000 ;
+	double P_4023(time) ;
+		P_4023:_FillValue = -9999.9 ;
+		P_4023:coordinates = "time z latitude longitude" ;
+		P_4023:epic_code = 4023 ;
+		P_4023:code = "R" ;
+		P_4023:sensor_depth = -28.6000003814697 ;
+		P_4023:generic_name = "pres" ;
+		P_4023:FORTRAN_format = "f10.3" ;
+		P_4023:long_name = "Sea Water Pressure (average over burst)" ;
+		P_4023:standard_name = "sea_water_pressure" ;
+		P_4023:actual_min = 3942.61f ;
+		P_4023:units = "dbar" ;
+		P_4023:serial_number = "P-1558" ;
+		P_4023:actual_max = 4228.f ;
+		P_4023:grid_mapping = "crs" ;
+		P_4023:_ChunkSizes = 1000 ;
+	double SDP_850(time) ;
+		SDP_850:_FillValue = -9999.9 ;
+		SDP_850:coordinates = "time z latitude longitude" ;
+		SDP_850:epic_code = 850 ;
+		SDP_850:code = "R" ;
+		SDP_850:sensor_depth = -28.6000003814697 ;
+		SDP_850:generic_name = "pres" ;
+		SDP_850:FORTRAN_format = "f10.5" ;
+		SDP_850:long_name = "Sea Water Pressure (standard deviation)" ;
+		SDP_850:standard_name = "sea_water_pressure" ;
+		SDP_850:actual_min = 0.72212f ;
+		SDP_850:cell_methods = "time: standard_deviation" ;
+		SDP_850:units = "dbar" ;
+		SDP_850:serial_number = "P-1558" ;
+		SDP_850:actual_max = 1.79197f ;
+		SDP_850:grid_mapping = "crs" ;
+		SDP_850:_ChunkSizes = 1000 ;
+	double S_40(time) ;
+		S_40:_FillValue = -9999.9 ;
+		S_40:coordinates = "time z latitude longitude" ;
+		S_40:epic_code = 40 ;
+		S_40:code = "R" ;
+		S_40:sensor_depth = -28.6000003814697 ;
+		S_40:generic_name = "sal" ;
+		S_40:FORTRAN_format = "f10.2" ;
+		S_40:long_name = "Salinity" ;
+		S_40:standard_name = "sea_water_practical_salinity" ;
+		S_40:actual_min = 32.2669f ;
+		S_40:units = "1e-3" ;
+		S_40:serial_number = "" ;
+		S_40:actual_max = 32.3591f ;
+		S_40:grid_mapping = "crs" ;
+		S_40:_ChunkSizes = 1000 ;
+	double TRN_107(time) ;
+		TRN_107:_FillValue = -9999.9 ;
+		TRN_107:coordinates = "time z latitude longitude" ;
+		TRN_107:epic_code = 107 ;
+		TRN_107:code = "R" ;
+		TRN_107:sensor_depth = -28.6000003814697 ;
+		TRN_107:generic_name = " " ;
+		TRN_107:FORTRAN_format = " " ;
+		TRN_107:long_name = "TRANSMISSOMETER VOLTAGE 7" ;
+		TRN_107:actual_min = 1.6577f ;
+		TRN_107:units = " " ;
+		TRN_107:serial_number = "NT-050" ;
+		TRN_107:actual_max = 1.70164f ;
+		TRN_107:grid_mapping = "crs" ;
+		TRN_107:_ChunkSizes = 1000 ;
+	double T_20(time) ;
+		T_20:_FillValue = -9999.9 ;
+		T_20:coordinates = "time z latitude longitude" ;
+		T_20:epic_code = 20 ;
+		T_20:code = "R" ;
+		T_20:sensor_depth = -28.6000003814697 ;
+		T_20:generic_name = "temp" ;
+		T_20:FORTRAN_format = "f10.2" ;
+		T_20:long_name = "Water Temperature" ;
+		T_20:standard_name = "sea_water_temperature" ;
+		T_20:actual_min = 4.26532f ;
+		T_20:units = "degree_Celsius" ;
+		T_20:serial_number = "T-0004" ;
+		T_20:actual_max = 4.68896f ;
+		T_20:grid_mapping = "crs" ;
+		T_20:_ChunkSizes = 1000 ;
+	double comp_1404(time) ;
+		comp_1404:_FillValue = -9999.9 ;
+		comp_1404:coordinates = "time z latitude longitude" ;
+		comp_1404:epic_code = 1404 ;
+		comp_1404:code = "R" ;
+		comp_1404:sensor_depth = -28.6000003814697 ;
+		comp_1404:generic_name = "comp" ;
+		comp_1404:FORTRAN_format = "f10.1" ;
+		comp_1404:long_name = "Instrument Heading (magnetic north)" ;
+		comp_1404:standard_name = "platform_orientation" ;
+		comp_1404:actual_min = 226.406f ;
+		comp_1404:units = "degree" ;
+		comp_1404:serial_number = "" ;
+		comp_1404:actual_max = 226.406f ;
+		comp_1404:grid_mapping = "crs" ;
+		comp_1404:_ChunkSizes = 1000 ;
+	double lowr_4003(time) ;
+		lowr_4003:_FillValue = -9999.9 ;
+		lowr_4003:coordinates = "time z latitude longitude" ;
+		lowr_4003:epic_code = 4003 ;
+		lowr_4003:code = "R" ;
+		lowr_4003:sensor_depth = -28.6000003814697 ;
+		lowr_4003:generic_name = "rotor" ;
+		lowr_4003:FORTRAN_format = "f10.3" ;
+		lowr_4003:long_name = "LOWER ROTOR SPEED    " ;
+		lowr_4003:actual_min = 2.43119f ;
+		lowr_4003:units = "cm/s" ;
+		lowr_4003:serial_number = "SD-003" ;
+		lowr_4003:actual_max = 9.22f ;
+		lowr_4003:grid_mapping = "crs" ;
+		lowr_4003:_ChunkSizes = 1000 ;
+	double tran_4010(time) ;
+		tran_4010:_FillValue = -9999.9 ;
+		tran_4010:coordinates = "time z latitude longitude" ;
+		tran_4010:epic_code = 4010 ;
+		tran_4010:code = "R" ;
+		tran_4010:sensor_depth = -28.6000003814697 ;
+		tran_4010:generic_name = "trans" ;
+		tran_4010:FORTRAN_format = "f10.3" ;
+		tran_4010:long_name = "TRANSMISSION (VOLTS)     " ;
+		tran_4010:actual_min = 1.70164f ;
+		tran_4010:units = "volts" ;
+		tran_4010:serial_number = "NT-050" ;
+		tran_4010:actual_max = 1.74803f ;
+		tran_4010:grid_mapping = "crs" ;
+		tran_4010:_ChunkSizes = 1000 ;
+	double u_1205(time) ;
+		u_1205:_FillValue = -9999.9 ;
+		u_1205:coordinates = "time z latitude longitude" ;
+		u_1205:epic_code = 1205 ;
+		u_1205:code = "R" ;
+		u_1205:sensor_depth = -28.6000003814697 ;
+		u_1205:generic_name = "u" ;
+		u_1205:FORTRAN_format = " " ;
+		u_1205:long_name = "Eastward (u) velocity" ;
+		u_1205:standard_name = "eastward_sea_water_velocity" ;
+		u_1205:actual_min = -2.62669f ;
+		u_1205:units = "m/s" ;
+		u_1205:serial_number = "SD-003" ;
+		u_1205:actual_max = 0.99513f ;
+		u_1205:grid_mapping = "crs" ;
+		u_1205:_ChunkSizes = 1000 ;
+	double upr_4001(time) ;
+		upr_4001:_FillValue = -9999.9 ;
+		upr_4001:coordinates = "time z latitude longitude" ;
+		upr_4001:epic_code = 4001 ;
+		upr_4001:code = "R" ;
+		upr_4001:sensor_depth = -28.6000003814697 ;
+		upr_4001:generic_name = "rotor" ;
+		upr_4001:FORTRAN_format = "f10.3" ;
+		upr_4001:long_name = "UPPER ROTOR SPEED     " ;
+		upr_4001:actual_min = 3.01281f ;
+		upr_4001:units = "cm/s" ;
+		upr_4001:serial_number = "SD-003" ;
+		upr_4001:actual_max = 12.6294f ;
+		upr_4001:grid_mapping = "crs" ;
+		upr_4001:_ChunkSizes = 1000 ;
+	double v_1206(time) ;
+		v_1206:_FillValue = -9999.9 ;
+		v_1206:coordinates = "time z latitude longitude" ;
+		v_1206:epic_code = 1206 ;
+		v_1206:code = "R" ;
+		v_1206:sensor_depth = -28.6000003814697 ;
+		v_1206:generic_name = "v" ;
+		v_1206:FORTRAN_format = " " ;
+		v_1206:long_name = "Northward (v) velocity" ;
+		v_1206:standard_name = "northward_sea_water_velocity" ;
+		v_1206:actual_min = 2.53953f ;
+		v_1206:units = "m/s" ;
+		v_1206:serial_number = "SD-003" ;
+		v_1206:actual_max = 16.6106f ;
+		v_1206:grid_mapping = "crs" ;
+		v_1206:_ChunkSizes = 1000 ;
+	double van_1403(time) ;
+		van_1403:_FillValue = -9999.9 ;
+		van_1403:coordinates = "time z latitude longitude" ;
+		van_1403:epic_code = 1403 ;
+		van_1403:code = "R" ;
+		van_1403:sensor_depth = -28.6000003814697 ;
+		van_1403:generic_name = "vane" ;
+		van_1403:FORTRAN_format = "f10.1" ;
+		van_1403:long_name = "Instrument Heading (vane)" ;
+		van_1403:standard_name = "platform_orientation" ;
+		van_1403:actual_min = 129.375f ;
+		van_1403:units = "degree" ;
+		van_1403:serial_number = "" ;
+		van_1403:actual_max = 199.687f ;
+		van_1403:grid_mapping = "crs" ;
+		van_1403:_ChunkSizes = 1000 ;
+
+// global attributes:
+		:project_summary = "A pilot study to determine the effect of winter storms on sediment movement at two potential dredge spoil disposal areas." ;
+		:VAR_FILL = "" ;
+		:DATA_TYPE = "TIME" ;
+		:DELTA_T = "7.50 minutes\r\n",
+			"" ;
+		:DEPTH_CONST = 0 ;
+		:days = 0 ;
+		:DATA_SUBTYPE = "" ;
+		:contributor_role = "principalInvestigator" ;
+		:keywords = "Oceans > Ocean Pressure > Water Pressure, Oceans > Ocean Temperature > Water Temperature, Oceans > Salinity/Density > Conductivity, Oceans > Salinity/Density > Salinity" ;
+		:publisher_name = "Ellyn Montgomery" ;
+		:id = "3051B-A" ;
+		:DATA_ORIGIN = "USGS/WHFC" ;
+		:project = "Coastal and Marine Geology Program" ;
+		:creator_url = "http://www.usgs.gov" ;
+		:title = "CAPE_COD_BAY - 3051B-A.cdf" ;
+		:standard_name_vocabulary = "CF-1.6" ;
+		:DESCRIPT = "?" ;
+		:DRIFTER = 0 ;
+		:keywords_vocabulary = "GCMD Science Keywords" ;
+		:original_folder = "CAPE_COD_BAY" ;
+		:stop_time = "09-Apr-1986 09:26:15" ;
+		:publisher_url = "http://www.usgs.gov" ;
+		:latitude = 41.92756f ;
+		:publisher_phone = "+1 (508) 548-8700" ;
+		:publisher_email = "emontgomery@usgs.gov" ;
+		:FILL_FLAG = 0 ;
+		:naming_authority = "gov.usgs.cmgp" ;
+		:creator_email = "rsignell@usgs.gov" ;
+		:start_time = "09-Apr-1986 04:33:45" ;
+		:CREATION_DATE = "09:13 25-APR-97" ;
+		:PROJECT = "?" ;
+		:POS_CONST = 0 ;
+		:WATER_DEPTH = 30 ;
+		:institution = "USGS Woods Hole Coastal and Marine Science Center" ;
+		:MOORING = 305 ;
+		:contributor_name = "B. Butman" ;
+		:DATA_CMNT = " CAPE COD BAY, SITE B.  MV APPLIED.  TRUNCATED AT GAP.  E.S.T.\r\n",
+			"" ;
+		:project_title = "Currents and Sediment Transport in Cape Cod Bay" ;
+		:creator_name = "Rich Signell" ;
+		:COMPOSITE = 0 ;
+		:COORD_SYSTEM = "GEOGRAPHICAL" ;
+		:longitude = -70.24289f ;
+		:summary = "3051B-A        start time =  8 Apr 1986  23:33:45  cycles = 40\n",
+			"               stop  time =  9 Apr 1986  04:26:15  # days = 0\n",
+			"Expt. = \'USGS\'  sampling interval = 7.50 minutes\n",
+			"Lat =  41.927555\n",
+			"Lon = -70.242889  File created:  10:56 JUL 16,\'86\n",
+			"depth = 30m  Mag.var = -15.000000\n",
+			"#  Variable     Units        Codes Depth   Inst.   Minimum   Maximum\n",
+			"-- ------------ ------------ ----- ------- ------ --------- ---------\n",
+			" 1 TIME         SECONDS      T     \n",
+			" 2 U.1          CMS/SEC      R       28.60 SD-003    -2.627     0.995\n",
+			" 3 V.1          CMS/SEC      R       28.60 SD-003     2.540    16.611\n",
+			" 4 VDIR.1       DEG          R       28.60 SD-003     4.861   358.189\n",
+			" 5 VSPD.1       CMS/SEC      R       28.60 SD-003     2.689    16.765\n",
+			" 6 INT_ROTOR1   CMS/SEC      R       28.60 SD-003     3.013    12.629\n",
+			" 7 INT_ROTOR2   CMS/SEC      R       28.60 SD-003     2.431     9.220\n",
+			" 8 VANE         ANG.DEG.     R       28.60          129.375   199.687\n",
+			" 9 COMPASS      ANG.DEG.     R       28.60          226.406   226.406\n",
+			"10 TEMPERATURE  DEG.CELC     R       28.60 T-0004     4.265     4.689\n",
+			"11 PRESSURE-I   MILLIBARS    R       28.60 P-1558  3943.594  4228.212\n",
+			"12 PRESSURE-B   MILLIBARS    R       28.60 P-1558  3942.611  4227.998\n",
+			"13 PSDEV  14 CONDUCTIVITY MHOS15 SALINITY     PPT          R  TIME is expressed as YEAR-MONTH-DAY  HOUR.MINUTE.SECOND\n",
+			"" ;
+		:creator_phone = "+1 (508) 548-8700" ;
+		:VAR_DESC = "attn v     upper lower vane compass temp int.p pres psdev con sal trans   " ;
+		:EXPERIMENT = "?" ;
+		:source = "USGS" ;
+		:original_filename = "3051B-A.cdf" ;
+		:WATER_MASS = "?" ;
+		:cycles = 40 ;
+		:INST_TYPE = "SD-003 T-0004 P-1558 C-228 NT-050 " ;
+		:history = "Original file creation date was 10:56 JUL 16,\'86\r\n",
+			"Converted to EPIC/NetCDF Fri Dec  6 15:29:21 1996\n",
+			"\n",
+			"Original ascii file was a3051b01.ascChanged epic code 310 to 310 on Thu Apr 24 18:18:14 1997\n",
+			"Changed epic code 300 to 300 on Thu Apr 24 18:18:14 1997\n",
+			"Changed epic code 4020 to 4001 on Thu Apr 24 18:18:14 1997\n",
+			"Changed epic code 4028 to 4003 on Thu Apr 24 18:18:14 1997\n",
+			"Changed epic code 4023 to 1403 on Thu Apr 24 18:18:14 1997\n",
+			"Changed epic code 4002 to 1404 on Thu Apr 24 18:18:14 1997\n",
+			"Changed epic code 20 to 20 on Thu Apr 24 18:18:14 1997\n",
+			"Changed epic code 4026 to 4022 on Thu Apr 24 18:18:14 1997\n",
+			"Changed epic code 4027 to 4023 on Thu Apr 24 18:18:14 1997\n",
+			"Changed epic code 4025 to 850 on Thu Apr 24 18:18:14 1997\n",
+			"Changed epic code 107 to 107 on Thu Apr 24 18:18:14 1997\n",
+			"" ;
+		:Conventions = "CF-1.6" ;
+		:date_created = "2015-09-14T18:40:00Z" ;
+		:geospatial_lat_min = 41.92756f ;
+		:geospatial_lat_max = 41.92756f ;
+		:time_coverage_start = "1986-04-09T04:33:45" ;
+		:time_coverage_end = "1986-04-09T09:26:15" ;
+		:time_coverage_duration = "P17550S" ;
+		:featureType = "timeSeries" ;
+		:geospatial_vertical_positive = "up" ;
+		:geospatial_vertical_min = -28.6f ;
+		:geospatial_vertical_max = -28.6f ;
+		:geospatial_lon_min = -70.24289f ;
+		:geospatial_lon_max = -70.24289f ;
+		:DODS.strlen = 7 ;
+		:DODS.dimName = "feature_type_instance" ;
+		:DODS_EXTRA.Unlimited_Dimension = "time" ;
+}
