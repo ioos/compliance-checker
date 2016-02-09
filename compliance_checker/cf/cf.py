@@ -1493,16 +1493,24 @@ class CFBaseCheck(BaseCheck):
 
             reasoning = []
 
-            for self_reference_variable in self_reference_variables:
-                if self_reference_variable not in reported_reference_variables:
-                    reasoning.append("Variable %s's coordinate references itself" % (self_reference_variable))
+            for coord in g.coords:
+                if coord in reported_reference_variables:
+                    continue
+                if coord in self_reference_variables:
+                    reasoning.append("Variable %s's coordinate references itself" % (coord))
 
                     result = Result(BaseCheck.HIGH,
                                     False,
-                                    ('§5.2 Latitude and longitude coordinates of a horizontal grid', self_reference_variable, 'coordinates_reference_itself'),
+                                    ('§5.2 Latitude and longitude coordinates of a horizontal grid', coord, 'coordinates_reference_itself'),
                                     reasoning)
                     ret_val.append(result)
-                    reported_reference_variables.append(self_reference_variable)
+                else:
+                    result = Result(BaseCheck.HIGH,
+                                    True,
+                                    ('§5.2 Latitude and longitude coordinates of a horizontal grid', coord, 'coordinates_reference_itself'),
+                                    [])
+                    ret_val.append(result)
+                reported_reference_variables.append(coord)
 
             # Determine if 2-D coordinate variables (Lat and Lon are of shape (i,j)
             valid = True

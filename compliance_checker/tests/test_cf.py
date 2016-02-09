@@ -2,7 +2,7 @@
 
 from compliance_checker.suite import CheckSuite
 from compliance_checker.cf import CFBaseCheck, dimless_vertical_coordinates
-from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal
+from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal, NCGraph
 from netCDF4 import Dataset
 from tempfile import gettempdir
 from pkg_resources import resource_filename
@@ -38,6 +38,7 @@ static_files = {
     'units_check'                : resource_filename('compliance_checker', 'tests/data/units_check.nc'),
     'self_referencing'           : resource_filename('compliance_checker', 'tests/data/non-comp/self_referencing.nc'),
     'time_units'                 : resource_filename('compliance_checker', 'tests/data/non-comp/time_units.nc'),
+    'valid_coordinates'          : resource_filename('compliance_checker', 'tests/data/valid_coordinates.nc'),
 }
 
 
@@ -570,9 +571,16 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_two_dimensional(dataset)
 
         scored, out_of, messages = self.get_results(results)
-        assert "Variable TEMP_H's coordinate references itself" in messages
-        assert scored == 0
-        assert out_of == 44
+        assert "Variable LATITUDE's coordinate references itself" in messages
+        assert scored == 1
+        assert out_of == 3
+
+        dataset = self.load_dataset(static_files['valid_coordinates'])
+        results = self.cf.check_two_dimensional(dataset)
+        scored, out_of, messages = self.get_results(results)
+        assert out_of == 4
+        assert scored == 4
+        assert "Variable CD_310's coordinate references itself" not in messages
 
     def test_check_independent_axis_dimensions(self):
         dataset = self.load_dataset(static_files['example-grid'])
@@ -606,23 +614,11 @@ class TestCF(unittest.TestCase):
         dataset = self.load_dataset(static_files['bad2dim'])
         results = self.cf.check_two_dimensional(dataset)
 
-        self.assertTrue(results[0].value)
-        self.assertFalse(results[1].value)
-        self.assertIn('lat, is not a coordinate or auxiliary variable', results[1].msgs[0])
-        self.assertFalse(results[2].value)
-        self.assertIn('coordinate lat is not a correct lat/lon variable', results[2].msgs[0])
-        self.assertTrue(results[3].value)
-        self.assertFalse(results[4].value)
-        self.assertIn('lat_p, does not share dimension x with the variable', results[4].msgs[0])
-        self.assertTrue(results[5].value)
+        scored, out_of, messages = self.get_results(results)
 
-        # Test the self referencing variables
-        dataset = self.load_dataset(static_files['self-referencing-var'])
-        try:
-            results = self.cf.check_two_dimensional(dataset)
-            self.assertFalse(results[0].value)
-        except:
-            self.assertTrue(False)
+        assert "Variable T's coordinate, lat, is not a coordinate or auxiliary variable" in messages
+        assert "coordinate lat is not a correct lat/lon variable" in messages
+        assert "Variable C's coordinate, lat_p, does not share dimension x with the variable" in messages
 
     def test_check_reduced_horizontal_grid(self):
         dataset = self.load_dataset(static_files['rhgrid'])
