@@ -63,7 +63,7 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
             self._has_var_attr(ds, 'platform', 'source', 'Platform Type'),
             self._has_var_attr(ds, 'platform', 'ioos_name', 'Station ID'),
             self._has_var_attr(ds, 'platform', 'wmo_id', 'Station WMO ID'),
-            self._has_var_attr(ds, 'platform', 'commend', 'Station Description'),
+            self._has_var_attr(ds, 'platform', 'comment', 'Station Description'),
         ]
 
     def check_time_period(self, ds):
