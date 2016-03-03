@@ -146,7 +146,7 @@ class ACDDBaseCheck(BaseCheck):
             results.append(Result(BaseCheck.HIGH, check, (variable, "var_std_name"), msgs))
 
         return results
-
+    
     @score_group('varattr')
     def check_var_units(self, ds):
         results = []
@@ -161,10 +161,16 @@ class ACDDBaseCheck(BaseCheck):
             if std_name is not None:
                 if 'status_flag' in std_name:
                     continue
-            check = hasattr(ds.variables[variable], 'units')
-            if not check:
+            # Check units and dims for variable
+            unit_check = hasattr(ds.variables[variable], 'units')
+            no_dim_check = (getattr(ds.variables[variable], 'dimensions') == tuple())
+            # Check if we have no dimensions.  If no dims, skip test
+            if no_dim_check:
+                continue
+            # Check if we have no units
+            if not unit_check:
                 msgs.append("Var %s missing attr units" % variable)
-            results.append(Result(BaseCheck.HIGH, check, (variable, "var_units"), msgs))
+            results.append(Result(BaseCheck.HIGH, unit_check, (variable, "var_units"), msgs))
 
         return results
 
