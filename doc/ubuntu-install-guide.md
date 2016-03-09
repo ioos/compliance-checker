@@ -1,11 +1,6 @@
 # Installing Compliance-Checker on Ubuntu
 
 
-## Installing SWIG on Ubuntu
-
-```
-sudo apt-get install swig
-```
 
 ## Installing UDUnits on Ubuntu
 
