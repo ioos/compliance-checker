@@ -1,11 +1,6 @@
 # Installing Compliance-Checker on Ubuntu
 
 
-## Installing SWIG on Ubuntu
-
-```
-sudo apt-get install swig
-```
 
 ## Installing UDUnits on Ubuntu
 
@@ -36,30 +31,6 @@ You should see:
 	libudunits2.so.0 (libc6,x86-64) => /usr/local/lib/libudunits2.so.0
 	libudunits2.so (libc6,x86-64) => /usr/local/lib/libudunits2.so
 ```
-
-## Installing Udunitspy
-
-In your Python virtual environment that you set up for Compliance-Checker
-
-```
-pip install udunitspy
-```
-
-## Testing your UDUnitspy installation
-
-In your Python virtual environment that you set up for Compliance-Checker
-
-Run Python with the `python` command
-
-```
-Python 2.7.3 (default, Apr 10 2013, 06:20:15) 
-[GCC 4.6.3] on linux2
-Type "help", "copyright", "credits" or "license" for more information.
->>> from udunitspy import Unit
->>> 
-```
-
-If you don't see an error then udunitspy was succesfully installed, and you can now finish the installation of the compliance checker.
 
 ## Installing lxml on Ubuntu
 
