@@ -1,0 +1,58 @@
+netcdf bad {
+dimensions:
+	_poor_dim = 1 ;
+	lat = 10 ;
+	lon = 10 ;
+	height = 1 ;
+	lev = 1 ;
+	time = 1 ;
+	sigma = 5 ;
+variables:
+	float _poor_dim(_poor_dim) ;
+	float lat(lat) ;
+		lat:standard_name = "latitude" ;
+	float lat_uv(lat) ;
+		lat_uv:units = "degreesN" ;
+		lat_uv:standard_name = "latitude" ;
+	float lat_like(lat) ;
+		lat_like:standard_name = "latitude" ;
+		lat_like:units = "N" ;
+	float lon(lon) ;
+		lon:standard_name = "longitude" ;
+	float lon_uv(lon) ;
+		lon_uv:standard_name = "longitude" ;
+		lon_uv:units = "degreesE" ;
+	float lon_like(lon) ;
+		lon_like:standard_name = "longitude" ;
+		lon_like:units = "E" ;
+	int height(height) ;
+		height:description = "no units" ;
+		height:standard_name = "height" ;
+	int depth(height) ;
+		depth:description = "not pressure and no positive" ;
+		depth:units = "1" ;
+		depth:standard_name = "depth" ;
+	int depth2(height) ;
+		depth2:description = "has incorrect \"positive\" attr" ;
+		depth2:positive = "negative" ;
+		depth2:units = "1" ;
+		depth2:axis = "Z" ;
+		depth2:standard_name = "depth" ;
+	float lev1(lev) ;
+		lev1:standard_name = "atmosphere_ln_pressure_coordinate" ;
+		lev1:description = "Missing formula_terms" ;
+	float lev2(lev) ;
+		lev2:standard_name = "atmosphere_hybrid_height_coordinate" ;
+		lev2:formula_terms = "a: var1 b: var2 orog: var3" ;
+		lev2:description = "Missing variables from formula_terms" ;
+	double bad_time_1(time) ;
+		bad_time_1:standard_name = "time" ;
+		bad_time_1:description = "lacks units" ;
+	double bad_time_2(time) ;
+		bad_time_2:units = "seconds" ;
+		bad_time_2:description = "incorrect units" ;
+		bad_time_2:standard_name = "time" ;
+		bad_time_2:calendar = "nope" ;
+	float column_temp(time, sigma) ;
+		column_temp:description = "sigma is not a coordinate variable" ;
+}

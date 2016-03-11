@@ -1,0 +1,19 @@
+netcdf self-referencing-var {
+dimensions:
+	TIME = 2 ;
+variables:
+	float DEPTH(TIME) ;
+		DEPTH:coordinates = "TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH" ;
+		DEPTH:standard_name = "depth" ;
+		DEPTH:units = "metres" ;
+		DEPTH:reference_datum = "sea surface" ;
+		DEPTH:positive = "down" ;
+	float TEMP(TIME) ;
+		TEMP:coordinates = "TIME LATITUDE LONGITUDE NOMINAL_DEPTH DEPTH" ;
+		TEMP:standard_name = "sea_water_temperature" ;
+		TEMP:units = "Celsius" ;
+	double TIME(TIME) ;
+		TIME:standard_name = "time" ;
+		TIME:units = "days since 1950-01-01 00:00:00 UTC" ;
+		TIME:calendar = "gregorian" ;
+}

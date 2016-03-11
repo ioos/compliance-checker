@@ -1,0 +1,52 @@
+netcdf index_ragged {
+dimensions:
+	obs = UNLIMITED ; // (213 currently)
+	trajectory = 10 ;
+	name_strlen = 50 ;
+variables:
+	float lat(obs) ;
+		lat:units = "degrees_north" ;
+		lat:long_name = "station latitude" ;
+		lat:standard_name = "latitude" ;
+	float lon(obs) ;
+		lon:units = "degrees_east" ;
+		lon:long_name = "station longitude" ;
+		lon:standard_name = "longitude" ;
+	int trajectory_info(trajectory) ;
+		trajectory_info:long_name = "trajectory info" ;
+		trajectory_info:missing_value = -999 ;
+	char trajectory_name(trajectory, name_strlen) ;
+		trajectory_name:cf_role = "trajectory_id" ;
+		trajectory_name:long_name = "trajectory name" ;
+	int trajectory_index(obs) ;
+		trajectory_index:long_name = "index of trajectory this obs belongs to" ;
+		trajectory_index:instance_dimension = "trajectory" ;
+	int time(obs) ;
+		time:long_name = "time of measurement" ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1990-01-01 00:00:00" ;
+		time:missing_value = -999 ;
+	float z(obs) ;
+		z:long_name = "height above mean sea level" ;
+		z:standard_name = "altitude" ;
+		z:units = "m" ;
+		z:positive = "up" ;
+		z:axis = "Z" ;
+		z:missing_value = -999.9f ;
+	float temperature(obs) ;
+		temperature:long_name = "Air Temperature" ;
+		temperature:standard_name = "air_temperature" ;
+		temperature:units = "Celsius" ;
+		temperature:coordinates = "time lat lon z" ;
+		temperature:missing_value = -999.9f ;
+	float humidity(obs) ;
+		humidity:long_name = "Humidity" ;
+		humidity:standard_name = "specific_humidity" ;
+		humidity:units = "Percent" ;
+		humidity:coordinates = "time lat lon z" ;
+		humidity:missing_value = -999.9f ;
+
+// global attributes:
+		:Conventions = "CF-1.6" ;
+		:featureType = "trajectory" ;
+}

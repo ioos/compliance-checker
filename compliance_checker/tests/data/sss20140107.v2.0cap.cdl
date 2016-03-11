@@ -1,0 +1,34 @@
+netcdf sss20140107.v2.0cap {
+dimensions:
+	Longitude = 360 ;
+	Latitude = 180 ;
+variables:
+	float Longitude(Longitude) ;
+		Longitude:units = "degrees_east" ;
+		Longitude:point_spacing = "1deg" ;
+	float Latitude(Latitude) ;
+		Latitude:units = "degrees_north" ;
+		Latitude:point_spacing = "1deg" ;
+	float sss_cap(Latitude, Longitude) ;
+		sss_cap:units = "PSU" ;
+		sss_cap:long_name = "Sea_Surface_Salinity" ;
+		sss_cap:FillValue = -9999.f ;
+
+// global attributes:
+		:INSTITUTION = "JPL" ;
+		:Satellite = "Aquarius" ;
+		:Data_Type = "1x1 Deg Gridded Bin Averaged Maps" ;
+		:VARIABLE_1 = "sss_cap(nlon,nlat)" ;
+		:First_Index = "Longitude" ;
+		:Second_Index = "Latitude" ;
+		:Original_Source_DATA = "L2_SCI_V2.0-HDF5" ;
+		:DATA_SOURCE_VERSION = "2.0" ;
+		:Map_Time_Range = "01/07/14-01/13/14" ;
+		:DATE_CREATION = "2014May20 15:18:12" ;
+		:Search_Radius_KM = "      111.000" ;
+		:Half_Power_Point_KM = "      75.0000" ;
+		:Binning_Method = "Gaussian" ;
+		:Land_Fraction = "    0.0100000" ;
+		:Ice_Fraction = "  0.000500000" ;
+		:Minimum_Bin_Pts = "      6.00000" ;
+}

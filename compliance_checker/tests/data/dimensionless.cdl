@@ -1,0 +1,20 @@
+netcdf dimensionless {
+dimensions:
+	time = UNLIMITED ; // (0 currently)
+	i = 1 ;
+	j = 1 ;
+	k = 1 ;
+	lev = 1 ;
+variables:
+	float ps(time, j, i) ;
+		ps:units = "dbar" ;
+		ps:standard_name = "pressure" ;
+	float ptop ;
+		ptop:long_name = "Boundary atmosphere pressure" ;
+		ptop:units = "dbar" ;
+	float lev(lev) ;
+		lev:long_name = "sigma at layer midpoints" ;
+		lev:positive = "up" ;
+		lev:standard_name = "atmosphere_sigma_coordinate" ;
+		lev:formula_terms = "sigma: lev ps: ps ptop: ptop" ;
+}

@@ -1,0 +1,42 @@
+netcdf bad-rhgrid {
+dimensions:
+	londim = 20 ;
+	latdim = 20 ;
+	rgrid = 20 ;
+	ijgrid = 20 ;
+variables:
+	float PSa(rgrid) ;
+		PSa:long_name = "surface pressure" ;
+		PSa:units = "Pa" ;
+		PSa:coordinates = "longitude lat" ;
+		PSa:description = "longitude is not an auxiliary coordinate" ;
+	float PSb(rgrid) ;
+		PSb:long_name = "surface pressure" ;
+		PSb:units = "Pa" ;
+		PSb:coordinates = "lon latitude" ;
+		PSb:description = "latitude does not have a shared dimension with PSb" ;
+	float PSc(ijgrid) ;
+		PSc:long_name = "surface pressure" ;
+		PSc:units = "Pa" ;
+		PSc:coordinates = "lon_i lat_j" ;
+		PSc:description = "ijgrid does not define compress" ;
+	float lon(rgrid) ;
+		lon:long_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	float lat(rgrid) ;
+		lat:long_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	float latitude(latdim) ;
+		latitude:long_name = "latitude" ;
+		latitude:units = "degrees_north" ;
+	float rgrid(rgrid) ;
+		rgrid:compress = "latdim londim" ;
+	float lon_i(ijgrid) ;
+		lon_i:long_name = "longitude" ;
+		lon_i:units = "degrees_east" ;
+	float lat_j(ijgrid) ;
+		lat_j:long_name = "latitude" ;
+		lat_j:units = "degrees_north" ;
+	float ijgrid(ijgrid) ;
+		ijgrid:description = "lacks a compress" ;
+}

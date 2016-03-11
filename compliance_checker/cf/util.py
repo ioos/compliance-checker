@@ -218,8 +218,8 @@ class NCGraph(object):
         if coord not in self.ds.variables:
             return
         if coord in self.reference_map:
-            if self.obj.name == coord:
-                self.reference_variables.add(self.obj.name)
+            if self.name == coord:
+                self.reference_variables.add(self.name)
             return self.reference_map[coord]
         return NCGraph(self.ds, coord, self.ds.variables[coord], self.reference_variables, self.reference_map)
 

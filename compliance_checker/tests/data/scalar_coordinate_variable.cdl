@@ -1,0 +1,18 @@
+netcdf scalar_coordinate_variable {
+dimensions:
+	TIME = 10 ;
+	METER = UNLIMITED ; // (0 currently)
+	DISTANCE = 1 ;
+	VERTICAL = 1 ;
+variables:
+	double VERTICAL ;
+	double HEIGHT ;
+		HEIGHT:coordinates = "TIME METER DISTANCE" ;
+	double DEPTH ;
+		DEPTH:coordinates = "LATITUDE LONGITUDE" ;
+	double LONGITUDE ;
+	double LATITUDE ;
+	double TIME(TIME) ;
+	double METER(METER) ;
+	double DISTANCE ;
+}
