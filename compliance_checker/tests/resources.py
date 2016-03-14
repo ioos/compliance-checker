@@ -13,7 +13,6 @@ def get_filename(path):
     return filename
 
 def generate_dataset(cdl_path, nc_path):
-    print "Creating %s from %s"%(nc_path,cdl_path)
     sh.ncgen('-o', nc_path, cdl_path)
 
 STATIC_FILES = {
