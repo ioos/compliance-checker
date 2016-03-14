@@ -1,6 +1,6 @@
-netcdf \3051B-A {
+netcdf valid_coordinates {
 dimensions:
-	time = UNLIMITED ; // (40 currently)
+	time = UNLIMITED ; // (0 currently)
 	maxStrlen64 = 64 ;
 variables:
 	char feature_type_instance(maxStrlen64) ;
@@ -19,7 +19,6 @@ variables:
 		time:standard_name = "time" ;
 		time:long_name = "time of measurement" ;
 		time:calendar = "gregorian" ;
-		time:_ChunkSizes = 1000 ;
 	double z ;
 		z:_FillValue = -9999.9 ;
 		z:grid_mapping = "crs" ;
@@ -54,7 +53,6 @@ variables:
 		CD_310:serial_number = "SD-003" ;
 		CD_310:actual_max = 358.189f ;
 		CD_310:grid_mapping = "crs" ;
-		CD_310:_ChunkSizes = 1000 ;
 	double CS_300(time) ;
 		CS_300:_FillValue = -9999.9 ;
 		CS_300:coordinates = "time z latitude longitude" ;
@@ -70,7 +68,6 @@ variables:
 		CS_300:serial_number = "SD-003" ;
 		CS_300:actual_max = 16.7648f ;
 		CS_300:grid_mapping = "crs" ;
-		CS_300:_ChunkSizes = 1000 ;
 	double C_50(time) ;
 		C_50:_FillValue = -9999.9 ;
 		C_50:coordinates = "time z latitude longitude" ;
@@ -87,7 +84,6 @@ variables:
 		C_50:serial_number = "C-228" ;
 		C_50:actual_max = 30.9131f ;
 		C_50:grid_mapping = "crs" ;
-		C_50:_ChunkSizes = 1000 ;
 	double P_4022(time) ;
 		P_4022:_FillValue = -9999.9 ;
 		P_4022:coordinates = "time z latitude longitude" ;
@@ -103,7 +99,6 @@ variables:
 		P_4022:serial_number = "P-1558" ;
 		P_4022:actual_max = 4228.21f ;
 		P_4022:grid_mapping = "crs" ;
-		P_4022:_ChunkSizes = 1000 ;
 	double P_4023(time) ;
 		P_4023:_FillValue = -9999.9 ;
 		P_4023:coordinates = "time z latitude longitude" ;
@@ -119,7 +114,6 @@ variables:
 		P_4023:serial_number = "P-1558" ;
 		P_4023:actual_max = 4228.f ;
 		P_4023:grid_mapping = "crs" ;
-		P_4023:_ChunkSizes = 1000 ;
 	double SDP_850(time) ;
 		SDP_850:_FillValue = -9999.9 ;
 		SDP_850:coordinates = "time z latitude longitude" ;
@@ -136,7 +130,6 @@ variables:
 		SDP_850:serial_number = "P-1558" ;
 		SDP_850:actual_max = 1.79197f ;
 		SDP_850:grid_mapping = "crs" ;
-		SDP_850:_ChunkSizes = 1000 ;
 	double S_40(time) ;
 		S_40:_FillValue = -9999.9 ;
 		S_40:coordinates = "time z latitude longitude" ;
@@ -152,7 +145,6 @@ variables:
 		S_40:serial_number = "" ;
 		S_40:actual_max = 32.3591f ;
 		S_40:grid_mapping = "crs" ;
-		S_40:_ChunkSizes = 1000 ;
 	double TRN_107(time) ;
 		TRN_107:_FillValue = -9999.9 ;
 		TRN_107:coordinates = "time z latitude longitude" ;
@@ -167,7 +159,6 @@ variables:
 		TRN_107:serial_number = "NT-050" ;
 		TRN_107:actual_max = 1.70164f ;
 		TRN_107:grid_mapping = "crs" ;
-		TRN_107:_ChunkSizes = 1000 ;
 	double T_20(time) ;
 		T_20:_FillValue = -9999.9 ;
 		T_20:coordinates = "time z latitude longitude" ;
@@ -183,7 +174,6 @@ variables:
 		T_20:serial_number = "T-0004" ;
 		T_20:actual_max = 4.68896f ;
 		T_20:grid_mapping = "crs" ;
-		T_20:_ChunkSizes = 1000 ;
 	double comp_1404(time) ;
 		comp_1404:_FillValue = -9999.9 ;
 		comp_1404:coordinates = "time z latitude longitude" ;
@@ -199,7 +189,6 @@ variables:
 		comp_1404:serial_number = "" ;
 		comp_1404:actual_max = 226.406f ;
 		comp_1404:grid_mapping = "crs" ;
-		comp_1404:_ChunkSizes = 1000 ;
 	double lowr_4003(time) ;
 		lowr_4003:_FillValue = -9999.9 ;
 		lowr_4003:coordinates = "time z latitude longitude" ;
@@ -214,7 +203,6 @@ variables:
 		lowr_4003:serial_number = "SD-003" ;
 		lowr_4003:actual_max = 9.22f ;
 		lowr_4003:grid_mapping = "crs" ;
-		lowr_4003:_ChunkSizes = 1000 ;
 	double tran_4010(time) ;
 		tran_4010:_FillValue = -9999.9 ;
 		tran_4010:coordinates = "time z latitude longitude" ;
@@ -229,7 +217,6 @@ variables:
 		tran_4010:serial_number = "NT-050" ;
 		tran_4010:actual_max = 1.74803f ;
 		tran_4010:grid_mapping = "crs" ;
-		tran_4010:_ChunkSizes = 1000 ;
 	double u_1205(time) ;
 		u_1205:_FillValue = -9999.9 ;
 		u_1205:coordinates = "time z latitude longitude" ;
@@ -245,7 +232,6 @@ variables:
 		u_1205:serial_number = "SD-003" ;
 		u_1205:actual_max = 0.99513f ;
 		u_1205:grid_mapping = "crs" ;
-		u_1205:_ChunkSizes = 1000 ;
 	double upr_4001(time) ;
 		upr_4001:_FillValue = -9999.9 ;
 		upr_4001:coordinates = "time z latitude longitude" ;
@@ -260,7 +246,6 @@ variables:
 		upr_4001:serial_number = "SD-003" ;
 		upr_4001:actual_max = 12.6294f ;
 		upr_4001:grid_mapping = "crs" ;
-		upr_4001:_ChunkSizes = 1000 ;
 	double v_1206(time) ;
 		v_1206:_FillValue = -9999.9 ;
 		v_1206:coordinates = "time z latitude longitude" ;
@@ -276,7 +261,6 @@ variables:
 		v_1206:serial_number = "SD-003" ;
 		v_1206:actual_max = 16.6106f ;
 		v_1206:grid_mapping = "crs" ;
-		v_1206:_ChunkSizes = 1000 ;
 	double van_1403(time) ;
 		van_1403:_FillValue = -9999.9 ;
 		van_1403:coordinates = "time z latitude longitude" ;
@@ -292,14 +276,12 @@ variables:
 		van_1403:serial_number = "" ;
 		van_1403:actual_max = 199.687f ;
 		van_1403:grid_mapping = "crs" ;
-		van_1403:_ChunkSizes = 1000 ;
 
 // global attributes:
 		:project_summary = "A pilot study to determine the effect of winter storms on sediment movement at two potential dredge spoil disposal areas." ;
 		:VAR_FILL = "" ;
 		:DATA_TYPE = "TIME" ;
-		:DELTA_T = "7.50 minutes\r\n",
-			"" ;
+		:DELTA_T = "7.50 minutes\r\n" ;
 		:DEPTH_CONST = 0 ;
 		:days = 0 ;
 		:DATA_SUBTYPE = "" ;
@@ -332,35 +314,13 @@ variables:
 		:institution = "USGS Woods Hole Coastal and Marine Science Center" ;
 		:MOORING = 305 ;
 		:contributor_name = "B. Butman" ;
-		:DATA_CMNT = " CAPE COD BAY, SITE B.  MV APPLIED.  TRUNCATED AT GAP.  E.S.T.\r\n",
-			"" ;
+		:DATA_CMNT = " CAPE COD BAY, SITE B.  MV APPLIED.  TRUNCATED AT GAP.  E.S.T.\r\n" ;
 		:project_title = "Currents and Sediment Transport in Cape Cod Bay" ;
 		:creator_name = "Rich Signell" ;
 		:COMPOSITE = 0 ;
 		:COORD_SYSTEM = "GEOGRAPHICAL" ;
 		:longitude = -70.24289f ;
-		:summary = "3051B-A        start time =  8 Apr 1986  23:33:45  cycles = 40\n",
-			"               stop  time =  9 Apr 1986  04:26:15  # days = 0\n",
-			"Expt. = \'USGS\'  sampling interval = 7.50 minutes\n",
-			"Lat =  41.927555\n",
-			"Lon = -70.242889  File created:  10:56 JUL 16,\'86\n",
-			"depth = 30m  Mag.var = -15.000000\n",
-			"#  Variable     Units        Codes Depth   Inst.   Minimum   Maximum\n",
-			"-- ------------ ------------ ----- ------- ------ --------- ---------\n",
-			" 1 TIME         SECONDS      T     \n",
-			" 2 U.1          CMS/SEC      R       28.60 SD-003    -2.627     0.995\n",
-			" 3 V.1          CMS/SEC      R       28.60 SD-003     2.540    16.611\n",
-			" 4 VDIR.1       DEG          R       28.60 SD-003     4.861   358.189\n",
-			" 5 VSPD.1       CMS/SEC      R       28.60 SD-003     2.689    16.765\n",
-			" 6 INT_ROTOR1   CMS/SEC      R       28.60 SD-003     3.013    12.629\n",
-			" 7 INT_ROTOR2   CMS/SEC      R       28.60 SD-003     2.431     9.220\n",
-			" 8 VANE         ANG.DEG.     R       28.60          129.375   199.687\n",
-			" 9 COMPASS      ANG.DEG.     R       28.60          226.406   226.406\n",
-			"10 TEMPERATURE  DEG.CELC     R       28.60 T-0004     4.265     4.689\n",
-			"11 PRESSURE-I   MILLIBARS    R       28.60 P-1558  3943.594  4228.212\n",
-			"12 PRESSURE-B   MILLIBARS    R       28.60 P-1558  3942.611  4227.998\n",
-			"13 PSDEV  14 CONDUCTIVITY MHOS15 SALINITY     PPT          R  TIME is expressed as YEAR-MONTH-DAY  HOUR.MINUTE.SECOND\n",
-			"" ;
+		:summary = "3051B-A        start time =  8 Apr 1986  23:33:45  cycles = 40\n               stop  time =  9 Apr 1986  04:26:15  # days = 0\nExpt. = \'USGS\'  sampling interval = 7.50 minutes\nLat =  41.927555\nLon = -70.242889  File created:  10:56 JUL 16,\'86\ndepth = 30m  Mag.var = -15.000000\n#  Variable     Units        Codes Depth   Inst.   Minimum   Maximum\n-- ------------ ------------ ----- ------- ------ --------- ---------\n 1 TIME         SECONDS      T     \n 2 U.1          CMS/SEC      R       28.60 SD-003    -2.627     0.995\n 3 V.1          CMS/SEC      R       28.60 SD-003     2.540    16.611\n 4 VDIR.1       DEG          R       28.60 SD-003     4.861   358.189\n 5 VSPD.1       CMS/SEC      R       28.60 SD-003     2.689    16.765\n 6 INT_ROTOR1   CMS/SEC      R       28.60 SD-003     3.013    12.629\n 7 INT_ROTOR2   CMS/SEC      R       28.60 SD-003     2.431     9.220\n 8 VANE         ANG.DEG.     R       28.60          129.375   199.687\n 9 COMPASS      ANG.DEG.     R       28.60          226.406   226.406\n10 TEMPERATURE  DEG.CELC     R       28.60 T-0004     4.265     4.689\n11 PRESSURE-I   MILLIBARS    R       28.60 P-1558  3943.594  4228.212\n12 PRESSURE-B   MILLIBARS    R       28.60 P-1558  3942.611  4227.998\n13 PSDEV  14 CONDUCTIVITY MHOS15 SALINITY     PPT          R  TIME is expressed as YEAR-MONTH-DAY  HOUR.MINUTE.SECOND\n" ;
 		:creator_phone = "+1 (508) 548-8700" ;
 		:VAR_DESC = "attn v     upper lower vane compass temp int.p pres psdev con sal trans   " ;
 		:EXPERIMENT = "?" ;
@@ -369,21 +329,7 @@ variables:
 		:WATER_MASS = "?" ;
 		:cycles = 40 ;
 		:INST_TYPE = "SD-003 T-0004 P-1558 C-228 NT-050 " ;
-		:history = "Original file creation date was 10:56 JUL 16,\'86\r\n",
-			"Converted to EPIC/NetCDF Fri Dec  6 15:29:21 1996\n",
-			"\n",
-			"Original ascii file was a3051b01.ascChanged epic code 310 to 310 on Thu Apr 24 18:18:14 1997\n",
-			"Changed epic code 300 to 300 on Thu Apr 24 18:18:14 1997\n",
-			"Changed epic code 4020 to 4001 on Thu Apr 24 18:18:14 1997\n",
-			"Changed epic code 4028 to 4003 on Thu Apr 24 18:18:14 1997\n",
-			"Changed epic code 4023 to 1403 on Thu Apr 24 18:18:14 1997\n",
-			"Changed epic code 4002 to 1404 on Thu Apr 24 18:18:14 1997\n",
-			"Changed epic code 20 to 20 on Thu Apr 24 18:18:14 1997\n",
-			"Changed epic code 4026 to 4022 on Thu Apr 24 18:18:14 1997\n",
-			"Changed epic code 4027 to 4023 on Thu Apr 24 18:18:14 1997\n",
-			"Changed epic code 4025 to 850 on Thu Apr 24 18:18:14 1997\n",
-			"Changed epic code 107 to 107 on Thu Apr 24 18:18:14 1997\n",
-			"" ;
+		:history = "Original file creation date was 10:56 JUL 16,\'86\r\nConverted to EPIC/NetCDF Fri Dec  6 15:29:21 1996\n\nOriginal ascii file was a3051b01.ascChanged epic code 310 to 310 on Thu Apr 24 18:18:14 1997\nChanged epic code 300 to 300 on Thu Apr 24 18:18:14 1997\nChanged epic code 4020 to 4001 on Thu Apr 24 18:18:14 1997\nChanged epic code 4028 to 4003 on Thu Apr 24 18:18:14 1997\nChanged epic code 4023 to 1403 on Thu Apr 24 18:18:14 1997\nChanged epic code 4002 to 1404 on Thu Apr 24 18:18:14 1997\nChanged epic code 20 to 20 on Thu Apr 24 18:18:14 1997\nChanged epic code 4026 to 4022 on Thu Apr 24 18:18:14 1997\nChanged epic code 4027 to 4023 on Thu Apr 24 18:18:14 1997\nChanged epic code 4025 to 850 on Thu Apr 24 18:18:14 1997\nChanged epic code 107 to 107 on Thu Apr 24 18:18:14 1997\n" ;
 		:Conventions = "CF-1.6" ;
 		:date_created = "2015-09-14T18:40:00Z" ;
 		:geospatial_lat_min = 41.92756f ;
@@ -400,4 +346,17 @@ variables:
 		:DODS.strlen = 7 ;
 		:DODS.dimName = "feature_type_instance" ;
 		:DODS_EXTRA.Unlimited_Dimension = "time" ;
+data:
+
+ feature_type_instance = "" ;
+
+ latitude = _ ;
+
+ longitude = _ ;
+
+ z = _ ;
+
+ crs = _ ;
+
+ platform = _ ;
 }

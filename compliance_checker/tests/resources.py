@@ -1,6 +1,6 @@
 from pkg_resources import resource_filename
-import sh
 import os
+import subprocess
 
 def get_filename(path):
     '''
@@ -13,7 +13,7 @@ def get_filename(path):
     return filename
 
 def generate_dataset(cdl_path, nc_path):
-    sh.ncgen('-o', nc_path, cdl_path)
+    subprocess.call(['ncgen','-o', nc_path, cdl_path])
 
 STATIC_FILES = {
     'rutgers'                    : get_filename('tests/data/ru07-20130824T170228_rt0.nc'),

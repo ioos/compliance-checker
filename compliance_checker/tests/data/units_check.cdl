@@ -1,39 +1,47 @@
 netcdf units_check {
 dimensions:
-    time = 1 ;
+	time = 1 ;
 variables:
-    uint64 time(time) ;
-        time:units = "seconds since 1970-01-01" ;
-        time:standard_name = "time" ;
-        time:calendar = "gregorian" ;
-
-    float latitude ;
-        latitude:units = "degrees_north" ;
-        latitude:standard_name = "latitude" ;
-        latitude:long_name = "Latitude" ;
-    float longitude ;
-        longitude:units = "degrees_east" ;
-        longitude:standard_name = "longitude" ;
-        longitude:long_name = "Longitude" ;
-
-    float temperature(time) ;
-        temperature:units = "deg_C" ;
-        temperature:standard_name = "sea_water_temperature" ;
-        temperature:long_name = "Seawater Temperature" ;
-
-    int crs; 
-        crs:grid_mapping_name = "latitude_longitude"; 
-        crs:epsg_code = "EPSG:4326" ; 
-        crs:semi_major_axis = 6378137.0 ; 
-        crs:inverse_flattening = 298.257223563 ; 
-
-    int platform ;
-        platform:long_name = "Annapolis" ;
-        platform:comment = "CBIBS Annapolis Buoy" ;
-        platform:wmo_code = "44041" ;
+	uint64 time(time) ;
+		time:units = "seconds since 1970-01-01" ;
+		time:standard_name = "time" ;
+		time:calendar = "gregorian" ;
+	float latitude ;
+		latitude:units = "degrees_north" ;
+		latitude:standard_name = "latitude" ;
+		latitude:long_name = "Latitude" ;
+	float longitude ;
+		longitude:units = "degrees_east" ;
+		longitude:standard_name = "longitude" ;
+		longitude:long_name = "Longitude" ;
+	float temperature(time) ;
+		temperature:units = "deg_C" ;
+		temperature:standard_name = "sea_water_temperature" ;
+		temperature:long_name = "Seawater Temperature" ;
+	int crs ;
+		crs:grid_mapping_name = "latitude_longitude" ;
+		crs:epsg_code = "EPSG:4326" ;
+		crs:semi_major_axis = 6378137. ;
+		crs:inverse_flattening = 298.257223563 ;
+	int platform ;
+		platform:long_name = "Annapolis" ;
+		platform:comment = "CBIBS Annapolis Buoy" ;
+		platform:wmo_code = "44041" ;
 
 // global attributes:
-        :featureType = "timeSeries" ;
-        :platform = "platform" ;
-}
+		:featureType = "timeSeries" ;
+		:platform = "platform" ;
+data:
 
+ time = _ ;
+
+ latitude = _ ;
+
+ longitude = _ ;
+
+ temperature = _ ;
+
+ crs = _ ;
+
+ platform = _ ;
+}

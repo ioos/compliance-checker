@@ -13,4 +13,11 @@ variables:
 
 // global attributes:
 		:featureType = "pointzz" ;
+data:
+
+ time = _, _, _, _, _ ;
+
+ temp = _, _, _, _, _ ;
+
+ temp_quality_control = _, _, _, _, _ ;
 }

@@ -15,4 +15,19 @@ variables:
 	double TIME(TIME) ;
 	double METER(METER) ;
 	double DISTANCE ;
+data:
+
+ VERTICAL = _ ;
+
+ HEIGHT = _ ;
+
+ DEPTH = _ ;
+
+ LONGITUDE = _ ;
+
+ LATITUDE = _ ;
+
+ TIME = _, _, _, _, _, _, _, _, _, _ ;
+
+ DISTANCE = _ ;
 }

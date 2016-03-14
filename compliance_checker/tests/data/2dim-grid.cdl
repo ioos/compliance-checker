@@ -28,4 +28,35 @@ variables:
 	float quality_control(yc, xc) ;
 		quality_control:long_name = "quality control" ;
 		quality_control:flag_meanings = "flag meanings" ;
+data:
+
+ T =
+  _, _,
+  _, _,
+  _, _,
+  _, _,
+  _, _,
+  _, _,
+  _, _,
+  _, _,
+  _, _,
+  _, _ ;
+
+ xc = _, _ ;
+
+ yc = _, _ ;
+
+ lev = _, _, _, _, _ ;
+
+ lon =
+  _, _,
+  _, _ ;
+
+ lat =
+  _, _,
+  _, _ ;
+
+ quality_control =
+  _, _,
+  _, _ ;
 }

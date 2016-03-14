@@ -16,4 +16,11 @@ variables:
 		TIME:standard_name = "time" ;
 		TIME:units = "days since 1950-01-01 00:00:00 UTC" ;
 		TIME:calendar = "gregorian" ;
+data:
+
+ DEPTH = -0.02751586, 0.03094603 ;
+
+ TEMP = 26.7101, 23.9961 ;
+
+ TIME = 23625.281099537, 23626 ;
 }

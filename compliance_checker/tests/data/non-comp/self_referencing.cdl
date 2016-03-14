@@ -1,4 +1,4 @@
-netcdf temp {
+netcdf self_referencing {
 dimensions:
 	TIME = UNLIMITED ; // (22 currently)
 	h_num = 15 ;

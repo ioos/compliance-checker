@@ -31,4 +31,25 @@ variables:
 		geo_regionZ:standard_name = "region" ;
 	char geo_region(strlen) ;
 		geo_region:standard_name = "region" ;
+data:
+
+ time = _, _, _ ;
+
+ latitude = _ ;
+
+ longitude = _ ;
+
+ temp =
+  {1, 0, 1},
+  {1, 1, 0},
+  {_, 1, 0} ;
+
+ salinity =
+  {0.65873145682807, 0.715646913770724, _} ;
+
+ longitudeZZ = _ ;
+
+ geo_regionZ = "The_Hood_Dawgz" ;
+
+ geo_region = "Atlantic_Ocean" ;
 }

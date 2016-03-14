@@ -35,4 +35,25 @@ variables:
 
 // global attributes:
 		:featureType = "point" ;
+data:
+
+ time = 1, _, _ ;
+
+ latitude = _ ;
+
+ longitude = _ ;
+
+ temp =
+  {1, 0, 1},
+  {1, 1, 0},
+  {_, 1, 0} ;
+
+ salinity =
+  {0, _, 2} ;
+
+ longitudeZZ = _ ;
+
+ geo_regionZ = "The_Hood_Dawgz" ;
+
+ geo_region = "Atlantic_Ocean" ;
 }

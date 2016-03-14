@@ -37,4 +37,21 @@ variables:
 
 // global attributes:
 		:featureType = "pointzz" ;
+data:
+
+ time = _, _, _ ;
+
+ latitude = _ ;
+
+ longitude = _ ;
+
+ temp =
+  {1, 0, 1},
+  {1, 1, 0},
+  {_, 1, 0} ;
+
+ salinity =
+  {0.0776476799782908, 0.774116051694633, _} ;
+
+ longitudeZZ = _ ;
 }

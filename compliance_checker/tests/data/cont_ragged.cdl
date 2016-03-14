@@ -43,4 +43,23 @@ variables:
 // global attributes:
 		:Conventions = "CF-1.6" ;
 		:featureType = "timeSeriesProfile" ;
+data:
+
+ lat = 37.5 ;
+
+ lon = -76.5 ;
+
+ station_info = 0 ;
+
+ station_name = "Station1" ;
+
+ profile = 0, 1, 2, 3 ;
+
+ time = 0, 3600, 7200, 10800 ;
+
+ row_size = 2, 2, 3, 3 ;
+
+ height = 0.5, 1.5, 0.5, 1.5, 0.5, 1.5, 2.5, 0.5, 1.5, 2.5 ;
+
+ temperature = 6.7, 6.9, 6.8, 7.9, 6.8, 7.9, 8.4, 5.7, 9.2, 8.3 ;
 }
