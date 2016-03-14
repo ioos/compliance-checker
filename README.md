@@ -353,6 +353,26 @@ units                                  :3:     0/ 1 :
 
 ## Installation
 
+### Non-Python dependencies
+
+A number of the Python modules used by the compliance checker such as NumPy
+require linking against external C or Fortran libraries.  If using an
+ installation method for Python dependencies such as pip below, these external
+ libraries will need to be installed beforehand prior to the installation of
+ the Python dependencies.
+Known C library dependencies include:
+  - NetCDF4
+  - HDF5
+  - UDUNITS (2.x series)
+  - libxml2/libxslt
+
+Installation for these libraries will vary depending on your choice of
+operating system and method of installation (i.e. binary packages versus
+compiling from source).  For more information on installing these libraries,
+reference the documentation from the individual libraries.
+
+### Python dependencies with `pip`
+
 To install locally, set up a virtual environment (recommend using
 [virtualenv-burrito](https://github.com/brainsik/virtualenv-burrito);
 however, do not use `virtualenv-burrito` if you are using Anaconda python.
