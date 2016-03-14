@@ -549,6 +549,7 @@ class CFBaseCheck(BaseCheck):
         boundary_vars = iter(self._find_boundary_vars(ds).values())
         container_vars = self._find_container_variables(ds)
         metadata_vars = self._find_metadata_vars(ds)
+        ancillary_vars = self._find_ancillary_vars(ds)
 
         for k, v in ds.variables.items():
 
@@ -556,6 +557,7 @@ class CFBaseCheck(BaseCheck):
             if v in clim_vars or \
                v in boundary_vars or \
                v in metadata_vars or \
+               v in ancillary_vars or \
                k in container_vars:
                 continue
 
@@ -723,9 +725,9 @@ class CFBaseCheck(BaseCheck):
             anc_result = Result(BaseCheck.HIGH, name=('§3.4 Ancillary Variables', k))
             msgs = []
 
-            if not isinstance(anc, str):
+            if not isinstance(anc, str) and not isinstance(anc, unicode):
                 anc_result.value = False
-                anc_result.msgs = ["ancillary_variables is not a string"]
+                anc_result.msgs = ["ancillary_variable(s) %s is not a string or unicode" % anc]
                 ret_val.append(anc_result)
                 continue
 
