@@ -31,17 +31,4 @@ variables:
 // global attributes:
 		:featureType = "timeSeries" ;
 		:platform = "platform" ;
-data:
-
- time = _ ;
-
- latitude = _ ;
-
- longitude = _ ;
-
- temperature = _ ;
-
- crs = _ ;
-
- platform = _ ;
 }

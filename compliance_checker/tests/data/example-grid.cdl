@@ -39,11 +39,4 @@ variables:
 
 // global attributes:
 		:featureType = "timeSeries" ;
-data:
-
- lat = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
-
- lon = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
-
- height = _, _ ;
 }

@@ -17,9 +17,4 @@ variables:
 		lev:positive = "up" ;
 		lev:standard_name = "atmosphere_sigma_coordinate" ;
 		lev:formula_terms = "sigma: lev ps: ps ptop: ptop" ;
-data:
-
- ptop = _ ;
-
- lev = _ ;
 }

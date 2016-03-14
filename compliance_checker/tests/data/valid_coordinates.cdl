@@ -346,17 +346,4 @@ variables:
 		:DODS.strlen = 7 ;
 		:DODS.dimName = "feature_type_instance" ;
 		:DODS_EXTRA.Unlimited_Dimension = "time" ;
-data:
-
- feature_type_instance = "" ;
-
- latitude = _ ;
-
- longitude = _ ;
-
- z = _ ;
-
- crs = _ ;
-
- platform = _ ;
 }

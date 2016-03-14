@@ -55,36 +55,4 @@ variables:
 		bad_time_2:calendar = "nope" ;
 	float column_temp(time, sigma) ;
 		column_temp:description = "sigma is not a coordinate variable" ;
-data:
-
- _poor_dim = _ ;
-
- lat = _, _, _, _, _, _, _, _, _, _ ;
-
- lat_uv = _, _, _, _, _, _, _, _, _, _ ;
-
- lat_like = _, _, _, _, _, _, _, _, _, _ ;
-
- lon = _, _, _, _, _, _, _, _, _, _ ;
-
- lon_uv = _, _, _, _, _, _, _, _, _, _ ;
-
- lon_like = _, _, _, _, _, _, _, _, _, _ ;
-
- height = _ ;
-
- depth = _ ;
-
- depth2 = _ ;
-
- lev1 = _ ;
-
- lev2 = _ ;
-
- bad_time_1 = _ ;
-
- bad_time_2 = _ ;
-
- column_temp =
-  _, _, _, _, _ ;
 }

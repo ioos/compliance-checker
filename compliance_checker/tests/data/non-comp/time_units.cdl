@@ -12,9 +12,4 @@ variables:
 
 // global attributes:
 		:featureType = "timeSeries" ;
-data:
-
- time = _, _, _, _, _, _, _, _, _, _ ;
-
- temperature = _, _, _, _, _, _, _, _, _, _ ;
 }

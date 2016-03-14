@@ -32,43 +32,4 @@ variables:
 	float lat_p(yc, x) ;
 		lat_p:long_name = "latitude_proj" ;
 		lat_p:units = "degrees_north" ;
-data:
-
- T =
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _ ;
-
- C =
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _,
-  _, _ ;
-
- xc = _, _ ;
-
- yc = _, _ ;
-
- lev = _, _, _, _, _ ;
-
- lon =
-  _, _,
-  _, _ ;
-
- lat_p =
-  _,
-  _ ;
 }
