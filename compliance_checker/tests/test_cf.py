@@ -285,8 +285,10 @@ class TestCF(unittest.TestCase):
         self.assertEqual(scored, 46)
         self.assertEqual(out_of, 59)
         self.assertEqual(messages.count('flag_values must be a list'), 6)
-        self.assertEqual(messages.count('flag_values attr does not have same type as var (fv: int8, v: int16)'), 6)
-        self.assertEqual(messages.count('flag_values attr does not have same type as var (fv: <U1, v: int16)'), 1)
+        m_str = r"'flag_values' attribute for variable '\w+' does not have same type \(fv: [<>]?\w+, v: [<>]?\w+\)"
+        # make sure flag_values attribute where not equal to variable type
+        # has the proper message
+        self.assertEqual(sum(bool(re.match(m_str, msg)) for msg in messages), 7)
 
     def test_check_bad_units(self):
 
