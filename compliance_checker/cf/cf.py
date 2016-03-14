@@ -2718,15 +2718,17 @@ class CFBaseCheck(BaseCheck):
                     name_list.append(name)
 
         for name, var in ds.variables.items():
+            if var in self._find_coord_vars(ds):
+                non_data_list.append(name)
+
             if hasattr(var, 'coordinates'):
                 for each in getattr(var, 'coordinates', '').split(' '):
                     if each in name_list:
                         non_data_list.append(each)
 
-            if hasattr(var, 'ancillary_variables'):
-                for each in getattr(var, 'ancillary_variables', '').split(' '):
-                    non_data_list.append(each)
-
+            if var in self._find_ancillary_vars(ds):
+                non_data_list.append(name)
+        
         data_list = [each for each in name_list if each not in non_data_list]
 
         for each in data_list:
