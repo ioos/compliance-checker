@@ -779,7 +779,9 @@ class CFBaseCheck(BaseCheck):
             if flag_values is not None:
                 # flag_values must be a list (array), not just a single value
                 result_name = '§3.5 Flags and flag attributes'
-                fvlist = Result(BaseCheck.HIGH, isinstance(flag_values, np.ndarray), result_name)
+                fvlist = Result(BaseCheck.HIGH, isinstance(flag_values,
+                                                           np.ndarray),
+                                result_name)
                 if not fvlist.value:
                     fvlist.msgs = ['flag_values must be a list']
                     # convert to an array so the remaining checks can be applied
@@ -787,9 +789,13 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(fvlist)
 
                 # 1) flags_values attribute must have same type as variable to which it is attached
-                fvr = Result(BaseCheck.HIGH, flag_values.dtype == v.dtype, name='§3.5 Flags and flag attributes')
+                fvr = Result(BaseCheck.HIGH, flag_values.dtype == v.dtype,
+                             name='§3.5 Flags and flag attributes')
                 if not fvr.value:
-                    fvr.msgs = ['flag_values attr does not have same type as var (fv: %s, v: %s)' % (flag_values.dtype, v.dtype)]
+                    fvr.msgs = [("'flag_values' attribute for variable '%s'" +\
+                                " does not have same type " +\
+                                "(fv: %s, v: %s)")
+                                % (v.name, flag_values.dtype, v.dtype)]
 
                 ret_val.append(fvr)
 
