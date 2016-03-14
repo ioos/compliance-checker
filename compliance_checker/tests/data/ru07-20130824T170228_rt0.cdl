@@ -1,0 +1,768 @@
+netcdf ru07-20130824T170228_rt0 {
+dimensions:
+	time = UNLIMITED ; // (188 currently)
+	trajectory = 1 ;
+	time_uv = 1 ;
+variables:
+	double time(time) ;
+		time:_FillValue = 9.96920996838687e+36 ;
+		time:axis = "T" ;
+		time:calendar = "gregorian" ;
+		time:long_name = "Time" ;
+		time:observation_type = "measured" ;
+		time:sensor_name = "m_present_time" ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1970-01-01 00:00:00 UTC" ;
+	byte time_qc(time) ;
+		time_qc:_FillValue = -127b ;
+		time_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		time_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		time_qc:long_name = "time Quality Flag" ;
+		time_qc:standard_name = "time status_flag" ;
+		time_qc:valid_max = 9b ;
+		time_qc:valid_min = 0b ;
+	double time_uv(time_uv) ;
+		time_uv:_FillValue = 9.96920996838687e+36 ;
+		time_uv:axis = "T" ;
+		time_uv:calendar = "gregorian" ;
+		time_uv:long_name = "Approximate time midpoint of each segment" ;
+		time_uv:observation_type = "estimated" ;
+		time_uv:standard_name = "time" ;
+		time_uv:units = "seconds since 1970-01-01 00:00:00 UTC" ;
+	short trajectory(trajectory) ;
+		trajectory:_FillValue = -32767s ;
+		trajectory:cf_role = "trajectory_id" ;
+		trajectory:comment = "A trajectory can span multiple data files each containing a single segment." ;
+		trajectory:long_name = "Unique identifier for each trajectory feature contained in the file" ;
+	short segment_id(time) ;
+		segment_id:_FillValue = -32767s ;
+		segment_id:comment = "Sequential segment number within a trajectory/deployment. A segment corresponds to the set of data collected between 2 gps fixes obtained when the glider surfaces." ;
+		segment_id:long_name = "Segment ID" ;
+		segment_id:observation_type = "calculated" ;
+		segment_id:valid_max = 999 ;
+		segment_id:valid_min = 1 ;
+	short profile_id(time) ;
+		profile_id:_FillValue = -32767s ;
+		profile_id:comment = "Sequential profile number within the current segment. A profile is defined as a single dive or climb" ;
+		profile_id:long_name = "Profile ID" ;
+		profile_id:observation_type = "calculated" ;
+		profile_id:valid_max = 999 ;
+		profile_id:valid_min = 1 ;
+	double depth(time) ;
+		depth:_FillValue = 9.96920996838687e+36 ;
+		depth:ancillary_variables = "depth_qc" ;
+		depth:axis = "Z" ;
+		depth:instrument = "instrument_ctd" ;
+		depth:long_name = "Depth" ;
+		depth:observation_type = "calculated" ;
+		depth:platform = "platform" ;
+		depth:positive = "down" ;
+		depth:reference_datum = "sea-surface" ;
+		depth:sensor_name = "drv_proInds" ;
+		depth:standard_name = "depth" ;
+		depth:units = "meters" ;
+		depth:valid_max = 2000 ;
+		depth:valid_min = 0 ;
+	byte depth_qc(time) ;
+		depth_qc:_FillValue = -127b ;
+		depth_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		depth_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		depth_qc:long_name = "depth Quality Flag" ;
+		depth_qc:standard_name = "depth status_flag" ;
+		depth_qc:valid_max = 9b ;
+		depth_qc:valid_min = 0b ;
+	double lat(time) ;
+		lat:_FillValue = 9.96920996838687e+36 ;
+		lat:ancillary_variables = "lat_qc" ;
+		lat:axis = "Y" ;
+		lat:comment = "Some values are linearly interpolated between measured coordinates.  See lat_qc" ;
+		lat:coordinate_reference_frame = "urn:ogc:crs:EPSG::4326" ;
+		lat:flag_meanings = "" ;
+		lat:long_name = "Latitude" ;
+		lat:observation_type = "measured" ;
+		lat:platform = "platform" ;
+		lat:reference = "WGS84" ;
+		lat:sensor_name = "" ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+		lat:valid_max = 90. ;
+		lat:valid_min = -90. ;
+	byte lat_qc(time) ;
+		lat_qc:_FillValue = -127b ;
+		lat_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		lat_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		lat_qc:long_name = "lat Quality Flag" ;
+		lat_qc:standard_name = "lat status_flag" ;
+		lat_qc:valid_max = 9b ;
+		lat_qc:valid_min = 0b ;
+	double lon(time) ;
+		lon:_FillValue = 9.96920996838687e+36 ;
+		lon:ancillary_variables = "lon_qc" ;
+		lon:axis = "X" ;
+		lon:comment = "Some values are linearly interpolated between measured coordinates.  See lon_qc" ;
+		lon:coordinate_reference_frame = "urn:ogc:crs:EPSG::4326" ;
+		lon:flag_meanings = "" ;
+		lon:long_name = "Longitude" ;
+		lon:observation_type = "measured" ;
+		lon:platform = "platform" ;
+		lon:reference = "WGS84" ;
+		lon:sensor_name = "" ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+		lon:valid_max = 180. ;
+		lon:valid_min = -180. ;
+	byte lon_qc(time) ;
+		lon_qc:_FillValue = -127b ;
+		lon_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		lon_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		lon_qc:long_name = "lon Quality Flag" ;
+		lon_qc:standard_name = "lon status_flag" ;
+		lon_qc:valid_max = 9b ;
+		lon_qc:valid_min = 0b ;
+	double pressure(time) ;
+		pressure:_FillValue = 9.96920996838687e+36 ;
+		pressure:accuracy = "" ;
+		pressure:ancillary_variables = "pressure_qc" ;
+		pressure:axis = "Z" ;
+		pressure:instrument = "instrument_ctd" ;
+		pressure:long_name = "Pressure" ;
+		pressure:observation_type = "calculated" ;
+		pressure:platform = "platform" ;
+		pressure:positive = "down" ;
+		pressure:precision = "" ;
+		pressure:reference_datum = "sea-surface" ;
+		pressure:resolution = "" ;
+		pressure:sensor_name = "" ;
+		pressure:standard_name = "pressure" ;
+		pressure:units = "dbar" ;
+		pressure:valid_max = 2000 ;
+		pressure:valid_min = 0 ;
+	byte pressure_qc(time) ;
+		pressure_qc:_FillValue = -127b ;
+		pressure_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		pressure_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		pressure_qc:long_name = "pressure Quality Flag" ;
+		pressure_qc:standard_name = "pressure status_flag" ;
+		pressure_qc:valid_max = 9b ;
+		pressure_qc:valid_min = 0b ;
+	double conductivity(time) ;
+		conductivity:_FillValue = 9.96920996838687e+36 ;
+		conductivity:accuracy = "" ;
+		conductivity:ancillary_variables = "conductivity_qc" ;
+		conductivity:coordinates = "lon lat depth time" ;
+		conductivity:instrument = "instrument_ctd" ;
+		conductivity:long_name = "Conductivity" ;
+		conductivity:observation_type = "measured" ;
+		conductivity:platform = "platform" ;
+		conductivity:precision = "" ;
+		conductivity:resolution = "" ;
+		conductivity:sensor_name = "" ;
+		conductivity:standard_name = "sea_water_electrical_conductivity" ;
+		conductivity:units = "S m-1" ;
+		conductivity:valid_max = 10. ;
+		conductivity:valid_min = 0. ;
+	byte conductivity_qc(time) ;
+		conductivity_qc:_FillValue = -127b ;
+		conductivity_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		conductivity_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		conductivity_qc:long_name = "conductivity Quality Flag" ;
+		conductivity_qc:standard_name = "conductivity status_flag" ;
+		conductivity_qc:valid_max = 9b ;
+		conductivity_qc:valid_min = 0b ;
+	double density(time) ;
+		density:_FillValue = 9.96920996838687e+36 ;
+		density:ancillary_variables = "density_qc" ;
+		density:coordinates = "lon lat depth time" ;
+		density:instrument = "instrument_ctd" ;
+		density:long_name = "Density" ;
+		density:observation_type = "calculated" ;
+		density:platform = "platform" ;
+		density:sensor_name = "" ;
+		density:standard_name = "sea_water_density" ;
+		density:units = "kg m-3" ;
+		density:valid_max = 1040. ;
+		density:valid_min = 1015. ;
+	byte density_qc(time) ;
+		density_qc:_FillValue = -127b ;
+		density_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		density_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		density_qc:long_name = "density Quality Flag" ;
+		density_qc:standard_name = "density status_flag" ;
+		density_qc:valid_max = 9b ;
+		density_qc:valid_min = 0b ;
+	double salinity(time) ;
+		salinity:_FillValue = 9.96920996838687e+36 ;
+		salinity:ancillary_variables = "salinity_qc" ;
+		salinity:coordinates = "lon lat depth time" ;
+		salinity:instrument = "instrument_ctd" ;
+		salinity:long_name = "Salinity" ;
+		salinity:observation_type = "calculated" ;
+		salinity:platform = "platform" ;
+		salinity:sensor_name = "" ;
+		salinity:standard_name = "sea_water_salinity" ;
+		salinity:units = "1e-3" ;
+		salinity:valid_max = 40. ;
+		salinity:valid_min = 0. ;
+	byte salinity_qc(time) ;
+		salinity_qc:_FillValue = -127b ;
+		salinity_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		salinity_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		salinity_qc:long_name = "salinity Quality Flag" ;
+		salinity_qc:standard_name = "salinity status_flag" ;
+		salinity_qc:valid_max = 9b ;
+		salinity_qc:valid_min = 0b ;
+	double temperature(time) ;
+		temperature:_FillValue = 9.96920996838687e+36 ;
+		temperature:accuracy = "" ;
+		temperature:ancillary_variables = "temperature_qc" ;
+		temperature:coordinates = "lon lat depth time" ;
+		temperature:instrument = "instrument_ctd" ;
+		temperature:long_name = "Temperature" ;
+		temperature:observation_type = "measured" ;
+		temperature:platform = "platform" ;
+		temperature:precision = "" ;
+		temperature:resolution = "" ;
+		temperature:sensor_name = "" ;
+		temperature:standard_name = "sea_water_temperature" ;
+		temperature:units = "Celsius" ;
+		temperature:valid_max = 40. ;
+		temperature:valid_min = -5. ;
+	byte temperature_qc(time) ;
+		temperature_qc:_FillValue = -127b ;
+		temperature_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		temperature_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		temperature_qc:long_name = "temperature Quality Flag" ;
+		temperature_qc:standard_name = "temperature status_flag" ;
+		temperature_qc:valid_max = 9b ;
+		temperature_qc:valid_min = 0b ;
+	double lat_uv(time_uv) ;
+		lat_uv:_FillValue = 9.96920996838687e+36 ;
+		lat_uv:axis = "Y" ;
+		lat_uv:comment = "Values are interpolated to provide the center latitude of the segment" ;
+		lat_uv:long_name = "Center Latitude for Depth-Averaged Current" ;
+		lat_uv:observation_type = "calculated" ;
+		lat_uv:platform = "platform" ;
+		lat_uv:standard_name = "latitude" ;
+		lat_uv:units = "degrees_north" ;
+		lat_uv:valid_max = 90. ;
+		lat_uv:valid_min = -90. ;
+	double lon_uv(time_uv) ;
+		lon_uv:_FillValue = 9.96920996838687e+36 ;
+		lon_uv:axis = "X" ;
+		lon_uv:comment = "Values are interpolated to provide the center longitude of the segment" ;
+		lon_uv:long_name = "Center Longitude for Depth-Averaged Current" ;
+		lon_uv:observation_type = "calculated" ;
+		lon_uv:platform = "platform" ;
+		lon_uv:standard_name = "longitude" ;
+		lon_uv:units = "degrees_east" ;
+		lon_uv:valid_max = 180. ;
+		lon_uv:valid_min = -180. ;
+	double u(time_uv) ;
+		u:_FillValue = 9.96920996838687e+36 ;
+		u:coordinates = "lon_uv lat_uv time_uv" ;
+		u:long_name = "Eastward Sea Water Velocity" ;
+		u:observation_type = "calculated" ;
+		u:platform = "platform" ;
+		u:sensor_name = "" ;
+		u:standard_name = "eastward_sea_water_velocity" ;
+		u:units = "m s-1" ;
+		u:valid_max = 10. ;
+		u:valid_min = -10. ;
+	byte u_qc(time_uv) ;
+		u_qc:_FillValue = -127b ;
+		u_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		u_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		u_qc:long_name = "u Quality Flag" ;
+		u_qc:standard_name = "u status_flag" ;
+		u_qc:valid_max = 9b ;
+		u_qc:valid_min = 0b ;
+	double v(time_uv) ;
+		v:_FillValue = 9.96920996838687e+36 ;
+		v:coordinates = "lon_uv lat_uv time_uv" ;
+		v:long_name = "Northward Sea Water Velocity" ;
+		v:observation_type = "calculated" ;
+		v:platform = "platform" ;
+		v:sensor_name = "" ;
+		v:standard_name = "northward_sea_water_velocity" ;
+		v:units = "m s-1" ;
+		v:valid_max = 10. ;
+		v:valid_min = -10. ;
+	byte v_qc(time_uv) ;
+		v_qc:_FillValue = -127b ;
+		v_qc:flag_meanings = "no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed not_used not_used interpolated_value missing_value" ;
+		v_qc:flag_values = 0b, 1b, 2b, 3b, 4b, 5b, 6b, 7b, 8b, 9b ;
+		v_qc:long_name = "v Quality Flag" ;
+		v_qc:standard_name = "v status_flag" ;
+		v_qc:valid_max = 9b ;
+		v_qc:valid_min = 0b ;
+	byte platform ;
+		platform:_FillValue = -127b ;
+		platform:comment = "Slocum Glider ru29" ;
+		platform:id = "ru29" ;
+		platform:instrument = "instrument_ctd" ;
+		platform:long_name = "Slocum Glider ru29" ;
+		platform:type = "platform" ;
+		platform:wmo_id = "ru29" ;
+	byte instrument_ctd ;
+		instrument_ctd:_FillValue = -127b ;
+		instrument_ctd:calibration_date = "2000-01-01" ;
+		instrument_ctd:calibration_report = "" ;
+		instrument_ctd:comment = "Slocum Glider ru29" ;
+		instrument_ctd:factory_calibrated = "" ;
+		instrument_ctd:long_name = "Seabird SBD 41CP Conductivity, Temperature, Depth Sensor" ;
+		instrument_ctd:make_model = "Seabird SBE 41CP" ;
+		instrument_ctd:platform = "platform" ;
+		instrument_ctd:serial_number = "0098" ;
+		instrument_ctd:user_calibrated = "" ;
+
+// global attributes:
+		:Conventions = "CF-1.6" ;
+		:Metadata_Conventions = "Unidata Dataset Discovery v1.0" ;
+		:acknowledgment = "This deployment partially supported by ..." ;
+		:cdm_data_type = "Trajectory" ;
+		:comment = "This file is intended to be used as a template only.  Data is not to be used for scientific purposes." ;
+		:contributor_name = "Scott Glenn, Oscar Schofield, John Kerfoot" ;
+		:contributor_role = "Principal Investigator, Principal Investigator, Data Manager" ;
+		:creator_email = "kerfoot@marine.rutgers.edu" ;
+		:creator_name = "John Kerfoot" ;
+		:creator_url = "http://marine.rutgers.edu/cool/auvs" ;
+		:date_created = "2013-09-05 12:55 UTC" ;
+		:date_issued = "2013-09-05 12:55 UTC" ;
+		:date_modified = "2013-09-05 12:55 UTC" ;
+		:featureType = "trajectory" ;
+		:format_version = "IOOS_Glider_NetCDF_Trajectory_Template_v0.0" ;
+		:geospatial_lat_max = 34.85172 ;
+		:geospatial_lat_min = 34.85033 ;
+		:geospatial_lat_resolution = "point" ;
+		:geospatial_lat_units = "degrees_north" ;
+		:geospatial_lon_max = -120.78092 ;
+		:geospatial_lon_min = -120.7855 ;
+		:geospatial_lon_resolution = "point" ;
+		:geospatial_lon_units = "degrees_east" ;
+		:geospatial_vertical_max = 589. ;
+		:geospatial_vertical_min = 1.1 ;
+		:geospatial_vertical_positive = "down" ;
+		:geospatial_vertical_resolution = "point" ;
+		:geospatial_vertical_units = "meters" ;
+		:history = "Created 2013-09-05 12:55 UTC" ;
+		:id = "ru07-20130824T170228" ;
+		:institution = "Institute of Marine & Coastal Sciences, Rutgers University" ;
+		:keywords = "Oceans > Ocean Pressure > Water Pressure, Oceans > Ocean Temperature > Water Temperature, Oceans > Salinity/Density > Conductivity, Oceans > Salinity/Density > Density, Oceans > Salinity/Density > Salinity" ;
+		:keywords_vocabulary = "GCMD Science Keywords" ;
+		:license = "This data may be redistributed and used without restriction." ;
+		:metadata_link = "" ;
+		:naming_authority = "edu.rutgers.marine" ;
+		:processing_level = "Dataset taken from glider native file format" ;
+		:project = "Deployment not project based" ;
+		:publisher_email = "kerfoot@marine.rutgers.edu" ;
+		:publisher_name = "John Kerfoot" ;
+		:publisher_url = "http://marine.rutgers.edu/cool/auvs" ;
+		:references = "" ;
+		:sea_name = "South Atlantic Ocean" ;
+		:source = "Observational data from a profiling glider" ;
+		:source_file = "/home/kerfoot/sandbox/glider/deployments-test/2013/ru07-383/ascii/queue/ru07_2013_234_0_29_sbd.dat" ;
+		:standard_name_vocabulary = "CF-v25" ;
+		:summary = "The Rutgers University Coastal Ocean Observation Lab has deployed autonomous underwater gliders around the world since 1990. Gliders are small, free-swimming, unmanned vehicles that use changes in buoyancy to move vertically and horizontally through the water column in a saw-tooth pattern. They are deployed for days to several months and gather detailed information about the physical, chemical and biological processes of the world\'s The Slocum glider was designed and oceans. built by Teledyne Webb Research Corporation, Falmouth, MA, USA." ;
+		:time_coverage_end = "2013-08-24 17:43 UTC" ;
+		:time_coverage_resolution = "point" ;
+		:time_coverage_start = "2013-08-24 17:02 UTC" ;
+		:title = "Slocum Glider Dataset" ;
+data:
+
+ time = 1377363748.7959, 1377363783.24022, 1377363817.68454, 
+    1377363851.40164, 1377363866.51892, 1377363876.6824, 1377363881.9743, 
+    1377363887.2435, 1377363892.6467, 1377363897.90735, 1377363902.8327, 
+    1377363907.73877, 1377363912.64548, 1377363917.54712, 1377363945.1362, 
+    1377363949.80057, 1377363981.64453, 1377363991.11032, 1377363995.77243, 
+    1377364014.02328, 1377364036.78885, 1377364045.96667, 1377364077.78964, 
+    1377364082.44727, 1377364109.7428, 1377364123.47406, 1377364128.14075, 
+    1377364141.86166, 1377364173.68921, 1377364205.53354, 1377364219.24554, 
+    1377364237.48477, 1377364246.67844, 1377364264.91901, 1377364269.57162, 
+    1377364278.74234, 1377364301.4946, 1377364306.15146, 1377364310.80038, 
+    1377364329.05484, 1377364333.72025, 1377364356.47162, 1377364365.659, 
+    1377364388.43823, 1377364397.64044, 1377364402.29065, 1377364425.05624, 
+    1377364429.71921, 1377364434.37262, 1377364439.03082, 1377364448.49078, 
+    1377364462.34445, 1377364494.18002, 1377364526.00192, 1377364539.69675, 
+    1377364557.92694, 1377364585.20895, 1377364589.86646, 1377364621.69489, 
+    1377364630.87344, 1377364640.06091, 1377364653.77045, 1377364667.46655, 
+    1377364676.65338, 1377364685.8327, 1377364713.12415, 1377364717.78302, 
+    1377364722.43051, 1377364749.71091, 1377364767.96875, 1377364781.66605, 
+    1377364813.49545, 1377364845.32516, 1377364859.03354, 1377364877.26532, 
+    1377364904.55557, 1377364909.2092, 1377364941.0506, 1377364950.23141, 
+    1377364972.98743, 1377364995.7514, 1377365000.40643, 1377365005.06345, 
+    1377365027.83096, 1377365037.0155, 1377365041.66803, 1377365068.96698, 
+    1377365078.18463, 1377365087.3634, 1377365101.0885, 1377365114.7952, 
+    1377365128.9093, 1377365133.56378, 1377365160.90884, 1377365165.56274, 
+    1377365174.75507, 1377365179.42117, 1377365193.13345, 1377365197.79224, 
+    1377365225.10651, 1377365229.76382, 1377365257.06308, 1377365261.71875, 
+    1377365270.91141, 1377365289.15744, 1377365293.81036, 1377365316.58292, 
+    1377365321.23795, 1377365325.88464, 1377365353.19705, 1377365357.85007, 
+    1377365362.52054, 1377365385.29651, 1377365389.95038, 1377365408.19427, 
+    1377365417.37469, 1377365422.02917, 1377365435.7345, 1377365440.39029, 
+    1377365449.58527, 1377365454.24121, 1377365463.42041, 1377365478.96631, 
+    1377365483.61685, 1377365488.27075, 1377365502.02463, 1377365515.73047, 
+    1377365520.39044, 1377365547.69708, 1377365552.34726, 1377365570.87177, 
+    1377365585.8685, 1377365595.04446, 1377365613.26611, 1377365617.91678, 
+    1377365640.67453, 1377365645.32715, 1377365649.9863, 1377365677.27158, 
+    1377365681.92215, 1377365686.57394, 1377365709.34821, 1377365714.00394, 
+    1377365732.22302, 1377365741.40097, 1377365746.04822, 1377365750.69846, 
+    1377365773.45889, 1377365778.12924, 1377365800.8967, 1377365805.54971, 
+    1377365810.20114, 1377365823.90808, 1377365837.61951, 1377365842.27322, 
+    1377365869.5799, 1377365874.23172, 1377365896.99866, 1377365911.11948, 
+    1377365915.92065, 1377365944.017, 1377365958.11673, 1377365962.9061, 
+    1377365976.99832, 1377365981.9126, 1377365986.80225, 1377365991.68677, 
+    1377365996.5769, 1377366001.8627, 1377366010.93268, 1377366016.19458, 
+    1377366021.45059, 1377366026.70206, 1377366031.94858, 1377366037.18253, 
+    1377366042.42999, 1377366057.66693, 1377366082.76797, 1377366099.90509, 
+    1377366105.7998, 1377366111.18082, 1377366147.26401, 1377366152.52194, 
+    1377366157.79568, 1377366162.96686, 1377366201.23584, 1377366211.74408, 
+    1377366237.759 ;
+
+ time_qc = 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ;
+
+ time_uv = 1377365070.83583 ;
+
+ trajectory = 1 ;
+
+ segment_id = 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ;
+
+ profile_id = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+    2, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ depth = 0.17, 1.07176470588235, 1.97352941176471, 2.87529411764706, 
+    3.77705882352941, 4.67882352941176, 5.58058823529412, 6.48235294117647, 
+    7.38411764705882, 8.28588235294118, 9.18764705882353, 10.0894117647059, 
+    10.9911764705882, 11.8929411764706, 12.7947058823529, 13.6964705882353, 
+    14.5982352941176, 15.5, 16.4041666666667, 17.3083333333333, 18.2125, 
+    19.1166666666667, 20.0208333333333, 20.925, 21.8291666666667, 
+    22.7333333333333, 23.6375, 24.5416666666667, 25.4458333333333, 26.35, 
+    27.2541666666667, 28.1583333333333, 29.0625, 29.9666666666667, 
+    30.8708333333333, 31.775, 32.6791666666667, 33.5833333333333, 34.4875, 
+    35.3916666666667, 36.2958333333333, 37.2, 38.1041666666667, 
+    39.0083333333333, 39.9125, 40.8166666666667, 41.7208333333333, 42.625, 
+    43.5291666666667, 44.4333333333333, 45.3375, 46.2416666666667, 
+    47.1458333333333, 48.05, 48.9541666666667, 49.8583333333333, 50.7625, 
+    51.6666666666667, 52.5708333333333, 53.475, 54.3791666666667, 
+    55.2833333333333, 56.1875, 57.0916666666667, 57.9958333333333, 58.9, 
+    58.8105769230769, 58.7211538461538, 58.6317307692308, 58.5423076923077, 
+    58.4528846153846, 58.3634615384615, 58.2740384615385, 58.1846153846154, 
+    58.0951923076923, 58.0057692307692, 57.9163461538462, 57.8269230769231, 
+    57.7375, 57.6480769230769, 57.5586538461538, 57.4692307692308, 
+    57.3798076923077, 57.2903846153846, 57.2009615384615, 57.1115384615385, 
+    57.0221153846154, 56.9326923076923, 56.8432692307692, 56.7538461538462, 
+    56.6644230769231, 56.575, 56.4855769230769, 56.3961538461538, 
+    56.3067307692308, 56.2173076923077, 56.1278846153846, 56.0384615384615, 
+    55.9490384615385, 55.8596153846154, 55.7701923076923, 55.6807692307692, 
+    55.5913461538462, 55.5019230769231, 55.4125, 55.3230769230769, 
+    55.2336538461538, 55.1442307692308, 55.0548076923077, 54.9653846153846, 
+    54.8759615384615, 54.7865384615385, 54.6971153846154, 54.6076923076923, 
+    54.5182692307692, 54.4288461538462, 54.3394230769231, 54.25, 
+    53.429696969697, 52.6093939393939, 51.7890909090909, 50.9687878787879, 
+    50.1484848484848, 49.3281818181818, 48.5078787878788, 47.6875757575758, 
+    46.8672727272727, 46.0469696969697, 45.2266666666667, 44.4063636363636, 
+    43.5860606060606, 42.7657575757576, 41.9454545454545, 41.1251515151515, 
+    40.3048484848485, 39.4845454545455, 38.6642424242424, 37.8439393939394, 
+    37.0236363636364, 36.2033333333333, 35.3830303030303, 34.5627272727273, 
+    33.7424242424242, 32.9221212121212, 32.1018181818182, 31.2815151515151, 
+    30.4612121212121, 29.6409090909091, 28.8206060606061, 28.000303030303, 
+    27.18, 26.359696969697, 25.5393939393939, 24.7190909090909, 
+    23.8987878787879, 23.0784848484848, 22.2581818181818, 21.4378787878788, 
+    20.6175757575758, 19.7972727272727, 18.9769696969697, 18.1566666666667, 
+    17.3363636363636, 16.5160606060606, 15.6957575757576, 14.8754545454545, 
+    14.0551515151515, 13.2348484848485, 12.4145454545455, 11.5942424242424, 
+    10.7739393939394, 9.95363636363636, 9.13333333333333, 8.3130303030303, 
+    7.49272727272727, 6.67242424242424, 5.85212121212121, 5.03181818181818, 
+    4.21151515151515, 3.39121212121212, 2.57090909090909, 1.75060606060606, 
+    0.93030303030303, 0.11, _, _, _, _ ;
+
+ depth_qc = 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, _, _, _, _ ;
+
+ lat = 34.85172, 34.8515836666667, 34.8514473333333, 34.851311, 
+    34.8511746666667, 34.8510383333333, 34.85103, 34.851015, 34.851, 
+    34.8509583333333, 34.8509483333333, 34.8509333333333, 34.8509183333333, 
+    34.8509033333333, 34.8509005777778, 34.8508978222222, 34.8508950666667, 
+    34.8508923111111, 34.8508895555556, 34.8508868, 34.8508840444444, 
+    34.8508812888889, 34.8508785333333, 34.8508757777778, 34.8508730222222, 
+    34.8508702666667, 34.8508675111111, 34.8508647555556, 34.850862, 
+    34.8508592444445, 34.8508564888889, 34.8508537333333, 34.8508509777778, 
+    34.8508482222222, 34.8508454666667, 34.8508427111111, 34.8508399555556, 
+    34.8508372, 34.8508344444444, 34.8508316888889, 34.8508289333333, 
+    34.8508261777778, 34.8508234222222, 34.8508206666667, 34.8508179111111, 
+    34.8508151555556, 34.8508124, 34.8508096444444, 34.8508068888889, 
+    34.8508041333333, 34.8508013777778, 34.8507986222222, 34.8507958666667, 
+    34.8507931111111, 34.8507903555556, 34.8507876, 34.8507848444444, 
+    34.8507820888889, 34.8507793333333, 34.8507765777778, 34.8507738222222, 
+    34.8507710666667, 34.8507683111111, 34.8507655555556, 34.8507628, 
+    34.8507600444444, 34.8507572888889, 34.8507545333333, 34.8507517777778, 
+    34.8507490222222, 34.8507462666667, 34.8507435111111, 34.8507407555556, 
+    34.850738, 34.8507352444444, 34.8507324888889, 34.8507297333333, 
+    34.8507269777778, 34.8507242222222, 34.8507214666667, 34.8507187111111, 
+    34.8507159555556, 34.8507132, 34.8507104444444, 34.8507076888889, 
+    34.8507049333333, 34.8507021777778, 34.8506994222222, 34.8506966666667, 
+    34.8506939111111, 34.8506911555556, 34.8506884, 34.8506856444444, 
+    34.8506828888889, 34.8506801333333, 34.8506773777778, 34.8506746222222, 
+    34.8506718666667, 34.8506691111111, 34.8506663555556, 34.8506636, 
+    34.8506608444444, 34.8506580888889, 34.8506553333333, 34.8506525777778, 
+    34.8506498222222, 34.8506470666667, 34.8506443111111, 34.8506415555556, 
+    34.8506388, 34.8506360444444, 34.8506332888889, 34.8506305333333, 
+    34.8506277777778, 34.8506250222222, 34.8506222666667, 34.8506195111111, 
+    34.8506167555556, 34.850614, 34.8506112444444, 34.8506084888889, 
+    34.8506057333333, 34.8506029777778, 34.8506002222222, 34.8505974666667, 
+    34.8505947111111, 34.8505919555556, 34.8505892, 34.8505864444444, 
+    34.8505836888889, 34.8505809333333, 34.8505781777778, 34.8505754222222, 
+    34.8505726666667, 34.8505699111111, 34.8505671555556, 34.8505644, 
+    34.8505616444444, 34.8505588888889, 34.8505561333333, 34.8505533777778, 
+    34.8505506222222, 34.8505478666667, 34.8505451111111, 34.8505423555556, 
+    34.8505396, 34.8505368444444, 34.8505340888889, 34.8505313333333, 
+    34.8505285777778, 34.8505258222222, 34.8505230666667, 34.8505203111111, 
+    34.8505175555556, 34.8505148, 34.8505120444444, 34.8505092888889, 
+    34.8505065333333, 34.8505037777778, 34.8505010222222, 34.8504982666667, 
+    34.8504955111111, 34.8504927555556, 34.85049, 34.8504716666667, 34.85046, 
+    34.8504466666667, 34.8504366666667, 34.85041, 34.8504083333333, 
+    34.850395, 34.8503866666667, 34.8503766666667, 34.8503633333333, 
+    34.850355, 34.8503266666667, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ lat_qc = 0, 8, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ lon = -120.780966666667, -120.780959666667, -120.780952666667, 
+    -120.780945666667, -120.780938666667, -120.780931666667, -120.780925, 
+    -120.780918333333, -120.780928333333, -120.78102, -120.780991666667, 
+    -120.78099, -120.781019309211, -120.781048618421, -120.781077927632, 
+    -120.781107236842, -120.781136546053, -120.781165855263, 
+    -120.781195164474, -120.781224473684, -120.781253782895, 
+    -120.781283092105, -120.781312401316, -120.781341710526, 
+    -120.781371019737, -120.781400328947, -120.781429638158, 
+    -120.781458947368, -120.781488256579, -120.781517565789, -120.781546875, 
+    -120.781576184211, -120.781605493421, -120.781634802632, 
+    -120.781664111842, -120.781693421053, -120.781722730263, 
+    -120.781752039474, -120.781781348684, -120.781810657895, 
+    -120.781839967105, -120.781869276316, -120.781898585526, 
+    -120.781927894737, -120.781957203947, -120.781986513158, 
+    -120.782015822368, -120.782045131579, -120.782074440789, -120.78210375, 
+    -120.782133059211, -120.782162368421, -120.782191677632, 
+    -120.782220986842, -120.782250296053, -120.782279605263, 
+    -120.782308914474, -120.782338223684, -120.782367532895, 
+    -120.782396842105, -120.782426151316, -120.782455460526, 
+    -120.782484769737, -120.782514078947, -120.782543388158, 
+    -120.782572697368, -120.782602006579, -120.782631315789, -120.782660625, 
+    -120.782689934211, -120.782719243421, -120.782748552632, 
+    -120.782777861842, -120.782807171053, -120.782836480263, 
+    -120.782865789474, -120.782895098684, -120.782924407895, 
+    -120.782953717105, -120.782983026316, -120.783012335526, 
+    -120.783041644737, -120.783070953947, -120.783100263158, 
+    -120.783129572368, -120.783158881579, -120.783188190789, -120.7832175, 
+    -120.783246809211, -120.783276118421, -120.783305427632, 
+    -120.783334736842, -120.783364046053, -120.783393355263, 
+    -120.783422664474, -120.783451973684, -120.783481282895, 
+    -120.783510592105, -120.783539901316, -120.783569210526, 
+    -120.783598519737, -120.783627828947, -120.783657138158, 
+    -120.783686447368, -120.783715756579, -120.783745065789, -120.783774375, 
+    -120.783803684211, -120.783832993421, -120.783862302632, 
+    -120.783891611842, -120.783920921053, -120.783950230263, 
+    -120.783979539474, -120.784008848684, -120.784038157895, 
+    -120.784067467105, -120.784096776316, -120.784126085526, 
+    -120.784155394737, -120.784184703947, -120.784214013158, 
+    -120.784243322368, -120.784272631579, -120.784301940789, -120.78433125, 
+    -120.784360559211, -120.784389868421, -120.784419177632, 
+    -120.784448486842, -120.784477796053, -120.784507105263, 
+    -120.784536414474, -120.784565723684, -120.784595032895, 
+    -120.784624342105, -120.784653651316, -120.784682960526, 
+    -120.784712269737, -120.784741578947, -120.784770888158, 
+    -120.784800197368, -120.784829506579, -120.784858815789, -120.784888125, 
+    -120.784917434211, -120.784946743421, -120.784976052632, 
+    -120.785005361842, -120.785034671053, -120.785063980263, 
+    -120.785093289474, -120.785122598684, -120.785151907895, 
+    -120.785181217105, -120.785210526316, -120.785239835526, 
+    -120.785269144737, -120.785298453947, -120.785327763158, 
+    -120.785357072368, -120.785386381579, -120.785415690789, -120.785445, 
+    -120.785438333333, -120.785443333333, -120.785441666667, 
+    -120.785453333333, -120.785463333333, -120.785471666667, 
+    -120.785473333333, -120.785478333333, -120.785485, -120.785486666667, 
+    -120.785496666667, -120.78549, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ lon_qc = 0, 8, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ pressure = 0.17, 1.07176470588235, 1.97352941176471, 2.87529411764706, 
+    3.77705882352941, 4.67882352941176, 5.58058823529412, 6.48235294117647, 
+    7.38411764705882, 8.28588235294118, 9.18764705882353, 10.0894117647059, 
+    10.9911764705882, 11.8929411764706, 12.7947058823529, 13.6964705882353, 
+    14.5982352941176, 15.5, 16.4041666666667, 17.3083333333333, 18.2125, 
+    19.1166666666667, 20.0208333333333, 20.925, 21.8291666666667, 
+    22.7333333333333, 23.6375, 24.5416666666667, 25.4458333333333, 26.35, 
+    27.2541666666667, 28.1583333333333, 29.0625, 29.9666666666667, 
+    30.8708333333333, 31.775, 32.6791666666667, 33.5833333333333, 34.4875, 
+    35.3916666666667, 36.2958333333333, 37.2, 38.1041666666667, 
+    39.0083333333333, 39.9125, 40.8166666666667, 41.7208333333333, 42.625, 
+    43.5291666666667, 44.4333333333333, 45.3375, 46.2416666666667, 
+    47.1458333333333, 48.05, 48.9541666666667, 49.8583333333333, 50.7625, 
+    51.6666666666667, 52.5708333333333, 53.475, 54.3791666666667, 
+    55.2833333333333, 56.1875, 57.0916666666667, 57.9958333333333, 58.9, 
+    58.8105769230769, 58.7211538461538, 58.6317307692308, 58.5423076923077, 
+    58.4528846153846, 58.3634615384615, 58.2740384615385, 58.1846153846154, 
+    58.0951923076923, 58.0057692307692, 57.9163461538462, 57.8269230769231, 
+    57.7375, 57.6480769230769, 57.5586538461538, 57.4692307692308, 
+    57.3798076923077, 57.2903846153846, 57.2009615384615, 57.1115384615385, 
+    57.0221153846154, 56.9326923076923, 56.8432692307692, 56.7538461538462, 
+    56.6644230769231, 56.575, 56.4855769230769, 56.3961538461538, 
+    56.3067307692308, 56.2173076923077, 56.1278846153846, 56.0384615384615, 
+    55.9490384615385, 55.8596153846154, 55.7701923076923, 55.6807692307692, 
+    55.5913461538462, 55.5019230769231, 55.4125, 55.3230769230769, 
+    55.2336538461538, 55.1442307692308, 55.0548076923077, 54.9653846153846, 
+    54.8759615384615, 54.7865384615385, 54.6971153846154, 54.6076923076923, 
+    54.5182692307692, 54.4288461538462, 54.3394230769231, 54.25, 
+    53.429696969697, 52.6093939393939, 51.7890909090909, 50.9687878787879, 
+    50.1484848484848, 49.3281818181818, 48.5078787878788, 47.6875757575758, 
+    46.8672727272727, 46.0469696969697, 45.2266666666667, 44.4063636363636, 
+    43.5860606060606, 42.7657575757576, 41.9454545454545, 41.1251515151515, 
+    40.3048484848485, 39.4845454545455, 38.6642424242424, 37.8439393939394, 
+    37.0236363636364, 36.2033333333333, 35.3830303030303, 34.5627272727273, 
+    33.7424242424242, 32.9221212121212, 32.1018181818182, 31.2815151515151, 
+    30.4612121212121, 29.6409090909091, 28.8206060606061, 28.000303030303, 
+    27.18, 26.359696969697, 25.5393939393939, 24.7190909090909, 
+    23.8987878787879, 23.0784848484848, 22.2581818181818, 21.4378787878788, 
+    20.6175757575758, 19.7972727272727, 18.9769696969697, 18.1566666666667, 
+    17.3363636363636, 16.5160606060606, 15.6957575757576, 14.8754545454545, 
+    14.0551515151515, 13.2348484848485, 12.4145454545455, 11.5942424242424, 
+    10.7739393939394, 9.95363636363636, 9.13333333333333, 8.3130303030303, 
+    7.49272727272727, 6.67242424242424, 5.85212121212121, 5.03181818181818, 
+    4.21151515151515, 3.39121212121212, 2.57090909090909, 1.75060606060606, 
+    0.93030303030303, 0.11, _, _, _, _ ;
+
+ pressure_qc = 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, _, _, _, _ ;
+
+ conductivity = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ conductivity_qc = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ density = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ density_qc = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ salinity = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ salinity_qc = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ temperature = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ temperature_qc = _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, 
+    _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ;
+
+ lat_uv = _ ;
+
+ lon_uv = _ ;
+
+ u = _ ;
+
+ u_qc = _ ;
+
+ v = _ ;
+
+ v_qc = _ ;
+
+ platform = _ ;
+
+ instrument_ctd = _ ;
+}

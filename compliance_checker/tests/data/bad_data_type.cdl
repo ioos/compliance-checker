@@ -1,0 +1,57 @@
+netcdf bad_data_type {
+dimensions:
+	time = UNLIMITED ; // (3 currently)
+	latitude = 1 ;
+	longitude = 1 ;
+variables:
+	double time(time) ;
+	double latitude(latitude) ;
+		latitude:units = "Degrees_N" ;
+		latitude:axis = "Y" ;
+		latitude:bounds = "salinity" ;
+	double longitude(longitude) ;
+		longitude:units = "Degrees_E" ;
+		longitude:compress = "longitude latitude" ;
+	int64 temp(time, time) ;
+		temp:_FillValue = -999L ;
+		temp:valid_min = 0L ;
+		temp:valid_max = 10L ;
+		temp:units = "K" ;
+		temp:add_offset = "c" ;
+		temp:scale_factor = 5L ;
+		temp:compress = "time longitudeZZ" ;
+	double salinity(latitude, longitude, time) ;
+		salinity:_FillValue = 1. ;
+		salinity:valid_min = -10L ;
+		salinity:valid_max = 10L ;
+		salinity:institution = 10L ;
+		salinity:units = "Chad Pennington" ;
+		salinity:standard_name = "Chadwick Penington" ;
+		salinity:axis = "Time" ;
+		salinity:coordinates = "latitude longitudeZZ time" ;
+		salinity:add_offset = 5. ;
+		salinity:scale_factor = 5. ;
+	double longitudeZZ(longitude) ;
+		longitudeZZ:_FillValue = 1. ;
+		longitudeZZ:coordinates = "longitude" ;
+
+// global attributes:
+		:featureType = "pointzz" ;
+data:
+
+ time = _, _, _ ;
+
+ latitude = _ ;
+
+ longitude = _ ;
+
+ temp =
+  {1, 0, 1},
+  {1, 1, 0},
+  {_, 1, 0} ;
+
+ salinity =
+  {0.0776476799782908, 0.774116051694633, _} ;
+
+ longitudeZZ = _ ;
+}

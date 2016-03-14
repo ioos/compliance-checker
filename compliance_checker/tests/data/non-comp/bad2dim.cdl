@@ -1,0 +1,35 @@
+netcdf bad2dim {
+dimensions:
+	lev = 5 ;
+	yc = 2 ;
+	xc = 2 ;
+	x = 1 ;
+variables:
+	float T(lev, yc, xc) ;
+		T:long_name = "Temperature" ;
+		T:units = "K" ;
+		T:coordinates = "lon lat" ;
+		T:description = "lat is missing" ;
+	float C(lev, yc, xc) ;
+		C:long_name = "Conductivity" ;
+		C:units = "S m-1" ;
+		C:coordinates = "lon lat_p" ;
+		C:description = "Dims don\'t match coordinates" ;
+	float xc(xc) ;
+		xc:axis = "X" ;
+		xc:long_name = "x-coordinate in Cartesian system" ;
+		xc:units = "m" ;
+	float yc(yc) ;
+		yc:axis = "Y" ;
+		yc:long_name = "y-coordinate in Cartesian system" ;
+		yc:units = "m" ;
+	float lev(lev) ;
+		lev:long_name = "pressure level" ;
+		lev:units = "hPa" ;
+	float lon(yc, xc) ;
+		lon:long_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	float lat_p(yc, x) ;
+		lat_p:long_name = "latitude_proj" ;
+		lat_p:units = "degrees_north" ;
+}

@@ -1,0 +1,167 @@
+netcdf mapping {
+dimensions:
+	time = 1534804 ;
+	locations = 1 ;
+	name_strlen1 = 12 ;
+	name_strlen2 = 24 ;
+variables:
+	char platform_id(locations, name_strlen1) ;
+		platform_id:long_name = "platform identification code" ;
+		platform_id:cf_role = "timeseries_id" ;
+		platform_id:standard_name = "platform_id" ;
+	char platform_name(locations, name_strlen2) ;
+		platform_name:long_name = "platform name" ;
+		platform_name:standard_name = "platform_name" ;
+	float lon(locations) ;
+		lon:long_name = "station longitude" ;
+		lon:units = "degrees_east" ;
+		lon:standard_name = "longitude" ;
+		lon:grid_mapping = "wgs84" ;
+	float lat(locations) ;
+		lat:long_name = "station latitude" ;
+		lat:units = "degrees_north" ;
+		lat:standard_name = "latitude" ;
+		lat:grid_mapping = "wgs84" ;
+	int wgs84 ;
+		wgs84:name = "WGS 84" ;
+		wgs84:epsg = 4326. ;
+		wgs84:grid_mapping_name = "latitude_longitude" ;
+		wgs84:semi_major_axis = 6378137. ;
+		wgs84:semi_minor_axis = 6356752.31424783 ;
+		wgs84:inverse_flattening = 298.2572236 ;
+		wgs84:proj4_params = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs " ;
+		wgs84:EPSG_code = "EPSG:4326" ;
+		wgs84:projection_name = "Latitude Longitude" ;
+		wgs84:wkt = "" ;
+		wgs84:comment = "value is equal to EPSG code" ;
+	int epsg ;
+		epsg:name = "Amersfoort / RD New" ;
+		epsg:epsg = 7415. ;
+		epsg:epsg_name = "Oblique Stereographic" ;
+		epsg:grid_mapping_name = "stereographic" ;
+		epsg:semi_major_axis = 6377397.155 ;
+		epsg:semi_minor_axis = 6356078.96281819 ;
+		epsg:inverse_flattening = 299.1528128 ;
+		epsg:latitude_of_projection_origin = 52.0922178 ;
+		epsg:longitude_of_projection_origin = 5.23155 ;
+		epsg:false_northing = 463000. ;
+		epsg:scale_factor_at_projection_origin = 0.9999079 ;
+		epsg:proj4_params = "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +towgs84=565.4174,50.3319,465.5542,-0.398957388243134,0.343987817378283,-1.87740163998045,4.0725 +no_defs" ;
+		epsg:EPSG_code = "EPSG:7415" ;
+		epsg:projection_name = "Amersfoort / RD New" ;
+		epsg:wkt = "" ;
+		epsg:comment = "value is equal to EPSG code" ;
+	float x(locations) ;
+		x:long_name = "station x" ;
+		x:units = "m" ;
+		x:standard_name = "projection_x_coordinate" ;
+		x:grid_mapping = "epsg" ;
+	float y(locations) ;
+		y:long_name = "station y" ;
+		y:units = "m" ;
+		y:standard_name = "projection_y_coordinate" ;
+		y:grid_mapping = "epsg" ;
+	float z(locations) ;
+		z:long_name = "station depth" ;
+		z:units = "meters" ;
+		z:standard_name = "height_above_reference_ellipsoid" ;
+		z:positive = "up" ;
+		z:axis = "Z" ;
+	double time(time) ;
+		time:long_name = "time" ;
+		time:units = "days since 1970-01-01 00:00:00 +01:00" ;
+		time:standard_name = "time" ;
+		time:_FillValue = NaN ;
+	float sea_surface_height(locations, time) ;
+		sea_surface_height:actual_range = -2.44, 3.63 ;
+		sea_surface_height:long_name = "Water height with respect to normal amsterdam level in surface water" ;
+		sea_surface_height:name = "sea_surface_height" ;
+		sea_surface_height:units = "m" ;
+		sea_surface_height:standard_name = "sea_surface_height" ;
+		sea_surface_height:alt_standard_name = NaN ;
+		sea_surface_height:suggested_standard_name = "water_surface_height" ;
+		sea_surface_height:donar_wnsnum = 1. ;
+		sea_surface_height:donar_units = "cm" ;
+		sea_surface_height:donar_wns_oms = "Waterhoogte in cm t.o.v. normaal amsterdams peil in oppervlaktewater    " ;
+		sea_surface_height:donar_parcode = "WATHTE" ;
+		sea_surface_height:Aquo_Grootheid_code = "WATHTE" ;
+		sea_surface_height:Aquo_Grootheid_omschrijving = "Waterhoogte" ;
+		sea_surface_height:Aquo_ChemischeStof_code = NaN ;
+		sea_surface_height:Aquo_ChemischeStof_omschrijving = NaN ;
+		sea_surface_height:Aquo_CASnummer = NaN ;
+		sea_surface_height:Aquo_Object_code = NaN ;
+		sea_surface_height:Aquo_Object_omschrijving = NaN ;
+		sea_surface_height:Aquo_Eenheid_code = "m" ;
+		sea_surface_height:Aquo_Eenheid_omschrijving = "meter" ;
+		sea_surface_height:Aquo_Hoedanigheid_code = "NAP" ;
+		sea_surface_height:Aquo_Hoedanigheid_omschrijving = "t.o.v. Normaal Amsterdams Peil" ;
+		sea_surface_height:Aquo_Compartiment_code = "OW" ;
+		sea_surface_height:Aquo_Compartiment_omschrijving = "Oppervlaktewater" ;
+		sea_surface_height:Aquo_WNS_code = NaN ;
+		sea_surface_height:sdn_standard_name = "P01/185/ASLVNPZZ" ;
+		sea_surface_height:sdn_prefLabel = "Surface elevation (NAP datum) of the water body" ;
+		sea_surface_height:sdn_units = "P061/current/ULAA" ;
+		sea_surface_height:_FillValue = NaNf ;
+		sea_surface_height:cell_methods = "time: point area: point" ;
+		sea_surface_height:coordinates = "lat lon" ;
+	double time_x(time) ;
+	double time_y(time) ;
+
+// global attributes:
+		:title = "" ;
+		:institution = "Rijkswaterstaat" ;
+		:source = "surface observation" ;
+		:history = "Source: http://live.waterbase.nl/wswaterbase/cgi-bin/wbGETDATA?ggt=id1&site=MIV&lang=nl&a=getData&gaverder=GaVerder&from=164810240000&loc=BROUWHVSGT08&to=201403270000&fmt=text, tranformation to netCDF: $HeadURL: https://svn.oss.deltares.nl/repos/openearthtools/trunk/matlab/applications/Rijkswaterstaat/rws_waterbase2nc.m $ $Revision: 8953 $ $Date: 2013-07-30 12:24:21 +0200 (Tue, 30 Jul 2013) $ $Author: boer_g $" ;
+		:references = "<http://www.waterbase.nl>,<http://openearth.deltares.nl>" ;
+		:email = "<servicedesk-data@rws.nl>" ;
+		:comment = "The structure of this netCDF file is described in: https://cf-pcmdi.llnl.gov/trac/wiki/PointObservationConventions, http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.5/cf-conventions.html#id2867470" ;
+		:version = "" ;
+		:Conventions = "CF-1.6, UM Aquo 2010 proof of concept, SeaDataNet proof of concept" ;
+		:featureType = "timeSeries" ;
+		:terms_for_use = "These data can be used freely for research purposes provided that the following source is acknowledged: Rijkswaterstaat." ;
+		:disclaimer = "This data is made available in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE." ;
+		:stationname = "Brouwershavensche Gat 08" ;
+		:location = "Brouwershavensche Gat 08" ;
+		:donar_code = "brouwhvsgt08" ;
+		:locationcode = "brouwhvsgt08" ;
+		:waarnemingssoort = "Waterhoogte in cm t.o.v. normaal amsterdams peil in oppervlaktewater" ;
+		:reference_level = "NVT" ;
+		:vat = "Vlotterniveaumeter - type DNM" ;
+		:geospatial_lat_min = 51.7507542236064 ;
+		:geospatial_lat_max = 51.7507542236064 ;
+		:geospatial_lon_min = 3.81148275244255 ;
+		:geospatial_lon_max = 3.81148275244255 ;
+		:time_coverage_start = "1980-01-01P00:00:00" ;
+		:time_coverage_end = "2014-03-08P00:50:00" ;
+		:geospatial_lat_units = "degrees_north" ;
+		:geospatial_lon_units = "degrees_east" ;
+data:
+
+ platform_id =
+  "brouwhvsgt08" ;
+
+ platform_name =
+  "Brouwershavensche Gat 08" ;
+
+ lon = 3.811483 ;
+
+ lat = 51.75076 ;
+
+ wgs84 = 4326 ;
+
+ epsg = 7415 ;
+
+ x = 46197 ;
+
+ y = 419184 ;
+
+ z = NaNf ;
+
+ time = 3652, 3652.04166666663, 3652.08333333337 ;
+
+ sea_surface_height = 0, 0, 0 ;
+
+ time_x = _, _, _ ;
+
+ time_y = _, _, _ ;
+}

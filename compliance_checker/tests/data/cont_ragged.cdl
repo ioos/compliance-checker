@@ -1,0 +1,65 @@
+netcdf cont_ragged {
+dimensions:
+	profile = 4 ;
+	obs = 10 ;
+	name_strlen = 50 ;
+variables:
+	double lat ;
+		lat:units = "degrees_north" ;
+		lat:long_name = "station latitude" ;
+		lat:standard_name = "latitude" ;
+	double lon ;
+		lon:units = "degrees_east" ;
+		lon:long_name = "station longitude" ;
+		lon:standard_name = "longitude" ;
+	int station_info ;
+		station_info:long_name = "station info" ;
+	char station_name(name_strlen) ;
+		station_name:cf_role = "timeseries_id" ;
+		station_name:long_name = "station name" ;
+	int profile(profile) ;
+		profile:cf_role = "profile_id" ;
+	int time(profile) ;
+		time:long_name = "time" ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1990-01-01 00:00:00" ;
+		time:missing_value = -999 ;
+	int row_size(profile) ;
+		row_size:long_name = "number of obs in this profile" ;
+		row_size:sample_dimension = "obs" ;
+	float height(obs) ;
+		height:long_name = "height above sea surface" ;
+		height:standard_name = "height" ;
+		height:units = "meters" ;
+		height:axis = "Z" ;
+		height:positive = "up" ;
+	float temperature(obs) ;
+		temperature:standard_name = "sea_water_temperature" ;
+		temperature:long_name = "Water Temperature" ;
+		temperature:units = "Celsius" ;
+		temperature:coordinates = "time lat lon height" ;
+		temperature:missing_value = -999.9f ;
+
+// global attributes:
+		:Conventions = "CF-1.6" ;
+		:featureType = "timeSeriesProfile" ;
+data:
+
+ lat = 37.5 ;
+
+ lon = -76.5 ;
+
+ station_info = 0 ;
+
+ station_name = "Station1" ;
+
+ profile = 0, 1, 2, 3 ;
+
+ time = 0, 3600, 7200, 10800 ;
+
+ row_size = 2, 2, 3, 3 ;
+
+ height = 0.5, 1.5, 0.5, 1.5, 0.5, 1.5, 2.5, 0.5, 1.5, 2.5 ;
+
+ temperature = 6.7, 6.9, 6.8, 7.9, 6.8, 7.9, 8.4, 5.7, 9.2, 8.3 ;
+}

@@ -1,0 +1,42 @@
+netcdf example-grid {
+dimensions:
+	lat = 20 ;
+	lon = 20 ;
+	time = UNLIMITED ; // (0 currently)
+	height = 2 ;
+variables:
+	double lat(lat) ;
+		lat:units = "degrees_north" ;
+		lat:long_name = "latitude" ;
+		lat:standard_name = "latitude" ;
+		lat:axis = "Y" ;
+	double lon(lon) ;
+		lon:units = "degrees_east" ;
+		lon:long_name = "longitude" ;
+		lon:standard_name = "longitude" ;
+		lon:axis = "X" ;
+	double time(time) ;
+		time:units = "seconds since 1970-01-01" ;
+		time:standard_name = "time" ;
+		time:long_name = "Time, unix time-stamp" ;
+		time:calendar = "standard" ;
+	int height(height) ;
+		height:units = "m" ;
+		height:positive = "down" ;
+		height:axis = "Z" ;
+		height:standard_name = "height" ;
+		height:long_name = "Depth in meters" ;
+	short water_temp(time, height, lat, lon) ;
+		water_temp:_FillValue = -30000s ;
+		water_temp:long_name = "Water Temperature" ;
+		water_temp:standard_name = "sea_water_temperature" ;
+		water_temp:units = "degC" ;
+		water_temp:missing_value = -30000s ;
+		water_temp:scale_factor = 0.001 ;
+		water_temp:add_offset = 20. ;
+		water_temp:NAVO_code = 15L ;
+		water_temp:coordinates = "time height lat lon" ;
+
+// global attributes:
+		:featureType = "timeSeries" ;
+}

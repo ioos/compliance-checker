@@ -1,0 +1,16 @@
+netcdf coordinates_and_metadata {
+dimensions:
+	time = 5 ;
+	latitude = 1 ;
+	longitude = 1 ;
+variables:
+	double time(time) ;
+	double temp(time) ;
+		temp:ancillary_variables = "temp_quality_control" ;
+		temp:standard_name = "temp" ;
+	double temp_quality_control(time) ;
+		temp_quality_control:standard_name = "temp_quality_control" ;
+
+// global attributes:
+		:featureType = "pointzz" ;
+}

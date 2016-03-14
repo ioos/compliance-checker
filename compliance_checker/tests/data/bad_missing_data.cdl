@@ -1,0 +1,59 @@
+netcdf bad_missing_data {
+dimensions:
+	time = UNLIMITED ; // (3 currently)
+	strlen = 14 ;
+	latitude = 1 ;
+	longitude = 1 ;
+variables:
+	double time(time) ;
+		time:_FillValue = -999.9 ;
+	double latitude(latitude) ;
+		latitude:units = "Degrees_N" ;
+		latitude:axis = "Y" ;
+	double longitude(longitude) ;
+		longitude:units = "Degrees_E" ;
+	int64 temp(time, time) ;
+		temp:_FillValue = -999L ;
+		temp:valid_min = 0L ;
+		temp:valid_max = 10L ;
+		temp:units = "K" ;
+	double salinity(latitude, longitude, time) ;
+		salinity:_FillValue = 1. ;
+		salinity:valid_min = -10L ;
+		salinity:valid_max = 10L ;
+		salinity:institution = 10L ;
+		salinity:units = "Chad Pennington" ;
+		salinity:standard_name = "Chadwick Penington" ;
+		salinity:axis = "Time" ;
+		salinity:coordinates = "latitude longitudeZZ time" ;
+	int64 longitudeZZ(longitude) ;
+		longitudeZZ:_FillValue = 1L ;
+	char geo_regionZ(strlen) ;
+		geo_regionZ:standard_name = "region" ;
+	char geo_region(strlen) ;
+		geo_region:standard_name = "region" ;
+
+// global attributes:
+		:featureType = "point" ;
+data:
+
+ time = 1, _, _ ;
+
+ latitude = _ ;
+
+ longitude = _ ;
+
+ temp =
+  {1, 0, 1},
+  {1, 1, 0},
+  {_, 1, 0} ;
+
+ salinity =
+  {0, _, 2} ;
+
+ longitudeZZ = _ ;
+
+ geo_regionZ = "The_Hood_Dawgz" ;
+
+ geo_region = "Atlantic_Ocean" ;
+}
