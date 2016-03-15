@@ -725,9 +725,9 @@ class CFBaseCheck(BaseCheck):
             anc_result = Result(BaseCheck.HIGH, name=('§3.4 Ancillary Variables', k))
             msgs = []
 
-            if not isinstance(anc, str) and not isinstance(anc, unicode):
+            if not isinstance(anc, basestring):
                 anc_result.value = False
-                anc_result.msgs = ["ancillary_variable(s) %s is not a string or unicode" % anc]
+                anc_result.msgs = ["ancillary_variable(s) {} is not a string or unicode".format(anc)]
                 ret_val.append(anc_result)
                 continue
 
@@ -738,7 +738,7 @@ class CFBaseCheck(BaseCheck):
                 if a in ds.variables:
                     existing += 1
                 else:
-                    msgs.append("ancillary var %s does not exist" % a)
+                    msgs.append("ancillary var {} does not exist".format(a))
 
             anc_result.value = (existing, len(ancs))
             anc_result.msgs = msgs
@@ -2717,33 +2717,29 @@ class CFBaseCheck(BaseCheck):
                 if var.dimensions != (name,):
                     name_list.append(name)
 
+        non_data_list = [name for name, var in ds.variables.items() if var in self._find_coord_vars(ds) or var in self._find_ancillary_vars(ds)]
+
         for name, var in ds.variables.items():
-            if var in self._find_coord_vars(ds):
-                non_data_list.append(name)
-
             if hasattr(var, 'coordinates'):
-                for each in getattr(var, 'coordinates', '').split(' '):
-                    if each in name_list:
-                        non_data_list.append(each)
+                for coord in getattr(var, 'coordinates', '').split(' '):
+                    if coord in name_list:
+                        non_data_list.append(coord)
 
-            if var in self._find_ancillary_vars(ds):
-                non_data_list.append(name)
-        
-        data_list = [each for each in name_list if each not in non_data_list]
+        data_list = [data for data in name_list if data not in non_data_list]
 
-        for each in data_list:
-            if getattr(ds.variables[each], 'coordinates', ''):
+        for data_entry in data_list:
+            if getattr(ds.variables[data_entry], 'coordinates', ''):
                 result = Result(BaseCheck.MEDIUM,
                                 True,
-                                ('§9.5 Discrete Geometry', each, 'check_coordinates'),
+                                ('§9.5 Discrete Geometry', data_entry, 'check_coordinates'),
                                 reasoning)
                 ret_val.append(result)
                 reasoning = []
             else:
-                reasoning.append('The variable %s does not have associated coordinates' % each)
+                reasoning.append('The variable {} does not have associated coordinates'.format(data_entry))
                 result = Result(BaseCheck.MEDIUM,
                                 False,
-                                ('§9.5 Discrete Geometry', each, 'check_coordinates'),
+                                ('§9.5 Discrete Geometry', data_entry, 'check_coordinates'),
                                 reasoning)
                 ret_val.append(result)
                 reasoning = []
