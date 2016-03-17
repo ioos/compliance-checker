@@ -112,10 +112,10 @@ class Result(object):
             if len(self.msgs) == 1:
                 ret += ' ({})'.format(self.msgs[0])
             else:
-                ret += ' ({!d} msgs)'.format(len(self.msgs))
+                ret += ' ({!s} msgs)'.format(len(self.msgs))
 
         if len(self.children):
-            ret += ' ({!d} children)'.format(len(self.children))
+            ret += ' ({!s} children)'.format(len(self.children))
             ret += '\n' + pprint.pformat(self.children)
         return ret
 
