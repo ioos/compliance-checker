@@ -36,6 +36,7 @@ class ACDDBaseCheck(BaseCheck):
             'project',
             'processing_level',
             'acknowledgement',
+            'geospatial_bounds',
             'geospatial_lat_min',
             'geospatial_lat_max',
             'geospatial_lon_min',

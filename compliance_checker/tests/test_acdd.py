@@ -1,7 +1,6 @@
-from compliance_checker.acdd import ACDDBaseCheck
 import unittest
-
-# not updated
+from compliance_checker.acdd import ACDDBaseCheck
+# from netCDF4 import Dataset
 
 def to_singleton_var(l):
     """Get the first value of a list if this implements iterator protocol"""
@@ -13,6 +12,7 @@ def check_varset_nonintersect(true_set, name_list):
     table is equal to the list of values we have
     """
     return len(true_set ^ set(to_singleton_var(name_list))) == 0
+
 
 
 class TestACDD1_1(unittest.TestCase):
@@ -144,3 +144,10 @@ class TestACDD1_3(unittest.TestCase):
         # from the list of required atts
         assert check_varset_nonintersect(self.expected['Recommended'],
                                          self.acdd.rec_atts)
+
+    def test_sug_present(self):
+        """Checks that all suggested attributes are present"""
+        assert check_varset_nonintersect(self.expected['Suggested'],
+                                         self.acdd.sug_atts)
+
+    #assert self.acdd.check_high(ds) is True
