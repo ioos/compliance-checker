@@ -35,8 +35,15 @@ class CheckSuite(object):
         for x in working_set.iter_entry_points('compliance_checker.suites'):
             try:
                 xl = x.load()
-
                 cls.checkers[xl.name] = xl
+                # set any specific version numbers or pass if we don't have
+                # the _supported_versions attribute
+                try:
+                    for ver in sorted(xl._supported_versions):
+                        cls.checkers["{}:{}".format(xl.name, ver)] = xl
+                except AttributeError:
+                    pass
+
             except Exception as e:
                 print("Could not load", x, ":", e, file=sys.stderr)
 
@@ -66,10 +73,13 @@ class CheckSuite(object):
         if len(checker_names) == 0:
             checker_names = list(self.checkers.keys())
 
-        args = [(name, self.checkers[name]) for name in checker_names if name in self.checkers]
+        # Get the base name of the checker here.  Do not worry about version
+        # handling until later
+        args = [(name, self.checkers[name]) for name in checker_names
+                if name.rsplit(':', 1)[0] in self.checkers]
         valid = []
 
-        all_checked = set([a[1] for a in args])  # only class types
+        all_checked = {a[1] for a in args}  # only class types
         checker_queue = set(args)
 
         while len(checker_queue):
@@ -100,7 +110,22 @@ class CheckSuite(object):
 
         for checker_name, checker_class in checkers:
 
-            checker = checker_class()
+            # try to get the version of the standard from the checker after the
+            # colon
+            try:
+                standard_version = checker_name.rsplit(':', 1)[1]
+            # if no version was supplied after a colon, use None as the version
+            except IndexError:
+                # is this assignment even needed?
+                standard_version = None
+                checker = checker_class()
+            else:
+                # Otherwise use the constructor with the version number
+                # specified.  If an invalid version is specified, leave that
+                # up to the class being called to determine that and throw
+                # an exception if necessary
+                checker = checker_class(version=standard_version)
+
             checker.setup(ds)
 
             checks             = self._get_checks(checker)
