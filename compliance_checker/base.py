@@ -166,15 +166,36 @@ def check_has(priority=BaseCheck.HIGH):
             ret_val = []
             for l in list_vars:
                 msgs = []
+                # if a tuple, check if there's a function or an iterable
+                # containing a number of allowed values
                 if isinstance(l, tuple):
-                    name, allowed = l
-                    res = s.std_check_in(ds, name, allowed)
-                    if res == 0:
-                        msgs.append("Attr %s not present" % name)
-                    elif res == 1:
-                        msgs.append("Attr %s present but not in expected value list (%s)" % (name, allowed))
+                    name, other = l
+                    if hasattr(other, '__iter__'):
+                        # redundant, we could easily do this with a hasattr
+                        # check instead
+                        res = s.std_check_in(ds, name, other)
+                        if res == 0:
+                            msgs.append("Attr %s not present" % name)
+                        elif res == 1:
+                            msgs.append("Attr %s present but not in expected value list (%s)" % (name, allowed))
 
-                    ret_val.append(Result(priority, (res, 2), name, msgs))
+                        ret_val.append(Result(priority, (res, 2), name, msgs))
+                    # if the attribute is a function, call it
+                    # right now only supports single attribute
+                    # important note: current magic approach uses all functions
+                    # starting with "check".  Avoid naming check functions
+                    # starting with check if you want to pass them in with
+                    # a tuple to avoid them being checked more than once
+                    elif hasattr(other, '__call__'):
+                        # TODO: should not be function's job to check whether or
+                        # not attribute is present
+                        # check functions currently return a Result object
+                        # return the result partially applied and then set
+                        # priority
+                        ret_val.append(other(ds)(priority))
+                    # unsupported second type in second
+                    else:
+                        raise TypeError("Second arg in tuple has unsupported type: {}".format(type(other)))
 
                 else:
                     res = s.std_check(ds, l)
@@ -204,6 +225,9 @@ def fix_return_value(v, method_name, method=None, checker=None):
 
     return v
 
+def ratable_result(value, name, msgs):
+    """Returns a partial function with a Result that has not been weighted."""
+    return lambda w: Result(w, value, name, msgs)
 
 def score_group(group_name=None):
     def _inner(func):

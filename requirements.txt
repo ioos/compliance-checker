@@ -5,3 +5,4 @@ requests>=2.2.1
 python-dateutil>=2.2
 Jinja2>=2.7.3
 setuptools>=15.0
+pygeoif==0.6

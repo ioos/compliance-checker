@@ -4,38 +4,28 @@ import numpy as np
 from dateutil.parser import parse as parse_dt
 from cf_units import Unit
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result, ratable_result
 from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate, _possiblexunits, _possibleyunits
 
+
+from pygeoif import from_wkt
 
 class ACDDBaseCheck(BaseCheck):
 
     register_checker = True
     name = 'acdd'
 
-    ###############################################################################
-    #
-    # HIGHLY RECOMMENDED
-    #
-    ###############################################################################
+    _supported_versions = {'1.1', '1.3'}
 
-    @check_has(BaseCheck.HIGH)
-    def check_high(self, ds):
-        return ['title', 'summary', 'keywords']
+    def __init__(self, version='1.1'):
+        if version in self._supported_versions:
+            self._version = version
+        else:
+            raise NotImplementedError("Version {} not found in valid versions".format(version))
 
-    ###############################################################################
-    #
-    # RECOMMENDED
-    #
-    ###############################################################################
-
-    @check_has(BaseCheck.MEDIUM)
-    def check_recommended(self, ds):
-        return [
+        common_rec_atts = [
             'id',
             'naming_authority',
-            'keywords_vocabulary',
-            ('cdm_data_type', ['Grid', 'Image', 'Point', 'Radial', 'Station', 'Swath', 'Trajectory']),
             'history',
             'comment',
             'date_created',
@@ -45,7 +35,8 @@ class ACDDBaseCheck(BaseCheck):
             'institution',
             'project',
             'processing_level',
-            'acknowledgment',
+            'acknowledgement',
+            ('geospatial_bounds', self.verify_geospatial_bounds),
             'geospatial_lat_min',
             'geospatial_lat_max',
             'geospatial_lon_min',
@@ -60,6 +51,97 @@ class ACDDBaseCheck(BaseCheck):
             'license'
         ]
 
+        common_sug_atts = [
+            'contributor_name',
+            'contributor_role',
+            'date_modified',
+            'date_issued',
+            'geospatial_lat_units',
+            'geospatial_lat_resolution',
+            'geospatial_lon_units',
+            'geospatial_lon_resolution',
+            'geospatial_vertical_units',
+            'geospatial_vertical_resolution'
+        ]
+
+        if self._version == '1.1':
+            self.high_rec_atts = ['title',
+                    'summary',
+                    'keywords']
+
+            common_rec_atts.extend([
+                            'keywords_vocabulary',
+                            ('cdm_data_type', ['Grid', 'Image', 'Point',
+                                               'Radial', 'Station', 'Swath',
+                                               'Trajectory'])])
+
+            common_sug_atts.extend([
+                                'publisher_name',       # publisher,dataCenter
+                                'publisher_url',        # publisher
+                                'publisher_email',      # publisher
+                                'geospatial_vertical_positive'
+                              ])
+
+        elif self._version == '1.3':
+            self.high_rec_atts = ['title',
+                    'summary',
+                    'keywords',
+                    # TODO: Requires at least 'ACDD-1.3' to be present
+                    # in attribute
+                    ('Conventions', ['ACDD-1.3'])]
+
+            common_rec_atts.extend(
+                ['geospatial_vertical_positive',
+                 'geospatial_bounds_crs',
+                 'geospatial_bounds_vertical_crs',
+                 'publisher_name',       # publisher,dataCenter
+                 'publisher_url',        # publisher
+                 'publisher_email',      # publisher
+                 'source'])
+
+            common_sug_atts.extend([
+                # 1.3.1, technically
+                ('creator_type', ['person', 'group', 'institution',
+                                  'position']),
+                'creator_institution',
+                ('cdm_data_type', ['Grid', 'Image', 'Point', 'Radial',
+                                   'Station', 'Swath', 'Trajectory']),
+                'platform',
+                # TODO: make dependent on platform
+                'platform_vocabulary',
+                'keywords_vocabulary',
+                'instrument',
+                'metadata_link',
+                'product_version',
+                'references',
+                ('publisher_type', ['person', 'group', 'institution',
+                                    'position']),
+                'instrument_vocabulary',
+                'date_metadata_modified',
+                'program',
+                'publisher_institution',
+            ])
+
+        self.rec_atts = common_rec_atts
+        self.sug_atts = common_sug_atts
+    ###############################################################################
+    #
+    # HIGHLY RECOMMENDED
+    #
+    ###############################################################################
+        # set up attributes accoriding to version
+    @check_has(BaseCheck.HIGH)
+    def check_high(self, ds):
+        return self.high_rec_atts
+    ###############################################################################
+    #
+    # RECOMMENDED
+    #
+    ###############################################################################
+
+    @check_has(BaseCheck.MEDIUM)
+    def check_recommended(self, ds):
+        return self.rec_atts
     ###############################################################################
     #
     # SUGGESTED
@@ -68,22 +150,7 @@ class ACDDBaseCheck(BaseCheck):
 
     @check_has(BaseCheck.LOW)
     def check_suggested(self, ds):
-        return [
-            'contributor_name',
-            'contributor_role',
-            'publisher_name',       # publisher,dataCenter
-            'publisher_url',        # publisher
-            'publisher_email',      # publisher
-            'date_modified',
-            'date_issued',
-            'geospatial_lat_units',
-            'geospatial_lat_resolution',
-            'geospatial_lon_units',
-            'geospatial_lon_resolution',
-            'geospatial_vertical_units',
-            'geospatial_vertical_resolution',
-            'geospatial_vertical_positive'
-        ]
+        return self.sug_atts
 
     ###############################################################################
     #
@@ -146,7 +213,35 @@ class ACDDBaseCheck(BaseCheck):
             results.append(Result(BaseCheck.HIGH, check, (variable, "var_std_name"), msgs))
 
         return results
-    
+
+    @score_group('varattr')
+    def check_var_coverage_content_type(self, ds):
+        results = []
+        platform_variable_name = getattr(ds, 'platform', None)
+        for variable in ds.variables:
+            msgs = []
+            if variable in {'crs', platform_variable_name}:
+                continue
+            ctype = getattr(ds.variables[variable],
+                            'coverage_content_type', None)
+            check = ctype is not None
+            if not check:
+                msgs.append("Var %s missing attr coverage_content_type" %
+                            variable)
+                results.append(Result(BaseCheck.HIGH, check,
+                                    (variable, "coverage_content_type"),
+                                    msgs))
+                return results
+            # ISO 19115-1 codes
+            valid_ctypes = {'image', 'thematicClassification', 'physicalMeasurement',
+                            'auxiliaryInformation', 'qualityInformation',
+                            'referenceInformation', 'modelResult', 'coordinate'}
+            if not ctype in valid_ctypes:
+                msgs.append("Var %s does not have a coverage_content_type in %s"
+                            % (variable, sorted(valid_ctypes)))
+
+        return results
+
     @score_group('varattr')
     def check_var_units(self, ds):
         results = []
@@ -305,6 +400,27 @@ class ACDDBaseCheck(BaseCheck):
                       (allpass, 2),
                       'geospatial_lon_extents_match',
                       msgs)
+
+    def verify_geospatial_bounds(self, ds):
+        """Checks that the geospatial bounds is well formed OGC WKT"""
+        var = getattr(ds, 'geospatial_bounds', None)
+        check = var is not None
+        if not check:
+            return ratable_result(False,
+                          'geospatial_bounds',
+                          ["Attr geospatial_bounds not present"])
+
+        try:
+            from_wkt(ds.geospatial_bounds)
+        except AttributeError:
+            return ratable_result(False,
+                          'geospatial_bounds',
+                          ['Could not parse WKT, possible bad value for WKT'])
+        # parsed OK
+        else:
+            return ratable_result(True, 'geospatial_bounds',
+                          ())
+
 
     def check_vertical_extents(self, ds):
         """
