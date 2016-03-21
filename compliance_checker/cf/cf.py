@@ -7,7 +7,7 @@ import numpy as np
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
-from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
+from compliance_checker.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
 
 try:
     basestring
@@ -770,7 +770,6 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
 
         for k, v in ds.variables.items():
-
             flag_values   = getattr(v, "flag_values", None)
             flag_masks    = getattr(v, "flag_masks", None)
             flag_meanings = getattr(v, "flag_meanings", None)
@@ -794,10 +793,11 @@ class CFBaseCheck(BaseCheck):
                 fvr = Result(BaseCheck.HIGH, flag_values.dtype == v.dtype,
                              name='§3.5 Flags and flag attributes')
                 if not fvr.value:
+                    #import pdb; pdb.set_trace()
                     fvr.msgs = [("'flag_values' attribute for variable '%s'" +\
                                 " does not have same type " +\
                                 "(fv: %s, v: %s)")
-                                % (v.name, flag_values.dtype, v.dtype)]
+                                % (v._name, flag_values.dtype, v.dtype)]
 
                 ret_val.append(fvr)
 
