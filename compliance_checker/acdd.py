@@ -4,7 +4,7 @@ import numpy as np
 from dateutil.parser import parse as parse_dt
 from cf_units import Unit
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result, ratable_result
 from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate, _possiblexunits, _possibleyunits
 
 
@@ -36,6 +36,7 @@ class ACDDBaseCheck(BaseCheck):
             'project',
             'processing_level',
             'acknowledgement',
+            ('geospatial_bounds', self.verify_geospatial_bounds),
             'geospatial_lat_min',
             'geospatial_lat_max',
             'geospatial_lon_min',
@@ -400,25 +401,24 @@ class ACDDBaseCheck(BaseCheck):
                       'geospatial_lon_extents_match',
                       msgs)
 
-    def check_geospatial_bounds(self, ds):
+    def verify_geospatial_bounds(self, ds):
         """Checks that the geospatial bounds is well formed OGC WKT"""
         var = getattr(ds, 'geospatial_bounds', None)
         check = var is not None
         if not check:
-            return Result(BaseCheck.MEDIUM, False,
-                          'geospatial_bounds_valid_wkt',
+            return ratable_result(False,
+                          'geospatial_bounds',
                           ["Attr geospatial_bounds not present"])
 
         try:
             from_wkt(ds.geospatial_bounds)
         except AttributeError:
-            return Result(BaseCheck.MEDIUM,
-                          False,
-                          'geospatial_bounds_valid_wkt',
+            return ratable_result(False,
+                          'geospatial_bounds',
                           ['Could not parse WKT, possible bad value for WKT'])
         # parsed OK
         else:
-            return Result(BaseCheck.MEDIUM, True, 'geospatial_bounds_valid_wkt',
+            return ratable_result(True, 'geospatial_bounds',
                           ())
 
 

@@ -20,6 +20,11 @@ def check_varset_nonintersect(true_set, name_list):
 
 
 class TestACDD1_1(unittest.TestCase):
+
+    def setUp(self):
+        # TODO: Find or make a canonical ACDD 1.1 reference file
+        #ds = Dataset("/Users/asadeveloper/Downloads/hycomglobalnavy_2012120300.nc")
+        self.acdd = ACDDBaseCheck(version='1.1')
     # Adapted using `pandas.read_html` from URL
     # http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-1
     expected = {'Suggested': {'contributor_name', 'contributor_role',
@@ -38,7 +43,8 @@ class TestACDD1_1(unittest.TestCase):
                                         'creator_name', 'creator_url',
                                         'creator_email', 'institution',
                                         'project', 'processing_level',
-                                        'acknowledgement', 'geospatial_bounds',
+                                        'acknowledgement',
+                                        'geospatial_bounds',
                                         'geospatial_lat_min',
                                         'geospatial_lat_max',
                                         'geospatial_lon_min',
@@ -54,11 +60,6 @@ class TestACDD1_1(unittest.TestCase):
                                                     'standard_name', 'units',
                                                     'coverage_content_type'}}
 
-    def setUp(self):
-        # TODO: Find or make a canonical ACDD 1.1 reference file
-        #ds = Dataset("/Users/asadeveloper/Downloads/hycomglobalnavy_2012120300.nc")
-        self.acdd = ACDDBaseCheck(version='1.1')
-
     # TODO: Break into multiple tests
     def test_high_rec_present(self):
         """Checks that all highly recommended attributes are present"""
@@ -69,9 +70,8 @@ class TestACDD1_1(unittest.TestCase):
         """Checks that all recommended attributes are present"""
         # 'geospatial_bounds' attribute currently has its own separate check
         # from the list of required atts
-        rec_atts = self.acdd.rec_atts + ['geospatial_bounds']
         assert check_varset_nonintersect(self.expected['Recommended'],
-                                         rec_atts)
+                                         self.acdd.rec_atts)
 
     def test_sug_present(self):
         """Checks that all suggested attributes are present"""
@@ -141,9 +141,8 @@ class TestACDD1_3(unittest.TestCase):
         """Checks that all recommended attributes are present"""
         # 'geospatial_bounds' attribute currently has its own separate check
         # from the list of required atts
-        rec_atts = self.acdd.rec_atts + ['geospatial_bounds']
         assert check_varset_nonintersect(self.expected['Recommended'],
-                                         rec_atts)
+                                         self.acdd.rec_atts)
 
     def test_sug_present(self):
         """Checks that all suggested attributes are present"""
