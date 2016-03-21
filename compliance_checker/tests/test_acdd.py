@@ -2,7 +2,6 @@ import unittest
 from compliance_checker.acdd import ACDDBaseCheck
 # from netCDF4 import Dataset
 import os
-import pandas as pd
 
 # not updated
 
