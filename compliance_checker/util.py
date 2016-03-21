@@ -5,6 +5,8 @@ from lxml import etree
 from cf_units import Unit
 from netCDF4 import Dimension, Variable
 from pkgutil import get_data
+from dateutil.parser import parse as parse_dt
+import re
 
 # copied from paegan
 # paegan may depend on these later
@@ -390,3 +392,15 @@ def is_vertical_coordinate(var_name, var):
     if not is_pressure:
         satisfied |= getattr(var, 'positive', '').lower() in ('up', 'down')
     return satisfied
+
+def is_readable(word):        
+    re_format = re.compile("^['\"0-9A-Za-z_\/()-. ]+$")    
+    return re_format.match(word)
+
+def time_is_iso(date):
+    try:
+        parse_dt(date)
+        return True, []
+    except:
+        return False, ['date provided is not ISO 8601 or RFC 3339 compliant']
+

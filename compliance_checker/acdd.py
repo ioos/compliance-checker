@@ -1,12 +1,12 @@
 import itertools
 import numpy as np
+import numpy.ma as ma
 
 from dateutil.parser import parse as parse_dt
 from cf_units import Unit
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result, ratable_result
-from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate, _possiblexunits, _possibleyunits
-
+from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result, ratable_result, skip_unless
+from compliance_checker.util import is_time_variable, is_vertical_coordinate, _possiblexunits, _possibleyunits, is_readable, time_is_iso
 
 from pygeoif import from_wkt
 
@@ -86,9 +86,7 @@ class ACDDBaseCheck(BaseCheck):
             self.high_rec_atts = ['title',
                     'summary',
                     'keywords',
-                    # TODO: Requires at least 'ACDD-1.3' to be present
-                    # in attribute
-                    ('Conventions', ['ACDD-1.3'])]
+                    ('Conventions', self.verify_convention_version)]
 
             common_rec_atts.extend(
                 ['geospatial_vertical_positive',
@@ -126,16 +124,16 @@ class ACDDBaseCheck(BaseCheck):
         self.sug_atts = common_sug_atts
     ###############################################################################
     #
-    # HIGHLY RECOMMENDED
+    # HIGHLY RECOMMENDED ATTRIBUTES
     #
     ###############################################################################
-        # set up attributes accoriding to version
+    # set up attributes accoriding to version
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         return self.high_rec_atts
     ###############################################################################
     #
-    # RECOMMENDED
+    # RECOMMENDED ATTRIBUTES
     #
     ###############################################################################
 
@@ -144,7 +142,7 @@ class ACDDBaseCheck(BaseCheck):
         return self.rec_atts
     ###############################################################################
     #
-    # SUGGESTED
+    # SUGGESTED ATTRIBUTES
     #
     ###############################################################################
 
@@ -214,6 +212,7 @@ class ACDDBaseCheck(BaseCheck):
 
         return results
 
+    @skip_unless('1.3')
     @score_group('varattr')
     def check_var_coverage_content_type(self, ds):
         results = []
@@ -268,6 +267,157 @@ class ACDDBaseCheck(BaseCheck):
             results.append(Result(BaseCheck.HIGH, unit_check, (variable, "var_units"), msgs))
 
         return results
+
+    ################################################################################
+    #
+    # HIGHLY RECOMMENDED CHECKS
+    #
+    ###############################################################################   
+
+    @skip_unless('1.3')
+    def check_title_is_readable(self, ds):
+        #Checks if title are human readable (within reason)
+        if not hasattr(ds, u'title'):
+            return 
+        if is_readable(ds.title):
+            return Result(BaseCheck.HIGH, True, 'title_readable', msgs = [])
+        else:
+            return Result(BaseCheck.HIGH, False, 'title_readable', msgs = [u'Title contains invalid characters'])
+
+    def check_summary_is_readable(self, ds):
+        #Checks if summary are human readable (within reason)
+        if not hasattr(ds, u'summary'):
+            return 
+        if is_readable(ds.summary):
+            return Result(BaseCheck.HIGH, True, 'summary_readable', msgs = [])
+        else:
+            return Result(BaseCheck.HIGH, False, 'summary_readable', msgs = [u'Summary contains invalid characters'])
+
+    @skip_unless('1.3')
+    def check_keywords_exist(self, ds):
+        #Checks if keywords are human readable (within reason)
+        if not hasattr(ds, u'keywords'):
+            return
+        keyword_readable = [keyword for keyword in ds.keywords.split(',') if is_readable(keyword)]
+        return Result(BaseCheck.HIGH, (len(keyword_readable),len(ds.keywords.split(','))), 'keywords_readable', msgs = [])
+
+    ###############################################################################
+    #
+    # RECOMMENDED CHECKS
+    #
+    ###############################################################################
+    
+    @skip_unless('1.3')
+    def check_id_has_no_blanks(self, ds):
+        #Check if there are blanks in the id field
+        if not hasattr(ds, u'id'):
+            return
+        if ' ' in getattr(ds, u'id'):
+            return Result(BaseCheck.MEDIUM, False, 'no_blanks_in_id', msgs = [u'There should be no blanks in the id field'])
+        else:
+            return Result(BaseCheck.MEDIUM, True, 'no_blanks_in_id', msgs = [])
+
+    @skip_unless('1.3')
+    def check_license(self, ds):
+        #Checks if license is from accepted list
+        if not hasattr(ds, u'license'):
+            return 
+        license_list = ['none', 'freely distributed']
+        if getattr(ds, u'license') in license_list:
+            return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs = ['The license is valid'])
+        elif '.' in getattr(ds, u'license'):
+            return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs = ['The license is a url'])
+        else:
+            return Result(BaseCheck.MEDIUM, False, 'valid_license', msgs = ['The license is not a url or in the accepted list'])
+ 
+    def check_processing_level_readable(self, ds):
+        #Check if processing level is human readable (within reason)
+        if not hasattr(ds, u'processing_level'):
+            return 
+        if is_readable(getattr(ds, u'processing_level')):
+            return Result(BaseCheck.MEDIUM, True, 'processing_level_readable', msgs = [])
+        else:
+            return Result(BaseCheck.MEDIUM, False, 'processing_level_readable', msgs = ['The processing_level is not readable'])
+
+    @skip_unless('1.3')
+    def check_date_created(self, ds):
+        #Chcek if date created is ISO
+        if not hasattr(ds, u'date_created'):
+            return 
+        date_created_check, msgs = time_is_iso(getattr(ds, u'date_created')) 
+        return Result(BaseCheck.MEDIUM, date_created_check, 'date_created_is_iso', msgs)
+
+    ###############################################################################
+    #
+    # SUGGESTED
+    #
+    ###############################################################################
+    def check_history(self, ds):
+        #@TODO Create a history check
+        return
+
+    def check_source(self, ds):
+        #@TODO Create a source check
+        return
+
+    @skip_unless('1.3')
+    def check_platform_uses_vocab(self, ds):
+        #Checks if platform vocab is in vocab list
+        if not hasattr(ds, u'platform'):
+            return
+        if not hasattr(ds, u'platform_vocabulary'):
+            return 
+        platform_names_good = [platform for platform in getattr(ds, u'platform') if instrument in getattr(ds, u'platform_vocabulary')]
+        return Result(BaseCheck.LOW, (len(platform_names_good),len(getattr(ds),'platform_uses_vocabulary')), 'platforms_valid', msgs = [u'Platform_vocabulary not present'])
+
+    @skip_unless('1.3')
+    def check_instrument_uses_vocab(self, ds):
+        #Checks if instrument vocab is in vocab list
+        if not hasattr(ds, u'instrument'):
+            return
+        if not hasattr(ds, u'instrument_vocabulary'):
+            return 
+        instrument_names_good = [instrument for instrument in getattr(ds, u'instrument') if instrument in getattr(ds, u'instrument_vocabulary')]
+        return Result(BaseCheck.LOW, (len(instrument_names_good),len(getattr(ds),'instrument_uses_vocabulary')), 'instruments_valid', msgs = [u'Instrument_vocabulary not present'])
+
+    @skip_unless('1.3')
+    def check_metadata_link(self, ds):
+        #Checks if metadata link is formed in a rational manner
+        if not hasattr(ds, u'metadata_link'):
+            return
+        msgs = []
+        meta_link = getattr(ds, 'metadata_link')
+        if not 'http' in meta_link:
+            msgs.append('Metadata URL should include http:// or https://')
+        if not '.' in meta_link:
+            msgs.append('Metadata URL is malformed')
+        valid_link = len(msgs) == 0
+        return Result(BaseCheck.LOW, valid_link,  'metadata_link_valid', msgs)
+
+    @skip_unless('1.3')
+    def check_date_modified_is_iso(self, ds):
+        #Checks if date modified field is ISO compliant
+        if not hasattr(ds, u'date_modified'):
+            return 
+        date_modified_check, msgs = time_is_iso(getattr(ds, u'date_modified')) 
+        return Result(BaseCheck.MEDIUM, date_modified_check, 'date_modified_is_iso', msgs)
+
+    @skip_unless('1.3')
+    def check_date_issued_is_iso(self, ds):
+        #Checks if date issued field is ISO compliant
+        if not hasattr(ds, u'date_issued'):
+            return 
+        date_issued_check, msgs = time_is_iso(getattr(ds, u'date_issued')) 
+        return Result(BaseCheck.MEDIUM, date_issued_check, 'date_issued_is_iso', msgs)
+    
+    @skip_unless('1.3')
+    def check_date_metadata_modified_is_iso(self, ds):
+        #Checks if date metadata modified field is ISO compliant
+        if not hasattr(ds, u'date_metadata_modified'):
+            return 
+        date_metadata_modified_check, msgs = time_is_iso(getattr(ds, u'date_metadata_modified')) 
+        return Result(BaseCheck.MEDIUM, date_metadata_modified_check, 'date_metadata_modified_is_iso', msgs)
+
 
     ###############################################################################
     #
@@ -433,7 +583,7 @@ class ACDDBaseCheck(BaseCheck):
         vert_max = ds.geospatial_vertical_max
 
         # identify vertical vars as per CF 4.3
-        v_vars = [var for name, var in ds.variables.items() if is_vertical_coordinate(name, var)]
+        v_vars = [(var._name, ma.masked_equal(var, var._FillValue)) for name, var in ds.variables.items() if is_vertical_coordinate(name, var)]
 
         if len(v_vars) == 0:
             return Result(BaseCheck.MEDIUM,
@@ -441,8 +591,8 @@ class ACDDBaseCheck(BaseCheck):
                           'geospatial_vertical_extents_match',
                           ['Could not find vertical variable to test extent of geospatial_vertical_min/geospatial_vertical_max, see CF-1.6 spec chapter 4.3'])
 
-        obs_mins = {var._name: np.nanmin(var) for var in v_vars if not np.isnan(var).all()}
-        obs_maxs = {var._name: np.nanmax(var) for var in v_vars if not np.isnan(var).all()}
+        obs_mins = {var[0]: np.nanmin(var[1]) for var in v_vars if not np.isnan(var[1]).all()}
+        obs_maxs = {var[0]: np.nanmax(var[1]) for var in v_vars if not np.isnan(var[1]).all()}
 
         min_pass = any((np.isclose(vert_min, min_val) for min_val in obs_mins.values()))
         max_pass = any((np.isclose(vert_max, max_val) for max_val in obs_maxs.values()))
@@ -468,9 +618,14 @@ class ACDDBaseCheck(BaseCheck):
             return
 
         epoch = parse_dt("1970-01-01 00:00:00 UTC")
-        t_min = (parse_dt(ds.time_coverage_start) - epoch).total_seconds()
-        t_max = (parse_dt(ds.time_coverage_end) - epoch).total_seconds()
-
+        try:
+            t_min = (parse_dt(ds.time_coverage_start) - epoch).total_seconds()
+            t_max = (parse_dt(ds.time_coverage_end) - epoch).total_seconds()
+        except:
+            return Result(BaseCheck.MEDIUM,
+                      False,
+                      'time_coverage_extents_match',
+                      ['time_coverage variables are not formatted properly'])
         # identify t vars as per CF 4.4
         t_vars = [var for name, var in ds.variables.items() if is_time_variable(name, var)]
 
@@ -499,6 +654,26 @@ class ACDDBaseCheck(BaseCheck):
                       'time_coverage_extents_match',
                       msgs)
 
+    def verify_convention_version(self, ds):
+        """
+        Verify that the version in the Conventions field is correct
+        """
+        if not hasattr(ds, 'Conventions'):
+            return ratable_result(
+                    (0,2),
+                    'Conventions',
+                    ["Attr Conventions not present"])
+        else:
+            for convention in getattr(ds, 'Conventions').replace(' ','').split(','):
+                if convention == 'ACDD-'+self._cc_spec_version:
+                    return ratable_result(
+                            (2,2),
+                            'Conventions',
+                            [])
+        return ratable_result(
+                (1,2),
+                'Conventions',
+                ["Attr Conventions does not contain 'ACDD-{}'".format(self._cc_spec_version)])
 
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
     pass
