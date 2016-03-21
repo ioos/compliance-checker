@@ -19,7 +19,7 @@ class ACDDBaseCheck(BaseCheck):
 
     def __init__(self, version='1.1'):
         if version in self._supported_versions:
-            self._version = version
+            self._cc_spec_version = version
         else:
             raise NotImplementedError("Version {} not found in valid versions".format(version))
 
@@ -64,7 +64,7 @@ class ACDDBaseCheck(BaseCheck):
             'geospatial_vertical_resolution'
         ]
 
-        if self._version == '1.1':
+        if self._cc_spec_version == '1.1':
             self.high_rec_atts = ['title',
                     'summary',
                     'keywords']
@@ -82,7 +82,7 @@ class ACDDBaseCheck(BaseCheck):
                                 'geospatial_vertical_positive'
                               ])
 
-        elif self._version == '1.3':
+        elif self._cc_spec_version == '1.3':
             self.high_rec_atts = ['title',
                     'summary',
                     'keywords',

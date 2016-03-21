@@ -60,7 +60,9 @@ class TestACDD1_1(unittest.TestCase):
                                                     'standard_name', 'units',
                                                     'coverage_content_type'}}
 
-    # TODO: Break into multiple tests
+    def test_cc_version(self):
+        assert self.acdd._cc_spec_version == '1.1'
+
     def test_high_rec_present(self):
         """Checks that all highly recommended attributes are present"""
         assert check_varset_nonintersect(self.expected['Highly Recommended'],
@@ -131,6 +133,9 @@ class TestACDD1_3(unittest.TestCase):
         # data originally obtained from
         # http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3
         self.acdd = ACDDBaseCheck(version='1.3')
+
+    def test_cc_version(self):
+        assert self.acdd._cc_spec_version == '1.3'
 
     def test_high_rec_present(self):
         """Checks that all highly recommended attributes are present"""
