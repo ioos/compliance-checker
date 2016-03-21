@@ -11,7 +11,7 @@ from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
-
+from distutils.version import StrictVersion as V
 
 def get_namespaces():
     n = Namespaces()
@@ -112,10 +112,10 @@ class Result(object):
             if len(self.msgs) == 1:
                 ret += ' ({})'.format(self.msgs[0])
             else:
-                ret += ' ({!d} msgs)'.format(len(self.msgs))
+                ret += ' ({!s} msgs)'.format(len(self.msgs))
 
         if len(self.children):
-            ret += ' ({!d} children)'.format(len(self.children))
+            ret += ' ({!s} children)'.format(len(self.children))
             ret += '\n' + pprint.pformat(self.children)
         return ret
 
@@ -259,3 +259,15 @@ def score_group(group_name=None):
             return ret_val
         return wraps(func)(_dec)
     return _inner
+
+def skip_unless(version_for_test):
+    def _inner(func):
+        def _dec(s,ds):
+            if V(version_for_test) == V(s._cc_spec_version):
+                ret_val = func(s, ds)
+                return ret_val
+            else:
+                return
+        return wraps(func)(_dec)
+    return _inner
+
