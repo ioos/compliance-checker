@@ -177,7 +177,7 @@ def check_has(priority=BaseCheck.HIGH):
                         if res == 0:
                             msgs.append("Attr %s not present" % name)
                         elif res == 1:
-                            msgs.append("Attr %s present but not in expected value list (%s)" % (name, allowed))
+                            msgs.append("Attr %s present but not in expected value list (%s)" % (name, other))
 
                         ret_val.append(Result(priority, (res, 2), name, msgs))
                     # if the attribute is a function, call it
