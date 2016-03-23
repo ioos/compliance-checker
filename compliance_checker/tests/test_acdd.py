@@ -3,8 +3,12 @@ from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check
 # from netCDF4 import Dataset
 
 def to_singleton_var(l):
-    """Get the first value of a list if this implements iterator protocol"""
-    return [x[0] if hasattr(x, '__iter__') else x for x in l]
+    """
+    Get the first value of a list if this implements iterator protocol
+    and is not a string
+    """
+    return [x[0] if hasattr(x, '__iter__') and not isinstance(x, str) else x
+            for x in l]
 
 def check_varset_nonintersect(true_set, name_list):
     """
