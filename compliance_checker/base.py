@@ -260,15 +260,3 @@ def score_group(group_name=None):
             return ret_val
         return wraps(func)(_dec)
     return _inner
-
-def skip_unless(version_for_test):
-    def _inner(func):
-        def _dec(s,ds):
-            if V(version_for_test) == V(s._cc_spec_version):
-                ret_val = func(s, ds)
-                return ret_val
-            else:
-                return
-        return wraps(func)(_dec)
-    return _inner
-

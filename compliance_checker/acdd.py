@@ -6,8 +6,8 @@ import numpy.ma as ma
 from dateutil.parser import parse as parse_dt
 from cf_units import Unit
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result, ratable_result, skip_unless
-from compliance_checker.util import is_time_variable, is_vertical_coordinate, _possiblexunits, _possibleyunits, is_readable, time_is_iso
+from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result, ratable_result
+from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate, _possiblexunits, _possibleyunits, is_readable, time_is_iso
 
 from pygeoif import from_wkt
 
