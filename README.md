@@ -503,6 +503,7 @@ https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e603
 - Dan Maher <dmaher@asascience.com>
 - Luke Campbell <lcampbell@asascience.com>
 - [Kyle Wilcox](https://github.com/kwilcox) <kyle@axiomdatascience.com>
+- Ben Adams <ben.adams@rpsgroup.com>
 
 And many more testers!    
 

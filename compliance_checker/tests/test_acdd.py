@@ -1,5 +1,5 @@
 import unittest
-from compliance_checker.acdd import ACDDBaseCheck
+from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check
 # from netCDF4 import Dataset
 
 def to_singleton_var(l):
@@ -17,44 +17,44 @@ def check_varset_nonintersect(true_set, name_list):
 
 class TestACDD1_1(unittest.TestCase):
 
-    def setUp(self):
-        # TODO: Find or make a canonical ACDD 1.1 reference file
-        #ds = Dataset("/Users/asadeveloper/Downloads/hycomglobalnavy_2012120300.nc")
-        self.acdd = ACDDBaseCheck(version='1.1')
     # Adapted using `pandas.read_html` from URL
     # http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-1
     expected = {'Suggested': {'contributor_name', 'contributor_role',
-                                    'publisher_name', 'publisher_url',
-                                    'publisher_email', 'date_modified',
-                                    'date_issued', 'geospatial_lat_units',
-                                    'geospatial_lat_resolution',
-                        'geospatial_lon_units', 'geospatial_lon_resolution',
-                        'geospatial_vertical_units',
-                        'geospatial_vertical_resolution',
-                        'geospatial_vertical_positive'},
-                    'Highly Recommended': {'title', 'summary', 'keywords'},
-                        'Recommended': {'id', 'naming_authority',
-                                        'keywords_vocabulary', 'cdm_data_type',
-                                        'history', 'comment', 'date_created',
-                                        'creator_name', 'creator_url',
-                                        'creator_email', 'institution',
-                                        'project', 'processing_level',
-                                        'acknowledgement',
-                                        'geospatial_bounds',
-                                        'geospatial_lat_min',
-                                        'geospatial_lat_max',
-                                        'geospatial_lon_min',
-                                        'geospatial_lon_max',
-                                        'geospatial_vertical_min',
-                                        'geospatial_vertical_max',
-                                        'time_coverage_start',
-                                        'time_coverage_end',
-                                        'time_coverage_duration',
-                                        'time_coverage_resolution',
-                                        'standard_name_vocabulary', 'license'},
-                    'Highly Recommended Variable Attributes': {'long_name',
-                                                    'standard_name', 'units',
-                                                    'coverage_content_type'}}
+                                'publisher_name', 'publisher_url',
+                                'publisher_email', 'date_modified',
+                                'date_issued', 'geospatial_lat_units',
+                                'geospatial_lat_resolution',
+                    'geospatial_lon_units', 'geospatial_lon_resolution',
+                    'geospatial_vertical_units',
+                    'geospatial_vertical_resolution',
+                    'geospatial_vertical_positive'},
+                'Highly Recommended': {'title', 'summary', 'keywords'},
+                    'Recommended': {'id', 'naming_authority',
+                                    'keywords_vocabulary', 'cdm_data_type',
+                                    'history', 'comment', 'date_created',
+                                    'creator_name', 'creator_url',
+                                    'creator_email', 'institution',
+                                    'project', 'processing_level',
+                                    'acknowledgement',
+                                    'geospatial_bounds',
+                                    'geospatial_lat_min',
+                                    'geospatial_lat_max',
+                                    'geospatial_lon_min',
+                                    'geospatial_lon_max',
+                                    'geospatial_vertical_min',
+                                    'geospatial_vertical_max',
+                                    'time_coverage_start',
+                                    'time_coverage_end',
+                                    'time_coverage_duration',
+                                    'time_coverage_resolution',
+                                    'standard_name_vocabulary', 'license'},
+                'Highly Recommended Variable Attributes': {'long_name',
+                                                'standard_name', 'units',
+                                                'coverage_content_type'}}
+
+    def setUp(self):
+        # TODO: Find or make a canonical ACDD 1.1 reference file
+        self.acdd = ACDD1_1Check()
 
     def test_cc_version(self):
         assert self.acdd._cc_spec_version == '1.1'
@@ -128,7 +128,7 @@ class TestACDD1_3(unittest.TestCase):
         #ds = Dataset("/Users/asadeveloper/Downloads/hycomglobalnavy_2012120300.nc")
         # data originally obtained from
         # http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3
-        self.acdd = ACDDBaseCheck(version='1.3')
+        self.acdd = ACDD1_3Check()
 
     def test_cc_version(self):
         assert self.acdd._cc_spec_version == '1.3'

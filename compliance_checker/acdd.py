@@ -12,18 +12,14 @@ from pygeoif import from_wkt
 
 class ACDDBaseCheck(BaseCheck):
 
-    register_checker = True
     name = 'acdd'
 
-    _supported_versions = {'1.1', '1.3'}
+    def __init__(self):
+        self.high_rec_atts = ['title',
+                         'summary',
+                         'keywords']
 
-    def __init__(self, version='1.1'):
-        if version in self._supported_versions:
-            self._cc_spec_version = version
-        else:
-            raise NotImplementedError("Version {} not found in valid versions".format(version))
-
-        common_rec_atts = [
+        self.rec_atts = [
             'id',
             'naming_authority',
             'history',
@@ -51,7 +47,7 @@ class ACDDBaseCheck(BaseCheck):
             'license'
         ]
 
-        common_sug_atts = [
+        self.sug_atts = [
             'contributor_name',
             'contributor_role',
             'date_modified',
@@ -64,64 +60,6 @@ class ACDDBaseCheck(BaseCheck):
             'geospatial_vertical_resolution'
         ]
 
-        if self._cc_spec_version == '1.1':
-            self.high_rec_atts = ['title',
-                    'summary',
-                    'keywords']
-
-            common_rec_atts.extend([
-                            'keywords_vocabulary',
-                            ('cdm_data_type', ['Grid', 'Image', 'Point',
-                                               'Radial', 'Station', 'Swath',
-                                               'Trajectory'])])
-
-            common_sug_atts.extend([
-                                'publisher_name',       # publisher,dataCenter
-                                'publisher_url',        # publisher
-                                'publisher_email',      # publisher
-                                'geospatial_vertical_positive'
-                              ])
-
-        elif self._cc_spec_version == '1.3':
-            self.high_rec_atts = ['title',
-                    'summary',
-                    'keywords',
-                    ('Conventions', self.verify_convention_version)]
-
-            common_rec_atts.extend(
-                ['geospatial_vertical_positive',
-                 'geospatial_bounds_crs',
-                 'geospatial_bounds_vertical_crs',
-                 'publisher_name',       # publisher,dataCenter
-                 'publisher_url',        # publisher
-                 'publisher_email',      # publisher
-                 'source'])
-
-            common_sug_atts.extend([
-                # 1.3.1, technically
-                ('creator_type', ['person', 'group', 'institution',
-                                  'position']),
-                'creator_institution',
-                ('cdm_data_type', ['Grid', 'Image', 'Point', 'Radial',
-                                   'Station', 'Swath', 'Trajectory']),
-                'platform',
-                # TODO: make dependent on platform
-                'platform_vocabulary',
-                'keywords_vocabulary',
-                'instrument',
-                'metadata_link',
-                'product_version',
-                'references',
-                ('publisher_type', ['person', 'group', 'institution',
-                                    'position']),
-                'instrument_vocabulary',
-                'date_metadata_modified',
-                'program',
-                'publisher_institution',
-            ])
-
-        self.rec_atts = common_rec_atts
-        self.sug_atts = common_sug_atts
     ###############################################################################
     #
     # HIGHLY RECOMMENDED ATTRIBUTES
@@ -212,34 +150,6 @@ class ACDDBaseCheck(BaseCheck):
 
         return results
 
-    @skip_unless('1.3')
-    @score_group('varattr')
-    def check_var_coverage_content_type(self, ds):
-        results = []
-        platform_variable_name = getattr(ds, 'platform', None)
-        for variable in ds.variables:
-            msgs = []
-            if variable in {'crs', platform_variable_name}:
-                continue
-            ctype = getattr(ds.variables[variable],
-                            'coverage_content_type', None)
-            check = ctype is not None
-            if not check:
-                msgs.append("Var %s missing attr coverage_content_type" %
-                            variable)
-                results.append(Result(BaseCheck.HIGH, check,
-                                    (variable, "coverage_content_type"),
-                                    msgs))
-                return results
-            # ISO 19115-1 codes
-            valid_ctypes = {'image', 'thematicClassification', 'physicalMeasurement',
-                            'auxiliaryInformation', 'qualityInformation',
-                            'referenceInformation', 'modelResult', 'coordinate'}
-            if not ctype in valid_ctypes:
-                msgs.append("Var %s does not have a coverage_content_type in %s"
-                            % (variable, sorted(valid_ctypes)))
-
-        return results
 
     @score_group('varattr')
     def check_var_units(self, ds):
@@ -272,151 +182,29 @@ class ACDDBaseCheck(BaseCheck):
     #
     # HIGHLY RECOMMENDED CHECKS
     #
-    ###############################################################################   
-
-    @skip_unless('1.3')
-    def check_title_is_readable(self, ds):
-        #Checks if title are human readable (within reason)
-        if not hasattr(ds, u'title'):
-            return 
-        if is_readable(ds.title):
-            return Result(BaseCheck.HIGH, True, 'title_readable', msgs = [])
-        else:
-            return Result(BaseCheck.HIGH, False, 'title_readable', msgs = [u'Title contains invalid characters'])
+    ###############################################################################
 
     def check_summary_is_readable(self, ds):
         #Checks if summary are human readable (within reason)
         if not hasattr(ds, u'summary'):
-            return 
+            return
         if is_readable(ds.summary):
             return Result(BaseCheck.HIGH, True, 'summary_readable', msgs = [])
         else:
             return Result(BaseCheck.HIGH, False, 'summary_readable', msgs = [u'Summary contains invalid characters'])
-
-    @skip_unless('1.3')
-    def check_keywords_exist(self, ds):
-        #Checks if keywords are human readable (within reason)
-        if not hasattr(ds, u'keywords'):
-            return
-        keyword_readable = [keyword for keyword in ds.keywords.split(',') if is_readable(keyword)]
-        return Result(BaseCheck.HIGH, (len(keyword_readable),len(ds.keywords.split(','))), 'keywords_readable', msgs = [])
 
     ###############################################################################
     #
     # RECOMMENDED CHECKS
     #
     ###############################################################################
-    
-    @skip_unless('1.3')
-    def check_id_has_no_blanks(self, ds):
-        #Check if there are blanks in the id field
-        if not hasattr(ds, u'id'):
-            return
-        if ' ' in getattr(ds, u'id'):
-            return Result(BaseCheck.MEDIUM, False, 'no_blanks_in_id', msgs = [u'There should be no blanks in the id field'])
-        else:
-            return Result(BaseCheck.MEDIUM, True, 'no_blanks_in_id', msgs = [])
 
-    @skip_unless('1.3')
-    def check_license(self, ds):
-        #Checks if license is from accepted list
-        if not hasattr(ds, u'license'):
-            return 
-        license_list = ['none', 'freely distributed']
-        if getattr(ds, u'license') in license_list:
-            return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs = ['The license is valid'])
-        elif '.' in getattr(ds, u'license'):
-            return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs = ['The license is a url'])
-        else:
-            return Result(BaseCheck.MEDIUM, False, 'valid_license', msgs = ['The license is not a url or in the accepted list'])
- 
-    def check_processing_level_readable(self, ds):
-        #Check if processing level is human readable (within reason)
-        if not hasattr(ds, u'processing_level'):
-            return 
-        if is_readable(getattr(ds, u'processing_level')):
-            return Result(BaseCheck.MEDIUM, True, 'processing_level_readable', msgs = [])
-        else:
-            return Result(BaseCheck.MEDIUM, False, 'processing_level_readable', msgs = ['The processing_level is not readable'])
-
-    @skip_unless('1.3')
-    def check_date_created(self, ds):
-        #Chcek if date created is ISO
-        if not hasattr(ds, u'date_created'):
-            return 
-        date_created_check, msgs = time_is_iso(getattr(ds, u'date_created')) 
-        return Result(BaseCheck.MEDIUM, date_created_check, 'date_created_is_iso', msgs)
 
     ###############################################################################
     #
     # SUGGESTED
     #
     ###############################################################################
-    def check_history(self, ds):
-        #@TODO Create a history check
-        return
-
-    def check_source(self, ds):
-        #@TODO Create a source check
-        return
-
-    @skip_unless('1.3')
-    def check_platform_uses_vocab(self, ds):
-        #Checks if platform vocab is in vocab list
-        if not hasattr(ds, u'platform'):
-            return
-        if not hasattr(ds, u'platform_vocabulary'):
-            return 
-        platform_names_good = [platform for platform in getattr(ds, u'platform') if instrument in getattr(ds, u'platform_vocabulary')]
-        return Result(BaseCheck.LOW, (len(platform_names_good),len(getattr(ds),'platform_uses_vocabulary')), 'platforms_valid', msgs = [u'Platform_vocabulary not present'])
-
-    @skip_unless('1.3')
-    def check_instrument_uses_vocab(self, ds):
-        #Checks if instrument vocab is in vocab list
-        if not hasattr(ds, u'instrument'):
-            return
-        if not hasattr(ds, u'instrument_vocabulary'):
-            return 
-        instrument_names_good = [instrument for instrument in getattr(ds, u'instrument') if instrument in getattr(ds, u'instrument_vocabulary')]
-        return Result(BaseCheck.LOW, (len(instrument_names_good),len(getattr(ds),'instrument_uses_vocabulary')), 'instruments_valid', msgs = [u'Instrument_vocabulary not present'])
-
-    @skip_unless('1.3')
-    def check_metadata_link(self, ds):
-        #Checks if metadata link is formed in a rational manner
-        if not hasattr(ds, u'metadata_link'):
-            return
-        msgs = []
-        meta_link = getattr(ds, 'metadata_link')
-        if not 'http' in meta_link:
-            msgs.append('Metadata URL should include http:// or https://')
-        if not '.' in meta_link:
-            msgs.append('Metadata URL is malformed')
-        valid_link = len(msgs) == 0
-        return Result(BaseCheck.LOW, valid_link,  'metadata_link_valid', msgs)
-
-    @skip_unless('1.3')
-    def check_date_modified_is_iso(self, ds):
-        #Checks if date modified field is ISO compliant
-        if not hasattr(ds, u'date_modified'):
-            return 
-        date_modified_check, msgs = time_is_iso(getattr(ds, u'date_modified')) 
-        return Result(BaseCheck.MEDIUM, date_modified_check, 'date_modified_is_iso', msgs)
-
-    @skip_unless('1.3')
-    def check_date_issued_is_iso(self, ds):
-        #Checks if date issued field is ISO compliant
-        if not hasattr(ds, u'date_issued'):
-            return 
-        date_issued_check, msgs = time_is_iso(getattr(ds, u'date_issued')) 
-        return Result(BaseCheck.MEDIUM, date_issued_check, 'date_issued_is_iso', msgs)
-    
-    @skip_unless('1.3')
-    def check_date_metadata_modified_is_iso(self, ds):
-        #Checks if date metadata modified field is ISO compliant
-        if not hasattr(ds, u'date_metadata_modified'):
-            return 
-        date_metadata_modified_check, msgs = time_is_iso(getattr(ds, u'date_metadata_modified')) 
-        return Result(BaseCheck.MEDIUM, date_metadata_modified_check, 'date_metadata_modified_is_iso', msgs)
 
 
     ###############################################################################
@@ -674,6 +462,206 @@ class ACDDBaseCheck(BaseCheck):
                 (1,2),
                 'Conventions',
                 ["Attr Conventions does not contain 'ACDD-{}'".format(self._cc_spec_version)])
+
+
+class ACDD1_1Check(ACDDBaseCheck):
+
+    _cc_spec_version = '1.1'
+    register_checker = True
+
+    def __init__(self):
+        super(ACDD1_1Check, self).__init__()
+        self.rec_atts.extend(['keywords_vocabulary',
+                        ('cdm_data_type', ['Grid', 'Image', 'Point',
+                                           'Radial', 'Station', 'Swath',
+                                           'Trajectory'])])
+
+        self.sug_atts.extend(['publisher_name',       # publisher,dataCenter
+                                'publisher_url',        # publisher
+                                'publisher_email',      # publisher
+                                'geospatial_vertical_positive'
+                              ])
+
+class ACDD1_3Check(ACDDBaseCheck):
+
+    _cc_spec_version = '1.3'
+    register_checker = True
+
+    def __init__(self):
+        super(ACDD1_3Check, self).__init__()
+        self.high_rec_atts.extend([('Conventions',
+                                    self.verify_convention_version)])
+
+        self.rec_atts.extend(['geospatial_vertical_positive',
+                              'geospatial_bounds_crs',
+                              'geospatial_bounds_vertical_crs',
+                              'publisher_name',       # publisher,dataCenter
+                              'publisher_url',        # publisher
+                              'publisher_email',      # publisher
+                              'source'])
+
+        self.sug_atts.extend([  # 1.3.1, technically
+                ('creator_type', ['person', 'group', 'institution',
+                                  'position']),
+                'creator_institution',
+                ('cdm_data_type', ['Grid', 'Image', 'Point', 'Radial',
+                                   'Station', 'Swath', 'Trajectory']),
+                'platform',
+                # TODO: make dependent on platform
+                'platform_vocabulary',
+                'keywords_vocabulary',
+                'instrument',
+                'metadata_link',
+                'product_version',
+                'references',
+                ('publisher_type', ['person', 'group', 'institution',
+                                    'position']),
+                'instrument_vocabulary',
+                'date_metadata_modified',
+                'program',
+                'publisher_institution',
+            ])
+
+    def check_history(self, ds):
+        #@TODO Create a history check
+        return
+
+    def check_source(self, ds):
+        #@TODO Create a source check
+        return
+
+    def check_platform_uses_vocab(self, ds):
+        #Checks if platform vocab is in vocab list
+        if not hasattr(ds, u'platform'):
+            return
+        if not hasattr(ds, u'platform_vocabulary'):
+            return
+        platform_names_good = [platform for platform in getattr(ds, u'platform') if platform in getattr(ds, u'platform_vocabulary')]
+        return Result(BaseCheck.LOW, (len(platform_names_good),len(getattr(ds,'platform_uses_vocabulary'))), 'platforms_valid', msgs = [u'Platform_vocabulary not present'])
+
+    def check_instrument_uses_vocab(self, ds):
+        #Checks if instrument vocab is in vocab list
+        if not hasattr(ds, u'instrument'):
+            return
+        if not hasattr(ds, u'instrument_vocabulary'):
+            return
+        instrument_names_good = [instrument for instrument in getattr(ds, u'instrument') if instrument in getattr(ds, u'instrument_vocabulary')]
+        return Result(BaseCheck.LOW, (len(instrument_names_good),len(getattr(ds,'instrument_uses_vocabulary'))), 'instruments_valid', msgs = [u'Instrument_vocabulary not present'])
+
+    def check_metadata_link(self, ds):
+        #Checks if metadata link is formed in a rational manner
+        if not hasattr(ds, u'metadata_link'):
+            return
+        msgs = []
+        meta_link = getattr(ds, 'metadata_link')
+        if not 'http' in meta_link:
+            msgs.append('Metadata URL should include http:// or https://')
+        if not '.' in meta_link:
+            msgs.append('Metadata URL is malformed')
+        valid_link = len(msgs) == 0
+        return Result(BaseCheck.LOW, valid_link,  'metadata_link_valid', msgs)
+
+    def check_date_modified_is_iso(self, ds):
+        #Checks if date modified field is ISO compliant
+        if not hasattr(ds, u'date_modified'):
+            return
+        date_modified_check, msgs = time_is_iso(getattr(ds, u'date_modified'))
+        return Result(BaseCheck.MEDIUM, date_modified_check, 'date_modified_is_iso', msgs)
+
+    def check_date_issued_is_iso(self, ds):
+        #Checks if date issued field is ISO compliant
+        if not hasattr(ds, u'date_issued'):
+            return
+        date_issued_check, msgs = time_is_iso(getattr(ds, u'date_issued'))
+        return Result(BaseCheck.MEDIUM, date_issued_check, 'date_issued_is_iso', msgs)
+
+    def check_date_metadata_modified_is_iso(self, ds):
+        #Checks if date metadata modified field is ISO compliant
+        if not hasattr(ds, u'date_metadata_modified'):
+            return
+        date_metadata_modified_check, msgs = time_is_iso(getattr(ds, u'date_metadata_modified'))
+        return Result(BaseCheck.MEDIUM, date_metadata_modified_check, 'date_metadata_modified_is_iso', msgs)
+
+    def check_id_has_no_blanks(self, ds):
+        #Check if there are blanks in the id field
+        if not hasattr(ds, u'id'):
+            return
+        if ' ' in getattr(ds, u'id'):
+            return Result(BaseCheck.MEDIUM, False, 'no_blanks_in_id', msgs = [u'There should be no blanks in the id field'])
+        else:
+            return Result(BaseCheck.MEDIUM, True, 'no_blanks_in_id', msgs = [])
+
+    def check_license(self, ds):
+        #Checks if license is from accepted list
+        if not hasattr(ds, u'license'):
+            return
+        license_list = {'none', 'freely distributed'}
+        if getattr(ds, u'license').lower() in license_list:
+            return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs=['The license is valid'])
+        elif '.' in getattr(ds, u'license'):
+            return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs=['The license is a url'])
+        else:
+            return Result(BaseCheck.MEDIUM, False, 'valid_license', msgs=['The license is not a url or in the accepted list'])
+
+    def check_processing_level_readable(self, ds):
+        #Check if processing level is human readable (within reason)
+        if not hasattr(ds, u'processing_level'):
+            return
+        if is_readable(getattr(ds, u'processing_level')):
+            return Result(BaseCheck.MEDIUM, True, 'processing_level_readable', msgs = [])
+        else:
+            return Result(BaseCheck.MEDIUM, False, 'processing_level_readable', msgs = ['The processing_level is not readable'])
+
+    def check_date_created(self, ds):
+        #Chcek if date created is ISO
+        if not hasattr(ds, u'date_created'):
+            return
+        date_created_check, msgs = time_is_iso(getattr(ds, u'date_created'))
+        return Result(BaseCheck.MEDIUM, date_created_check, 'date_created_is_iso', msgs)
+
+    @score_group('varattr')
+    def check_var_coverage_content_type(self, ds):
+        results = []
+        platform_variable_name = getattr(ds, 'platform', None)
+        for variable in ds.variables:
+            msgs = []
+            if variable in {'crs', platform_variable_name}:
+                continue
+            ctype = getattr(ds.variables[variable],
+                            'coverage_content_type', None)
+            check = ctype is not None
+            if not check:
+                msgs.append("Var %s missing attr coverage_content_type" %
+                            variable)
+                results.append(Result(BaseCheck.HIGH, check,
+                                    (variable, "coverage_content_type"),
+                                    msgs))
+                return results
+            # ISO 19115-1 codes
+            valid_ctypes = {'image', 'thematicClassification', 'physicalMeasurement',
+                            'auxiliaryInformation', 'qualityInformation',
+                            'referenceInformation', 'modelResult', 'coordinate'}
+            if not ctype in valid_ctypes:
+                msgs.append("Var %s does not have a coverage_content_type in %s"
+                            % (variable, sorted(valid_ctypes)))
+
+        return results
+
+    def check_title_is_readable(self, ds):
+        #Checks if title are human readable (within reason)
+        if not hasattr(ds, u'title'):
+            return
+        if is_readable(ds.title):
+            return Result(BaseCheck.HIGH, True, 'title_readable', msgs = [])
+        else:
+            return Result(BaseCheck.HIGH, False, 'title_readable', msgs = [u'Title contains invalid characters'])
+
+    def check_keywords_exist(self, ds):
+        #Checks if keywords are human readable (within reason)
+        if not hasattr(ds, u'keywords'):
+            return
+        keyword_readable = [keyword for keyword in ds.keywords.split(',') if is_readable(keyword)]
+        return Result(BaseCheck.HIGH, (len(keyword_readable),len(ds.keywords.split(','))), 'keywords_readable', msgs = [])
 
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
     pass
