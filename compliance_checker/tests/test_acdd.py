@@ -18,6 +18,7 @@ def check_varset_nonintersect(true_set, name_list):
     return len(true_set ^ set(to_singleton_var(name_list))) == 0
 
 
+# TODO: move common atts to Base ACDD check test
 
 class TestACDD1_1(unittest.TestCase):
 
@@ -60,7 +61,8 @@ class TestACDD1_1(unittest.TestCase):
         # TODO: Find or make a canonical ACDD 1.1 reference file
         self.acdd = ACDD1_1Check()
 
-    def test_cc_version(self):
+    def test_cc_meta(self):
+        assert self.acdd._cc_spec == 'acdd'
         assert self.acdd._cc_spec_version == '1.1'
 
     def test_high_rec_present(self):
@@ -134,7 +136,8 @@ class TestACDD1_3(unittest.TestCase):
         # http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3
         self.acdd = ACDD1_3Check()
 
-    def test_cc_version(self):
+    def test_cc_meta(self):
+        assert self.acdd._cc_spec == 'acdd'
         assert self.acdd._cc_spec_version == '1.3'
 
     def test_high_rec_present(self):
