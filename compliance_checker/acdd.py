@@ -12,7 +12,9 @@ from pygeoif import from_wkt
 
 class ACDDBaseCheck(BaseCheck):
 
-    name = 'acdd'
+    _cc_spec = 'acdd'
+    _cc_description = 'Attribute Conventions for Dataset Discovery (ACDD)'
+    _cc_url = 'http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery'
 
     def __init__(self):
         self.high_rec_atts = ['title',
