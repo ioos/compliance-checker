@@ -770,7 +770,6 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
 
         for k, v in ds.variables.items():
-
             flag_values   = getattr(v, "flag_values", None)
             flag_masks    = getattr(v, "flag_masks", None)
             flag_meanings = getattr(v, "flag_meanings", None)
@@ -797,7 +796,7 @@ class CFBaseCheck(BaseCheck):
                     fvr.msgs = [("'flag_values' attribute for variable '%s'" +\
                                 " does not have same type " +\
                                 "(fv: %s, v: %s)")
-                                % (v.name, flag_values.dtype, v.dtype)]
+                                % (v._name, flag_values.dtype, v.dtype)]
 
                 ret_val.append(fvr)
 

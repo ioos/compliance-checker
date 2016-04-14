@@ -1,41 +1,32 @@
 import itertools
 import numpy as np
+import numpy.ma as ma
 
 from dateutil.parser import parse as parse_dt
 from cf_units import Unit
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result
-from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate, _possiblexunits, _possibleyunits
-
+from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
+                                     score_group, Result, ratable_result)
+from compliance_checker.cf.util import (is_time_variable,
+                                        is_vertical_coordinate,
+                                       _possiblexunits, _possibleyunits)
+from compliance_checker.util import is_readable, datetime_is_iso
+from pygeoif import from_wkt
 
 class ACDDBaseCheck(BaseCheck):
 
-    register_checker = True
-    name = 'acdd'
+    _cc_spec = 'acdd'
+    _cc_description = 'Attribute Conventions for Dataset Discovery (ACDD)'
+    _cc_url = 'http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery'
 
-    ###############################################################################
-    #
-    # HIGHLY RECOMMENDED
-    #
-    ###############################################################################
+    def __init__(self):
+        self.high_rec_atts = [('title', self.check_title_is_readable),
+                              'summary',
+                              ('keywords', self.check_keywords_exist)]
 
-    @check_has(BaseCheck.HIGH)
-    def check_high(self, ds):
-        return ['title', 'summary', 'keywords']
-
-    ###############################################################################
-    #
-    # RECOMMENDED
-    #
-    ###############################################################################
-
-    @check_has(BaseCheck.MEDIUM)
-    def check_recommended(self, ds):
-        return [
+        self.rec_atts = [
             'id',
             'naming_authority',
-            'keywords_vocabulary',
-            ('cdm_data_type', ['Grid', 'Image', 'Point', 'Radial', 'Station', 'Swath', 'Trajectory']),
             'history',
             'comment',
             'date_created',
@@ -45,7 +36,8 @@ class ACDDBaseCheck(BaseCheck):
             'institution',
             'project',
             'processing_level',
-            'acknowledgment',
+            'acknowledgement',
+            ('geospatial_bounds', self.verify_geospatial_bounds),
             'geospatial_lat_min',
             'geospatial_lat_max',
             'geospatial_lon_min',
@@ -60,20 +52,9 @@ class ACDDBaseCheck(BaseCheck):
             'license'
         ]
 
-    ###############################################################################
-    #
-    # SUGGESTED
-    #
-    ###############################################################################
-
-    @check_has(BaseCheck.LOW)
-    def check_suggested(self, ds):
-        return [
+        self.sug_atts = [
             'contributor_name',
             'contributor_role',
-            'publisher_name',       # publisher,dataCenter
-            'publisher_url',        # publisher
-            'publisher_email',      # publisher
             'date_modified',
             'date_issued',
             'geospatial_lat_units',
@@ -81,9 +62,36 @@ class ACDDBaseCheck(BaseCheck):
             'geospatial_lon_units',
             'geospatial_lon_resolution',
             'geospatial_vertical_units',
-            'geospatial_vertical_resolution',
-            'geospatial_vertical_positive'
+            'geospatial_vertical_resolution'
         ]
+
+    ###############################################################################
+    #
+    # HIGHLY RECOMMENDED ATTRIBUTES
+    #
+    ###############################################################################
+    # set up attributes accoriding to version
+    @check_has(BaseCheck.HIGH)
+    def check_high(self, ds):
+        return self.high_rec_atts
+    ###############################################################################
+    #
+    # RECOMMENDED ATTRIBUTES
+    #
+    ###############################################################################
+
+    @check_has(BaseCheck.MEDIUM)
+    def check_recommended(self, ds):
+        return self.rec_atts
+    ###############################################################################
+    #
+    # SUGGESTED ATTRIBUTES
+    #
+    ###############################################################################
+
+    @check_has(BaseCheck.LOW)
+    def check_suggested(self, ds):
+        return self.sug_atts
 
     ###############################################################################
     #
@@ -146,7 +154,8 @@ class ACDDBaseCheck(BaseCheck):
             results.append(Result(BaseCheck.HIGH, check, (variable, "var_std_name"), msgs))
 
         return results
-    
+
+
     @score_group('varattr')
     def check_var_units(self, ds):
         results = []
@@ -173,6 +182,35 @@ class ACDDBaseCheck(BaseCheck):
             results.append(Result(BaseCheck.HIGH, unit_check, (variable, "var_units"), msgs))
 
         return results
+
+    ################################################################################
+    #
+    # HIGHLY RECOMMENDED CHECKS
+    #
+    ###############################################################################
+
+    def check_summary_is_readable(self, ds):
+        #Checks if summary are human readable (within reason)
+        if not hasattr(ds, u'summary'):
+            return
+        if is_readable(ds.summary):
+            return Result(BaseCheck.HIGH, True, 'summary_readable', msgs = [])
+        else:
+            return Result(BaseCheck.HIGH, False, 'summary_readable', msgs = [u'Summary contains invalid characters'])
+
+    ###############################################################################
+    #
+    # RECOMMENDED CHECKS
+    #
+    ###############################################################################
+
+
+    ###############################################################################
+    #
+    # SUGGESTED
+    #
+    ###############################################################################
+
 
     ###############################################################################
     #
@@ -306,6 +344,29 @@ class ACDDBaseCheck(BaseCheck):
                       'geospatial_lon_extents_match',
                       msgs)
 
+    def verify_geospatial_bounds(self, ds):
+        """Checks that the geospatial bounds is well formed OGC WKT"""
+        var = getattr(ds, 'geospatial_bounds', None)
+        check = var is not None
+        if not check:
+            return ratable_result(False,
+                          'geospatial_bounds',
+                          ["Attr geospatial_bounds not present"])
+
+        try:
+            # TODO: verify that WKT is valid given CRS (defaults to EPSG:4326
+            #       in ACDD.
+            from_wkt(ds.geospatial_bounds)
+        except AttributeError:
+            return ratable_result(False,
+                          'geospatial_bounds',
+                          ['Could not parse WKT, possible bad value for WKT'])
+        # parsed OK
+        else:
+            return ratable_result(True, 'geospatial_bounds',
+                          ())
+
+
     def check_vertical_extents(self, ds):
         """
         Check that the values of geospatial_vertical_min/geospatial_vertical_max approximately match the data.
@@ -317,7 +378,7 @@ class ACDDBaseCheck(BaseCheck):
         vert_max = ds.geospatial_vertical_max
 
         # identify vertical vars as per CF 4.3
-        v_vars = [var for name, var in ds.variables.items() if is_vertical_coordinate(name, var)]
+        v_vars = [(var._name, ma.masked_equal(var, var._FillValue)) for name, var in ds.variables.items() if is_vertical_coordinate(name, var)]
 
         if len(v_vars) == 0:
             return Result(BaseCheck.MEDIUM,
@@ -325,8 +386,8 @@ class ACDDBaseCheck(BaseCheck):
                           'geospatial_vertical_extents_match',
                           ['Could not find vertical variable to test extent of geospatial_vertical_min/geospatial_vertical_max, see CF-1.6 spec chapter 4.3'])
 
-        obs_mins = {var._name: np.nanmin(var) for var in v_vars if not np.isnan(var).all()}
-        obs_maxs = {var._name: np.nanmax(var) for var in v_vars if not np.isnan(var).all()}
+        obs_mins = {var[0]: np.nanmin(var[1]) for var in v_vars if not np.isnan(var[1]).all()}
+        obs_maxs = {var[0]: np.nanmax(var[1]) for var in v_vars if not np.isnan(var[1]).all()}
 
         min_pass = any((np.isclose(vert_min, min_val) for min_val in obs_mins.values()))
         max_pass = any((np.isclose(vert_max, max_val) for max_val in obs_maxs.values()))
@@ -351,10 +412,16 @@ class ACDDBaseCheck(BaseCheck):
         if not (hasattr(ds, 'time_coverage_start') and hasattr(ds, 'time_coverage_end')):
             return
 
+        # allows non-ISO 8601 formatted dates
         epoch = parse_dt("1970-01-01 00:00:00 UTC")
-        t_min = (parse_dt(ds.time_coverage_start) - epoch).total_seconds()
-        t_max = (parse_dt(ds.time_coverage_end) - epoch).total_seconds()
-
+        try:
+            t_min = (parse_dt(ds.time_coverage_start) - epoch).total_seconds()
+            t_max = (parse_dt(ds.time_coverage_end) - epoch).total_seconds()
+        except:
+            return Result(BaseCheck.MEDIUM,
+                          False,
+                          'time_coverage_extents_match',
+                          ['time_coverage variables are not formatted properly'])
         # identify t vars as per CF 4.4
         t_vars = [var for name, var in ds.variables.items() if is_time_variable(name, var)]
 
@@ -383,6 +450,231 @@ class ACDDBaseCheck(BaseCheck):
                       'time_coverage_extents_match',
                       msgs)
 
+    def verify_convention_version(self, ds):
+        """
+        Verify that the version in the Conventions field is correct
+        """
+        for convention in ds.Conventions.replace(' ','').split(','):
+            if convention == 'ACDD-' + self._cc_spec_version:
+                return ratable_result(
+                        (2,2),
+                        'Conventions',
+                        [])
+        # Conventions attribute is present, but does not include
+        # proper ACDD version
+        return ratable_result(
+                (1,2),
+                'Conventions',
+                ["Attr Conventions does not contain 'ACDD-{}'".format(
+                            self._cc_spec_version)])
+
+
+    def check_title_is_readable(self, ds):
+        #Checks if title are human readable (within reason)
+        if is_readable(ds.title):
+            return Result(BaseCheck.HIGH, True, 'title_readable', msgs=[])
+        else:
+            return Result(BaseCheck.HIGH, False, 'title_readable',
+                          msgs=[u'Title contains invalid characters'])
+
+    def check_keywords_exist(self, ds):
+        #Checks if keywords are human readable (within reason)
+        keyword_readable = [keyword for keyword in ds.keywords.split(',')
+                            if is_readable(keyword)]
+        return Result(BaseCheck.HIGH, (len(keyword_readable),
+               len(ds.keywords.split(','))), 'keywords_readable', msgs=[])
+
+
+class ACDD1_1Check(ACDDBaseCheck):
+
+    _cc_spec_version = '1.1'
+    register_checker = True
+
+    def __init__(self):
+        super(ACDD1_1Check, self).__init__()
+        self.rec_atts.extend(['keywords_vocabulary',
+                        ('cdm_data_type', ['Grid', 'Image', 'Point',
+                                           'Radial', 'Station', 'Swath',
+                                           'Trajectory'])])
+
+        self.sug_atts.extend(['publisher_name',       # publisher,dataCenter
+                                'publisher_url',        # publisher
+                                'publisher_email',      # publisher
+                                'geospatial_vertical_positive'
+                              ])
+
+
+class ACDD1_3Check(ACDDBaseCheck):
+
+    _cc_spec_version = '1.3'
+    register_checker = True
+
+    def __init__(self):
+        super(ACDD1_3Check, self).__init__()
+        self.high_rec_atts.extend([('Conventions',
+                                    self.verify_convention_version)])
+
+        self.rec_atts.extend(['geospatial_vertical_positive',
+                              'geospatial_bounds_crs',
+                              'geospatial_bounds_vertical_crs',
+                              'publisher_name',       # publisher,dataCenter
+                              'publisher_url',        # publisher
+                              'publisher_email',      # publisher
+                              'source'])
+
+        self.sug_atts.extend([  # 1.3.1, technically
+                ('creator_type', ['person', 'group', 'institution',
+                                  'position']),
+                'creator_institution',
+                ('cdm_data_type', ['Grid', 'Image', 'Point', 'Radial',
+                                   'Station', 'Swath', 'Trajectory']),
+                'platform',
+                # TODO: make dependent on platform
+                'platform_vocabulary',
+                'keywords_vocabulary',
+                'instrument',
+                'metadata_link',
+                'product_version',
+                'references',
+                ('publisher_type', ['person', 'group', 'institution',
+                                    'position']),
+                'instrument_vocabulary',
+                'date_metadata_modified',
+                'program',
+                'publisher_institution',
+            ])
+
+    def check_history(self, ds):
+        #@TODO Create a history check
+        return
+
+    def check_source(self, ds):
+        #@TODO Create a source check
+        return
+
+    def check_platform_uses_vocab(self, ds):
+        #Checks if platform vocab is in vocab list
+        if not hasattr(ds, u'platform'):
+            return
+        if not hasattr(ds, u'platform_vocabulary'):
+            return
+        platform_names_good = [platform for platform in getattr(ds, u'platform') if platform in getattr(ds, u'platform_vocabulary')]
+        return Result(BaseCheck.LOW, (len(platform_names_good),len(getattr(ds,'platform_uses_vocabulary'))), 'platforms_valid', msgs = [u'Platform_vocabulary not present'])
+
+    def check_instrument_uses_vocab(self, ds):
+        #Checks if instrument vocab is in vocab list
+        if not hasattr(ds, u'instrument'):
+            return
+        if not hasattr(ds, u'instrument_vocabulary'):
+            return
+        instrument_names_good = [instrument for instrument in
+                                 getattr(ds, u'instrument') if instrument
+                                 in getattr(ds, u'instrument_vocabulary')]
+        return Result(BaseCheck.LOW, (len(instrument_names_good),
+                      len(getattr(ds,'instrument_uses_vocabulary'))),
+                      'instruments_valid',
+                      msgs=[u'Instrument_vocabulary not present'])
+
+    def check_metadata_link(self, ds):
+        #Checks if metadata link is formed in a rational manner
+        if not hasattr(ds, u'metadata_link'):
+            return
+        msgs = []
+        meta_link = getattr(ds, 'metadata_link')
+        if not 'http' in meta_link:
+            msgs.append('Metadata URL should include http:// or https://')
+        if not '.' in meta_link:
+            msgs.append('Metadata URL is malformed')
+        valid_link = len(msgs) == 0
+        return Result(BaseCheck.LOW, valid_link,  'metadata_link_valid', msgs)
+
+    def check_date_modified_is_iso(self, ds):
+        #Checks if date modified field is ISO compliant
+        if not hasattr(ds, u'date_modified'):
+            return
+        date_modified_check, msgs = datetime_is_iso(getattr(ds, u'date_modified'))
+        return Result(BaseCheck.MEDIUM, date_modified_check, 'date_modified_is_iso', msgs)
+
+    def check_date_issued_is_iso(self, ds):
+        #Checks if date issued field is ISO compliant
+        if not hasattr(ds, u'date_issued'):
+            return
+        date_issued_check, msgs = datetime_is_iso(getattr(ds, u'date_issued'))
+        return Result(BaseCheck.MEDIUM, date_issued_check, 'date_issued_is_iso', msgs)
+
+    def check_date_metadata_modified_is_iso(self, ds):
+        #Checks if date metadata modified field is ISO compliant
+        if not hasattr(ds, u'date_metadata_modified'):
+            return
+        date_metadata_modified_check, msgs = datetime_is_iso(getattr(ds, u'date_metadata_modified'))
+        return Result(BaseCheck.MEDIUM, date_metadata_modified_check, 'date_metadata_modified_is_iso', msgs)
+
+    def check_id_has_no_blanks(self, ds):
+        #Check if there are blanks in the id field
+        if not hasattr(ds, u'id'):
+            return
+        if ' ' in getattr(ds, u'id'):
+            return Result(BaseCheck.MEDIUM, False, 'no_blanks_in_id', msgs = [u'There should be no blanks in the id field'])
+        else:
+            return Result(BaseCheck.MEDIUM, True, 'no_blanks_in_id', msgs = [])
+
+    # BWA: can describe license in plain text
+    #def check_license(self, ds):
+    #    #Checks if license is from accepted list
+    #    if not hasattr(ds, u'license'):
+    #        return
+    #    license_list = {'none', 'freely distributed'}
+    #    if getattr(ds, u'license').lower() in license_list:
+    #        return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs=['The license is valid'])
+    #    elif '.' in getattr(ds, u'license'):
+    #        return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs=['The license is a url'])
+    #    else:
+    #        return Result(BaseCheck.MEDIUM, False, 'valid_license', msgs=['The license is not a url or in the accepted list'])
+
+    def check_processing_level_readable(self, ds):
+        #Check if processing level is human readable (within reason)
+        if not hasattr(ds, u'processing_level'):
+            return
+        if is_readable(getattr(ds, u'processing_level')):
+            return Result(BaseCheck.MEDIUM, True, 'processing_level_readable', msgs = [])
+        else:
+            return Result(BaseCheck.MEDIUM, False, 'processing_level_readable', msgs = ['The processing_level is not readable'])
+
+    def check_date_created(self, ds):
+        #Check if date created is ISO
+        if not hasattr(ds, u'date_created'):
+            return
+        date_created_check, msgs = datetime_is_iso(getattr(ds, u'date_created'))
+        return Result(BaseCheck.MEDIUM, date_created_check,
+                      'date_created_is_iso', msgs)
+
+    @score_group('varattr')
+    def check_var_coverage_content_type(self, ds):
+        results = []
+        platform_variable_name = getattr(ds, 'platform', None)
+        for variable in ds.variables:
+            msgs = []
+            if variable in {'crs', platform_variable_name}:
+                continue
+            ctype = getattr(ds.variables[variable],
+                            'coverage_content_type', None)
+            check = ctype is not None
+            if not check:
+                msgs.append("Var %s missing attr coverage_content_type" %
+                            variable)
+                results.append(Result(BaseCheck.HIGH, check,
+                                    (variable, "coverage_content_type"),
+                                    msgs))
+                return results
+            # ISO 19115-1 codes
+            valid_ctypes = {'image', 'thematicClassification', 'physicalMeasurement',
+                            'auxiliaryInformation', 'qualityInformation',
+                            'referenceInformation', 'modelResult', 'coordinate'}
+            if not ctype in valid_ctypes:
+                msgs.append("Var %s does not have a coverage_content_type in %s"
+                            % (variable, sorted(valid_ctypes)))
+
+        return results
 
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
     pass
