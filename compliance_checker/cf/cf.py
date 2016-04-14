@@ -793,7 +793,6 @@ class CFBaseCheck(BaseCheck):
                 fvr = Result(BaseCheck.HIGH, flag_values.dtype == v.dtype,
                              name='§3.5 Flags and flag attributes')
                 if not fvr.value:
-                    #import pdb; pdb.set_trace()
                     fvr.msgs = [("'flag_values' attribute for variable '%s'" +\
                                 " does not have same type " +\
                                 "(fv: %s, v: %s)")

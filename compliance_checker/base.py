@@ -173,7 +173,7 @@ def check_has(priority=BaseCheck.HIGH):
                     if hasattr(other, '__iter__'):
                         # redundant, we could easily do this with a hasattr
                         # check instead
-                        res = s.std_check_in(ds, name, other)
+                        res = std_check_in(ds, name, other)
                         if res == 0:
                             msgs.append("Attr %s not present" % name)
                         elif res == 1:
@@ -187,18 +187,23 @@ def check_has(priority=BaseCheck.HIGH):
                     # starting with check if you want to pass them in with
                     # a tuple to avoid them being checked more than once
                     elif hasattr(other, '__call__'):
-                        # TODO: should not be function's job to check whether or
-                        # not attribute is present
-                        # check functions currently return a Result object
-                        # return the result partially applied and then set
-                        # priority
-                        ret_val.append(other(ds)(priority))
+                        # check that the attribute is actually present.
+                        # This reduces boilerplate in functions by not needing
+                        # to check whether the attribute is present every time
+                        # and instead focuses on the core functionality of the
+                        # test
+                        res = std_check(ds, name)
+                        if not res:
+                            msgs = ["Attr %s not present" % name]
+                            ret_val.append(Result(priority, res, name, msgs))
+                        else:
+                            ret_val.append(other(ds)(priority))
                     # unsupported second type in second
                     else:
                         raise TypeError("Second arg in tuple has unsupported type: {}".format(type(other)))
 
                 else:
-                    res = s.std_check(ds, l)
+                    res = std_check(ds, l)
                     if not res:
                         msgs = ["Attr %s not present" % l]
                     ret_val.append(Result(priority, res, l, msgs))
@@ -253,7 +258,8 @@ def score_group(group_name=None):
 
                 return Result(r.weight, r.value, tuple(cur_grouping), r.msgs)
 
-            ret_val = [fix_return_value(x, func.__name__, func, s) for x in ret_val]
+            ret_val = [fix_return_value(x, func.__name__, func, s) for x in
+                       ret_val]
             ret_val = list(map(dogroup, ret_val))
 
             return ret_val

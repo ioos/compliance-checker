@@ -5,9 +5,12 @@ import numpy.ma as ma
 from dateutil.parser import parse as parse_dt
 from cf_units import Unit
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, check_has, score_group, Result, ratable_result
-from compliance_checker.cf.util import is_time_variable, is_vertical_coordinate, _possiblexunits, _possibleyunits, is_readable, time_is_iso
-
+from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
+                                     score_group, Result, ratable_result)
+from compliance_checker.cf.util import (is_time_variable,
+                                        is_vertical_coordinate,
+                                       _possiblexunits, _possibleyunits)
+from compliance_checker.util import is_readable, datetime_is_iso
 from pygeoif import from_wkt
 
 class ACDDBaseCheck(BaseCheck):
@@ -17,9 +20,9 @@ class ACDDBaseCheck(BaseCheck):
     _cc_url = 'http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery'
 
     def __init__(self):
-        self.high_rec_atts = ['title',
-                         'summary',
-                         'keywords']
+        self.high_rec_atts = [('title', self.check_title_is_readable),
+                              'summary',
+                              ('keywords', self.check_keywords_exist)]
 
         self.rec_atts = [
             'id',
@@ -351,6 +354,8 @@ class ACDDBaseCheck(BaseCheck):
                           ["Attr geospatial_bounds not present"])
 
         try:
+            # TODO: verify that WKT is valid given CRS (defaults to EPSG:4326
+            #       in ACDD.
             from_wkt(ds.geospatial_bounds)
         except AttributeError:
             return ratable_result(False,
@@ -407,15 +412,16 @@ class ACDDBaseCheck(BaseCheck):
         if not (hasattr(ds, 'time_coverage_start') and hasattr(ds, 'time_coverage_end')):
             return
 
+        # allows non-ISO 8601 formatted dates
         epoch = parse_dt("1970-01-01 00:00:00 UTC")
         try:
             t_min = (parse_dt(ds.time_coverage_start) - epoch).total_seconds()
             t_max = (parse_dt(ds.time_coverage_end) - epoch).total_seconds()
         except:
             return Result(BaseCheck.MEDIUM,
-                      False,
-                      'time_coverage_extents_match',
-                      ['time_coverage variables are not formatted properly'])
+                          False,
+                          'time_coverage_extents_match',
+                          ['time_coverage variables are not formatted properly'])
         # identify t vars as per CF 4.4
         t_vars = [var for name, var in ds.variables.items() if is_time_variable(name, var)]
 
@@ -448,22 +454,35 @@ class ACDDBaseCheck(BaseCheck):
         """
         Verify that the version in the Conventions field is correct
         """
-        if not hasattr(ds, 'Conventions'):
-            return ratable_result(
-                    (0,2),
-                    'Conventions',
-                    ["Attr Conventions not present"])
-        else:
-            for convention in getattr(ds, 'Conventions').replace(' ','').split(','):
-                if convention == 'ACDD-'+self._cc_spec_version:
-                    return ratable_result(
-                            (2,2),
-                            'Conventions',
-                            [])
+        for convention in ds.Conventions.replace(' ','').split(','):
+            if convention == 'ACDD-' + self._cc_spec_version:
+                return ratable_result(
+                        (2,2),
+                        'Conventions',
+                        [])
+        # Conventions attribute is present, but does not include
+        # proper ACDD version
         return ratable_result(
                 (1,2),
                 'Conventions',
-                ["Attr Conventions does not contain 'ACDD-{}'".format(self._cc_spec_version)])
+                ["Attr Conventions does not contain 'ACDD-{}'".format(
+                            self._cc_spec_version)])
+
+
+    def check_title_is_readable(self, ds):
+        #Checks if title are human readable (within reason)
+        if is_readable(ds.title):
+            return Result(BaseCheck.HIGH, True, 'title_readable', msgs=[])
+        else:
+            return Result(BaseCheck.HIGH, False, 'title_readable',
+                          msgs=[u'Title contains invalid characters'])
+
+    def check_keywords_exist(self, ds):
+        #Checks if keywords are human readable (within reason)
+        keyword_readable = [keyword for keyword in ds.keywords.split(',')
+                            if is_readable(keyword)]
+        return Result(BaseCheck.HIGH, (len(keyword_readable),
+               len(ds.keywords.split(','))), 'keywords_readable', msgs=[])
 
 
 class ACDD1_1Check(ACDDBaseCheck):
@@ -483,6 +502,7 @@ class ACDD1_1Check(ACDDBaseCheck):
                                 'publisher_email',      # publisher
                                 'geospatial_vertical_positive'
                               ])
+
 
 class ACDD1_3Check(ACDDBaseCheck):
 
@@ -547,8 +567,13 @@ class ACDD1_3Check(ACDDBaseCheck):
             return
         if not hasattr(ds, u'instrument_vocabulary'):
             return
-        instrument_names_good = [instrument for instrument in getattr(ds, u'instrument') if instrument in getattr(ds, u'instrument_vocabulary')]
-        return Result(BaseCheck.LOW, (len(instrument_names_good),len(getattr(ds,'instrument_uses_vocabulary'))), 'instruments_valid', msgs = [u'Instrument_vocabulary not present'])
+        instrument_names_good = [instrument for instrument in
+                                 getattr(ds, u'instrument') if instrument
+                                 in getattr(ds, u'instrument_vocabulary')]
+        return Result(BaseCheck.LOW, (len(instrument_names_good),
+                      len(getattr(ds,'instrument_uses_vocabulary'))),
+                      'instruments_valid',
+                      msgs=[u'Instrument_vocabulary not present'])
 
     def check_metadata_link(self, ds):
         #Checks if metadata link is formed in a rational manner
@@ -567,21 +592,21 @@ class ACDD1_3Check(ACDDBaseCheck):
         #Checks if date modified field is ISO compliant
         if not hasattr(ds, u'date_modified'):
             return
-        date_modified_check, msgs = time_is_iso(getattr(ds, u'date_modified'))
+        date_modified_check, msgs = datetime_is_iso(getattr(ds, u'date_modified'))
         return Result(BaseCheck.MEDIUM, date_modified_check, 'date_modified_is_iso', msgs)
 
     def check_date_issued_is_iso(self, ds):
         #Checks if date issued field is ISO compliant
         if not hasattr(ds, u'date_issued'):
             return
-        date_issued_check, msgs = time_is_iso(getattr(ds, u'date_issued'))
+        date_issued_check, msgs = datetime_is_iso(getattr(ds, u'date_issued'))
         return Result(BaseCheck.MEDIUM, date_issued_check, 'date_issued_is_iso', msgs)
 
     def check_date_metadata_modified_is_iso(self, ds):
         #Checks if date metadata modified field is ISO compliant
         if not hasattr(ds, u'date_metadata_modified'):
             return
-        date_metadata_modified_check, msgs = time_is_iso(getattr(ds, u'date_metadata_modified'))
+        date_metadata_modified_check, msgs = datetime_is_iso(getattr(ds, u'date_metadata_modified'))
         return Result(BaseCheck.MEDIUM, date_metadata_modified_check, 'date_metadata_modified_is_iso', msgs)
 
     def check_id_has_no_blanks(self, ds):
@@ -593,17 +618,18 @@ class ACDD1_3Check(ACDDBaseCheck):
         else:
             return Result(BaseCheck.MEDIUM, True, 'no_blanks_in_id', msgs = [])
 
-    def check_license(self, ds):
-        #Checks if license is from accepted list
-        if not hasattr(ds, u'license'):
-            return
-        license_list = {'none', 'freely distributed'}
-        if getattr(ds, u'license').lower() in license_list:
-            return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs=['The license is valid'])
-        elif '.' in getattr(ds, u'license'):
-            return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs=['The license is a url'])
-        else:
-            return Result(BaseCheck.MEDIUM, False, 'valid_license', msgs=['The license is not a url or in the accepted list'])
+    # BWA: can describe license in plain text
+    #def check_license(self, ds):
+    #    #Checks if license is from accepted list
+    #    if not hasattr(ds, u'license'):
+    #        return
+    #    license_list = {'none', 'freely distributed'}
+    #    if getattr(ds, u'license').lower() in license_list:
+    #        return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs=['The license is valid'])
+    #    elif '.' in getattr(ds, u'license'):
+    #        return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs=['The license is a url'])
+    #    else:
+    #        return Result(BaseCheck.MEDIUM, False, 'valid_license', msgs=['The license is not a url or in the accepted list'])
 
     def check_processing_level_readable(self, ds):
         #Check if processing level is human readable (within reason)
@@ -615,11 +641,12 @@ class ACDD1_3Check(ACDDBaseCheck):
             return Result(BaseCheck.MEDIUM, False, 'processing_level_readable', msgs = ['The processing_level is not readable'])
 
     def check_date_created(self, ds):
-        #Chcek if date created is ISO
+        #Check if date created is ISO
         if not hasattr(ds, u'date_created'):
             return
-        date_created_check, msgs = time_is_iso(getattr(ds, u'date_created'))
-        return Result(BaseCheck.MEDIUM, date_created_check, 'date_created_is_iso', msgs)
+        date_created_check, msgs = datetime_is_iso(getattr(ds, u'date_created'))
+        return Result(BaseCheck.MEDIUM, date_created_check,
+                      'date_created_is_iso', msgs)
 
     @score_group('varattr')
     def check_var_coverage_content_type(self, ds):
@@ -648,22 +675,6 @@ class ACDD1_3Check(ACDDBaseCheck):
                             % (variable, sorted(valid_ctypes)))
 
         return results
-
-    def check_title_is_readable(self, ds):
-        #Checks if title are human readable (within reason)
-        if not hasattr(ds, u'title'):
-            return
-        if is_readable(ds.title):
-            return Result(BaseCheck.HIGH, True, 'title_readable', msgs = [])
-        else:
-            return Result(BaseCheck.HIGH, False, 'title_readable', msgs = [u'Title contains invalid characters'])
-
-    def check_keywords_exist(self, ds):
-        #Checks if keywords are human readable (within reason)
-        if not hasattr(ds, u'keywords'):
-            return
-        keyword_readable = [keyword for keyword in ds.keywords.split(',') if is_readable(keyword)]
-        return Result(BaseCheck.HIGH, (len(keyword_readable),len(ds.keywords.split(','))), 'keywords_readable', msgs = [])
 
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
     pass

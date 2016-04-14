@@ -1,6 +1,8 @@
 import unittest
-from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check
-# from netCDF4 import Dataset
+from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check, ACDDBaseCheck
+from compliance_checker.cf import util
+from netCDF4 import Dataset
+import os
 
 def to_singleton_var(l):
     """
@@ -19,6 +21,42 @@ def check_varset_nonintersect(true_set, name_list):
 
 
 # TODO: move common atts to Base ACDD check test
+
+class TestACDDCommon(unittest.TestCase):
+    def setUp(self):
+        self.acdd = ACDDBaseCheck()
+        self.ds = Dataset(filename=os.devnull, mode='w', diskless=True)
+        #self.ds = Dataset(mode='w')
+
+    def tearDown(self):
+        self.ds.close()
+
+    def test_verify_geospatial_bounds(self):
+        """Tests the geospatial_bounds function"""
+        self.ds.geospatial_bounds = 'POLYGON ((40.26 -111.29, 41.26 -111.29, 41.26 -110.29, 40.26 -110.29, 40.26 -111.29))'
+        # give arbitrary rating and check that things passed
+        result = self.acdd.verify_geospatial_bounds(self.ds)(1)
+        self.assertTrue(result.value)
+
+    def test_verify_valid_title(self):
+        self.ds.title = '@@@@@@@invalid@@@@@'
+
+    def check_valid_date(self):
+        self.ds.date_created = '2011-04-27T00:00:00Z'
+        self.ds.date_created = '2011-04-27T00:00:00Z'
+
+    def test_title_readable(self):
+        """Tests common ACDD attributes"""
+        self.ds.title = "Test of data"
+        # test
+        result = self.acdd.check_title_is_readable(self.ds)
+        self.assertTrue(result.value)
+
+    def test_summary_readable(self):
+        self.ds.summary = "Counts of blue green algae, diatoms, and miscellaneous phytoplankton"
+        result = self.acdd.check_summary_is_readable(self.ds)
+        self.assertTrue(result.value)
+
 
 class TestACDD1_1(unittest.TestCase):
 
@@ -82,29 +120,27 @@ class TestACDD1_1(unittest.TestCase):
         assert check_varset_nonintersect(self.expected['Suggested'],
                                          self.acdd.sug_atts)
 
-    #assert self.acdd.check_high(ds) is True
-
 
 class TestACDD1_3(unittest.TestCase):
     # Adapted using `pandas.read_html` from URL
     # http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3
     expected = {'Suggested': {'creator_type', 'creator_institution',
-                            'publisher_type', 'publisher_institution',
-                            'program', 'contributor_name', 'contributor_role',
-                            'geospatial_lat_units',
-                            'geospatial_lat_resolution',
-                            'geospatial_lon_units',
-                            'geospatial_lon_resolution',
-                            'geospatial_vertical_units',
-                            'geospatial_vertical_resolution',
-                            'date_modified', 'date_issued',
-                            'date_metadata_modified', 'product_version',
-                            'keywords_vocabulary', 'platform',
-                            'platform_vocabulary', 'instrument',
-                            'instrument_vocabulary', 'cdm_data_type',
-                            'metadata_link', 'references'},
+                              'publisher_type', 'publisher_institution',
+                              'program', 'contributor_name', 'contributor_role',
+                              'geospatial_lat_units',
+                              'geospatial_lat_resolution',
+                              'geospatial_lon_units',
+                              'geospatial_lon_resolution',
+                              'geospatial_vertical_units',
+                              'geospatial_vertical_resolution',
+                              'date_modified', 'date_issued',
+                              'date_metadata_modified', 'product_version',
+                              'keywords_vocabulary', 'platform',
+                              'platform_vocabulary', 'instrument',
+                              'instrument_vocabulary', 'cdm_data_type',
+                              'metadata_link', 'references'},
             'Highly Recommended': {'title', 'summary', 'keywords',
-                                    'Conventions'},
+                                   'Conventions'},
             'Recommended': {'id', 'naming_authority', 'history', 'source',
                             'processing_level', 'comment',
                             'acknowledgement', 'license',
@@ -124,9 +160,9 @@ class TestACDD1_3(unittest.TestCase):
                             'time_coverage_duration',
                             'time_coverage_resolution'},
                 'Highly Recommended Variable Attributes': {'long_name',
-                                                        'standard_name',
-                                                        'units',
-                                                    'coverage_content_type'}
+                                                           'standard_name',
+                                                           'units',
+                                                           'coverage_content_type'}
             }
 
     def setUp(self):
@@ -135,6 +171,11 @@ class TestACDD1_3(unittest.TestCase):
         # data originally obtained from
         # http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3
         self.acdd = ACDD1_3Check()
+        # create in memory netCDF file for testing purposes
+        self.ds = Dataset(filename=os.devnull, mode='w', diskless=True)
+
+    def tearDown(self):
+        self.ds.close()
 
     def test_cc_meta(self):
         assert self.acdd._cc_spec == 'acdd'
@@ -144,6 +185,9 @@ class TestACDD1_3(unittest.TestCase):
         """Checks that all highly recommended attributes are present"""
         assert check_varset_nonintersect(self.expected['Highly Recommended'],
                                         self.acdd.high_rec_atts)
+
+    def test_high_rec(self):
+        self.acdd.check_high(self.ds)
 
     def test_rec_present(self):
         """Checks that all recommended attributes are present"""
@@ -157,4 +201,8 @@ class TestACDD1_3(unittest.TestCase):
         assert check_varset_nonintersect(self.expected['Suggested'],
                                          self.acdd.sug_atts)
 
-    #assert self.acdd.check_high(ds) is True
+    def test_var_coverage_content_type(self):
+        var = self.ds.createVariable('foo', 'i4')
+        var.coverage_content_type = 'modelResult'
+        result = self.acdd.check_var_coverage_content_type(self.ds)
+        assert len(result) == 0
