@@ -3,6 +3,7 @@ lxml>=3.2.1
 cf_units>=0.1.1
 requests>=2.2.1
 python-dateutil>=2.2
+isodate==0.5.4
 Jinja2>=2.7.3
 setuptools>=15.0
 pygeoif==0.6
