@@ -1,6 +1,5 @@
 import unittest
 from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check, ACDDBaseCheck
-from compliance_checker.cf import util
 from netCDF4 import Dataset
 import os
 
@@ -49,7 +48,7 @@ class TestACDDCommon(unittest.TestCase):
         """Tests common ACDD attributes"""
         self.ds.title = "Test of data"
         # test
-        result = self.acdd.check_title_is_readable(self.ds)
+        result = self.acdd.verify_title_is_readable(self.ds)(2)
         self.assertTrue(result.value)
 
     def test_summary_readable(self):

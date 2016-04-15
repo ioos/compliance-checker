@@ -19,7 +19,7 @@ def main():
     parser.add_argument('-f', '--format', default='text', choices=['text', 'html', 'json'], help='Output format')
     parser.add_argument('-o', '--output', default='-', action='store', help='Output filename')
     parser.add_argument('-V', '--version', action='store_true', help='Display the IOOS Compliance Checker version information.')
-    parser.add_argument('dataset_location', nargs='*', help= "Defines the location of the dataset to be checked.")
+    parser.add_argument('dataset_location', nargs='*', help="Defines the location of the dataset to be checked.")
 
     args = parser.parse_args()
     args.test = args.test or ['acdd']

@@ -29,6 +29,8 @@ class TestSuite(unittest.TestCase):
     __str__ = __repr__
 
     def test_suite(self):
+        # BWA: what's the purpose of this test?  Just to see if the suite
+        # runs without errors?
         cs = CheckSuite()
         cs.load_all_available_checkers()
         ds = cs.load_dataset(static_files['2dim'])
