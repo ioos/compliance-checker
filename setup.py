@@ -38,7 +38,11 @@ setup(
         ],
         'compliance_checker.suites': [
             'cf = compliance_checker.cf.cf:CFBaseCheck',
-            'acdd = compliance_checker.acdd:ACDDBaseCheck',
+            'acdd = compliance_checker.acdd:ACDD1_1Check',
+            # TODO: figure out how to use colons for version in checker -t
+            #       argument
+            'acdd:1.1 = compliance_checker.acdd:ACDD1_1Check',
+            'acdd:1.3 = compliance_checker.acdd:ACDD1_3Check',
             'ioos = compliance_checker.ioos:IOOSBaseCheck',
         ]
     },

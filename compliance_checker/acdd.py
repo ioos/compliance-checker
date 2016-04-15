@@ -21,9 +21,9 @@ class ACDDBaseCheck(BaseCheck):
     _cc_url = 'http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery'
 
     def __init__(self):
-        self.high_rec_atts = [('title', self.check_title_is_readable),
-                              'summary',
-                              ('keywords', self.check_keywords_exist)]
+        self.high_rec_atts = [('title', self.verify_title_is_readable),
+                              ('keywords', self.verify_keywords_exist),
+                              'summary']
 
         self.rec_atts = [
             'id',
@@ -71,7 +71,7 @@ class ACDDBaseCheck(BaseCheck):
     # HIGHLY RECOMMENDED ATTRIBUTES
     #
     ###############################################################################
-    # set up attributes accoriding to version
+    # set up attributes according to version
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         return self.high_rec_atts
@@ -470,23 +470,29 @@ class ACDDBaseCheck(BaseCheck):
                             self._cc_spec_version)])
 
 
-    def check_title_is_readable(self, ds):
-        #Checks if title are human readable (within reason)
+    def verify_title_is_readable(self, ds):
+        """Checks if title are human readable (within reason)"""
         if is_readable(ds.title):
-            return Result(BaseCheck.HIGH, True, 'title_readable', msgs=[])
+            # TODO: these should always return HIGH priority.  Add logic
+            # path to prevent need to use partial fns
+            return ratable_result(True, 'title_readable', msgs=[])
         else:
-            return Result(BaseCheck.HIGH, False, 'title_readable',
+            return ratable_result(False, 'title_readable',
                           msgs=[u'Title contains invalid characters'])
 
-    def check_keywords_exist(self, ds):
+    def verify_keywords_exist(self, ds):
         #Checks if keywords are human readable (within reason)
         keyword_readable = [keyword for keyword in ds.keywords.split(',')
                             if is_readable(keyword)]
-        return Result(BaseCheck.HIGH, (len(keyword_readable),
-               len(ds.keywords.split(','))), 'keywords_readable', msgs=[])
+        return ratable_result((len(keyword_readable),
+                              len(ds.keywords.split(','))),
+                              'keywords_readable', msgs=[])
 
 
-class ACDD1_1Check(ACDDBaseCheck):
+class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
+    pass
+
+class ACDD1_1Check(ACDDNCCheck):
 
     _cc_spec_version = '1.1'
     register_checker = True
@@ -505,7 +511,7 @@ class ACDD1_1Check(ACDDBaseCheck):
                               ])
 
 
-class ACDD1_3Check(ACDDBaseCheck):
+class ACDD1_3Check(ACDDNCCheck):
 
     _cc_spec_version = '1.3'
     register_checker = True
@@ -677,5 +683,3 @@ class ACDD1_3Check(ACDDBaseCheck):
 
         return results
 
-class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
-    pass
