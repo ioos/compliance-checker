@@ -32,7 +32,7 @@ The compliance-checker can work against local files (.nc files, .xml files of SO
 > **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPenDAP URL, please be sure the size is reasonable!
 
 ```
-usage: compliance-checker [-h] [--test {gliderdac,acdd,cf,ioos}]
+usage: compliance-checker [-h] [--test <test>[,...]]
                    [--criteria [{lenient,normal,strict}]] [--verbose]
                    [-f {stdout,html}] [-o OUTPUT]
                    dataset_location [dataset_location ...]
@@ -42,8 +42,8 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --test {gliderdac,acdd,cf,ioos}, -t {gliderdac,acdd,cf,ioos}, --test= {gliderdac,acdd,cf,ioos}, -t= {gliderdac,acdd,cf,ioos}
-                        Select the Checks you want to perform.
+  --test {gliderdac|acdd|cf|ioos[:version]}[,...], -t {gliderdac|acdd|cf|ioos[:version]}[,...] --test= {gliderdac|acdd|cf|ioos[:version]}[,...], -t= {gliderdac|acdd|cf|ioos[:version]}[,...]
+                        Select the Checks you want to perform. Versions may be specified by using a colon followed by a version number.  Using a specification without a version number or with `:latest` will select the latest version of the standard.  Multiple tests may be specified by separating with a comma
   --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
                         Define the criteria for the checks. Either Strict,
                         Normal, or Lenient. Defaults to Normal.
@@ -453,7 +453,7 @@ scores = groups['acdd']
 ## Usage (Command Line)
 
 ```
-compliance-checker <data-source> -t [cf|acdd|ioos|gliderdac]
+compliance-checker <data-source> -t <test>[,...]
 ```
 
 The compliance checker command line tool will print out (to STDOUT) the test
@@ -463,7 +463,7 @@ non-0 for a failure.
 ## Available Test Suites
 
 - [CF 1.6](http://cfconventions.org/)
-- [ACDD](http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/metadata/DataDiscoveryAttConvention.html)
+- [ACDD 1.1, 1.3](http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/metadata/DataDiscoveryAttConvention.html)
 - [IOOS](http://www.ioos.noaa.gov/data/contribute_data.html)
 
 ## Available Test Suites as Plugins
