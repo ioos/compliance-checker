@@ -41,7 +41,13 @@ class CheckSuite(object):
             # TODO: remove this once all checkers move over to the new
             #       _cc_spec, _cc_spec_version
             except AttributeError:
-                cls.checkers[xl.name] = xl
+                # if there are versioned classes, it will get overwritten by the
+                # latest version later.  If there are not, it will be assigned
+                # the checker as the main class
+                # TODO: nix name attribute in plugins.  Keeping in for now
+                #       to provide backwards compatibility
+                cls.checkers[getattr(xl, 'name', None) or xl._cc_spec] = xl
+
             except Exception as e:
                 print("Could not load", x, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
@@ -51,7 +57,8 @@ class CheckSuite(object):
             # right now this looks for character order. May break if
             # version specifications become more complicated
             latest_version = max(v[-1] for v in versions)
-            cls.checkers[spec] = cls.checkers[':'.join((spec, latest_version))]
+            cls.checkers[spec] = cls.checkers[spec + ':latest'] = \
+                cls.checkers[':'.join((spec, latest_version))]
 
     def _get_checks(self, checkclass):
         """

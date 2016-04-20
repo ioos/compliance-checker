@@ -495,6 +495,7 @@ class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
 class ACDD1_1Check(ACDDNCCheck):
 
     _cc_spec_version = '1.1'
+    _cc_description = 'Attribute Conventions for Dataset Discovery (ACDD) 1.1'
     register_checker = True
 
     def __init__(self):
@@ -514,6 +515,7 @@ class ACDD1_1Check(ACDDNCCheck):
 class ACDD1_3Check(ACDDNCCheck):
 
     _cc_spec_version = '1.3'
+    _cc_description = 'Attribute Conventions for Dataset Discovery (ACDD) 1.3'
     register_checker = True
 
     def __init__(self):

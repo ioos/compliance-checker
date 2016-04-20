@@ -108,7 +108,11 @@ def is_likely_dsg(func):
 
 class CFBaseCheck(BaseCheck):
     register_checker = True
-    name = 'cf'
+    _cc_spec = 'cf'
+    # TODO: break out into subclasses once CF-1.7 is a working standard
+    _cc_spec_version = '1.6'
+    _cc_description = 'Climate and Forecast Conventions (CF)'
+    _cc_url = 'http://cfconventions.org'
 
     @classmethod
     def beliefs(cls):  # @TODO

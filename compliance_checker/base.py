@@ -12,6 +12,7 @@ from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
+from compliance_checker import __version__
 from distutils.version import StrictVersion as V
 
 def get_namespaces():
@@ -25,6 +26,8 @@ class BaseCheck(object):
     HIGH   = 3
     MEDIUM = 2
     LOW    = 1
+
+    _cc_checker_version = __version__
 
     supported_ds = []
 
