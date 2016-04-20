@@ -280,6 +280,8 @@ class CheckSuite(object):
 
         points = sum(points)
         out_of = sum(out_of)
+        # sorts lists into high/medium/low order
+        score_list.sort(key=lambda x: x[1], reverse=True)
 
         return score_list, points, out_of
 
