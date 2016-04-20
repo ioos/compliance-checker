@@ -3,7 +3,12 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, Base
 
 class IOOSBaseCheck(BaseCheck):
     register_checker = True
-    name = 'ioos'
+    _cc_spec = 'ioos'
+    _cc_spec_version = '0.1'
+    _cc_description = 'IOOS Inventory Metadata'
+    # requires login
+    _cc_url = 'https://docs.google.com/spreadsheets/d/1huUFauh7rPj2oKfiRhLE1ZCsnes8SmAm6fKE95dsybE/'
+
 
     @classmethod
     def _has_attr(cls, ds, attr, concept_name, priority=BaseCheck.HIGH):
