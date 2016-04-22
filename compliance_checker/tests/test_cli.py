@@ -53,3 +53,22 @@ class TestCLI(TestCase):
 
         assert os.stat(path).st_size > 0
 
+    def test_unicode_cf_html(self):
+        '''
+        Tests that the CF checker can produce HTML output with unicode characters
+        '''
+
+        fd, path = tempfile.mkstemp()
+        os.close(fd)
+        self.addCleanup(os.remove, path)
+
+        return_value, errors = ComplianceChecker.run_checker(
+            ds_loc='compliance_checker/tests/data/2dim-grid.nc',
+            verbose=0,
+            criteria='strict',
+            checker_names=['cf'],
+            output_filename=path,
+            output_format='html'
+        )
+
+        assert os.stat(path).st_size > 0
