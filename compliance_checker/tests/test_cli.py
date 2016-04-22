@@ -7,6 +7,7 @@ Tests for command line output and parsing
 
 from unittest import TestCase
 from compliance_checker.runner import ComplianceChecker, CheckSuite
+from compliance_checker.tests.resources import STATIC_FILES
 import tempfile
 import os
 
@@ -43,7 +44,7 @@ class TestCLI(TestCase):
         os.close(fd)
         self.addCleanup(os.remove, path)
         return_value, errors = ComplianceChecker.run_checker(
-            ds_loc='compliance_checker/tests/data/2dim-grid.nc',
+            ds_loc=STATIC_FILES['2dim'],
             verbose=0,
             criteria='strict',
             checker_names=['acdd'],
@@ -63,7 +64,7 @@ class TestCLI(TestCase):
         self.addCleanup(os.remove, path)
 
         return_value, errors = ComplianceChecker.run_checker(
-            ds_loc='compliance_checker/tests/data/2dim-grid.nc',
+            ds_loc=STATIC_FILES['2dim'],
             verbose=0,
             criteria='strict',
             checker_names=['cf'],
