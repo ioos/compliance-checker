@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import itertools
 import numpy as np
 
@@ -146,7 +147,7 @@ class ACDDBaseCheck(BaseCheck):
             results.append(Result(BaseCheck.HIGH, check, (variable, "var_std_name"), msgs))
 
         return results
-    
+
     @score_group('varattr')
     def check_var_units(self, ds):
         results = []

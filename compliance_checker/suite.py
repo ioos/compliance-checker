@@ -2,6 +2,7 @@
 Compliance Checker suite runner
 """
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import sys
 import inspect
@@ -261,14 +262,16 @@ class CheckSuite(object):
         template_vars = self.build_structure(check_name, groups, source_name, limit)
 
         buf = template.render(**template_vars)
-        file_object.write(str(buf))
+
+        file_object.write(buf)
 
     def get_points(self, groups, limit):
         score_list = []
         score_only_list = []
 
         for v in range(len(groups)):
-            score_list.append([groups[v].name, groups[v].weight, groups[v].value, groups[v].children])
+            score_list.append([groups[v].name, groups[v].weight, groups[v].value,
+                               groups[v].children])
             if groups[v].weight >= limit:
                 score_only_list.append(groups[v].value)
 
@@ -434,10 +437,10 @@ class CheckSuite(object):
         wrapper = textwrap.TextWrapper(initial_indent = '', width = 80, subsequent_indent = ' ' * 54)
         for res in grouped_sorted:
             if (res.value[0] != res.value[1]) and not res.msgs:
-                print('%-39s:%1s:%6s/%2s : %s' % (str(indent * '    ' + res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), ' '))
+                print('%-39s:%1s:%6s/%2s : %s' % ((indent * '    ' + res.name)[0:39], res.weight, res.value[0], res.value[1], ' '))
 
             if (res.value[0] != res.value[1]) and res.msgs:
-                print(wrapper.fill('%-39s:%1s:%6s/%2s : %s' % (str(indent * '    ' + res.name)[0:39], res.weight, str(res.value[0]), str(res.value[1]), str(", ".join(res.msgs)))))
+                print(wrapper.fill('%-39s:%1s:%6s/%2s : %s' % ((indent * '    ' + res.name)[0:39], res.weight, res.value[0], res.value[1], ", ".join(res.msgs))))
 
             if res.children:
                 self.reasoning_routine(res.children, indent + 1, False)
@@ -469,9 +472,15 @@ class CheckSuite(object):
             def is_binary_string(bts):
                 # do a cheap imitation of libmagic
                 # http://stackoverflow.com/a/7392391/84732
-                textchars = ''.join(map(chr, [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))))
                 if sys.version_info >= (3, ):
-                    textchars = textchars.encode()
+                    join_str = ''
+                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100)))).encode()
+                    #textchars = textchars.encode()
+                else:
+                    # because of `unicode_literals` import, we need to convert
+                    # to a Py2 string/bytes
+                    join_str = str('')
+                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))))
                 return bool(bts.translate(None, textchars))
 
             with open(ds_str, 'rb') as f:
@@ -551,7 +560,8 @@ class CheckSuite(object):
                 retval = r.name
             return retval
 
-        grouped = itertools.groupby(sorted(raw_scores, key=group_func), key=group_func)
+        grouped = itertools.groupby(sorted(raw_scores, key=group_func),
+                                    key=group_func)
 
         ret_val = []
 
