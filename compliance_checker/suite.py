@@ -225,7 +225,7 @@ class CheckSuite(object):
         aggregates = self.build_structure(check_name, groups, source_name, limit)
         aggregates = self.serialize(aggregates)
         json_string = json.dumps(aggregates, ensure_ascii=False)
-        file_object.write(str(json_string))
+        file_object.write(json_string)
         return
 
     def serialize(self, o):
