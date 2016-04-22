@@ -33,7 +33,7 @@ class TestCLI(TestCase):
             return "%s ( %s )" % (name[-1], '.'.join(name[:-2]) + ":" + '.'.join(name[-2:]))
     __str__ = __repr__
 
-    def test_unicode_html(self):
+    def test_unicode_acdd_html(self):
         '''
         Tests that the checker is capable of producing HTML with unicode characters
         '''
