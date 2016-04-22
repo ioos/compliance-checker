@@ -3,8 +3,6 @@ lxml>=3.2.1
 cf_units>=0.1.1
 requests>=2.2.1
 python-dateutil>=2.2
-# need 1.1 for current conda package index
-ordered-set==2.0.1
 isodate==0.5.4
 Jinja2>=2.7.3
 setuptools>=15.0
