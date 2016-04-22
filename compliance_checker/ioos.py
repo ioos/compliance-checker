@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, Result
 
 
