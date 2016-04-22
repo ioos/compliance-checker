@@ -32,7 +32,7 @@ The compliance-checker can work against local files (.nc files, .xml files of SO
 > **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPenDAP URL, please be sure the size is reasonable!
 
 ```
-usage: compliance-checker [-h] [--test <test>[,...]]
+usage: compliance-checker [-h] [--test <test>[ <test>...]]
                    [--criteria [{lenient,normal,strict}]] [--verbose]
                    [-f {stdout,html}] [-o OUTPUT]
                    dataset_location [dataset_location ...]
@@ -42,7 +42,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --test {gliderdac|acdd|cf|ioos[:version]}[,...], -t {gliderdac|acdd|cf|ioos[:version]}[,...] --test= {gliderdac|acdd|cf|ioos[:version]}[,...], -t= {gliderdac|acdd|cf|ioos[:version]}[,...]
+  --test {gliderdac|acdd|cf|ioos[:version]}[ gliderdac|acdd|cf|ioos[:version]...] -t {gliderdac|acdd|cf|ioos[:version]}[ gliderdac|acdd|cf|ioos[:version]...] --test= {gliderdac|acdd|cf|ioos[:version]}[ gliderdac|acdd|cf|ioos[:version]...], -t= {gliderdac|acdd|cf|ioos[:version]}[ gliderdac|acdd|cf|ioos[:version]...]
                         Select the Checks you want to perform. Versions may be specified by using a colon followed by a version number.  Using a specification without a version number or with `:latest` will select the latest version of the standard.  Multiple tests may be specified by separating with a comma
   --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
                         Define the criteria for the checks. Either Strict,
@@ -453,7 +453,7 @@ scores = groups['acdd']
 ## Usage (Command Line)
 
 ```
-compliance-checker <data-source> -t <test>[,...]
+compliance-checker <data-source> -t <test>[ <test>...]
 ```
 
 The compliance checker command line tool will print out (to STDOUT) the test
