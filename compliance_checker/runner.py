@@ -113,7 +113,7 @@ class ComplianceChecker(object):
             groups, errors = rpair
             if output_filename == '-':
                 f = StringIO()
-                cs.json_output(checker, groups, f, ds_loc)
+                cs.json_output(checker, groups, f, ds_loc, limit)
                 f.seek(0)
                 print(f.read())
             else:
