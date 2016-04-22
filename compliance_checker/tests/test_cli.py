@@ -71,3 +71,23 @@ class TestCLI(TestCase):
         )
 
         assert os.stat(path).st_size > 0
+
+    def test_json_output(self):
+        '''
+        Tests that the CF checker can produce JSON output
+        '''
+
+        fd, path = tempfile.mkstemp()
+        os.close(fd)
+        self.addCleanup(os.remove, path)
+
+        return_value, errors = ComplianceChecker.run_checker(
+            ds_loc=STATIC_FILES['conv_bad'],
+            verbose=0,
+            criteria='strict',
+            checker_names=['cf'],
+            output_filename=path,
+            output_format='json'
+        )
+
+        assert os.stat(path).st_size > 0
