@@ -5,7 +5,6 @@ import argparse
 import sys
 from compliance_checker.runner import ComplianceChecker, CheckSuite
 from compliance_checker import __version__
-from ordered_set import OrderedSet
 
 
 def main():
@@ -18,23 +17,21 @@ def main():
 A custom argparse Action to ensure only the supported tests are passed in
         """
         def __call__(self, parser, namespace, values, option_string=None):
-            choices_sorted = sorted(check_suite.checkers.keys())
             choices = set(check_suite.checkers.keys())
-            specified = OrderedSet(values.split(','))
-            arg_diff = specified - choices
-            if len(specified - choices) != 0:
-                err_msg = "Test arguments {} not in valid values of {}".format(list(arg_diff), choices_sorted)
+            arg_diff = set(values) - choices
+            if len(arg_diff) != 0:
+                err_msg = "Test arguments {} not in valid values of {}".format(sorted(arg_diff),
+                                                                               sorted(choices))
                 raise argparse.ArgumentError(self, err_msg)
             else:
-                setattr(namespace, self.dest, specified)
+                setattr(namespace, self.dest, values)
 
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', '-t', '--test=', '-t=', required=True,
-                        #nargs='+',
+                        nargs='+',
                         action=SupportedTests,
                         help="Select the Checks you want to perform.")
-                        #choices=sorted(check_suite.checkers.keys()))
 
     parser.add_argument('--criteria', '-c',
                         help="Define the criteria for the checks.  Either Strict, Normal, or Lenient.  Defaults to Normal.",
