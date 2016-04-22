@@ -12,25 +12,10 @@ def main():
     check_suite = CheckSuite()
     check_suite.load_all_available_checkers()
 
-    class SupportedTests(argparse.Action):
-        """
-A custom argparse Action to ensure only the supported tests are passed in
-        """
-        def __call__(self, parser, namespace, values, option_string=None):
-            choices = set(check_suite.checkers.keys())
-            arg_diff = set(values) - choices
-            if len(arg_diff) != 0:
-                err_msg = "Test arguments {} not in valid values of {}".format(sorted(arg_diff),
-                                                                               sorted(choices))
-                raise argparse.ArgumentError(self, err_msg)
-            else:
-                setattr(namespace, self.dest, values)
-
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', '-t', '--test=', '-t=', required=True,
                         nargs='+',
-                        action=SupportedTests,
+                        choices=sorted(check_suite.checkers.keys()),
                         help="Select the Checks you want to perform.")
 
     parser.add_argument('--criteria', '-c',
