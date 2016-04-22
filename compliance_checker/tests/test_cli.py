@@ -11,6 +11,8 @@ from compliance_checker.tests.resources import STATIC_FILES
 import tempfile
 import os
 
+CheckSuite.load_all_available_checkers()
+
 
 class TestCLI(TestCase):
     '''
@@ -30,10 +32,6 @@ class TestCLI(TestCase):
         else:
             return "%s ( %s )" % (name[-1], '.'.join(name[:-2]) + ":" + '.'.join(name[-2:]))
     __str__ = __repr__
-
-    def setUp(self):
-        check_suite = CheckSuite()
-        check_suite.load_all_available_checkers()
 
     def test_unicode_html(self):
         '''
