@@ -553,14 +553,6 @@ class ACDD1_3Check(ACDDNCCheck):
                 'publisher_institution',
             ])
 
-    def check_history(self, ds):
-        #@TODO Create a history check
-        return
-
-    def check_source(self, ds):
-        #@TODO Create a source check
-        return
-
     def check_platform_uses_vocab(self, ds):
         #Checks if platform vocab is in vocab list
         if not hasattr(ds, u'platform'):
