@@ -37,7 +37,8 @@ class ACDDBaseCheck(BaseCheck):
             'institution',
             'project',
             'processing_level',
-            'acknowledgement',
+            # mutliple spellings get tested, move to check fn instead
+            #'acknowledgement',
             ('geospatial_bounds', self.verify_geospatial_bounds),
             'geospatial_lat_min',
             'geospatial_lat_max',
@@ -190,6 +191,19 @@ class ACDDBaseCheck(BaseCheck):
     #
     ###############################################################################
 
+
+    def check_acknowledgment(self, ds):
+        """Check if acknowledgment/acknowledgment attr is present"""
+        if not (hasattr(ds, 'acknowledgment') or
+                hasattr(ds, 'acknowledgement')):
+            return Result(BaseCheck.MEDIUM, False,
+                          'acknowledgment/acknowledgement', msgs = [])
+        else:
+            return Result(BaseCheck.HIGH, True,
+                          'acknowledgment/acknowledgement',
+                          msgs=["Neither 'acknowledgment' nor 'acknowledgement' attributes present"])
+
+
     def check_summary_is_readable(self, ds):
         #Checks if summary are human readable (within reason)
         if not hasattr(ds, u'summary'):
@@ -197,7 +211,7 @@ class ACDDBaseCheck(BaseCheck):
         if is_readable(ds.summary):
             return Result(BaseCheck.HIGH, True, 'summary_readable', msgs = [])
         else:
-            return Result(BaseCheck.HIGH, False, 'summary_readable', msgs = [u'Summary contains invalid characters'])
+            return Result(BaseCheck.HIGH, False, 'summary_readable', msgs = ['Summary contains invalid characters'])
 
     ###############################################################################
     #

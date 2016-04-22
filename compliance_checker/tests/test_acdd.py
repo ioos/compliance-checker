@@ -77,7 +77,8 @@ class TestACDD1_1(unittest.TestCase):
                                     'creator_name', 'creator_url',
                                     'creator_email', 'institution',
                                     'project', 'processing_level',
-                                    'acknowledgement',
+                                    # Tested separately
+                                    #'acknowledgement',
                                     'geospatial_bounds',
                                     'geospatial_lat_min',
                                     'geospatial_lat_max',
@@ -142,7 +143,9 @@ class TestACDD1_3(unittest.TestCase):
                                    'Conventions'},
             'Recommended': {'id', 'naming_authority', 'history', 'source',
                             'processing_level', 'comment',
-                            'acknowledgement', 'license',
+                            # Tested separately
+                            #'acknowledgement',
+                            'license',
                             'standard_name_vocabulary', 'date_created',
                             'creator_name', 'creator_email', 'creator_url',
                             'institution', 'project', 'publisher_name',
