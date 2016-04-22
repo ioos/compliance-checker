@@ -107,7 +107,11 @@ def is_likely_dsg(func):
 
 class CFBaseCheck(BaseCheck):
     register_checker = True
-    name = 'cf'
+    _cc_spec = 'cf'
+    # TODO: break out into subclasses once CF-1.7 is a working standard
+    _cc_spec_version = '1.6'
+    _cc_description = 'Climate and Forecast Conventions (CF)'
+    _cc_url = 'http://cfconventions.org'
 
     @classmethod
     def beliefs(cls):  # @TODO
@@ -770,7 +774,6 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
 
         for k, v in ds.variables.items():
-
             flag_values   = getattr(v, "flag_values", None)
             flag_masks    = getattr(v, "flag_masks", None)
             flag_meanings = getattr(v, "flag_meanings", None)
@@ -797,7 +800,7 @@ class CFBaseCheck(BaseCheck):
                     fvr.msgs = [("'flag_values' attribute for variable '%s'" +\
                                 " does not have same type " +\
                                 "(fv: %s, v: %s)")
-                                % (v.name, flag_values.dtype, v.dtype)]
+                                % (v._name, flag_values.dtype, v.dtype)]
 
                 ret_val.append(fvr)
 

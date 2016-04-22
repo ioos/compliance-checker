@@ -11,7 +11,8 @@ from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
-
+from compliance_checker import __version__
+from distutils.version import StrictVersion as V
 
 def get_namespaces():
     n = Namespaces()
@@ -24,6 +25,8 @@ class BaseCheck(object):
     HIGH   = 3
     MEDIUM = 2
     LOW    = 1
+
+    _cc_checker_version = __version__
 
     supported_ds = []
 
@@ -166,18 +169,44 @@ def check_has(priority=BaseCheck.HIGH):
             ret_val = []
             for l in list_vars:
                 msgs = []
+                # if a tuple, check if there's a function or an iterable
+                # containing a number of allowed values
                 if isinstance(l, tuple):
-                    name, allowed = l
-                    res = s.std_check_in(ds, name, allowed)
-                    if res == 0:
-                        msgs.append("Attr %s not present" % name)
-                    elif res == 1:
-                        msgs.append("Attr %s present but not in expected value list (%s)" % (name, allowed))
+                    name, other = l
+                    if hasattr(other, '__iter__'):
+                        # redundant, we could easily do this with a hasattr
+                        # check instead
+                        res = std_check_in(ds, name, other)
+                        if res == 0:
+                            msgs.append("Attr %s not present" % name)
+                        elif res == 1:
+                            msgs.append("Attr %s present but not in expected value list (%s)" % (name, other))
 
-                    ret_val.append(Result(priority, (res, 2), name, msgs))
+                        ret_val.append(Result(priority, (res, 2), name, msgs))
+                    # if the attribute is a function, call it
+                    # right now only supports single attribute
+                    # important note: current magic approach uses all functions
+                    # starting with "check".  Avoid naming check functions
+                    # starting with check if you want to pass them in with
+                    # a tuple to avoid them being checked more than once
+                    elif hasattr(other, '__call__'):
+                        # check that the attribute is actually present.
+                        # This reduces boilerplate in functions by not needing
+                        # to check whether the attribute is present every time
+                        # and instead focuses on the core functionality of the
+                        # test
+                        res = std_check(ds, name)
+                        if not res:
+                            msgs = ["Attr %s not present" % name]
+                            ret_val.append(Result(priority, res, name, msgs))
+                        else:
+                            ret_val.append(other(ds)(priority))
+                    # unsupported second type in second
+                    else:
+                        raise TypeError("Second arg in tuple has unsupported type: {}".format(type(other)))
 
                 else:
-                    res = s.std_check(ds, l)
+                    res = std_check(ds, l)
                     if not res:
                         msgs = ["Attr %s not present" % l]
                     ret_val.append(Result(priority, res, l, msgs))
@@ -204,6 +233,9 @@ def fix_return_value(v, method_name, method=None, checker=None):
 
     return v
 
+def ratable_result(value, name, msgs):
+    """Returns a partial function with a Result that has not been weighted."""
+    return lambda w: Result(w, value, name, msgs)
 
 def score_group(group_name=None):
     def _inner(func):
@@ -229,7 +261,8 @@ def score_group(group_name=None):
 
                 return Result(r.weight, r.value, tuple(cur_grouping), r.msgs)
 
-            ret_val = [fix_return_value(x, func.__name__, func, s) for x in ret_val]
+            ret_val = [fix_return_value(x, func.__name__, func, s) for x in
+                       ret_val]
             ret_val = list(map(dogroup, ret_val))
 
             return ret_val

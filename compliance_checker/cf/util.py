@@ -390,3 +390,5 @@ def is_vertical_coordinate(var_name, var):
     if not is_pressure:
         satisfied |= getattr(var, 'positive', '').lower() in ('up', 'down')
     return satisfied
+
+
