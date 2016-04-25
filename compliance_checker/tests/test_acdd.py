@@ -25,7 +25,6 @@ class TestACDDCommon(unittest.TestCase):
     def setUp(self):
         self.acdd = ACDDBaseCheck()
         self.ds = Dataset(filename=os.devnull, mode='w', diskless=True)
-        #self.ds = Dataset(mode='w')
 
     def tearDown(self):
         self.ds.close()

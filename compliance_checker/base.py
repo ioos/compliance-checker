@@ -135,6 +135,9 @@ class Result(object):
             'children' : [i.serialize() for i in self.children]
         }
 
+    def __eq__(self, other):
+        return self.serialize() == other.serialize()
+
 
 def std_check_in(dataset, name, allowed_vals):
     """
@@ -160,6 +163,68 @@ def std_check(dataset, name):
 
     return False
 
+def attr_check(l, ds, priority, ret_val):
+    """
+    Handles attribute checks for simple presence of an attribute, presence of
+    one of several attributes, and passing a validation function.  Returns a
+    status along with an error message in the event of a failure.  Mutates
+    ret_val parameter
+    """
+    msgs = []
+    if isinstance(l, tuple):
+        name, other = l
+        if hasattr(other, '__iter__'):
+            # redundant, we could easily do this with a hasattr
+            # check instead
+            res = std_check_in(ds, name, other)
+            if res == 0:
+                msgs.append("Attr %s not present" % name)
+            elif res == 1:
+                msgs.append("Attr %s present, but not in expected value list (%s)" % (name, other))
+
+            ret_val.append(Result(priority, (res, 2), name, msgs))
+        # if the attribute is a function, call it
+        # right now only supports single attribute
+        # important note: current magic approach uses all functions
+        # starting with "check".  Avoid naming check functions
+        # starting with check if you want to pass them in with
+        # a tuple to avoid them being checked more than once
+        elif hasattr(other, '__call__'):
+            # check that the attribute is actually present.
+            # This reduces boilerplate in functions by not needing
+            # to check whether the attribute is present every time
+            # and instead focuses on the core functionality of the
+            # test
+            res = std_check(ds, name)
+            if not res:
+                msgs = ["Attr %s not present" % name]
+                ret_val.append(Result(priority, res, name, msgs))
+            else:
+                ret_val.append(other(ds)(priority))
+        # unsupported second type in second
+        else:
+            raise TypeError("Second arg in tuple has unsupported type: {}".format(type(other)))
+
+    else:
+        res = std_check(ds, l)
+        if not res:
+            msgs = ["Attr %s not present" % l]
+        else:
+            try:
+                # see if this attribute is a string, try stripping
+                # whitespace, and return an error if empty
+                att_strip = getattr(ds, l).strip()
+                if not att_strip:
+                    res = False
+                    msgs = ["Attr %s is empty or completely whitespace" % l]
+            # if not a string/has no strip method we should be OK
+            except AttributeError:
+                pass
+
+        ret_val.append(Result(priority, res, l, msgs))
+
+    return ret_val
+
 
 def check_has(priority=BaseCheck.HIGH):
 
@@ -168,50 +233,11 @@ def check_has(priority=BaseCheck.HIGH):
             list_vars = func(s, ds)
 
             ret_val = []
+            # could potentially run tests in parallel if we eliminated side
+            # effects on `ret_val`
             for l in list_vars:
-                msgs = []
-                # if a tuple, check if there's a function or an iterable
-                # containing a number of allowed values
-                if isinstance(l, tuple):
-                    name, other = l
-                    if hasattr(other, '__iter__'):
-                        # redundant, we could easily do this with a hasattr
-                        # check instead
-                        res = std_check_in(ds, name, other)
-                        if res == 0:
-                            msgs.append("Attr %s not present" % name)
-                        elif res == 1:
-                            msgs.append("Attr %s present but not in expected value list (%s)" % (name, other))
-
-                        ret_val.append(Result(priority, (res, 2), name, msgs))
-                    # if the attribute is a function, call it
-                    # right now only supports single attribute
-                    # important note: current magic approach uses all functions
-                    # starting with "check".  Avoid naming check functions
-                    # starting with check if you want to pass them in with
-                    # a tuple to avoid them being checked more than once
-                    elif hasattr(other, '__call__'):
-                        # check that the attribute is actually present.
-                        # This reduces boilerplate in functions by not needing
-                        # to check whether the attribute is present every time
-                        # and instead focuses on the core functionality of the
-                        # test
-                        res = std_check(ds, name)
-                        if not res:
-                            msgs = ["Attr %s not present" % name]
-                            ret_val.append(Result(priority, res, name, msgs))
-                        else:
-                            ret_val.append(other(ds)(priority))
-                    # unsupported second type in second
-                    else:
-                        raise TypeError("Second arg in tuple has unsupported type: {}".format(type(other)))
-
-                else:
-                    res = std_check(ds, l)
-                    if not res:
-                        msgs = ["Attr %s not present" % l]
-                    ret_val.append(Result(priority, res, l, msgs))
-
+                # function mutates ret_val
+                attr_check(l, ds, priority, ret_val)
             return ret_val
 
         return wraps(func)(_dec)
