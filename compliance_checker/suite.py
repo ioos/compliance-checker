@@ -269,11 +269,10 @@ class CheckSuite(object):
         score_list = []
         score_only_list = []
 
-        for v in range(len(groups)):
-            score_list.append([groups[v].name, groups[v].weight, groups[v].value,
-                               groups[v].children])
-            if groups[v].weight >= limit:
-                score_only_list.append(groups[v].value)
+        for g in groups:
+            score_list.append([g.name, g.weight, g.value, g.children])
+            if g.weight >= limit:
+                score_only_list.append(g.value)
 
         points = [x[0] for x in score_only_list]
         out_of = [x[1] for x in score_only_list]
@@ -447,6 +446,21 @@ class CheckSuite(object):
             if res.children:
                 self.reasoning_routine(res.children, indent + 1, False)
 
+    def process_doc(doc):
+        """
+        Attempt to parse an xml string conforming to either an SOS or SensorML
+        dataset and return the results
+        """
+        xml_doc = ET.fromstring(str(doc))
+        if xml_doc.tag == "{http://www.opengis.net/sos/1.0}Capabilities":
+            ds = SensorObservationService(ds_str, xml=str(doc))
+
+        elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
+            ds = SensorML(xml_doc)
+        else:
+            raise ValueError("Unrecognized XML root element: %s" % xml_doc.tag)
+        return ds
+
     def load_dataset(self, ds_str):
         """
         Helper method to load a dataset or SOS GC/DS url.
@@ -457,7 +471,7 @@ class CheckSuite(object):
         doc = None
         pr = urlparse(ds_str)
         if pr.netloc:       # looks like a remote url
-            rhead = requests.head(ds_str)
+            rhead = requests.head(ds_str, allow_redirects=True)
 
             # if we get a 400 here, it's likely a Dataset openable OpenDAP url
             if rhead.status_code == 400:
@@ -476,13 +490,14 @@ class CheckSuite(object):
                 # http://stackoverflow.com/a/7392391/84732
                 if sys.version_info >= (3, ):
                     join_str = ''
-                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100)))).encode()
-                    #textchars = textchars.encode()
+                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27]
+                                                  + list(range(0x20, 0x100)))).encode()
                 else:
                     # because of `unicode_literals` import, we need to convert
                     # to a Py2 string/bytes
                     join_str = str('')
-                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))))
+                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27]
+                                                  + list(range(0x20, 0x100))))
                 return bool(bts.translate(None, textchars))
 
             with open(ds_str, 'rb') as f:
@@ -495,14 +510,7 @@ class CheckSuite(object):
                     doc = "".join(f.readlines())
 
         if doc is not None:
-            xml_doc = ET.fromstring(str(doc))
-            if xml_doc.tag == "{http://www.opengis.net/sos/1.0}Capabilities":
-                ds = SensorObservationService(ds_str, xml=str(doc))
-
-            elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
-                ds = SensorML(xml_doc)
-            else:
-                raise Exception("Unrecognized XML root element: %s" % xml_doc.tag)
+            ds = process_doc(doc)
         else:
             # no doc? try the dataset constructor
             ds = Dataset(ds_str)
