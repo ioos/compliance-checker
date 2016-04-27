@@ -11,7 +11,7 @@ from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
 from compliance_checker.cf.util import (is_time_variable,
                                         is_vertical_coordinate,
                                        _possiblexunits, _possibleyunits)
-from compliance_checker.util import is_readable, datetime_is_iso
+from compliance_checker.util import datetime_is_iso
 from pygeoif import from_wkt
 
 class ACDDBaseCheck(BaseCheck):
@@ -21,8 +21,8 @@ class ACDDBaseCheck(BaseCheck):
     _cc_url = 'http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery'
 
     def __init__(self):
-        self.high_rec_atts = [('title', self.verify_title_is_readable),
-                              ('keywords', self.verify_keywords_exist),
+        self.high_rec_atts = ['title',
+                              'keywords',
                               'summary']
 
         self.rec_atts = [
@@ -203,15 +203,6 @@ class ACDDBaseCheck(BaseCheck):
                           'acknowledgment/acknowledgement',
                           msgs=["Neither 'acknowledgment' nor 'acknowledgement' attributes present"])
 
-
-    def check_summary_is_readable(self, ds):
-        #Checks if summary are human readable (within reason)
-        if not hasattr(ds, u'summary'):
-            return
-        if is_readable(ds.summary):
-            return Result(BaseCheck.HIGH, True, 'summary_readable', msgs = [])
-        else:
-            return Result(BaseCheck.HIGH, False, 'summary_readable', msgs = ['Summary contains invalid characters'])
 
     ###############################################################################
     #
@@ -484,25 +475,6 @@ class ACDDBaseCheck(BaseCheck):
                             self._cc_spec_version)])
 
 
-    def verify_title_is_readable(self, ds):
-        """Checks if title are human readable (within reason)"""
-        if is_readable(ds.title):
-            # TODO: these should always return HIGH priority.  Add logic
-            # path to prevent need to use partial fns
-            return ratable_result(True, 'title_readable', msgs=[])
-        else:
-            return ratable_result(False, 'title_readable',
-                          msgs=[u'Title contains invalid characters'])
-
-    def verify_keywords_exist(self, ds):
-        #Checks if keywords are human readable (within reason)
-        keyword_readable = [keyword for keyword in ds.keywords.split(',')
-                            if is_readable(keyword)]
-        return ratable_result((len(keyword_readable),
-                              len(ds.keywords.split(','))),
-                              'keywords_readable', msgs=[])
-
-
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
     pass
 
@@ -646,14 +618,6 @@ class ACDD1_3Check(ACDDNCCheck):
     #    else:
     #        return Result(BaseCheck.MEDIUM, False, 'valid_license', msgs=['The license is not a url or in the accepted list'])
 
-    def check_processing_level_readable(self, ds):
-        #Check if processing level is human readable (within reason)
-        if not hasattr(ds, u'processing_level'):
-            return
-        if is_readable(getattr(ds, u'processing_level')):
-            return Result(BaseCheck.MEDIUM, True, 'processing_level_readable', msgs = [])
-        else:
-            return Result(BaseCheck.MEDIUM, False, 'processing_level_readable', msgs = ['The processing_level is not readable'])
 
     def check_date_created(self, ds):
         #Check if date created is ISO

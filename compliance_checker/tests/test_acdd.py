@@ -43,18 +43,6 @@ class TestACDDCommon(unittest.TestCase):
         self.ds.date_created = '2011-04-27T00:00:00Z'
         self.ds.date_created = '2011-04-27T00:00:00Z'
 
-    def test_title_readable(self):
-        """Tests common ACDD attributes"""
-        self.ds.title = "Test of data"
-        # test
-        result = self.acdd.verify_title_is_readable(self.ds)(2)
-        self.assertTrue(result.value)
-
-    def test_summary_readable(self):
-        self.ds.summary = "Counts of blue green algae, diatoms, and miscellaneous phytoplankton"
-        result = self.acdd.check_summary_is_readable(self.ds)
-        self.assertTrue(result.value)
-
 
 class TestACDD1_1(unittest.TestCase):
 
