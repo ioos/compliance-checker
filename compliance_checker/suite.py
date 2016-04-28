@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import sys
 import inspect
 import itertools
+from operator import itemgetter
 import json
 from netCDF4 import Dataset
 from lxml import etree as ET
@@ -36,10 +37,28 @@ class CheckSuite(object):
         for x in working_set.iter_entry_points('compliance_checker.suites'):
             try:
                 xl = x.load()
+                cls.checkers[':'.join((xl._cc_spec, xl._cc_spec_version))] = xl
+            # TODO: remove this once all checkers move over to the new
+            #       _cc_spec, _cc_spec_version
+            except AttributeError:
+                # if there are versioned classes, it will get overwritten by the
+                # latest version later.  If there are not, it will be assigned
+                # the checker as the main class
+                # TODO: nix name attribute in plugins.  Keeping in for now
+                #       to provide backwards compatibility
+                cls.checkers[getattr(xl, 'name', None) or xl._cc_spec] = xl
 
-                cls.checkers[xl.name] = xl
             except Exception as e:
                 print("Could not load", x, ":", e, file=sys.stderr)
+        # find the latest version of versioned checkers and set that as the
+        # default checker for compliance checker if no version is specified
+        ver_checkers = [c.split(':', 1) for c in cls.checkers if ':' in c]
+        for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
+            # right now this looks for character order. May break if
+            # version specifications become more complicated
+            latest_version = max(v[-1] for v in versions)
+            cls.checkers[spec] = cls.checkers[spec + ':latest'] = \
+                cls.checkers[':'.join((spec, latest_version))]
 
     def _get_checks(self, checkclass):
         """
@@ -75,10 +94,12 @@ class CheckSuite(object):
 
         while len(checker_queue):
             name, a = checker_queue.pop()
+            # is the current dataset type in the supported filetypes
+            # for the checker class?
             if type(ds) in a().supported_ds:
                 valid.append((name, a))
 
-            # add all to queue
+            # add any subclasses of the checker class
             for subc in a.__subclasses__():
                 if subc not in all_checked:
                     all_checked.add(subc)

@@ -138,7 +138,8 @@ class ComplianceChecker(object):
                 errors_occurred = True
                 print("WARNING: The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker, file=sys.stderr)
                 for check_name, epair in errors.items():
-                    print("%s.%s: %s" % (checker, check_name, epair[0].message), file=sys.stderr)
+                    print("%s.%s: %s" % (checker, check_name, epair[0]), file=sys.stderr)
+
                     if verbose > 0:
                         traceback.print_tb(epair[1].tb_next.tb_next)    # skip first two as they are noise from the running itself @TODO search for check_name
                         print(file=sys.stderr)

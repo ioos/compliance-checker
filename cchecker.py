@@ -13,16 +13,31 @@ def main():
     check_suite.load_all_available_checkers()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--test', '-t', '--test=', '-t=', action='append', help="Select the Checks you want to perform.", choices=list(check_suite.checkers.keys()))
-    parser.add_argument('--criteria', '-c', help="Define the criteria for the checks.  Either Strict, Normal, or Lenient.  Defaults to Normal.", nargs='?', default='normal', choices = ['lenient', 'normal', 'strict'])
-    parser.add_argument('--verbose' , '-v', help="Increase output. May be specified up to three times.", action="count")
-    parser.add_argument('-f', '--format', default='text', choices=['text', 'html', 'json'], help='Output format')
-    parser.add_argument('-o', '--output', default='-', action='store', help='Output filename')
-    parser.add_argument('-V', '--version', action='store_true', help='Display the IOOS Compliance Checker version information.')
-    parser.add_argument('dataset_location', nargs='*', help= "Defines the location of the dataset to be checked.")
+    parser.add_argument('--test', '-t', '--test=', '-t=', default=('acdd',),
+                        nargs='+',
+                        choices=sorted(check_suite.checkers.keys()),
+                        help="Select the Checks you want to perform.  Defaults to 'acdd' if unspecified")
+
+    parser.add_argument('--criteria', '-c',
+                        help="Define the criteria for the checks.  Either Strict, Normal, or Lenient.  Defaults to Normal.",
+                        nargs='?', default='normal',
+                        choices = ['lenient', 'normal', 'strict'])
+
+    parser.add_argument('--verbose', '-v',
+                        help="Increase output. May be specified up to three times.",
+                        action="count",
+                        default=0)
+
+    parser.add_argument('-f', '--format', default='text',
+                        choices=['text', 'html', 'json'], help='Output format')
+    parser.add_argument('-o', '--output', default='-', action='store',
+                        help='Output filename')
+    parser.add_argument('-V', '--version', action='store_true',
+                        help='Display the IOOS Compliance Checker version information.')
+    parser.add_argument('dataset_location', nargs='*',
+                        help="Defines the location of the dataset to be checked.")
 
     args = parser.parse_args()
-    args.test = args.test or ['acdd']
 
     if args.version:
         print("IOOS compliance checker version %s" % __version__)
