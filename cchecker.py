@@ -25,7 +25,8 @@ def main():
 
     parser.add_argument('--verbose', '-v',
                         help="Increase output. May be specified up to three times.",
-                        action="count")
+                        action="count",
+                        default=0)
 
     parser.add_argument('-f', '--format', default='text',
                         choices=['text', 'html', 'json'], help='Output format')
