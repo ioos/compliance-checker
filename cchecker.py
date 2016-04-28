@@ -13,10 +13,10 @@ def main():
     check_suite.load_all_available_checkers()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--test', '-t', '--test=', '-t=', required=True,
+    parser.add_argument('--test', '-t', '--test=', '-t=', default=('acdd',),
                         nargs='+',
                         choices=sorted(check_suite.checkers.keys()),
-                        help="Select the Checks you want to perform.")
+                        help="Select the Checks you want to perform.  Defaults to 'acdd' if unspecified")
 
     parser.add_argument('--criteria', '-c',
                         help="Define the criteria for the checks.  Either Strict, Normal, or Lenient.  Defaults to Normal.",
@@ -37,7 +37,6 @@ def main():
                         help="Defines the location of the dataset to be checked.")
 
     args = parser.parse_args()
-    args.test = args.test or ['acdd']
 
     if args.version:
         print("IOOS compliance checker version %s" % __version__)
