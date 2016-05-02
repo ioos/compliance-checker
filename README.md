@@ -441,12 +441,16 @@ Installing on Ubuntu? Check out the [Ubuntu Install Guide](doc/ubuntu-install-gu
 ## Usage (from Python code)
 
 ```python
-from compliance_checker.runner import ComplianceCheckerCheckSuite
+from compliance_checker.runner import ComplianceChecker, CheckSuite
 
-cs = ComplianceCheckerCheckSuite()
-dataset = cs.load_dataset("/path/or/url/to/your/dataset")
-groups = cs.run(dataset, 'acdd')
-scores = groups['acdd']
+# Load all available checker classes
+check_suite = CheckSuite()
+check_suite.load_all_available_checkers()
+
+# Run cf and adcc checks with normal strictness, verbose text format to stdout
+return_value, errors = ComplianceChecker.run_checker(
+                                '/path/or/url/to/your/dataset',
+                                ['cf', 'acdd'], True, 'normal', '-', 'text')
 ```
 
 
