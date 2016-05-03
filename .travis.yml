@@ -13,7 +13,7 @@ before_install:
     - bash miniconda.sh -b -p $HOME/miniconda
     - export PATH="$HOME/miniconda/bin:$PATH"
     - conda update --yes --all
-    - conda config --add channels ioos --force
+    - conda config --add channels conda-forge --force
     - travis_retry conda create --yes -n test --file requirements.txt $CONDA
     - travis_retry conda install -n test --yes pytest flake8
     - source activate test
