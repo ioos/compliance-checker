@@ -1,6 +1,8 @@
 from compliance_checker import acdd
 from pkg_resources import resource_filename
 from compliance_checker.suite import CheckSuite
+from compliance_checker.base import Result, BaseCheck
+import numpy as np
 import unittest
 
 static_files = {
@@ -66,3 +68,19 @@ class TestSuite(unittest.TestCase):
             score_list, points, out_of = cs.standard_output(limit, checker, groups)
             # This asserts that print is able to generate all of the unicode output
             cs.non_verbose_output_generation(score_list, groups, limit, points, out_of)
+
+    def test_score_grouping(self):
+        # Testing the grouping of results for output, which can fail
+        # if some assumptions are not met, e.g. if a Result object has
+        # a value attribute of unexpected type
+        cs = CheckSuite()
+        res = [Result(BaseCheck.MEDIUM, True, 'one'),
+               Result(BaseCheck.MEDIUM, (1, 3), 'one'),
+               Result(BaseCheck.MEDIUM, True, 'two'),
+               Result(BaseCheck.MEDIUM, np.isnan(1), 'two')  # value is type numpy.bool_
+        ]
+        score = cs.scores(res)
+        self.assertEqual(score[0].name, 'one')
+        self.assertEqual(score[0].value, (2, 4))
+        self.assertEqual(score[1].name, 'two')
+        self.assertEqual(score[1].value, (1, 2))
