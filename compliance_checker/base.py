@@ -89,7 +89,8 @@ class Result(object):
     Holds the result of a check method.
 
     Stores such information as the check's value (True, False, a 2-tuple of (pass, total) or None for a skip),
-    weight of the check, any granular messages, or a hierarchy of results.
+    weight of the check, any granular messages, or a hierarchy of results. If given value is not a tuple, it
+    is cast as a boolean using the bool() function.
 
     Stores the checker instance and the check method that produced this result.
     """
@@ -97,7 +98,11 @@ class Result(object):
     def __init__(self, weight=BaseCheck.MEDIUM, value=None, name=None, msgs=None, children=None, checker=None, check_method=None):
 
         self.weight = weight
-        self.value  = value
+        if isinstance(value, tuple):
+            assert len(value)==2, 'Result value must be 2-tuple or boolean!'
+            self.value = value
+        else:
+            self.value = bool(value)
         self.name   = name
         self.msgs   = msgs or []
 
