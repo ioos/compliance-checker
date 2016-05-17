@@ -101,7 +101,10 @@ class Result(object):
     def __init__(self, weight=BaseCheck.MEDIUM, value=None, name=None, msgs=None, children=None, checker=None, check_method=None):
 
         self.weight = weight
-        if isinstance(value, tuple):
+
+        if value is None:
+            self.value = None
+        elif isinstance(value, tuple):
             assert len(value)==2, 'Result value must be 2-tuple or boolean!'
             self.value = value
         else:
