@@ -76,6 +76,7 @@ class TestSuite(unittest.TestCase):
         cs = CheckSuite()
         res = [Result(BaseCheck.MEDIUM, True, 'one'),
                Result(BaseCheck.MEDIUM, (1, 3), 'one'),
+               Result(BaseCheck.MEDIUM, None, 'one'),
                Result(BaseCheck.MEDIUM, True, 'two'),
                Result(BaseCheck.MEDIUM, np.isnan(1), 'two')  # value is type numpy.bool_
         ]
