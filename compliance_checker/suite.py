@@ -21,6 +21,13 @@ except:
 from datetime import datetime
 import requests
 import textwrap
+import codecs
+
+# Ensure output is encoded as Unicode when checker output is redirected or piped
+if sys.stdout.encoding is None:
+    sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+if sys.stderr.encoding is None:
+    sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 
 
 class CheckSuite(object):
