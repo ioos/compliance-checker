@@ -13,7 +13,7 @@ def main():
     check_suite.load_all_available_checkers()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--test', '-t', '--test=', '-t=', default=('acdd',),
+    parser.add_argument('--test', '-t', '--test=', '-t=', default=[],
                         action='append',
                         help="Select the Checks you want to perform.  Defaults to 'acdd' if unspecified")
 
@@ -55,7 +55,7 @@ def main():
         if args.format != 'json':
             print("Running Compliance Checker on the dataset from: {}".format(dataset), file=sys.stderr)
         return_value, errors = ComplianceChecker.run_checker(args.dataset_location[0],
-                                                             args.test,
+                                                             args.test or ['acdd'],
                                                              args.verbose,
                                                              args.criteria,
                                                              args.output,
