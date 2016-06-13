@@ -14,14 +14,13 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', '-t', '--test=', '-t=', default=('acdd',),
-                        nargs='+',
-                        choices=sorted(check_suite.checkers.keys()),
+                        action='append',
                         help="Select the Checks you want to perform.  Defaults to 'acdd' if unspecified")
 
     parser.add_argument('--criteria', '-c',
                         help="Define the criteria for the checks.  Either Strict, Normal, or Lenient.  Defaults to Normal.",
                         nargs='?', default='normal',
-                        choices = ['lenient', 'normal', 'strict'])
+                        choices=['lenient', 'normal', 'strict'])
 
     parser.add_argument('--verbose', '-v',
                         help="Increase output. May be specified up to three times.",
@@ -36,11 +35,18 @@ def main():
                         help='Display the IOOS Compliance Checker version information.')
     parser.add_argument('dataset_location', nargs='*',
                         help="Defines the location of the dataset to be checked.")
+    parser.add_argument('-l', '--list-tests', action='store_true', help='List the available tests')
 
     args = parser.parse_args()
 
     if args.version:
         print("IOOS compliance checker version %s" % __version__)
+        return 0
+
+    if args.list_tests:
+        print("IOOS compliance checker available checker suites:")
+        for checker in sorted(check_suite.checkers.keys()):
+            print(" -", checker)
         return 0
 
     return_values = []
