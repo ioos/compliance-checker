@@ -212,7 +212,7 @@ class CFBaseCheck(BaseCheck):
             if name in ('platform_name', 'station_name', 'instrument_name', 'station_id', 'platform_id', 'surface_altitude'):
                 self._metadata_vars[ds].append(var)
 
-            elif getattr(var, 'cf_role', None) == 'timeseries_id':
+            elif getattr(var, 'cf_role', '') != '':
                 self._metadata_vars[ds].append(var)
 
             elif getattr(var, 'standard_name', None) is None and len(var.dimensions) == 0:
