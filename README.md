@@ -490,6 +490,17 @@ $ py.test --pylama
 Take a look at the failed tests and fix accordingly. Travis does not run with the `--pylama` flag so you MUSt do this yourself!
 
 
+To run tests for both Python 2 and 3, install `tox` globally via
+```
+pip install tox
+```
+
+then run
+
+`tox -c tox.ini`
+
+to run the tests
+
 ## Resource materials
 
 [Compliance checker Webinar](
