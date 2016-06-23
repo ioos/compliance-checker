@@ -32,13 +32,14 @@ setup(
     ],
     include_package_data = True,
     scripts=['cchecker.py'],
+    # Note: Do not use colons in the entry-point keys. Python 3 reserves
+    # portions of the key after a colon for special use.
     entry_points         = {
         'console_scripts': [
             'compliance-checker = cchecker:main'
         ],
         'compliance_checker.suites': [
             'cf = compliance_checker.cf.cf:CFBaseCheck',
-            'acdd = compliance_checker.acdd:ACDD1_1Check',
             'acdd-1.1 = compliance_checker.acdd:ACDD1_1Check',
             'acdd-1.3 = compliance_checker.acdd:ACDD1_3Check',
             'ioos = compliance_checker.ioos:IOOSBaseCheck',
