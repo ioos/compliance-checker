@@ -32,8 +32,15 @@ setup(
     ],
     include_package_data = True,
     scripts=['cchecker.py'],
+
     # Note: Do not use colons in the entry-point keys. Python 3 reserves
     # portions of the key after a colon for special use.
+
+    # Note: The entry point names are not used at all. All methods in the
+    # compliance checker use class attributes to determine the checker's name
+    # and version. But, an entry point must be defined for each plugin to be
+    # loaded.
+
     entry_points         = {
         'console_scripts': [
             'compliance-checker = cchecker:main'
