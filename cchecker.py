@@ -44,9 +44,10 @@ def main():
         return 0
 
     if args.list_tests:
-        print("IOOS compliance checker available checker suites:")
+        print("IOOS compliance checker available checker suites (code version):")
         for checker in sorted(check_suite.checkers.keys()):
-            print(" -", checker)
+            version = getattr(check_suite.checkers[checker], '_cc_checker_version', "???")
+            print(" - {} ({})".format(checker, version))
         return 0
 
     return_values = []
