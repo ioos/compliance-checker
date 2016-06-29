@@ -1,10 +1,17 @@
 <?xml version="1.0"?>
 <standard_name_table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cf-standard-name-table-1.1.xsd">
-   <version_number>29</version_number>
-   <last_modified>2015-07-08T09:43:36Z</last_modified>
-   <institution>Program for Climate Model Diagnosis and Intercomparison</institution>
-   <contact>webmaster@pcmdi.llnl.gov</contact>
+   <version_number>34</version_number>
+   <last_modified>2016-06-13T10:23:54Z</last_modified>
+   <institution>National Centre for Atmospheric Science</institution>
+   <contact>support@ceda.ac.uk</contact>
 
+  
+   <entry id="acoustic_signal_roundtrip_travel_time_in_sea_water">
+      <canonical_units>s</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The quantity with standard name acoustic_signal_roundtrip_travel_time_in_sea_water is the time taken for an acoustic signal to propagate from the emitting instrument to a reflecting surface and back again to the instrument. In the case of an instrument based on the sea floor and measuring the roundtrip time to the sea surface, the data are commonly used as a measure of ocean heat content.</description>
+   </entry>
   
    <entry id="aerodynamic_particle_diameter">
       <canonical_units>m</canonical_units>
@@ -130,6 +137,13 @@
       <grib></grib>
       <amip></amip>
       <description>cloud_top refers to the top of the highest cloud. Air temperature is the bulk temperature of the air, not the surface (skin) temperature.</description>
+   </entry>
+  
+   <entry id="air_temperature_at_effective_cloud_top_defined_by_infrared_radiation">
+      <canonical_units>K</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The &quot;effective cloud top defined by infrared radiation&quot; is (approximately) the geometric height above the surface that is one optical depth at infrared wavelengths (in the region of 11 micrometers) below the cloud top that would be detected by visible and lidar techniques. Reference: Minnis, P. et al 2011 CERES Edition-2 Cloud Property Retrievals Using TRMM VIRS and Terra and Aqua MODIS Data x2014; Part I: Algorithms IEEE Transactions on Geoscience and Remote Sensing, 49(11), 4374-4400. doi: http://dx.doi.org/10.1109/TGRS.2011.2144601.</description>
    </entry>
   
    <entry id="air_temperature_lapse_rate">
@@ -2491,6 +2505,13 @@ totals are summed to obtain the index.</description>
       <description>The surface called &quot;surface&quot; means the lower boundary of the atmosphere. The specification of a physical process by the phrase due_to_process means that the quantity named is a single term in a sum of terms which together compose the general quantity named by omitting the phrase. &quot;wrt&quot; means with respect to. &quot;Content&quot; indicates a quantity per unit area. &quot;Layer&quot; means any layer with upper and lower boundaries that have constant values in some vertical coordinate. There must be a vertical coordinate variable indicating the extent of the layer(s). If the layers are model layers, the vertical coordinate can be model_level_number, but it is recommended to specify a physical coordinate (in a scalar or auxiliary coordinate variable) as well. See Appendix D of the CF convention for information about dimensionless vertical coordinates.</description>
    </entry>
   
+   <entry id="change_in_land_ice_amount">
+      <canonical_units>kg m-2</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;Amount&quot; means mass per unit area. Zero change in land ice amount is an arbitrary level. &quot;Land ice&quot; means glaciers, ice-caps and ice-sheets resting on bedrock and also includes ice-shelves.</description>
+   </entry>
+  
    <entry id="change_over_time_in_atmosphere_mass_content_of_water_due_to_advection">
       <canonical_units>kg m-2</canonical_units>
       <grib></grib>
@@ -2652,6 +2673,13 @@ totals are summed to obtain the index.</description>
       <description>&quot;Compressive strength&quot; is a measure of the capacity of a material to withstand compressive forces.  If compressive forces are exerted on a material in excess of its compressive strength, fracturing will occur.</description>
    </entry>
   
+   <entry id="concentration_of_colored_dissolved_organic_matter_in_sea_water_expressed_as_equivalent_mass_fraction_of_quinine_sulfate_dihydrate">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The quantity with standard name concentration_of_colored_dissolved_organic_matter_in_sea_water_expressed_as_equivalent_mass_fraction_of_quinine_sulfate_dihydrate is also commonly known as Chromophoric Dissolved Organic Matter (CDOM). CDOM plays an important role in the carbon cycling and biogeochemistry of coastal waters. It occurs naturally in aquatic environments primarily as a result of tannins released from decaying plant and animal matter, which can enter coastal areas in river run-off containing organic materials leached from soils. When present in high concentrations, it imparts a brown or yellowish color to water. Its presence can negatively impact fish populations by reducing dissolved oxygen concentrations to harmful levels and by releasing nutrients and metals that contaminate the water. Increased understanding of the role of CDOM will further our ability to manage and protect coastal ecosystems. Sensors are commonly calibrated against a 100 parts per billion (ppb) quinine sulfate dihydrate solution, a fluorescent reference standard commonly used with CDOM sensors. CDOM sensors therefore report in &quot;QSDE&quot; (quinine sulfate dihydrate equivalents). It is important to note, however, that CDOM concentrations in QSDE are not necessarily equivalent to the in situ CDOM concentrations in ppb.</description>
+   </entry>
+  
    <entry id="convection_time_fraction">
       <canonical_units>1</canonical_units>
       <grib></grib>
@@ -2806,6 +2834,13 @@ totals are summed to obtain the index.</description>
       <description>The geoid is a surface of constant geopotential with which mean sea level would coincide if the ocean were at rest. (The volume enclosed between the geoid and the sea floor equals the mean volume of water in the ocean.) In an ocean GCM the geoid is the surface of zero depth, or the rigid lid if the model uses that approximation. &quot;Depth_below_X&quot; means the vertical distance below the named surface X.</description>
    </entry>
   
+   <entry id="depth_below_sea_floor">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;Depth_below_X&quot; means the vertical distance below the named surface X.</description>
+   </entry>
+  
    <entry id="depth_of_isosurface_of_sea_water_potential_temperature">
       <canonical_units>m</canonical_units>
       <grib></grib>
@@ -2883,6 +2918,13 @@ totals are summed to obtain the index.</description>
       <description>&quot;direction_of_X&quot; means direction of a vector, a bearing. A velocity is a vector quantity.</description>
    </entry>
   
+   <entry id="distance_from_geocenter">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A measure of distance from the Earth&#39;s geocenter, commonly used in satellite tracks.</description>
+   </entry>
+  
    <entry id="distance_from_sun">
       <canonical_units>m</canonical_units>
       <grib></grib>
@@ -2909,6 +2951,13 @@ totals are summed to obtain the index.</description>
       <grib>44 E155</grib>
       <amip></amip>
       <description>&quot;[horizontal_]divergence_of_X&quot; means [horizontal] divergence of a vector X; if X does not have a vertical component then &quot;horizontal&quot; should be omitted. Wind is defined as a two-dimensional (horizontal) air velocity vector, with no vertical component. (Vertical motion in the atmosphere has the standard name upward_air_velocity.)</description>
+   </entry>
+  
+   <entry id="downward_air_velocity">
+      <canonical_units>m s-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A velocity is a vector quantity. “Downward&quot; indicates a vector component which is positive when directed downward (negative upward). Downward air velocity is the vertical component of the 3D air velocity vector. The standard name upward_air_velocity may be used for a vector component with the opposite sign convention.</description>
    </entry>
   
    <entry id="downward_dry_static_energy_flux_due_to_diffusion">
@@ -3219,6 +3268,20 @@ totals are summed to obtain the index.</description>
       <description>Downwelling radiation is radiation from above. It does not mean &quot;net downward&quot;. Spherical irradiance is the radiation incident on unit area of a hemispherical (or &quot;2-pi&quot;) collector. It is sometimes called &quot;scalar irradiance&quot;. The direction (up/downwelling) is specified. Radiation incident on a 4-pi collector has standard names of &quot;omnidirectional spherical irradiance&quot;. A coordinate variable for radiation wavelength should be given the standard name radiation_wavelength.</description>
    </entry>
   
+   <entry id="dry_atmosphere_mole_fraction_of_carbon_dioxide">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Mole fraction is used in the construction &quot;mole_fraction_of_X_in_Y&quot;, where X is a material constituent of Y. A chemical species denoted by X may be described by a single term such as &quot;nitrogen&quot; or a phrase such as &quot;nox_expressed_as_nitrogen&quot;. The construction &quot;dry_atmosphere_mole_fraction&quot; means that the quantity refers to the whole atmospheric column and is calculated as the total number of particles of X in the column divided by the number of dry air particles in the same column, i.e. the effect of water vapor is excluded. For localized values within the atmospheric medium, standard names including &quot;in_air&quot; are used. The chemical formula for carbon dioxide is CO2.</description>
+   </entry>
+  
+   <entry id="dry_atmosphere_mole_fraction_of_methane">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Mole fraction is used in the construction &quot;mole_fraction_of_X_in_Y&quot;, where X is a material constituent of Y. A chemical species denoted by X may be described by a single term such as &quot;nitrogen&quot; or a phrase such as &quot;nox_expressed_as_nitrogen&quot;. The construction &quot;dry_atmosphere_mole_fraction&quot; means that the quantity refers to the whole atmospheric column and is calculated as the total number of particles of X in the column divided by the number of dry air particles in the same column, i.e. the effect of water vapor is excluded. For localized values within the atmospheric medium, standard names including &quot;in_air&quot; are used. Methane is a member of the group of hydrocarbons known as alkanes. There are standard names for the alkane group as well as for some of the individual species. The chemical formula for methane is CH4.</description>
+   </entry>
+  
    <entry id="dry_energy_content_of_atmosphere_layer">
       <canonical_units>J m-2</canonical_units>
       <grib></grib>
@@ -3287,6 +3350,20 @@ totals are summed to obtain the index.</description>
       <grib></grib>
       <amip></amip>
       <description>A velocity is a vector quantity.  &quot;Eastward&quot; indicates a vector component which is positive when directed eastward (negative westward).  &quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward).  Sea ice velocity is defined as a two-dimensional vector, with no vertical component.  &quot;component_derivative_of_X&quot; means  derivative of X with respect to distance in the component  direction, which may be northward, southward, eastward, westward, x or y. The last two indicate derivatives along the axes of the grid, in the case where they are not true longitude and latitude.  The named quantity is a component of the strain rate tensor for sea ice.</description>
+   </entry>
+  
+   <entry id="eastward_flood_water_velocity">
+      <canonical_units>m s-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A velocity is a vector quantity. &quot;Eastward&quot; indicates a vector component which is positive when directed eastward (negative westward). Flood water is water that covers land which is normally not covered by water.</description>
+   </entry>
+  
+   <entry id="eastward_land_ice_velocity">
+      <canonical_units>m s-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A velocity is a vector quantity. &quot;Eastward&quot; indicates a vector component which is positive when directed eastward (negative westward). Land ice velocity is defined as a two-dimensional vector, with no vertical component. &quot;Land ice&quot; means glaciers, ice-caps and ice-sheets resting on bedrock and also includes ice-shelves.</description>
    </entry>
   
    <entry id="eastward_mass_flux_of_air">
@@ -3557,6 +3634,27 @@ totals are summed to obtain the index.</description>
       <description>&quot;Floating ice&quot; means any ice that is floating on water, e.g. on a sea or lake surface.  &quot;Thickness&quot; means the vertical extent of the ice.</description>
    </entry>
   
+   <entry id="flood_water_duration_above_threshold">
+      <canonical_units>s</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The  quantity with standard name flood_water_duration_above_threshold is the time elapsed between the instant when the flood depth first rises above a given threshold until the time falls below the same threshold for the last time at a given point in space. If a threshold is supplied, it should be specified by associating a coordinate variable or scalar coordinate variable with the data variable and giving the coordinate variable a standard name of flood_water_thickness. The values of the coordinate variable are the threshold values for the corresponding subarrays of the data variable. If no threshold is specified, its value is taken to be zero. Flood water is water that covers land which is normally not covered by water.</description>
+   </entry>
+  
+   <entry id="flood_water_speed">
+      <canonical_units>m s-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Speed is the magnitude of velocity. Flood water is water that covers land which is normally not covered by water.</description>
+   </entry>
+  
+   <entry id="flood_water_thickness">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The flood_water_thickness is the vertical distance between the surface of the flood water and the surface of the solid ground, as measured at a given point in space. The standard name ground_level_altitude is used for a data variable giving the geometric height of the ground surface above the geoid. &quot;Flood water&quot; is water that covers land which is normally not covered by water.</description>
+   </entry>
+  
    <entry id="fog_area_fraction">
       <canonical_units>1</canonical_units>
       <grib></grib>
@@ -3711,6 +3809,13 @@ totals are summed to obtain the index.</description>
       <description>&quot;Production of carbon&quot; means the production of biomass expressed as the mass of carbon which it contains. Gross primary production is the rate of synthesis of biomass from inorganic precursors by autotrophs (&quot;producers&quot;), for example, photosynthesis in plants or phytoplankton. The producers also respire some of this biomass and the difference is &quot;net_primary_production&quot;. &quot;Productivity&quot; means production per unit area. The phrase &quot;expressed_as&quot; is used in the construction A_expressed_as_B, where B is a chemical constituent of A. It means that the quantity indicated by the standard name is calculated solely with respect to the B contained in A, neglecting all other chemical constituents of A.</description>
    </entry>
   
+   <entry id="ground_level_altitude">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The ground_level_altitude is the geometric height of the upper boundary of the solid Earth above the geoid, which is the reference geopotential surface. The geoid is similar to mean sea level.</description>
+   </entry>
+  
    <entry id="harmonic_period">
       <canonical_units>s</canonical_units>
       <grib></grib>
@@ -3726,10 +3831,10 @@ totals are summed to obtain the index.</description>
    </entry>
   
    <entry id="heat_flux_into_sea_water_due_to_freezing_of_frazil_ice">
-      <canonical_units>Wm-2</canonical_units>
+      <canonical_units>W m-2</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description>In accordance with common usage in geophysical disciplines, &quot;flux&quot; implies per unit area, called &quot;flux density&quot; in physics.  The specification of a physical process by the phrase due_to_process means that the quantity named is a single term in a sum of terms which together compose the general quantity named by omitting the phrase.  &quot;Frazil&quot; consists of needle like crystals of ice, typically between three and four millimeters in diameter, which form as sea water begins to freeze. Salt is expelled during the freezing process and frazil ice consists of nearly pure fresh water.</description>
+      <description>In accordance with common usage in geophysical disciplines, &quot;flux&quot; implies per unit area, called &quot;flux density&quot; in physics. The specification of a physical process by the phrase due_to_process means that the quantity named is a single term in a sum of terms which together compose the general quantity named by omitting the phrase. &quot;Frazil&quot; consists of needle like crystals of ice, typically between three and four millimeters in diameter, which form as sea water begins to freeze. Salt is expelled during the freezing process and frazil ice consists of nearly pure fresh water.</description>
    </entry>
   
    <entry id="heat_flux_into_sea_water_due_to_iceberg_thermodynamics">
@@ -3788,6 +3893,13 @@ totals are summed to obtain the index.</description>
       <description>cloud_top refers to the top of the highest cloud. Height is the vertical distance above the surface.</description>
    </entry>
   
+   <entry id="height_at_effective_cloud_top_defined_by_infrared_radiation">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The &quot;effective cloud top defined by infrared radiation&quot; is (approximately) the geometric height above the surface that is one optical depth at infrared wavelengths (in the region of 11 micrometers) below the cloud top that would be detected by visible and lidar techniques. Reference: Minnis, P. et al 2011 CERES Edition-2 Cloud Property Retrievals Using TRMM VIRS and Terra and Aqua MODIS Data x2014; Part I: Algorithms IEEE Transactions on Geoscience and Remote Sensing, 49(11), 4374-4400. doi: http://dx.doi.org/10.1109/TGRS.2011.2144601.</description>
+   </entry>
+  
    <entry id="heterotrophic_respiration_carbon_flux">
       <canonical_units>kg m-2 s-1</canonical_units>
       <grib></grib>
@@ -3799,7 +3911,7 @@ totals are summed to obtain the index.</description>
       <canonical_units>1</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description>High type clouds are: Cirrus, Cirrostratus, Cirrocumulus. &quot;X_area_fraction&quot; means the fraction of horizontal area occupied by X. Cloud area fraction is also called &quot;cloud amount&quot; and &quot;cloud cover&quot;. X_type_cloud_area_fraction is determined on the basis of cloud type and not on the vertical location of the cloud.</description>
+      <description>High type clouds are: Cirrus, Cirrostratus, Cirrocumulus. &quot;X_area_fraction&quot; means the fraction of horizontal area occupied by X. Cloud area fraction is also called &quot;cloud amount&quot; and &quot;cloud cover&quot;. X_type_cloud_area_fraction is generally determined on the basis of cloud type, though Numerical Weather Prediction (NWP) models often calculate them based on the vertical location of the cloud.</description>
    </entry>
   
    <entry id="histogram_of_backscattering_ratio_over_height_above_reference_ellipsoid">
@@ -3837,18 +3949,39 @@ totals are summed to obtain the index.</description>
       <description>Humidity mixing ratio of a parcel of moist air is the ratio of the mass of water vapor to the mass of dry air.</description>
    </entry>
   
+   <entry id="ice_cloud_area_fraction">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;X_area_fraction&quot; means the fraction of horizontal area occupied by X. Cloud area fraction is also called &quot;cloud amount&quot; and &quot;cloud cover&quot;. The cloud area fraction is for the whole atmosphere column, as seen from the surface or the top of the atmosphere. The cloud area fraction in a layer of the atmosphere has the standard name cloud_area_fraction_in_atmosphere_layer.</description>
+   </entry>
+  
+   <entry id="ice_cloud_area_fraction_in_atmosphere_layer">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;Layer&quot; means any layer with upper and lower boundaries that have constant values in some vertical coordinate. There must be a vertical coordinate variable indicating the extent of the layer(s). If the layers are model layers, the vertical coordinate can be &quot;model_level_number&quot;, but it is recommended to specify a physical coordinate (in a scalar or auxiliary coordinate variable) as well. &quot;X_area_fraction&quot; means the fraction of horizontal area occupied by X. Cloud area fraction is also called &quot;cloud amount&quot; and &quot;cloud cover&quot;.</description>
+   </entry>
+  
+   <entry id="institution">
+      <canonical_units></canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>An auxiliary coordinate variable with a standard name of institution contains string values which specify where the original data, with which the coordinate variable is associated, were produced. The use of institution as the standard name for an auxiliary coordinate variable permits the aggregation of data from multiple institutions within a single data file.</description>
+   </entry>
+  
    <entry id="integral_of_air_temperature_deficit_wrt_time">
       <canonical_units>K s</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description>&quot;integral_of_Y_wrt_X&quot; means int Y dX. The data variable should have an axis for X specifying the limits of the integral as bounds. &quot;wrt&quot; means with respect to. Air temperature is the bulk temperature of the air, not the surface (skin) temperature. The air temperature deficit is the air temperature threshold minus the air temperature. Its integral with respect to time is often called after its units of &quot;degree-days&quot;.</description>
+      <description>&quot;integral_of_Y_wrt_X&quot; means int Y dX. The data variable should have an axis for X specifying the limits of the integral as bounds. &quot;wrt&quot; means with respect to. Air temperature is the bulk temperature of the air, not the surface (skin) temperature. The air temperature deficit is the air temperature threshold minus the air temperature, where only positive values are included in the integral. Its integral with respect to time is often called after its units of &quot;degree-days&quot;. The air_temperature variable, which is the data variable of the integral should have a scalar coordinate variable or a size-one coordinate variable with the standard name of air_temperature_threshold, to indicate the threshold.</description>
    </entry>
   
    <entry id="integral_of_air_temperature_excess_wrt_time">
       <canonical_units>K s</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description>&quot;integral_of_Y_wrt_X&quot; means int Y dX. The data variable should have an axis for X specifying the limits of the integral as bounds. &quot;wrt&quot; means with respect to. Air temperature is the bulk temperature of the air, not the surface (skin) temperature. The air temperature excess is the air temperature minus the air temperature threshold. Its integral with respect to time is often called after its units of &quot;degree-days&quot;.</description>
+      <description>&quot;integral_of_Y_wrt_X&quot; means int Y dX. The data variable should have an axis for X specifying the limits of the integral as bounds. &quot;wrt&quot; means with respect to. Air temperature is the bulk temperature of the air, not the surface (skin) temperature. The air temperature excess is the air temperature minus the air temperature threshold, where only positive values are included in the integral. Its integral with respect to time is often called after its units of &quot;degree-days&quot;. The air_temperature variable, which is the data variable of the integral should have a scalar coordinate variable or a size-one coordinate variable with the standard name of air_temperature_threshold, to indicate the threshold.</description>
    </entry>
   
    <entry id="integral_of_sea_ice_temperature_wrt_depth_expressed_as_heat_content">
@@ -4180,6 +4313,20 @@ totals are summed to obtain the index.</description>
       <description>The standard name &quot;lightning radiant energy&quot; means the energy emitted as electromagnetic radiation due to lightning. A coordinate variable of radiation_wavelength, radiation_frequency, or sensor_band_central_wavelength may be specified to indicate that the lightning_radiant_energy applies at specific wavelengths or frequencies. Bounds of the time and spatial coordinates may be specified to indicate the time interval and spatial extent over which the energy is emitted.</description>
    </entry>
   
+   <entry id="liquid_water_cloud_area_fraction">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;X_area_fraction&quot; means the fraction of horizontal area occupied by X. Cloud area fraction is also called &quot;cloud amount&quot; and &quot;cloud cover&quot;. The cloud area fraction is for the whole atmosphere column, as seen from the surface or the top of the atmosphere. The cloud area fraction in a layer of the atmosphere has the standard name cloud_area_fraction_in_atmosphere_layer. The chemical formula for water is H2O.</description>
+   </entry>
+  
+   <entry id="liquid_water_cloud_area_fraction_in_atmosphere_layer">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;Layer&quot; means any layer with upper and lower boundaries that have constant values in some vertical coordinate. There must be a vertical coordinate variable indicating the extent of the layer(s). If the layers are model layers, the vertical coordinate can be &quot;model_level_number&quot;, but it is recommended to specify a physical coordinate (in a scalar or auxiliary coordinate variable) as well. &quot;X_area_fraction&quot; means the fraction of horizontal area occupied by X. Cloud area fraction is also called &quot;cloud amount&quot; and &quot;cloud cover&quot;. The chemical formula for water is H2O.</description>
+   </entry>
+  
    <entry id="liquid_water_content_of_permafrost_layer">
       <canonical_units>kg m-2</canonical_units>
       <grib></grib>
@@ -4233,7 +4380,7 @@ totals are summed to obtain the index.</description>
       <canonical_units>1</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description>Low type clouds are: Stratus, Stratocumulus, Cumulus, Cumulonimbus. &quot;X_area_fraction&quot; means the fraction of horizontal area occupied by X. Cloud area fraction is also called &quot;cloud amount&quot; and &quot;cloud cover&quot;. X_type_cloud_area_fraction is determined on the basis of cloud type and not on the vertical location of the cloud.</description>
+      <description>Low type clouds are: Stratus, Stratocumulus, Cumulus, Cumulonimbus. &quot;X_area_fraction&quot; means the fraction of horizontal area occupied by X. Cloud area fraction is also called &quot;cloud amount&quot; and &quot;cloud cover&quot;. X_type_cloud_area_fraction is generally determined on the basis of cloud type, though Numerical Weather Prediction (NWP) models often calculate them based on the vertical location of the cloud.</description>
    </entry>
   
    <entry id="lwe_convective_precipitation_rate">
@@ -6481,7 +6628,7 @@ totals are summed to obtain the index.</description>
       <canonical_units>1</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description>Middle type clouds are: Altostratus, Altocumulus, Nimbostratus. &quot;X_area_fraction&quot; means the fraction of horizontal area occupied by X. Cloud area fraction is also called &quot;cloud amount&quot; and &quot;cloud cover&quot;. X_type_cloud_area_fraction is determined on the basis of cloud type and not on the vertical location of the cloud.</description>
+      <description>Middle type clouds are: Altostratus, Altocumulus, Nimbostratus. &quot;X_area_fraction&quot; means the fraction of horizontal area occupied by X. Cloud area fraction is also called &quot;cloud amount&quot; and &quot;cloud cover&quot;. X_type_cloud_area_fraction is generally determined on the basis of cloud type, though Numerical Weather Prediction (NWP) models often calculate them based on the vertical location of the cloud.</description>
    </entry>
   
    <entry id="minimum_depth_of_aragonite_undersaturation_in_sea_water">
@@ -7513,6 +7660,13 @@ totals are summed to obtain the index.</description>
       <description>Mole concentration means number of moles per unit volume, also called &quot;molarity&quot;, and is used in the construction mole_concentration_of_X_in_Y, where X is a material constituent of Y.  A chemical or biological species denoted by X may be described by a single term such as &#39;nitrogen&#39; or a phrase such as &#39;nox_expressed_as_nitrogen&#39;.The phrase &#39;expressed_as&#39; is used in the construction A_expressed_as_B, where B is a chemical constituent of A. It means that the quantity indicated by the standard name is calculated solely with respect to the B contained in A, neglecting all other chemical constituents of A. Standard names also exist for the mole concentration of a number of components that make up the total zooplankton population, such as mesozooplankton, microzooplankton andmiscellaneous zooplankton.</description>
    </entry>
   
+   <entry id="mole_concentration_of_zooplankton_expressed_as_nitrogen_in_sea_water">
+      <canonical_units>mol m-3</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Mole concentration means number of moles per unit volume, also called &quot;molarity&quot;, and is used in the construction mole_concentration_of_X_in_Y, where X is a material constituent of Y. A chemical species denoted by X may be described by a single term such as &quot;nitrogen&quot; or a phrase such as &quot;nox_expressed_as_nitrogen&quot;. The phrase &quot;expressed_as&quot; is used in the construction A_expressed_as_B, where B is a chemical constituent of A. It means that the quantity indicated by the standard name is calculated in terms of B alone, neglecting all other chemical constituents of A. Standard names also exist for the mole concentration of a number of components that make up the total zooplankton population, such as mesozooplankton, and microzooplankton.</description>
+   </entry>
+  
    <entry id="mole_content_of_ozone_in_atmosphere_layer">
       <canonical_units>mol m-2</canonical_units>
       <grib></grib>
@@ -8423,6 +8577,13 @@ totals are summed to obtain the index.</description>
       <description>&quot;shortwave&quot; means shortwave radiation. &quot;Layer&quot; means any layer with upper and lower boundaries that have constant values in some vertical coordinate. There must be a vertical coordinate variable indicating the extent of the layer(s). If the layers are model layers, the vertical coordinate can be model_level_number, but it is recommended to specify a physical coordinate (in a scalar or auxiliary coordinate variable) as well. Net absorbed radiation is the difference between absorbed and emitted radiation.</description>
    </entry>
   
+   <entry id="net_rate_of_absorption_of_shortwave_energy_in_ocean_layer">
+      <canonical_units>W m-2</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;shortwave&quot; means shortwave radiation. &quot;Layer&quot; means any layer with upper and lower boundaries that have constant values in some vertical coordinate. There must be a vertical coordinate variable indicating the extent of the layer(s). If the layers are model layers, the vertical coordinate can be model_level_number, but it is recommended to specify a physical coordinate (in a scalar or auxiliary coordinate variable) as well. Net absorbed radiation is the difference between absorbed and emitted radiation.</description>
+   </entry>
+  
    <entry id="net_upward_longwave_flux_in_air">
       <canonical_units>W m-2</canonical_units>
       <grib>115</grib>
@@ -8500,11 +8661,25 @@ totals are summed to obtain the index.</description>
       <description>&quot;Eliassen Palm flux&quot; is a widely used vector in the meridional plane, and the divergence of this flux appears as a forcing in the Transformed Eulerian mean formulation of the zonal mean zonal wind equation.  &quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward).</description>
    </entry>
   
+   <entry id="northward_flood_water_velocity">
+      <canonical_units>m s-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A velocity is a vector quantity. &quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward). Flood water is water that covers land which is normally not covered by water.</description>
+   </entry>
+  
    <entry id="northward_heat_flux_in_air_due_to_eddy_advection">
       <canonical_units>W m-2</canonical_units>
       <grib></grib>
       <amip></amip>
       <description>The specification of a physical process by the phrase due_to_process means that the quantity named is a single term in a sum of terms which together compose the general quantity named by omitting the phrase. &quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward).  In accordance with common usage in geophysical disciplines, &quot;flux&quot; implies per unit area, called &quot;flux density&quot; in physics.</description>
+   </entry>
+  
+   <entry id="northward_land_ice_velocity">
+      <canonical_units>m s-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A velocity is a vector quantity. &quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward). Land ice velocity is defined as a two-dimensional vector, with no vertical component. &quot;Land ice&quot; means glaciers, ice-caps and ice-sheets resting on bedrock and also includes ice-shelves.</description>
    </entry>
   
    <entry id="northward_mass_flux_of_air">
@@ -8519,6 +8694,13 @@ totals are summed to obtain the index.</description>
       <grib></grib>
       <amip>tauvcorr</amip>
       <description>&quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward). Momentum flux is dimensionally equivalent to stress and pressure. It is a tensor quantity. Flux correction is also called &quot;flux adjustment&quot;. A positive flux correction is downward i.e. added to the ocean. In accordance with common usage in geophysical disciplines, &quot;flux&quot; implies per unit area, called &quot;flux density&quot; in physics.</description>
+   </entry>
+  
+   <entry id="northward_northward_derivative_of_geopotential">
+      <canonical_units>s-2</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A quantity with standard name Xward_Yward_derivative_of_geopotential is a second spatial derivative of geopotential, P, in the direction specified by X and Y, i.e., d2P/dXdY. Geopotential is the sum of the specific gravitational potential energy relative to the geoid and the specific centripetal potential energy. &quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward). &quot;component_derivative_of_X&quot; means derivative of X with respect to distance in the component direction, which may be &quot;northward&quot;, &quot;southward&quot;, &quot;eastward&quot;, &quot;westward&quot;, &quot;x&quot; or &quot;y&quot;. The last two indicate derivatives along the axes of the grid, in the case where they are not true longitude and latitude.</description>
    </entry>
   
    <entry id="northward_ocean_freshwater_transport">
@@ -8661,6 +8843,13 @@ totals are summed to obtain the index.</description>
       <description>&quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward).</description>
    </entry>
   
+   <entry id="northward_upward_derivative_of_geopotential">
+      <canonical_units>s-2</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A quantity with standard name Xward_Yward_derivative_of_geopotential is a second spatial derivative of geopotential, P, in the direction specified by X and Y, i.e., d2P/dXdY. Geopotential is the sum of the specific gravitational potential energy relative to the geoid and the specific centripetal potential energy. &quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward). &quot;Upward&quot; indicates a vector component which is positive when directed upward (negative downward). &quot;component_derivative_of_X&quot; means derivative of X with respect to distance in the component direction, which may be &quot;northward&quot;, &quot;southward&quot;, &quot;eastward&quot;, &quot;westward&quot;, &quot;x&quot; or &quot;y&quot;. The last two indicate derivatives along the axes of the grid, in the case where they are not true longitude and latitude.</description>
+   </entry>
+  
    <entry id="northward_water_vapor_flux_in_air">
       <canonical_units>kg m-2 s-1</canonical_units>
       <grib></grib>
@@ -8673,6 +8862,13 @@ totals are summed to obtain the index.</description>
       <grib></grib>
       <amip></amip>
       <description>&quot;Layer&quot; means any layer with upper and lower boundaries that have constant values in some vertical coordinate. There must be a vertical coordinate variable indicating the extent of the layer(s). If the layers are model layers, the vertical coordinate can be model_level_number, but it is recommended to specify a physical coordinate (in a scalar or auxiliary coordinate variable) as well. &quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward). Transport across_unit_distance means expressed per unit distance normal to the direction of transport.</description>
+   </entry>
+  
+   <entry id="northward_westward_derivative_of_geopotential">
+      <canonical_units>s-2</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A quantity with standard name Xward_Yward_derivative_of_geopotential is a second spatial derivative of geopotential in the direction specified by X and Y, i.e., d2P/dXdY. Geopotential is the sum of the specific gravitational potential energy relative to the geoid and the specific centripetal potential energy. &quot;Westward&quot; indicates a vector component which is positive when directed westward (negative eastward). &quot;Northward&quot; indicates a vector component which is positive when directed northward (negative southward). &quot;component_derivative_of_X&quot; means derivative of X with respect to distance in the component direction, which may be &quot;northward&quot;, &quot;southward&quot;, &quot;eastward&quot;, &quot;westward&quot;, &quot;x&quot; or &quot;y&quot;. The last two indicate derivatives along the axes of the grid, in the case where they are not true longitude and latitude.</description>
    </entry>
   
    <entry id="northward_wind">
@@ -8752,6 +8948,13 @@ totals are summed to obtain the index.</description>
       <description>&quot;Number concentration&quot; means the number of particles or other specified objects per unit volume. &quot;Ambient_aerosol&quot; means that the aerosol is measured or modelled at the ambient state of pressure, temperature and relative humidity that exists in its immediate environment. &quot;Ambient aerosol particles&quot; are aerosol particles that have taken up ambient water through hygroscopic growth. The extent of hygroscopic growth depends on the relative humidity and the composition of the particles. Nucleation mode aerosol particles have a diameter of less than 3 nanometers.</description>
    </entry>
   
+   <entry id="number_concentration_of_ozone_molecules_in_air">
+      <canonical_units>m-3</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;Number concentration&quot; means the number of particles or other specified objects per unit volume. The chemical formula for ozone is O3. The IUPAC name for ozone is trioxygen.</description>
+   </entry>
+  
    <entry id="number_concentration_of_pm10_aerosol_particles_in_air">
       <canonical_units>m-3</canonical_units>
       <grib></grib>
@@ -8785,6 +8988,13 @@ totals are summed to obtain the index.</description>
       <grib></grib>
       <amip></amip>
       <description>&quot;Amount&quot; means mass per unit area.  The construction lwe_thickness_of_X_amount or _content means the vertical extent of a layer of liquid water having the same mass per unit area.  &quot;lwe&quot; means liquid water equivalent.  A variable whose standard name has the form number_of_days_with_X_below|above_threshold is a count of the number of days on which the condition X_below|above_threshold is satisfied.  It must have a coordinate variable or scalar coordinate variable with the a standard name of X to supply the threshold(s). It must have a climatological time variable, and a cell_methods entry for within days which describes the processing of quantity X before the threshold is applied. A number_of_days is an extensive quantity in time, and the cell_methods entry for over days should be &quot;sum&quot;.</description>
+   </entry>
+  
+   <entry id="number_of_days_with_surface_temperature_below_threshold">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The surface temperature is the temperature at the interface, not the bulk temperature of the medium above or below. The surface called &quot;surface&quot; means the lower boundary of the atmosphere. A variable whose standard name has the form number_of_days_with_X_below|above_threshold is a count of the number of days on which the condition X_below|above_threshold is satisfied. It must have a coordinate variable or scalar coordinate variable with the a standard name of X to supply the threshold(s). It must have a climatological time variable, and a cell_methods entry for within days which describes the processing of quantity X before the threshold is applied. A number_of_days is an extensive quantity in time, and the cell_methods entry for over days should be &quot;sum&quot;.</description>
    </entry>
   
    <entry id="number_of_days_with_wind_speed_above_threshold">
@@ -9025,6 +9235,13 @@ totals are summed to obtain the index.</description>
       <description>Mongomery potential is defined as M = ap + gz, where a = specific volume, p = pressure, g = gravity, and z=depth. It represents an exact streamfunction on specificvolume anomaly surfaces.</description>
    </entry>
   
+   <entry id="ocean_relative_vorticity">
+      <canonical_units>s-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Relative vorticity is the upward component of the relative vorticity vector i.e. the component which arises from horizontal velocity.</description>
+   </entry>
+  
    <entry id="ocean_rigid_lid_pressure">
       <canonical_units>Pa</canonical_units>
       <grib></grib>
@@ -9079,6 +9296,13 @@ totals are summed to obtain the index.</description>
       <grib></grib>
       <amip></amip>
       <description>See Appendix D of the CF convention for information about dimensionless vertical coordinates. Note that the ocean sigma coordinate is not the same quantity as sea water sigma (excess of density over 1000 kg m-3), for which there are various other standard names.</description>
+   </entry>
+  
+   <entry id="ocean_sigma_z_coordinate">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>See Appendix D of the CF convention for information about dimensionless vertical coordinates.</description>
    </entry>
   
    <entry id="ocean_tracer_bolus_biharmonic_diffusivity">
@@ -9487,6 +9711,13 @@ totals are summed to obtain the index.</description>
       <grib></grib>
       <amip>prveg</amip>
       <description>&quot;Canopy&quot; means the plant or vegetation canopy. In accordance with common usage in geophysical disciplines, &quot;flux&quot; implies per unit area, called &quot;flux density&quot; in physics.  Unless indicated in the cell_methods attribute, a quantity is assumed to apply to the whole area of each horizontal grid box. Previously, the qualifier where_type was used to specify that the quantity applies only to the part of the grid box of the named type.  Names containing the where_type qualifier are deprecated and newly created data should use the cell_methods attribute to indicate the horizontal area to which the quantity applies.</description>
+   </entry>
+  
+   <entry id="pressure_at_effective_cloud_top_defined_by_infrared_radiation">
+      <canonical_units>Pa</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The &quot;effective cloud top defined by infrared radiation&quot; is (approximately) the geometric height above the surface that is one optical depth at infrared wavelengths (in the region of 11 micrometers) below the cloud top that would be detected by visible and lidar techniques. Reference: Minnis, P. et al 2011 CERES Edition-2 Cloud Property Retrievals Using TRMM VIRS and Terra and Aqua MODIS Data x2014; Part I: Algorithms IEEE Transactions on Geoscience and Remote Sensing, 49(11), 4374-4400. doi: http://dx.doi.org/10.1109/TGRS.2011.2144601.</description>
    </entry>
   
    <entry id="product_of_air_temperature_and_omega">
@@ -10196,6 +10427,13 @@ totals are summed to obtain the index.</description>
       <description>The surface called &quot;surface&quot; means the lower boundary of the atmosphere. The sea surface subskin temperature is the temperature at the base of the conductive laminar sub-layer of the ocean surface, that is, at a depth of approximately 1 - 1.5 millimeters below the air-sea interface. For practical purposes, this quantity can be well approximated to the measurement of surface temperature by a microwave radiometer operating in the 6 - 11 gigahertz frequency range, but the relationship is neither direct nor invariant to changing physical conditions or to the specific geometry of the microwave measurements. Measurements of this quantity are subject to a large potential diurnal cycle due to thermal stratification of the upper ocean layer in low wind speed high solar irradiance conditions.</description>
    </entry>
   
+   <entry id="sea_surface_swell_wave_from_direction">
+      <canonical_units>degree</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Swell waves are waves on the ocean surface. &quot;from_direction&quot; is used in the construction X_from_direction and indicates the direction from which the velocity vector of X is coming.</description>
+   </entry>
+  
    <entry id="sea_surface_swell_wave_mean_period_from_variance_spectral_density_first_frequency_moment">
       <canonical_units>s</canonical_units>
       <grib></grib>
@@ -10249,7 +10487,7 @@ totals are summed to obtain the index.</description>
       <canonical_units>K</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description>Sea surface temperature is usually abbreviated as &quot;SST&quot;. It is the temperature of sea water near the surface (including the part under sea-ice, if any), and not the skin temperature, whose standard name is surface_temperature. For the temperature of sea water at a particular depth or layer, a data variable of sea_water_temperature with a vertical coordinate axis should be used.</description>
+      <description>Sea surface temperature is usually abbreviated as &quot;SST&quot;. It is the temperature of sea water near the surface (including the part under sea-ice, if any). More specific terms, namely sea_surface_skin_temperature, sea_surface_subskin_temperature, and surface_termperature are available for the skin, subskin, and interface temperature. respectively. For the temperature of sea water at a particular depth or layer, a data variable of sea_water_temperature with a vertical coordinate axis should be used.’</description>
    </entry>
   
    <entry id="sea_surface_wave_directional_variance_spectral_density">
@@ -10334,6 +10572,13 @@ totals are summed to obtain the index.</description>
       <grib></grib>
       <amip></amip>
       <description>A period is an interval of time, or the time-period of an oscillation. The zero upcrossing period is defined as the time interval between consecutive occasions on which the surface height passes upward above the mean level.</description>
+   </entry>
+  
+   <entry id="sea_surface_wind_wave_from_direction">
+      <canonical_units>degree</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Wind waves are waves on the ocean surface. Wind is defined as a two-dimensional (horizontal) air velocity vector, with no vertical component. (Vertical motion in the atmosphere has the standard name &quot;upward_air_velocity&quot;.) &quot;from_direction&quot; is used in the construction X_from_direction and indicates the direction from which the velocity vector of X is coming.</description>
    </entry>
   
    <entry id="sea_surface_wind_wave_mean_period_from_variance_spectral_density_first_frequency_moment">
@@ -10481,6 +10726,13 @@ totals are summed to obtain the index.</description>
       <grib></grib>
       <amip></amip>
       <description>Potential temperature is the temperature a parcel of air or sea water would have if moved adiabatically to sea level pressure.</description>
+   </entry>
+  
+   <entry id="sea_water_potential_temperature_at_sea_floor">
+      <canonical_units>K</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Potential temperature is the temperature a parcel of air or sea water would have if moved adiabatically to sea level pressure. The potential temperature at the sea floor is that adjacent to the ocean bottom, which would be the deepest grid cell in an ocean model.</description>
    </entry>
   
    <entry id="sea_water_practical_salinity">
@@ -10672,6 +10924,13 @@ totals are summed to obtain the index.</description>
       <grib></grib>
       <amip></amip>
       <description>&quot;Time fraction&quot; means a fraction of a time interval. The interval in question must be specified by the values or bounds of the time coordinate variable associated with the data. &quot;X_time_fraction&quot; means the fraction of the time interval during which X occurs.</description>
+   </entry>
+  
+   <entry id="single_scattering_albedo_in_air_due_to_ambient_aerosol_particles">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;Single scattering albedo&quot; is the fraction of radiation in an incident light beam scattered by the particles of an aerosol reference volume for a given wavelength. It is the ratio of the scattering and the extinction coefficients of the aerosol particles in the reference volume. A coordinate variable with a standard name of radiation_wavelength or radiation_frequency should be included to specify either the wavelength or frequency. &quot;Aerosol&quot; means the system of suspended liquid or solid particles in air (except cloud droplets) and their carrier gas, the air itself. &quot;Ambient_aerosol&quot; means that the aerosol is measured or modelled at the ambient state of pressure, temperature and relative humidity that exists in its immediate environment. &quot;Ambient aerosol particles&quot; are aerosol particles that have taken up ambient water through hygroscopic growth. The extent of hygroscopic growth depends on the relative humidity and the composition of the particles. To specify the relative humidity and temperature at which the quantity described by the standard name applies, provide scalar coordinate variables with standard names of &quot;relative_humidity&quot; and &quot;air_temperature&quot;. The specification of a physical process by the phrase &quot;due_to_&quot; process means that the quantity named is a single term in a sum of terms which together compose the general quantity named by omitting the phrase.</description>
    </entry>
   
    <entry id="sinking_mole_flux_of_aragonite_expressed_as_carbon_in_sea_water">
@@ -10954,6 +11213,13 @@ totals are summed to obtain the index.</description>
       <description>Sound pressure is the difference from the local ambient pressure caused by a sound wave at a particular location and time. Sound pressure level in water is expressed on a logarithmic scale with reference to a sound pressure of 1e-6 Pa. Lp = 20 log10(p/p0) where Lp is the sound pressure level, p is the rms sound pressure and p0 is the reference sound pressure.</description>
    </entry>
   
+   <entry id="source">
+      <canonical_units></canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>An auxiliary coordinate variable with a standard name of source contains string values which describe the method of production of the original data with which the coordinate variable is associated. If the data were model-generated, source should name the model and its version, as specifically as could be useful. If the data are observational, source should characterize them (e.g., &quot;surface observation&quot;, &quot;radiosonde&quot;). The use of source as the standard name for an auxiliary coordinate variable permits the aggregation of data from multiple sources within a single data file.</description>
+   </entry>
+  
    <entry id="specific_dry_energy_of_air">
       <canonical_units>m2 s-2</canonical_units>
       <grib></grib>
@@ -10987,6 +11253,20 @@ totals are summed to obtain the index.</description>
       <grib></grib>
       <amip></amip>
       <description>&quot;specific&quot; means per unit mass.</description>
+   </entry>
+  
+   <entry id="specific_turbulent_kinetic_energy_dissipation_in_sea_water">
+      <canonical_units>W kg-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;Specific&quot; means per unit mass. &quot;Turbulent kinetic energy&quot; is the kinetic energy of chaotic fluctuations of the fluid flow. The dissipation of kinetic energy arises in ocean models as a result of the viscosity of sea water.</description>
+   </entry>
+  
+   <entry id="specific_turbulent_kinetic_energy_of_sea_water">
+      <canonical_units>m2 s-2</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;Specific&quot; means per unit mass. &quot;Turbulent kinetic energy&quot; is the kinetic energy of chaotic fluctuations of the fluid flow.</description>
    </entry>
   
    <entry id="speed_of_sound_in_air">
@@ -11347,10 +11627,10 @@ totals are summed to obtain the index.</description>
    </entry>
   
    <entry id="surface_downward_heat_flux_in_snow">
-      <canonical_units>Wm-2</canonical_units>
+      <canonical_units>W m-2</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description>&quot;Downward&quot; indicates a vector component which is positive when directed downward (negative upward).  In accordance with common usage in geophysical disciplines, &quot;flux&quot; implies per unit area, called &quot;flux density&quot; in physics.  The surface called &quot;surface&quot; means the lower boundary of the atmosphere.</description>
+      <description>&quot;Downward&quot; indicates a vector component which is positive when directed downward (negative upward). In accordance with common usage in geophysical disciplines, &quot;flux&quot; implies per unit area, called &quot;flux density&quot; in physics. The surface called &quot;surface&quot; means the lower boundary of the atmosphere.</description>
    </entry>
   
    <entry id="surface_downward_latent_heat_flux">
@@ -12351,10 +12631,10 @@ final_air_pressure_of_lifted_parcel should be specified to indicate the specific
    </entry>
   
    <entry id="tendency_of_air_temperature_due_to_radiative_heating">
-      <canonical_units></canonical_units>
+      <canonical_units>K s-1</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description>&quot;Content&quot; indicates a quantity per unit area.  The &quot;atmosphere content&quot; of a quantity refers to the vertical integral from the surface to the top of the atmosphere. For the content between specified levels in the atmosphere, standard names including content_of_atmosphere_layer are used.  The specification of a physical process by the phrase due_to_process means that the quantity named is a  single term in a sum of terms which together compose the general quantity  named by omitting the phrase.  &quot;tendency_of_X&quot; means derivative of X with respect to time.  &quot;Wet deposition&quot; means deposition by precipitation. The chemical formula for acetic_acid is CH3COOH. The IUPAC name for acetic acid is ethanoic acid.</description>
+      <description>The specification of a physical process by the phrase due_to_process means that the quantity named is a single term in a sum of terms which together compose the general quantity named by omitting the phrase. &quot;tendency_of_X&quot; means derivative of X with respect to time. Air temperature is the bulk temperature of the air, not the surface (skin) temperature.</description>
    </entry>
   
    <entry id="tendency_of_air_temperature_due_to_shortwave_heating">
@@ -16193,6 +16473,13 @@ final_air_pressure_of_lifted_parcel should be specified to indicate the specific
       <description>&quot;tendency_of_X&quot; means derivative of X with respect to time. Altitude is the (geometric) height above the geoid, which is the reference geopotential surface. The geoid is similar to mean sea level. &quot;Bedrock&quot; is the solid Earth surface beneath land ice or ocean water.</description>
    </entry>
   
+   <entry id="tendency_of_change_in_land_ice_amount">
+      <canonical_units>kg m-2 s-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;Amount&quot; means mass per unit area. Zero change in land ice amount is an arbitrary level. &quot;Land ice&quot; means glaciers, ice-caps and ice-sheets resting on bedrock and also includes ice-shelves. &quot;tendency_of_X&quot; means derivative of X with respect to time.</description>
+   </entry>
+  
    <entry id="tendency_of_dry_energy_content_of_atmosphere_layer">
       <canonical_units>W m-2</canonical_units>
       <grib></grib>
@@ -17371,10 +17658,10 @@ final_air_pressure_of_lifted_parcel should be specified to indicate the specific
    </entry>
   
    <entry id="tendency_of_specific_humidity_due_to_stratiform_cloud_and_precipitation_and_boundary_layer_mixing">
-      <canonical_units>K s-1</canonical_units>
+      <canonical_units>s-1</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description>Specific humidity is the mass fraction of water vapor in (moist) air.  In an atmosphere model, stratiform cloud is that produced by large-scale convergence (not the convection schemes).  The specification of a physical process by the phrase due_to_process means that the quantity named is a  single term in a sum of terms which together compose the general quantity  named by omitting the phrase.  &quot;tendency_of_X&quot; means derivative of X with respect to time.  &quot;specific&quot; means per unit mass.</description>
+      <description>Specific humidity is the mass fraction of water vapor in (moist) air. In an atmosphere model, stratiform cloud is that produced by large-scale convergence (not the convection schemes). The specification of a physical process by the phrase due_to_process means that the quantity named is a single term in a sum of terms which together compose the general quantity named by omitting the phrase. &quot;tendency_of_X&quot; means derivative of X with respect to time. &quot;specific&quot; means per unit mass.</description>
    </entry>
   
    <entry id="tendency_of_specific_humidity_due_to_stratiform_precipitation">
@@ -17552,11 +17839,32 @@ final_air_pressure_of_lifted_parcel should be specified to indicate the specific
       <description></description>
    </entry>
   
+   <entry id="time_of_maximum_flood_depth">
+      <canonical_units>s</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The quantity with standard name time_of_maximum_flood_depth is the time elapsed between the breaking of a levee (origin of flood water simulation) and the instant when the flood depth reaches its maximum during the simulation for a given point in space. Flood water is water that covers land which is normally not covered by water.</description>
+   </entry>
+  
    <entry id="time_sample_difference_due_to_collocation">
       <canonical_units>s</canonical_units>
       <grib></grib>
       <amip></amip>
       <description>time_sample_difference_due_to_collocation is the difference in time between two events that are collocated. Two events are deemed to be collocated based on some set of spatial, temporal, and viewing geometry criteria.</description>
+   </entry>
+  
+   <entry id="time_when_flood_water_falls_below_threshold">
+      <canonical_units>s</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The quantity with standard name time_when_flood_water_falls_below_threshold is the time elapsed between the breaking of a levee (origin of flood water simulation) and the instant when the depth falls below a given threshold for the last time, having already risen to its maximum depth, at a given point in space. If a threshold is supplied, it should be specified by associating a coordinate variable or scalar coordinate variable with the data variable and giving the coordinate variable a standard name of flood_water_thickness. The values of the coordinate variable are the threshold values for the corresponding subarrays of the data variable. If no threshold is specified, its value is taken to be zero. Flood water is water that covers land which is normally not covered by water.</description>
+   </entry>
+  
+   <entry id="time_when_flood_water_rises_above_threshold">
+      <canonical_units>s</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The quantity with standard name time_when_flood_water_rises_above_threshold is the time elapsed between the breaking of a levee (origin of flood water simulation) and the instant when the depth first rises above a given threshold at a given point in space. If a threshold is supplied, it should be specified by associating a coordinate variable or scalar coordinate variable with the data variable and giving the coordinate variable a standard name of flood_water_thickness. The values of the coordinate variable are the threshold values for the corresponding subarrays of the data variable. If no threshold is specified, its value is taken to be zero. Flood water is water that covers land which is normally not covered by water.</description>
    </entry>
   
    <entry id="toa_adjusted_longwave_forcing">
@@ -17967,11 +18275,39 @@ monitored sensor. This TOA brightness temperature difference is a measure of the
       <description>&quot;Content&quot; indicates a quantity per unit area. The &quot;troposphere content&quot; of a quantity refers to the vertical integral from the surface to the tropopause. For the content between specified levels in the atmosphere, standard names including content_of_atmosphere_layer are used. The chemical formula for suflur_dioxide is SO2.</description>
    </entry>
   
+   <entry id="turbulent_mixing_length_of_sea_water">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>&quot;Turbulent mixing length&quot; is used in models to describe the average distance over which a fluid parcel can travel while retaining properties that allow the parcel to be distinguished from its immediate environonment. &quot;Turbulent mixing&quot; means chaotic fluctuations of the fluid flow.</description>
+   </entry>
+  
+   <entry id="ultraviolet_index">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The &quot;Ultraviolet Index&quot; (UVI) is a measure of the amount of solar ultraviolet radiation that reaches the surface of the earth depending on factors such as time of day and cloud cover. It is often used to alert the public of the need to limit sun exposure and use sun creams to protect the skin. Each point on the Index scale is equivalent to 25 mW m-2 of UV radiation (reference: Australian Bureau of Meteorology, http://www.bom.gov.au/uv/about_uv_index.shtml). The UVI range is expressed as a numeric value from 0 to 20 and sometimes graphically as bands of color indicating the attendant risk of skin damage. A UVI of 0-2 is described as &#39;Low&#39; (represented graphically in green); a UVI of 11 or greater is described as &quot;Extreme&quot; (represented graphically in purple). The higher the UVI, the greater the potential health risk to humans and the less time it takes for harm to occur. To specify the amount of cloud cover at which the data variable applies, provide a scalar coordinate variable with standard name &quot;cloud_area_fraction&quot;. Standard names are also defined for the quantities ultraviolet_index_assuming_clear_sky and ultraviolet_index_assuming_overcast_sky.</description>
+   </entry>
+  
+   <entry id="ultraviolet_index_assuming_clear_sky">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The &quot;Ultraviolet Index&quot; (UVI) is a measure of the amount of solar ultraviolet radiation that reaches the surface of the earth depending on factors such as time of day and cloud cover. It is often used to alert the public of the need to limit sun exposure and use sun creams to protect the skin. Each point on the Index scale is equivalent to 25 mW m-2 of UV radiation (reference: Australian Bureau of Meteorology, http://www.bom.gov.au/uv/about_uv_index.shtml). The UVI range is expressed as a numeric value from 0 to 20 and sometimes graphically as bands of color indicating the attendant risk of skin damage. A UVI of 0-2 is described as &#39;Low&#39; (represented graphically in green); a UVI of 11 or greater is described as &quot;Extreme&quot; (represented graphically in purple). The higher the UVI, the greater the potential health risk to humans and the less time it takes for harm to occur. A phrase &quot;assuming_condition&quot; indicates that the named quantity is the value which would obtain if all aspects of the system were unaltered except for the assumption of the circumstances specified by the condition. Standard names are also defined for the quantities ultraviolet_index and ultraviolet_index_assuming_overcast_sky.</description>
+   </entry>
+  
+   <entry id="ultraviolet_index_assuming_overcast_sky">
+      <canonical_units>1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The &quot;Ultraviolet Index&quot; (UVI) is a measure of the amount of solar ultraviolet radiation that reaches the surface of the earth depending on factors such as time of day and cloud cover. It is often used to alert the public of the need to limit sun exposure and use sun creams to protect the skin. Each point on the Index scale is equivalent to 25 mW m-2 of UV radiation (reference: Australian Bureau of Meteorology, http://www.bom.gov.au/uv/about_uv_index.shtml). The UVI range is expressed as a numeric value from 0 to 20 and sometimes graphically as bands of color indicating the attendant risk of skin damage. A UVI of 0-2 is described as &#39;Low&#39; (represented graphically in green); a UVI of 11 or greater is described as &quot;Extreme&quot; (represented graphically in purple). The higher the UVI, the greater the potential health risk to humans and the less time it takes for harm to occur. A phrase &quot;assuming_condition&quot; indicates that the named quantity is the value which would obtain if all aspects of the system were unaltered except for the assumption of the circumstances specified by the condition. &quot;Overcast&quot; means a fractional sky cover of 95% or more when at least a portion of this amount is attributable to clouds or obscuring phenomena (such as haze, dust, smoke, fog, etc.) aloft. (Reference: AMS Glossary: http://glossary.ametsoc.org/wiki/Main_Page). Standard names are also defined for the quantities ultraviolet_index and ultraviolet_index_assuming_clear_sky.</description>
+   </entry>
+  
    <entry id="upward_air_velocity">
       <canonical_units>m s-1</canonical_units>
       <grib>40</grib>
       <amip></amip>
-      <description>A velocity is a vector quantity. &quot;Upward&quot; indicates a vector component which is positive when directed upward (negative downward). Upward air velocity is the vertical component of the 3D air velocity vector.</description>
+      <description>A velocity is a vector quantity. &quot;Upward&quot; indicates a vector component which is positive when directed upward (negative downward). Upward air velocity is the vertical component of the 3D air velocity vector. The standard name downward_air_velocity may be used for a vector component with the opposite sign convention.</description>
    </entry>
   
    <entry id="upward_dry_static_energy_flux_due_to_diffusion">
@@ -18098,6 +18434,13 @@ monitored sensor. This TOA brightness temperature difference is a measure of the
       <grib></grib>
       <amip></amip>
       <description>&quot;Upward&quot; indicates a vector component which is positive when directed upward (negative downward). The sensible heat flux, also called &quot;turbulent&quot; heat flux, is the exchange of heat caused by the motion of air. In accordance with common usage in geophysical disciplines, &quot;flux&quot; implies per unit area, called &quot;flux density&quot; in physics.</description>
+   </entry>
+  
+   <entry id="upward_upward_derivative_of_geopotential">
+      <canonical_units>s-2</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A quantity with standard name Xward_Yward_derivative_of_geopotential is a second spatial derivative of geopotential in the direction specified by X and Y, i.e., d2P/dXdY. Geopotential is the sum of the specific gravitational potential energy relative to the geoid and the specific centripetal potential energy. &quot;Upward&quot; indicates a vector component which is positive when directed upward (negative downward). &quot;component_derivative_of_X&quot; means derivative of X with respect to distance in the component direction, which may be &quot;northward&quot;, &quot;southward&quot;, &quot;eastward&quot;, &quot;westward&quot;, &quot;x&quot; or &quot;y&quot;. The last two indicate derivatives along the axes of the grid, in the case where they are not true longitude and latitude.</description>
    </entry>
   
    <entry id="upward_water_vapor_flux_in_air">
@@ -18343,6 +18686,13 @@ monitored sensor. This TOA brightness temperature difference is a measure of the
       <grib></grib>
       <amip></amip>
       <description>The volume extinction coefficient is the fractional change of radiative flux per unit path length. Extinction is the sum of absorption and scattering, sometimes called &quot;attenuation&quot;. &quot;Extinction&quot; is the term most commonly used at optical wavelengths whereas &quot;attenuation&quot; is more often used at radio and radar wavelengths. &quot;Aerosol&quot; means the system of suspended liquid or solid particles in air (except cloud droplets) and their carrier gas, the air itself. &quot;Ambient_aerosol&quot; means that the aerosol is measured or modelled at the ambient state of pressure, temperature and relative humidity that exists in its immediate environment. &quot;Ambient aerosol particles&quot; are aerosol particles that have taken up ambient water through hygroscopic growth. The extent of hygroscopic growth depends on the relative humidity and the composition of the particles. The specification of a physical process by the phrase &quot;due_to_&quot; process means that the quantity named is a single term in a sum of terms which together compose the general quantity named by omitting the phrase.</description>
+   </entry>
+  
+   <entry id="volume_extinction_coefficient_in_air_due_to_cloud_particles">
+      <canonical_units>m-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The volume extinction coefficient is the fractional change of radiative flux per unit path length. Extinction is the sum of absorption and scattering, sometimes called &quot;attenuation&quot;. &quot;Extinction&quot; is the term most commonly used at optical wavelengths whereas &quot;attenuation&quot; is more often used at radio and radar wavelengths. The specification of a physical process by the phrase &quot;due_to_&quot; process means that the quantity named is a single term in a sum of terms which together compose the general quantity named by omitting the phrase. &quot;Cloud particles&quot; means suspended liquid or ice water droplets. A coordinate of radiation_wavelength or radiation_frequency should be included to specify either the wavelength or frequency.</description>
    </entry>
   
    <entry id="volume_fraction_of_clay_in_soil">
@@ -18611,6 +18961,13 @@ monitored sensor. This TOA brightness temperature difference is a measure of the
       <description>Water vapor saturation deficit is the difference between the saturationwater vapor partial pressure and the actual water vapor partial pressure in air.</description>
    </entry>
   
+   <entry id="water_volume_transport_in_river_channel">
+      <canonical_units>m3 s-1</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The water flux or volume transport in rivers is the amount of water flowing in the river channel and flood plain. &quot;Water&quot; means water in all phases.</description>
+   </entry>
+  
    <entry id="water_volume_transport_into_sea_water_from_rivers">
       <canonical_units>m3 s-1</canonical_units>
       <grib></grib>
@@ -18623,6 +18980,20 @@ monitored sensor. This TOA brightness temperature difference is a measure of the
       <grib></grib>
       <amip></amip>
       <description>Frequency is the number of oscillations of a wave per unit time.</description>
+   </entry>
+  
+   <entry id="westward_upward_derivative_of_geopotential">
+      <canonical_units>s-2</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A quantity with standard name Xward_Yward_derivative_of_geopotential is a second spatial derivative of geopotential, P, in the direction specified by X and Y, i.e., d2P/dXdY. Geopotential is the sum of the specific gravitational potential energy relative to the geoid and the specific centripetal potential energy. &quot;Westward&quot; indicates a vector component which is positive when directed westward (negative eastward). &quot;Upward&quot; indicates a vector component which is positive when directed upward (negative downward). &quot;component_derivative_of_X&quot; means derivative of X with respect to distance in the component direction, which may be &quot;northward&quot;, &quot;southward&quot;, &quot;eastward&quot;, &quot;westward&quot;, &quot;x&quot; or &quot;y&quot;. The last two indicate derivatives along the axes of the grid, in the case where they are not true longitude and latitude.</description>
+   </entry>
+  
+   <entry id="westward_westward_derivative_of_geopotential">
+      <canonical_units>s-2</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>A quantity with standard name Xward_Yward_derivative_of_geopotential is a second spatial derivative of geopotential, P, in the direction specified by X and Y, i.e., d2P/dXdY. Geopotential is the sum of the specific gravitational potential energy relative to the geoid and the specific centripetal potential energy. &quot;Westward&quot; indicates a vector component which is positive when directed westward (negative eastward). &quot;component_derivative_of_X&quot; means derivative of X with respect to distance in the component direction, which may be &quot;northward&quot;, &quot;southward&quot;, &quot;eastward&quot;, &quot;westward&quot;, &quot;x&quot; or &quot;y&quot;. The last two indicate derivatives along the axes of the grid, in the case where they are not true longitude and latitude.</description>
    </entry>
   
    <entry id="wet_bulb_temperature">
@@ -19658,6 +20029,54 @@ monitored sensor. This TOA brightness temperature difference is a measure of the
     <entry_id>atmosphere_convective_available_potential_energy</entry_id>
   </alias>
   
+  <alias id="net_primary_mole_productivity_of_carbon_by_diatoms">
+    <entry_id>net_primary_mole_productivity_of_biomass_expressed_as_carbon_by_diatoms</entry_id>
+  </alias>
+  
+  <alias id="gross_primary_productivity_of_carbon">
+    <entry_id>gross_primary_productivity_of_biomass_expressed_as_carbon</entry_id>
+  </alias>
+  
+  <alias id="net_primary_mole_productivity_of_carbon_by_calcareous_phytoplankton">
+    <entry_id>net_primary_mole_productivity_of_biomass_expressed_as_carbon_by_calcareous_phytoplankton</entry_id>
+  </alias>
+  
+  <alias id="net_primary_mole_productivity_of_carbon_by_miscellaneous_phytoplankton">
+    <entry_id>net_primary_mole_productivity_of_biomass_expressed_as_carbon_by_miscellaneous_phytoplankton</entry_id>
+  </alias>
+  
+  <alias id="net_primary_mole_productivity_of_carbon_by_diazotrophs">
+    <entry_id>net_primary_mole_productivity_of_biomass_expressed_as_carbon_by_diazotrophs</entry_id>
+  </alias>
+  
+  <alias id="net_primary_mole_productivity_of_carbon_by_phytoplankton">
+    <entry_id>net_primary_mole_productivity_of_biomass_expressed_as_carbon_by_phytoplankton</entry_id>
+  </alias>
+  
+  <alias id="net_primary_mole_productivity_of_carbon_due_to_nitrate_utilization">
+    <entry_id>net_primary_mole_productivity_of_biomass_expressed_as_carbon_due_to_nitrate_utilization</entry_id>
+  </alias>
+  
+  <alias id="net_primary_productivity_of_carbon">
+    <entry_id>net_primary_productivity_of_biomass_expressed_as_carbon</entry_id>
+  </alias>
+  
+  <alias id="net_primary_productivity_of_carbon_accumulated_in_leaves">
+    <entry_id>net_primary_productivity_of_biomass_expressed_as_carbon_accumulated_in_leaves</entry_id>
+  </alias>
+  
+  <alias id="net_primary_productivity_of_carbon_accumulated_in_roots">
+    <entry_id>net_primary_productivity_of_biomass_expressed_as_carbon_accumulated_in_roots</entry_id>
+  </alias>
+  
+  <alias id="net_primary_productivity_of_carbon_accumulated_in_wood">
+    <entry_id>net_primary_productivity_of_biomass_expressed_as_carbon_accumulated_in_wood</entry_id>
+  </alias>
+  
+  <alias id="net_primary_mole_productivity_of_carbon_by_picophytoplankton">
+    <entry_id>net_primary_mole_productivity_of_biomass_expressed_as_carbon_by_picophytoplankton</entry_id>
+  </alias>
+  
   <alias id="tendency_of_atmosphere_mass_content_of_black_carbon_dry_aerosol_due_to_dry_deposition">
     <entry_id>tendency_of_atmosphere_mass_content_of_elemental_carbon_dry_aerosol_particles_due_to_dry_deposition</entry_id>
   </alias>
@@ -20224,4 +20643,3 @@ monitored sensor. This TOA brightness temperature difference is a measure of the
  
 
 </standard_name_table>
-
