@@ -32,7 +32,7 @@ def get_sea_names():
     global _SEA_NAMES
     if _SEA_NAMES is None:
         buf = {}
-        with open(resource_filename('cc_plugin_ncei', 'data/seanames.csv'), 'r') as f:
+        with open(resource_filename('compliance_checker', 'data/seanames.csv'), 'r') as f:
             reader = csv.reader(f)
             for code, sea_name in reader:
                 buf[sea_name] = code
