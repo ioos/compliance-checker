@@ -1,0 +1,35 @@
+netcdf multi-timeseries-orthogonal {
+dimensions:
+    instance = 1;
+    time = 2;
+variables:
+    double time(time);
+        time:standard_name = "time";
+        time:long_name = "Time";
+        time:axis = "T";
+        time:units = "seconds since 1970-01-01T00:00:00Z";
+    float lat(instance);
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+        lat:axis = "Y";
+        lat:long_name = "Latitude";
+    float lon(instance);
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+        lon:axis = "X";
+        lon:long_name = "Longitude";
+    float z(instance);
+        z:standard_name = "depth";
+        z:positive = "down";
+        z:units = "m";
+        z:long_name = "Depth below surface";
+
+    float temperature(instance, time);
+        temperature:standard_name = "sea_water_temperature";
+        temperature:units = "deg_C";
+        temperature:long_name = "Seawater Temperature";
+        temperature:coordinates = "time lat lon z";
+
+}
+
+
