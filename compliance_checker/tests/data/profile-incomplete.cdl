@@ -1,0 +1,37 @@
+netcdf profile-incomplete {
+dimensions:
+    depth = 5;
+    profile = 2;
+variables:
+    double time(profile);
+        time:standard_name = "time";
+        time:long_name = "Time";
+        time:axis = "T";
+        time:units = "seconds since 1970-01-01T00:00:00Z";
+    float lat(profile);
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+        lat:axis = "Y";
+        lat:long_name = "Latitude";
+    float lon(profile);
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+        lon:axis = "X";
+        lon:long_name = "Longitude";
+    float depth(profile, depth);
+        depth:standard_name = "depth";
+        depth:positive = "down";
+        depth:units = "m";
+        depth:long_name = "Depth below surface";
+
+    float temperature(profile, depth);
+        temperature:standard_name = "sea_water_temperature";
+        temperature:units = "deg_C";
+        temperature:long_name = "Seawater Temperature";
+        temperature:coordinates = "time lat lon z";
+
+}
+
+
+
+
