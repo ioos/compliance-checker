@@ -634,10 +634,11 @@ class TestCF(unittest.TestCase):
         self.assertFalse(results[0].value)
         self.assertTrue(results[1].value)
 
-    def test_check_alternative_coordinates(self):
-        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        results = self.cf.check_alternative_coordinates(dataset)
-        self.assertTrue(results[0].value)
+    # def test_check_alternative_coordinates(self):
+    #     # DEPRECATED
+    #     dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
+    #     results = self.cf.check_alternative_coordinates(dataset)
+    #     self.assertTrue(results[0].value)
 
     # def test_check_cell_boundaries(self):
     #    dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
