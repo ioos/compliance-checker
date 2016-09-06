@@ -1914,30 +1914,6 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(result)
         return ret_val
 
-    def check_alternative_coordinates(self, ds):
-        """
-        6.2 In some situations a dimension may have alternative sets of coordinates values. Since there can only be
-        one coordinate variable for the dimension (the variable with the same name as the dimension), any alternative
-        sets of values have to be stored in auxiliary coordinate variables. For such alternative coordinate variables,
-        there are no mandatory attributes, but they may have any of the attributes allowed for coordinate variables.
-        """
-        ret_val = []
-        coordinate_list = []
-
-        for name, var in ds.variables.items():
-            if hasattr(var, 'coordinates'):
-                for coordinate in getattr(var, 'coordinates', '').split(' '):
-                    coordinate_list.append(coordinate)
-        for name, var in ds.variables.items():
-            if name in coordinate_list and var.ndim == 1 and name not in ds.dimensions:
-                result = Result(BaseCheck.MEDIUM,
-                                True,
-                                ('§6.2 Alternative Coordinates', name, 'alternative_coordinates')
-                                )
-                ret_val.append(result)
-
-        return ret_val
-
     ###############################################################################
     #
     # CHAPTER 7: Data Representative of Cells
