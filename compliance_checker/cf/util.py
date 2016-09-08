@@ -1,4 +1,6 @@
 import itertools
+import urllib
+import requests
 from copy import deepcopy
 from collections import defaultdict
 from lxml import etree
@@ -256,13 +258,14 @@ class StandardNameTable(object):
             return vals[0].text
 
     def __init__(self, resource_name):
-        resource_text = get_data("compliance_checker", "data/cf-standard-name-table.xml")
+        resource_text = get_data("compliance_checker", resource_name)
         parser = etree.XMLParser(remove_blank_text=True)
         self._root = etree.fromstring(resource_text, parser)
 
         # generate and save a list of all standard names in file
         self._names = [node.get('id') for node in self._root.iter('entry')]
         self._aliases = [node.get('id') for node in self._root.iter('alias')]
+        self._version = self._root.xpath('version_number')[0].text
 
     def __len__(self):
         return len(self._names) + len(self._aliases)
@@ -292,6 +295,27 @@ class StandardNameTable(object):
 
     def __iter__(self):
         return iter(itertools.chain(self._names, self._aliases))
+
+
+def download_cf_standard_name_table(version, location=None):
+    '''
+    Downloads the specified CF standard name table version and saves it to file
+
+    :param str version: CF standard name table version number (i.e 34)
+    :param str location: Path/filename to write downloaded xml file to
+    '''
+
+    if location is None:  # This case occurs when updating the packaged version from command line
+        location = 'compliance_checker/data/cf-standard-name-table.xml'
+
+    url = "http://cfconventions.org/Data/cf-standard-names/%s/src/cf-standard-name-table.xml" % (version)
+    rhead = requests.head(url, allow_redirects=True)
+    if rhead.status_code == 200:
+        print "Downloading cf-standard-names table version %s from: %s" % (version, url)
+        urllib.urlretrieve(url, location)
+    else:
+        raise Exception("Could not find specified cf-standard-names table version %s from: %s" % (version, url))
+    return
 
 
 def units_known(units):
@@ -390,5 +414,3 @@ def is_vertical_coordinate(var_name, var):
     if not is_pressure:
         satisfied |= getattr(var, 'positive', '').lower() in ('up', 'down')
     return satisfied
-
-
