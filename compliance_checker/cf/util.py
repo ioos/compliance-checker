@@ -1,5 +1,8 @@
 import itertools
-import urllib
+try:
+    from urllib import urlretrieve
+except:
+    from urllib.request import urlretrieve
 import requests
 from copy import deepcopy
 from collections import defaultdict
@@ -312,7 +315,7 @@ def download_cf_standard_name_table(version, location=None):
     rhead = requests.head(url, allow_redirects=True)
     if rhead.status_code == 200:
         print("Downloading cf-standard-names table version {0} from: {1}".format(version, url))
-        urllib.urlretrieve(url, location)
+        urlretrieve(url, location)
     else:
         raise Exception("Could not find specified cf-standard-names table version {0} from: {1}".format(version, url))
     return
