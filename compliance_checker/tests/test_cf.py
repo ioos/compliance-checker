@@ -2,7 +2,7 @@
 
 from compliance_checker.suite import CheckSuite
 from compliance_checker.cf import CFBaseCheck, dimless_vertical_coordinates
-from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal, StandardNameTable, download_cf_standard_name_table
+from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal, StandardNameTable, create_cached_data_dir, download_cf_standard_name_table
 from netCDF4 import Dataset
 from tempfile import gettempdir
 from compliance_checker.tests.resources import STATIC_FILES
@@ -252,13 +252,14 @@ class TestCF(unittest.TestCase):
         Test that a user can download a specific standard name table
         """
         version = '35'
-        location = 'compliance_checker/data/cf-standard-name-table-test-{0}.xml'.format(version)
+
+        data_directory = create_cached_data_dir()
+        location = os.path.join(data_directory, 'cf-standard-name-table-test-{0}.xml'.format(version))
         download_cf_standard_name_table(version, location)
 
         # Test that the file now exists in location and is the right version
         self.assertTrue(os.path.isfile(location))
-        resource_name = location.split('compliance_checker/')[1]  # relative to package
-        std_names = StandardNameTable(resource_name)
+        std_names = StandardNameTable(location)
         self.assertEqual(std_names._version, version)
         self.addCleanup(os.remove, location)
 

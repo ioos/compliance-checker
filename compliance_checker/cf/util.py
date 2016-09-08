@@ -1,15 +1,13 @@
 import itertools
-try:
-    from urllib import urlretrieve
-except:
-    from urllib.request import urlretrieve
 import requests
+import os
 from copy import deepcopy
 from collections import defaultdict
 from lxml import etree
 from cf_units import Unit
 from netCDF4 import Dimension, Variable
 from pkgutil import get_data
+from pkg_resources import resource_filename
 
 # copied from paegan
 # paegan may depend on these later
@@ -260,8 +258,16 @@ class StandardNameTable(object):
 
             return vals[0].text
 
-    def __init__(self, resource_name):
-        resource_text = get_data("compliance_checker", resource_name)
+    def __init__(self, cached_location=None):
+        if cached_location:
+            try:
+                with open(cached_location, 'r') as fp:
+                    resource_text = fp.read()
+            except Exception:
+                resource_text = get_data("compliance_checker", "data/cf-standard-name-table.xml")
+        else:
+            resource_text = get_data("compliance_checker", "data/cf-standard-name-table.xml")
+
         parser = etree.XMLParser(remove_blank_text=True)
         self._root = etree.fromstring(resource_text, parser)
 
@@ -309,17 +315,30 @@ def download_cf_standard_name_table(version, location=None):
     '''
 
     if location is None:  # This case occurs when updating the packaged version from command line
-        location = 'compliance_checker/data/cf-standard-name-table.xml'
+        location = resource_filename('compliance_checker', 'data/cf-standard-name-table.xml')
 
     url = "http://cfconventions.org/Data/cf-standard-names/{0}/src/cf-standard-name-table.xml".format(version)
-    rhead = requests.head(url, allow_redirects=True)
-    if rhead.status_code == 200:
+    r = requests.get(url, allow_redirects=True)
+    if r.status_code == 200:
         print("Downloading cf-standard-names table version {0} from: {1}".format(version, url))
-        urlretrieve(url, location)
+        with open(location, 'wb') as f:
+            f.write(r.content)
     else:
-        raise Exception("Could not find specified cf-standard-names table version {0} from: {1}".format(version, url))
+        r.raise_for_status()
     return
 
+def create_cached_data_dir():
+    '''
+    Returns the path to the data directory to download CF standard names.
+    Use $XDG_DATA_HOME.
+    '''
+    writable_directory = os.path.join(os.path.expanduser('~'), '.local', 'share')
+    data_directory = os.path.join(os.environ.get("XDG_DATA_HOME", writable_directory),
+                                  'compliance-checker')
+    if not os.path.isdir(data_directory):
+        os.mkdir(data_directory)
+
+    return data_directory
 
 def units_known(units):
     try:

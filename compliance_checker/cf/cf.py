@@ -9,7 +9,7 @@ import os
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
-from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, download_cf_standard_name_table, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
+from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, create_cached_data_dir, download_cf_standard_name_table, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
 
 try:
     basestring
@@ -133,7 +133,7 @@ class CFBaseCheck(BaseCheck):
         self._metadata_vars  = defaultdict(list)
         self._boundary_vars  = defaultdict(dict)
 
-        self._std_names      = StandardNameTable('data/cf-standard-name-table.xml')
+        self._std_names      = StandardNameTable()
 
     ################################################################################
     #
@@ -159,7 +159,7 @@ class CFBaseCheck(BaseCheck):
 
         # Try to parse this attribute to get version
         version = None
-        if 'CF Standard Name Table' in standard_name_vocabulary:
+        if 'cf standard name table' in standard_name_vocabulary.lower():
             version = standard_name_vocabulary.split()[-1]
         else:
             # Can't parse the attribute, use the packaged version
@@ -174,12 +174,12 @@ class CFBaseCheck(BaseCheck):
 
         # Try to download the version specified
         try:
-            location = 'compliance_checker/data/cf-standard-name-table-{0}.xml'.format(version)  # (don't overwrite package location)
+            data_directory = create_cached_data_dir()
+            location = os.path.join(data_directory, 'cf-standard-name-table-test-{0}.xml'.format(version))
             # Did we already download this before?
             if not os.path.isfile(location):
                 download_cf_standard_name_table(version, location)
-            resource_name = location.split('compliance_checker/')[1]  # relative to package
-            self._std_names = StandardNameTable(resource_name)
+            self._std_names = StandardNameTable(location)
             return 1
         except Exception:
             # There was an error downloading the CF table. That's ok, we'll just use the packaged version
