@@ -174,7 +174,7 @@ class CFBaseCheck(BaseCheck):
 
         # Try to download the version specified
         try:
-            location = 'compliance_checker/data/cf-standard-name-table-%s.xml' % (version)  # (don't overwrite package location)
+            location = 'compliance_checker/data/cf-standard-name-table-{0}.xml'.format(version)  # (don't overwrite package location)
             # Did we already download this before?
             if not os.path.isfile(location):
                 download_cf_standard_name_table(version, location)

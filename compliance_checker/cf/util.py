@@ -308,13 +308,13 @@ def download_cf_standard_name_table(version, location=None):
     if location is None:  # This case occurs when updating the packaged version from command line
         location = 'compliance_checker/data/cf-standard-name-table.xml'
 
-    url = "http://cfconventions.org/Data/cf-standard-names/%s/src/cf-standard-name-table.xml" % (version)
+    url = "http://cfconventions.org/Data/cf-standard-names/{0}/src/cf-standard-name-table.xml".format(version)
     rhead = requests.head(url, allow_redirects=True)
     if rhead.status_code == 200:
-        print "Downloading cf-standard-names table version %s from: %s" % (version, url)
+        print("Downloading cf-standard-names table version {0} from: {1}".format(version, url))
         urllib.urlretrieve(url, location)
     else:
-        raise Exception("Could not find specified cf-standard-names table version %s from: %s" % (version, url))
+        raise Exception("Could not find specified cf-standard-names table version {0} from: {1}".format(version, url))
     return
 
 

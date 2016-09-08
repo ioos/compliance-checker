@@ -252,7 +252,7 @@ class TestCF(unittest.TestCase):
         Test that a user can download a specific standard name table
         """
         version = '35'
-        location = 'compliance_checker/data/cf-standard-name-table-test-%s.xml' % (version)
+        location = 'compliance_checker/data/cf-standard-name-table-test-{0}.xml'.format(version)
         download_cf_standard_name_table(version, location)
 
         # Test that the file now exists in location and is the right version
