@@ -336,7 +336,7 @@ def create_cached_data_dir():
     data_directory = os.path.join(os.environ.get("XDG_DATA_HOME", writable_directory),
                                   'compliance-checker')
     if not os.path.isdir(data_directory):
-        os.mkdir(data_directory)
+        os.makedirs(data_directory)
 
     return data_directory
 
