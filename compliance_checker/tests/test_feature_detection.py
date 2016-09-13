@@ -159,4 +159,12 @@ class TestFeatureDetection(TestCase):
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_3d_regular_grid(nc, variable), "{} is 3d regular grid".format(variable)
 
-
+    def test_boundaries(self):
+        '''
+        Ensures that boundary variables are not listed as geophysical variables
+        '''
+        with Dataset(resources.STATIC_FILES['grid-boundaries']) as nc:
+            assert 'lat_bnds' not in util.get_geophysical_variables(nc)
+            assert 'lon_bnds' not in util.get_geophysical_variables(nc)
+            assert 'lat_bnds' in util.get_cell_boundary_variables(nc)
+            assert 'lon_bnds' in util.get_cell_boundary_variables(nc)
