@@ -5,6 +5,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import sys
+import os
+import subprocess
 import inspect
 import itertools
 from operator import itemgetter
@@ -22,6 +24,7 @@ from datetime import datetime
 import requests
 import textwrap
 import codecs
+from tempfile import gettempdir
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
@@ -489,18 +492,30 @@ class CheckSuite(object):
             raise ValueError("Unrecognized XML root element: %s" % xml_doc.tag)
         return ds
 
+    def generate_dataset(self, cdl_path):
+        '''
+        Use ncgen to generate a netCDF file from a .cdl file
+        Returns the path to the generated netcdf file
+
+        :param str cdl_path: Absolute path to cdl file that is used to generate netCDF file
+        '''
+        if '.cdl' in cdl_path:  # it's possible the filename doesn't have the .cdl extension
+            ds_str = cdl_path.replace('.cdl', '.nc')
+        else:
+            ds_str = cdl_path + '.nc'
+        subprocess.call(['ncgen', '-o', ds_str, cdl_path])
+        return ds_str
+
     def load_dataset(self, ds_str):
         """
         Helper method to load a dataset or SOS GC/DS url.
         """
         ds = None
-
         # try to figure out if this is a local NetCDF Dataset, a remote one, or an SOS GC/DS url
         doc = None
         pr = urlparse(ds_str)
         if pr.netloc:       # looks like a remote url
             rhead = requests.head(ds_str, allow_redirects=True)
-
             # if we get a 400 here, it's likely a Dataset openable OpenDAP url
             if rhead.status_code == 400:
                 pass
@@ -528,11 +543,38 @@ class CheckSuite(object):
                                                   + list(range(0x20, 0x100))))
                 return bool(bts.translate(None, textchars))
 
+            def is_cdl_file(filename, data):
+                '''
+                Quick check for .cdl ascii file
+
+                Example:
+                    netcdf sample_file {
+                    dimensions:
+                        name_strlen = 7 ;
+                        time = 96 ;
+                    variables:
+                        float lat ;
+                            lat:units = "degrees_north" ;
+                            lat:standard_name = "latitude" ;
+                            lat:long_name = "station latitude" ;
+                    etc...
+
+                :param str filename: Absolute path of file to check
+                :param str data: First chuck of data from file to check
+                '''
+                if os.path.splitext(filename)[-1] == '.cdl':
+                    return True
+                if data.startswith('netcdf') or 'dimensions' in data:
+                    return True
+                return False
+
             with open(ds_str, 'rb') as f:
                 first_chunk = f.read(1024)
                 if is_binary_string(first_chunk):
                     # likely netcdf file
                     pass
+                elif is_cdl_file(ds_str, first_chunk):
+                    ds_str = self.generate_dataset(ds_str)
                 else:
                     f.seek(0)
                     doc = "".join(f.readlines())
