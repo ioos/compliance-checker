@@ -4,11 +4,14 @@ from compliance_checker.suite import CheckSuite
 from compliance_checker.base import Result, BaseCheck
 import numpy as np
 import unittest
+import os
 
 static_files = {
     '2dim'                       : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
     'bad_region'                 : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
     'bad_data_type'              : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
+    'test_cdl'                   : resource_filename('compliance_checker', 'tests/data/test_cdl.cdl'),
+    'test_cdl_nc'                : resource_filename('compliance_checker', 'tests/data/test_cdl_nc_file.nc'),
 }
 
 
@@ -85,3 +88,37 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(score[0].value, (2, 4))
         self.assertEqual(score[1].name, 'two')
         self.assertEqual(score[1].value, (1, 2))
+
+    def test_cdl_file(self):
+        # Testing whether you can run compliance checker on a .cdl file
+        cs = CheckSuite()
+        cs.load_all_available_checkers()
+
+        # Load the cdl file
+        ds = cs.load_dataset(static_files['test_cdl'])
+        vals = cs.run(ds, 'cf')
+
+        limit = 2
+        for checker, rpair in vals.items():
+            groups, errors = rpair
+            score_list, cdl_points, cdl_out_of = cs.standard_output(limit, checker, groups)
+            # This asserts that print is able to generate all of the unicode output
+            cs.non_verbose_output_generation(score_list, groups, limit, cdl_points, cdl_out_of)
+
+        # Ok now load the nc file that it came from
+        ds = cs.load_dataset(static_files['test_cdl_nc'])
+        vals = cs.run(ds, 'cf')
+
+        limit = 2
+        for checker, rpair in vals.items():
+            groups, errors = rpair
+            score_list, nc_points, nc_out_of = cs.standard_output(limit, checker, groups)
+            # This asserts that print is able to generate all of the unicode output
+            cs.non_verbose_output_generation(score_list, groups, limit, nc_points, nc_out_of)
+
+        nc_file_path = static_files['test_cdl'].replace('.cdl', '.nc')
+        self.addCleanup(os.remove, nc_file_path)
+
+        # Ok the scores should be equal!
+        self.assertEqual(nc_points, cdl_points)
+        self.assertEqual(nc_out_of, cdl_out_of)
