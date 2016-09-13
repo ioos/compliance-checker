@@ -34,7 +34,7 @@ The compliance-checker can work against local files (.nc files, .xml files of SO
 ```
 usage: compliance-checker [-h] [--test <test>[ <test>...]]
                    [--criteria [{lenient,normal,strict}]] [--verbose]
-                   [-f {stdout,html}] [-o OUTPUT]
+                   [-f {stdout,html}] [-o OUTPUT] [-d]
                    dataset_location [dataset_location ...]
 
 positional arguments:
@@ -52,6 +52,9 @@ optional arguments:
                         Output format
   -o OUTPUT, --output OUTPUT
                         Output filename
+  -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
+                        Specify a version of the cf standard name table to
+                        download as packaged version
 ```
 
 ```
@@ -349,6 +352,12 @@ conventions                            :3:     0/ 1 : Conventions field is not
 units                                  :3:     0/ 1 :  
     sss_cap                            :3:     0/ 1 :  
         known                          :3:     0/ 1 : unknown units type (PSU)
+
+
+
+$ compliance-checker -d 35
+
+Downloading cf-standard-names table version 35 from: http://cfconventions.org/Data/cf-standard-names/35/src/cf-standard-name-table.xml
 ```
 
 ## Installation
