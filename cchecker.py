@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import sys
 from compliance_checker.runner import ComplianceChecker, CheckSuite
+from compliance_checker.cf.util import download_cf_standard_name_table
 from compliance_checker import __version__
 
 
@@ -36,6 +37,7 @@ def main():
     parser.add_argument('dataset_location', nargs='*',
                         help="Defines the location of the dataset to be checked.")
     parser.add_argument('-l', '--list-tests', action='store_true', help='List the available tests')
+    parser.add_argument('-d', '--download-standard-names', help='Specify a version of the cf standard name table to download as packaged version')
 
     args = parser.parse_args()
 
@@ -49,6 +51,9 @@ def main():
             version = getattr(check_suite.checkers[checker], '_cc_checker_version', "???")
             print(" - {} ({})".format(checker, version))
         return 0
+
+    if args.download_standard_names:
+        download_cf_standard_name_table(args.download_standard_names)
 
     return_values = []
     had_errors = []
