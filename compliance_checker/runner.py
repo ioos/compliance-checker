@@ -28,7 +28,8 @@ class ComplianceChecker(object):
     """
     @classmethod
     def run_checker(cls, ds_loc, checker_names, verbose, criteria,
-                    skip_checks=[], output_filename='-', output_format='text'):
+                    skip_checks=None, output_filename='-',
+                    output_format='text'):
         """
         Static check runner.
 
@@ -44,7 +45,9 @@ class ComplianceChecker(object):
         """
         cs = CheckSuite()
         ds = cs.load_dataset(ds_loc)
-        score_groups = cs.run(ds, skip_checks, *checker_names)
+
+        score_groups = cs.run(ds, [] if skip_checks is None else skip_checks,
+                              *checker_names)
 
         if criteria == 'normal':
             limit = 2
