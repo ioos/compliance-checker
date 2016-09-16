@@ -57,6 +57,16 @@ class TestSuite(unittest.TestCase):
             # This asserts that print is able to generate all of the unicode output
             cs.non_verbose_output_generation(score_list, groups, limit, points, out_of)
 
+    def test_skip_checks(self):
+        """Tests that checks are properly skipped when specified"""
+        cs = CheckSuite()
+        cs.load_all_available_checkers()
+        ds = cs.load_dataset(static_files['2dim'])
+        # exclude title from the check attributes
+        score_groups = cs.run(ds, ['check_high'], 'acdd')
+        assert all(sg.name not in {'Conventions', 'title', 'keywords',
+                                   'summary'} for sg in score_groups['acdd'][0])
+
     def test_group_func(self):
         # This is checking for issue #183, where group_func results in
         # IndexError: list index out of range

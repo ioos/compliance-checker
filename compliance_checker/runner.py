@@ -28,7 +28,7 @@ class ComplianceChecker(object):
     """
     @classmethod
     def run_checker(cls, ds_loc, checker_names, verbose, criteria,
-                    output_filename='-', output_format='text'):
+                    skip_checks=[], output_filename='-', output_format='text'):
         """
         Static check runner.
 
@@ -37,13 +37,14 @@ class ComplianceChecker(object):
         @param  verbose         Verbosity of the output (0, 1, 2)
         @param  criteria        Determines failure (lenient, normal, strict)
         @param  output_filename Path to the file for output
+        @param  skip_checks     Names of checks to skip
         @param  output_format   Format of the output
 
         @returns                If the tests failed (based on the criteria)
         """
         cs = CheckSuite()
         ds = cs.load_dataset(ds_loc)
-        score_groups = cs.run(ds, *checker_names)
+        score_groups = cs.run(ds, skip_checks, *checker_names)
 
         if criteria == 'normal':
             limit = 2
