@@ -2,7 +2,8 @@
 
 [![Build Status](https://travis-ci.org/ioos/compliance-checker.svg)](https://travis-ci.org/ioos/compliance-checker)
 
-The IOOS Compliance Checker is a Python tool to check local/remote datasets against a variety of compliance standards. It is primarily a command-line tool (tested on OSX/Linux) and can also be used as a library import.
+The IOOS Compliance Checker is a Python tool to check local/remote datasets against a variety of compliance standards.
+It is primarily a command-line tool (tested on OS X/Linux) and can also be used as a library import.
 
 It currently supports the following sources and standards:
 
@@ -15,21 +16,29 @@ It currently supports the following sources and standards:
 
 ## Concepts & Terminology
 
-Each compliance standard is executed by a Check Suite, which functions similar to a Python standard Unit Test. A Check Suite runs one or more checks against a dataset, returning a list of Results which are then aggregated into a summary.
+Each compliance standard is executed by a Check Suite,
+which functions similar to a Python standard Unit Test.
+A Check Suite runs one or more checks against a dataset,
+returning a list of Results which are then aggregated into a summary.
 
-Each Result has a (# passed / # total) score, a weight (HIGH/MEDIUM/LOW), a computer-readable name, an optional list of human-readable messages, and optionally a list of child Results.
+Each Result has a (# passed / # total) score, a weight (HIGH/MEDIUM/LOW),
+a computer-readable name, an optional list of human-readable messages,
+and optionally a list of child Results.
 
-A single score is then calculated by aggregating on the names, then multiplying the score by the weight and summing them together.
+A single score is then calculated by aggregating on the names,
+then multiplying the score by the weight and summing them together.
 
-The computer-readable name field controls how Results are aggregated together - in order to prevent the overall score for a Check Suite varying on the number of variables, it is possible to *group* Results together via the name property. Grouped results will only add up to a single top-level entry.
+The computer-readable name field controls how Results are aggregated together - in order to prevent the overall score for a Check Suite varying on the number of variables,
+it is possible to *group* Results together via the name property.
+Grouped results will only add up to a single top-level entry.
 
 See the [Development](//github.com/ioos/compliance-checker/wiki/Development) wiki page for more details on implementation.
 
 ## Usage (command line)
 
-The compliance-checker can work against local files (.nc files, .cdl metadata files, .xml files of SOS GetCapabilities/DescribeSensor requests) or against remote URLs (OPeNDAP data URLs, SOS GetCapabilities/DescribeSensor URLs).
+The compliance-checker can work against local files (`.nc` files, `.cdl` metadata files, `.xml` files of SOS GetCapabilities/DescribeSensor requests) or against remote URLs (OPeNDAP data URLs, SOS GetCapabilities/DescribeSensor URLs).
 
-> **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPenDAP URL, please be sure the size is reasonable!
+> **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPeNDAP URL, please be sure the size is reasonable!
 
 ```
 usage: compliance-checker [-h] [--test <test>[ <test>...]]
@@ -63,13 +72,13 @@ Running Compliance Checker on the dataset from: compliance_checker/tests/data/ru
 
 
 --------------------------------------------------------------------------------
-                    The dataset scored 100 out of 188 points                    
-                             during the acdd check                              
+                    The dataset scored 100 out of 188 points
+                             during the acdd check
 --------------------------------------------------------------------------------
-                               Scoring Breakdown:                               
+                               Scoring Breakdown:
 
 
-                                 High Priority                                  
+                                 High Priority
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
 keywords                                :3:     1/1
@@ -78,7 +87,7 @@ title                                   :3:     1/1
 varattr                                 :3:    69/150
 
 
-                                Medium Priority                                 
+                                Medium Priority
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
 acknowledgement                         :2:     0/1
@@ -114,141 +123,141 @@ time_coverage_start                     :2:     1/1
 
 
 --------------------------------------------------------------------------------
-                  Reasoning for the failed tests given below:                   
+                  Reasoning for the failed tests given below:
 
 
 Name                             Priority:     Score:Reasoning
 --------------------------------------------------------------------------------
-varattr                                :3:    69/150 :  
-    conductivity                       :3:     3/ 5 :  
+varattr                                :3:    69/150 :
+    conductivity                       :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var conductivity missing
                                                       attr coverage_content_type
-    conductivity_qc                    :3:     2/ 5 :  
+    conductivity_qc                    :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var conductivity_qc
                                                       missing attr
                                                       coverage_content_type
         var_units                      :3:     0/ 1 : Var conductivity_qc
                                                       missing attr units
-    density                            :3:     3/ 5 :  
+    density                            :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var density missing attr
                                                       coverage_content_type
-    density_qc                         :3:     2/ 5 :  
+    density_qc                         :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var density_qc missing
                                                       attr coverage_content_type
         var_units                      :3:     0/ 1 : Var density_qc missing
                                                       attr units
-    depth                              :3:     3/ 5 :  
+    depth                              :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var depth missing attr
                                                       coverage_content_type
-    depth_qc                           :3:     2/ 5 :  
+    depth_qc                           :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var depth_qc missing attr
                                                       coverage_content_type
         var_units                      :3:     0/ 1 : Var depth_qc missing attr
                                                       units
-    instrument_ctd                     :3:     1/ 5 :  
+    instrument_ctd                     :3:     1/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var instrument_ctd missing
                                                       attr coverage_content_type
         var_std_name                   :3:     0/ 1 : Var instrument_ctd missing
                                                       attr standard_name
         var_units                      :3:     0/ 1 : Var instrument_ctd missing
                                                       attr units
-    lat                                :3:     3/ 5 :  
+    lat                                :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var lat missing attr
                                                       coverage_content_type
-    lat_qc                             :3:     2/ 5 :  
+    lat_qc                             :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var lat_qc missing attr
                                                       coverage_content_type
         var_units                      :3:     0/ 1 : Var lat_qc missing attr
                                                       units
-    lat_uv                             :3:     3/ 5 :  
+    lat_uv                             :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var lat_uv missing attr
                                                       coverage_content_type
-    lon                                :3:     3/ 5 :  
+    lon                                :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var lon missing attr
                                                       coverage_content_type
-    lon_qc                             :3:     2/ 5 :  
+    lon_qc                             :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var lon_qc missing attr
                                                       coverage_content_type
         var_units                      :3:     0/ 1 : Var lon_qc missing attr
                                                       units
-    lon_uv                             :3:     3/ 5 :  
+    lon_uv                             :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var lon_uv missing attr
                                                       coverage_content_type
-    platform                           :3:     1/ 5 :  
+    platform                           :3:     1/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var platform missing attr
                                                       coverage_content_type
         var_std_name                   :3:     0/ 1 : Var platform missing attr
                                                       standard_name
         var_units                      :3:     0/ 1 : Var platform missing attr
                                                       units
-    pressure                           :3:     3/ 5 :  
+    pressure                           :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var pressure missing attr
                                                       coverage_content_type
-    pressure_qc                        :3:     2/ 5 :  
+    pressure_qc                        :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var pressure_qc missing
                                                       attr coverage_content_type
         var_units                      :3:     0/ 1 : Var pressure_qc missing
                                                       attr units
-    profile_id                         :3:     1/ 5 :  
+    profile_id                         :3:     1/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var profile_id missing
                                                       attr coverage_content_type
         var_std_name                   :3:     0/ 1 : Var profile_id missing
                                                       attr standard_name
         var_units                      :3:     0/ 1 : Var profile_id missing
                                                       attr units
-    salinity                           :3:     3/ 5 :  
+    salinity                           :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var salinity missing attr
                                                       coverage_content_type
-    salinity_qc                        :3:     2/ 5 :  
+    salinity_qc                        :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var salinity_qc missing
                                                       attr coverage_content_type
         var_units                      :3:     0/ 1 : Var salinity_qc missing
                                                       attr units
-    segment_id                         :3:     1/ 5 :  
+    segment_id                         :3:     1/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var segment_id missing
                                                       attr coverage_content_type
         var_std_name                   :3:     0/ 1 : Var segment_id missing
                                                       attr standard_name
         var_units                      :3:     0/ 1 : Var segment_id missing
                                                       attr units
-    temperature                        :3:     3/ 5 :  
+    temperature                        :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var temperature missing
                                                       attr coverage_content_type
-    temperature_qc                     :3:     2/ 5 :  
+    temperature_qc                     :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var temperature_qc missing
                                                       attr coverage_content_type
         var_units                      :3:     0/ 1 : Var temperature_qc missing
                                                       attr units
-    time                               :3:     3/ 5 :  
+    time                               :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var time missing attr
                                                       coverage_content_type
-    time_qc                            :3:     2/ 5 :  
+    time_qc                            :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var time_qc missing attr
                                                       coverage_content_type
         var_units                      :3:     0/ 1 : Var time_qc missing attr
                                                       units
-    time_uv                            :3:     3/ 5 :  
+    time_uv                            :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var time_uv missing attr
                                                       coverage_content_type
-    trajectory                         :3:     1/ 5 :  
+    trajectory                         :3:     1/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var trajectory missing
                                                       attr coverage_content_type
         var_std_name                   :3:     0/ 1 : Var trajectory missing
                                                       attr standard_name
         var_units                      :3:     0/ 1 : Var trajectory missing
                                                       attr units
-    u                                  :3:     3/ 5 :  
+    u                                  :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var u missing attr
                                                       coverage_content_type
-    u_qc                               :3:     2/ 5 :  
+    u_qc                               :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var u_qc missing attr
                                                       coverage_content_type
         var_units                      :3:     0/ 1 : Var u_qc missing attr
                                                       units
-    v                                  :3:     3/ 5 :  
+    v                                  :3:     3/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var v missing attr
                                                       coverage_content_type
-    v_qc                               :3:     2/ 5 :  
+    v_qc                               :3:     2/ 5 :
         var_coverage_content_type      :3:     0/ 2 : Var v_qc missing attr
                                                       coverage_content_type
         var_units                      :3:     0/ 1 : Var v_qc missing attr
@@ -310,13 +319,13 @@ Running Compliance Checker on the dataset from: compliance_checker/tests/data/ss
 
 
 --------------------------------------------------------------------------------
-                     The dataset scored 12 out of 14 points                     
-                              during the cf check                               
+                     The dataset scored 12 out of 14 points
+                              during the cf check
 --------------------------------------------------------------------------------
-                               Scoring Breakdown:                               
+                               Scoring Breakdown:
 
 
-                                 High Priority                                  
+                                 High Priority
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
 Variable names                          :3:     3/3
@@ -326,7 +335,7 @@ dimension_names                         :3:     3/3
 units                                   :3:     0/1
 
 
-                                Medium Priority                                 
+                                Medium Priority
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
 all_features_are_same_type              :2:     0/0
@@ -342,15 +351,15 @@ var                                     :2:     1/1
 
 
 --------------------------------------------------------------------------------
-                  Reasoning for the failed tests given below:                   
+                  Reasoning for the failed tests given below:
 
 
 Name                             Priority:     Score:Reasoning
 --------------------------------------------------------------------------------
 conventions                            :3:     0/ 1 : Conventions field is not
                                                       present
-units                                  :3:     0/ 1 :  
-    sss_cap                            :3:     0/ 1 :  
+units                                  :3:     0/ 1 :
+    sss_cap                            :3:     0/ 1 :
         known                          :3:     0/ 1 : unknown units type (PSU)
 
 
@@ -362,90 +371,50 @@ Downloading cf-standard-names table version 35 from: http://cfconventions.org/Da
 
 ## Installation
 
-### Non-Python dependencies
+### Conda users
 
-A number of the Python modules used by the compliance checker such as NumPy
-require linking against external C or Fortran libraries.  If using an
- installation method for Python dependencies such as pip below, these external
- libraries will need to be installed beforehand prior to the installation of
- the Python dependencies.
+`compliance-checker` depends on many external C libraries,
+so the easiest way to install it on MS-Windows/OS X/Linux is with `conda`.
+
+```shell
+$ conda install -c conda-forge compliance-checker
+```
+
+For more information on `conda` and installing the IOOS software stack see:
+
+https://github.com/ioos/notebooks_demos/wiki/Installing-Conda-Python-with-the-IOOS-environment
+
+### Pip users
+
+When using pip the user must install the non-Python dependencies first.
 Known C library dependencies include:
-  - NetCDF4
-  - HDF5
   - UDUNITS (2.x series)
+  - HDF5
+  - NetCDF4
   - libxml2/libxslt
 
-Installation for these libraries will vary depending on your choice of
-operating system and method of installation (i.e. binary packages versus
-compiling from source).  For more information on installing these libraries,
+Installation for these libraries will vary depending on your choice of operating system and method of installation
+(i.e. binary packages versus compiling from source).
+For more information on installing these libraries,
 reference the documentation from the individual libraries.
-
-### Python dependencies with `pip`
+(Check our [Ubuntu Install Guide](doc/ubuntu-install-guide.md) out.)
 
 To install locally, set up a virtual environment (recommend using
 [virtualenv-burrito](https://github.com/brainsik/virtualenv-burrito);
-however, do not use `virtualenv-burrito` if you are using Anaconda python.
-[Instructions for Anaconda](#anaconda) appear below):
 
 ```
 $ mkvirtualenv --no-site-packages compliance-checker
 $ workon compliance-checker
 ```
 
-The Python dependencies require several underlying system packages that most package managers should have. See the [Installation](//github.com/ioos/compliance-checker/wiki/Installation) wiki page for more information.
+The Python dependencies require several underlying system packages that most package managers should have.
+See the [Installation](//github.com/ioos/compliance-checker/wiki/Installation) wiki page for more information.
 
 Install dependencies, numpy must be installed on its own:
 
-```
-$ pip install numpy
+```shell
 $ pip install compliance-checker
 ```
-
-###<a name="anaconda"></a> Anaconda on linux
-
-Assuming you have a standard Anaconda installation, run the following:
-
-1. From the compliance-checker top-level directory create the virtual
-environment (stay as far away from virtualenv's burrito as you possibly
-can):    
-	```     
-conda create --file requirements.txt -n compliance_checker    
-source activate compliance_checker    
-conda install compliance-checker    
-	```    
-     
-2. Test the installation using the following commands:     
-	```    
-	compliance-checker --help    
-	compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170228_rt0.nc    
-	compliance-checker --test=cf compliance_checker/tests/data/sss20140107.v2.0cap.nc     
-	```    
-
-### MS-Windows
-
-Before [creating the virtual environment and installing compliance-checker](https://github.com/ioos/compliance-checker#-anaconda-on-linux), the channel locations should be updated in the Anaconda configuration file `.condarc`; without that the `conda` command fails to find the required packages. If that file does not exist it should be created in the Anaconda root directory with the following text (the comments with "#" prefix are optional):
-
-```
-# channel locations. These override conda defaults, i.e., conda will
-# search *only* the channels listed here, in the order given. Use "defaults" to
-# automatically include all default channels. Non-url channels will be
-# interpreted as binstar usernames (this can be changed by modifying the
-# channel_alias key; see below).
-channels:
-  - defaults
-  - IOOS
-  
-```
-
-If after that conda still cannot find the required packages, the `binstar` package should be installed:
-
-```
-conda install binstar
-```
-
-### Ubuntu
-
-Installing on Ubuntu? Check out the [Ubuntu Install Guide](doc/ubuntu-install-guide.md)
 
 ## Usage (from Python code)
 
@@ -510,7 +479,7 @@ https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e603
 - Improved text output (\#12)
 - UGRID compliance (\#33)
 
-## Contributors    
+## Contributors
 
 - Dave Foster <dave@axiomdatascience.com>
 - Dan Maher <dmaher@asascience.com>
@@ -518,10 +487,10 @@ https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e603
 - [Kyle Wilcox](https://github.com/kwilcox) <kyle@axiomdatascience.com>
 - Ben Adams <ben.adams@rpsgroup.com>
 
-And many more testers!    
+And many more testers!
 
-Portions of the CF checker are based on Michael Decker's work, http://repositories.iek.fz-juelich.de/hg/CFchecker/    
- 
+Portions of the CF checker are based on Michael Decker's work, http://repositories.iek.fz-juelich.de/hg/CFchecker/
+
 <!--
    15  vim --version
    17  python --version
@@ -533,7 +502,7 @@ Portions of the CF checker are based on Michael Decker's work, http://repositori
    82  git clone ssh://git@github.com/duncombe/centos-instance.git
   106  git config --global user.name "Christopher Duncombe Rae"
   108  git config --global user.email "christopher.duncombe.rae@noaa.gov"
-  278  git remote add origin ssh://git@github.com/duncombe/PROGS.git 
+  278  git remote add origin ssh://git@github.com/duncombe/PROGS.git
   344  git clone ssh://git@github.com/duncombe/system-test.git
   348  git remote set-url upstream ssh://git@github.com/ioos/system-test.git
   449  git submodule add ssh://git@github.com/duncombe/bash-git-prompt.git
@@ -544,10 +513,10 @@ Portions of the CF checker are based on Michael Decker's work, http://repositori
   785  conda config --add channels https://conda.binstar.org/Unidata
   791  conda create -n workshop python=2 numpy matplotlib cartopy ipython ipython-notebook     netcdf4 owslib pyudl networkx basemap
   836  compliance-checker --test=acdd compliance_checker/tests/data/test-data/ru07-20130824T170228_rt0.nc
-  837  compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170228_rt0.nc 
+  837  compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170228_rt0.nc
   838  compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170228_rt0.nc | less -S
   839  compliance-checker --test=acdd test-data/ru07-20130824T170228_rt0.nc
-  
+
 -->
 
 
