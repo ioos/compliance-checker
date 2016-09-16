@@ -410,8 +410,6 @@ $ workon compliance-checker
 The Python dependencies require several underlying system packages that most package managers should have.
 See the [Installation](//github.com/ioos/compliance-checker/wiki/Installation) wiki page for more information.
 
-Install dependencies, numpy must be installed on its own:
-
 ```shell
 $ pip install compliance-checker
 ```
@@ -490,33 +488,3 @@ https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e603
 And many more testers!
 
 Portions of the CF checker are based on Michael Decker's work, http://repositories.iek.fz-juelich.de/hg/CFchecker/
-
-<!--
-   15  vim --version
-   17  python --version
-   23  git --version
-   27  wget http://09c8d0b2229f813c1b93-c95ac804525aac4b6dba79b00b39d1d3.r79.cf1.rackcdn.com/Anaconda-2.1.0-Linux-x86_64.sh
-   33  bash Anaconda-2.1.0-Linux-x86_64.sh
-   67  wget https://github.com/spf13/hugo/releases/download/v0.12/hugo_0.12_linux_amd64.tar.gz
-   70  git clone ssh://git@github.com/duncombe/dotfiles.git
-   82  git clone ssh://git@github.com/duncombe/centos-instance.git
-  106  git config --global user.name "Christopher Duncombe Rae"
-  108  git config --global user.email "christopher.duncombe.rae@noaa.gov"
-  278  git remote add origin ssh://git@github.com/duncombe/PROGS.git
-  344  git clone ssh://git@github.com/duncombe/system-test.git
-  348  git remote set-url upstream ssh://git@github.com/ioos/system-test.git
-  449  git submodule add ssh://git@github.com/duncombe/bash-git-prompt.git
-  749  git clone ssh://git@github.com/duncombe/unidata-python-workshop.git
-  750  git remote add upstream  ssh://git@github.com/Unidata/unidata-python-workshop.git
-  783  git clone https://github.com/Unidata/unidata-python-workshop
-  784  conda config --add channels https://conda.binstar.org/rsignell
-  785  conda config --add channels https://conda.binstar.org/Unidata
-  791  conda create -n workshop python=2 numpy matplotlib cartopy ipython ipython-notebook     netcdf4 owslib pyudl networkx basemap
-  836  compliance-checker --test=acdd compliance_checker/tests/data/test-data/ru07-20130824T170228_rt0.nc
-  837  compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170228_rt0.nc
-  838  compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170228_rt0.nc | less -S
-  839  compliance-checker --test=acdd test-data/ru07-20130824T170228_rt0.nc
-
--->
-
-
