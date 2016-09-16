@@ -315,10 +315,6 @@ class CheckSuite(object):
 
         return score_list, points, out_of
 
-    # TODO: These methods for output generation could use a refactor to simply
-    #       generate a string and handle output as necessary instead of a
-    #       large number of print functions.  Perhaps use something like a
-    #       Jinja2 template?
     def standard_output(self, limit, check_name, groups):
         """
         Generates the Terminal Output for Standard cases
