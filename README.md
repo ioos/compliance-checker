@@ -61,6 +61,10 @@ optional arguments:
                         Output format
   -o OUTPUT, --output OUTPUT
                         Output filename
+  -s {check1} [check2...] --skip-checks {check1} [check2...]
+                        Skips the any check functions contained within the
+                        check suites selected which have the same function
+                        name(s) as the string(s) specified.
   -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
                         Specify a version of the cf standard name table to
                         download as packaged version
