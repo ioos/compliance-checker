@@ -91,3 +91,24 @@ class TestCLI(TestCase):
         )
 
         assert os.stat(path).st_size > 0
+
+    def test_json_output(self):
+        '''
+        Tests that the 'text' output can be redirected to file with arguments
+        to the command line
+        '''
+
+        fd, path = tempfile.mkstemp()
+        os.close(fd)
+        self.addCleanup(os.remove, path)
+
+        return_value, errors = ComplianceChecker.run_checker(
+            ds_loc=STATIC_FILES['conv_bad'],
+            verbose=0,
+            criteria='strict',
+            checker_names=['cf'],
+            output_filename=path,
+            output_format='text'
+        )
+
+        assert os.stat(path).st_size > 0
