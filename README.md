@@ -61,7 +61,7 @@ optional arguments:
                         Output format
   -o OUTPUT, --output OUTPUT
                         Output filename
-  -s {check1} [check2...] --skip-checks {check1} [check2...]
+  -s check1 [-s check2] ..., --skip-checks check1 [--skip-checks check2] ...
                         Skips the any check functions contained within the
                         check suites selected which have the same function
                         name(s) as the string(s) specified.  May be specified
