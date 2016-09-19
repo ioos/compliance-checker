@@ -30,7 +30,7 @@ def main():
 
     parser.add_argument('--skip-checks', '-s',
                         help="Specifies tests to skip",
-                        nargs='*')
+                        action='append')
 
     parser.add_argument('-f', '--format', default='text',
                         choices=['text', 'html', 'json'], help='Output format')
