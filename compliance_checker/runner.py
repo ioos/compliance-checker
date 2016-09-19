@@ -3,10 +3,21 @@ from __future__ import print_function
 import traceback
 import sys
 import io
-from io import StringIO
 
+from contextlib import contextmanager
 from compliance_checker.suite import CheckSuite
 
+# Py 3.4+ has contextlib.redirect_stdout to redirect stdout to a different
+# stream, but use this decorated function in order to redirect output in
+# previous versions
+@contextmanager
+def stdout_redirector(stream):
+    old_stdout = sys.stdout
+    sys.stdout = stream
+    try:
+        yield
+    finally:
+        sys.stdout = old_stdout
 
 class ComplianceChecker(object):
     """
@@ -40,8 +51,16 @@ class ComplianceChecker(object):
         elif criteria == 'lenient':
             limit = 3
 
-        if output_filename == '-' and output_format == 'text':
-            groups = cls.stdout_output(cs, score_groups, verbose, limit)
+        if output_format == 'text':
+            if output_filename == '-':
+                groups = cls.stdout_output(cs, score_groups, verbose, limit)
+            # need to redirect output from stdout since print functions are
+            # presently used to generate the standard report output
+            else:
+                with io.open(output_filename, 'w', encoding='utf-8') as f:
+                    with stdout_redirector(f):
+                        groups = cls.stdout_output(cs, score_groups, verbose,
+                                                   limit)
 
         elif output_format == 'html':
             groups = cls.html_output(cs, score_groups, output_filename, ds_loc, limit)
@@ -67,6 +86,7 @@ class ComplianceChecker(object):
         @param verbose      Integer value for verbosity level
         @param limit        The degree of strictness, 1 being the strictest, and going up from there.
         '''
+
         for checker, rpair in score_groups.items():
             groups, errors = rpair
             score_list, points, out_of = cs.standard_output(limit, checker, groups)
@@ -89,7 +109,7 @@ class ComplianceChecker(object):
         for checker, rpair in score_groups.items():
             groups, errors = rpair
             if output_filename == '-':
-                f = StringIO()
+                f = io.StringIO()
                 cs.html_output(checker, groups, f, ds_loc, limit)
                 f.seek(0)
                 print(f.read())
@@ -112,7 +132,7 @@ class ComplianceChecker(object):
         for checker, rpair in score_groups.items():
             groups, errors = rpair
             if output_filename == '-':
-                f = StringIO()
+                f = io.StringIO()
                 cs.json_output(checker, groups, f, ds_loc, limit)
                 f.seek(0)
                 print(f.read())
