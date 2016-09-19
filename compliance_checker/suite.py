@@ -93,6 +93,9 @@ class CheckSuite(object):
         Returns a filtered list of 2-tuples: (name, valid checker) based on the ds object's type and
         the user selected names.
         """
+        assert len(self.checkers) > 0, \
+                "You need to load some checker."
+
         if len(checker_names) == 0:
             checker_names = list(self.checkers.keys())
 
