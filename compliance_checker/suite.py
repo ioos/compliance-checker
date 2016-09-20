@@ -477,7 +477,7 @@ class CheckSuite(object):
             if res.children:
                 self.reasoning_routine(res.children, indent + 1, False)
 
-    def process_doc(doc):
+    def process_doc(self, doc):
         """
         Attempt to parse an xml string conforming to either an SOS or SensorML
         dataset and return the results
@@ -580,7 +580,7 @@ class CheckSuite(object):
                     doc = "".join(f.readlines())
 
         if doc is not None:
-            ds = process_doc(doc)
+            ds = self.process_doc(doc)
         else:
             # no doc? try the dataset constructor
             ds = Dataset(ds_str)
