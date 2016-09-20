@@ -170,6 +170,7 @@ class CFBaseCheck(BaseCheck):
 
         # If the packaged version is what we're after, then we're good
         if version == self._std_names._version:
+            print("Using packaged standard name table v{0}".format(version))
             return 0
 
         # Try to download the version specified
@@ -179,10 +180,15 @@ class CFBaseCheck(BaseCheck):
             # Did we already download this before?
             if not os.path.isfile(location):
                 download_cf_standard_name_table(version, location)
+                print("Using downloaded standard name table v{0}".format(version))
+            else:
+                print("Using cached standard name table v{0} from {1}".format(version, location))
+
             self._std_names = StandardNameTable(location)
             return 1
         except Exception:
             # There was an error downloading the CF table. That's ok, we'll just use the packaged version
+            print("Error fetching standard name table. Using packaged v{0}".format(self._std_names._version))
             return 0
 
     def _find_coord_vars(self, ds, refresh=False):
