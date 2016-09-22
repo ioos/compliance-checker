@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, Result
+from owslib.namespaces import Namespaces
+from lxml.etree import XPath
 
 
 class IOOSBaseCheck(BaseCheck):
@@ -174,6 +176,10 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
 
 class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
 
+    # set up namespaces for XPath
+    ns = Namespaces().get_namespaces(['sos', 'gml', 'xlink'])
+    ns['ows'] = Namespaces().get_namespace('ows110')
+
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         return [
@@ -183,16 +189,20 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
     @check_has(BaseCheck.MEDIUM)
     def check_recommended(self, ds):
         return [
-            'service_contact_email',
-            'service_contact_name',
-            'service_provider_name',
+            ('service_contact_email', XPath("/sos:Capabilities/ows:ServiceProvider/ows:ServiceContact/ows:ContactInfo/ows:Address/ows:ElectronicMailAddress", namespaces=self.ns)),
+            ('service_contact_name', XPath("/sos:Capabilities/ows:ServiceProvider/ows:ServiceContact/ows:IndividualName", namespaces=self.ns)),
+            ('service_provider_name', XPath("/sos:Capabilities/ows:ServiceProvider/ows:ProviderName", namespaces=self.ns)),
 
-            'service_title',
-            'service_type_name',
-            'service_type_version',
-
-            'data_format_template_version',
-            'variable_names',
+            ('service_title', XPath("/sos:Capabilities/ows:ServiceProvider/ows:ProviderName", namespaces=self.ns)),
+            ('service_type_name', XPath("/sos:Capabilities/ows:ServiceIdentification/ows:ServiceType", namespaces=self.ns)),
+            ('service_type_version', XPath("/sos:Capabilities/ows:ServiceIdentification/ows:ServiceTypeVersion", namespaces=self.ns)),
+            # ds.identification[0].observed_properties has this as well, but
+            # don't want to try to shoehorn a function here
+            #('variable_names', len(ds.identification[0].observed_properties) > 0)
+            ('variable_names', XPath("/sos:Capabilities/sos:Contents/sos:ObservationOfferingList/sos:ObservationOffering/sos:observedProperty",
+             namespaces=self.ns)),
+            ('data_format_template_version', XPath("/sos:Capabilities/ows:OperationsMetadata/ows:ExtendedCapabilities/gml:metaDataProperty[@xlink:title='ioosTemplateVersion']/gml:version",
+             namespaces=self.ns))
         ]
 
     @check_has(BaseCheck.LOW)
@@ -204,39 +214,41 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
 
 class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseCheck):
 
+    # set up namespaces for XPath
+    ns = Namespaces().get_namespaces(['sml', 'swe', 'gml', 'xlink'])
+
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         return [
-            'platform_sponsor',
-            'platform_type',
-            'station_publisher_name',
-            'station_publisher_email',
-            'station_id',
-            'station_long_name',
-            'station_short_name',
-            'station_wmo_id',
-            'time_period',
-            'operator_email',
-            'operator_name',
-            'station_description',
-            'station_location_lat',
-            'station_location_lon',
-
+            ('platform_sponsor', XPath("/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='sponsor']/sml:Term/sml:value", namespaces=self.ns)),
+            ('platform_type', XPath("/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='platformType']/sml:Term/sml:value", namespaces=self.ns)),
+            ('station_publisher_name', XPath("/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/publisher']/sml:ResponsibleParty/sml:organizationName", namespaces=self.ns)),
+            ('station_publisher_email', XPath("/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/publisher']/sml:ResponsibleParty/sml:contactInfo/address/sml:electronicMailAddress", namespaces=self.ns)),
+            ('station_id', XPath("/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='stationID']/sml:Term/sml:value", namespaces=self.ns)),
+            ('station_long_name', XPath("/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='longName']/sml:Term/sml:value", namespaces=self.ns)),
+            ('station_short_name', XPath("/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='shortName']/sml:Term/sml:value", namespaces=self.ns)),
+            ('station_wmo_id', XPath("/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier/sml:Term[@definition=\"http://mmisw.org/ont/ioos/definition/wmoID\"]/sml:value", namespaces=self.ns)),
+            ('time_period', XPath("/sml:SensorML/sml:member/sml:System/sml:capabilities[@name='observationTimeRange']/swe:DataRecord/swe:field[@name='observationTimeRange']/swe:TimeRange/swe:value", namespaces=self.ns)),
+            ('operator_email', XPath("/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/operator']/sml:ResponsibleParty/sml:contactInfo/address/sml:electronicMailAddress", namespaces=self.ns)),
+            ('operator_name', XPath("/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/operator']/sml:ResponsibleParty/sml:organizationName", namespaces=self.ns)),
+            ('station_description', XPath("/sml:SensorML/sml:member/sml:System/gml:description", namespaces=self.ns)),
+            # replaced with lon/lat with point
+            ('station_location_point', XPath("/sml:SensorML/sml:member/sml:System/sml:location/gml:Point/gml:pos", namespaces=self.ns))
         ]
 
     @check_has(BaseCheck.MEDIUM)
     def check_recommended(self, ds):
         return [
-            'sensor_descriptions',
-            'sensor_ids',
-            'sensor_names',
+            ('sensor_descriptions', XPath("/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/gml:description", namespaces=self.ns)),
+            ('sensor_ids', XPath("/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/@gml:id", namespaces=self.ns)),
+            ('sensor_names', XPath("/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/@name", namespaces=self.ns)),
 
-            'data_format_template_version',
+            ('data_format_template_version', XPath("/sml:SensorML/sml:capabilities/swe:SimpleDataRecord/swe:field[@name='ioosTemplateVersion']/swe:Text/swe:value", namespaces=self.ns)),
 
-            'variable_names',
-            'variable_units',
-            'network_id',
-            'operator_sector',
+            ('variable_names', XPath("/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/sml:outputs/sml:OutputList/sml:output/swe:Quantity/@definition", namespaces=self.ns)),
+            ('variable_units', XPath("/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/sml:outputs/sml:OutputList/sml:output/swe:Quantity/swe:uom/@code", namespaces=self.ns)),
+            ('network_id', XPath("/sml:SensorML/sml:member/sml:System/sml:capabilities[@name='networkProcedures']/swe:SimpleDataRecord/gml:metaDataProperty/@xlink:href", namespaces=self.ns)),
+            ('operator_sector', XPath("/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='operatorSector']/sml:Term/sml:value", namespaces=self.ns)),
         ]
 
     @check_has(BaseCheck.LOW)
