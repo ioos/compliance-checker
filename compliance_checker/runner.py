@@ -27,7 +27,8 @@ class ComplianceChecker(object):
     the command line or can be used via import.
     """
     @classmethod
-    def run_checker(cls, ds_loc, checker_names, verbose, criteria, output_filename='stdout', output_format='stdout'):
+    def run_checker(cls, ds_loc, checker_names, verbose, criteria,
+                    output_filename='-', output_format='text'):
         """
         Static check runner.
 
