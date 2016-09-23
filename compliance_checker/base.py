@@ -148,11 +148,8 @@ def std_check_in(dataset, name, allowed_vals):
         return 0
 
     ret_val = 1
-    try:
-        if getattr(dataset, name) in allowed_vals:
-            ret_val += 1
-    except DogmaGetterSetterException:
-        pass
+    if getattr(dataset, name) in allowed_vals:
+        ret_val += 1
 
     return ret_val
 
