@@ -482,9 +482,9 @@ class CheckSuite(object):
         Attempt to parse an xml string conforming to either an SOS or SensorML
         dataset and return the results
         """
-        xml_doc = ET.fromstring(str(doc))
+        xml_doc = ET.fromstring(doc)
         if xml_doc.tag == "{http://www.opengis.net/sos/1.0}Capabilities":
-            ds = SensorObservationService(ds_str, xml=str(doc))
+            ds = SensorObservationService(None, xml=doc)
 
         elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
             ds = SensorML(xml_doc)
@@ -524,7 +524,7 @@ class CheckSuite(object):
                 r = requests.get(ds_str)
                 r.raise_for_status()
 
-                doc = r.text
+                doc = r.content
             else:
                 raise Exception("Could not understand response code %s and content-type %s" % (rhead.status_code, rhead.headers.get('content-type', 'none')))
         else:
@@ -564,7 +564,7 @@ class CheckSuite(object):
                 '''
                 if os.path.splitext(filename)[-1] == '.cdl':
                     return True
-                if data.startswith('netcdf') or 'dimensions' in data:
+                if data.startswith(b'netcdf') or b'dimensions' in data:
                     return True
                 return False
 
@@ -577,7 +577,7 @@ class CheckSuite(object):
                     ds_str = self.generate_dataset(ds_str)
                 else:
                     f.seek(0)
-                    doc = "".join(f.readlines())
+                    doc = f.read()
 
         if doc is not None:
             ds = self.process_doc(doc)
