@@ -24,7 +24,6 @@ from datetime import datetime
 import requests
 import textwrap
 import codecs
-from tempfile import gettempdir
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
