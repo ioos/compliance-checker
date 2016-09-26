@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sml:SensorML xmlns:sml="http://www.opengis.net/sensorML/1.0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" xmlns:swe="http://www.opengis.net/swe/1.0.1" xsi:schemaLocation="http://www.opengis.net/sensorML/1.0.1 http://schemas.opengis.net/sensorML/1.0.1/sensorML.xsd" version="1.0.1">
+  <sml:capabilities name="ioosServiceMetadata">
+    <swe:SimpleDataRecord>
+      <swe:field name="ioosTemplateVersion">
+        <swe:Text definition="http://code.google.com/p/ioostech/source/browse/#svn%2Ftrunk%2Ftemplates%2FMilestone1.0">
+          <swe:value>1.0</swe:value>
+        </swe:Text>
+      </swe:field>
+      <swe:field name="softwareVersion">
+        <swe:Text definition="https://github.com/asascience-open/ncSOS/releases">
+          <swe:value>1.2.2</swe:value>
+        </swe:Text>
+      </swe:field>
+    </swe:SimpleDataRecord>
+  </sml:capabilities>
+  <sml:member>
+    <sml:System>
+      <gml:description>no description</gml:description>
+      <gml:name>urn:ioos:station:ncsos:VIA</gml:name>
+      <gml:boundedBy>
+        <gml:Envelope srsName="http://www.opengis.net/def/crs/EPSG/0/4326">
+          <gml:lowerCorner>-65.004 18.2573</gml:lowerCorner>
+          <gml:upperCorner>-65.004 18.2573</gml:upperCorner>
+        </gml:Envelope>
+      </gml:boundedBy>
+      <sml:identification>
+        <sml:IdentifierList>
+          <sml:identifier name="stationID">
+            <sml:Term definition="http://mmisw.org/ont/ioos/definition/stationID">
+              <sml:value>urn:ioos:station:ncsos:VIA</sml:value>
+            </sml:Term>
+          </sml:identifier>
+          <sml:identifier name="shortName">
+            <sml:Term definition="http://mmisw.org/ont/ioos/definition/shortName">
+              <sml:value>Attribute not present in source data</sml:value>
+            </sml:Term>
+          </sml:identifier>
+          <sml:identifier name="longName">
+            <sml:Term definition="http://mmisw.org/ont/ioos/definition/longName">
+              <sml:value>Attribute not present in source data</sml:value>
+            </sml:Term>
+          </sml:identifier>
+        </sml:IdentifierList>
+      </sml:identification>
+      <sml:classification>
+        <sml:ClassifierList>
+          <sml:classifier name="platformType">
+            <sml:Term definition="http://mmisw.org/ont/ioos/definition/platformType">
+              <sml:codeSpace xlink:href="http://mmisw.org/ont/ioos/platform" />
+              <sml:value>Attribute not present in source data</sml:value>
+            </sml:Term>
+          </sml:classifier>
+          <sml:classifier name="operatorSector">
+            <sml:Term definition="http://mmisw.org/ont/ioos/definition/operatorSector">
+              <sml:codeSpace xlink:href="http://mmisw.org/ont/ioos/sector" />
+              <sml:value>Attribute not present in source data</sml:value>
+            </sml:Term>
+          </sml:classifier>
+          <sml:classifier name="publisher">
+            <sml:Term definition="http://mmisw.org/ont/ioos/definition/publisher">
+              <sml:codeSpace xlink:href="http://mmisw.org/ont/ioos/organization" />
+              <sml:value>Attribute not present in source data</sml:value>
+            </sml:Term>
+          </sml:classifier>
+          <sml:classifier name="parentNetwork">
+            <sml:Term definition="http://mmisw.org/ont/ioos/definition/parentNetwork">
+              <sml:codeSpace xlink:href="http://mmisw.org/ont/ioos/organization" />
+              <sml:value>Attribute not present in source data</sml:value>
+            </sml:Term>
+          </sml:classifier>
+          <sml:classifier name="sponsor">
+            <sml:Term definition="http://mmisw.org/ont/ioos/definition/sponsor">
+              <sml:codeSpace xlink:href="http://mmisw.org/ont/ioos/organization" />
+              <sml:value>Attribute not present in source data</sml:value>
+            </sml:Term>
+          </sml:classifier>
+        </sml:ClassifierList>
+      </sml:classification>
+      <sml:capabilities name="observationTimeRange">
+        <swe:DataRecord>
+          <swe:field name="observationTimeRange">
+            <swe:TimeRange definition="http://mmisw.org/ont/ioos/definition/observationTimeRange">
+              <swe:value>2016-07-24T20:20:00Z 2016-08-12T11:40:00Z</swe:value>
+            </swe:TimeRange>
+          </swe:field>
+        </swe:DataRecord>
+      </sml:capabilities>
+      <sml:capabilities name="networkProcedures">
+        <swe:SimpleDataRecord>
+          <swe:field name="network-all">
+            <swe:Text definition="http://mmisw.org/ont/ioos/definition/networkID">
+              <swe:value>urn:ioos:network:ncsos:all</swe:value>
+            </swe:Text>
+          </swe:field>
+        </swe:SimpleDataRecord>
+      </sml:capabilities>
+      <sml:contact>
+        <sml:ContactList>
+          <sml:member xlink:role="http://mmisw.org/ont/ioos/definition/operator">
+            <sml:ResponsibleParty>
+              <sml:organizationName>Attribute not present in source data</sml:organizationName>
+              <sml:contactInfo>
+                <sml:address>
+                  <sml:country>Attribute not present in source data</sml:country>
+                  <sml:electronicMailAddress>Attribute not present in source data</sml:electronicMailAddress>
+                </sml:address>
+                <sml:phone>
+                  <sml:voice>No global attribute 'creator_phone' found.</sml:voice>
+                </sml:phone>
+                <sml:onlineResource xlink:href="No global attribute 'creator_url' found." />
+              </sml:contactInfo>
+            </sml:ResponsibleParty>
+          </sml:member>
+          <sml:member xlink:role="http://mmisw.org/ont/ioos/definition/publisher">
+            <sml:ResponsibleParty>
+              <sml:organizationName>Attribute not present in source data</sml:organizationName>
+              <sml:contactInfo>
+                <sml:address>
+                  <sml:country>Attribute not present in source data</sml:country>
+                  <sml:electronicMailAddress>Attribute not present in source data</sml:electronicMailAddress>
+                </sml:address>
+                <sml:phone>
+                  <sml:voice>No global attribute 'publisher_phone' found.</sml:voice>
+                </sml:phone>
+                <sml:onlineResource xlink:href="No global attribute 'publisher_url' found." />
+              </sml:contactInfo>
+            </sml:ResponsibleParty>
+          </sml:member>
+        </sml:ContactList>
+      </sml:contact>
+      <sml:documentation />
+      <sml:history />
+      <sml:location>
+        <gml:Point srsName="http://www.opengis.net/def/crs/EPSG/0/4326">
+          <gml:pos>-65.004 18.2573</gml:pos>
+        </gml:Point>
+      </sml:location>
+      <sml:components>
+        <sml:ComponentList>
+          <sml:component name="Sensor ATMP">
+            <sml:System gml:id="sensor-ATMP">
+              <gml:description>ATMP</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:ATMP" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3AATMP" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="ATMP">
+                    <swe:Quantity definition="http://mmisw.org/ont/cf/parameter/air_temperature">
+                      <swe:uom code="degC" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+          <sml:component name="Sensor CDIR">
+            <sml:System gml:id="sensor-CDIR">
+              <gml:description>CDIR</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:CDIR" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3ACDIR" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="CDIR">
+                    <swe:Quantity definition="http://mmisw.org/ont/cf/parameter/direction_of_sea_water_velocity">
+                      <swe:uom code="degT" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+          <sml:component name="Sensor CSPD">
+            <sml:System gml:id="sensor-CSPD">
+              <gml:description>CSPD</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:CSPD" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3ACSPD" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="CSPD">
+                    <swe:Quantity definition="http://mmisw.org/ont/cf/parameter/sea_water_speed">
+                      <swe:uom code="cms" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+          <sml:component name="Sensor DPD">
+            <sml:System gml:id="sensor-DPD">
+              <gml:description>DPD</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:DPD" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3ADPD" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="DPD">
+                    <swe:Quantity definition="http://mmisw.org/ont/ioos/parameter/dominant_wave_period">
+                      <swe:uom code="s" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+          <sml:component name="Sensor GST">
+            <sml:System gml:id="sensor-GST">
+              <gml:description>GST</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:GST" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3AGST" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="GST">
+                    <swe:Quantity definition="http://mmisw.org/ont/cf/parameter/wind_speed_of_gust">
+                      <swe:uom code="ms" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+          <sml:component name="Sensor MWD">
+            <sml:System gml:id="sensor-MWD">
+              <gml:description>MWD</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:MWD" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3AMWD" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="MWD">
+                    <swe:Quantity definition="http://mmisw.org/ont/ioos/parameter/mean_wave_direction">
+                      <swe:uom code="degT" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+          <sml:component name="Sensor PRES">
+            <sml:System gml:id="sensor-PRES">
+              <gml:description>PRES</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:PRES" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3APRES" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="PRES">
+                    <swe:Quantity definition="http://mmisw.org/ont/ioos/parameter/barometric_pressure">
+                      <swe:uom code="hPa" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+          <sml:component name="Sensor PTDY">
+            <sml:System gml:id="sensor-PTDY">
+              <gml:description>PTDY</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:PTDY" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3APTDY" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="PTDY">
+                    <swe:Quantity definition="http://mmisw.org/ont/ioos/parameter/pressure_tendency">
+                      <swe:uom code="hPa" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+          <sml:component name="Sensor WDIR">
+            <sml:System gml:id="sensor-WDIR">
+              <gml:description>WDIR</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:WDIR" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3AWDIR" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="WDIR">
+                    <swe:Quantity definition="http://mmisw.org/ont/ioos/parameter/wind_direction_from">
+                      <swe:uom code="degT" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+          <sml:component name="Sensor WSPD">
+            <sml:System gml:id="sensor-WSPD">
+              <gml:description>WSPD</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:WSPD" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3AWSPD" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="WSPD">
+                    <swe:Quantity definition="http://mmisw.org/ont/cf/parameter/wind_speed">
+                      <swe:uom code="ms" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+          <sml:component name="Sensor WVHT">
+            <sml:System gml:id="sensor-WVHT">
+              <gml:description>WVHT</gml:description>
+              <sml:identification xlink:href="urn:ioos:sensor:ncsos:VIA:WVHT" />
+              <sml:documentation xlink:href="http%3A%2F%2Fdata.oceansmap.com%2Fthredds%2Fsos%2Fcaricoos_ag%2FVIA%2FVIA.ncml%3F%3Fservice%3DSOS%26request%3DDescribeSensor%26version%3D1.0.0%26outputFormat%3Dtext%2Fxml%3Bsubtype%3D%22sensorML%2F1.0.1%22%26procedure%3Durn%3Aioos%3Asensor%3Ancsos%3AVIA%3AWVHT" />
+              <sml:outputs>
+                <sml:OutputList>
+                  <sml:output name="WVHT">
+                    <swe:Quantity definition="http://mmisw.org/ont/cf/parameter/sea_surface_wave_significant_height">
+                      <swe:uom code="m" />
+                    </swe:Quantity>
+                  </sml:output>
+                </sml:OutputList>
+              </sml:outputs>
+            </sml:System>
+          </sml:component>
+        </sml:ComponentList>
+      </sml:components>
+    </sml:System>
+  </sml:member>
+</sml:SensorML>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sos:Capabilities xmlns:sos="http://www.opengis.net/sos/1.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:om="http://www.opengis.net/om/1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/sos/1.0 http://schemas.opengis.net/sos/1.0.0/sosAll.xsd" version="1.0.0">
+  <ows:ServiceIdentification>
+    <ows:Title>VIA</ows:Title>
+    <ows:Abstract />
+    <ows:Keywords />
+    <ows:ServiceType codeSpace="http://opengeospatial.net">OGC:SOS</ows:ServiceType>
+    <ows:ServiceTypeVersion>1.0.0</ows:ServiceTypeVersion>
+    <ows:Fees />
+    <ows:AccessConstraints />
+  </ows:ServiceIdentification>
+  <ows:ServiceProvider>
+    <ows:ProviderName>No global attribute 'publisher_name' found.</ows:ProviderName>
+    <ows:ProviderSite xlink:href="No global attribute 'publisher_url' found." />
+    <ows:ServiceContact>
+      <ows:IndividualName>No global attribute 'publisher_name' found.</ows:IndividualName>
+      <ows:ContactInfo>
+        <ows:Phone>
+          <ows:Voice>No global attribute 'publisher_phone' found.</ows:Voice>
+        </ows:Phone>
+        <ows:Address>
+          <ows:ElectronicMailAddress>No global attribute 'publisher_email' found.</ows:ElectronicMailAddress>
+        </ows:Address>
+      </ows:ContactInfo>
+    </ows:ServiceContact>
+  </ows:ServiceProvider>
+  <ows:OperationsMetadata>
+    <ows:Operation name="GetCapabilities">
+      <ows:DCP>
+        <ows:HTTP>
+          <ows:Get xlink:href="http://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml?" />
+        </ows:HTTP>
+      </ows:DCP>
+      <ows:Parameter name="Sections">
+        <ows:AllowedValues>
+          <ows:Value>ServiceIdentification</ows:Value>
+          <ows:Value>ServiceProvider</ows:Value>
+          <ows:Value>OperationsMetadata</ows:Value>
+          <ows:Value>Contents</ows:Value>
+          <ows:Value>All</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+    </ows:Operation>
+    <ows:Operation name="GetObservation">
+      <ows:DCP>
+        <ows:HTTP>
+          <ows:Get xlink:href="http://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml?" />
+        </ows:HTTP>
+      </ows:DCP>
+      <ows:Parameter name="offering">
+        <ows:AllowedValues>
+          <ows:Value>urn:ioos:station:ncsos:VIA</ows:Value>
+          <ows:Value>urn:ioos:network:ncsos:all</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+      <ows:Parameter name="observedProperty">
+        <ows:AllowedValues>
+          <ows:Value>http://mmisw.org/ont/cf/parameter/air_temperature</ows:Value>
+          <ows:Value>http://mmisw.org/ont/cf/parameter/direction_of_sea_water_velocity</ows:Value>
+          <ows:Value>http://mmisw.org/ont/cf/parameter/sea_water_speed</ows:Value>
+          <ows:Value>http://mmisw.org/ont/ioos/parameter/dominant_wave_period</ows:Value>
+          <ows:Value>http://mmisw.org/ont/cf/parameter/wind_speed_of_gust</ows:Value>
+          <ows:Value>http://mmisw.org/ont/ioos/parameter/mean_wave_direction</ows:Value>
+          <ows:Value>http://mmisw.org/ont/ioos/parameter/barometric_pressure</ows:Value>
+          <ows:Value>http://mmisw.org/ont/ioos/parameter/pressure_tendency</ows:Value>
+          <ows:Value>http://mmisw.org/ont/ioos/parameter/wind_direction_from</ows:Value>
+          <ows:Value>http://mmisw.org/ont/cf/parameter/wind_speed</ows:Value>
+          <ows:Value>http://mmisw.org/ont/cf/parameter/sea_surface_wave_significant_height</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+      <ows:Parameter name="procedure">
+        <ows:AllowedValues>
+          <ows:Value>urn:ioos:station:ncsos:VIA</ows:Value>
+          <ows:Value>urn:ioos:network:ncsos:all</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+    </ows:Operation>
+    <ows:Operation name="DescribeSensor">
+      <ows:DCP>
+        <ows:HTTP>
+          <ows:Get xlink:href="http://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml?" />
+        </ows:HTTP>
+      </ows:DCP>
+      <ows:Parameter name="outputFormat">
+        <ows:AllowedValues>
+          <ows:Value>text/xml;subtype="sensorML/1.0.1/profiles/ioos_sos/1.0"</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+      <ows:Parameter name="procedure">
+        <ows:AllowedValues>
+          <ows:Value>urn:ioos:station:ncsos:VIA</ows:Value>
+          <ows:Value>urn:ioos:network:ncsos:all</ows:Value>
+        </ows:AllowedValues>
+      </ows:Parameter>
+    </ows:Operation>
+    <ows:Parameter name="service">
+      <ows:AllowedValues>
+        <ows:Value>SOS</ows:Value>
+      </ows:AllowedValues>
+    </ows:Parameter>
+    <ows:Parameter name="version">
+      <ows:AllowedValues>
+        <ows:Value>1.0.0</ows:Value>
+      </ows:AllowedValues>
+    </ows:Parameter>
+    <ows:ExtendedCapabilities>
+      <gml:metaDataProperty xlink:title="ioosTemplateVersion" xlink:href="http://code.google.com/p/ioostech/source/browse/#svn%2Ftrunk%2Ftemplates%2FMilestone1.0">
+        <gml:version>1.0</gml:version>
+      </gml:metaDataProperty>
+      <gml:metaDataProperty xlink:title="softwareVersion" xlink:href="https://github.com/asascience-open/ncSOS/releases">
+        <gml:version>1.2.2</gml:version>
+      </gml:metaDataProperty>
+    </ows:ExtendedCapabilities>
+  </ows:OperationsMetadata>
+  <sos:Contents>
+    <sos:ObservationOfferingList>
+      <sos:ObservationOffering gml:id="network-all">
+        <gml:description>Network offering containing all features in the dataset</gml:description>
+        <gml:name>urn:ioos:network:ncsos:all</gml:name>
+        <gml:boundedBy>
+          <gml:Envelope srsName="http://www.opengis.net/def/crs/EPSG/0/4326">
+            <gml:lowerCorner>-65.004 18.2573</gml:lowerCorner>
+            <gml:upperCorner>-65.0039 18.257400000000004</gml:upperCorner>
+          </gml:Envelope>
+        </gml:boundedBy>
+        <sos:time>
+          <gml:TimePeriod>
+            <gml:beginPosition>2016-07-24T20:20:00Z</gml:beginPosition>
+            <gml:endPosition>2016-08-12T11:40:00Z</gml:endPosition>
+          </gml:TimePeriod>
+        </sos:time>
+        <sos:procedure xlink:href="urn:ioos:network:ncsos:all" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/air_temperature" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/direction_of_sea_water_velocity" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/sea_water_speed" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/ioos/parameter/dominant_wave_period" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/wind_speed_of_gust" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/ioos/parameter/mean_wave_direction" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/ioos/parameter/barometric_pressure" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/ioos/parameter/pressure_tendency" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/ioos/parameter/wind_direction_from" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/wind_speed" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/sea_surface_wave_significant_height" />
+        <sos:featureOfInterest xlink:href="urn:ioos:station:ncsos:VIA" />
+        <sos:responseFormat>text/xml;subtype="om/1.0.0"</sos:responseFormat>
+        <sos:responseFormat>text/xml;subtype="om/1.0.0/profiles/ioos_sos/1.0"</sos:responseFormat>
+        <sos:resultModel>om:ObservationCollection</sos:resultModel>
+        <sos:responseMode>inline</sos:responseMode>
+      </sos:ObservationOffering>
+      <sos:ObservationOffering gml:id="urn_ioos_station_ncsos_VIA">
+        <gml:name>urn:ioos:station:ncsos:VIA</gml:name>
+        <gml:boundedBy>
+          <gml:Envelope srsName="http://www.opengis.net/def/crs/EPSG/0/4326">
+            <gml:lowerCorner>-65.004 18.2573</gml:lowerCorner>
+            <gml:upperCorner>-65.0039 18.2574</gml:upperCorner>
+          </gml:Envelope>
+        </gml:boundedBy>
+        <sos:time>
+          <gml:TimePeriod>
+            <gml:beginPosition>2016-07-24T20:20:00Z</gml:beginPosition>
+            <gml:endPosition>2016-08-12T11:40:00Z</gml:endPosition>
+          </gml:TimePeriod>
+        </sos:time>
+        <sos:procedure xlink:href="urn:ioos:station:ncsos:VIA" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/air_temperature" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/direction_of_sea_water_velocity" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/sea_water_speed" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/ioos/parameter/dominant_wave_period" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/wind_speed_of_gust" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/ioos/parameter/mean_wave_direction" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/ioos/parameter/barometric_pressure" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/ioos/parameter/pressure_tendency" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/ioos/parameter/wind_direction_from" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/wind_speed" />
+        <sos:observedProperty xlink:href="http://mmisw.org/ont/cf/parameter/sea_surface_wave_significant_height" />
+        <sos:featureOfInterest xlink:href="urn:ioos:station:ncsos:VIA" />
+        <sos:responseFormat>text/xml;subtype="om/1.0.0"</sos:responseFormat>
+        <sos:responseFormat>text/xml;subtype="om/1.0.0/profiles/ioos_sos/1.0"</sos:responseFormat>
+        <sos:resultModel>om:ObservationCollection</sos:resultModel>
+        <sos:responseMode>inline</sos:responseMode>
+      </sos:ObservationOffering>
+    </sos:ObservationOfferingList>
+  </sos:Contents>
+</sos:Capabilities>
+

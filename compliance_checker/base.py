@@ -14,6 +14,7 @@ from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
 from compliance_checker import __version__
 from distutils.version import StrictVersion as V
+from lxml import etree
 
 def get_namespaces():
     n = Namespaces()
@@ -71,20 +72,12 @@ class BaseSOSGCCheck(object):
     """
     supported_ds = [SensorObservationService_1_0_0]
 
-    def load_datapair(self, ds):
-        data_object = MultipleXmlDogma('sos-gc', self.beliefs(), ds._capabilities, namespaces=get_namespaces())
-        return DSPair(ds, data_object)
-
 
 class BaseSOSDSCheck(object):
     """
     Base class for SOS-DescribeSensor supporting Check Suites.
     """
     supported_ds = [SensorML]
-
-    def load_datapair(self, ds):
-        data_object = MultipleXmlDogma('sos-ds', self.beliefs(), ds._root, namespaces=get_namespaces())
-        return DSPair(ds, data_object)
 
 
 class Result(object):
@@ -155,11 +148,8 @@ def std_check_in(dataset, name, allowed_vals):
         return 0
 
     ret_val = 1
-    try:
-        if getattr(dataset, name) in allowed_vals:
-            ret_val += 1
-    except DogmaGetterSetterException:
-        pass
+    if getattr(dataset, name) in allowed_vals:
+        ret_val += 1
 
     return ret_val
 
@@ -170,6 +160,10 @@ def std_check(dataset, name):
         return True
 
     return False
+
+def xpath_check(tree, xpath):
+    """Checks whether tree contains one or more elements matching xpath"""
+    return len(xpath(tree)) > 0
 
 def attr_check(l, ds, priority, ret_val):
     """
@@ -191,6 +185,13 @@ def attr_check(l, ds, priority, ret_val):
                 msgs.append("Attr %s present, but not in expected value list (%s)" % (name, other))
 
             ret_val.append(Result(priority, (res, 2), name, msgs))
+        # if we have an XPath expression, call it on the document
+        elif type(other) is etree.XPath:
+            # TODO: store tree instead of creating it each time?
+            res = xpath_check(ds._root, other)
+            if not res:
+                msgs = ["XPath for {} not found".format(name)]
+            ret_val.append(Result(priority, res, name, msgs))
         # if the attribute is a function, call it
         # right now only supports single attribute
         # important note: current magic approach uses all functions

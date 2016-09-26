@@ -18,13 +18,12 @@ from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 try:
     from urlparse import urlparse
-except:
+except ImportError:
     from urllib.parse import urlparse
 from datetime import datetime
 import requests
 import textwrap
 import codecs
-from tempfile import gettempdir
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
@@ -485,6 +484,9 @@ class CheckSuite(object):
         xml_doc = ET.fromstring(doc)
         if xml_doc.tag == "{http://www.opengis.net/sos/1.0}Capabilities":
             ds = SensorObservationService(None, xml=doc)
+            # SensorObservationService does not store the etree doc root,
+            # so maybe use monkey patching here for now?
+            ds._root = xml_doc
 
         elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
             ds = SensorML(xml_doc)
@@ -524,6 +526,9 @@ class CheckSuite(object):
                 r = requests.get(ds_str)
                 r.raise_for_status()
 
+                # need to use content to get bytes, as text will return unicode
+                # in Python3, which will break etree.fromstring if encoding
+                # is also declared in the XML doc
                 doc = r.content
             else:
                 raise Exception("Could not understand response code %s and content-type %s" % (rhead.status_code, rhead.headers.get('content-type', 'none')))
