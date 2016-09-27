@@ -28,6 +28,10 @@ def main():
                         action="count",
                         default=0)
 
+    parser.add_argument('--skip-checks', '-s',
+                        help="Specifies tests to skip",
+                        action='append')
+
     parser.add_argument('-f', '--format', default='text',
                         choices=['text', 'html', 'json'], help='Output format')
     parser.add_argument('-o', '--output', default='-', action='store',
@@ -64,6 +68,7 @@ def main():
                                                              args.test or ['acdd'],
                                                              args.verbose,
                                                              args.criteria,
+                                                             args.skip_checks,
                                                              args.output,
                                                              args.format)
         return_values.append(return_value)

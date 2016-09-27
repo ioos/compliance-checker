@@ -69,15 +69,18 @@ class CheckSuite(object):
             cls.checkers[spec] = cls.checkers[spec + ':latest'] = \
                 cls.checkers[':'.join((spec, latest_version))]
 
-    def _get_checks(self, checkclass):
+    def _get_checks(self, checkclass, skip_checks):
         """
-        Helper method to retreive check methods from a Checker class.
+        Helper method to retreive check methods from a Checker class.  Excludes
+        any checks in `skip_checks`.
 
         The name of the methods in the Checker class should start with "check_" for this
         method to find them.
         """
         meths = inspect.getmembers(checkclass, inspect.ismethod)
-        return [x[1] for x in meths if x[0].startswith("check_")]
+        # return all check methods not among the skipped checks
+        return [x[1] for x in meths if x[0].startswith("check_") and
+                x[0] not in skip_checks]
 
     def _run_check(self, check_method, ds):
         val = check_method(ds)
@@ -116,7 +119,7 @@ class CheckSuite(object):
 
         return valid
 
-    def run(self, ds, *checker_names):
+    def run(self, ds, skip_checks, *checker_names):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
@@ -134,7 +137,7 @@ class CheckSuite(object):
             checker = checker_class()
             checker.setup(ds)
 
-            checks             = self._get_checks(checker)
+            checks             = self._get_checks(checker, skip_checks)
             vals               = []
             errs               = {}   # check method name -> (exc, traceback)
 
