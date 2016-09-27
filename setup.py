@@ -53,6 +53,6 @@ setup(
         ]
     },
     package_data         = {
-        'compliance_checker': ['data/*.xml', 'tests/data/*.cdl', 'tests/data/non-comp/*.cdl', 'data/templates/*.j2'],
+        'compliance_checker': ['data/*.xml', 'tests/data/*.nc', 'tests/data/*.cdl', 'tests/data/non-comp/*.cdl', 'data/templates/*.j2'],
     }
 )
