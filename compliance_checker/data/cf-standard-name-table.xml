@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <standard_name_table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cf-standard-name-table-1.1.xsd">
-   <version_number>34</version_number>
-   <last_modified>2016-06-13T10:23:54Z</last_modified>
+   <version_number>36</version_number>
+   <last_modified>2016-09-21T04:47:47Z</last_modified>
    <institution>National Centre for Atmospheric Science</institution>
    <contact>support@ceda.ac.uk</contact>
 
@@ -10207,7 +10207,7 @@ totals are summed to obtain the index.</description>
       <canonical_units>m2</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description></description>
+      <description>The term sea_ice_extent means the total area of all grid cells in which the sea ice area fraction equals or exceeds a threshold, often chosen to be 15 per cent. The threshold must be specified by supplying a coordinate variable or scalar coordinate variable with the standard name of sea_ice_area_fraction.  The horizontal domain over which sea ice extent is calculated is described by the associated coordinate variables and coordinate bounds or by a coordinate variable or scalar coordinate variable with the standard name of &quot;region&quot; supplied according to section 6.1.1 of the CF conventions.</description>
    </entry>
   
    <entry id="sea_ice_freeboard">
@@ -10270,7 +10270,7 @@ totals are summed to obtain the index.</description>
       <canonical_units>m3</canonical_units>
       <grib></grib>
       <amip></amip>
-      <description></description>
+      <description>&quot;X_volume&quot; means the volume occupied by X within the grid cell.</description>
    </entry>
   
    <entry id="sea_ice_x_displacement">
@@ -10406,11 +10406,25 @@ totals are summed to obtain the index.</description>
       <description>The specification of a physical process by the phrase due_to_process means that the quantity named is a single term in a sum of terms which together compose the general quantity named by omitting the phrase. &quot;Air pressure at low frequency&quot; means variations in air pressure with periods longer than 20 days. These give rise to corresponding variations in sea surface topography. The quantity sea_surface_height_correction_due_to_air_pressure_at_low_frequency is commonly called the &quot;inverted barometer effect&quot; and the correction should be applied by adding it to the quantity with standard name altimeter_range.  Additional altimeter range corrections are given by the quantities with standard names altimeter_range_correction_due_to_wet_troposphere, altimeter_range_correction_due_to_dry_troposphere, altimeter_range_correction_due_to_ionosphere and sea_surface_height_correction_due_to_air_pressure_and_wind_at_high_frequency.</description>
    </entry>
   
+   <entry id="sea_surface_primary_swell_wave_significant_height">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Swell waves are waves on the ocean surface and are the low frequency portion of a bimodal wave frequency spectrum. The primary swell wave is the most energetic swell wave. Significant wave height is a statistic computed from wave measurements and corresponds to the average height of the highest one third of the waves, where the height is defined as the vertical distance from a wave trough to the following wave crest.</description>
+   </entry>
+  
    <entry id="sea_surface_salinity">
       <canonical_units>1e-3</canonical_units>
       <grib></grib>
       <amip></amip>
       <description>Sea surface salinity is the salt content of sea water close to the sea surface, often on the Practical Salinity Scale of 1978. However, the unqualified term &#39;salinity&#39; is generic and does not necessarily imply any particular method of calculation. The units of salinity are dimensionless and the units attribute should normally be given as 1e-3 or 0.001 i.e. parts per thousand. Sea surface salinity is often abbreviated as &quot;SSS&quot;. For the salinity of sea water at a particular depth or layer, a data variable of &quot;sea_water_salinity&quot; or one of the more precisely defined salinities should be used with a vertical coordinate axis. There are standard names for the precisely defined salinity quantities: sea_water_knudsen_salinity, S_K (used for salinity observations between 1901 and 1966), sea_water_cox_salinity, S_C (used for salinity observations between 1967 and 1977), sea_water_practical_salinity, S_P (used for salinity observations from 1978 to the present day), sea_water_absolute_salinity, S_A, sea_water_preformed_salinity, S_*, and sea_water_reference_salinity. Practical Salinity is reported on the Practical Salinity Scale of 1978 (PSS-78), and is usually based on the electrical conductivity of sea water in observations since the 1960s. Conversion of data between the observed scales follows: S_P = (S_K - 0.03) * (1.80655 / 1.805) and S_P = S_C, however the accuracy of the latter is dependent on whether chlorinity or conductivity was used to determine the S_C value, with this inconsistency driving the development of PSS-78. The more precise standard names should be used where appropriate for both modelled and observed salinities. In particular, the use of sea_water_salinity to describe salinity observations made from 1978 onwards is now deprecated in favor of the term sea_water_practical_salinity which is the salinity quantity stored by national data centers for post-1978 observations. The only exception to this is where the observed salinities are definitely known not to be recorded on the Practical Salinity Scale. The unit &quot;parts per thousand&quot; was used for sea_water_knudsen_salinity and sea_water_cox_salinity.</description>
+   </entry>
+  
+   <entry id="sea_surface_secondary_swell_wave_significant_height">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Swell waves are waves on the ocean surface and are the low frequency portion of a bimodal wave frequency spectrum. The secondary swell wave is the second most energetic wave in the low frequency portion of a bimodal wave frequency spectrum. Significant wave height is a statistic computed from wave measurements and corresponds to the average height of the highest one third of the waves, where the height is defined as the vertical distance from a wave trough to the following wave crest.</description>
    </entry>
   
    <entry id="sea_surface_skin_temperature">
@@ -10466,7 +10480,7 @@ totals are summed to obtain the index.</description>
       <canonical_units>m</canonical_units>
       <grib>105</grib>
       <amip></amip>
-      <description>Height is the vertical distance above the surface. Swell waves are waves on the ocean surface.</description>
+      <description>Swell waves are waves on the ocean surface and are the low frequency portion of a bimodal wave frequency spectrum. Significant wave height is a statistic computed from wave measurements and corresponds to the average height of the highest one third of the waves, where the height is defined as the vertical distance from a wave trough to the following wave crest.</description>
    </entry>
   
    <entry id="sea_surface_swell_wave_to_direction">
@@ -10504,6 +10518,41 @@ totals are summed to obtain the index.</description>
       <description>&quot;from_direction&quot; is used in the construction X_from_direction and indicates the direction from which the velocity vector of X is coming.</description>
    </entry>
   
+   <entry id="sea_surface_wave_maximum_crest_height">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The crest is the highest point of a wave. Crest height is the vertical distance between the crest and the calm sea surface. Maximum crest height is the maximum value measured during the observation period.</description>
+   </entry>
+  
+   <entry id="sea_surface_wave_maximum_height">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Wave height is defined as the vertical distance from a wave trough to the following wave crest. The maximum wave height is the greatest trough to crest distance measured during the observation period.</description>
+   </entry>
+  
+   <entry id="sea_surface_wave_maximum_trough_depth">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>The trough is the lowest point of a wave. Trough depth is the vertical distance between the trough and the calm sea surface. Maximum trough depth is the maximum value measured during the observation period.</description>
+   </entry>
+  
+   <entry id="sea_surface_wave_mean_height">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Wave height is defined as the vertical distance from a wave trough to the following wave crest. The mean wave height is the mean trough to crest distance measured during the observation period.</description>
+   </entry>
+  
+   <entry id="sea_surface_wave_mean_height_of_highest_tenth">
+      <canonical_units>m</canonical_units>
+      <grib></grib>
+      <amip></amip>
+      <description>Wave height is defined as the vertical distance from a wave trough to the following wave crest. The height of the highest tenth is defined as the mean of the highest ten per cent of trough to crest distances measured during the observation period.</description>
+   </entry>
+  
    <entry id="sea_surface_wave_mean_period_from_variance_spectral_density_first_frequency_moment">
       <canonical_units>s</canonical_units>
       <grib></grib>
@@ -10536,7 +10585,7 @@ totals are summed to obtain the index.</description>
       <canonical_units>m</canonical_units>
       <grib>100</grib>
       <amip></amip>
-      <description>Height is the vertical distance above the surface.</description>
+      <description>Significant wave height is a statistic computed from wave measurements and corresponds to the average height of the highest one third of the waves, where the height is defined as the vertical distance from a wave trough to the following wave crest.</description>
    </entry>
   
    <entry id="sea_surface_wave_stokes_drift_x_velocity">
@@ -10613,7 +10662,7 @@ totals are summed to obtain the index.</description>
       <canonical_units>m</canonical_units>
       <grib>102</grib>
       <amip></amip>
-      <description>Height is the vertical distance above the surface. Wind waves are waves on the ocean surface. Wind is defined as a two-dimensional (horizontal) air velocity vector, with no vertical component. (Vertical motion in the atmosphere has the standard name upward_air_velocity.)</description>
+      <description>Wind waves are waves on the ocean surface and are the high frequency portion of a bimodal wave frequency spectrum. Significant wave height is a statistic computed from wave measurements and corresponds to the average height of the highest one third of the waves, where the height is defined as the vertical distance from a wave trough to the following wave crest.</description>
    </entry>
   
    <entry id="sea_surface_wind_wave_to_direction">
@@ -19201,20 +19250,8 @@ monitored sensor. This TOA brightness temperature difference is a measure of the
     <entry_id>sea_surface_swell_wave_period</entry_id>
   </alias>
   
-  <alias id="significant_height_of_swell_waves">
-    <entry_id>sea_surface_swell_wave_significant_height</entry_id>
-  </alias>
-  
-  <alias id="significant_height_of_wind_and_swell_waves">
-    <entry_id>sea_surface_wave_significant_height</entry_id>
-  </alias>
-  
   <alias id="wind_wave_period">
     <entry_id>sea_surface_wind_wave_period</entry_id>
-  </alias>
-  
-  <alias id="significant_height_of_wind_waves">
-    <entry_id>sea_surface_wind_wave_significant_height</entry_id>
   </alias>
   
   <alias id="sea_surface_elevation_anomaly">
@@ -20639,6 +20676,18 @@ monitored sensor. This TOA brightness temperature difference is a measure of the
   
   <alias id="surface_cover">
     <entry_id>area_type</entry_id>
+  </alias>
+  
+  <alias id="significant_height_of_swell_waves">
+    <entry_id>sea_surface_swell_wave_significant_height</entry_id>
+  </alias>
+  
+  <alias id="significant_height_of_wind_waves">
+    <entry_id>sea_surface_wind_wave_significant_height</entry_id>
+  </alias>
+  
+  <alias id="significant_height_of_wind_and_swell_waves">
+    <entry_id>sea_surface_wave_significant_height</entry_id>
   </alias>
  
 
