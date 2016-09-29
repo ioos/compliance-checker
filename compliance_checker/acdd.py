@@ -384,7 +384,8 @@ class ACDDBaseCheck(BaseCheck):
         vert_max = ds.geospatial_vertical_max
 
         # identify vertical vars as per CF 4.3
-        v_vars = [(var._name, ma.masked_equal(var, var._FillValue)) for name, var in ds.variables.items() if is_vertical_coordinate(name, var)]
+        v_vars = [(var._name, ma.array(var)) for name, var in
+                  ds.variables.items() if is_vertical_coordinate(name, var)]
 
         if len(v_vars) == 0:
             return Result(BaseCheck.MEDIUM,
