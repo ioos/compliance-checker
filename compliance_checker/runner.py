@@ -3,6 +3,7 @@ from __future__ import print_function
 import traceback
 import sys
 import io
+import json
 
 from contextlib import contextmanager
 from compliance_checker.suite import CheckSuite
@@ -134,16 +135,19 @@ class ComplianceChecker(object):
         @param ds_loc          Location of the source dataset
         @param limit           The degree of strictness, 1 being the strictest, and going up from there.
         '''
-        for checker, rpair in score_groups.items():
+        results = {}
+        for i, (checker, rpair) in enumerate(score_groups.items()):
             groups, errors = rpair
-            if output_filename == '-':
-                f = io.StringIO()
-                cs.json_output(checker, groups, f, ds_loc, limit)
-                f.seek(0)
-                print(f.read())
-            else:
-                with io.open(output_filename, 'w', encoding='utf8') as f:
-                    cs.json_output(checker, groups, f, ds_loc, limit)
+            results[checker] = cs.dict_output(
+                checker, groups, ds_loc, limit
+            )
+        json_results = json.dumps(results, indent=2, ensure_ascii=False)
+
+        if output_filename == '-':
+            print(json_results)
+        else:
+            with io.open(output_filename, 'w', encoding='utf8') as f:
+                f.write(json_results)
 
         return groups
 

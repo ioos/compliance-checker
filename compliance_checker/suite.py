@@ -244,22 +244,18 @@ class CheckSuite(object):
         aggregates['source_name']       = source_name
         return aggregates
 
-    def json_output(self, check_name, groups, file_object, source_name, limit):
+    def dict_output(self, check_name, groups, source_name, limit):
         '''
         Builds the results into a JSON structure and writes it to the file buffer.
 
         @param check_name      The test which was run
         @param groups          List of results from compliance checker
         @param output_filename Path to file to save output
-        @param file_object     A python file object where the output should be written to
         @param source_name     Source of the dataset, used for title
         @param limit           Integer value for limiting output
         '''
         aggregates = self.build_structure(check_name, groups, source_name, limit)
-        aggregates = self.serialize(aggregates)
-        json_string = json.dumps(aggregates, ensure_ascii=False)
-        file_object.write(json_string)
-        return
+        return self.serialize(aggregates)
 
     def serialize(self, o):
         '''
