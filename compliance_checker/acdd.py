@@ -2,8 +2,9 @@ from __future__ import unicode_literals
 import itertools
 import numpy as np
 import numpy.ma as ma
-
+from netCDF4 import num2date
 from dateutil.parser import parse as parse_dt
+from datetime import timedelta
 from cf_units import Unit
 
 from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
@@ -11,7 +12,8 @@ from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
 from compliance_checker.cf.util import (is_time_variable,
                                         is_vertical_coordinate,
                                        _possiblexunits, _possibleyunits)
-from compliance_checker.util import datetime_is_iso
+from compliance_checker.util import datetime_is_iso, dateparse
+from compliance_checker import cfutil
 from pygeoif import from_wkt
 
 class ACDDBaseCheck(BaseCheck):
@@ -101,36 +103,38 @@ class ACDDBaseCheck(BaseCheck):
     #
     ###############################################################################
 
-    def _get_vars(self, ds, attr_filter=None):
-        vars = ds.dogma._eval_xpath('//ncml:variable')
+    def get_applicable_variables(self, ds):
+        '''
+        Returns a list of variable names that are applicable to ACDD Metadata
+        Checks for variables. This includes geophysical and coordinate
+        variables only.
 
-        if attr_filter is not None:
-            attrs = itertools.chain.from_iterable((v.xpath('ncml:attribute[@name="%s"]/@value' % attr_filter, namespaces=ds.dogma._namespaces) or [None] for v in vars))
-            names = (v.get('name', 'unknown') for v in vars)
-
-            attrs = list(zip(attrs, names))
-
-            return attrs
-
-        return vars
-
-    def _get_msg(self, vpair, attr):
-        vval, vname = vpair
-        if vval is None:
-            return ["Var %s missing attr %s" % (vname, attr)]
-
-        return []
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        applicable_variables = cfutil.get_geophysical_variables(ds)
+        varname = cfutil.get_time_variable(ds)
+        if varname:
+            applicable_variables.append(varname)
+        varname = cfutil.get_lon_variable(ds)
+        if varname:
+            applicable_variables.append(varname)
+        varname = cfutil.get_lat_variable(ds)
+        if varname:
+            applicable_variables.append(varname)
+        varname = cfutil.get_z_variable(ds)
+        if varname:
+            applicable_variables.append(varname)
+        return applicable_variables
 
     @score_group('varattr')
     def check_var_long_name(self, ds):
         results = []
-        # We don't check certain container variables for units
-        platform_variable_name = getattr(ds, 'platform', None)
-        for variable in ds.variables:
+
+        # ACDD Variable Metadata applies to all coordinate variables and
+        # geophysical variables only.
+
+        for variable in self.get_applicable_variables(ds):
             msgs = []
-            if variable in ('crs', platform_variable_name):
-                continue
-            # If the variable is a QC flag, we don't need units
             long_name = getattr(ds.variables[variable], 'long_name', None)
             check = long_name is not None
             if not check:
@@ -142,13 +146,8 @@ class ACDDBaseCheck(BaseCheck):
     @score_group('varattr')
     def check_var_standard_name(self, ds):
         results = []
-        # We don't check certain container variables for units
-        platform_variable_name = getattr(ds, 'platform', None)
-        for variable in ds.variables:
+        for variable in self.get_applicable_variables(ds):
             msgs = []
-            if variable in ('crs', platform_variable_name):
-                continue
-            # If the variable is a QC flag, we don't need units
             std_name = getattr(ds.variables[variable], 'standard_name', None)
             check = std_name is not None
             if not check:
@@ -157,21 +156,11 @@ class ACDDBaseCheck(BaseCheck):
 
         return results
 
-
     @score_group('varattr')
     def check_var_units(self, ds):
         results = []
-        # We don't check certain container variables for units
-        platform_variable_name = getattr(ds, 'platform', None)
-        for variable in ds.variables:
+        for variable in self.get_applicable_variables(ds):
             msgs = []
-            if variable in ('crs', platform_variable_name):
-                continue
-            # If the variable is a QC flag, we don't need units
-            std_name = getattr(ds.variables[variable], 'standard_name', None)
-            if std_name is not None:
-                if 'status_flag' in std_name:
-                    continue
             # Check units and dims for variable
             unit_check = hasattr(ds.variables[variable], 'units')
             no_dim_check = (getattr(ds.variables[variable], 'dimensions') == tuple())
@@ -420,40 +409,47 @@ class ACDDBaseCheck(BaseCheck):
             return
 
         # allows non-ISO 8601 formatted dates
-        epoch = parse_dt("1970-01-01 00:00:00 UTC")
         try:
-            t_min = (parse_dt(ds.time_coverage_start) - epoch).total_seconds()
-            t_max = (parse_dt(ds.time_coverage_end) - epoch).total_seconds()
+            t_min = dateparse(ds.time_coverage_start)
+            t_max = dateparse(ds.time_coverage_end)
         except:
             return Result(BaseCheck.MEDIUM,
                           False,
                           'time_coverage_extents_match',
-                          ['time_coverage variables are not formatted properly'])
-        # identify t vars as per CF 4.4
-        t_vars = [var for name, var in ds.variables.items() if is_time_variable(name, var)]
+                          ['time_coverage variables are not formatted properly. Please ensure they are valid ISO-8601 time strings'])
 
-        if len(t_vars) == 0:
+        timevar = cfutil.get_time_variable(ds)
+
+        if not timevar:
             return Result(BaseCheck.MEDIUM,
                           False,
                           'time_coverage_extents_match',
                           ['Could not find time variable to test extent of time_coverage_start/time_coverage_end, see CF-1.6 spec chapter 4.4'])
 
-        obs_mins = {var._name: Unit(str(var.units)).convert(np.nanmin(var), "seconds since 1970-01-01") for var in t_vars}
-        obs_maxs = {var._name: Unit(str(var.units)).convert(np.nanmax(var), "seconds since 1970-01-01") for var in t_vars}
+        # Time should be monotonically increasing, so we make that assumption here so we don't have to download THE ENTIRE ARRAY
+        try:
+            time0 = num2date(ds.variables[timevar][0], ds.variables[timevar].units)
+            time1 = num2date(ds.variables[timevar][-1], ds.variables[timevar].units)
+        except:
+            return Result(BaseCheck.MEDIUM,
+                          False,
+                          'time_coverage_extents_match',
+                          ['Failed to retrieve and convert times for variables %s.' % timevar])
 
-        min_pass = any((np.isclose(t_min, min_val) for min_val in obs_mins.values()))
-        max_pass = any((np.isclose(t_max, max_val) for max_val in obs_maxs.values()))
+        start_dt = abs(time0 - t_min)
+        end_dt = abs(time1 - t_max)
 
-        allpass = sum((min_pass, max_pass))
-
+        score = 2
         msgs = []
-        if not min_pass:
-            msgs.append("Data for possible time variables (%s) did not match time_coverage_start value (%s)" % (obs_mins, t_min))
-        if not max_pass:
-            msgs.append("Data for possible time variables (%s) did not match time_coverage_end value (%s)" % (obs_maxs, t_max))
+        if start_dt > timedelta(hours=1):
+            msgs.append("Date time mismatch between time_coverage_start and actual time values %s (time_coverage_start) != %s (time[0])" % (t_min.isoformat(), time0.isoformat()))
+            score -= 1
+        if end_dt > timedelta(hours=1):
+            msgs.append("Date time mismatch between time_coverage_end and actual time values %s (time_coverage_end) != %s (time[N])" % (t_max.isoformat(), time1.isoformat()))
+            score -= 1
 
         return Result(BaseCheck.MEDIUM,
-                      (allpass, 2),
+                      (score, 2),
                       'time_coverage_extents_match',
                       msgs)
 
@@ -541,7 +537,9 @@ class ACDD1_3Check(ACDDNCCheck):
             ])
 
     def check_platform_uses_vocab(self, ds):
-        #Checks if platform vocab is in vocab list
+        '''
+        Checks if platform vocab is in vocab list
+        '''
         if not hasattr(ds, u'platform'):
             return
         if not hasattr(ds, u'platform_vocabulary'):
@@ -550,7 +548,9 @@ class ACDD1_3Check(ACDDNCCheck):
         return Result(BaseCheck.LOW, (len(platform_names_good),len(getattr(ds,'platform_uses_vocabulary'))), 'platforms_valid', msgs = [u'Platform_vocabulary not present'])
 
     def check_instrument_uses_vocab(self, ds):
-        #Checks if instrument vocab is in vocab list
+        '''
+        Checks if instrument vocab is in vocab list
+        '''
         if not hasattr(ds, u'instrument'):
             return
         if not hasattr(ds, u'instrument_vocabulary'):
@@ -564,7 +564,9 @@ class ACDD1_3Check(ACDDNCCheck):
                       msgs=[u'Instrument_vocabulary not present'])
 
     def check_metadata_link(self, ds):
-        #Checks if metadata link is formed in a rational manner
+        '''
+        Checks if metadata link is formed in a rational manner
+        '''
         if not hasattr(ds, u'metadata_link'):
             return
         msgs = []
@@ -577,51 +579,47 @@ class ACDD1_3Check(ACDDNCCheck):
         return Result(BaseCheck.LOW, valid_link,  'metadata_link_valid', msgs)
 
     def check_date_modified_is_iso(self, ds):
-        #Checks if date modified field is ISO compliant
+        '''
+        Checks if date modified field is ISO compliant
+        '''
         if not hasattr(ds, u'date_modified'):
             return
         date_modified_check, msgs = datetime_is_iso(getattr(ds, u'date_modified'))
         return Result(BaseCheck.MEDIUM, date_modified_check, 'date_modified_is_iso', msgs)
 
     def check_date_issued_is_iso(self, ds):
-        #Checks if date issued field is ISO compliant
+        '''
+        Checks if date issued field is ISO compliant
+        '''
         if not hasattr(ds, u'date_issued'):
             return
         date_issued_check, msgs = datetime_is_iso(getattr(ds, u'date_issued'))
         return Result(BaseCheck.MEDIUM, date_issued_check, 'date_issued_is_iso', msgs)
 
     def check_date_metadata_modified_is_iso(self, ds):
-        #Checks if date metadata modified field is ISO compliant
+        '''
+        Checks if date metadata modified field is ISO compliant
+        '''
         if not hasattr(ds, u'date_metadata_modified'):
             return
         date_metadata_modified_check, msgs = datetime_is_iso(getattr(ds, u'date_metadata_modified'))
         return Result(BaseCheck.MEDIUM, date_metadata_modified_check, 'date_metadata_modified_is_iso', msgs)
 
     def check_id_has_no_blanks(self, ds):
-        #Check if there are blanks in the id field
+        '''
+        Check if there are blanks in the id field
+        '''
         if not hasattr(ds, u'id'):
             return
         if ' ' in getattr(ds, u'id'):
-            return Result(BaseCheck.MEDIUM, False, 'no_blanks_in_id', msgs = [u'There should be no blanks in the id field'])
+            return Result(BaseCheck.MEDIUM, False, 'no_blanks_in_id', msgs=[u'There should be no blanks in the id field'])
         else:
-            return Result(BaseCheck.MEDIUM, True, 'no_blanks_in_id', msgs = [])
-
-    # BWA: can describe license in plain text
-    #def check_license(self, ds):
-    #    #Checks if license is from accepted list
-    #    if not hasattr(ds, u'license'):
-    #        return
-    #    license_list = {'none', 'freely distributed'}
-    #    if getattr(ds, u'license').lower() in license_list:
-    #        return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs=['The license is valid'])
-    #    elif '.' in getattr(ds, u'license'):
-    #        return Result(BaseCheck.MEDIUM, True, 'valid_license', msgs=['The license is a url'])
-    #    else:
-    #        return Result(BaseCheck.MEDIUM, False, 'valid_license', msgs=['The license is not a url or in the accepted list'])
-
+            return Result(BaseCheck.MEDIUM, True, 'no_blanks_in_id', msgs=[])
 
     def check_date_created(self, ds):
-        #Check if date created is ISO
+        '''
+        Check if date created is ISO-8601
+        '''
         if not hasattr(ds, u'date_created'):
             return
         date_created_check, msgs = datetime_is_iso(getattr(ds, u'date_created'))
@@ -631,11 +629,8 @@ class ACDD1_3Check(ACDDNCCheck):
     @score_group('varattr')
     def check_var_coverage_content_type(self, ds):
         results = []
-        platform_variable_name = getattr(ds, 'platform', None)
-        for variable in ds.variables:
+        for variable in cfutil.get_geophysical_variables(ds):
             msgs = []
-            if variable in {'crs', platform_variable_name}:
-                continue
             ctype = getattr(ds.variables[variable],
                             'coverage_content_type', None)
             check = ctype is not None
@@ -643,14 +638,14 @@ class ACDD1_3Check(ACDDNCCheck):
                 msgs.append("Var %s missing attr coverage_content_type" %
                             variable)
                 results.append(Result(BaseCheck.HIGH, check,
-                                    (variable, "coverage_content_type"),
-                                    msgs))
-                return results
+                                      (variable, "coverage_content_type"),
+                                      msgs))
+                continue
             # ISO 19115-1 codes
             valid_ctypes = {'image', 'thematicClassification', 'physicalMeasurement',
                             'auxiliaryInformation', 'qualityInformation',
                             'referenceInformation', 'modelResult', 'coordinate'}
-            if not ctype in valid_ctypes:
+            if ctype not in valid_ctypes:
                 msgs.append("Var %s does not have a coverage_content_type in %s"
                             % (variable, sorted(valid_ctypes)))
 
