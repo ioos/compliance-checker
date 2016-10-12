@@ -24,6 +24,7 @@ variables:
         lon:units = "degrees_east";
         lon:axis = "X";
         lon:long_name = "Longitude";
+        lon:bounds = "lon_bnds";
     float lon_bnds(lon, nv);
         lon_bnds:units = "degrees_east";
         lon_bnds:long_name = "Longitude Cell Boundaries";
