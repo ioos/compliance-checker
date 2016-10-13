@@ -1,5 +1,6 @@
 import unittest
 from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check
+from compliance_checker.tests.resources import STATIC_FILES
 from netCDF4 import Dataset
 import os
 
@@ -25,7 +26,23 @@ def check_varset_nonintersect(group0, group1):
     return len(set(group0) ^ set(group1)) == 0
 
 
-class TestACDD1_1(unittest.TestCase):
+class BaseTestCase(unittest.TestCase):
+    '''
+    Base test case for ACDD
+    '''
+    def load_dataset(self, nc_dataset):
+        '''
+        Return a loaded NC Dataset for the given path
+        '''
+        if not isinstance(nc_dataset, str):
+            raise ValueError("nc_dataset should be a string")
+
+        nc_dataset = Dataset(nc_dataset, 'r')
+        self.addCleanup(nc_dataset.close)
+        return nc_dataset
+
+
+class TestACDD1_1(BaseTestCase):
 
     # Adapted using `pandas.read_html` from URL
     # http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-1
@@ -88,7 +105,9 @@ class TestACDD1_1(unittest.TestCase):
     }
 
     def setUp(self):
-        # TODO: Find or make a canonical ACDD 1.1 reference file
+        # Use the NCEI Gold Standard Point dataset for ACDD checks
+        self.ds = self.load_dataset(STATIC_FILES['ncei_gold_point_1'])
+
         self.acdd = ACDD1_1Check()
         self.acdd_highly_recommended = to_singleton_var(self.acdd.high_rec_atts)
         self.acdd_recommended = to_singleton_var(self.acdd.rec_atts)
@@ -98,14 +117,26 @@ class TestACDD1_1(unittest.TestCase):
         assert self.acdd._cc_spec == 'acdd'
         assert self.acdd._cc_spec_version == '1.1'
 
-    def test_high_rec_present(self):
+    def test_highly_recommended(self):
         '''
         Checks that all highly recommended attributes are present
         '''
         assert check_varset_nonintersect(self.expected['Highly Recommended'],
                                          self.acdd_highly_recommended)
 
-    def test_rec_present(self):
+        # Check the reference dataset, NCEI 1.1 Gold Standard Point
+        results = self.acdd.check_high(self.ds)
+        for result in results:
+            assert result.value is True
+
+        # Empty file
+        empty_ds = Dataset(os.devnull, 'w', diskless=True)
+        self.addCleanup(empty_ds.close)
+        results = self.acdd.check_high(empty_ds)
+        for result in results:
+            assert result.value is False
+
+    def test_recommended(self):
         '''
         Checks that all recommended attributes are present
         '''
@@ -114,15 +145,96 @@ class TestACDD1_1(unittest.TestCase):
         assert check_varset_nonintersect(self.expected['Recommended'],
                                          self.acdd_recommended)
 
-    def test_sug_present(self):
+        ncei_exceptions = [
+            'geospatial_bounds',
+            'time_coverage_duration'
+        ]
+        results = self.acdd.check_recommended(self.ds)
+        for result in results:
+            # NODC 1.1 doesn't have some ACDD attributes
+            if result.name in ncei_exceptions:
+                continue
+
+            # The NCEI Gold Standard Point is missing time_coverage_resolution...
+            if result.name == 'time_coverage_resolution':
+                assert result.value is False
+                continue
+
+            # Results can be either boolean or a tuple of (received, possible)
+            if isinstance(result.value, bool):
+                assert result.value is True
+            else:
+                assert result.value[0] == result.value[1]
+
+        empty_ds = Dataset(os.devnull, 'w', diskless=True)
+        self.addCleanup(empty_ds.close)
+
+        results = self.acdd.check_recommended(empty_ds)
+        for result in results:
+            if isinstance(result.value, bool):
+                assert result.value is False
+            else:
+                assert result.value[0] == 0
+
+    def test_suggested(self):
         '''
         Checks that all suggested attributes are present
         '''
         assert check_varset_nonintersect(self.expected['Suggested'],
                                          self.acdd_suggested)
 
+        # Attributes that are missing from NCEI but should be there
+        missing = [
+            'geospatial_lat_resolution',
+            'geospatial_lon_resolution',
+            'geospatial_vertical_resolution'
+        ]
+
+        results = self.acdd.check_suggested(self.ds)
+        for result in results:
+            if result.name in missing:
+                assert result.value is False
+                continue
+            # Results can be either boolean or a tuple of (received, possible)
+            if isinstance(result.value, bool):
+                assert result.value is True
+            else:
+                assert result.value[0] == result.value[1]
+
+        empty_ds = Dataset(os.devnull, 'w', diskless=True)
+        self.addCleanup(empty_ds.close)
+
+        results = self.acdd.check_recommended(empty_ds)
+        for result in results:
+            if isinstance(result.value, bool):
+                assert result.value is False
+            else:
+                assert result.value[0] == 0
+
     def test_acknowldegement_check(self):
-        pass
+        # Check British Spelling
+        try:
+            empty0 = Dataset(os.devnull, 'w', diskless=True)
+            result = self.acdd.check_acknowledgment(empty0)
+            assert result.value is False
+
+            empty0.acknowledgement = "Attribution goes here"
+            result = self.acdd.check_acknowledgment(empty0)
+            assert result.value is True
+        finally:
+            empty0.close()
+
+        try:
+            # Check British spelling
+            empty1 = Dataset(os.devnull, 'w', diskless=True)
+            result = self.acdd.check_acknowledgment(empty1)
+            assert result.value is False
+
+            empty1.acknowledgment = "Attribution goes here"
+            result = self.acdd.check_acknowledgment(empty1)
+            assert result.value is True
+        finally:
+            empty1.close()
 
 
 class TestACDD1_3(unittest.TestCase):

@@ -1,20 +1,24 @@
+'''
+Checks for the Attribute Conventions for Dataset Discovery (ACDD)
+
+This module contains classes defined as checks part of the compliance checker
+project for the verification and scoring of attributes for datasets.
+'''
+
 from __future__ import unicode_literals
-import itertools
+
 import numpy as np
 import numpy.ma as ma
 from netCDF4 import num2date
-from dateutil.parser import parse as parse_dt
 from datetime import timedelta
-from cf_units import Unit
 
 from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
                                      score_group, Result, ratable_result)
-from compliance_checker.cf.util import (is_time_variable,
-                                        is_vertical_coordinate,
-                                       _possiblexunits, _possibleyunits)
+from compliance_checker.cf.util import is_vertical_coordinate, _possiblexunits, _possibleyunits
 from compliance_checker.util import datetime_is_iso, dateparse
 from compliance_checker import cfutil
 from pygeoif import from_wkt
+
 
 class ACDDBaseCheck(BaseCheck):
 
@@ -23,6 +27,7 @@ class ACDDBaseCheck(BaseCheck):
     _cc_url = 'http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery'
 
     def __init__(self):
+
         self.high_rec_atts = [
             'title',
             'keywords',
@@ -73,39 +78,18 @@ class ACDDBaseCheck(BaseCheck):
         # the method isn't executed repeatedly.
         self._applicable_variables = None
 
-    ###############################################################################
-    #
-    # HIGHLY RECOMMENDED ATTRIBUTES
-    #
-    ###############################################################################
     # set up attributes according to version
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         return self.high_rec_atts
-    ###############################################################################
-    #
-    # RECOMMENDED ATTRIBUTES
-    #
-    ###############################################################################
 
     @check_has(BaseCheck.MEDIUM)
     def check_recommended(self, ds):
         return self.rec_atts
-    ###############################################################################
-    #
-    # SUGGESTED ATTRIBUTES
-    #
-    ###############################################################################
 
     @check_has(BaseCheck.LOW)
     def check_suggested(self, ds):
         return self.sug_atts
-
-    ###############################################################################
-    #
-    # HIGHLY RECOMMENDED VARIABLE ATTRS
-    #
-    ###############################################################################
 
     def get_applicable_variables(self, ds):
         '''
