@@ -45,32 +45,50 @@ def is_geophysical(ds, variable):
     Returns true if the dataset's variable is likely a geophysical variable
     '''
     ncvar = ds.variables[variable]
-    # Does it have a standard name and units?
-    standard_name = getattr(ncvar, 'standard_name', '')
-    if not standard_name:
-        return False
-    if standard_name and standard_name not in get_unitless_standard_names():
-        units = getattr(ncvar, 'units', '')
-        if units == '':
-            return False
-    if not hasattr(ncvar, 'standard_name') or not hasattr(ncvar, 'units'):
-        return False
-    if getattr(ncvar, 'standard_name') in ('time', 'latitude', 'longitude', 'height', 'depth', 'altitude'):
-        return False
-    # Is it dimensionless?
-    if len(ncvar.shape) == 0:
-        return False
-    # Is it a QC Flag?
-    if 'status_flag' in ncvar.standard_name:
-        return False
-
+    # Check for axis
     if getattr(ncvar, 'cf_role', None):
         return False
 
     if getattr(ncvar, 'axis', None):
         return False
 
+    # Does it have a standard name and units?
+    standard_name = getattr(ncvar, 'standard_name', '')
+    units = getattr(ncvar, 'units', '')
+    # Is the variable legally allowed to be unitless?
+    if standard_name and standard_name not in get_unitless_standard_names():
+        if units == '':
+            return False
+    # Is it a known coordinate variable
+    if standard_name in ('time', 'latitude', 'longitude', 'height', 'depth', 'altitude'):
+        return False
+
+    # Is it dimensionless?
+    if len(ncvar.shape) == 0:
+        return False
+
+    # Is it a QC Flag?
+    if 'status_flag' in standard_name:
+        return False
+
+    # Is it a §7.1 Cell Boundaries variable
+    if variable in get_cell_boundary_variables(ds):
+        return False
+
     return True
+
+
+def get_cell_boundary_variables(ds):
+    '''
+    Returns a list of variable names for variables that represent cell
+    boundaries through the `bounds` attribute
+    '''
+    boundary_variables = []
+    has_bounds = ds.get_variables_by_attributes(bounds=lambda x: x is not None)
+    for var in has_bounds:
+        if var.bounds in ds.variables:
+            boundary_variables.append(var.bounds)
+    return boundary_variables
 
 
 def get_geophysical_variables(ds):

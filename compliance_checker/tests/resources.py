@@ -62,4 +62,5 @@ STATIC_FILES = {
     'trajectory-profile-incomplete'        : get_filename('tests/data/trajectory-profile-incomplete.cdl'),
     '2d-regular-grid'                      : get_filename('tests/data/2d-regular-grid.cdl'),
     '3d-regular-grid'                      : get_filename('tests/data/3d-regular-grid.cdl'),
+    'grid-boundaries'                      : get_filename('tests/data/grid-boundaries.cdl'),
 }
