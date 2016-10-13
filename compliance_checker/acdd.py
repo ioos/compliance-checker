@@ -23,9 +23,11 @@ class ACDDBaseCheck(BaseCheck):
     _cc_url = 'http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery'
 
     def __init__(self):
-        self.high_rec_atts = ['title',
-                              'keywords',
-                              'summary']
+        self.high_rec_atts = [
+            'title',
+            'keywords',
+            'summary'
+        ]
 
         self.rec_atts = [
             'id',
@@ -39,8 +41,6 @@ class ACDDBaseCheck(BaseCheck):
             'institution',
             'project',
             'processing_level',
-            # mutliple spellings get tested, move to check fn instead
-            #'acknowledgement',
             ('geospatial_bounds', self.verify_geospatial_bounds),
             'geospatial_lat_min',
             'geospatial_lat_max',
@@ -68,6 +68,10 @@ class ACDDBaseCheck(BaseCheck):
             'geospatial_vertical_units',
             'geospatial_vertical_resolution'
         ]
+
+        # This variable is used to cache the results of applicable variables so
+        # the method isn't executed repeatedly.
+        self._applicable_variables = None
 
     ###############################################################################
     #
@@ -111,20 +115,21 @@ class ACDDBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         '''
-        applicable_variables = cfutil.get_geophysical_variables(ds)
-        varname = cfutil.get_time_variable(ds)
-        if varname:
-            applicable_variables.append(varname)
-        varname = cfutil.get_lon_variable(ds)
-        if varname:
-            applicable_variables.append(varname)
-        varname = cfutil.get_lat_variable(ds)
-        if varname:
-            applicable_variables.append(varname)
-        varname = cfutil.get_z_variable(ds)
-        if varname:
-            applicable_variables.append(varname)
-        return applicable_variables
+        if self._applicable_variables is None:
+            self.applicable_variables = cfutil.get_geophysical_variables(ds)
+            varname = cfutil.get_time_variable(ds)
+            if varname:
+                self.applicable_variables.append(varname)
+            varname = cfutil.get_lon_variable(ds)
+            if varname:
+                self.applicable_variables.append(varname)
+            varname = cfutil.get_lat_variable(ds)
+            if varname:
+                self.applicable_variables.append(varname)
+            varname = cfutil.get_z_variable(ds)
+            if varname:
+                self.applicable_variables.append(varname)
+        return self.applicable_variables
 
     @score_group('varattr')
     def check_var_long_name(self, ds):
@@ -174,44 +179,20 @@ class ACDDBaseCheck(BaseCheck):
 
         return results
 
-    ################################################################################
-    #
-    # HIGHLY RECOMMENDED CHECKS
-    #
-    ###############################################################################
-
-
     def check_acknowledgment(self, ds):
-        """Check if acknowledgment/acknowledgment attr is present"""
-        if not (hasattr(ds, 'acknowledgment') or
-                hasattr(ds, 'acknowledgement')):
-            return Result(BaseCheck.MEDIUM, False,
-                          'acknowledgment/acknowledgement', msgs = [])
+        '''
+        Check if acknowledgment/acknowledgment attr is present. There
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        check = False
+        messages = []
+        if hasattr(ds, 'acknowledgment') or hasattr(ds, 'acknowledgement'):
+            check = True
         else:
-            return Result(BaseCheck.HIGH, True,
-                          'acknowledgment/acknowledgement',
-                          msgs=["Neither 'acknowledgment' nor 'acknowledgement' attributes present"])
+            messages.append("acknowledgement global attribute is recommended")
 
-
-    ###############################################################################
-    #
-    # RECOMMENDED CHECKS
-    #
-    ###############################################################################
-
-
-    ###############################################################################
-    #
-    # SUGGESTED
-    #
-    ###############################################################################
-
-
-    ###############################################################################
-    #
-    # DATA EXTENTS MATCHING ATTRIBUTES
-    #
-    ###############################################################################
+        return Result(BaseCheck.MEDIUM, check, 'acknowledgment/acknowledgement', msgs=messages)
 
     def check_lat_extents(self, ds):
         """
