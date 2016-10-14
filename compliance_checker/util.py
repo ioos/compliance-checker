@@ -5,6 +5,13 @@ import isodate
 import arrow
 
 
+def isstring(obj):
+    try:
+        return isinstance(obj, basestring)
+    except NameError:
+        return isinstance(obj, str)
+
+
 def datetime_is_iso(dt):
     """Attempts to parse a date formatted in ISO 8601 format"""
     try:
@@ -20,7 +27,7 @@ def dateparse(date_str):
 
     :param str date_str: An ISO-8601 string
     '''
-    if isinstance(date_str, basestring):
+    if isstring(date_str):
         if date_str.endswith('+00'):
             date_str = date_str.replace('+00', 'Z')
     arrow_obj = arrow.get(date_str)

@@ -165,7 +165,7 @@ class ACDDBaseCheck(BaseCheck):
 
     def check_acknowledgment(self, ds):
         '''
-        Check if acknowledgment/acknowledgment attr is present. There
+        Check if acknowledgment/acknowledgment attr is present.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         '''
