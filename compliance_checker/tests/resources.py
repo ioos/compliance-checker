@@ -64,4 +64,5 @@ STATIC_FILES = {
     '3d-regular-grid'                      : get_filename('tests/data/3d-regular-grid.cdl'),
     'grid-boundaries'                      : get_filename('tests/data/grid-boundaries.cdl'),
     'ncei_gold_point_1'                    : get_filename('tests/data/ncei_gold_point_1.cdl'),
+    'ncei_gold_point_2'                    : get_filename('tests/data/ncei_gold_point_2.cdl'),
 }

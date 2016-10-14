@@ -41,6 +41,18 @@ class BaseTestCase(unittest.TestCase):
         self.addCleanup(nc_dataset.close)
         return nc_dataset
 
+    def assert_result_is_good(self, result):
+        if isinstance(result.value, bool):
+            assert result.value is True
+        else:
+            assert result.value[0] == result.value[1]
+
+    def assert_result_is_bad(self, result):
+        if isinstance(result.value, bool):
+            assert result.value is False
+        else:
+            assert result.value[0] != result.value[1]
+
 
 class TestACDD1_1(BaseTestCase):
 
@@ -127,14 +139,15 @@ class TestACDD1_1(BaseTestCase):
         # Check the reference dataset, NCEI 1.1 Gold Standard Point
         results = self.acdd.check_high(self.ds)
         for result in results:
-            assert result.value is True
+            self.assert_result_is_good(result)
 
-        # Empty file
+        # Create an empty dataset that writes to /dev/null This acts as a
+        # temporary netCDF file in-memory that never gets written to disk.
         empty_ds = Dataset(os.devnull, 'w', diskless=True)
         self.addCleanup(empty_ds.close)
         results = self.acdd.check_high(empty_ds)
         for result in results:
-            assert result.value is False
+            self.assert_result_is_bad(result)
 
     def test_recommended(self):
         '''
@@ -157,24 +170,17 @@ class TestACDD1_1(BaseTestCase):
 
             # The NCEI Gold Standard Point is missing time_coverage_resolution...
             if result.name == 'time_coverage_resolution':
-                assert result.value is False
+                self.assert_result_is_bad(result)
                 continue
 
-            # Results can be either boolean or a tuple of (received, possible)
-            if isinstance(result.value, bool):
-                assert result.value is True
-            else:
-                assert result.value[0] == result.value[1]
-
+        # Create an empty dataset that writes to /dev/null This acts as a
+        # temporary netCDF file in-memory that never gets written to disk.
         empty_ds = Dataset(os.devnull, 'w', diskless=True)
         self.addCleanup(empty_ds.close)
 
         results = self.acdd.check_recommended(empty_ds)
         for result in results:
-            if isinstance(result.value, bool):
-                assert result.value is False
-            else:
-                assert result.value[0] == 0
+            self.assert_result_is_bad(result)
 
     def test_suggested(self):
         '''
@@ -193,34 +199,30 @@ class TestACDD1_1(BaseTestCase):
         results = self.acdd.check_suggested(self.ds)
         for result in results:
             if result.name in missing:
-                assert result.value is False
+                self.assert_result_is_bad(result)
                 continue
-            # Results can be either boolean or a tuple of (received, possible)
-            if isinstance(result.value, bool):
-                assert result.value is True
-            else:
-                assert result.value[0] == result.value[1]
 
+            self.assert_result_is_good(result)
+
+        # Create an empty dataset that writes to /dev/null This acts as a
+        # temporary netCDF file in-memory that never gets written to disk.
         empty_ds = Dataset(os.devnull, 'w', diskless=True)
         self.addCleanup(empty_ds.close)
 
         results = self.acdd.check_recommended(empty_ds)
         for result in results:
-            if isinstance(result.value, bool):
-                assert result.value is False
-            else:
-                assert result.value[0] == 0
+            self.assert_result_is_bad(result)
 
     def test_acknowldegement_check(self):
         # Check British Spelling
         try:
             empty0 = Dataset(os.devnull, 'w', diskless=True)
             result = self.acdd.check_acknowledgment(empty0)
-            assert result.value is False
+            self.assert_result_is_bad(result)
 
             empty0.acknowledgement = "Attribution goes here"
             result = self.acdd.check_acknowledgment(empty0)
-            assert result.value is True
+            self.assert_result_is_good(result)
         finally:
             empty0.close()
 
@@ -228,16 +230,16 @@ class TestACDD1_1(BaseTestCase):
             # Check British spelling
             empty1 = Dataset(os.devnull, 'w', diskless=True)
             result = self.acdd.check_acknowledgment(empty1)
-            assert result.value is False
+            self.assert_result_is_bad(result)
 
             empty1.acknowledgment = "Attribution goes here"
             result = self.acdd.check_acknowledgment(empty1)
-            assert result.value is True
+            self.assert_result_is_good(result)
         finally:
             empty1.close()
 
 
-class TestACDD1_3(unittest.TestCase):
+class TestACDD1_3(BaseTestCase):
     # Adapted using `pandas.read_html` from URL
     # http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3
     expected = {
@@ -316,53 +318,123 @@ class TestACDD1_3(unittest.TestCase):
     }
 
     def setUp(self):
-        # TODO: Find or make a canonical ACDD 1.3 reference file
-        # ds = Dataset("/Users/asadeveloper/Downloads/hycomglobalnavy_2012120300.nc")
-        # data originally obtained from
-        # http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3
+        # Use the NCEI Gold Standard Point dataset for ACDD checks
+        self.ds = self.load_dataset(STATIC_FILES['ncei_gold_point_2'])
         self.acdd = ACDD1_3Check()
-        # create in memory netCDF file for testing purposes
-        self.ds = Dataset(filename=os.devnull, mode='w', diskless=True)
 
         self.acdd_highly_recommended = to_singleton_var(self.acdd.high_rec_atts)
         self.acdd_recommended = to_singleton_var(self.acdd.rec_atts)
         self.acdd_suggested = to_singleton_var(self.acdd.sug_atts)
 
-    def tearDown(self):
-        self.ds.close()
-
     def test_cc_meta(self):
         assert self.acdd._cc_spec == 'acdd'
         assert self.acdd._cc_spec_version == '1.3'
 
-    def test_high_rec_present(self):
+    def test_highly_recommended(self):
         '''
         Checks that all highly recommended attributes are present
         '''
         assert check_varset_nonintersect(self.expected['Highly Recommended'],
                                          self.acdd_highly_recommended)
 
-    def test_high_rec(self):
-        self.acdd.check_high(self.ds)
+        results = self.acdd.check_high(self.ds)
+        for result in results:
+            # NODC 2.0 has a different value in the conventions field
+            self.assert_result_is_good(result)
 
-    def test_rec_present(self):
+    def test_recommended(self):
         '''
         Checks that all recommended attributes are present
         '''
-        # 'geospatial_bounds' attribute currently has its own separate check
-        # from the list of required atts
         assert check_varset_nonintersect(self.expected['Recommended'],
                                          self.acdd_recommended)
 
-    def test_sug_present(self):
+        results = self.acdd.check_recommended(self.ds)
+        ncei_exceptions = [
+            'time_coverage_duration',
+            'time_coverage_resolution'
+        ]
+        for result in results:
+            if result.name in ncei_exceptions:
+                self.assert_result_is_bad(result)
+                continue
+
+            self.assert_result_is_good(result)
+
+    def test_suggested(self):
         '''
         Checks that all suggested attributes are present
         '''
         assert check_varset_nonintersect(self.expected['Suggested'],
                                          self.acdd_suggested)
 
-    def test_var_coverage_content_type(self):
-        var = self.ds.createVariable('foo', 'i4')
-        var.coverage_content_type = 'modelResult'
-        result = self.acdd.check_var_coverage_content_type(self.ds)
-        assert len(result) == 0
+        results = self.acdd.check_suggested(self.ds)
+        # NCEI does not require or suggest resolution attributes
+        ncei_exceptions = [
+            'geospatial_lat_resolution',
+            'geospatial_lon_resolution',
+            'geospatial_vertical_resolution'
+        ]
+        for result in results:
+            if result.name in ncei_exceptions:
+                self.assert_result_is_bad(result)
+                continue
+            self.assert_result_is_good(result)
+
+    def test_variables(self):
+        '''
+        Test that variables are checked for required attributes
+        '''
+        # Create an empty dataset that writes to /dev/null This acts as a
+        # temporary netCDF file in-memory that never gets written to disk.
+        empty_ds = Dataset(os.devnull, 'w', diskless=True)
+        self.addCleanup(empty_ds.close)
+
+        # The dataset needs at least one variable to check that it's missing
+        # all the required attributes.
+        empty_ds.createDimension('time', 1)
+        empty_ds.createVariable('fake', 'float32', ('time',))
+
+        # long_name
+        results = self.acdd.check_var_long_name(self.ds)
+        for result in results:
+            self.assert_result_is_good(result)
+
+        results = self.acdd.check_var_long_name(empty_ds)
+        assert len(results) == 1
+        for result in results:
+            self.assert_result_is_bad(result)
+
+        # standard_name
+        results = self.acdd.check_var_standard_name(self.ds)
+        for result in results:
+            self.assert_result_is_good(result)
+
+        results = self.acdd.check_var_standard_name(empty_ds)
+        assert len(results) == 1
+        for result in results:
+            self.assert_result_is_bad(result)
+
+        # units
+        results = self.acdd.check_var_units(self.ds)
+        for result in results:
+            self.assert_result_is_good(result)
+
+        results = self.acdd.check_var_units(empty_ds)
+        assert len(results) == 1
+        for result in results:
+            self.assert_result_is_bad(result)
+
+    def test_acknowledgement(self):
+        '''
+        Test acknowledgement attribute is being checked
+        '''
+
+        empty_ds = Dataset(os.devnull, 'w', diskless=True)
+        self.addCleanup(empty_ds.close)
+
+        result = self.acdd.check_acknowledgment(self.ds)
+        self.assert_result_is_good(result)
+
+        result = self.acdd.check_acknowledgment(empty_ds)
+        self.assert_result_is_bad(result)
