@@ -18,7 +18,7 @@ def datetime_is_iso(dt):
         isodate.parse_datetime(dt)
         return True, []
     except isodate.ISO8601Error:
-        return False, ['Datetime provided is not in a valid ISO 8602 format']
+        return False, ['Datetime provided is not in a valid ISO 8601 format']
 
 
 def dateparse(date_str):
