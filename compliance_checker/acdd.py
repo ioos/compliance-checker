@@ -81,10 +81,20 @@ class ACDDBaseCheck(BaseCheck):
     # set up attributes according to version
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
+        '''
+        Performs a check on each highly recommended attributes' existence in the dataset
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
         return self.high_rec_atts
 
     @check_has(BaseCheck.MEDIUM)
     def check_recommended(self, ds):
+        '''
+        Performs a check on each recommended attributes' existence in the dataset
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
         return self.rec_atts
 
     @check_has(BaseCheck.LOW)
@@ -117,6 +127,11 @@ class ACDDBaseCheck(BaseCheck):
 
     @score_group('varattr')
     def check_var_long_name(self, ds):
+        '''
+        Checks each applicable variable for the long_name attribute
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
         results = []
 
         # ACDD Variable Metadata applies to all coordinate variables and
@@ -134,6 +149,11 @@ class ACDDBaseCheck(BaseCheck):
 
     @score_group('varattr')
     def check_var_standard_name(self, ds):
+        '''
+        Checks each applicable variable for the standard_name attribute
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
         results = []
         for variable in self.get_applicable_variables(ds):
             msgs = []
@@ -147,6 +167,11 @@ class ACDDBaseCheck(BaseCheck):
 
     @score_group('varattr')
     def check_var_units(self, ds):
+        '''
+        Checks each applicable variable for the units attribute
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
         results = []
         for variable in self.get_applicable_variables(ds):
             msgs = []
@@ -179,9 +204,12 @@ class ACDDBaseCheck(BaseCheck):
         return Result(BaseCheck.MEDIUM, check, 'acknowledgment/acknowledgement', msgs=messages)
 
     def check_lat_extents(self, ds):
-        """
-        Check that the values of geospatial_lat_min/geospatial_lat_max approximately match the data.
-        """
+        '''
+        Check that the values of geospatial_lat_min/geospatial_lat_max
+        approximately match the data.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
         if not (hasattr(ds, 'geospatial_lat_min') and hasattr(ds, 'geospatial_lat_max')):
             return
 
@@ -242,9 +270,12 @@ class ACDDBaseCheck(BaseCheck):
                       msgs)
 
     def check_lon_extents(self, ds):
-        """
-        Check that the values of geospatial_lon_min/geospatial_lon_max approximately match the data.
-        """
+        '''
+        Check that the values of geospatial_lon_min/geospatial_lon_max
+        approximately match the data.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
         if not (hasattr(ds, 'geospatial_lon_min') and hasattr(ds, 'geospatial_lon_max')):
             return
 
@@ -310,8 +341,8 @@ class ACDDBaseCheck(BaseCheck):
         check = var is not None
         if not check:
             return ratable_result(False,
-                          'geospatial_bounds',
-                          ["Attr geospatial_bounds not present"])
+                                  'geospatial_bounds',
+                                  ["Attr geospatial_bounds not present"])
 
         try:
             # TODO: verify that WKT is valid given CRS (defaults to EPSG:4326
@@ -319,13 +350,11 @@ class ACDDBaseCheck(BaseCheck):
             from_wkt(ds.geospatial_bounds)
         except AttributeError:
             return ratable_result(False,
-                          'geospatial_bounds',
-                          ['Could not parse WKT, possible bad value for WKT'])
+                                  'geospatial_bounds',
+                                  ['Could not parse WKT, possible bad value for WKT'])
         # parsed OK
         else:
-            return ratable_result(True, 'geospatial_bounds',
-                          ())
-
+            return ratable_result(True, 'geospatial_bounds', tuple())
 
     def check_vertical_extents(self, ds):
         """
@@ -407,10 +436,12 @@ class ACDDBaseCheck(BaseCheck):
         score = 2
         msgs = []
         if start_dt > timedelta(hours=1):
-            msgs.append("Date time mismatch between time_coverage_start and actual time values %s (time_coverage_start) != %s (time[0])" % (t_min.isoformat(), time0.isoformat()))
+            msgs.append("Date time mismatch between time_coverage_start and actual "
+                        "time values %s (time_coverage_start) != %s (time[0])" % (t_min.isoformat(), time0.isoformat()))
             score -= 1
         if end_dt > timedelta(hours=1):
-            msgs.append("Date time mismatch between time_coverage_end and actual time values %s (time_coverage_end) != %s (time[N])" % (t_max.isoformat(), time1.isoformat()))
+            msgs.append("Date time mismatch between time_coverage_end and actual "
+                        "time values %s (time_coverage_end) != %s (time[N])" % (t_max.isoformat(), time1.isoformat()))
             score -= 1
 
         return Result(BaseCheck.MEDIUM,
@@ -422,23 +453,24 @@ class ACDDBaseCheck(BaseCheck):
         """
         Verify that the version in the Conventions field is correct
         """
-        for convention in ds.Conventions.replace(' ','').split(','):
+        for convention in ds.Conventions.replace(' ', '').split(','):
             if convention == 'ACDD-' + self._cc_spec_version:
-                return ratable_result(
-                        (2,2),
-                        'Conventions',
-                        [])
+                return ratable_result((2, 2),
+                                      'Conventions',
+                                      [])
         # Conventions attribute is present, but does not include
         # proper ACDD version
-        return ratable_result(
-                (1,2),
-                'Conventions',
-                ["Attr Conventions does not contain 'ACDD-{}'".format(
-                            self._cc_spec_version)])
+        messages = [
+            "Attr Conventions does not contain 'ACDD-{}'".format(self._cc_spec_version)
+        ]
+        return ratable_result((1, 2),
+                              'Conventions',
+                              messages)
 
 
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
     pass
+
 
 class ACDD1_1Check(ACDDNCCheck):
 
@@ -448,16 +480,25 @@ class ACDD1_1Check(ACDDNCCheck):
 
     def __init__(self):
         super(ACDD1_1Check, self).__init__()
-        self.rec_atts.extend(['keywords_vocabulary',
-                        ('cdm_data_type', ['Grid', 'Image', 'Point',
-                                           'Radial', 'Station', 'Swath',
-                                           'Trajectory'])])
+        self.rec_atts.extend([
+            'keywords_vocabulary',
+            ('cdm_data_type', [
+                'Grid',
+                'Image',
+                'Point',
+                'Radial',
+                'Station',
+                'Swath',
+                'Trajectory'
+            ])
+        ])
 
-        self.sug_atts.extend(['publisher_name',       # publisher,dataCenter
-                                'publisher_url',        # publisher
-                                'publisher_email',      # publisher
-                                'geospatial_vertical_positive'
-                              ])
+        self.sug_atts.extend([
+            'publisher_name',       # publisher,dataCenter
+            'publisher_url',        # publisher
+            'publisher_email',      # publisher
+            'geospatial_vertical_positive'
+        ])
 
 
 class ACDD1_3Check(ACDDNCCheck):
@@ -468,8 +509,9 @@ class ACDD1_3Check(ACDDNCCheck):
 
     def __init__(self):
         super(ACDD1_3Check, self).__init__()
-        self.high_rec_atts.extend([('Conventions',
-                                    self.verify_convention_version)])
+        self.high_rec_atts.extend([
+            ('Conventions', self.verify_convention_version)
+        ])
 
         self.rec_atts.extend(['geospatial_vertical_positive',
                               'geospatial_bounds_crs',
@@ -479,73 +521,62 @@ class ACDD1_3Check(ACDDNCCheck):
                               'publisher_email',      # publisher
                               'source'])
 
-        self.sug_atts.extend([  # 1.3.1, technically
-                ('creator_type', ['person', 'group', 'institution',
-                                  'position']),
-                'creator_institution',
-                ('cdm_data_type', ['Grid', 'Image', 'Point', 'Radial',
-                                   'Station', 'Swath', 'Trajectory']),
-                'platform',
-                # TODO: make dependent on platform
-                'platform_vocabulary',
-                'keywords_vocabulary',
-                'instrument',
-                'metadata_link',
-                'product_version',
-                'references',
-                ('publisher_type', ['person', 'group', 'institution',
-                                    'position']),
-                'instrument_vocabulary',
-                'date_metadata_modified',
-                'program',
-                'publisher_institution',
-            ])
-
-    def check_platform_uses_vocab(self, ds):
-        '''
-        Checks if platform vocab is in vocab list
-        '''
-        if not hasattr(ds, u'platform'):
-            return
-        if not hasattr(ds, u'platform_vocabulary'):
-            return
-        platform_names_good = [platform for platform in getattr(ds, u'platform') if platform in getattr(ds, u'platform_vocabulary')]
-        return Result(BaseCheck.LOW, (len(platform_names_good),len(getattr(ds,'platform_uses_vocabulary'))), 'platforms_valid', msgs = [u'Platform_vocabulary not present'])
-
-    def check_instrument_uses_vocab(self, ds):
-        '''
-        Checks if instrument vocab is in vocab list
-        '''
-        if not hasattr(ds, u'instrument'):
-            return
-        if not hasattr(ds, u'instrument_vocabulary'):
-            return
-        instrument_names_good = [instrument for instrument in
-                                 getattr(ds, u'instrument') if instrument
-                                 in getattr(ds, u'instrument_vocabulary')]
-        return Result(BaseCheck.LOW, (len(instrument_names_good),
-                      len(getattr(ds,'instrument_uses_vocabulary'))),
-                      'instruments_valid',
-                      msgs=[u'Instrument_vocabulary not present'])
+        self.sug_atts.extend([
+            ('creator_type', [
+                'person',
+                'group',
+                'institution',
+                'position'
+            ]),
+            'creator_institution',
+            ('cdm_data_type', [
+                'Grid',
+                'Image',
+                'Point',
+                'Radial',
+                'Station',
+                'Swath',
+                'Trajectory'
+            ]),
+            'platform',
+            'platform_vocabulary',
+            'keywords_vocabulary',
+            'instrument',
+            'metadata_link',
+            'product_version',
+            'references',
+            ('publisher_type', [
+                'person',
+                'group',
+                'institution',
+                'position'
+            ]),
+            'instrument_vocabulary',
+            'date_metadata_modified',
+            'program',
+            'publisher_institution',
+        ])
 
     def check_metadata_link(self, ds):
         '''
         Checks if metadata link is formed in a rational manner
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
         '''
         if not hasattr(ds, u'metadata_link'):
             return
         msgs = []
         meta_link = getattr(ds, 'metadata_link')
-        if not 'http' in meta_link:
+        if 'http' not in meta_link:
             msgs.append('Metadata URL should include http:// or https://')
-        if not '.' in meta_link:
-            msgs.append('Metadata URL is malformed')
-        valid_link = len(msgs) == 0
-        return Result(BaseCheck.LOW, valid_link,  'metadata_link_valid', msgs)
+        valid_link = (len(msgs) == 0)
+        return Result(BaseCheck.LOW, valid_link, 'metadata_link_valid', msgs)
 
     def check_date_modified_is_iso(self, ds):
         '''
         Checks if date modified field is ISO compliant
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
         '''
         if not hasattr(ds, u'date_modified'):
             return
@@ -555,6 +586,8 @@ class ACDD1_3Check(ACDDNCCheck):
     def check_date_issued_is_iso(self, ds):
         '''
         Checks if date issued field is ISO compliant
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
         '''
         if not hasattr(ds, u'date_issued'):
             return
@@ -564,6 +597,8 @@ class ACDD1_3Check(ACDDNCCheck):
     def check_date_metadata_modified_is_iso(self, ds):
         '''
         Checks if date metadata modified field is ISO compliant
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
         '''
         if not hasattr(ds, u'date_metadata_modified'):
             return
@@ -573,17 +608,22 @@ class ACDD1_3Check(ACDDNCCheck):
     def check_id_has_no_blanks(self, ds):
         '''
         Check if there are blanks in the id field
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
         '''
         if not hasattr(ds, u'id'):
             return
         if ' ' in getattr(ds, u'id'):
-            return Result(BaseCheck.MEDIUM, False, 'no_blanks_in_id', msgs=[u'There should be no blanks in the id field'])
+            return Result(BaseCheck.MEDIUM, False, 'no_blanks_in_id',
+                          msgs=[u'There should be no blanks in the id field'])
         else:
             return Result(BaseCheck.MEDIUM, True, 'no_blanks_in_id', msgs=[])
 
     def check_date_created(self, ds):
         '''
         Check if date created is ISO-8601
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
         '''
         if not hasattr(ds, u'date_created'):
             return
@@ -593,6 +633,11 @@ class ACDD1_3Check(ACDDNCCheck):
 
     @score_group('varattr')
     def check_var_coverage_content_type(self, ds):
+        '''
+        Check coverage content type against valid ISO-19115-1 codes
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
         results = []
         for variable in cfutil.get_geophysical_variables(ds):
             msgs = []
@@ -606,10 +651,18 @@ class ACDD1_3Check(ACDDNCCheck):
                                       (variable, "coverage_content_type"),
                                       msgs))
                 continue
+
             # ISO 19115-1 codes
-            valid_ctypes = {'image', 'thematicClassification', 'physicalMeasurement',
-                            'auxiliaryInformation', 'qualityInformation',
-                            'referenceInformation', 'modelResult', 'coordinate'}
+            valid_ctypes = {
+                'image',
+                'thematicClassification',
+                'physicalMeasurement',
+                'auxiliaryInformation',
+                'qualityInformation',
+                'referenceInformation',
+                'modelResult',
+                'coordinate'
+            }
             if ctype not in valid_ctypes:
                 msgs.append("Var %s does not have a coverage_content_type in %s"
                             % (variable, sorted(valid_ctypes)))
