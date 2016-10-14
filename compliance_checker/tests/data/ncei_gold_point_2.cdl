@@ -1,5 +1,4 @@
-
-// Source: https://data.nodc.noaa.gov/thredds/dodsC/testdata/mbiddle/GOLD_STANDARD_NETCDF/2.0/NCEI_point_template_v2.0_2016-06-15_133828.496967.nc.html
+// Source https://data.nodc.noaa.gov/thredds/dodsC/testdata/mbiddle/GOLD_STANDARD_NETCDF/2.0/NCEI_point_template_v2.0_2016-06-15_133828.496967.nc
 netcdf NCEI_point_template_v2.0_2016-06-15_133828.496967 {
 dimensions:
 	maxStrlen64 = 64 ;
@@ -166,4 +165,23 @@ variables:
 		:history = "This file was created on 2016-06-15T13:38:28.496967Z" ;
 		:license = "Freely available" ;
 		:DODS.strlen = 0 ;
+data:
+
+ z = 1.5 ;
+
+ time = 1427322017 ;
+
+ lat = 38.048 ;
+
+ lon = -123.458 ;
+
+ sal = 33 ;
+
+ temp = 13 ;
+
+ instrument1 = "" ;
+
+ platform1 = "" ;
+
+ crs = _ ;
 }

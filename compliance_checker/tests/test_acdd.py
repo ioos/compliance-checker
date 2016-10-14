@@ -438,3 +438,11 @@ class TestACDD1_3(BaseTestCase):
 
         result = self.acdd.check_acknowledgment(empty_ds)
         self.assert_result_is_bad(result)
+
+    def test_vertical_extents(self):
+        '''
+        Test vertical extents are being checked
+        '''
+
+        result = self.acdd.check_vertical_extents(self.ds)
+        self.assert_result_is_good(result)

@@ -356,44 +356,93 @@ class ACDDBaseCheck(BaseCheck):
         else:
             return ratable_result(True, 'geospatial_bounds', tuple())
 
+    def _check_total_z_extents(self, ds, z_variable):
+        '''
+        Check the entire array of Z for minimum and maximum and compare that to
+        the vertical extents defined in the global attributes
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        vert_min = ds.geospatial_vertical_min
+        vert_max = ds.geospatial_vertical_max
+        msgs = []
+        total = 2
+
+        zvalue = ds.variables[z_variable][:]
+        # If the array has fill values, which is allowed in the case of point
+        # features
+        if hasattr(zvalue, 'mask'):
+            zvalue = zvalue[~zvalue.mask]
+        zmin = zvalue.min()
+        zmax = zvalue.max()
+        if not np.isclose(vert_min, zmin):
+            msgs.append("geospatial_vertical_min != min(%s) values, %s != %s" % (
+                z_variable,
+                vert_min,
+                zmin
+            ))
+        if not np.isclose(vert_max, zmax):
+            msgs.append("geospatial_vertical_max != max(%s) values, %s != %s" % (
+                z_variable,
+                vert_min,
+                zmax
+            ))
+
+        return Result(BaseCheck.MEDIUM,
+                      (total - len(msgs), total),
+                      'geospatial_vertical_extents_match',
+                      msgs)
+
+    def _check_scalar_vertical_extents(self, ds, z_variable):
+        '''
+        Check the scalar value of Z compared to the vertical extents which
+        should also be equivalent
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        vert_min = ds.geospatial_vertical_min
+        vert_max = ds.geospatial_vertical_max
+        msgs = []
+        total = 2
+
+        zvalue = ds.variables[z_variable][:].item()
+        if not np.isclose(vert_min, vert_max):
+            msgs.append("geospatial_vertical_min != geospatial_vertical_max for scalar depth values, %s != %s" % (
+                vert_min,
+                vert_max
+            ))
+
+        if not np.isclose(vert_max, zvalue):
+            msgs.append("geospatial_vertical_max != %s values, %s != %s" % (
+                z_variable,
+                vert_max,
+                zvalue
+            ))
+
+        return Result(BaseCheck.MEDIUM,
+                      (total - len(msgs), total),
+                      'geospatial_vertical_extents_match',
+                      msgs)
+
     def check_vertical_extents(self, ds):
         """
         Check that the values of geospatial_vertical_min/geospatial_vertical_max approximately match the data.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
         """
         if not (hasattr(ds, 'geospatial_vertical_min') and hasattr(ds, 'geospatial_vertical_max')):
             return
 
-        vert_min = ds.geospatial_vertical_min
-        vert_max = ds.geospatial_vertical_max
-
-        # identify vertical vars as per CF 4.3
-        v_vars = [(var._name, ma.array(var)) for name, var in
-                  ds.variables.items() if is_vertical_coordinate(name, var)]
-
-        if len(v_vars) == 0:
+        z_variable = cfutil.get_z_variable(ds)
+        if not z_variable:
             return Result(BaseCheck.MEDIUM,
                           False,
                           'geospatial_vertical_extents_match',
                           ['Could not find vertical variable to test extent of geospatial_vertical_min/geospatial_vertical_max, see CF-1.6 spec chapter 4.3'])
+        if ds.variables[z_variable].dimensions == tuple():
+            return self._check_scalar_vertical_extents(ds, z_variable)
 
-        obs_mins = {var[0]: np.nanmin(var[1]) for var in v_vars if not np.isnan(var[1]).all()}
-        obs_maxs = {var[0]: np.nanmax(var[1]) for var in v_vars if not np.isnan(var[1]).all()}
-
-        min_pass = any((np.isclose(vert_min, min_val) for min_val in obs_mins.values()))
-        max_pass = any((np.isclose(vert_max, max_val) for max_val in obs_maxs.values()))
-
-        allpass = sum((min_pass, max_pass))
-
-        msgs = []
-        if not min_pass:
-            msgs.append("Data for possible vertical variables (%s) did not match geospatial_vertical_min value (%s)" % (obs_mins, vert_min))
-        if not max_pass:
-            msgs.append("Data for possible vertical variables (%s) did not match geospatial_vertical_max value (%s)" % (obs_maxs, vert_max))
-
-        return Result(BaseCheck.MEDIUM,
-                      (allpass, 2),
-                      'geospatial_vertical_extents_match',
-                      msgs)
+        return self._check_total_z_extents(ds, z_variable)
 
     def check_time_extents(self, ds):
         """
