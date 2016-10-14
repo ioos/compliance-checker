@@ -141,7 +141,8 @@ class TestACDD1_1(BaseTestCase):
         for result in results:
             self.assert_result_is_good(result)
 
-        # Empty file
+        # Create an empty dataset that writes to /dev/null This acts as a
+        # temporary netCDF file in-memory that never gets written to disk.
         empty_ds = Dataset(os.devnull, 'w', diskless=True)
         self.addCleanup(empty_ds.close)
         results = self.acdd.check_high(empty_ds)
@@ -172,7 +173,8 @@ class TestACDD1_1(BaseTestCase):
                 self.assert_result_is_bad(result)
                 continue
 
-
+        # Create an empty dataset that writes to /dev/null This acts as a
+        # temporary netCDF file in-memory that never gets written to disk.
         empty_ds = Dataset(os.devnull, 'w', diskless=True)
         self.addCleanup(empty_ds.close)
 
@@ -202,6 +204,8 @@ class TestACDD1_1(BaseTestCase):
 
             self.assert_result_is_good(result)
 
+        # Create an empty dataset that writes to /dev/null This acts as a
+        # temporary netCDF file in-memory that never gets written to disk.
         empty_ds = Dataset(os.devnull, 'w', diskless=True)
         self.addCleanup(empty_ds.close)
 
@@ -381,9 +385,13 @@ class TestACDD1_3(BaseTestCase):
         '''
         Test that variables are checked for required attributes
         '''
+        # Create an empty dataset that writes to /dev/null This acts as a
+        # temporary netCDF file in-memory that never gets written to disk.
         empty_ds = Dataset(os.devnull, 'w', diskless=True)
         self.addCleanup(empty_ds.close)
 
+        # The dataset needs at least one variable to check that it's missing
+        # all the required attributes.
         empty_ds.createDimension('time', 1)
         empty_ds.createVariable('fake', 'float32', ('time',))
 
