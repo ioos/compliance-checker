@@ -75,6 +75,10 @@ def is_geophysical(ds, variable):
     if variable in get_cell_boundary_variables(ds):
         return False
 
+    # Is it a string but with no defined units?
+    if ncvar.dtype.char == 'S' and not units:
+        return False
+
     return True
 
 
