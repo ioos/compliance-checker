@@ -926,12 +926,15 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(Result(BaseCheck.HIGH, (ok_count, 2), '§3.5 Flags and flag attributes', msgs=msgs))
 
                 # 7) the flag_masks attribute values must be non-zero
-                zeros = [x for x in flag_masks if x == 0]
+                zeros_absent = 0 not in flag_masks
+
                 msgs = []
-                if len(zeros):
+                if not zeros_absent:
                     msgs = ['flag_masks attribute values contains a zero']
 
-                ret_val.append(Result(BaseCheck.HIGH, len(zeros) != 0, '§3.5 Flags and flag attributes', msgs=msgs))
+                ret_val.append(Result(BaseCheck.HIGH, zeros_absent,
+                                      '§3.5 Flags and flag attributes',
+                                      msgs=msgs))
 
             # 9) when both defined, boolean AND of each entry in flag_values with corresponding entry in flag_masks
             #    should equal the flags_value entry
