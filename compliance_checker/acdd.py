@@ -362,6 +362,7 @@ class ACDDBaseCheck(BaseCheck):
         the vertical extents defined in the global attributes
 
         :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str z_variable: Name of the variable representing the Z-Axis
         '''
         vert_min = ds.geospatial_vertical_min
         vert_max = ds.geospatial_vertical_max
@@ -399,6 +400,7 @@ class ACDDBaseCheck(BaseCheck):
         should also be equivalent
 
         :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str z_variable: Name of the variable representing the Z-Axis
         '''
         vert_min = ds.geospatial_vertical_min
         vert_max = ds.geospatial_vertical_max
