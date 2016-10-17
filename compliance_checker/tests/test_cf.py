@@ -276,6 +276,13 @@ class TestCF(unittest.TestCase):
         # has the proper message
         self.assertEqual(sum(bool(re.match(m_str, msg)) for msg in messages), 7)
 
+    def test_check_flag_masks(self):
+        dataset = self.load_dataset(STATIC_FILES['ghrsst'])
+        results = self.cf.check_flags(dataset)
+        scored, out_of, messages = self.get_results(results)
+        self.assertEqual(scored, 32)
+        self.assertEqual(out_of, 32)
+
     def test_check_bad_units(self):
 
         dataset = self.load_dataset(STATIC_FILES['2dim'])
@@ -789,6 +796,8 @@ class TestCF(unittest.TestCase):
         self.assertTrue(units_temporal('hours since 2000-01-01'))
         self.assertFalse(units_temporal('hours'))
         self.assertFalse(units_temporal('days since the big bang'))
+
+
 
 
 def breakpoint(scope=None, global_scope=None):
