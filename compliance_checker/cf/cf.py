@@ -548,7 +548,8 @@ class CFBaseCheck(BaseCheck):
         valid_range (if used) for a variable.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret = []
 
@@ -609,7 +610,8 @@ class CFBaseCheck(BaseCheck):
         to exist.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         attrs = ['title', 'history']
         ret = []
@@ -669,7 +671,8 @@ class CFBaseCheck(BaseCheck):
           specified cell_methods attribute if present
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
 
@@ -796,7 +799,8 @@ class CFBaseCheck(BaseCheck):
         optionally followed by one or more blanks and a standard name modifier
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
 
@@ -855,7 +859,8 @@ class CFBaseCheck(BaseCheck):
         the relationship.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
 
@@ -920,7 +925,8 @@ class CFBaseCheck(BaseCheck):
         matches the flag_values value indicates a true condition.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
 
@@ -1068,7 +1074,8 @@ class CFBaseCheck(BaseCheck):
         standard_name attribute may be used for direct identification.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret_val     = []
         coord_vars  = self._find_coord_vars(ds)
@@ -1147,7 +1154,8 @@ class CFBaseCheck(BaseCheck):
         coordinate types whenever they are applicable.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
         # 1. Verify that for any known or common coordinate name as a dmension
@@ -1181,6 +1189,7 @@ class CFBaseCheck(BaseCheck):
         :param str recommended: The recommended units for the coordinate variable
         :param list acceptable: A list of acceptable units that coordinate is allowed to be
         :rtype: list
+        :return: List of results
         '''
         ret_val = []
         has_units = hasattr(var, 'units')
@@ -1219,7 +1228,8 @@ class CFBaseCheck(BaseCheck):
         the axis attribute with the value Y.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
 
@@ -1247,7 +1257,8 @@ class CFBaseCheck(BaseCheck):
         the axis attribute with the value X.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
 
@@ -1277,7 +1288,8 @@ class CFBaseCheck(BaseCheck):
         vertical coordinate data.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
 
         ret_val = []
@@ -1341,7 +1353,8 @@ class CFBaseCheck(BaseCheck):
         Plural forms are also acceptable.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
         for k, v in ds.variables.items():
@@ -1399,7 +1412,8 @@ class CFBaseCheck(BaseCheck):
         but is strongly recommended.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
 
@@ -1478,7 +1492,8 @@ class CFBaseCheck(BaseCheck):
         the axis attribute with the value T.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
 
         ret_val = []
@@ -1549,7 +1564,8 @@ class CFBaseCheck(BaseCheck):
         using the appropriate attributes is required.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: list
+        :return: List of results
         '''
         valid_calendars = [
             'gregorian',
@@ -1655,12 +1671,11 @@ class CFBaseCheck(BaseCheck):
         # pass
 
     def check_independent_axis_dimensions(self, ds):
-        """
-        5.1 When each of a variable's spatiotemporal dimensions is a latitude,
+        '''
+        CF §5.1 When each of a variable's spatiotemporal dimensions is a latitude,
         longitude, vertical, or time dimension, then each axis is identified by
         a coordinate variable.
-
-        """
+        '''
         ret_val = []
 
         space_time_dim = []
@@ -1713,6 +1728,9 @@ class CFBaseCheck(BaseCheck):
           for each coordinate defined, verify that the coordinate:
             is either a coordinate variable OR comprises coordinate variables
 
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         """
         ret_val = []
         reported_reference_variables = []
