@@ -127,6 +127,12 @@ class CFBaseCheck(BaseCheck):
     """
 
     def __init__(self):
+        # The compliance checker can be run on multiple datasets in a single
+        # instantiation, so caching values has be done by the unique identifier
+        # for each dataset loaded.
+
+        # Each default dict is a key, value mapping from the dataset object to
+        # a list of variables
         self._coord_vars     = defaultdict(list)
         self._ancillary_vars = defaultdict(list)
         self._clim_vars      = defaultdict(list)
@@ -150,10 +156,12 @@ class CFBaseCheck(BaseCheck):
         self._find_cf_standard_name_table(ds)
 
     def _find_cf_standard_name_table(self, ds):
-        """
-        Parse out the :standard_name_vocabulary attribute and download that version of
-        the cf standard name table
-        """
+        '''
+        Parse out the :standard_name_vocabulary attribute and download that
+        version of the cf standard name table
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
         # Get the standard name vocab
         standard_name_vocabulary = getattr(ds, 'standard_name_vocabulary', '')
 
@@ -192,14 +200,19 @@ class CFBaseCheck(BaseCheck):
             return 0
 
     def _find_coord_vars(self, ds, refresh=False):
-        """
+        '''
         Finds all coordinate variables in a dataset.
 
-        A variable with the same name as a dimension is called a coordinate variable.
+        A variable with the same name as a dimension is called a coordinate
+        variable.
 
-        The result is cached by the passed in dataset object inside of this checker. Pass refresh=True
-        to redo the cached value.
-        """
+        The result is cached by the passed in dataset object inside of this
+        checker. Pass refresh=True to redo the cached value.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        '''
         if ds in self._coord_vars and not refresh:
             return self._coord_vars[ds]
 
@@ -209,19 +222,25 @@ class CFBaseCheck(BaseCheck):
 
     def _find_ancillary_vars(self, ds, refresh=False):
         """
-        Finds all ancillary variables in a dataset.
+        Returns a list of variable names that are defined as ancillary
+        variables in the dataset ds.
 
-        TODO: fully define
-
-        An ancillary variable generally is a metadata container and referenced from
-        other variables via a string reference in an attribute.
+        An ancillary variable generally is a metadata container and referenced
+        from other variables via a string reference in an attribute.
 
         - via ancillary_variables (3.4)
         - "grid mapping var" (5.6)
         - TODO: more?
 
-        The result is cached by the passed in dataset object inside of this checker. Pass refresh=True
-        to redo the cached value.
+        The result is cached by the passed in dataset object inside of this
+        checker. Pass refresh=True to redo the cached value.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        :rtype: list
+        :return: List of variable names (str) that are defined as ancillary
+                 variables in the dataset ds.
         """
         if ds in self._ancillary_vars and not refresh:
             return self._ancillary_vars[ds]
