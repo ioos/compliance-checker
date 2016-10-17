@@ -242,21 +242,26 @@ class CFBaseCheck(BaseCheck):
         :return: List of variable names (str) that are defined as ancillary
                  variables in the dataset ds.
         """
-        if ds in self._ancillary_vars and not refresh:
+
+        # Used the cached version if it exists and is not empty
+        if self._ancillary_vars.get(ds, None) and refresh is False:
             return self._ancillary_vars[ds]
+
+        # Invalidate the cache at all costs
+        self._ancillary_vars[ds] = []
 
         for name, var in ds.variables.items():
             if hasattr(var, 'ancillary_variables'):
                 for anc_name in var.ancillary_variables.split(" "):
                     if anc_name in ds.variables:
-                        self._ancillary_vars[ds].append(ds.variables[anc_name])
+                        self._ancillary_vars[ds].append(anc_name)
 
             if hasattr(var, 'grid_mapping'):
                 gm_name = var.grid_mapping
                 if gm_name in ds.variables:
-                    self._ancillary_vars[ds].append(ds.variables[gm_name])
+                    self._ancillary_vars[ds].append(gm_name)
 
-        return self._ancillary_vars
+        return self._ancillary_vars[ds]
 
     def _find_metadata_vars(self, ds, refresh=False):
         '''
@@ -2756,27 +2761,38 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         reasoning = []
 
-        name_list = []
         non_data_list = []
-        data_list = []
 
+        # Build a list of variables that are not geophysical variables
         for name, var in ds.variables.items():
+            if var in self._find_coord_vars(ds):
+                non_data_list.append(name)
+            elif name in self._find_ancillary_vars(ds):
+                non_data_list.append(name)
 
-            if var.dimensions and not hasattr(var, 'cf_role') and not self._is_station_var(var):
-                if var.dimensions != (name,):
-                    name_list.append(name)
-
-        non_data_list = [name for name, var in ds.variables.items() if var in self._find_coord_vars(ds) or var in self._find_ancillary_vars(ds)]
-
-        for name, var in ds.variables.items():
-            if hasattr(var, 'coordinates'):
+            # If there's a variable that is referenced in another variable's
+            # coordinates attribute, put that on the non-data list as well.
+            elif hasattr(var, 'coordinates'):
                 for coord in getattr(var, 'coordinates', '').split(' '):
-                    if coord in name_list:
+                    if coord in ds.variables:
                         non_data_list.append(coord)
 
-        data_list = [data for data in name_list if data not in non_data_list]
+            # If the variable has a dimension and is not a station identifier
+            elif var.dimensions == tuple() or var.dimensions == (name,):
+                non_data_list.append(name)
 
-        for data_entry in data_list:
+            elif self._is_station_var(var):
+                non_data_list.append(name)
+
+            elif hasattr(var, 'cf_role'):
+                non_data_list.append(name)
+
+        for data_entry in ds.variables:
+            # If the variable is not a geophysical variable, skip checking it
+            if data_entry in non_data_list:
+                continue
+
+            # If the variable has a coordinates attribute, then it passes
             if getattr(ds.variables[data_entry], 'coordinates', ''):
                 result = Result(BaseCheck.MEDIUM,
                                 True,
