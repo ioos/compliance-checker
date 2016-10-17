@@ -157,7 +157,7 @@ class CFBaseCheck(BaseCheck):
 
     def _find_cf_standard_name_table(self, ds):
         '''
-        Parse out the :standard_name_vocabulary attribute and download that
+        Parse out the `standard_name_vocabulary` attribute and download that
         version of the cf standard name table
 
         :param netCDF4.Dataset ds: An open netCDF dataset
@@ -201,10 +201,7 @@ class CFBaseCheck(BaseCheck):
 
     def _find_coord_vars(self, ds, refresh=False):
         '''
-        Finds all coordinate variables in a dataset.
-
-        A variable with the same name as a dimension is called a coordinate
-        variable.
+        Returns a list of variable names that identify as coordinate variables.
 
         The result is cached by the passed in dataset object inside of this
         checker. Pass refresh=True to redo the cached value.
@@ -212,6 +209,9 @@ class CFBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param bool refresh: if refresh is set to True, the cache is
                              invalidated.
+        :rtype: list
+        :return: A list of variables names (str) that are defined as coordinate
+                 variables in the dataset ds.
         '''
         if ds in self._coord_vars and not refresh:
             return self._coord_vars[ds]
@@ -221,7 +221,7 @@ class CFBaseCheck(BaseCheck):
         return self._coord_vars[ds]
 
     def _find_ancillary_vars(self, ds, refresh=False):
-        """
+        '''
         Returns a list of variable names that are defined as ancillary
         variables in the dataset ds.
 
@@ -241,7 +241,7 @@ class CFBaseCheck(BaseCheck):
         :rtype: list
         :return: List of variable names (str) that are defined as ancillary
                  variables in the dataset ds.
-        """
+        '''
 
         # Used the cached version if it exists and is not empty
         if self._ancillary_vars.get(ds, None) and refresh is False:
@@ -265,9 +265,9 @@ class CFBaseCheck(BaseCheck):
 
     def _find_metadata_vars(self, ds, refresh=False):
         '''
-        Finds all variables that could be considered purely metadata
-
         Returns a list of netCDF variable instances for those that are likely metadata variables
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
         '''
         if ds in self._metadata_vars and not refresh:
             return self._metadata_vars[ds]
@@ -289,10 +289,8 @@ class CFBaseCheck(BaseCheck):
         return self._metadata_vars[ds]
 
     def _find_data_vars(self, ds):
-        """
-        Finds all variables that could be considered Data variables.
-
-        Returns a dictionary mapping name -> variable.
+        '''
+        Returns a dictionary of variables that could be considered data variables.
 
         Excludes variables that are:
             - coordinate variables
@@ -300,8 +298,9 @@ class CFBaseCheck(BaseCheck):
             - dimensionless
             - metadata variables
 
-        Results are NOT CACHED.
-        """
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: dict
+        '''
         candidates = {}
         for var_name, variable in ds.variables.items():
 
@@ -318,13 +317,13 @@ class CFBaseCheck(BaseCheck):
         return candidates
 
     def _find_clim_vars(self, ds, refresh=False):
-        """
-        Finds all climatology variables in a dataset.
+        '''
+        Returns a list of variables that are likely to be climatology variables based on CF §7.4
 
-        Climatology variables (7.4)
-
-        Cached.
-        """
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        '''
 
         if ds in self._clim_vars and not refresh:
             return self._clim_vars[ds]
@@ -352,14 +351,6 @@ class CFBaseCheck(BaseCheck):
                 if is_cvar:
                     c_time.add(v)
 
-            else:
-                # check cell_methods
-                if hasattr(v, 'cell_methods'):
-                    try:
-                        cell_methods = parse_cell_methods(v.cell_methods)
-                    except:
-                        pass
-
         dvars = set(ds.variables.values()) - set(coord_vars)
         for dim in c_time:
             for v in dvars:
@@ -371,11 +362,14 @@ class CFBaseCheck(BaseCheck):
         return c_vars
 
     def _find_boundary_vars(self, ds, refresh=False):
-        """
-        Returns dict of coordinates vars -> associated boundary vars
+        '''
+        Returns dictionary of boundary variables mapping the variable instance
+        to the name of the variable acting as a boundary variable.
 
-        Cached.
-        """
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        '''
         if ds in self._boundary_vars and not refresh:
             return self._boundary_vars[ds]
 
@@ -396,9 +390,16 @@ class CFBaseCheck(BaseCheck):
     ###############################################################################
 
     def check_data_types(self, ds):
-        """
-        2.2 The netCDF data types char, byte, short, int, float or real, and double are all acceptable
-        """
+        '''
+        Checks the data type of all netCDF variables to ensure they are valid
+        data types under CF.
+
+        CF §2.2 The netCDF data types char, byte, short, int, float or real, and
+        double are all acceptable
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         fails = []
         total = len(ds.variables)
 
@@ -418,9 +419,15 @@ class CFBaseCheck(BaseCheck):
         return Result(BaseCheck.HIGH, (total - len(fails), total), '§2.2 Valid netCDF data types', msgs=fails)
 
     def check_naming_conventions(self, ds):
-        """
-        2.3 Variable, dimension and attribute names should begin with a letter and be composed of letters, digits, and underscores.
-        """
+        '''
+        Checks the variable names to ensure they are valid CF variable names under CF.
+
+        CF §2.3 Variable, dimension and attribute names should begin with a letter
+        and be composed of letters, digits, and underscores.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         fails = []
         total = len(ds.variables)
 
@@ -433,9 +440,15 @@ class CFBaseCheck(BaseCheck):
         return Result(BaseCheck.HIGH, (total - len(fails), total), '§2.3 Legal variable names', fails)
 
     def check_names_unique(self, ds):
-        """
-        2.3 names should not be distinguished purely by case, i.e., if case is disregarded, no two names should be the same.
-        """
+        '''
+        Checks the variable names for uniqueness regardless of case.
+
+        CF §2.3 names should not be distinguished purely by case, i.e., if case
+        is disregarded, no two names should be the same.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         fails = []
         total = len(ds.variables)
         names = defaultdict(int)
@@ -447,9 +460,15 @@ class CFBaseCheck(BaseCheck):
         return Result(BaseCheck.LOW, (total - len(fails), total), '§2.3 Unique variable names', msgs=fails)
 
     def check_dimension_names(self, ds):
-        """
-        2.4 A variable may have any number of dimensions, including zero, and the dimensions must all have different names.
-        """
+        '''
+        Checks variables contain no duplicate dimension names.
+
+        CF §2.4 A variable may have any number of dimensions, including zero,
+        and the dimensions must all have different names.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         fails = []
         total = len(ds.variables)
 
@@ -465,12 +484,18 @@ class CFBaseCheck(BaseCheck):
         return Result(BaseCheck.HIGH, (total - len(fails), total), '§2.4 Unique dimensions', msgs=fails)
 
     def check_dimension_order(self, ds):
-        """
-        2.4 If any or all of the dimensions of a variable have the interpretations of "date or time" (T), "height or depth" (Z),
-        "latitude" (Y), or "longitude" (X) then we recommend, those dimensions to appear in the relative order T, then Z, then Y,
-        then X in the CDL definition corresponding to the file. All other dimensions should, whenever possible, be placed to the
-        left of the spatiotemporal dimensions.
-        """
+        '''
+        Checks each variable's dimension order to ensure that the order is
+        consistent and in order under CF §2.4
+
+        CF §2.4 If any or all of the dimensions of a variable have the
+        interpretations of "date or time" (T), "height or depth" (Z),
+        "latitude" (Y), or "longitude" (X) then we recommend, those dimensions
+        to appear in the relative order T, then Z, then Y, then X in the CDL
+        definition corresponding to the file. All other dimensions should,
+        whenever possible, be placed to the left of the spatiotemporal
+        dimensions.
+        '''
         fails = []
         total = len(ds.variables)
 
@@ -484,7 +509,10 @@ class CFBaseCheck(BaseCheck):
             nonnones = [i for i, x in enumerate(dclass) if x is not None]
             '''
             Documenting for clarification:
-            This next line of code says "If there is a non-space-time dimension and there is a space time dimension and the location of the non-space-time is before the location of the space-time dimension, fail test"
+            This next line of code says "If there is a non-space-time dimension
+            and there is a space time dimension and the location of the
+            non-space-time is before the location of the space-time dimension,
+            fail test"
             '''
             if len(nones) and len(nonnones) and max(nones) < min(nonnones):
                 fails.append("Variable %s has a non-space-time dimension after space-time-dimensions" % k)
@@ -512,9 +540,16 @@ class CFBaseCheck(BaseCheck):
         # pass
 
     def check_fill_value_outside_valid_range(self, ds):
-        """
-        2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
-        """
+        '''
+        Checks each variable's _FillValue to ensure that it's in valid_range or
+        between valid_min and valid_max according to CF §2.5.1
+
+        CF §2.5.1 The _FillValue should be outside the range specified by
+        valid_range (if used) for a variable.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret = []
 
         for k, v in ds.variables.items():
@@ -531,7 +566,7 @@ class CFBaseCheck(BaseCheck):
                 else:
                     continue
 
-                valid     = not (v._FillValue >= rmin and v._FillValue <= rmax)
+                valid = (v._FillValue < rmin or v._FillValue > rmax)
                 reasoning = []
                 if not valid:
                     reasoning = ["%s must not be in valid range (%s to %s) as specified by %s" % (v._FillValue, rmin, rmax, spec_by)]
@@ -541,9 +576,15 @@ class CFBaseCheck(BaseCheck):
         return ret
 
     def check_conventions_are_cf_16(self, ds):
-        """
-        2.6.1 the NUG defined global attribute Conventions to the string value "CF-1.6"
-        """
+        '''
+        Check the global attribute conventions to contain CF-1.6
+
+        CF §2.6.1 the NUG defined global attribute Conventions to the string
+        value "CF-1.6"
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
 
         valid_conventions = ['CF-1.6']
         if hasattr(ds, 'Conventions'):
@@ -561,9 +602,15 @@ class CFBaseCheck(BaseCheck):
 
     @score_group('§2.6.2 Convention Attributes')
     def check_convention_globals(self, ds):
-        """
-        2.6.2 title/history global attributes, must be strings. Do not need to exist.
-        """
+        '''
+        Check the common global attributes are strings if they exist.
+
+        CF §2.6.2 title/history global attributes, must be strings. Do not need
+        to exist.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         attrs = ['title', 'history']
         ret = []
 
@@ -576,9 +623,12 @@ class CFBaseCheck(BaseCheck):
     @score_group('§2.6.2 Convention Attributes')
     def check_convention_possibly_var_attrs(self, ds):
         """
-        2.6.2 institution, source, references, and comment, either global or assigned to individual variables.
-        When an attribute appears both globally and as a variable attribute, the variable's version has precedence.
-        Must be strings.
+        Check variable and global attributes are strings for recommended attributes under CF §2.6.2
+
+        CF §2.6.2 institution, source, references, and comment, either global
+        or assigned to individual variables.  When an attribute appears both
+        globally and as a variable attribute, the variable's version has
+        precedence.  Must be strings.
         """
         attrs = ['institution', 'source', 'references', 'comment']
         ret = []
@@ -601,8 +651,11 @@ class CFBaseCheck(BaseCheck):
     ###############################################################################
 
     def check_units(self, ds):
-        """
-        3.1 The units attribute is required for all variables that represent dimensional quantities
+        '''
+        Check the units attribute for all variables to ensure they are CF
+        compliant under CF §3.1
+
+        CF §3.1 The units attribute is required for all variables that represent dimensional quantities
         (except for boundary variables defined in Section 7.1, "Cell Boundaries" and climatology variables
         defined in Section 7.4, "Climatological Statistics").
 
@@ -614,7 +667,10 @@ class CFBaseCheck(BaseCheck):
         - type must be recognized by udunits
         - if std name specified, must be consistent with standard name table, must also be consistent with a
           specified cell_methods attribute if present
-        """
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret_val = []
 
         deprecated = ['level', 'layer', 'sigma_level']
@@ -731,11 +787,17 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_standard_name(self, ds):
-        """
-        3.3 A standard name is associated with a variable via the attribute standard_name which takes a
-        string value comprised of a standard name optionally followed by one or more blanks and a
-        standard name modifier
-        """
+        '''
+        Check a variables's standard_name attribute to ensure that it meets CF
+        compliance.
+
+        CF §3.3 A standard name is associated with a variable via the attribute
+        standard_name which takes a string value comprised of a standard name
+        optionally followed by one or more blanks and a standard name modifier
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret_val = []
 
         for k, v in ds.variables.items():
@@ -780,13 +842,21 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_ancillary_data(self, ds):
-        """
-        3.4 It is a string attribute whose value is a blank separated list of variable names.
-        The nature of the relationship between variables associated via ancillary_variables must
-        be determined by other attributes. The variables listed by the ancillary_variables attribute
-        will often have the standard name of the variable which points to them including a modifier
-        (Appendix C, Standard Name Modifiers) to indicate the relationship.
-        """
+        '''
+        Checks the ancillary_variable attribute for all variables to ensure
+        they are CF compliant.
+
+        CF §3.4 It is a string attribute whose value is a blank separated list
+        of variable names.  The nature of the relationship between variables
+        associated via ancillary_variables must be determined by other
+        attributes. The variables listed by the ancillary_variables attribute
+        will often have the standard name of the variable which points to them
+        including a modifier (Appendix C, Standard Name Modifiers) to indicate
+        the relationship.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret_val = []
 
         for k, v in ds.variables.items():
@@ -821,25 +891,37 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_flags(self, ds):
-        """
-        3.5 The attributes flag_values, flag_masks and flag_meanings are intended to make variables
-        that contain flag values self describing. Status codes and Boolean (binary) condition flags may be
-        expressed with different combinations of flag_values and flag_masks attribute definitions.
+        '''
+        Check the flag_values, flag_masks and flag_meanings attributes for
+        variables to ensure they are CF compliant.
 
-        The flag_values and flag_meanings attributes describe a status flag consisting of mutually exclusive coded values.
+        CF §3.5 The attributes flag_values, flag_masks and flag_meanings are
+        intended to make variables that contain flag values self describing.
+        Status codes and Boolean (binary) condition flags may be expressed with
+        different combinations of flag_values and flag_masks attribute
+        definitions.
 
-        The flag_meanings attribute is a string whose value is a blank separated list of descriptive words
-        or phrases, one for each flag value. Each word or phrase should consist of characters from
-        the alphanumeric set and the following five: '_', '-', '.', '+', '@'.
+        The flag_values and flag_meanings attributes describe a status flag
+        consisting of mutually exclusive coded values.
 
-        The flag_masks and flag_meanings attributes describe a number of independent Boolean conditions
-        using bit field notation by setting unique bits in each flag_masks value.
+        The flag_meanings attribute is a string whose value is a blank
+        separated list of descriptive words or phrases, one for each flag
+        value. Each word or phrase should consist of characters from the
+        alphanumeric set and the following five: '_', '-', '.', '+', '@'.
 
-        The flag_masks, flag_values and flag_meanings attributes, used together, describe a blend of
-        independent Boolean conditions and enumerated status codes. A flagged condition is identified
-        by a bitwise AND of the variable value and each flag_masks value; a result that matches the
-        flag_values value indicates a true condition.
-        """
+        The flag_masks and flag_meanings attributes describe a number of
+        independent Boolean conditions using bit field notation by setting
+        unique bits in each flag_masks value.
+
+        The flag_masks, flag_values and flag_meanings attributes, used
+        together, describe a blend of independent Boolean conditions and
+        enumerated status codes. A flagged condition is identified by a bitwise
+        AND of the variable value and each flag_masks value; a result that
+        matches the flag_values value indicates a true condition.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret_val = []
 
         for k, v in ds.variables.items():
@@ -977,11 +1059,17 @@ class CFBaseCheck(BaseCheck):
     ###############################################################################
 
     def check_coordinate_axis_attr(self, ds):
-        """
-        4 The attribute axis may be attached to a coordinate variable and given one of the values X, Y, Z or T
-        which stand for a longitude, latitude, vertical, or time axis respectively. Alternatively the standard_name
-        attribute may be used for direct identification.
-        """
+        '''
+        Check the axis attribute of coordinate variables
+
+        CF §4 The attribute axis may be attached to a coordinate variable and
+        given one of the values X, Y, Z or T which stand for a longitude,
+        latitude, vertical, or time axis respectively. Alternatively the
+        standard_name attribute may be used for direct identification.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret_val     = []
         coord_vars  = self._find_coord_vars(ds)
         dim_to_axis = map_axes({k: v for k, v in ds.variables.items() if v in coord_vars}, reverse_map=True)
@@ -1051,9 +1139,16 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_coordinate_vars_for_all_coordinate_types(self, ds):
-        """
-        4 We strongly recommend that coordinate variables be used for all coordinate types whenever they are applicable.
-        """
+        '''
+        Check that coordinate variables exist for X, Y, Z, and T axes of the
+        physical world.
+
+        CF §4 We strongly recommend that coordinate variables be used for all
+        coordinate types whenever they are applicable.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret_val = []
         # 1. Verify that for any known or common coordinate name as a dmension
         #    there is a coordinate variable for that dimension.
@@ -1075,6 +1170,18 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def _coord_has_units(self, name, coordinate, var, recommended, acceptable):
+        '''
+        Returns a list of results that check if the coordinate variable has
+        units and if they are valid for the given coordinate according to CF
+        recommendations.
+
+        :param str name: Name of the coordinate variable
+        :param str coordinate: 'X', 'Y', 'Z', or 'T'
+        :param var: netCDF variable instance for the coordinate
+        :param str recommended: The recommended units for the coordinate variable
+        :param list acceptable: A list of acceptable units that coordinate is allowed to be
+        :rtype: list
+        '''
         ret_val = []
         has_units = hasattr(var, 'units')
         result = Result(BaseCheck.HIGH, has_units, '§4 Coordinate Variable %s contains valid attributes' % coordinate)
@@ -1099,13 +1206,21 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_latitude(self, ds):
-        """
-        4.1 Variables representing latitude must always explicitly include the units attribute; there is no default value.
-        The recommended unit of latitude is degrees_north. Also acceptable are degree_north, degree_N, degrees_N, degreeN, and degreesN.
+        '''
+        Check variable(s) that define latitude and are defined correctly according to CF.
 
-        Optionally, the latitude type may be indicated additionally by providing the standard_name attribute with the
-        value latitude, and/or the axis attribute with the value Y.
-        """
+        CF §4.1 Variables representing latitude must always explicitly include
+        the units attribute; there is no default value.  The recommended unit
+        of latitude is degrees_north. Also acceptable are degree_north,
+        degree_N, degrees_N, degreeN, and degreesN.
+
+        Optionally, the latitude type may be indicated additionally by
+        providing the standard_name attribute with the value latitude, and/or
+        the axis attribute with the value Y.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret_val = []
 
         recommended = 'degrees_north'
@@ -1119,13 +1234,21 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_longitude(self, ds):
-        """
-        4.2 Variables representing longitude must always explicitly include the units attribute; there is no default value.
-        The recommended unit of longitude is degrees_east. Also acceptable are degree_east, degree_E, degrees_E, degreeE, and degreesE.
+        '''
+        Check variable(s) that define longitude and are defined correctly according to CF.
 
-        Optionally, the longitude type may be indicated additionally by providing the standard_name attribute with the
-        value longitude, and/or the axis attribute with the value X.
-        """
+        CF §4.2 Variables representing longitude must always explicitly include
+        the units attribute; there is no default value.  The recommended unit
+        of longitude is degrees_east. Also acceptable are degree_east,
+        degree_E, degrees_E, degreeE, and degreesE.
+
+        Optionally, the longitude type may be indicated additionally by
+        providing the standard_name attribute with the value longitude, and/or
+        the axis attribute with the value X.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret_val = []
 
         recommended = 'degrees_east'
@@ -1139,9 +1262,13 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_vertical_coordinate(self, ds):
-        """
-        4.3 Variables representing dimensional height or depth axes must always
-        explicitly include the units attribute; there is no default value.
+        '''
+        Check variables defining height or depth are defined correctly
+        according to CF.
+
+        CF §4.3 Variables representing dimensional height or depth axes must
+        always explicitly include the units attribute; there is no default
+        value.
 
         The attribute positive is required if the vertical axis units are not a
         valid unit of pressure. The positive attribute may have the value up or
@@ -1149,7 +1276,9 @@ class CFBaseCheck(BaseCheck):
         coordinate variables or auxillary coordinate variables that contain
         vertical coordinate data.
 
-        """
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
 
         ret_val = []
         for k, v in ds.variables.items():
@@ -1190,8 +1319,11 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_dimensional_vertical_coordinate(self, ds):
-        """
-        4.3.1 The units attribute for dimensional coordinates will be a string
+        '''
+        Check units for variables defining vertical position are valid under
+        CF.
+
+        CF §4.3.1 The units attribute for dimensional coordinates will be a string
         formatted as per the udunits.dat file.
 
         The acceptable units for vertical (depth or height) coordinate variables
@@ -1207,7 +1339,10 @@ class CFBaseCheck(BaseCheck):
           temperature.
 
         Plural forms are also acceptable.
-        """
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret_val = []
         for k, v in ds.variables.items():
             # If this is not a vertical coordinate
@@ -1246,8 +1381,11 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_dimensionless_vertical_coordinate(self, ds):
-        """
-        4.3.2 The units attribute is not required for dimensionless coordinates.
+        '''
+        Check the validity of dimensionless coordinates under CF
+
+        CF §4.3.2 The units attribute is not required for dimensionless
+        coordinates.
 
         The standard_name attribute associates a coordinate with its definition
         from Appendix D, Dimensionless Vertical Coordinates. The definition
@@ -1259,7 +1397,10 @@ class CFBaseCheck(BaseCheck):
         definitions with variables in a netCDF file.  To maintain backwards
         compatibility with COARDS the use of these attributes is not required,
         but is strongly recommended.
-        """
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         ret_val = []
 
         dimless = dict(dimless_vertical_coordinates)
@@ -1310,9 +1451,11 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_time_coordinate(self, ds):
-        """
-        4.4 Variables representing time must always explicitly include the units
-        attribute; there is no default value.
+        '''
+        Check variables defining time are valid under CF
+
+        CF §4.4 Variables representing time must always explicitly include the
+        units attribute; there is no default value.
 
         The units attribute takes a string value formatted as per the
         recommendations in the Udunits package.
@@ -1333,7 +1476,10 @@ class CFBaseCheck(BaseCheck):
         Optionally, the time coordinate may be indicated additionally by
         providing the standard_name attribute with an appropriate value, and/or
         the axis attribute with the value T.
-        """
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
 
         ret_val = []
         for k, v in ds.variables.items():
@@ -1365,8 +1511,11 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_calendar(self, ds):
-        """
-        4.4.1 In order to calculate a new date and time given a base date, base
+        '''
+        Check the calendar attribute for variables defining time and ensure it
+        is a valid calendar prescribed by CF.
+
+        CF §4.4.1 In order to calculate a new date and time given a base date, base
         time and a time increment one must know what calendar to use.
 
         The values currently defined for calendar are:
@@ -1398,7 +1547,10 @@ class CFBaseCheck(BaseCheck):
         appropriate. However, the calendar attribute is allowed to take
         non-standard values and in that case defining the non-standard calendar
         using the appropriate attributes is required.
-        """
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        '''
         valid_calendars = [
             'gregorian',
             'standard',
