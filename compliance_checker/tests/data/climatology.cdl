@@ -1,0 +1,22 @@
+netcdf climatology.nc {
+dimensions:
+    time=1;
+    nv=2;
+variables:
+    float temperature(time);
+        temperature:long_name = "surface air temperature";
+        temperature:cell_methods = "time: mean within days time: mean over days";
+        temperature:units = "K";
+
+    float lat;
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+    float lon;
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+    double time(time);
+        time:climatology = "climatology_bounds";
+        time:units = "hours since 1997-4-1";
+        time:standard_name = "time";
+    double climatology_bounds(time, nv);
+}
