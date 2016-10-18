@@ -40,21 +40,40 @@ def get_sea_names():
     return _SEA_NAMES
 
 
+def is_unitless(ds, variable):
+    '''
+    Returns true if the variable is unitless
+
+    Note units of '1' are considered whole numbers or parts but still represent
+    physical units and not the absence of units.
+
+    :param netCDF4.Dataset ds: An open netCDF dataset
+    :param str variable: Name of the variable
+    '''
+    units = getattr(ds.variables[variable], 'units', None)
+    if units is None or units == '':
+        return True
+    return False
+
+
 def is_geophysical(ds, variable):
     '''
     Returns true if the dataset's variable is likely a geophysical variable
+
+    :param netCDF4.Dataset ds: An open netCDF dataset
+    :param str variable: Name of the variable
     '''
     ncvar = ds.variables[variable]
-    # Check for axis
+
     if getattr(ncvar, 'cf_role', None):
         return False
 
+    # Check for axis
     if getattr(ncvar, 'axis', None):
         return False
 
-    # Does it have a standard name and units?
     standard_name = getattr(ncvar, 'standard_name', '')
-    units = getattr(ncvar, 'units', '')
+    unitless = is_unitless(ds, variable)
 
     # Is the standard name associated with coordinates
     if standard_name in ('time', 'latitude', 'longitude', 'height', 'depth', 'altitude'):
@@ -64,7 +83,7 @@ def is_geophysical(ds, variable):
         return False
 
     # Is it dimensionless and unitless?
-    if len(ncvar.shape) == 0 and not units:
+    if len(ncvar.shape) == 0 and unitless:
         return False
 
     # Is it a QC Flag?
@@ -79,7 +98,7 @@ def is_geophysical(ds, variable):
         return False
 
     # Is it a string but with no defined units?
-    if ncvar.dtype.char == 'S' and not units:
+    if ncvar.dtype.char == 'S' and unitless:
         return False
 
     # Is it an instrument descriptor?

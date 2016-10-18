@@ -214,7 +214,7 @@ class CFBaseCheck(BaseCheck):
         :return: A list of variables names (str) that are defined as coordinate
                  variables in the dataset ds.
         '''
-        if ds in self._coord_vars and not refresh:
+        if ds in self._coord_vars and refresh is False:
             return self._coord_vars[ds]
 
         self._coord_vars[ds] = cfutil.get_coordinate_variables(ds)
@@ -327,7 +327,7 @@ class CFBaseCheck(BaseCheck):
                              invalidated.
         '''
 
-        if self._clim_vars.get(ds, None) and not refresh:
+        if self._clim_vars.get(ds, None) and refresh is False:
             return self._clim_vars[ds]
 
         climatology_variable = cfutil.get_climatology_variable(ds)
