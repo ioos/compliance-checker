@@ -184,3 +184,19 @@ class TestFeatureDetection(TestCase):
             assert 'climatology_bounds' not in geophysical_variables
             assert 'climatology_bounds' == climatology_variable
 
+    def test_grid_mapping(self):
+        '''
+        Ensures that grid mapping variables are properly identified
+        '''
+        with Dataset(resources.STATIC_FILES['rotated_pole_grid']) as nc:
+            grid_mapping = util.get_grid_mapping_variables(nc)
+            coordinate_variables = util.get_coordinate_variables(nc)
+            axis_variables = util.get_axis_variables(nc)
+
+            assert 'rotated_pole' in grid_mapping
+            assert set(['rlon', 'rlat', 'lev']) == set(coordinate_variables)
+            assert set(['rlon', 'rlat', 'lev']) == set(axis_variables)
+            assert 'lat' == util.get_lat_variable(nc)
+            assert 'lon' == util.get_lon_variable(nc)
+
+

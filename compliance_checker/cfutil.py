@@ -286,6 +286,18 @@ def get_time_variable(ds):
     return None
 
 
+def get_axis_variables(ds):
+    '''
+    Returns a list of variables that define an axis of the dataset
+
+    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    '''
+    axis_variables = []
+    for ncvar in ds.get_variables_by_attributes(axis=lambda x: x is not None):
+        axis_variables.append(ncvar.name)
+    return axis_variables
+
+
 def get_climatology_variable(ds):
     '''
     Returns the variable describing climatology bounds if it exists.
@@ -310,17 +322,17 @@ def get_climatology_variable(ds):
     return None
 
 
-def get_crs_variable(ds):
+def get_grid_mapping_variables(ds):
     '''
-    Returns the name of the variable identified by a grid_mapping attribute
+    Returns a list of grid mapping variables
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
     '''
-    for var in ds.variables:
-        grid_mapping = getattr(ds.variables[var], 'grid_mapping', '')
-        if grid_mapping and grid_mapping in ds.variables:
-            return grid_mapping
-    return None
+    grid_mapping_variables = []
+    for ncvar in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
+        if ncvar.grid_mapping in ds.variables:
+            grid_mapping_variables.append(ncvar.grid_mapping)
+    return grid_mapping_variables
 
 
 def coordinate_dimension_matrix(nc):
