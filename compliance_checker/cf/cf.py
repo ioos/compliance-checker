@@ -134,13 +134,14 @@ class CFBaseCheck(BaseCheck):
 
         # Each default dict is a key, value mapping from the dataset object to
         # a list of variables
-        self._coord_vars     = defaultdict(list)
-        self._ancillary_vars = defaultdict(list)
-        self._clim_vars      = defaultdict(list)
-        self._metadata_vars  = defaultdict(list)
-        self._boundary_vars  = defaultdict(list)
+        self._coord_vars       = defaultdict(list)
+        self._ancillary_vars   = defaultdict(list)
+        self._clim_vars        = defaultdict(list)
+        self._metadata_vars    = defaultdict(list)
+        self._boundary_vars    = defaultdict(list)
+        self._geophysical_vars = defaultdict(list)
 
-        self._std_names      = StandardNameTable()
+        self._std_names        = StandardNameTable()
 
     ################################################################################
     #
@@ -155,6 +156,7 @@ class CFBaseCheck(BaseCheck):
         self._find_boundary_vars(ds)
         self._find_metadata_vars(ds)
         self._find_cf_standard_name_table(ds)
+        self._find_geophysical_vars(ds)
 
     def _find_cf_standard_name_table(self, ds):
         '''
@@ -290,33 +292,19 @@ class CFBaseCheck(BaseCheck):
 
         return self._metadata_vars[ds]
 
-    def _find_data_vars(self, ds):
+    def _find_geophysical_vars(self, ds, refresh=False):
         '''
-        Returns a dictionary of variables that could be considered data variables.
-
-        Excludes variables that are:
-            - coordinate variables
-            - ancillary variables
-            - dimensionless
-            - metadata variables
+        Returns a list of geophysical variables
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: dict
         '''
-        candidates = {}
-        for name, variable in ds.variables.items():
+        if self._geophysical_vars.get(ds, None) and refresh is False:
+            return self._geophysical_vars[ds]
 
-            if name in self._find_coord_vars(ds):
-                continue
-            if name in self._find_ancillary_vars(ds):
-                continue
-            if name in self._find_metadata_vars(ds):
-                continue
-            if variable.dimensions == tuple():
-                continue
-            candidates[name] = variable
+        self._geophysical_vars[ds] = cfutil.get_geophysical_variables(ds)
 
-        return candidates
+        return self._geophysical_vars[ds]
 
     def _find_clim_vars(self, ds, refresh=False):
         '''
@@ -2718,10 +2706,11 @@ class CFBaseCheck(BaseCheck):
 
         feature_tuple_list.append(feature_tuple)
 
-        data_vars = self._find_data_vars(ds)
+        data_vars = self._find_geophysical_vars(ds)
 
         feature_map = {}
-        for var_name, variable in data_vars.items():
+        for var_name in data_vars:
+            variable = ds.variables[var_name]
             feature = variable.dimensions
             feature_map[var_name] = feature
 
