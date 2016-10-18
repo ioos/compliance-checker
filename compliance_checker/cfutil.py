@@ -117,10 +117,27 @@ def get_coordinate_variables(ds):
     return coord_vars
 
 
+def get_cell_boundary_map(ds):
+    '''
+    Returns a dictionary mapping a variable to it's boundary variable. The
+    returned dictionary maps a string variable name to the name of the boundary
+    variable.
+
+    :param netCDF4.Dataset nc: netCDF dataset
+    '''
+    boundary_map = {}
+    for variable in ds.get_variables_by_attributes(bounds=lambda x: x is not None):
+        if variable.bounds in ds.variables:
+            boundary_map[variable.name] = variable.bounds
+    return boundary_map
+
+
 def get_cell_boundary_variables(ds):
     '''
     Returns a list of variable names for variables that represent cell
     boundaries through the `bounds` attribute
+
+    :param netCDF4.Dataset nc: netCDF dataset
     '''
     boundary_variables = []
     has_bounds = ds.get_variables_by_attributes(bounds=lambda x: x is not None)

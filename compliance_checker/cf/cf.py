@@ -138,7 +138,7 @@ class CFBaseCheck(BaseCheck):
         self._ancillary_vars = defaultdict(list)
         self._clim_vars      = defaultdict(list)
         self._metadata_vars  = defaultdict(list)
-        self._boundary_vars  = defaultdict(dict)
+        self._boundary_vars  = defaultdict(list)
 
         self._std_names      = StandardNameTable()
 
@@ -344,18 +344,12 @@ class CFBaseCheck(BaseCheck):
         :param bool refresh: if refresh is set to True, the cache is
                              invalidated.
         '''
-        if ds in self._boundary_vars and not refresh:
+        if self._boundary_vars.get(ds, None) and refresh is False:
             return self._boundary_vars[ds]
 
-        b_vars = {}
+        self._boundary_vars[ds] = cfutil.get_cell_boundary_variables(ds)
 
-        for k, v in ds.variables.items():
-            bounds = getattr(v, 'bounds', None)
-            if bounds is not None and isinstance(bounds, str) and bounds in ds.variables:
-                b_vars[v] = ds.variables[bounds]
-
-        self._boundary_vars[ds] = b_vars
-        return b_vars
+        return self._boundary_vars[ds]
 
     ###############################################################################
     #
@@ -652,7 +646,7 @@ class CFBaseCheck(BaseCheck):
 
         deprecated = ['level', 'layer', 'sigma_level']
         clim_vars = self._find_clim_vars(ds)
-        boundary_vars = iter(self._find_boundary_vars(ds).values())
+        boundary_vars = self._find_boundary_vars(ds)
         container_vars = self._find_container_variables(ds)
         metadata_vars = self._find_metadata_vars(ds)
         ancillary_vars = self._find_ancillary_vars(ds)
@@ -2139,6 +2133,8 @@ class CFBaseCheck(BaseCheck):
 
     def check_cell_boundaries(self, ds):
         """
+        Checks the dimensions of cell boundary variables to ensure they are CF compliant.
+
         7.1 To represent cells we add the attribute bounds to the appropriate coordinate variable(s). The value of bounds
         is the name of the variable that contains the vertices of the cell boundaries. We refer to this type of variable as
         a "boundary variable." A boundary variable will have one more dimension than its associated coordinate or auxiliary
@@ -2170,20 +2166,28 @@ class CFBaseCheck(BaseCheck):
             In all other cases, the bounds should be dimensioned (...,n,p), where (...,n) are the dimensions of the auxiliary
             coordinate variables, and p the number of vertices of the cells. The vertices must be traversed anticlockwise in the
             lon-lat plane as viewed from above. The starting vertex is not specified.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
         """
         ret_val = []
         reasoning = []
-        valid = ' '
 
-        for cvar, bvar in self._find_boundary_vars(ds).items():
+        # Here variable is usually a coordinate variable and is mapped to a boundary variable
+        for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(ds):
+            variable = ds.variables[variable_name]
+            boundary_variable = ds.variables[boundary_variable_name]
             valid = True
-            if bvar.ndim != cvar.ndim + 1:
+
+            if boundary_variable.ndim != variable.ndim + 1:
                 valid = False
-                reasoning.append('The number of dimensions of the Coordinate Variable is %s, but the number of dimensions of the Boundary Variable is %s.' % (cvar.ndim, bvar.ndim))
+                reasoning.append('The number of dimensions of the Coordinate Variable is %s, but the '
+                                 'number of dimensions of the Boundary Variable is %s.' %
+                                 (variable_name.ndim, boundary_variable_name.ndim))
 
             result = Result(BaseCheck.MEDIUM,
                             valid,
-                            ('§7.1 Cell boundaries', cvar._name, 'cell_boundaries'),
+                            ('§7.1 Cell boundaries', variable_name, 'cell_boundaries'),
                             reasoning)
             ret_val.append(result)
             reasoning = []
