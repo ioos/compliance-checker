@@ -10,6 +10,7 @@ import os
 from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, create_cached_data_dir, download_cf_standard_name_table, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
+from compliance_checker import cfutil
 
 try:
     basestring
@@ -216,7 +217,7 @@ class CFBaseCheck(BaseCheck):
         if ds in self._coord_vars and not refresh:
             return self._coord_vars[ds]
 
-        self._coord_vars[ds] = find_coord_vars(ds)
+        self._coord_vars[ds] = cfutil.get_coordinate_variables(ds)
 
         return self._coord_vars[ds]
 
@@ -302,17 +303,17 @@ class CFBaseCheck(BaseCheck):
         :rtype: dict
         '''
         candidates = {}
-        for var_name, variable in ds.variables.items():
+        for name, variable in ds.variables.items():
 
-            if variable in self._find_coord_vars(ds):
+            if name in self._find_coord_vars(ds):
                 continue
-            if variable in self._find_ancillary_vars(ds):
+            if name in self._find_ancillary_vars(ds):
                 continue
-            if variable in self._find_metadata_vars(ds):
+            if name in self._find_metadata_vars(ds):
                 continue
-            if not variable.dimensions:
+            if variable.dimensions == tuple():
                 continue
-            candidates[var_name] = variable
+            candidates[name] = variable
 
         return candidates
 
@@ -334,22 +335,26 @@ class CFBaseCheck(BaseCheck):
         coord_vars = self._find_coord_vars(ds)
 
         # find all time dimension variables
-        time_vars = [v for v in coord_vars if guess_dim_type(v.dimensions[0]) == 'T']
+        time_vars = []
+        for coord_var in coord_vars:
+            if guess_dim_type(coord_var) == 'T':
+                time_vars.append(coord_var)
 
-        for k, v in ds.variables.items():
+        for name, variable in ds.variables.items():
             is_cvar = False
 
-            if v in coord_vars:
-                if hasattr(v, 'climatology') and not hasattr(v, 'bounds'):
+            if name in coord_vars:
+
+                if hasattr(variable, 'climatology') and not hasattr(variable, 'bounds'):
                     is_cvar = True
 
-                if k in time_vars and hasattr(v, 'units'):
-                    units_split = v.units.split()
+                if name in time_vars and hasattr(variable, 'units'):
+                    units_split = variable.units.split()
                     if len(units_split) == 3 and units_split[1:] == ['since', '0-1-1']:
                         is_cvar = True
 
                 if is_cvar:
-                    c_time.add(v)
+                    c_time.add(name)
 
         dvars = set(ds.variables.values()) - set(coord_vars)
         for dim in c_time:
@@ -1082,8 +1087,8 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val     = []
         coord_vars  = self._find_coord_vars(ds)
-        dim_to_axis = map_axes({k: v for k, v in ds.variables.items() if v in coord_vars}, reverse_map=True)
-        data_vars   = {k: v for k, v in ds.variables.items() if v not in coord_vars}
+        dim_to_axis = map_axes({k: v for k, v in ds.variables.items() if k in coord_vars}, reverse_map=True)
+        data_vars   = {k: v for k, v in ds.variables.items() if k not in coord_vars}
 
         # find auxiliary coordinate variables via 'coordinates' attribute
         auxiliary_coordinate_vars = []
@@ -1111,7 +1116,7 @@ class CFBaseCheck(BaseCheck):
             ret_val.append(avr)
 
             # 2) only coordinate vars or auxiliary coordinate variable are allowed to have axis set
-            if v in coord_vars or v in auxiliary_coordinate_vars:
+            if k in coord_vars or v in auxiliary_coordinate_vars:
                 acvr = Result(BaseCheck.HIGH, True, '§4 Axis attributes and coordinate variables')
             else:
                 acvr = Result(BaseCheck.HIGH, False, '§4 Axis attributes and coordinate variables')
@@ -1689,11 +1694,13 @@ class CFBaseCheck(BaseCheck):
 
         space_time_coord_var = []
         # Check to find all space-time coordinate variables (Lat/Lon/Time/Height)
-        for each in self._find_coord_vars(ds):
-            if str(each._name) in _possibleaxis \
-               or (hasattr(each, 'units') and (each.units in _possibleaxisunits or each.units.split(" ")[0] in _possibleaxisunits)) \
-               or hasattr(each, 'positive'):
-                space_time_coord_var.append(each._name)
+        for coord_name in self._find_coord_vars(ds):
+            coord_var = ds.variables[coord_name]
+
+            if coord_name in _possibleaxis \
+               or (hasattr(coord_var, 'units') and (coord_var.units in _possibleaxisunits or coord_var.units.split(" ")[0] in _possibleaxisunits)) \
+               or hasattr(coord_var, 'positive'):
+                space_time_coord_var.append(coord_name)
 
         # Looks to ensure that every dimension of each variable that is a space-time dimension has associated coordinate variables
         for name, var in ds.variables.items():
@@ -2692,35 +2699,37 @@ class CFBaseCheck(BaseCheck):
         t = ''
 
         flag = 0
-        for var in self._find_coord_vars(ds):
-            if getattr(var, "grid_mapping_name", ""):
+        for coord_name in self._find_coord_vars(ds):
+            coord_var = ds.variables[coord_name]
+            if getattr(coord_var, "grid_mapping_name", ""):
                 # DO GRIDMAPPING CHECKS FOR X,Y,Z,T
                 flag = 1
                 for name_again, var_again in ds.variables.items():
-                    if getattr(var_again, "standard_name", "") == self.grid_mapping_dict[getattr(var, "grid_mapping_name", "")][2][0]:
+                    if getattr(var_again, "standard_name", "") == self.grid_mapping_dict[getattr(coord_var, "grid_mapping_name", "")][2][0]:
                         x = name_again
-                    if getattr(var_again, "standard_name", "") == self.grid_mapping_dict[getattr(var, "grid_mapping_name", "")][2][1]:
+                    if getattr(var_again, "standard_name", "") == self.grid_mapping_dict[getattr(coord_var, "grid_mapping_name", "")][2][1]:
                         y = name_again
 
-        for var in self._find_coord_vars(ds):
+        for coord_name in self._find_coord_vars(ds):
+            coord_var = ds.variables[coord_name]
             # DO STANDARD SEARCH
-            if getattr(var, 'units', '').lower() in ['pa', 'kpa', 'mbar', 'bar', 'atm', 'hpa', 'dbar'] or getattr(var, 'positive', '') or getattr(var, 'standard_name', '') == 'z' or getattr(var, 'axis', '') == 'z':
-                z = var._name
-            if var._name.lower() in ['lon', 'longitude'] and flag == 0:
-                x = var._name
-            elif var._name.lower()in ['lat', 'latitude'] and flag == 0:
-                y = var._name
-            elif var._name.lower() == 'time':
-                t = var._name
+            if getattr(coord_name, 'units', '').lower() in ['pa', 'kpa', 'mbar', 'bar', 'atm', 'hpa', 'dbar'] or getattr(coord_name, 'positive', '') or getattr(coord_name, 'standard_name', '') == 'z' or getattr(coord_var, 'axis', '') == 'z':
+                z = coord_name
+            if coord_name.lower() in ['lon', 'longitude'] and flag == 0:
+                x = coord_name
+            elif coord_name.lower()in ['lat', 'latitude'] and flag == 0:
+                y = coord_name
+            elif coord_name.lower() == 'time':
+                t = coord_name
 
-            if getattr(var, '_CoordinateAxisType', ''):
-                axis_type = getattr(var, '_CoordinateAxisType', '')
+            if getattr(coord_var, '_CoordinateAxisType', ''):
+                axis_type = getattr(coord_var, '_CoordinateAxisType', '')
                 if axis_type.lower() in ['lon', 'longitude'] and flag == 0:
-                    x = var._name
+                    x = coord_name
                 elif axis_type.lower()in ['lat', 'latitude'] and flag == 0:
-                    y = var._name
+                    y = coord_name
                 elif axis_type.lower() == 'time':
-                    t = var._name
+                    t = coord_name
 
         valid = False
         feature_tuple_list = []
@@ -2938,7 +2947,7 @@ class CFBaseCheck(BaseCheck):
 
         # Build a list of variables that are not geophysical variables
         for name, var in ds.variables.items():
-            if var in self._find_coord_vars(ds):
+            if name in self._find_coord_vars(ds):
                 non_data_list.append(name)
             elif name in self._find_ancillary_vars(ds):
                 non_data_list.append(name)

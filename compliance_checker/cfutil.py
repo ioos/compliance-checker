@@ -82,6 +82,30 @@ def is_geophysical(ds, variable):
     return True
 
 
+def get_coordinate_variables(ds):
+    '''
+    Returns a list of variable names that identify as coordinate variables.
+
+    A coordinate variable is a netCDF variable with exactly one dimension. The
+    name of this dimension must be equivalent to the variable name.
+
+    From CF §1.2 Terminology
+
+    It is a one-dimensional variable with the same name as its dimension [e.g.,
+    time(time) ], and it is defined as a numeric data type with values that are
+    ordered monotonically. Missing values are not allowed in coordinate
+    variables.
+
+    :param netCDF4.Dataset ds: An open netCDF dataset
+    '''
+    coord_vars = []
+    for dimension in ds.dimensions:
+        if dimension in ds.variables:
+            if ds.variables[dimension].dimensions == (dimension,):
+                coord_vars.append(dimension)
+    return coord_vars
+
+
 def get_cell_boundary_variables(ds):
     '''
     Returns a list of variable names for variables that represent cell
