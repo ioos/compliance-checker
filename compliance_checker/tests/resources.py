@@ -67,4 +67,5 @@ STATIC_FILES = {
     'ncei_gold_point_2'                    : get_filename('tests/data/ncei_gold_point_2.cdl'),
     'ghrsst'                               : get_filename('tests/data/20160919092000-ABOM-L3S_GHRSST-SSTfnd-AVHRR_D-1d_dn_truncate.cdl'),
     'climatology'                          : get_filename('tests/data/climatology.cdl'),
+    'rotated_pole_grid'                    : get_filename('tests/data/rotated_pole_grid.cdl'),
 }
