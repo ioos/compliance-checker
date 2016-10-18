@@ -168,3 +168,19 @@ class TestFeatureDetection(TestCase):
             assert 'lon_bnds' not in util.get_geophysical_variables(nc)
             assert 'lat_bnds' in util.get_cell_boundary_variables(nc)
             assert 'lon_bnds' in util.get_cell_boundary_variables(nc)
+
+            boundary_map = util.get_cell_boundary_map(nc)
+            assert boundary_map['lat'] == 'lat_bnds'
+            assert boundary_map['lon'] == 'lon_bnds'
+
+    def test_climatology(self):
+        '''
+        Ensures that climatology variables are identified as climatology variables and not geophysical variables
+        '''
+        with Dataset(resources.STATIC_FILES['climatology']) as nc:
+            geophysical_variables = util.get_geophysical_variables(nc)
+            climatology_variable = util.get_climatology_variable(nc)
+            assert 'temperature' in geophysical_variables
+            assert 'climatology_bounds' not in geophysical_variables
+            assert 'climatology_bounds' == climatology_variable
+

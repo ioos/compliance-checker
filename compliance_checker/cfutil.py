@@ -40,31 +40,50 @@ def get_sea_names():
     return _SEA_NAMES
 
 
+def is_unitless(ds, variable):
+    '''
+    Returns true if the variable is unitless
+
+    Note units of '1' are considered whole numbers or parts but still represent
+    physical units and not the absence of units.
+
+    :param netCDF4.Dataset ds: An open netCDF dataset
+    :param str variable: Name of the variable
+    '''
+    units = getattr(ds.variables[variable], 'units', None)
+    if units is None or units == '':
+        return True
+    return False
+
+
 def is_geophysical(ds, variable):
     '''
     Returns true if the dataset's variable is likely a geophysical variable
+
+    :param netCDF4.Dataset ds: An open netCDF dataset
+    :param str variable: Name of the variable
     '''
     ncvar = ds.variables[variable]
-    # Check for axis
+
     if getattr(ncvar, 'cf_role', None):
         return False
 
+    # Check for axis
     if getattr(ncvar, 'axis', None):
         return False
 
-    # Does it have a standard name and units?
     standard_name = getattr(ncvar, 'standard_name', '')
-    units = getattr(ncvar, 'units', '')
-    # Is the variable legally allowed to be unitless?
-    if standard_name and standard_name not in get_unitless_standard_names():
-        if units == '':
-            return False
-    # Is it a known coordinate variable
+    unitless = is_unitless(ds, variable)
+
+    # Is the standard name associated with coordinates
     if standard_name in ('time', 'latitude', 'longitude', 'height', 'depth', 'altitude'):
         return False
 
-    # Is it dimensionless?
-    if len(ncvar.shape) == 0:
+    if variable in get_coordinate_variables(ds):
+        return False
+
+    # Is it dimensionless and unitless?
+    if len(ncvar.shape) == 0 and unitless:
         return False
 
     # Is it a QC Flag?
@@ -75,8 +94,19 @@ def is_geophysical(ds, variable):
     if variable in get_cell_boundary_variables(ds):
         return False
 
+    if variable == get_climatology_variable(ds):
+        return False
+
     # Is it a string but with no defined units?
-    if ncvar.dtype.char == 'S' and not units:
+    if ncvar.dtype.char == 'S' and unitless:
+        return False
+
+    # Is it an instrument descriptor?
+    if variable in get_instrument_variables(ds):
+        return False
+
+    # What about a platform descriptor?
+    if variable in get_platform_variables(ds):
         return False
 
     return True
@@ -106,10 +136,27 @@ def get_coordinate_variables(ds):
     return coord_vars
 
 
+def get_cell_boundary_map(ds):
+    '''
+    Returns a dictionary mapping a variable to it's boundary variable. The
+    returned dictionary maps a string variable name to the name of the boundary
+    variable.
+
+    :param netCDF4.Dataset nc: netCDF dataset
+    '''
+    boundary_map = {}
+    for variable in ds.get_variables_by_attributes(bounds=lambda x: x is not None):
+        if variable.bounds in ds.variables:
+            boundary_map[variable.name] = variable.bounds
+    return boundary_map
+
+
 def get_cell_boundary_variables(ds):
     '''
     Returns a list of variable names for variables that represent cell
     boundaries through the `bounds` attribute
+
+    :param netCDF4.Dataset nc: netCDF dataset
     '''
     boundary_variables = []
     has_bounds = ds.get_variables_by_attributes(bounds=lambda x: x is not None)
@@ -236,6 +283,30 @@ def get_time_variable(ds):
                 if candidate.dimensions == (candidate.name,):
                     return candidate.name
 
+    return None
+
+
+def get_climatology_variable(ds):
+    '''
+    Returns the variable describing climatology bounds if it exists.
+
+    Climatology variables are similar to cell boundary variables that describe
+    the climatology bounds.
+
+    See Example 7.8 in CF 1.6
+
+    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    :rtype: str or None
+    '''
+    time = get_time_variable(ds)
+    # If there's no time dimension there's no climatology bounds
+    if not time:
+        return None
+    # Climatology variable is simply whatever time points to under the
+    # `climatology` attribute.
+    if hasattr(ds.variables[time], 'climatology'):
+        if ds.variables[time].climatology in ds.variables:
+            return ds.variables[time].climatology
     return None
 
 

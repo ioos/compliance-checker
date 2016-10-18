@@ -138,7 +138,7 @@ class CFBaseCheck(BaseCheck):
         self._ancillary_vars = defaultdict(list)
         self._clim_vars      = defaultdict(list)
         self._metadata_vars  = defaultdict(list)
-        self._boundary_vars  = defaultdict(dict)
+        self._boundary_vars  = defaultdict(list)
 
         self._std_names      = StandardNameTable()
 
@@ -214,7 +214,7 @@ class CFBaseCheck(BaseCheck):
         :return: A list of variables names (str) that are defined as coordinate
                  variables in the dataset ds.
         '''
-        if ds in self._coord_vars and not refresh:
+        if ds in self._coord_vars and refresh is False:
             return self._coord_vars[ds]
 
         self._coord_vars[ds] = cfutil.get_coordinate_variables(ds)
@@ -270,22 +270,23 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         '''
-        if ds in self._metadata_vars and not refresh:
+        if self._metadata_vars.get(ds, None) and refresh is False:
             return self._metadata_vars[ds]
 
+        self._metadata_vars[ds] = []
         for name, var in ds.variables.items():
 
             if name in self._find_ancillary_vars(ds) or name in self._find_coord_vars(ds):
                 continue
 
             if name in ('platform_name', 'station_name', 'instrument_name', 'station_id', 'platform_id', 'surface_altitude'):
-                self._metadata_vars[ds].append(var)
+                self._metadata_vars[ds].append(name)
 
             elif getattr(var, 'cf_role', '') != '':
-                self._metadata_vars[ds].append(var)
+                self._metadata_vars[ds].append(name)
 
             elif getattr(var, 'standard_name', None) is None and len(var.dimensions) == 0:
-                self._metadata_vars[ds].append(var)
+                self._metadata_vars[ds].append(name)
 
         return self._metadata_vars[ds]
 
@@ -326,45 +327,14 @@ class CFBaseCheck(BaseCheck):
                              invalidated.
         '''
 
-        if ds in self._clim_vars and not refresh:
+        if self._clim_vars.get(ds, None) and refresh is False:
             return self._clim_vars[ds]
 
-        c_time = set()  # set of climatological time axes
-        c_vars = set()  # set of climatological variables
+        climatology_variable = cfutil.get_climatology_variable(ds)
+        if climatology_variable:
+            self._clim_vars[ds].append(climatology_variable)
 
-        coord_vars = self._find_coord_vars(ds)
-
-        # find all time dimension variables
-        time_vars = []
-        for coord_var in coord_vars:
-            if guess_dim_type(coord_var) == 'T':
-                time_vars.append(coord_var)
-
-        for name, variable in ds.variables.items():
-            is_cvar = False
-
-            if name in coord_vars:
-
-                if hasattr(variable, 'climatology') and not hasattr(variable, 'bounds'):
-                    is_cvar = True
-
-                if name in time_vars and hasattr(variable, 'units'):
-                    units_split = variable.units.split()
-                    if len(units_split) == 3 and units_split[1:] == ['since', '0-1-1']:
-                        is_cvar = True
-
-                if is_cvar:
-                    c_time.add(name)
-
-        dvars = set(ds.variables.values()) - set(coord_vars)
-        for dim in c_time:
-            for v in dvars:
-                if dim in v.dimensions:
-                    c_vars.add(v)
-
-        self._clim_vars[ds] = c_vars
-
-        return c_vars
+        return self._clim_vars[ds]
 
     def _find_boundary_vars(self, ds, refresh=False):
         '''
@@ -375,18 +345,12 @@ class CFBaseCheck(BaseCheck):
         :param bool refresh: if refresh is set to True, the cache is
                              invalidated.
         '''
-        if ds in self._boundary_vars and not refresh:
+        if self._boundary_vars.get(ds, None) and refresh is False:
             return self._boundary_vars[ds]
 
-        b_vars = {}
+        self._boundary_vars[ds] = cfutil.get_cell_boundary_variables(ds)
 
-        for k, v in ds.variables.items():
-            bounds = getattr(v, 'bounds', None)
-            if bounds is not None and isinstance(bounds, str) and bounds in ds.variables:
-                b_vars[v] = ds.variables[bounds]
-
-        self._boundary_vars[ds] = b_vars
-        return b_vars
+        return self._boundary_vars[ds]
 
     ###############################################################################
     #
@@ -683,49 +647,49 @@ class CFBaseCheck(BaseCheck):
 
         deprecated = ['level', 'layer', 'sigma_level']
         clim_vars = self._find_clim_vars(ds)
-        boundary_vars = iter(self._find_boundary_vars(ds).values())
+        boundary_vars = self._find_boundary_vars(ds)
         container_vars = self._find_container_variables(ds)
         metadata_vars = self._find_metadata_vars(ds)
         ancillary_vars = self._find_ancillary_vars(ds)
 
-        for k, v in ds.variables.items():
+        for name, variable in ds.variables.items():
 
             # skip climatological vars, boundary vars
-            if v in clim_vars or \
-               v in boundary_vars or \
-               v in metadata_vars or \
-               v in ancillary_vars or \
-               k in container_vars:
+            if name in clim_vars or \
+               name in boundary_vars or \
+               name in metadata_vars or \
+               name in ancillary_vars or \
+               name in container_vars:
                 continue
 
             # skip string type vars
-            if (isinstance(v.dtype, type) and issubclass(v.dtype, str)) or v.dtype.char == 'S':
+            if (isinstance(variable.dtype, type) and issubclass(variable.dtype, str)) or variable.dtype.char == 'S':
                 continue
 
             # skip quality control vars
-            if hasattr(v, 'flag_meanings'):
+            if hasattr(variable, 'flag_meanings'):
                 continue
 
-            if hasattr(v, 'standard_name') and 'status_flag' in v.standard_name:
+            if hasattr(variable, 'standard_name') and 'status_flag' in variable.standard_name:
                 continue
 
             # skip DSG cf_role
-            if hasattr(v, "cf_role"):
+            if hasattr(variable, "cf_role"):
                 continue
 
-            units = str(getattr(v, 'units', None))
+            units = str(getattr(variable, 'units', None))
 
             # 1) "units" attribute must be present
             presence = Result(BaseCheck.HIGH, units is not None, '§3.1 Variables contain units')
             if not presence.value:
-                presence.msgs = ['units attribute is required for %s' % k]
+                presence.msgs = ['units attribute is required for %s' % name]
                 ret_val.append(presence)
                 continue
 
             # 2) units attribute must be a string
             astring = Result(BaseCheck.HIGH, isinstance(units, str), '§3.1 units attribute is a string')
             if not astring.value:
-                astring.msgs = ["units not a string (%s) for %s" % (type(units), k)]
+                astring.msgs = ["units not a string (%s) for %s" % (type(units), name)]
                 ret_val.append(astring)
                 continue
 
@@ -733,7 +697,7 @@ class CFBaseCheck(BaseCheck):
             # 3) units are not deprecated
             resdeprecated = Result(BaseCheck.LOW, units not in deprecated, '§3.1 Variables contain valid units')
             if not resdeprecated.value:
-                resdeprecated.msgs = ['units (%s) is deprecated for %s' % (units, k)]
+                resdeprecated.msgs = ['units (%s) is deprecated for %s' % (units, name)]
                 ret_val.append(resdeprecated)
                 continue
 
@@ -741,11 +705,11 @@ class CFBaseCheck(BaseCheck):
 
             knownu = Result(BaseCheck.HIGH, units_known(units), '§3.1 Variables contain valid CF Units')
             if not knownu.value:
-                knownu.msgs = ['unknown units type (%s) for %s' % (units, k)]
+                knownu.msgs = ['unknown units type (%s) for %s' % (units, name)]
                 ret_val.append(knownu)
                 # continue
             # units look ok so far, check against standard name / cell methods
-            std_name = getattr(v, 'standard_name', None)
+            std_name = getattr(variable, 'standard_name', None)
             std_name_modifier = None
 
             if isinstance(std_name, str):
@@ -753,8 +717,8 @@ class CFBaseCheck(BaseCheck):
                     std_name, std_name_modifier = std_name.split(' ', 1)
 
             # if no standard name or cell_methods, nothing left to do
-            if std_name is None and not hasattr(v, 'cell_methods'):
-                # ret_val.append(Result(BaseCheck.HIGH, True, ('units', k, 'ok')))
+            if std_name is None and not hasattr(variable, 'cell_methods'):
+                # ret_val.append(Result(BaseCheck.HIGH, True, ('units', name, 'ok')))
                 continue
 
             # 5) if a known std_name, use the units provided
@@ -781,16 +745,16 @@ class CFBaseCheck(BaseCheck):
                         valid = False
                 else:
                     valid = False
-                    msgs = ['The unit for variable {} is of type None.'.format(v.name)]
+                    msgs = ['The unit for variable {} is of type None.'.format(variable.name)]
 
                 ret_val.append(Result(BaseCheck.HIGH, valid, '§3.1 Variables contain valid units for the standard_name', msgs))
 
             # 6) cell methods @TODO -> Isnt this in the check_cell_methods section?
-            # if hasattr(v, 'cell_methods'):
-            #    cell_methods = v.cell_methods
+            # if hasattr(variable, 'cell_methods'):
+            #    cell_methods = variable.cell_methods
 #
             #    # placemarker for future check
-            #    ret_val.append(Result(BaseCheck.HIGH, False, ('units', k, 'cell_methods'), ['TODO: implement cell_methods check']))
+            #    ret_val.append(Result(BaseCheck.HIGH, False, ('units', name, 'cell_methods'), ['TODO: implement cell_methods check']))
 
         return ret_val
 
@@ -2170,6 +2134,8 @@ class CFBaseCheck(BaseCheck):
 
     def check_cell_boundaries(self, ds):
         """
+        Checks the dimensions of cell boundary variables to ensure they are CF compliant.
+
         7.1 To represent cells we add the attribute bounds to the appropriate coordinate variable(s). The value of bounds
         is the name of the variable that contains the vertices of the cell boundaries. We refer to this type of variable as
         a "boundary variable." A boundary variable will have one more dimension than its associated coordinate or auxiliary
@@ -2201,20 +2167,28 @@ class CFBaseCheck(BaseCheck):
             In all other cases, the bounds should be dimensioned (...,n,p), where (...,n) are the dimensions of the auxiliary
             coordinate variables, and p the number of vertices of the cells. The vertices must be traversed anticlockwise in the
             lon-lat plane as viewed from above. The starting vertex is not specified.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
         """
         ret_val = []
         reasoning = []
-        valid = ' '
 
-        for cvar, bvar in self._find_boundary_vars(ds).items():
+        # Here variable is usually a coordinate variable and is mapped to a boundary variable
+        for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(ds):
+            variable = ds.variables[variable_name]
+            boundary_variable = ds.variables[boundary_variable_name]
             valid = True
-            if bvar.ndim != cvar.ndim + 1:
+
+            if boundary_variable.ndim != variable.ndim + 1:
                 valid = False
-                reasoning.append('The number of dimensions of the Coordinate Variable is %s, but the number of dimensions of the Boundary Variable is %s.' % (cvar.ndim, bvar.ndim))
+                reasoning.append('The number of dimensions of the Coordinate Variable is %s, but the '
+                                 'number of dimensions of the Boundary Variable is %s.' %
+                                 (variable_name.ndim, boundary_variable_name.ndim))
 
             result = Result(BaseCheck.MEDIUM,
                             valid,
-                            ('§7.1 Cell boundaries', cvar._name, 'cell_boundaries'),
+                            ('§7.1 Cell boundaries', variable_name, 'cell_boundaries'),
                             reasoning)
             ret_val.append(result)
             reasoning = []
