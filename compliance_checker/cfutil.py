@@ -87,7 +87,7 @@ def is_geophysical(ds, variable):
         return False
 
     # Is it a QC Flag?
-    if 'status_flag' in standard_name:
+    if 'status_flag' in standard_name or hasattr(ncvar, 'flag_meanings'):
         return False
 
     # Is it a §7.1 Cell Boundaries variable

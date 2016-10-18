@@ -91,7 +91,15 @@ class Result(object):
     Stores the checker instance and the check method that produced this result.
     """
 
-    def __init__(self, weight=BaseCheck.MEDIUM, value=None, name=None, msgs=None, children=None, checker=None, check_method=None):
+    def __init__(self, 
+                 weight=BaseCheck.MEDIUM,
+                 value=None,
+                 name=None,
+                 msgs=None,
+                 children=None,
+                 checker=None,
+                 check_method=None,
+                 variable_name=None):
 
         self.weight = weight
 
@@ -109,6 +117,7 @@ class Result(object):
 
         self.checker = checker
         self.check_method = check_method
+        self.variable_name = variable_name
 
     def __repr__(self):
         ret = '{} (*{}): {}'.format(self.name, self.weight, self.value)
@@ -138,6 +147,33 @@ class Result(object):
 
     def __eq__(self, other):
         return self.serialize() == other.serialize()
+
+
+class TestCtx(object):
+    '''
+    Simple struct object that holds score values and messages to compile into a result
+    '''
+    def __init__(self, category=None, description='', out_of=0, score=0, messages=None, variable=None):
+        self.category = category or BaseCheck.LOW
+        self.out_of = out_of
+        self.score = score
+        self.messages = messages or []
+        self.description = description or ''
+        self.variable = variable
+
+    def to_result(self):
+        return Result(self.category, (self.score, self.out_of), self.description, self.messages, variable_name=self.variable)
+
+    def assert_true(self, test, message):
+        '''
+        Increments score if test is true otherwise appends a message
+        '''
+        self.out_of += 1
+
+        if test:
+            self.score += 1
+        else:
+            self.messages.append(message)
 
 
 def std_check_in(dataset, name, allowed_vals):

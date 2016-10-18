@@ -7,7 +7,7 @@ from collections import defaultdict
 import numpy as np
 import os
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result, TestCtx
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, create_cached_data_dir, download_cf_standard_name_table, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
 from compliance_checker import cfutil
@@ -634,115 +634,89 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
 
         deprecated = ['level', 'layer', 'sigma_level']
-        clim_vars = self._find_clim_vars(ds)
-        boundary_vars = self._find_boundary_vars(ds)
-        container_vars = self._find_container_variables(ds)
-        metadata_vars = self._find_metadata_vars(ds)
-        ancillary_vars = self._find_ancillary_vars(ds)
+        coordinate_variables = self._find_coord_vars(ds)
+        geophysical_variables = self._find_geophysical_vars(ds)
+        unit_required_variables = coordinate_variables + geophysical_variables
+        unitless_standard_names = cfutil.get_unitless_standard_names()
 
-        for name, variable in ds.variables.items():
+        for name in unit_required_variables:
+            variable = ds.variables[name]
 
-            # skip climatological vars, boundary vars
-            if name in clim_vars or \
-               name in boundary_vars or \
-               name in metadata_vars or \
-               name in ancillary_vars or \
-               name in container_vars:
-                continue
+            units = getattr(variable, 'units', None)
+            standard_name = getattr(variable, 'standard_name', None)
+            standard_name_modifier = None
 
-            # skip string type vars
-            if (isinstance(variable.dtype, type) and issubclass(variable.dtype, str)) or variable.dtype.char == 'S':
-                continue
+            # Sometimes standard_name has modifiers
+            # See CF 1.6 Appendix C
+            if isinstance(standard_name, str):
+                if ' ' in standard_name:
+                    standard_name, standard_name_modifier = standard_name.split(' ', 1)
 
-            # skip quality control vars
-            if hasattr(variable, 'flag_meanings'):
-                continue
+            '''
+            Some standard names are inherently unitless
 
-            if hasattr(variable, 'standard_name') and 'status_flag' in variable.standard_name:
-                continue
+            From CF §3.1:
 
-            # skip DSG cf_role
-            if hasattr(variable, "cf_role"):
-                continue
+            Units are not required for dimensionless quantities. A variable
+            with no units attribute is assumed to be dimensionless.
+            '''
 
-            units = str(getattr(variable, 'units', None))
+            should_be_unitless = standard_name in unitless_standard_names
 
-            # 1) "units" attribute must be present
-            presence = Result(BaseCheck.HIGH, units is not None, '§3.1 Variables contain units')
-            if not presence.value:
-                presence.msgs = ['units attribute is required for %s' % name]
-                ret_val.append(presence)
-                continue
+            # 1) Units must exist
+            valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(name))
+            valid_units.assert_true(should_be_unitless or units is not None,
+                                    'units attribute is required for {}'.format(name))
 
             # 2) units attribute must be a string
-            astring = Result(BaseCheck.HIGH, isinstance(units, str), '§3.1 units attribute is a string')
-            if not astring.value:
-                astring.msgs = ["units not a string (%s) for %s" % (type(units), name)]
-                ret_val.append(astring)
-                continue
+            valid_units.assert_true(should_be_unitless or isinstance(units, basestring),
+                                    'units attribute for {} needs to be a string'.format(name))
 
-            # now, units are present and string
             # 3) units are not deprecated
-            resdeprecated = Result(BaseCheck.LOW, units not in deprecated, '§3.1 Variables contain valid units')
-            if not resdeprecated.value:
-                resdeprecated.msgs = ['units (%s) is deprecated for %s' % (units, name)]
-                ret_val.append(resdeprecated)
+            valid_units.assert_true(units not in deprecated,
+                                    'units for {}, "{}" are deprecated by CF 1.6'.format(name, units))
+
+            ret_val.append(valid_units.to_result())
+
+            # 4) units are contained in udunits
+            valid_udunits = TestCtx(BaseCheck.LOW, "§3.1 Variable {}'s units are contained in UDUnits".format(name))
+            are_udunits = (units is not None and units_known(units))
+            valid_udunits.assert_true(should_be_unitless or are_udunits, 'units for {}, "{}" are not recognized by udunits'.format(name, units))
+
+            ret_val.append(valid_udunits.to_result())
+
+            if standard_name is None:
                 continue
+            # 5) units are appropriate for the standard_name attribute used
+            valid_standard_units = TestCtx(BaseCheck.HIGH,
+                                           "§3.1 Variable {}'s units are appropriate for "
+                                           "the standard_name {}".format(name, standard_name or "unspecified"))
 
-            # 4) units are known
+            standard_entry = self._std_names.get(standard_name, None)
+            if standard_entry is not None:
+                canonical_units = standard_entry.canonical_units
+            else:
+                canonical_units = None
 
-            knownu = Result(BaseCheck.HIGH, units_known(units), '§3.1 Variables contain valid CF Units')
-            if not knownu.value:
-                knownu.msgs = ['unknown units type (%s) for %s' % (units, name)]
-                ret_val.append(knownu)
-                # continue
-            # units look ok so far, check against standard name / cell methods
-            std_name = getattr(variable, 'standard_name', None)
-            std_name_modifier = None
+            # Other standard_name modifiers have the same units as the
+            # unmodified standard name or are not checked for units.
 
-            if isinstance(std_name, str):
-                if ' ' in std_name:
-                    std_name, std_name_modifier = std_name.split(' ', 1)
+            if standard_name_modifier == 'number_of_observations':
+                canonical_units = '1'
 
-            # if no standard name or cell_methods, nothing left to do
-            if std_name is None and not hasattr(variable, 'cell_methods'):
-                # ret_val.append(Result(BaseCheck.HIGH, True, ('units', name, 'ok')))
-                continue
+            elif standard_name == 'time':
+                valid_standard_units.assert_true(units_convertible(units, 'seconds since 1970-01-01'),
+                                                 'time must be in a valid units format <unit> since <epoch> '
+                                                 'not {}'.format(units))
+            elif should_be_unitless:
+                valid_standard_units.assert_true(True, '')
 
-            # 5) if a known std_name, use the units provided
-            if std_name is not None and std_name in self._std_names:
+            else:
+                valid_standard_units.assert_true(units_convertible(canonical_units, units),
+                                                 'units for variable {} must be convertible to {} '
+                                                 'currently they are {}'.format(name, canonical_units, units))
 
-                std_units = self._std_names[std_name].canonical_units
-
-                # @TODO modifiers changes units
-                msgs = []
-                valid = True
-                if units is not None:
-                    if std_name == 'time' and units.split(" ")[0] in ['day', 'days', 'd', 'hour', 'hours', 'hr', 'hrs', 'h', 'year', 'years', 'minute', 'minutes', 'm', 'min', 'mins', 'second', 'seconds', 's', 'sec', 'secs']:
-                        if len(units.split(" ")) > 1:
-                            if units.split(" ")[1] == 'since':
-                                std_units = units
-                        else:
-                            std_units = units
-
-                    if std_units == 'm' and units in ['meter', 'meters']:
-                        std_units = units
-
-                    if units != std_units and units not in ['degrees_north', 'degree_N', 'degreeN', 'degreesN', 'degrees_east', 'degree_E', 'degreeE', 'degreesE'] and not units_convertible(units, std_units):
-                        msgs = ['units are %s, standard_name units should be %s' % (units, std_units)]
-                        valid = False
-                else:
-                    valid = False
-                    msgs = ['The unit for variable {} is of type None.'.format(variable.name)]
-
-                ret_val.append(Result(BaseCheck.HIGH, valid, '§3.1 Variables contain valid units for the standard_name', msgs))
-
-            # 6) cell methods @TODO -> Isnt this in the check_cell_methods section?
-            # if hasattr(variable, 'cell_methods'):
-            #    cell_methods = variable.cell_methods
-#
-            #    # placemarker for future check
-            #    ret_val.append(Result(BaseCheck.HIGH, False, ('units', name, 'cell_methods'), ['TODO: implement cell_methods check']))
+            ret_val.append(valid_standard_units.to_result())
 
         return ret_val
 

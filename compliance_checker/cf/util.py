@@ -299,6 +299,15 @@ class StandardNameTable(object):
         entry = self.NameEntry(self._root.xpath('entry')[idx])
         return entry
 
+    def get(self, key, default=None):
+        '''
+        Returns the item for the key or returns the default if it does not exist
+        '''
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
     def __contains__(self, key):
         return key in self._names or key in self._aliases
 

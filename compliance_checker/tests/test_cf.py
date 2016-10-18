@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#-*- coding: utf-8 -*-
 
 from compliance_checker.suite import CheckSuite
 from compliance_checker.cf import CFBaseCheck, dimless_vertical_coordinates
@@ -6,6 +7,7 @@ from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable,
 from netCDF4 import Dataset
 from tempfile import gettempdir
 from compliance_checker.tests.resources import STATIC_FILES
+from compliance_checker.tests import BaseTestCase
 
 import unittest
 import os
@@ -19,23 +21,7 @@ class MockVariable(object):
     pass
 
 
-class TestCF(unittest.TestCase):
-    # @see
-    # http://www.saltycrane.com/blog/2012/07/how-prevent-nose-unittest-using-docstring-when-verbosity-2/
-
-    def shortDescription(self):
-        return None
-
-    # override __str__ and __repr__ behavior to show a copy-pastable nosetest name for ion tests
-    #  ion.module:TestClassName.test_function_name
-    def __repr__(self):
-        name = self.id()
-        name = name.split('.')
-        if name[0] not in ["ion", "pyon"]:
-            return "%s (%s)" % (name[-1], '.'.join(name[:-1]))
-        else:
-            return "%s ( %s )" % (name[-1], '.'.join(name[:-2]) + ":" + '.'.join(name[-2:]))
-    __str__ = __repr__
+class TestCF(BaseTestCase):
 
     def setUp(self):
         '''
@@ -286,14 +272,24 @@ class TestCF(unittest.TestCase):
     def test_check_bad_units(self):
 
         dataset = self.load_dataset(STATIC_FILES['2dim'])
-        result = self.cf.check_units(dataset)
-        for each in result:
-            self.assertTrue(each.value)
+        results = self.cf.check_units(dataset)
+        for result in results:
+            self.assert_result_is_good(result)
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        result = self.cf.check_units(dataset)
-        for each in result:
-            self.assertFalse(each.value)
+        results = self.cf.check_units(dataset)
+        for result in results:
+            # time doesn't have units
+            if result.name == u'§3.1 Variable time contains units attribute':
+                self.assert_result_is_bad(result)
+
+            # The non-existent units attribute surely isn't a string
+            elif result.name == u'§3.1 units attribute for time is a string':
+                self.assert_result_is_bad(result)
+
+            # Technically this is true, it's not using deprecated units
+            elif result.name == u'§3.1 units for time are not deprecated':
+                self.assert_result_is_good(result)
 
     def test_coordinate_types(self):
         '''
