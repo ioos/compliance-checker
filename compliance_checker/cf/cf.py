@@ -657,108 +657,177 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
 
-        deprecated = ['level', 'layer', 'sigma_level']
         coordinate_variables = self._find_coord_vars(ds)
         auxiliary_coordinates = self._find_aux_coord_vars(ds)
         geophysical_variables = self._find_geophysical_vars(ds)
         unit_required_variables = coordinate_variables + auxiliary_coordinates + geophysical_variables
-        unitless_standard_names = cfutil.get_unitless_standard_names()
 
         for name in unit_required_variables:
             variable = ds.variables[name]
 
-            units = getattr(variable, 'units', None)
             standard_name = getattr(variable, 'standard_name', None)
-            standard_name_modifier = None
+            standard_name, standard_name_modifier = self._split_standard_name(standard_name)
 
-            # Sometimes standard_name has modifiers
-            # See CF 1.6 Appendix C
-            if isinstance(standard_name, str):
-                if ' ' in standard_name:
-                    standard_name, standard_name_modifier = standard_name.split(' ', 1)
+            valid_units = self._check_valid_cf_units(ds, name)
+            ret_val.append(valid_units)
 
-            '''
-            Some standard names are inherently unitless
-
-            From CF §3.1:
-
-            Units are not required for dimensionless quantities. A variable
-            with no units attribute is assumed to be dimensionless.
-            '''
-
-            should_be_unitless = standard_name in unitless_standard_names
-
-            # 1) Units must exist
-            valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(name))
-            valid_units.assert_true(should_be_unitless or units is not None,
-                                    'units attribute is required for {}'.format(name))
-
-            # 2) units attribute must be a string
-            valid_units.assert_true(should_be_unitless or isinstance(units, basestring),
-                                    'units attribute for {} needs to be a string'.format(name))
-
-            # 3) units are not deprecated
-            valid_units.assert_true(units not in deprecated,
-                                    'units for {}, "{}" are deprecated by CF 1.6'.format(name, units))
-
-            ret_val.append(valid_units.to_result())
-
-            # 4) units are contained in udunits
-            valid_udunits = TestCtx(BaseCheck.LOW, "§3.1 Variable {}'s units are contained in UDUnits".format(name))
-            are_udunits = (units is not None and units_known(units))
-            valid_udunits.assert_true(should_be_unitless or are_udunits, 'units for {}, "{}" are not recognized by udunits'.format(name, units))
-
-            ret_val.append(valid_udunits.to_result())
+            valid_udunits = self._check_valid_udunits(ds, name)
+            ret_val.append(valid_udunits)
 
             if standard_name is None:
                 continue
-            # 5) units are appropriate for the standard_name attribute used
-            valid_standard_units = TestCtx(BaseCheck.HIGH,
-                                           "§3.1 Variable {}'s units are appropriate for "
-                                           "the standard_name {}".format(name, standard_name or "unspecified"))
 
-            standard_entry = self._std_names.get(standard_name, None)
-            if standard_entry is not None:
-                canonical_units = standard_entry.canonical_units
-            else:
-                canonical_units = None
-
-            # Other standard_name modifiers have the same units as the
-            # unmodified standard name or are not checked for units.
-
-            if standard_name_modifier == 'number_of_observations':
-                canonical_units = '1'
-
-            elif standard_name == 'time':
-                valid_standard_units.assert_true(units_convertible(units, 'seconds since 1970-01-01'),
-                                                 'time must be in a valid units format <unit> since <epoch> '
-                                                 'not {}'.format(units))
-            # UDunits can't tell the difference between east and north facing coordinates
-            elif standard_name == 'latitude':
-                # degrees is allowed if using a transformed grid
-                allowed_units = [i.lower() for i in _possibleyunits] + ['degrees']
-                valid_standard_units.assert_true(units.lower() in allowed_units,
-                                                 'variables defining latitude must use degrees_north '
-                                                 'or degrees if defining a transformed grid. Currently '
-                                                 '{}'.format(units))
-            elif standard_name == 'longitude':
-                # degrees is allowed if using a transformed grid
-                allowed_units = [i.lower() for i in _possiblexunits] + ['degrees']
-                valid_standard_units.assert_true(units.lower() in allowed_units,
-                                                 'variables defining longitude must use degrees_east '
-                                                 'or degrees if defining a transformed grid. Currently '
-                                                 '{}'.format(units))
-            elif should_be_unitless:
-                valid_standard_units.assert_true(True, '')
-
-            else:
-                valid_standard_units.assert_true(units_convertible(canonical_units, units),
-                                                 'units for variable {} must be convertible to {} '
-                                                 'currently they are {}'.format(name, canonical_units, units))
-
-            ret_val.append(valid_standard_units.to_result())
+            valid_standard_units = self._check_valid_standard_units(ds, name)
+            ret_val.append(valid_standard_units)
 
         return ret_val
+
+    def _split_standard_name(self, standard_name):
+        '''
+        Returns a tuple of the standard_name and standard_name modifier
+
+        Nones are used to represent the absence of a modifier or standard_name
+
+        :rtype: tuple
+        '''
+        standard_name_modifier = None
+        if not isinstance(standard_name, basestring):
+            return (None, None)
+
+        if ' ' in standard_name:
+            standard_name, standard_name_modifier = standard_name.split(' ', 1)
+
+        return (standard_name, standard_name_modifier)
+
+    def _check_valid_cf_units(self, ds, variable_name):
+        '''
+        Checks that the variable contains units attribute, the attribute is a
+        string and the value is not deprecated by CF
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str variable_name: Name of the variable to be checked
+        '''
+        # This list is straight from section 3
+        deprecated = ['level', 'layer', 'sigma_level']
+        variable = ds.variables[variable_name]
+
+        units = getattr(variable, 'units', None)
+        standard_name = getattr(variable, 'standard_name', None)
+        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+        unitless_standard_names = cfutil.get_unitless_standard_names()
+
+        should_be_unitless = standard_name in unitless_standard_names
+
+        # 1) Units must exist
+        valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(variable_name))
+        valid_units.assert_true(should_be_unitless or units is not None,
+                                'units attribute is required for {}'.format(variable_name))
+
+        # 2) units attribute must be a string
+        valid_units.assert_true(should_be_unitless or isinstance(units, basestring),
+                                'units attribute for {} needs to be a string'.format(variable_name))
+
+        # 3) units are not deprecated
+        valid_units.assert_true(units not in deprecated,
+                                'units for {}, "{}" are deprecated by CF 1.6'.format(variable_name, units))
+        return valid_units.to_result()
+
+    def _check_valid_udunits(self, ds, variable_name):
+        '''
+        Checks that the variable's units are contained in UDUnits
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str variable_name: Name of the variable to be checked
+        '''
+        variable = ds.variables[variable_name]
+
+        units = getattr(variable, 'units', None)
+        standard_name = getattr(variable, 'standard_name', None)
+        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+        unitless_standard_names = cfutil.get_unitless_standard_names()
+
+        # If the variable is supposed to be unitless, it automatically passes
+        should_be_unitless = standard_name in unitless_standard_names
+
+        valid_udunits = TestCtx(BaseCheck.LOW,
+                                "§3.1 Variable {}'s units are contained in UDUnits".format(variable_name))
+        are_udunits = (units is not None and units_known(units))
+        valid_udunits.assert_true(should_be_unitless or are_udunits,
+                                  'units for {}, "{}" are not recognized by udunits'.format(variable_name, units))
+        return valid_udunits.to_result()
+
+    def _check_valid_standard_units(self, ds, variable_name):
+        '''
+        Checks that the variable's units are appropriate for the standard name
+        according to the CF standard name table and coordinate sections in CF
+        1.6
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str variable_name: Name of the variable to be checked
+        '''
+        variable = ds.variables[variable_name]
+        units = getattr(variable, 'units', None)
+        standard_name = getattr(variable, 'standard_name', None)
+        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+
+        unitless_standard_names = cfutil.get_unitless_standard_names()
+
+        # If the variable is supposed to be unitless, it automatically passes
+        should_be_unitless = standard_name in unitless_standard_names
+
+        valid_standard_units = TestCtx(BaseCheck.HIGH,
+                                       "§3.1 Variable {}'s units are appropriate for "
+                                       "the standard_name {}".format(variable_name,
+                                                                     standard_name or "unspecified"))
+
+        standard_entry = self._std_names.get(standard_name, None)
+        if standard_entry is not None:
+            canonical_units = standard_entry.canonical_units
+        else:
+            canonical_units = None
+
+        # Other standard_name modifiers have the same units as the
+        # unmodified standard name or are not checked for units.
+
+        if standard_name_modifier == 'number_of_observations':
+            canonical_units = '1'
+
+        # This section represents the different cases where simple udunits
+        # comparison isn't comprehensive enough to determine if the units are
+        # appropriate under CF
+
+        # UDUnits accepts "s" as a unit of time but it should be <unit> since <epoch>
+        if standard_name == 'time':
+            valid_standard_units.assert_true(units_convertible(units, 'seconds since 1970-01-01'),
+                                             'time must be in a valid units format <unit> since <epoch> '
+                                             'not {}'.format(units))
+
+        # UDunits can't tell the difference between east and north facing coordinates
+        elif standard_name == 'latitude':
+            # degrees is allowed if using a transformed grid
+            allowed_units = [i.lower() for i in _possibleyunits] + ['degrees']
+            valid_standard_units.assert_true(units.lower() in allowed_units,
+                                             'variables defining latitude must use degrees_north '
+                                             'or degrees if defining a transformed grid. Currently '
+                                             '{}'.format(units))
+        # UDunits can't tell the difference between east and north facing coordinates
+        elif standard_name == 'longitude':
+            # degrees is allowed if using a transformed grid
+            allowed_units = [i.lower() for i in _possiblexunits] + ['degrees']
+            valid_standard_units.assert_true(units.lower() in allowed_units,
+                                             'variables defining longitude must use degrees_east '
+                                             'or degrees if defining a transformed grid. Currently '
+                                             '{}'.format(units))
+        # Standard Name table agrees the unit should be unitless
+        elif should_be_unitless:
+            valid_standard_units.assert_true(True, '')
+
+        else:
+            valid_standard_units.assert_true(units_convertible(canonical_units, units),
+                                             'units for variable {} must be convertible to {} '
+                                             'currently they are {}'.format(variable_name, canonical_units, units))
+
+        return valid_standard_units.to_result()
 
     def check_standard_name(self, ds):
         '''
