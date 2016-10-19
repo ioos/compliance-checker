@@ -896,7 +896,7 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
-    def check_ancillary_data(self, ds):
+    def check_ancillary_variables(self, ds):
         '''
         Checks the ancillary_variable attribute for all variables to ensure
         they are CF compliant.
@@ -915,35 +915,27 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
 
-        for k, v in ds.variables.items():
-            anc = getattr(v, 'ancillary_variables', None)
-            if anc is None:
+        for ncvar in ds.get_variables_by_attributes(ancillary_variables=lambda x: x is not None):
+            name = ncvar.name
+            valid_ancillary = TestCtx(BaseCheck.HIGH, "§3.4 Ancillary Variables defined by {}".format(name))
+            ancillary_variables = ncvar.ancillary_variables
+
+            valid_ancillary.assert_true(isinstance(ancillary_variables, basestring),
+                                        "ancillary_variables attribute defined by {} "
+                                        "should be string".format(name))
+
+            # Can't perform the second check if it's not a string
+            if not isinstance(ancillary_variables, basestring):
+                ret_val.append(valid_ancillary.to_result())
                 continue
 
-            # should be a string, splittable, and each should exist
-            anc_result = Result(BaseCheck.HIGH, name=('§3.4 Ancillary Variables', k))
-            msgs = []
+            for ancillary_variable in ancillary_variables.split():
+                valid_ancillary.assert_true(ancillary_variables in ds.variables,
+                                            "{} is not a variable in this dataset".format(ancillary_variable))
 
-            if not isinstance(anc, basestring):
-                anc_result.value = False
-                anc_result.msgs = ["ancillary_variable(s) {} is not a string or unicode".format(anc)]
-                ret_val.append(anc_result)
-                continue
+            ret_val.append(valid_ancillary.to_result())
 
-            ancs = anc.split()
-            existing = 0
-
-            for a in ancs:
-                if a in ds.variables:
-                    existing += 1
-                else:
-                    msgs.append("ancillary var {} does not exist".format(a))
-
-            anc_result.value = (existing, len(ancs))
-            anc_result.msgs = msgs
-
-            ret_val.append(anc_result)
-
+        print "returning {} results".format(len(ret_val))
         return ret_val
 
     def check_flags(self, ds):

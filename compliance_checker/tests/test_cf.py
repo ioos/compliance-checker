@@ -248,6 +248,24 @@ class TestCF(BaseTestCase):
 
         assert len(result_dict) == 7
 
+    def test_check_ancillary_variables(self):
+        '''
+        Test to ensure that ancillary variables are properly checked
+        '''
+
+        dataset = self.load_dataset(STATIC_FILES['rutgers'])
+        results = self.cf.check_ancillary_variables(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§3.4 Ancillary Variables defined by temperature']
+        assert result.value == (2, 2)
+
+        dataset = self.load_dataset(STATIC_FILES['bad_reference'])
+        results = self.cf.check_ancillary_variables(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§3.4 Ancillary Variables defined by temp']
+        assert result.value == (1, 2)
+        assert "temp_qc is not a variable in this dataset" == result.msgs[0]
+
     def test_download_standard_name_table(self):
         """
         Test that a user can download a specific standard name table
