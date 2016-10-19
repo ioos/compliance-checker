@@ -199,4 +199,13 @@ class TestFeatureDetection(TestCase):
             assert 'lat' == util.get_lat_variable(nc)
             assert 'lon' == util.get_lon_variable(nc)
 
+    def test_auxiliary_coordinates(self):
+        '''
+        Ensures variables are classified as auxiliary coordinate variables
+        '''
+        with Dataset(resources.STATIC_FILES['bad_units']) as nc:
+            coordinate_variables = util.get_coordinate_variables(nc)
+            assert set(['time']) == set(coordinate_variables)
 
+            aux_coord_vards = util.get_auxiliary_coordinate_variables(nc)
+            assert set(['lat', 'lon']) == set(aux_coord_vards)

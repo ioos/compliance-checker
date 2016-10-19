@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#-*- coding: utf-8 -*-
 
 from compliance_checker.suite import CheckSuite
 from compliance_checker.cf import CFBaseCheck, dimless_vertical_coordinates
@@ -6,6 +7,7 @@ from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable,
 from netCDF4 import Dataset
 from tempfile import gettempdir
 from compliance_checker.tests.resources import STATIC_FILES
+from compliance_checker.tests import BaseTestCase
 
 import unittest
 import os
@@ -19,23 +21,7 @@ class MockVariable(object):
     pass
 
 
-class TestCF(unittest.TestCase):
-    # @see
-    # http://www.saltycrane.com/blog/2012/07/how-prevent-nose-unittest-using-docstring-when-verbosity-2/
-
-    def shortDescription(self):
-        return None
-
-    # override __str__ and __repr__ behavior to show a copy-pastable nosetest name for ion tests
-    #  ion.module:TestClassName.test_function_name
-    def __repr__(self):
-        name = self.id()
-        name = name.split('.')
-        if name[0] not in ["ion", "pyon"]:
-            return "%s (%s)" % (name[-1], '.'.join(name[:-1]))
-        else:
-            return "%s ( %s )" % (name[-1], '.'.join(name[:-2]) + ":" + '.'.join(name[-2:]))
-    __str__ = __repr__
+class TestCF(BaseTestCase):
 
     def setUp(self):
         '''
@@ -286,14 +272,66 @@ class TestCF(unittest.TestCase):
     def test_check_bad_units(self):
 
         dataset = self.load_dataset(STATIC_FILES['2dim'])
-        result = self.cf.check_units(dataset)
-        for each in result:
-            self.assertTrue(each.value)
+        results = self.cf.check_units(dataset)
+        for result in results:
+            self.assert_result_is_good(result)
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        result = self.cf.check_units(dataset)
-        for each in result:
-            self.assertFalse(each.value)
+        results = self.cf.check_units(dataset)
+        result_dict = {result.name: result for result in results}
+
+        result = result_dict[u'§3.1 Variable time contains valid CF units']
+        # Since no units are specified, they can't be deprecated
+        assert result.value == (1, 3)
+        assert 'units attribute is required for time' in result.msgs
+        assert 'units attribute for time needs to be a string' in result.msgs
+
+        # it's Degrees_E which is a valid udunits. The preferred units are
+        # degrees_east and they are checked in the check_longitude check
+        result = result_dict[u'§3.1 Variable longitude\'s units are contained in UDUnits']
+        assert result.value == (1, 1)
+
+        result = result_dict[u'§3.1 Variable temp contains valid CF units']
+        assert result.value == (3, 3)
+
+        result = result_dict[u'§3.1 Variable temp\'s units are contained in UDUnits']
+        assert result.value == (1, 1)
+
+        dataset = self.load_dataset(STATIC_FILES['bad_units'])
+        results = self.cf.check_units(dataset)
+        result_dict = {result.name: result for result in results}
+
+        # time(time)
+        #   time:units = "s"
+        result = result_dict[u'§3.1 Variable time contains valid CF units']
+        # They are valid and even valid UDUnits
+        assert result.value == (3, 3)
+        result = result_dict[u"§3.1 Variable time's units are contained in UDUnits"]
+        assert result.value == (1, 1)
+
+        # But they are not appropriate for time
+        result = result_dict[u"§3.1 Variable time's units are appropriate for the standard_name time"]
+        assert result.value == (0, 1)
+
+        # lat;
+        #   lat:units = "degrees_E";
+        # Should all be good
+        result = result_dict[u"§3.1 Variable lat's units are appropriate for the standard_name latitude"]
+        assert result.value == (0, 1)
+
+        # lev;
+        #   lev:units = "level";
+        # level is deprecated
+        result = result_dict[u"§3.1 Variable lev contains valid CF units"]
+        assert result.value == (2, 3)
+        assert 'units for lev, "level" are deprecated by CF 1.6' in result.msgs
+
+        # temp_count(time);
+        #   temp_count:standard_name = "atmospheric_temperature number_of_observations";
+        #   temp_count:units = "1";
+        result = result_dict[u"§3.1 Variable temp_count's units are appropriate for "
+                             u"the standard_name atmospheric_temperature number_of_observations"]
+        assert result.value == (1, 1)
 
     def test_coordinate_types(self):
         '''
@@ -764,8 +802,8 @@ class TestCF(unittest.TestCase):
         # we can make a strict assertion about how many checks were performed
         # and if there were errors, which there shouldn't be.
         scored, out_of, messages = self.get_results(results)
-        assert scored == 4
-        assert out_of == 4
+        assert scored == 20
+        assert out_of == 20
         assert messages == []
 
     def test_64bit(self):
@@ -775,14 +813,6 @@ class TestCF(unittest.TestCase):
             'cf'        : CFBaseCheck
         }
         suite.run(dataset, 'cf')
-
-    def test_time_units(self):
-        dataset = self.load_dataset(STATIC_FILES['time_units'])
-        results = self.cf.check_units(dataset)
-        scored, out_of, messages = self.get_results(results)
-        assert 'units are days since 1970-01-01, standard_name units should be K' in messages
-        assert scored == 1
-        assert out_of == 2
 
     # --------------------------------------------------------------------------------
     # Utility Method Tests

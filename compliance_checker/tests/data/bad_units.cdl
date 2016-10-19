@@ -1,0 +1,25 @@
+netcdf bad_units {
+dimensions:
+    time = 2;
+variables:
+    double time(time);
+        time:standard_name = "time";
+        time:units = "s"; // wrong, should be <unit> since <epoch>
+    double lat;
+        lat:standard_name = "latitude";
+        lat:units = "degrees_E"; // ok but not preferred
+    double lon;
+        lon:standard_name = "longitude";
+        lon:units = "degrees"; // actually allowed on a transformed grid
+    double lev;
+        lev:long_name = "Level";
+        lev:units = "level"; //deprecated
+    double temp(time);
+        temp:standard_name = "atmospheric_temperature";
+        temp:units = "N"; // valid udunits but not appropriate for temperature
+        temp:coordinates = "time lon lat";
+    int temp_count(time);
+        temp_count:standard_name = "atmospheric_temperature number_of_observations";
+        temp_count:units = "1";
+        temp_count:coordinates = "time lon lat";
+}

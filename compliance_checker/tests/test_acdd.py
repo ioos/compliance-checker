@@ -1,6 +1,6 @@
-import unittest
 from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check
 from compliance_checker.tests.resources import STATIC_FILES
+from compliance_checker.tests import BaseTestCase
 from netCDF4 import Dataset
 import os
 
@@ -24,34 +24,6 @@ def check_varset_nonintersect(group0, group1):
     '''
     # Performs symmetric difference on two lists converted to sets
     return len(set(group0) ^ set(group1)) == 0
-
-
-class BaseTestCase(unittest.TestCase):
-    '''
-    Base test case for ACDD
-    '''
-    def load_dataset(self, nc_dataset):
-        '''
-        Return a loaded NC Dataset for the given path
-        '''
-        if not isinstance(nc_dataset, str):
-            raise ValueError("nc_dataset should be a string")
-
-        nc_dataset = Dataset(nc_dataset, 'r')
-        self.addCleanup(nc_dataset.close)
-        return nc_dataset
-
-    def assert_result_is_good(self, result):
-        if isinstance(result.value, bool):
-            assert result.value is True
-        else:
-            assert result.value[0] == result.value[1]
-
-    def assert_result_is_bad(self, result):
-        if isinstance(result.value, bool):
-            assert result.value is False
-        else:
-            assert result.value[0] != result.value[1]
 
 
 class TestACDD1_1(BaseTestCase):

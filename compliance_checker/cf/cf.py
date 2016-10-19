@@ -7,10 +7,11 @@ from collections import defaultdict
 import numpy as np
 import os
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result
+from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result, TestCtx
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, create_cached_data_dir, download_cf_standard_name_table, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
 from compliance_checker import cfutil
+from compliance_checker.cf.util import _possibleyunits, _possiblexunits
 
 try:
     basestring
@@ -134,13 +135,15 @@ class CFBaseCheck(BaseCheck):
 
         # Each default dict is a key, value mapping from the dataset object to
         # a list of variables
-        self._coord_vars     = defaultdict(list)
-        self._ancillary_vars = defaultdict(list)
-        self._clim_vars      = defaultdict(list)
-        self._metadata_vars  = defaultdict(list)
-        self._boundary_vars  = defaultdict(list)
+        self._coord_vars       = defaultdict(list)
+        self._ancillary_vars   = defaultdict(list)
+        self._clim_vars        = defaultdict(list)
+        self._metadata_vars    = defaultdict(list)
+        self._boundary_vars    = defaultdict(list)
+        self._geophysical_vars = defaultdict(list)
+        self._aux_coords       = defaultdict(list)
 
-        self._std_names      = StandardNameTable()
+        self._std_names        = StandardNameTable()
 
     ################################################################################
     #
@@ -150,11 +153,13 @@ class CFBaseCheck(BaseCheck):
 
     def setup(self, ds):
         self._find_coord_vars(ds)
+        self._find_aux_coord_vars(ds)
         self._find_ancillary_vars(ds)
         self._find_clim_vars(ds)
         self._find_boundary_vars(ds)
         self._find_metadata_vars(ds)
         self._find_cf_standard_name_table(ds)
+        self._find_geophysical_vars(ds)
 
     def _find_cf_standard_name_table(self, ds):
         '''
@@ -220,6 +225,27 @@ class CFBaseCheck(BaseCheck):
         self._coord_vars[ds] = cfutil.get_coordinate_variables(ds)
 
         return self._coord_vars[ds]
+
+    def _find_aux_coord_vars(self, ds, refresh=False):
+        '''
+        Returns a list of auxiliary coordinate variables
+
+        An auxiliary coordinate variable is any netCDF variable that contains
+        coordinate data, but is not a coordinate variable (in the sense of the term
+        defined by CF).
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        :rtype: list
+        :return: List of variable names (str) that are defined to be auxiliary
+                 coordinate variables.
+        '''
+        if self._aux_coords.get(ds, None) and refresh is False:
+            return self._aux_coords[ds]
+
+        self._aux_coords[ds] = cfutil.get_auxiliary_coordinate_variables(ds)
+        return self._aux_coords[ds]
 
     def _find_ancillary_vars(self, ds, refresh=False):
         '''
@@ -290,33 +316,19 @@ class CFBaseCheck(BaseCheck):
 
         return self._metadata_vars[ds]
 
-    def _find_data_vars(self, ds):
+    def _find_geophysical_vars(self, ds, refresh=False):
         '''
-        Returns a dictionary of variables that could be considered data variables.
-
-        Excludes variables that are:
-            - coordinate variables
-            - ancillary variables
-            - dimensionless
-            - metadata variables
+        Returns a list of geophysical variables
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: dict
         '''
-        candidates = {}
-        for name, variable in ds.variables.items():
+        if self._geophysical_vars.get(ds, None) and refresh is False:
+            return self._geophysical_vars[ds]
 
-            if name in self._find_coord_vars(ds):
-                continue
-            if name in self._find_ancillary_vars(ds):
-                continue
-            if name in self._find_metadata_vars(ds):
-                continue
-            if variable.dimensions == tuple():
-                continue
-            candidates[name] = variable
+        self._geophysical_vars[ds] = cfutil.get_geophysical_variables(ds)
 
-        return candidates
+        return self._geophysical_vars[ds]
 
     def _find_clim_vars(self, ds, refresh=False):
         '''
@@ -645,118 +657,178 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
 
-        deprecated = ['level', 'layer', 'sigma_level']
-        clim_vars = self._find_clim_vars(ds)
-        boundary_vars = self._find_boundary_vars(ds)
-        container_vars = self._find_container_variables(ds)
-        metadata_vars = self._find_metadata_vars(ds)
-        ancillary_vars = self._find_ancillary_vars(ds)
+        coordinate_variables = self._find_coord_vars(ds)
+        auxiliary_coordinates = self._find_aux_coord_vars(ds)
+        geophysical_variables = self._find_geophysical_vars(ds)
+        unit_required_variables = coordinate_variables + auxiliary_coordinates + geophysical_variables
 
-        for name, variable in ds.variables.items():
+        for name in unit_required_variables:
+            variable = ds.variables[name]
 
-            # skip climatological vars, boundary vars
-            if name in clim_vars or \
-               name in boundary_vars or \
-               name in metadata_vars or \
-               name in ancillary_vars or \
-               name in container_vars:
+            standard_name = getattr(variable, 'standard_name', None)
+            standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+
+            valid_units = self._check_valid_cf_units(ds, name)
+            ret_val.append(valid_units)
+
+            valid_udunits = self._check_valid_udunits(ds, name)
+            ret_val.append(valid_udunits)
+
+            if standard_name is None:
                 continue
 
-            # skip string type vars
-            if (isinstance(variable.dtype, type) and issubclass(variable.dtype, str)) or variable.dtype.char == 'S':
-                continue
-
-            # skip quality control vars
-            if hasattr(variable, 'flag_meanings'):
-                continue
-
-            if hasattr(variable, 'standard_name') and 'status_flag' in variable.standard_name:
-                continue
-
-            # skip DSG cf_role
-            if hasattr(variable, "cf_role"):
-                continue
-
-            units = str(getattr(variable, 'units', None))
-
-            # 1) "units" attribute must be present
-            presence = Result(BaseCheck.HIGH, units is not None, '§3.1 Variables contain units')
-            if not presence.value:
-                presence.msgs = ['units attribute is required for %s' % name]
-                ret_val.append(presence)
-                continue
-
-            # 2) units attribute must be a string
-            astring = Result(BaseCheck.HIGH, isinstance(units, str), '§3.1 units attribute is a string')
-            if not astring.value:
-                astring.msgs = ["units not a string (%s) for %s" % (type(units), name)]
-                ret_val.append(astring)
-                continue
-
-            # now, units are present and string
-            # 3) units are not deprecated
-            resdeprecated = Result(BaseCheck.LOW, units not in deprecated, '§3.1 Variables contain valid units')
-            if not resdeprecated.value:
-                resdeprecated.msgs = ['units (%s) is deprecated for %s' % (units, name)]
-                ret_val.append(resdeprecated)
-                continue
-
-            # 4) units are known
-
-            knownu = Result(BaseCheck.HIGH, units_known(units), '§3.1 Variables contain valid CF Units')
-            if not knownu.value:
-                knownu.msgs = ['unknown units type (%s) for %s' % (units, name)]
-                ret_val.append(knownu)
-                # continue
-            # units look ok so far, check against standard name / cell methods
-            std_name = getattr(variable, 'standard_name', None)
-            std_name_modifier = None
-
-            if isinstance(std_name, str):
-                if ' ' in std_name:
-                    std_name, std_name_modifier = std_name.split(' ', 1)
-
-            # if no standard name or cell_methods, nothing left to do
-            if std_name is None and not hasattr(variable, 'cell_methods'):
-                # ret_val.append(Result(BaseCheck.HIGH, True, ('units', name, 'ok')))
-                continue
-
-            # 5) if a known std_name, use the units provided
-            if std_name is not None and std_name in self._std_names:
-
-                std_units = self._std_names[std_name].canonical_units
-
-                # @TODO modifiers changes units
-                msgs = []
-                valid = True
-                if units is not None:
-                    if std_name == 'time' and units.split(" ")[0] in ['day', 'days', 'd', 'hour', 'hours', 'hr', 'hrs', 'h', 'year', 'years', 'minute', 'minutes', 'm', 'min', 'mins', 'second', 'seconds', 's', 'sec', 'secs']:
-                        if len(units.split(" ")) > 1:
-                            if units.split(" ")[1] == 'since':
-                                std_units = units
-                        else:
-                            std_units = units
-
-                    if std_units == 'm' and units in ['meter', 'meters']:
-                        std_units = units
-
-                    if units != std_units and units not in ['degrees_north', 'degree_N', 'degreeN', 'degreesN', 'degrees_east', 'degree_E', 'degreeE', 'degreesE'] and not units_convertible(units, std_units):
-                        msgs = ['units are %s, standard_name units should be %s' % (units, std_units)]
-                        valid = False
-                else:
-                    valid = False
-                    msgs = ['The unit for variable {} is of type None.'.format(variable.name)]
-
-                ret_val.append(Result(BaseCheck.HIGH, valid, '§3.1 Variables contain valid units for the standard_name', msgs))
-
-            # 6) cell methods @TODO -> Isnt this in the check_cell_methods section?
-            # if hasattr(variable, 'cell_methods'):
-            #    cell_methods = variable.cell_methods
-#
-            #    # placemarker for future check
-            #    ret_val.append(Result(BaseCheck.HIGH, False, ('units', name, 'cell_methods'), ['TODO: implement cell_methods check']))
+            valid_standard_units = self._check_valid_standard_units(ds, name)
+            ret_val.append(valid_standard_units)
 
         return ret_val
+
+    def _split_standard_name(self, standard_name):
+        '''
+        Returns a tuple of the standard_name and standard_name modifier
+
+        Nones are used to represent the absence of a modifier or standard_name
+
+        :rtype: tuple
+        '''
+        standard_name_modifier = None
+        if not isinstance(standard_name, basestring):
+            return (None, None)
+
+        if ' ' in standard_name:
+            standard_name, standard_name_modifier = standard_name.split(' ', 1)
+
+        return (standard_name, standard_name_modifier)
+
+    def _check_valid_cf_units(self, ds, variable_name):
+        '''
+        Checks that the variable contains units attribute, the attribute is a
+        string and the value is not deprecated by CF
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str variable_name: Name of the variable to be checked
+        '''
+        # This list is straight from section 3
+        deprecated = ['level', 'layer', 'sigma_level']
+        variable = ds.variables[variable_name]
+
+        units = getattr(variable, 'units', None)
+        standard_name = getattr(variable, 'standard_name', None)
+        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+        unitless_standard_names = cfutil.get_unitless_standard_names()
+
+        should_be_unitless = standard_name in unitless_standard_names
+
+        # 1) Units must exist
+        valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(variable_name))
+        valid_units.assert_true(should_be_unitless or units is not None,
+                                'units attribute is required for {}'.format(variable_name))
+
+        # 2) units attribute must be a string
+        valid_units.assert_true(should_be_unitless or isinstance(units, basestring),
+                                'units attribute for {} needs to be a string'.format(variable_name))
+
+        # 3) units are not deprecated
+        valid_units.assert_true(units not in deprecated,
+                                'units for {}, "{}" are deprecated by CF 1.6'.format(variable_name, units))
+        return valid_units.to_result()
+
+    def _check_valid_udunits(self, ds, variable_name):
+        '''
+        Checks that the variable's units are contained in UDUnits
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str variable_name: Name of the variable to be checked
+        '''
+        variable = ds.variables[variable_name]
+
+        units = getattr(variable, 'units', None)
+        standard_name = getattr(variable, 'standard_name', None)
+        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+        unitless_standard_names = cfutil.get_unitless_standard_names()
+
+        # If the variable is supposed to be unitless, it automatically passes
+        should_be_unitless = standard_name in unitless_standard_names
+
+        valid_udunits = TestCtx(BaseCheck.LOW,
+                                "§3.1 Variable {}'s units are contained in UDUnits".format(variable_name))
+        are_udunits = (units is not None and units_known(units))
+        valid_udunits.assert_true(should_be_unitless or are_udunits,
+                                  'units for {}, "{}" are not recognized by udunits'.format(variable_name, units))
+        return valid_udunits.to_result()
+
+    def _check_valid_standard_units(self, ds, variable_name):
+        '''
+        Checks that the variable's units are appropriate for the standard name
+        according to the CF standard name table and coordinate sections in CF
+        1.6
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str variable_name: Name of the variable to be checked
+        '''
+        variable = ds.variables[variable_name]
+        units = getattr(variable, 'units', None)
+        standard_name = getattr(variable, 'standard_name', None)
+
+        unitless_standard_names = cfutil.get_unitless_standard_names()
+
+        # If the variable is supposed to be unitless, it automatically passes
+        should_be_unitless = standard_name in unitless_standard_names
+
+        valid_standard_units = TestCtx(BaseCheck.HIGH,
+                                       "§3.1 Variable {}'s units are appropriate for "
+                                       "the standard_name {}".format(variable_name,
+                                                                     standard_name or "unspecified"))
+
+        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+
+        standard_entry = self._std_names.get(standard_name, None)
+        if standard_entry is not None:
+            canonical_units = standard_entry.canonical_units
+        else:
+            canonical_units = None
+
+        # Other standard_name modifiers have the same units as the
+        # unmodified standard name or are not checked for units.
+
+        if standard_name_modifier == 'number_of_observations':
+            canonical_units = '1'
+
+        # This section represents the different cases where simple udunits
+        # comparison isn't comprehensive enough to determine if the units are
+        # appropriate under CF
+
+        # UDUnits accepts "s" as a unit of time but it should be <unit> since <epoch>
+        if standard_name == 'time':
+            valid_standard_units.assert_true(units_convertible(units, 'seconds since 1970-01-01'),
+                                             'time must be in a valid units format <unit> since <epoch> '
+                                             'not {}'.format(units))
+
+        # UDunits can't tell the difference between east and north facing coordinates
+        elif standard_name == 'latitude':
+            # degrees is allowed if using a transformed grid
+            allowed_units = [i.lower() for i in _possibleyunits] + ['degrees']
+            valid_standard_units.assert_true(units.lower() in allowed_units,
+                                             'variables defining latitude must use degrees_north '
+                                             'or degrees if defining a transformed grid. Currently '
+                                             '{}'.format(units))
+        # UDunits can't tell the difference between east and north facing coordinates
+        elif standard_name == 'longitude':
+            # degrees is allowed if using a transformed grid
+            allowed_units = [i.lower() for i in _possiblexunits] + ['degrees']
+            valid_standard_units.assert_true(units.lower() in allowed_units,
+                                             'variables defining longitude must use degrees_east '
+                                             'or degrees if defining a transformed grid. Currently '
+                                             '{}'.format(units))
+        # Standard Name table agrees the unit should be unitless
+        elif should_be_unitless:
+            valid_standard_units.assert_true(True, '')
+
+        else:
+            valid_standard_units.assert_true(units_convertible(canonical_units, units),
+                                             'units for variable {} must be convertible to {} '
+                                             'currently they are {}'.format(variable_name, canonical_units, units))
+
+        return valid_standard_units.to_result()
 
     def check_standard_name(self, ds):
         '''
@@ -2718,10 +2790,11 @@ class CFBaseCheck(BaseCheck):
 
         feature_tuple_list.append(feature_tuple)
 
-        data_vars = self._find_data_vars(ds)
+        data_vars = self._find_geophysical_vars(ds)
 
         feature_map = {}
-        for var_name, variable in data_vars.items():
+        for var_name in data_vars:
+            variable = ds.variables[var_name]
             feature = variable.dimensions
             feature_map[var_name] = feature
 
