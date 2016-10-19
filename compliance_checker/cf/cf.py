@@ -768,7 +768,6 @@ class CFBaseCheck(BaseCheck):
         variable = ds.variables[variable_name]
         units = getattr(variable, 'units', None)
         standard_name = getattr(variable, 'standard_name', None)
-        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
 
         unitless_standard_names = cfutil.get_unitless_standard_names()
 
@@ -779,6 +778,8 @@ class CFBaseCheck(BaseCheck):
                                        "§3.1 Variable {}'s units are appropriate for "
                                        "the standard_name {}".format(variable_name,
                                                                      standard_name or "unspecified"))
+
+        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
 
         standard_entry = self._std_names.get(standard_name, None)
         if standard_entry is not None:

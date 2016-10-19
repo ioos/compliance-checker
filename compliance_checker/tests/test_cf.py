@@ -326,6 +326,13 @@ class TestCF(BaseTestCase):
         assert result.value == (2, 3)
         assert 'units for lev, "level" are deprecated by CF 1.6' in result.msgs
 
+        # temp_count(time);
+        #   temp_count:standard_name = "atmospheric_temperature number_of_observations";
+        #   temp_count:units = "1";
+        result = result_dict[u"§3.1 Variable temp_count's units are appropriate for "
+                             u"the standard_name atmospheric_temperature number_of_observations"]
+        assert result.value == (1, 1)
+
     def test_coordinate_types(self):
         '''
         Section 4 Coordinate Types
