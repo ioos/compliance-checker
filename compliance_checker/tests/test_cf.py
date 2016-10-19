@@ -229,9 +229,24 @@ class TestCF(BaseTestCase):
             self.assertTrue(each.value)
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        result = self.cf.check_standard_name(dataset)
-        for each in result:
-            self.assertFalse(each.value)
+        results = self.cf.check_standard_name(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§3.3 Variable time has valid standard_name attribute']
+        assert result.value == (0, 2)
+        assert 'standard_name undefined is not defined' in result.msgs[1]
+
+        result = result_dict[u'§3.3 Variable latitude has valid standard_name attribute']
+        assert result.value == (0, 2)
+        assert 'standard_name undefined is not defined' in result.msgs[1]
+
+        result = result_dict[u'§3.3 Variable salinity has valid standard_name attribute']
+        assert result.value == (1, 2)
+        assert 'standard_name Chadwick is not defined in Standard Name Table' in result.msgs[0]
+
+        result = result_dict[u'§3.3 standard_name modifier for salinity is valid']
+        assert result.value == (0, 1)
+
+        assert len(result_dict) == 7
 
     def test_download_standard_name_table(self):
         """

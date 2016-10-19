@@ -845,44 +845,54 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
 
-        for k, v in ds.variables.items():
-            std_name = getattr(v, 'standard_name', None)
+        coord_vars = self._find_coord_vars(ds)
+        aux_coord_vars = self._find_aux_coord_vars(ds)
+        axis_vars = cfutil.get_axis_variables(ds)
+        flag_vars = cfutil.get_flag_variables(ds)
+        geophysical_vars = self._find_geophysical_vars(ds)
 
-            std_name_modifier = None
+        variables_requiring_standard_names = coord_vars + aux_coord_vars + axis_vars + flag_vars + geophysical_vars
+        for name in variables_requiring_standard_names:
+            ncvar = ds.variables[name]
+            standard_name = getattr(ncvar, 'standard_name', None)
 
-            # no standard name? is ok by the letter of the law
-            if std_name is None:
-                continue
+            standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+            # §1.3 The long_name and standard_name attributes are used to
+            # describe the content of each variable. For backwards
+            # compatibility with COARDS neither is required, but use of at
+            # least one of them is strongly recommended.
 
-            if isinstance(std_name, basestring):
-                if ' ' in std_name:
-                    std_name, std_name_modifier = std_name.split(' ', 1)
+            # If standard_name is not defined but long_name is, don't continue
+            # the check for this variable
+            if standard_name is None:
+                long_name = getattr(ncvar, 'long_name', None)
+                if long_name is not None:
+                    continue
 
-            # 1) standard name is a string and in standard name table or an exception, see H.2
-            msgs = []
-            is_str = isinstance(std_name, basestring)
-            in_exception = std_name in ('platform_name', 'station_name', 'instrument_name')
-            in_table = std_name in self._std_names
+            valid_std_name = TestCtx(BaseCheck.HIGH, '§3.3 Variable {} has valid standard_name attribute'.format(name))
 
-            if not is_str:
-                msgs.append("The standard name '%s' is not of type string.  It is type %s" % (std_name, type(std_name)))
-            if not in_table and not in_exception:
-                msgs.append("The standard name '%s' is not in standard name table" % std_name)
+            valid_std_name.assert_true(isinstance(standard_name, basestring),
+                                       "variable {}'s attribute standard_name must be a string".format(name))
 
-            ret_val.append(Result(BaseCheck.HIGH, is_str and in_table, '§3.3 Standard Names', msgs))
+            valid_std_name.assert_true(standard_name in self._std_names,
+                                       "standard_name {} is not defined in Standard Name Table v{}".format(
+                                           standard_name or 'undefined',
+                                           self._std_names._version))
+
+            ret_val.append(valid_std_name.to_result())
 
             # 2) optional - if modifiers, should be in table
-            if std_name_modifier:
+            if standard_name_modifier is not None:
+                valid_modifier = TestCtx(BaseCheck.HIGH, "§3.3 standard_name modifier for {} is valid".format(name))
                 allowed = ['detection_minimum',
                            'number_of_observations',
                            'standard_error',
                            'status_flag']
+                valid_modifier.assert_true(standard_name_modifier in allowed,
+                                           "standard_name modifier {} is not a valid modifier "
+                                           "according to appendix C".format(standard_name_modifier))
 
-                msgs = []
-                if std_name_modifier not in allowed:
-                    msgs.append("modifier (%s) not allowed" % std_name_modifier)
-
-                ret_val.append(Result(BaseCheck.HIGH, std_name_modifier in allowed, '§3.3 Standard Names', msgs))
+                ret_val.append(valid_modifier.to_result())
 
         return ret_val
 

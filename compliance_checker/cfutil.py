@@ -371,6 +371,20 @@ def get_climatology_variable(ds):
     return None
 
 
+def get_flag_variables(ds):
+    '''
+    Returns a list of variables that are defined as flag variables
+    '''
+    flag_variables = []
+    for name, ncvar in ds.variables.items():
+        standard_name = getattr(ncvar, 'standard_name', None)
+        if isinstance(standard_name, basestring) and 'status_flag' in standard_name:
+            flag_variables.append(name)
+        if hasattr(ncvar, 'flag_meanings'):
+            flag_variables.append(name)
+    return flag_variables
+
+
 def get_grid_mapping_variables(ds):
     '''
     Returns a list of grid mapping variables
