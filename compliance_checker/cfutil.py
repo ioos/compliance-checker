@@ -168,17 +168,12 @@ def get_auxiliary_coordinate_variables(ds):
             aux_vars.append(variable)
 
     # Last are any variables that define the common coordinate standard names
-    lon = get_lon_variable(ds)
-    if lon and lon not in aux_vars:
-        aux_vars.append(lon)
+    coordinate_standard_names = ['time', 'longitude', 'latitude', 'height', 'depth', 'altitude']
 
-    lat = get_lat_variable(ds)
-    if lat and lat not in aux_vars:
-        aux_vars.append(lat)
-
-    time_var = get_time_variable(ds)
-    if time_var and time_var not in aux_vars:
-        aux_vars.append(time_var)
+    # Some datasets like ROMS use multiple variables to define coordinates
+    for ncvar in ds.get_variables_by_attributes(standard_name=lambda x: x in coordinate_standard_names):
+        if ncvar.name not in aux_vars:
+            aux_vars.append(ncvar.name)
 
     # Remove any that are purely coordinate variables
     ret_val = []
