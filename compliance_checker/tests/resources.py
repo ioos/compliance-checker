@@ -68,4 +68,5 @@ STATIC_FILES = {
     'ghrsst'                               : get_filename('tests/data/20160919092000-ABOM-L3S_GHRSST-SSTfnd-AVHRR_D-1d_dn_truncate.cdl'),
     'climatology'                          : get_filename('tests/data/climatology.cdl'),
     'rotated_pole_grid'                    : get_filename('tests/data/rotated_pole_grid.cdl'),
+    'bad_units'                            : get_filename('tests/data/bad_units.cdl'),
 }

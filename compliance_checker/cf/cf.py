@@ -11,6 +11,7 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result,
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, create_cached_data_dir, download_cf_standard_name_table, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
 from compliance_checker import cfutil
+from compliance_checker.cf.util import _possibleyunits, _possiblexunits
 
 try:
     basestring
@@ -140,6 +141,7 @@ class CFBaseCheck(BaseCheck):
         self._metadata_vars    = defaultdict(list)
         self._boundary_vars    = defaultdict(list)
         self._geophysical_vars = defaultdict(list)
+        self._aux_coords       = defaultdict(list)
 
         self._std_names        = StandardNameTable()
 
@@ -151,6 +153,7 @@ class CFBaseCheck(BaseCheck):
 
     def setup(self, ds):
         self._find_coord_vars(ds)
+        self._find_aux_coord_vars(ds)
         self._find_ancillary_vars(ds)
         self._find_clim_vars(ds)
         self._find_boundary_vars(ds)
@@ -222,6 +225,27 @@ class CFBaseCheck(BaseCheck):
         self._coord_vars[ds] = cfutil.get_coordinate_variables(ds)
 
         return self._coord_vars[ds]
+
+    def _find_aux_coord_vars(self, ds, refresh=False):
+        '''
+        Returns a list of auxiliary coordinate variables
+
+        An auxiliary coordinate variable is any netCDF variable that contains
+        coordinate data, but is not a coordinate variable (in the sense of the term
+        defined by CF).
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        :rtype: list
+        :return: List of variable names (str) that are defined to be auxiliary
+                 coordinate variables.
+        '''
+        if self._aux_coords.get(ds, None) and refresh is False:
+            return self._aux_coords[ds]
+
+        self._aux_coords[ds] = cfutil.get_auxiliary_coordinate_variables(ds)
+        return self._aux_coords[ds]
 
     def _find_ancillary_vars(self, ds, refresh=False):
         '''
@@ -635,8 +659,9 @@ class CFBaseCheck(BaseCheck):
 
         deprecated = ['level', 'layer', 'sigma_level']
         coordinate_variables = self._find_coord_vars(ds)
+        auxiliary_coordinates = self._find_aux_coord_vars(ds)
         geophysical_variables = self._find_geophysical_vars(ds)
-        unit_required_variables = coordinate_variables + geophysical_variables
+        unit_required_variables = coordinate_variables + auxiliary_coordinates + geophysical_variables
         unitless_standard_names = cfutil.get_unitless_standard_names()
 
         for name in unit_required_variables:
@@ -708,6 +733,21 @@ class CFBaseCheck(BaseCheck):
                 valid_standard_units.assert_true(units_convertible(units, 'seconds since 1970-01-01'),
                                                  'time must be in a valid units format <unit> since <epoch> '
                                                  'not {}'.format(units))
+            # UDunits can't tell the difference between east and north facing coordinates
+            elif standard_name == 'latitude':
+                # degrees is allowed if using a transformed grid
+                allowed_units = [i.lower() for i in _possibleyunits] + ['degrees']
+                valid_standard_units.assert_true(units.lower() in allowed_units,
+                                                 'variables defining latitude must use degrees_north '
+                                                 'or degrees if defining a transformed grid. Currently '
+                                                 '{}'.format(units))
+            elif standard_name == 'longitude':
+                # degrees is allowed if using a transformed grid
+                allowed_units = [i.lower() for i in _possiblexunits] + ['degrees']
+                valid_standard_units.assert_true(units.lower() in allowed_units,
+                                                 'variables defining longitude must use degrees_east '
+                                                 'or degrees if defining a transformed grid. Currently '
+                                                 '{}'.format(units))
             elif should_be_unitless:
                 valid_standard_units.assert_true(True, '')
 

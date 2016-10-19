@@ -7,6 +7,12 @@ from pkg_resources import resource_filename
 import csv
 import json
 
+# For python2/python3 support
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 _UNITLESS_DB = None
 _SEA_NAMES = None
@@ -134,6 +140,54 @@ def get_coordinate_variables(ds):
             if ds.variables[dimension].dimensions == (dimension,):
                 coord_vars.append(dimension)
     return coord_vars
+
+
+def get_auxiliary_coordinate_variables(ds):
+    '''
+    Returns a list of auxiliary coordinate variables
+
+    An auxiliary coordinate variable is any netCDF variable that contains
+    coordinate data, but is not a coordinate variable (in the sense of the term
+    defined by CF).
+
+    :param netCDf4.Dataset ds: An open netCDF dataset
+    '''
+    aux_vars = []
+    # get any variables referecned by the coordinates attribute
+    for ncvar in ds.get_variables_by_attributes(coordinates=lambda x: isinstance(x, basestring)):
+        # split the coordinates into individual variable names
+        referenced_variables = ncvar.coordinates.split(' ')
+        # if the variable names exist, add them
+        for referenced_variable in referenced_variables:
+            if referenced_variable in ds.variables:
+                aux_vars.append(referenced_variable)
+
+    # axis variables are automatically in
+    for variable in get_axis_variables(ds):
+        if variable not in aux_vars:
+            aux_vars.append(variable)
+
+    # Last are any variables that define the common coordinate standard names
+    lon = get_lon_variable(ds)
+    if lon and lon not in aux_vars:
+        aux_vars.append(lon)
+
+    lat = get_lat_variable(ds)
+    if lat and lat not in aux_vars:
+        aux_vars.append(lat)
+
+    time_var = get_time_variable(ds)
+    if time_var and time_var not in aux_vars:
+        aux_vars.append(time_var)
+
+    # Remove any that are purely coordinate variables
+    ret_val = []
+    for aux_var in aux_vars:
+        if ds.variables[aux_var].dimensions == (aux_var,):
+            continue
+        ret_val.append(aux_var)
+
+    return ret_val
 
 
 def get_cell_boundary_map(ds):

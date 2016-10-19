@@ -278,18 +278,53 @@ class TestCF(BaseTestCase):
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         results = self.cf.check_units(dataset)
-        for result in results:
-            # time doesn't have units
-            if result.name == u'§3.1 Variable time contains units attribute':
-                self.assert_result_is_bad(result)
+        result_dict = {result.name: result for result in results}
 
-            # The non-existent units attribute surely isn't a string
-            elif result.name == u'§3.1 units attribute for time is a string':
-                self.assert_result_is_bad(result)
+        result = result_dict[u'§3.1 Variable time contains valid CF units']
+        # Since no units are specified, they can't be deprecated
+        assert result.value == (1, 3)
+        assert 'units attribute is required for time' in result.msgs
+        assert 'units attribute for time needs to be a string' in result.msgs
 
-            # Technically this is true, it's not using deprecated units
-            elif result.name == u'§3.1 units for time are not deprecated':
-                self.assert_result_is_good(result)
+        # it's Degrees_E which is a valid udunits. The preferred units are
+        # degrees_east and they are checked in the check_longitude check
+        result = result_dict[u'§3.1 Variable longitude\'s units are contained in UDUnits']
+        assert result.value == (1, 1)
+
+        result = result_dict[u'§3.1 Variable temp contains valid CF units']
+        assert result.value == (3, 3)
+
+        result = result_dict[u'§3.1 Variable temp\'s units are contained in UDUnits']
+        assert result.value == (1, 1)
+
+        dataset = self.load_dataset(STATIC_FILES['bad_units'])
+        results = self.cf.check_units(dataset)
+        result_dict = {result.name: result for result in results}
+
+        # time(time)
+        #   time:units = "s"
+        result = result_dict[u'§3.1 Variable time contains valid CF units']
+        # They are valid and even valid UDUnits
+        assert result.value == (3, 3)
+        result = result_dict[u"§3.1 Variable time's units are contained in UDUnits"]
+        assert result.value == (1, 1)
+
+        # But they are not appropriate for time
+        result = result_dict[u"§3.1 Variable time's units are appropriate for the standard_name time"]
+        assert result.value == (0, 1)
+
+        # lat;
+        #   lat:units = "degrees_E";
+        # Should all be good
+        result = result_dict[u"§3.1 Variable lat's units are appropriate for the standard_name latitude"]
+        assert result.value == (0, 1)
+
+        # lev;
+        #   lev:units = "level";
+        # level is deprecated
+        result = result_dict[u"§3.1 Variable lev contains valid CF units"]
+        assert result.value == (2, 3)
+        assert 'units for lev, "level" are deprecated by CF 1.6' in result.msgs
 
     def test_coordinate_types(self):
         '''
@@ -760,8 +795,8 @@ class TestCF(BaseTestCase):
         # we can make a strict assertion about how many checks were performed
         # and if there were errors, which there shouldn't be.
         scored, out_of, messages = self.get_results(results)
-        assert scored == 4
-        assert out_of == 4
+        assert scored == 20
+        assert out_of == 20
         assert messages == []
 
     def test_64bit(self):
@@ -771,14 +806,6 @@ class TestCF(BaseTestCase):
             'cf'        : CFBaseCheck
         }
         suite.run(dataset, 'cf')
-
-    def test_time_units(self):
-        dataset = self.load_dataset(STATIC_FILES['time_units'])
-        results = self.cf.check_units(dataset)
-        scored, out_of, messages = self.get_results(results)
-        assert 'units are days since 1970-01-01, standard_name units should be K' in messages
-        assert scored == 1
-        assert out_of == 2
 
     # --------------------------------------------------------------------------------
     # Utility Method Tests
