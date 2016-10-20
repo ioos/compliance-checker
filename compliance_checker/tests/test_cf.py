@@ -149,7 +149,10 @@ class TestCF(BaseTestCase):
 
         self.assertEqual(result.value, expected)
 
-        # TODO: Add bad unique names to bad.nc
+        dataset = self.load_dataset(STATIC_FILES['chap2'])
+        result = self.cf.check_names_unique(dataset)
+        assert result.value == (6, 7)
+        assert result.msgs[0] == 'Variables are not case sensitive. Duplicate variables named: not_unique'
 
     def test_check_dimension_names(self):
         """

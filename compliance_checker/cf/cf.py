@@ -463,8 +463,8 @@ class CFBaseCheck(BaseCheck):
         for k in ds.variables:
             names[k.lower()] += 1
 
-        fails = ['Variables are not case sensitive.  Duplicate variables named: %s' % k for k, v in names.items() if v > 1]
-        return Result(BaseCheck.LOW, (total - len(fails), total), '§2.3 Unique variable names', msgs=fails)
+        fails = ['Variables are not case sensitive. Duplicate variables named: %s' % k for k, v in names.items() if v > 1]
+        return Result(BaseCheck.MEDIUM, (total - len(fails), total), '§2.3 Unique variable names', msgs=fails)
 
     def check_dimension_names(self, ds):
         '''
