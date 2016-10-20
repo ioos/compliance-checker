@@ -366,7 +366,7 @@ class CFBaseCheck(BaseCheck):
 
     ###############################################################################
     #
-    # CHAPTER 2: NetCDF Files and Components
+    # Chapter 2: NetCDF Files and Components
     #
     ###############################################################################
 
@@ -396,7 +396,7 @@ class CFBaseCheck(BaseCheck):
                                'float32'
                                ]:
 
-                fails.append(('The variable %s failed because the datatype is %s' % (k, v.datatype)))
+                fails.append('The variable {} failed because the datatype is {}'.format(k, v.datatype))
         return Result(BaseCheck.HIGH, (total - len(fails), total), '§2.2 Valid netCDF data types', msgs=fails)
 
     def check_naming_conventions(self, ds):
@@ -409,16 +409,42 @@ class CFBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: Result
         '''
-        fails = []
-        total = len(ds.variables)
+        ret_val = []
+        variable_naming = TestCtx(BaseCheck.MEDIUM, '§2.3 Naming Conventions for variables')
+        dimension_naming = TestCtx(BaseCheck.MEDIUM, '§2.3 Naming Conventions for dimensions')
+        attribute_naming = TestCtx(BaseCheck.MEDIUM, '§2.3 Naming Conventions for attributes')
 
-        rname = re.compile("[A-Za-z][A-Za-z0-9_]*")
+        rname = re.compile("^[A-Za-z][A-Za-z0-9_]*$")
 
-        for k, v in ds.variables.items():
-            if not rname.match(k):
-                fails.append('Variable %s failed because it does not start with a letter, digit, or an underscore' % k)
+        for name, variable in ds.variables.items():
+            variable_naming.assert_true(rname.match(name) is not None,
+                                        "variable {} should begin with a letter and be composed of "
+                                        "letters, digits, and underscores".format(name))
 
-        return Result(BaseCheck.HIGH, (total - len(fails), total), '§2.3 Legal variable names', fails)
+            # Keep track of all the attributes, we'll need to check them
+            for attr in variable.ncattrs():
+                # ignore reserved attrs
+                if attr == '_FillValue':
+                    continue
+                attribute_naming.assert_true(rname.match(attr) is not None,
+                                             "attribute {}:{} should begin with a letter and be composed of "
+                                             "letters, digits, and underscores".format(name, attr))
+
+        ret_val.append(variable_naming.to_result())
+
+        for dimension in ds.dimensions:
+            dimension_naming.assert_true(rname.match(dimension) is not None,
+                                         "dimension {} should begin with a latter and be composed of "
+                                         "letters, digits, and underscores".format(dimension))
+        ret_val.append(dimension_naming.to_result())
+
+        for global_attr in ds.ncattrs():
+            attribute_naming.assert_true(rname.match(global_attr) is not None,
+                                         "global attribute {} should begin with a letter and be composed of "
+                                         "letters, digits, and underscores".format(global_attr))
+        ret_val.append(attribute_naming.to_result())
+
+        return ret_val
 
     def check_names_unique(self, ds):
         '''
@@ -629,7 +655,7 @@ class CFBaseCheck(BaseCheck):
 
     ###############################################################################
     #
-    # CHAPTER 3: Description of the Data
+    # Chapter 3: Description of the Data
     #
     ###############################################################################
 
@@ -1133,11 +1159,11 @@ class CFBaseCheck(BaseCheck):
 
     ###############################################################################
     #
-    # CHAPTER 4: Coordinate Types
+    # Chapter 4: Coordinate Types
     #
     ###############################################################################
 
-    def check_coordinate_axis_attr(self, ds):
+    def check_coordinate_types(self, ds):
         '''
         Check the axis attribute of coordinate variables
 
@@ -1150,73 +1176,157 @@ class CFBaseCheck(BaseCheck):
         :rtype: list
         :return: List of results
         '''
-        ret_val     = []
-        coord_vars  = self._find_coord_vars(ds)
-        dim_to_axis = map_axes({k: v for k, v in ds.variables.items() if k in coord_vars}, reverse_map=True)
-        data_vars   = {k: v for k, v in ds.variables.items() if k not in coord_vars}
+        ret_val = []
+        coord_types = self._find_coord_vars(ds) + self._find_aux_coord_vars(ds)
 
-        # find auxiliary coordinate variables via 'coordinates' attribute
-        auxiliary_coordinate_vars = []
-        for name, var in data_vars.items():
-            if hasattr(var, 'coordinates'):
-                cv = var.coordinates.split(' ')
+        for name in coord_types:
+            variable = ds.variables[name]
 
-                for c in cv:
-                    if c in ds.variables:
-                        auxiliary_coordinate_vars.append(ds.variables[c])
+            valid_coord = TestCtx(BaseCheck.MEDIUM, '§4 {} is a valid coordinate type'.format(name))
 
-        for k, v in ds.variables.items():
-            axis = getattr(v, 'axis', None)
+            axis = getattr(variable, 'axis', None)
+            standard_name = getattr(variable, 'standard_name', None)
 
-            if axis is None:
-                continue
+            valid_coord.assert_true(axis is not None or standard_name is not None,
+                                    "coordinate types are recommended to define either axis or standard_name attributes")
+            ret_val.append(valid_coord.to_result())
 
-            # 1) axis must be X, Y, Z, or T
-            axis_valid = axis in ['X', 'Y', 'Z', 'T']
+            if axis is not None:
+                valid_axis = self._check_axis(ds, name)
+                ret_val.append(valid_axis)
 
-            avr = Result(BaseCheck.HIGH, axis_valid, '§4 Axis attributes and coordinate variables')
-            if not axis_valid:
-                avr.msgs = ['axis value (%s) is not valid' % axis]
+            if standard_name is not None:
+                valid_standard_name = self._check_coord_standard_name(ds, name)
+                ret_val.append(valid_standard_name)
 
-            ret_val.append(avr)
+            if axis is not None and standard_name is not None:
+                valid_mapping = self._check_coord_mapping(ds, name)
+                ret_val.append(valid_mapping)
 
-            # 2) only coordinate vars or auxiliary coordinate variable are allowed to have axis set
-            if k in coord_vars or v in auxiliary_coordinate_vars:
-                acvr = Result(BaseCheck.HIGH, True, '§4 Axis attributes and coordinate variables')
-            else:
-                acvr = Result(BaseCheck.HIGH, False, '§4 Axis attributes and coordinate variables')
-                acvr.msgs = ['%s is not allowed to have an axis attr as it is not a coordinate var or auxiliary_coordinate_var' % k]
-
-            ret_val.append(acvr)
-
-            # 3) must be consistent with coordinate type deduced from units and positive
-            axis_type = guess_coord_type(getattr(v, 'units', None), getattr(v, 'positive', None))
-            if axis_type is not None:
-                atr = Result(BaseCheck.HIGH, axis_type == axis, '§4 Axis attributes and coordinate variables')
-                if not atr.value:
-                    atr.msgs = ['%s guessed type (%s) is not consistent with coord type (%s)' % (k, axis_type, axis)]
-
-                ret_val.append(atr)
-
-            # 4) a data variable must not have more than one coordinate variable with a particular value of the axis attribute
-            if k in data_vars:
-                dep_axes = [(dim_to_axis[d], d) for d in v.dimensions if d in dim_to_axis]
-                dups = defaultdict(int)
-                for d in dep_axes:
-                    dups[d[0][0]] += 1
-
-                dups = {kk: vv for kk, vv in dups.items() if vv > 1}
-
-                coores = Result(BaseCheck.HIGH, len(dups) == 0, '§4 Axis attributes and coordinate variables')
-                if not coores.value:
-                    coores.msgs = []
-                    for kk, vv in dups.items():
-                        same_axis = [item[1] for item in dep_axes if item[0] == kk]
-                        coores.msgs.append('%s depends on multiple coord vars with axis attribute (%s): %s' % (k, kk, ','.join(same_axis)))
-
-                ret_val.append(coores)
+            valid_coordinate_type = self._check_coordinate_type(ds, name)
+            ret_val.append(valid_coordinate_type)
 
         return ret_val
+
+    def _check_axis(self, ds, name):
+        '''
+        Checks that the axis attribute is a string and an allowed value
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: Name of the variable
+        '''
+        allowed_axis = ['T', 'X', 'Y', 'Z']
+        variable = ds.variables[name]
+        axis = variable.axis
+
+        valid_axis = TestCtx(BaseCheck.HIGH, '§4 {} contains a valid axis'.format(name))
+        axis_is_string = isinstance(axis, basestring),
+        valid_axis.assert_true(axis_is_string and len(axis) > 0,
+                               "axis attribute must be a non-empty string")
+
+        # If axis isn't a string we can't continue any checks
+        if not axis_is_string or len(axis) == 0:
+            return valid_axis.to_result()
+
+        valid_axis.assert_true(axis in allowed_axis,
+                               "axis attribute must be T, X, Y, or Z, "
+                               "currently {}".format(axis))
+
+        return valid_axis.to_result()
+
+    def _check_coord_standard_name(self, ds, name):
+        '''
+        Checks that the standard_name attribute for a coordinate type is a suggested value.
+
+        :param netCDF4.Dataset ds: An open netCDF Dataset
+        :param str name: Name of the variable
+        '''
+        allowed_standard_names = [
+            'time',
+            'longitude',
+            'latitude',
+            'height',
+            'depth',
+            'altitude'
+        ]
+
+        variable = ds.variables[name]
+        standard_name = variable.standard_name
+
+        # §4.5 Discrete Axis states that it is only recommended that the
+        # coordinate types map to coordinate positions time, lat, lon etc.
+        # Discrete axes are also ok.
+        valid_standard_name = TestCtx(BaseCheck.LOW, '§4 {} has suggested standard_name for coordinate type'.format(name))
+        valid_standard_name.assert_true(isinstance(standard_name, basestring),
+                                        "standard_name is not a string")
+
+        if not isinstance(standard_name, basestring):
+            return valid_standard_name.to_result()
+
+        valid_standard_name.assert_true(standard_name in allowed_standard_names,
+                                        "standard_name attribute for coordinate types is suggested to be "
+                                        "time, longitude, latitude, height, depth or altitude")
+
+        return valid_standard_name.to_result()
+
+    def _check_coord_mapping(self, ds, name):
+        '''
+        Checks that the axis maps to a suggested coordinate
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: Name of the variable
+        '''
+        variable = ds.variables[name]
+        axis = variable.axis
+        standard_name = variable.standard_name
+
+        allowed_map = {
+            'T': ['time'],
+            'X': ['longitude'],
+            'Y': ['latitude'],
+            'Z': ['height', 'depth', 'altitude']
+        }
+
+        valid_coord_mapping = TestCtx(BaseCheck.LOW, '§4 {} has suggested mapping from axis to standard_name'.format(name))
+        axis_is_string = isinstance(axis, basestring)
+        standard_name_is_string = isinstance(standard_name, basestring)
+
+        valid_coord_mapping.assert_true(axis_is_string and standard_name_is_string,
+                                        "axis and standard_name must be strings")
+
+        if not standard_name_is_string or not axis_is_string:
+            return valid_coord_mapping.to_result()
+
+        valid_coord_mapping.assert_true(axis in allowed_map,
+                                        "axis must be T, X, Y, or Z")
+        if axis not in allowed_map:
+            return valid_coord_mapping.to_result()
+
+        valid_coord_mapping.assert_true(standard_name in allowed_map[axis],
+                                        "standard_name for axis {} is suggested to be "
+                                        "{}. Is currently {}"
+                                        "".format(axis,
+                                                  ', '.join(allowed_map[axis]),
+                                                  standard_name))
+
+        return valid_coord_mapping.to_result()
+
+    def _check_coordinate_type(self, ds, name):
+        '''
+        Checks that the coordinate type is a coordinate variable
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: Name of the variable
+        '''
+        variable = ds.variables[name]
+        valid_coordinate_type = TestCtx(BaseCheck.LOW, '§4 recommends that coordinate types be coordinate variables')
+        is_coordinate_variable = variable.dimensions == (name,)
+        is_dimensionless = variable.ndim == 0
+        # dimensionless coordinate types are loosely considered coordinate
+        # variables of dimension size 1
+        valid_coordinate_type.assert_true(is_coordinate_variable or is_dimensionless,
+                                          "{} is not a coordinate variable".format(name))
+        return valid_coordinate_type.to_result()
 
     def check_coordinate_vars_for_all_coordinate_types(self, ds):
         '''
@@ -1683,7 +1793,7 @@ class CFBaseCheck(BaseCheck):
 
     ###############################################################################
     #
-    # CHAPTER 5: Coordinate Systems
+    # Chapter 5: Coordinate Systems
     #
     ###############################################################################
 
@@ -1713,7 +1823,7 @@ class CFBaseCheck(BaseCheck):
         with two exceptions:
         - String-valued coordinates (Section 6.1, "Labels") have a dimension for
           maximum string length
-        - In the ragged array representations of data (Chapter 9, Discrete
+        - In the ragged array representations of data (Section 9, Discrete
           Sampling Geometries), special methods are needed to connect the data
           and coordinates
 
@@ -2124,7 +2234,7 @@ class CFBaseCheck(BaseCheck):
 
     ###############################################################################
     #
-    # CHAPTER 6: Labels and Alternative Coordinates
+    # Chapter 6: Labels and Alternative Coordinates
     #
     ###############################################################################
 
@@ -2229,7 +2339,7 @@ class CFBaseCheck(BaseCheck):
 
     ###############################################################################
     #
-    # CHAPTER 7: Data Representative of Cells
+    # Chapter 7: Data Representative of Cells
     #
     ###############################################################################
 
@@ -2629,7 +2739,7 @@ class CFBaseCheck(BaseCheck):
 
     ###############################################################################
     #
-    # CHAPTER 8: Reduction of Dataset Size
+    # Chapter 8: Reduction of Dataset Size
     #
     ###############################################################################
 
@@ -2752,7 +2862,7 @@ class CFBaseCheck(BaseCheck):
         return ret_val
     ###############################################################################
     #
-    # CHAPTER 9: Discrete Sampling Geometries
+    # Chapter 9: Discrete Sampling Geometries
     #
     ###############################################################################
 

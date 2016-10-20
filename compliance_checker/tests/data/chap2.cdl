@@ -1,0 +1,29 @@
+netcdf chap2 {
+dimensions:
+    time = 16;
+variables:
+    ushort bad_dtype; // ushort or uint16 is an illegal type
+    float bad\ name; // PLEASE DON'T DO THIS
+    double not_unique;
+    double NOT_UNIQUE;
+
+    double temperature(time); // nothing wrong with this
+        temperature:_FillValue = -20.;
+        temperature:valid_range = 0., 20.;
+        temperature:units = "deg_C";
+
+    float no_reason(time, time);
+        no_reason:_bad_attr = "Example of a bad attr on a variable";
+
+    double wind_speed(time);
+        wind_speed:_FillValue = 12.; // not a valid _FillValue because inside range
+        wind_speed:valid_min = 0.;
+        wind_speed:valid_max = 20.;
+        wind_speed:units = "knots";
+    
+    :title = "A succint description of what is in the dataset";
+    :institution = "CF";
+    :history = "history goes here";
+    :Conventions = "ACDD-1.1, CF-1.6";
+    :bad\ global = "Example of a bad global attribute";
+}

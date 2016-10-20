@@ -88,11 +88,16 @@ class TestCF(BaseTestCase):
         """
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
         result = self.cf.check_data_types(dataset)
-        self.assertTrue(result.value)
+        assert result.value[0] == result.value[1]
 
-        dpair = self.load_dataset(STATIC_FILES['bad_data_type'])
-        result = self.cf.check_data_types(dpair)
+        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
+        result = self.cf.check_data_types(dataset)
         assert result.value == (5, 6)
+
+        dataset = self.load_dataset(STATIC_FILES['chap2'])
+        result = self.cf.check_data_types(dataset)
+        assert result.value == (6, 7)
+        assert 'The variable bad_dtype failed because the datatype is uint16' == result.msgs[0]
 
     def test_naming_conventions(self):
         '''
@@ -101,18 +106,36 @@ class TestCF(BaseTestCase):
         Variable, dimension and attribute names should begin with a letter and be composed of letters, digits, and underscores.
         '''
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
-        result = self.cf.check_naming_conventions(dataset)
+        results = self.cf.check_naming_conventions(dataset)
         num_var = len(dataset.variables)
-
-        expected = (num_var,) * 2
-        self.assertEqual(result.value, expected)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§2.3 Naming Conventions for variables']
+        assert result.value == (num_var, num_var)
 
         dataset = self.load_dataset(STATIC_FILES['bad'])
-        result = self.cf.check_naming_conventions(dataset)
-        num_var = len(dataset.variables)
-        expected = (num_var - 1, num_var)
-        self.assertEqual(result.value, expected)
-        assert '_poor_dim' in result.msgs[0]
+        results = self.cf.check_naming_conventions(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§2.3 Naming Conventions for variables']
+        assert result.value == (14, 15)
+        assert u'variable _poor_dim should begin with a letter and be composed of letters, digits, and underscores' == result.msgs[0]
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (52, 54)
+
+        dataset = self.load_dataset(STATIC_FILES['chap2'])
+        results = self.cf.check_naming_conventions(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§2.3 Naming Conventions for variables']
+        assert result.value == (6, 7)
+        assert u'variable bad name should begin with a letter and be composed of letters, digits, and underscores' == result.msgs[0]
+
+        result = result_dict[u'§2.3 Naming Conventions for attributes']
+        assert result.msgs[0] == ('attribute no_reason:_bad_attr should begin with a letter and be '
+                                  'composed of letters, digits, and underscores')
+        assert result.msgs[1] == ('global attribute bad global should begin with a letter and be '
+                                  'composed of letters, digits, and underscores')
+
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (16, 19)
 
     def test_check_names_unique(self):
         """
@@ -383,21 +406,26 @@ class TestCF(BaseTestCase):
         for each in result:
             self.assertTrue(each.value)
 
-    def test_check_coordinate_axis_attr(self):
+    def test_check_coordinate_types(self):
 
-        dataset = self.load_dataset(STATIC_FILES['2dim'])
-        result = self.cf.check_coordinate_axis_attr(dataset)
-        for each in result:
-            self.assertTrue(each.value)
+        dataset = self.load_dataset(STATIC_FILES['coordinate_types'])
+        results = self.cf.check_coordinate_types(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§4 time is a valid coordinate type']
+        assert result.value == (1, 1)
 
-        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        result = self.cf.check_coordinate_axis_attr(dataset)
-        for each in result:
-            if each.name[1] in ['time', 'latitude']:
-                self.assertTrue(each.value)
-            if each.name[1] in ['salinity']:
-                if each.name[2] not in ['does_not_depend_on_mult_coord_vars']:
-                    self.assertFalse(each.value)
+        result = result_dict[u'§4 time has suggested standard_name for coordinate type']
+        assert result.value == (2, 2)
+
+        result = result_dict[u'§4 lat has suggested mapping from axis to standard_name']
+        assert result.value == (2, 3)
+        assert result.msgs[0] == 'standard_name for axis X is suggested to be longitude. Is currently latitude'
+
+        result = result_dict[u'§4 temperature has suggested standard_name for coordinate type']
+        assert result.value == (1, 2)
+
+        scored, out_of, messages = self.get_results(results)
+        assert (scored, out_of) == (21, 25)
 
     def test_latitude(self):
         '''

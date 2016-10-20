@@ -1,0 +1,36 @@
+netcdf coordinate_types {
+dimensions:
+    time = 2;
+    temperature = 5;
+variables:
+    // time is completely valid coordinate type even without axis
+    double time(time);
+        time:standard_name = "time";
+        time:units = "seconds since 1970-01-01";
+    // this is a coordinate variable and a legal coordinate type
+    // it does not have all the suggested characteristics because
+    // it does not map to longitude, latitude, time or depth
+    double lat;
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+        // invalid axis for this standard_name
+        lat:axis = "X";
+    double lon;
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+
+    double temperature(temperature);
+        temperature:standard_name = "sea_water_temperature";
+        temperature:units = "deg_C";
+        // F is not a valid axis at all
+        temperature:axis = "F";
+
+    double frequency(time, temperature);
+        frequency:long_name = "frequency of biologic detections at temperature";
+        frequency:units = "1";
+        frequency:coordinates = "time lon lat temperature";
+        frequency:comment = "Number of times biologic activity was detected for a given temperature at a specific time";
+}
+
+
+
