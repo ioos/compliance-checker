@@ -503,36 +503,78 @@ class CFBaseCheck(BaseCheck):
         whenever possible, be placed to the left of the spatiotemporal
         dimensions.
         '''
-        fails = []
-        total = len(ds.variables)
-
+        valid_dimension_order = TestCtx(BaseCheck.MEDIUM, '§2.4 Dimension Order')
         expected = ['T', 'Z', 'Y', 'X']
+        coord_vars = self._find_coord_vars(ds)
+        # Build a map from coordinate variable to axis
+        coord_axis_map = {}
 
-        for k, v in ds.variables.items():
+        for coord_name in coord_vars:
+            coord_var = ds.variables[coord_name]
+            axis = getattr(coord_var, 'axis', None)
+            standard_name = getattr(coord_var, 'standard_name', None)
+            # axis takes precedence over standard_name
+            if axis in expected:
+                coord_axis_map[coord_name] = axis
+            elif standard_name == 'time':
+                coord_axis_map[coord_name] = 'T'
+            elif standard_name == 'longitude':
+                coord_axis_map[coord_name] = 'X'
+            elif standard_name == 'latitude':
+                coord_axis_map[coord_name] = 'Y'
+            elif standard_name in ['height', 'depth', 'altitude']:
+                coord_axis_map[coord_name] = 'Z'
+            else:
+                # mark the coordinate variable as unknown
+                coord_axis_map[coord_name] = 'U'
 
-            dclass = list(map(guess_dim_type, v.dimensions))
-            # any nones should be before classified ones
-            nones    = [i for i, x in enumerate(dclass) if x is None]
-            nonnones = [i for i, x in enumerate(dclass) if x is not None]
-            '''
-            Documenting for clarification:
-            This next line of code says "If there is a non-space-time dimension
-            and there is a space time dimension and the location of the
-            non-space-time is before the location of the space-time dimension,
-            fail test"
-            '''
-            if len(nones) and len(nonnones) and max(nones) < min(nonnones):
-                fails.append("Variable %s has a non-space-time dimension after space-time-dimensions" % k)
+        # If a dimension does not have a coordinate variable mark it as unknown
+        # 'U'
+        for dimension in ds.dimensions:
+            if dimension not in coord_axis_map:
+                coord_axis_map[dimension] = 'U'
 
-            # classified ones should be in correct order
-            nonnones = [expected.index(x) for x in dclass if x is not None]
-            nonnones_sorted = sorted(nonnones)
+        # Check each variable's dimension order
+        for name, variable in ds.variables.items():
+            if variable.dimensions:
+                dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
+                valid_dimension_order.assert_true(self._dims_in_order(dimension_order),
+                                                  "{}'s dimensions are not in the recommended order "
+                                                  "T, X, Y, Z. They are {}"
+                                                  "".format(name,
+                                                            ", ".join(dimension_order)))
 
-            if nonnones != nonnones_sorted:
-                fails.append("The dimensions for %s are not in T Z Y X order" % k)
+        return valid_dimension_order.to_result()
 
-        # there are two checks here per variable so totals must be doubled
-        return Result(BaseCheck.LOW, (total * 2 - len(fails), total * 2), '§2.4 Dimension order', msgs=fails)
+    def _get_dimension_order(self, ds, name, coord_axis_map):
+        '''
+        Returns a list of strings corresponding to the named axis of the dimensions for a variable.
+
+        Example::
+            self._get_dimension_order(ds, 'temperature', coord_axis_map)
+            --> ['T', 'Y', 'X']
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: Name of the variable
+        :param dict coord_axis_map: A dictionary mapping each coordinate variable and dimension to a named axis
+        :rtype: list
+        '''
+
+        retval = []
+        variable = ds.variables[name]
+        for dim in variable.dimensions:
+            retval.append(coord_axis_map[dim])
+        return retval
+
+    def _dims_in_order(self, dimension_order):
+        '''
+        Returns True if the dimensions are in order U*, T, Z, Y, X
+
+        :param list dimension_order: A list of axes
+        '''
+        regx = re.compile(r'^U*T?Z?Y?X?$')
+        dimension_string = ''.join(dimension_order)
+        return regx.match(dimension_string) is not None
 
     # def check_dimension_single_value_applicable(self, ds):
         """
