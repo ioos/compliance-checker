@@ -935,7 +935,6 @@ class CFBaseCheck(BaseCheck):
 
             ret_val.append(valid_ancillary.to_result())
 
-        print "returning {} results".format(len(ret_val))
         return ret_val
 
     def check_flags(self, ds):
@@ -973,136 +972,164 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
 
-        for k, v in ds.variables.items():
-            flag_values   = getattr(v, "flag_values", None)
-            flag_masks    = getattr(v, "flag_masks", None)
-            flag_meanings = getattr(v, "flag_meanings", None)
+        for name in cfutil.get_flag_variables(ds):
+            variable = ds.variables[name]
+            flag_values = getattr(variable, "flag_values", None)
+            flag_masks = getattr(variable, "flag_masks", None)
 
-            if not (flag_values is not None or flag_masks is not None):
-                continue
+            valid_flags_var = TestCtx(BaseCheck.HIGH, '§3.5 {} is a valid flags variable'.format(name))
+            # Check that the variable defines mask or values
+            valid_flags_var.assert_true(flag_values is not None or flag_masks is not None,
+                                        "{} does not define either flag_masks or flag_values".format(name))
+            ret_val.append(valid_flags_var.to_result())
 
+            valid_meanings = self._check_flag_meanings(ds, name)
+            ret_val.append(valid_meanings)
+
+            # check flag_values
             if flag_values is not None:
-                # flag_values must be a list (array), not just a single value
-                result_name = '§3.5 Flags and flag attributes'
-                fvlist = Result(BaseCheck.HIGH, isinstance(flag_values,
-                                                           np.ndarray),
-                                result_name)
-                if not fvlist.value:
-                    fvlist.msgs = ['flag_values must be a list']
-                    # convert to an array so the remaining checks can be applied
-                    flag_values = np.array([flag_values])
-                ret_val.append(fvlist)
+                valid_values = self._check_flag_values(ds, name)
+                ret_val.append(valid_values)
 
-                # 1) flags_values attribute must have same type as variable to which it is attached
-                fvr = Result(BaseCheck.HIGH, flag_values.dtype == v.dtype,
-                             name='§3.5 Flags and flag attributes')
-                if not fvr.value:
-                    fvr.msgs = [("'flag_values' attribute for variable '%s'" +\
-                                " does not have same type " +\
-                                "(fv: %s, v: %s)")
-                                % (v._name, flag_values.dtype, v.dtype)]
-
-                ret_val.append(fvr)
-
-                # 2) if flag_values, must have flag_meanings
-                fmr = Result(BaseCheck.HIGH, flag_meanings is not None, name='§3.5 Flags and flag attributes')
-                if not fmr.value:
-                    fmr.msgs = ['flag_meanings must be present']
-
-                ret_val.append(fmr)
-
-                # 8) flag_values attribute values must be mutually exclusive
-                fvset = set(flag_values)
-                fvsr = Result(BaseCheck.HIGH, len(fvset) == len(flag_values), '§3.5 Flags and flag attributes')
-                if not fvsr.value:
-                    fvsr.msgs = ['repeated items in flag_values']
-
-                ret_val.append(fvsr)
-
-            # 3) type of flag_meanings is a string, blank separated list of words
-            if flag_meanings is not None:
-                fmt = Result(BaseCheck.HIGH, isinstance(flag_meanings, basestring), name='§3.5 Flags and flag attributes')
-                if not fmt.value:
-                    fmt.msgs = ['flag_meanings must be a string']
-
-                ret_val.append(fmt)
-
-                # split and check each word
-                rflags = re.compile("^[0-9A-Za-z_\-.+@]+$")
-                meanings = flag_meanings.split()
-                msgs = []
-                ok_count = 0
-
-                for fm in meanings:
-                    if rflags.match(fm) is not None:
-                        ok_count += 1
-                    else:
-                        msgs.append("flag_meaning %s of var %s is incorrectly named" % (fm, k))
-
-                ret_val.append(Result(BaseCheck.HIGH, (ok_count, len(meanings)), name='§3.5 Flags and flag attributes', msgs=msgs))
-
-                # now that we've split meanings up, check length vs values/masks
-
-                # 4) number of flag_values must equal number of meanings
-                if flag_values is not None:
-                    fvfmr = Result(BaseCheck.HIGH, len(flag_values) == len(meanings), '§3.5 Flags and flag attributes')
-                    if not fvfmr.value:
-                        fvfmr.msgs = ['flag_values length (%d) not equal to flag_meanings length (%d)' % (len(flag_values), len(meanings))]
-
-                    ret_val.append(fvfmr)
-
-                # 5) number of flag_masks must equal number of meanings
-                if flag_masks is not None:
-                    fmfmr = Result(BaseCheck.HIGH, len(flag_masks) == len(meanings), '§3.5 Flags and flag attributes')
-                    if not fmfmr.value:
-                        fmfmr.msgs = ['flag_masks length (%d) not equal to flag_meanings length (%d)' % (len(flag_masks), len(meanings))]
-
-                    ret_val.append(fmfmr)
-
-            # 6) flag_masks must have same type as var and those vars must be compatible with bit field expressions
+            # check flag_masks
             if flag_masks is not None:
-                msgs = []
-                ok_count = 0
+                valid_masks = self._check_flag_masks(ds, name)
+                ret_val.append(valid_masks)
 
-                same_type = flag_masks.dtype == v.dtype
-                type_ok = (np.issubdtype(v.dtype, int) or
-                           np.issubdtype(v.dtype, 'S') or
-                           np.issubdtype(v.dtype, 'b'))
-                if same_type:
-                    ok_count += 1
-                else:
-                    msgs.append("flag_masks is not same type as v (fm: %s, v: %s)" % (flag_masks.dtype, v.dtype))
-
-                if type_ok:
-                    ok_count += 1
-                else:
-                    msgs.append("variable not of appropriate type to have flag_masks (%s)" % (v.dtype))
-
-                ret_val.append(Result(BaseCheck.HIGH, (ok_count, 2), '§3.5 Flags and flag attributes', msgs=msgs))
-
-                # 7) the flag_masks attribute values must be non-zero
-                zeros_absent = 0 not in flag_masks
-
-                msgs = []
-                if not zeros_absent:
-                    msgs = ['flag_masks attribute values contains a zero']
-
-                ret_val.append(Result(BaseCheck.HIGH, zeros_absent,
-                                      '§3.5 Flags and flag attributes',
-                                      msgs=msgs))
-
-            # 9) when both defined, boolean AND of each entry in flag_values with corresponding entry in flag_masks
-            #    should equal the flags_value entry
             if flag_values is not None and flag_masks is not None:
                 allv = list(map(lambda a, b: a & b == a, list(zip(flag_values, flag_masks))))
 
-                allvr = Result(BaseCheck.MEDIUM, all(allv), '§3.5 Flags and flag attributes')
+                allvr = Result(BaseCheck.MEDIUM, all(allv), '§3.5 flags for {}'.format(name))
                 if not allvr.value:
                     allvr.msgs = ["flag masks and flag values combined don't equal flag value"]
 
                 ret_val.append(allvr)
 
         return ret_val
+
+    def _check_flag_values(self, ds, name):
+        '''
+        Checks a variable's flag_values attribute for compliance under CF
+
+        - flag_values exists as an array
+        - unique elements in flag_values
+        - flag_values si the same dtype as the variable
+        - flag_values is the same length as flag_meanings
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: Name of variable to check
+        '''
+        variable = ds.variables[name]
+
+        flag_values = variable.flag_values
+        flag_meanings = getattr(variable, 'flag_meanings', None)
+        valid_values = TestCtx(BaseCheck.HIGH, '§3.5 flag_values for {}'.format(name))
+
+        # flag_values must be a list of values, not a string or anything else
+        valid_values.assert_true(isinstance(flag_values, np.ndarray),
+                                 "flag_values must be an array of values not {}".format(type(flag_values)))
+
+        # We can't perform any more checks
+        if not isinstance(flag_values, np.ndarray):
+            return valid_values.to_result()
+
+        # the flag values must be independent, no repeating values
+        flag_set = set(flag_values)
+        valid_values.assert_true(len(flag_set) == len(flag_values),
+                                 "flag_values must be independent and can not be repeated")
+
+        # the data type for flag_values should be the same as the variable
+        valid_values.assert_true(variable.dtype == flag_values.dtype,
+                                 "flag_values ({}) must be the same data type as {} ({})"
+                                 "".format(flag_values.dtype, name, variable.dtype))
+
+        if isinstance(flag_meanings, basestring):
+            flag_meanings = flag_meanings.split()
+            valid_values.assert_true(len(flag_meanings) == len(flag_values),
+                                     "flag_meanings and flag_values should have the same number "
+                                     "of elements.")
+
+        return valid_values.to_result()
+
+    def _check_flag_masks(self, ds, name):
+        '''
+        Check a variable's flag_masks attribute for compliance under CF
+
+        - flag_masks exists as an array
+        - flag_masks is the same dtype as the variable
+        - variable's dtype can support bit-field
+        - flag_masks is the same length as flag_meanings
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: Variable name
+        '''
+        variable = ds.variables[name]
+
+        flag_masks = variable.flag_masks
+        flag_meanings = getattr(ds, 'flag_meanings', None)
+
+        valid_masks = TestCtx(BaseCheck.HIGH, '§3.5 flag_masks for {}'.format(name))
+
+        valid_masks.assert_true(isinstance(flag_masks, np.ndarray),
+                                "flag_masks must be an array of values not {}".format(type(flag_masks)))
+
+        if not isinstance(flag_masks, np.ndarray):
+            return valid_masks.to_result()
+
+        valid_masks.assert_true(variable.dtype == flag_masks.dtype,
+                                "flag_masks ({}) mustbe the same data type as {} ({})"
+                                "".format(flag_masks.dtype, name, variable.dtype))
+
+        type_ok = (np.issubdtype(variable.dtype, int) or
+                   np.issubdtype(variable.dtype, 'S') or
+                   np.issubdtype(variable.dtype, 'b'))
+
+        valid_masks.assert_true(type_ok, "{}'s data type must be capable of bit-field expression")
+
+        if isinstance(flag_meanings, basestring):
+            flag_meanings = flag_meanings.split()
+            valid_masks.assert_true(len(flag_meanings) == len(flag_masks),
+                                    "flag_meanings and flag_masks should have the same number "
+                                    "of elements.")
+
+        return valid_masks.to_result()
+
+    def _check_flag_meanings(self, ds, name):
+        '''
+        Check a variable's flag_meanings attribute for compliance under CF
+
+        - flag_meanings exists
+        - flag_meanings is a string
+        - flag_meanings elements are valid strings
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: Variable name
+        '''
+        variable = ds.variables[name]
+        flag_meanings = getattr(variable, 'flag_meanings', None)
+        valid_meanings = TestCtx(BaseCheck.HIGH, '§3.5 flag_meanings for {}'.format(name))
+
+        valid_meanings.assert_true(flag_meanings is not None,
+                                   "flag_meanings attribute is required for flag variables")
+
+        valid_meanings.assert_true(isinstance(flag_meanings, basestring),
+                                   "flag_meanings attribute must be a string")
+
+        # We can't perform any additional checks if it's not a string
+        if not isinstance(flag_meanings, basestring):
+            return valid_meanings.to_result()
+
+        valid_meanings.assert_true(len(flag_meanings) > 0,
+                                   "flag_meanings can't be empty")
+
+        flag_regx = re.compile("^[0-9A-Za-z_\-.+@]+$")
+        meanings = flag_meanings.split()
+        for meaning in meanings:
+            if flag_regx.match(meaning) is None:
+                valid_meanings.assert_true(False,
+                                           "flag_meanings attribute defined an illegal flag meaning "
+                                           "{}".format(meaning))
+        return valid_meanings.to_result()
 
     ###############################################################################
     #
