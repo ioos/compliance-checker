@@ -92,7 +92,7 @@ class TestCF(BaseTestCase):
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_data_types(dataset)
-        assert result.value == (5, 6)
+        assert result.value == (6, 7)
 
         dataset = self.load_dataset(STATIC_FILES['chap2'])
         result = self.cf.check_data_types(dataset)
@@ -161,7 +161,7 @@ class TestCF(BaseTestCase):
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_dimension_names(dataset)
-        assert result.value == (5, 6)
+        assert result.value == (6, 7)
 
         dataset = self.load_dataset(STATIC_FILES['chap2'])
         result = self.cf.check_dimension_names(dataset)
@@ -176,7 +176,11 @@ class TestCF(BaseTestCase):
         """
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_dimension_order(dataset)
-        assert result.value == (11, 12)
+        assert result.value == (5, 7)
+        assert result.msgs[0] == ("salinity's dimensions are not in the recommended order "
+                                  "T, X, Y, Z. They are Y, U, U")
+        assert result.msgs[1] == ("really_bad's dimensions are not in the recommended order "
+                                  "T, X, Y, Z. They are Y, U")
 
     def test_check_fill_value_outside_valid_range(self):
         """
@@ -276,7 +280,7 @@ class TestCF(BaseTestCase):
         result = result_dict[u'§3.3 standard_name modifier for salinity is valid']
         assert result.value == (0, 1)
 
-        assert len(result_dict) == 7
+        assert len(result_dict) == 8
 
     def test_check_ancillary_variables(self):
         '''
