@@ -163,6 +163,10 @@ class TestCF(BaseTestCase):
         result = self.cf.check_dimension_names(dataset)
         assert result.value == (5, 6)
 
+        dataset = self.load_dataset(STATIC_FILES['chap2'])
+        result = self.cf.check_dimension_names(dataset)
+        assert result.msgs[0] == u'no_reason has two or more dimensions named time'
+
     def test_check_dimension_order(self):
         """
         2.4 If any or all of the dimensions of a variable have the interpretations of "date or time" (T), "height or depth" (Z),
