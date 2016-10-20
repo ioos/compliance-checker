@@ -71,4 +71,5 @@ STATIC_FILES = {
     'bad_units'                            : get_filename('tests/data/bad_units.cdl'),
     'bad_reference'                        : get_filename('tests/data/bad_reference.cdl'),
     'coordinate_types'                     : get_filename('tests/data/coordinate_types.cdl'),
+    'chap2'                                : get_filename('tests/data/chap2.cdl'),
 }

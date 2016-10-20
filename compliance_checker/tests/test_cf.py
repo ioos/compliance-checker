@@ -88,11 +88,16 @@ class TestCF(BaseTestCase):
         """
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
         result = self.cf.check_data_types(dataset)
-        self.assertTrue(result.value)
+        assert result.value[0] == result.value[1]
 
-        dpair = self.load_dataset(STATIC_FILES['bad_data_type'])
-        result = self.cf.check_data_types(dpair)
+        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
+        result = self.cf.check_data_types(dataset)
         assert result.value == (5, 6)
+
+        dataset = self.load_dataset(STATIC_FILES['chap2'])
+        result = self.cf.check_data_types(dataset)
+        assert result.value == (6, 7)
+        assert 'The variable bad_dtype failed because the datatype is uint16' == result.msgs[0]
 
     def test_naming_conventions(self):
         '''

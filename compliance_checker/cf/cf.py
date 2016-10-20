@@ -396,7 +396,7 @@ class CFBaseCheck(BaseCheck):
                                'float32'
                                ]:
 
-                fails.append(('The variable %s failed because the datatype is %s' % (k, v.datatype)))
+                fails.append('The variable {} failed because the datatype is {}'.format(k, v.datatype))
         return Result(BaseCheck.HIGH, (total - len(fails), total), '§2.2 Valid netCDF data types', msgs=fails)
 
     def check_naming_conventions(self, ds):
