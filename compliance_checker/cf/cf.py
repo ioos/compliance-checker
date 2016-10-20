@@ -412,13 +412,14 @@ class CFBaseCheck(BaseCheck):
         fails = []
         total = len(ds.variables)
 
-        rname = re.compile("[A-Za-z][A-Za-z0-9_]*")
+        rname = re.compile("^[A-Za-z][A-Za-z0-9_]*$")
 
         for k, v in ds.variables.items():
             if not rname.match(k):
-                fails.append('Variable %s failed because it does not start with a letter, digit, or an underscore' % k)
+                fails.append('Variable {} should begin with a letter and be composed of letters, '
+                             'digits and underscores'.format(k))
 
-        return Result(BaseCheck.HIGH, (total - len(fails), total), '§2.3 Legal variable names', fails)
+        return Result(BaseCheck.MEDIUM, (total - len(fails), total), '§2.3 Legal variable names', fails)
 
     def check_names_unique(self, ds):
         '''

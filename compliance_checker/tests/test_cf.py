@@ -109,15 +109,17 @@ class TestCF(BaseTestCase):
         result = self.cf.check_naming_conventions(dataset)
         num_var = len(dataset.variables)
 
-        expected = (num_var,) * 2
-        self.assertEqual(result.value, expected)
+        assert result.value == (num_var, num_var)
 
         dataset = self.load_dataset(STATIC_FILES['bad'])
         result = self.cf.check_naming_conventions(dataset)
-        num_var = len(dataset.variables)
-        expected = (num_var - 1, num_var)
-        self.assertEqual(result.value, expected)
-        assert '_poor_dim' in result.msgs[0]
+        assert result.value == (14, 15)
+        assert u'Variable _poor_dim should begin with a letter and be composed of letters, digits and underscores' == result.msgs[0]
+
+        dataset = self.load_dataset(STATIC_FILES['chap2'])
+        result = self.cf.check_naming_conventions(dataset)
+        assert result.value == (6, 7)
+        assert u'Variable bad name should begin with a letter and be composed of letters, digits and underscores' == result.msgs[0]
 
     def test_check_names_unique(self):
         """
