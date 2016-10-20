@@ -106,20 +106,36 @@ class TestCF(BaseTestCase):
         Variable, dimension and attribute names should begin with a letter and be composed of letters, digits, and underscores.
         '''
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
-        result = self.cf.check_naming_conventions(dataset)
+        results = self.cf.check_naming_conventions(dataset)
         num_var = len(dataset.variables)
-
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§2.3 Naming Conventions for variables']
         assert result.value == (num_var, num_var)
 
         dataset = self.load_dataset(STATIC_FILES['bad'])
-        result = self.cf.check_naming_conventions(dataset)
+        results = self.cf.check_naming_conventions(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§2.3 Naming Conventions for variables']
         assert result.value == (14, 15)
-        assert u'Variable _poor_dim should begin with a letter and be composed of letters, digits and underscores' == result.msgs[0]
+        assert u'variable _poor_dim should begin with a letter and be composed of letters, digits, and underscores' == result.msgs[0]
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (52, 54)
 
         dataset = self.load_dataset(STATIC_FILES['chap2'])
-        result = self.cf.check_naming_conventions(dataset)
+        results = self.cf.check_naming_conventions(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§2.3 Naming Conventions for variables']
         assert result.value == (6, 7)
-        assert u'Variable bad name should begin with a letter and be composed of letters, digits and underscores' == result.msgs[0]
+        assert u'variable bad name should begin with a letter and be composed of letters, digits, and underscores' == result.msgs[0]
+
+        result = result_dict[u'§2.3 Naming Conventions for attributes']
+        assert result.msgs[0] == ('attribute no_reason:_bad_attr should begin with a letter and be '
+                                  'composed of letters, digits, and underscores')
+        assert result.msgs[1] == ('global attribute bad global should begin with a letter and be '
+                                  'composed of letters, digits, and underscores')
+
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (16, 19)
 
     def test_check_names_unique(self):
         """

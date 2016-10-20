@@ -409,17 +409,42 @@ class CFBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: Result
         '''
-        fails = []
-        total = len(ds.variables)
+        ret_val = []
+        variable_naming = TestCtx(BaseCheck.MEDIUM, '§2.3 Naming Conventions for variables')
+        dimension_naming = TestCtx(BaseCheck.MEDIUM, '§2.3 Naming Conventions for dimensions')
+        attribute_naming = TestCtx(BaseCheck.MEDIUM, '§2.3 Naming Conventions for attributes')
 
         rname = re.compile("^[A-Za-z][A-Za-z0-9_]*$")
 
-        for k, v in ds.variables.items():
-            if not rname.match(k):
-                fails.append('Variable {} should begin with a letter and be composed of letters, '
-                             'digits and underscores'.format(k))
+        for name, variable in ds.variables.items():
+            variable_naming.assert_true(rname.match(name) is not None,
+                                        "variable {} should begin with a letter and be composed of "
+                                        "letters, digits, and underscores".format(name))
 
-        return Result(BaseCheck.MEDIUM, (total - len(fails), total), '§2.3 Legal variable names', fails)
+            # Keep track of all the attributes, we'll need to check them
+            for attr in variable.ncattrs():
+                # ignore reserved attrs
+                if attr == '_FillValue':
+                    continue
+                attribute_naming.assert_true(rname.match(attr) is not None,
+                                             "attribute {}:{} should begin with a letter and be composed of "
+                                             "letters, digits, and underscores".format(name, attr))
+
+        ret_val.append(variable_naming.to_result())
+
+        for dimension in ds.dimensions:
+            dimension_naming.assert_true(rname.match(dimension) is not None,
+                                         "dimension {} should begin with a latter and be composed of "
+                                         "letters, digits, and underscores".format(dimension))
+        ret_val.append(dimension_naming.to_result())
+
+        for global_attr in ds.ncattrs():
+            attribute_naming.assert_true(rname.match(global_attr) is not None,
+                                         "global attribute {} should begin with a letter and be composed of "
+                                         "letters, digits, and underscores".format(global_attr))
+        ret_val.append(attribute_naming.to_result())
+
+        return ret_val
 
     def check_names_unique(self, ds):
         '''
