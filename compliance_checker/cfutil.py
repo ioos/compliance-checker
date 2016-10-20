@@ -374,6 +374,8 @@ def get_climatology_variable(ds):
 def get_flag_variables(ds):
     '''
     Returns a list of variables that are defined as flag variables
+
+    :param netCDF4.Dataset ds: An open netCDF4 Dataset
     '''
     flag_variables = []
     for name, ncvar in ds.variables.items():

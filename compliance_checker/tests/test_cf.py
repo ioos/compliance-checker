@@ -383,21 +383,26 @@ class TestCF(BaseTestCase):
         for each in result:
             self.assertTrue(each.value)
 
-    def test_check_coordinate_axis_attr(self):
+    def test_check_coordinate_types(self):
 
-        dataset = self.load_dataset(STATIC_FILES['2dim'])
-        result = self.cf.check_coordinate_axis_attr(dataset)
-        for each in result:
-            self.assertTrue(each.value)
+        dataset = self.load_dataset(STATIC_FILES['coordinate_types'])
+        results = self.cf.check_coordinate_types(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§4 time is a valid coordinate type']
+        assert result.value == (1, 1)
 
-        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        result = self.cf.check_coordinate_axis_attr(dataset)
-        for each in result:
-            if each.name[1] in ['time', 'latitude']:
-                self.assertTrue(each.value)
-            if each.name[1] in ['salinity']:
-                if each.name[2] not in ['does_not_depend_on_mult_coord_vars']:
-                    self.assertFalse(each.value)
+        result = result_dict[u'§4 time has suggested standard_name for coordinate type']
+        assert result.value == (2, 2)
+
+        result = result_dict[u'§4 lat has suggested mapping from axis to standard_name']
+        assert result.value == (2, 3)
+        assert result.msgs[0] == 'standard_name for axis X is suggested to be longitude. Is currently latitude'
+
+        result = result_dict[u'§4 temperature has suggested standard_name for coordinate type']
+        assert result.value == (1, 2)
+
+        scored, out_of, messages = self.get_results(results)
+        assert (scored, out_of) == (21, 25)
 
     def test_latitude(self):
         '''
