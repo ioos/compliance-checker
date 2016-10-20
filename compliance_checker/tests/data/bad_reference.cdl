@@ -1,0 +1,12 @@
+netcdf bad_reference {
+dimensions:
+    time = 2;
+variables:
+    double time(time);
+        time:standard_name = "time";
+        time:units = "seconds since 1970-01-01";
+    float temp(time);
+        temp:standard_name = "air_temperature";
+        temp:units = "deg_C";
+        temp:ancillary_variables="temp_qc"; // doesn't exist
+}

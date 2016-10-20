@@ -380,7 +380,7 @@ def get_flag_variables(ds):
         standard_name = getattr(ncvar, 'standard_name', None)
         if isinstance(standard_name, basestring) and 'status_flag' in standard_name:
             flag_variables.append(name)
-        if hasattr(ncvar, 'flag_meanings'):
+        elif hasattr(ncvar, 'flag_meanings'):
             flag_variables.append(name)
     return flag_variables
 

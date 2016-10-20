@@ -69,4 +69,5 @@ STATIC_FILES = {
     'climatology'                          : get_filename('tests/data/climatology.cdl'),
     'rotated_pole_grid'                    : get_filename('tests/data/rotated_pole_grid.cdl'),
     'bad_units'                            : get_filename('tests/data/bad_units.cdl'),
+    'bad_reference'                        : get_filename('tests/data/bad_reference.cdl'),
 }

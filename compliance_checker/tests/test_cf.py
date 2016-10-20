@@ -248,6 +248,24 @@ class TestCF(BaseTestCase):
 
         assert len(result_dict) == 7
 
+    def test_check_ancillary_variables(self):
+        '''
+        Test to ensure that ancillary variables are properly checked
+        '''
+
+        dataset = self.load_dataset(STATIC_FILES['rutgers'])
+        results = self.cf.check_ancillary_variables(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§3.4 Ancillary Variables defined by temperature']
+        assert result.value == (2, 2)
+
+        dataset = self.load_dataset(STATIC_FILES['bad_reference'])
+        results = self.cf.check_ancillary_variables(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§3.4 Ancillary Variables defined by temp']
+        assert result.value == (1, 2)
+        assert "temp_qc is not a variable in this dataset" == result.msgs[0]
+
     def test_download_standard_name_table(self):
         """
         Test that a user can download a specific standard name table
@@ -265,24 +283,30 @@ class TestCF(BaseTestCase):
         self.addCleanup(os.remove, location)
 
     def test_check_flags(self):
-        dataset = self.load_dataset(STATIC_FILES['self_referencing'])
+        dataset = self.load_dataset(STATIC_FILES['rutgers'])
         results = self.cf.check_flags(dataset)
-        scored, out_of, messages = self.get_results(results)
-
-        self.assertEqual(scored, 46)
-        self.assertEqual(out_of, 59)
-        self.assertEqual(messages.count('flag_values must be a list'), 6)
-        m_str = r"'flag_values' attribute for variable '\w+' does not have same type \(fv: [<>]?\w+, v: [<>]?\w+\)"
-        # make sure flag_values attribute where not equal to variable type
-        # has the proper message
-        self.assertEqual(sum(bool(re.match(m_str, msg)) for msg in messages), 7)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§3.5 time_qc is a valid flags variable']
+        assert result.value == (1, 1)
+        result = result_dict[u'§3.5 flag_meanings for time_qc']
+        assert result.value == (3, 3)
+        result = result_dict[u'§3.5 flag_values for time_qc']
+        assert result.value == (4, 4)
+        # lat(time);
+        #   lat:flag_meanings = "";
+        result = result_dict[u'§3.5 lat is a valid flags variable']
+        assert result.value == (0, 1)
+        result = result_dict[u'§3.5 flag_meanings for lat']
+        assert result.value == (2, 3)
+        assert "flag_meanings can't be empty" == result.msgs[0]
 
     def test_check_flag_masks(self):
         dataset = self.load_dataset(STATIC_FILES['ghrsst'])
         results = self.cf.check_flags(dataset)
         scored, out_of, messages = self.get_results(results)
-        self.assertEqual(scored, 32)
-        self.assertEqual(out_of, 32)
+        # This is an example of a perfect dataset for flags
+        assert scored > 0
+        assert scored == out_of
 
     def test_check_bad_units(self):
 
