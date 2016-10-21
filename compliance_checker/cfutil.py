@@ -248,16 +248,45 @@ def get_z_variable(nc):
 
 def get_lat_variable(nc):
     '''
-    Returns the variable for latitude
+    Returns the first variable matching latitude
 
     :param netcdf4.dataset nc: an open netcdf dataset object
     '''
-    if 'latitude' in nc.variables:
-        return 'latitude'
-    latitudes = nc.get_variables_by_attributes(standard_name="latitude")
+    latitudes = get_latitude_variables(nc)
     if latitudes:
-        return latitudes[0].name
+        return latitudes[0]
     return None
+
+
+def get_latitude_variables(nc):
+    '''
+    Returns a list of all variables matching definitions for latitude
+
+    :param netcdf4.dataset nc: an open netcdf dataset object
+    '''
+    allowed_lat_units = [
+        'degrees_north',
+        'degree_north',
+        'degree_n',
+        'degrees_n',
+        'degreen',
+        'degreesn'
+    ]
+    latitude_variables = []
+    # standard_name takes precedence
+    for variable in nc.get_variables_by_attributes(standard_name="latitude"):
+        latitude_variables.append(variable.name)
+
+    # Then axis
+    for variable in nc.get_variables_by_attributes(axis='Y'):
+        if variable.name not in latitude_variables:
+            latitude_variables.append(variable.name)
+
+    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in allowed_lat_units):
+        if variable.name not in latitude_variables:
+            latitude_variables.append(variable.name)
+
+    return latitude_variables
 
 
 def get_lon_variable(nc):
@@ -266,12 +295,41 @@ def get_lon_variable(nc):
 
     :param netCDF4.Dataset nc: netCDF dataset
     '''
-    if 'longitude' in nc.variables:
-        return 'longitude'
-    longitudes = nc.get_variables_by_attributes(standard_name="longitude")
+    longitudes = get_longitude_variables(nc)
     if longitudes:
-        return longitudes[0].name
+        return longitudes[0]
     return None
+
+
+def get_longitude_variables(nc):
+    '''
+    Returns a list of all variables matching definitions for longitude
+
+    :param netcdf4.dataset nc: an open netcdf dataset object
+    '''
+    allowed_lon_units = [
+        'degrees_east',
+        'degree_east',
+        'degree_e',
+        'degrees_e',
+        'degreee',
+        'degreese'
+    ]
+    longitude_variables = []
+    # standard_name takes precedence
+    for variable in nc.get_variables_by_attributes(standard_name="longitude"):
+        longitude_variables.append(variable.name)
+
+    # Then axis
+    for variable in nc.get_variables_by_attributes(axis='X'):
+        if variable.name not in longitude_variables:
+            longitude_variables.append(variable.name)
+
+    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in allowed_lon_units):
+        if variable.name not in longitude_variables:
+            longitude_variables.append(variable.name)
+
+    return longitude_variables
 
 
 def get_platform_variables(ds):
@@ -398,6 +456,18 @@ def get_grid_mapping_variables(ds):
         if ncvar.grid_mapping in ds.variables:
             grid_mapping_variables.append(ncvar.grid_mapping)
     return grid_mapping_variables
+
+
+def is_coordinate_variable(ds, variable):
+    '''
+    Returns True if the variable is a coordinate variable
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    :param str variable: Variable name
+    '''
+    if variable not in ds.variables:
+        return False
+    return ds.variables[variable].dimensinos == (variable,)
 
 
 def coordinate_dimension_matrix(nc):
@@ -1062,3 +1132,107 @@ def is_3d_regular_grid(nc, variable):
     if len(dims) == 4 and x in dims and y in dims and t in dims and z in dims:
         return True
     return False
+
+
+def is_mapped_grid(nc, variable):
+    '''
+    Returns true if the feature-type of variable corresponds to a mapped grid
+    type. Characterized by Appedix F of CF-1.6
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    :param str variable: name of the variable to check
+    '''
+    # x(j, i), y(j, i), z?, t?
+    # F(t?, z?, j, i)
+
+    # The important and really defining characteristic of mapped grids is that
+    # the true latitude and longitude coordinates are functions of (j,i) and
+    # that the geophysical variables are also functions of (j,i) in their
+    # dimensions.
+    dims = nc.variables[variable].dimensions
+    # For cases like ROMS, the coordinates are mapped using the coordinates attribute
+    variable_coordinates = getattr(nc.variables[variable], 'coordinates', '').split()
+
+    lons = get_longitude_variables(nc)
+    for lon in lons:
+        if lon in variable_coordinates:
+            break
+    else:
+        lon = get_lon_variable(nc)
+
+    if lon is None:
+        return False
+
+    lats = get_latitude_variables(nc)
+    for lat in lats:
+        if lat in variable_coordinates:
+            break
+    else:
+        lat = get_lat_variable(nc)
+
+    if lat is None:
+        return False
+
+    x = nc.variables[lon].dimensions
+    y = nc.variables[lat].dimensions
+
+    if len(x) != 2:
+        return False
+    if x != y:
+        return False
+
+    comma_dimension = ','.join(dims)
+    # Dimensions must be in the same order and the mapping coordinates i and j
+    # must be in the same order
+    if ','.join(x) not in comma_dimension:
+        return False
+
+    return True
+
+
+def guess_feature_type(nc, variable):
+    '''
+    Returns a string describing the feature type for this variable
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    :param str variable: name of the variable to check
+    '''
+    if is_point(nc, variable):
+        return 'point'
+    if is_timeseries(nc, variable):
+        return 'timeseries'
+    if is_multi_timeseries_orthogonal(nc, variable):
+        return 'multi-timeseries-orthogonal'
+    if is_multi_timeseries_incomplete(nc, variable):
+        return 'multi-timeseries-incomplete'
+    if is_cf_trajectory(nc, variable):
+        return 'cf-trajectory'
+    if is_single_trajectory(nc, variable):
+        return 'single-trajectory'
+    if is_profile_orthogonal(nc, variable):
+        return 'profile-orthogonal'
+    if is_profile_incomplete(nc, variable):
+        return 'profile-incomplete'
+    if is_timeseries_profile_single_station(nc, variable):
+        return 'timeseries-profile-single-station'
+    if is_timeseries_profile_multi_station(nc, variable):
+        return 'timeseries-profile-multi-station'
+    if is_timeseries_profile_single_ortho_time(nc, variable):
+        return 'timeseries-profile-single-ortho-time'
+    if is_timeseries_profile_multi_ortho_time(nc, variable):
+        return 'timeseries-profile-multi-ortho-time'
+    if is_timeseries_profile_ortho_depth(nc, variable):
+        return 'timeseries-profile-ortho-depth'
+    if is_timeseries_profile_incomplete(nc, variable):
+        return 'timeseries-profile-incomplete'
+    if is_trajectory_profile_orthogonal(nc, variable):
+        return 'trajectory-profile-orthogonal'
+    if is_trajectory_profile_incomplete(nc, variable):
+        return 'trajectory-profile-incomplete'
+    if is_2d_regular_grid(nc, variable):
+        return '2d-regular-grid'
+    if is_3d_regular_grid(nc, variable):
+        return '3d-regular-grid'
+    if is_mapped_grid(nc, variable):
+        return 'mapped-grid'
+
