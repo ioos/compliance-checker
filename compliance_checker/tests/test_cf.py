@@ -188,9 +188,15 @@ class TestCF(BaseTestCase):
         """
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        results = self.cf.check_fill_value_outside_valid_range(dataset)
-        assert sum((result.value for result in results)) == 1
-        assert len(results) == 2
+        result = self.cf.check_fill_value_outside_valid_range(dataset)
+        assert result.msgs[0] == ('salinity:_FillValue (1.0) should be outside the '
+                                  'range specified by valid_min/valid_max (-10, 10)')
+
+        dataset = self.load_dataset(STATIC_FILES['chap2'])
+        result = self.cf.check_fill_value_outside_valid_range(dataset)
+        assert result.value == (1, 2)
+        assert result.msgs[0] == ('wind_speed:_FillValue (12.0) should be outside the '
+                                  'range specified by valid_min/valid_max (0.0, 20.0)')
 
     def test_check_conventions_are_cf_16(self):
         """
