@@ -1487,19 +1487,76 @@ class CFBaseCheck(BaseCheck):
         providing the standard_name attribute with the value latitude, and/or
         the axis attribute with the value Y.
 
+        - Four checks per latitude variable
+        - (H) latitude has units attribute
+        - (M) latitude has an allowed units attribute
+        - (L) latitude uses degrees_north (if not in rotated pole)
+        - (M) latitude defines either standard_name or axis
+
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: list
         :return: List of results
         '''
         ret_val = []
 
-        recommended = 'degrees_north'
-        acceptable = ['degree_north', 'degree_N', 'degrees_N', 'degreeN', 'degreesN']
+        allowed_lat_units = [
+            'degrees_north',
+            'degree_north',
+            'degree_n',
+            'degrees_n',
+            'degreen',
+            'degreesn'
+        ]
 
-        for k, v in ds.variables.items():
-            if k == 'latitude' or getattr(v, 'standard_name', None) == 'latitude':
-                results = self._coord_has_units(k, 'latitude', v, recommended, acceptable)
-                ret_val.extend(results)
+        # Determine the grid mappings in this dataset
+        grid_mapping = []
+        grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
+        for name in grid_mapping_variables:
+            variable = ds.variables[name]
+            grid_mapping_name = getattr(variable, 'grid_mapping_name', None)
+            if grid_mapping_name:
+                grid_mapping.append(grid_mapping_name)
+
+        latitude_variables = cfutil.get_latitude_variables(ds)
+        for latitude in latitude_variables:
+            variable = ds.variables[latitude]
+            units = getattr(variable, 'units', None)
+            units_is_string = isinstance(units, basestring)
+            standard_name = getattr(variable, 'standard_name', None)
+            axis = getattr(variable, 'axis', None)
+
+            # Check that latitude defines units
+            valid_latitude = TestCtx(BaseCheck.HIGH, '§4.1 Latitude variable {} has required units attribute'.format(latitude))
+            valid_latitude.assert_true(units is not None,
+                                       "latitude variable '{}' must define units".format(latitude))
+            ret_val.append(valid_latitude.to_result())
+
+            # Check that latitude uses allowed units
+            allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Latitude variable {} uses recommended units'.format(latitude))
+            if 'rotated_latitude_longitude' in grid_mapping and standard_name == 'grid_latitude':
+                allowed_units.assert_true(units == 'degrees',
+                                          "latitude variable '{}' should use degrees for units in rotated pole grid"
+                                          "".format(latitude))
+            else:
+                allowed_units.assert_true(units_is_string and units.lower() in allowed_lat_units,
+                                          "latitude variable '{}' should define valid units for latitude"
+                                          "".format(latitude))
+            ret_val.append(allowed_units.to_result())
+
+            # Check that latitude uses degrees_north
+            recommended_units = TestCtx(BaseCheck.LOW, '§4.1 Latitude variable {} defines units using degrees_north'.format(latitude))
+            if standard_name == 'latitude':
+                recommended_units.assert_true(units == 'degrees_north',
+                                              "CF recommends latitude variable '{}' to use units degrees_north"
+                                              "".format(latitude))
+                ret_val.append(recommended_units.to_result())
+
+            # Check that latitude defines either standard_name or axis
+            definition = TestCtx(BaseCheck.MEDIUM, '§4.1 Latitude variable {} defines either standard_name or axis'.format(latitude))
+            definition.assert_true(standard_name == 'latitude' or axis == 'Y',
+                                   "latitude variable '{}' should define standard_name='latitude' or axis='Y'"
+                                   "".format(latitude))
+            ret_val.append(definition.to_result())
 
         return ret_val
 
