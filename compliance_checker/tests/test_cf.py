@@ -225,13 +225,12 @@ class TestCF(BaseTestCase):
         # check for pass
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
         result = self.cf.check_convention_globals(dataset)
-        for each in result:
-            self.assertTrue(each.value)
+        assert result.value == (2, 2)
         # check if it doesn't exist that we pass
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_convention_globals(dataset)
-        for each in result:
-            self.assertTrue(each.value)
+        assert result.value == (0, 2)
+        assert result.msgs[0] == 'global attribute title should exist and be a non-empty string'
 
     def test_check_convention_possibly_var_attrs(self):
         """

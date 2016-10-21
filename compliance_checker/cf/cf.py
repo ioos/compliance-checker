@@ -657,7 +657,6 @@ class CFBaseCheck(BaseCheck):
             reasoning = ['Conventions field is not present']
         return Result(BaseCheck.MEDIUM, valid, '§2.6.1 Global Attribute Conventions includes CF-1.6', msgs=reasoning)
 
-    @score_group('§2.6.2 Convention Attributes')
     def check_convention_globals(self, ds):
         '''
         Check the common global attributes are strings if they exist.
@@ -670,13 +669,17 @@ class CFBaseCheck(BaseCheck):
         :return: List of results
         '''
         attrs = ['title', 'history']
-        ret = []
 
-        for a in attrs:
-            if hasattr(ds, a):
-                ret.append(Result(BaseCheck.HIGH, isinstance(getattr(ds, a), basestring), ('§2.6.2 Title/history global attributes', a)))
+        valid_globals = TestCtx(BaseCheck.MEDIUM, '§2.6.2 Recommended Global Attributes')
 
-        return ret
+        for attr in attrs:
+            dataset_attr = getattr(ds, attr, None)
+            is_string = isinstance(dataset_attr, basestring)
+            valid_globals.assert_true(is_string and len(dataset_attr),
+                                      "global attribute {} should exist and be a non-empty string"
+                                      "".format(attr))
+
+        return valid_globals.to_result()
 
     @score_group('§2.6.2 Convention Attributes')
     def check_convention_possibly_var_attrs(self, ds):
