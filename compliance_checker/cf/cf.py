@@ -600,30 +600,37 @@ class CFBaseCheck(BaseCheck):
         :rtype: list
         :return: List of results
         '''
-        ret = []
+        valid_fill_range = TestCtx(BaseCheck.MEDIUM,
+                                   '§2.5.1 Fill Values should be outside the range specified by valid_range')
 
-        for k, v in ds.variables.items():
-            if hasattr(v, '_FillValue'):
-                attrs = v.ncattrs()
+        for name, variable in ds.variables.items():
+            # If the variable doesn't have a defined _FillValue don't check it.
 
-                if 'valid_range' in attrs:
-                    rmin, rmax = v.valid_range
-                    spec_by = 'valid_range'
-                elif 'valid_min' in attrs and 'valid_max' in attrs:
-                    rmin = v.valid_min
-                    rmax = v.valid_max
-                    spec_by = 'valid_min/valid_max'
-                else:
-                    continue
+            if not hasattr(variable, '_FillValue'):
+                continue
 
-                valid = (v._FillValue < rmin or v._FillValue > rmax)
-                reasoning = []
-                if not valid:
-                    reasoning = ["%s must not be in valid range (%s to %s) as specified by %s" % (v._FillValue, rmin, rmax, spec_by)]
+            fill_value = variable._FillValue
 
-                ret.append(Result(BaseCheck.HIGH, valid, ('§2.5.1 _FillValue outside of valid range', k), msgs=reasoning))
+            attrs = variable.ncattrs()
 
-        return ret
+            if 'valid_range' in attrs:
+                rmin, rmax = variable.valid_range
+                spec_by = 'valid_range'
+
+            elif 'valid_min' in attrs and 'valid_max' in attrs:
+                rmin = variable.valid_min
+                rmax = variable.valid_max
+                spec_by = 'valid_min/valid_max'
+            else:
+                continue
+
+            valid = (fill_value < rmin or fill_value > rmax)
+
+            valid_fill_range.assert_true(valid,
+                                         "{}:_FillValue ({}) should be outside the range specified by {} ({}, {})"
+                                         "".format(name, fill_value, spec_by, rmin, rmax))
+
+        return valid_fill_range.to_result()
 
     def check_conventions_are_cf_16(self, ds):
         '''
