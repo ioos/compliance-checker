@@ -1573,19 +1573,75 @@ class CFBaseCheck(BaseCheck):
         providing the standard_name attribute with the value longitude, and/or
         the axis attribute with the value X.
 
+        - Four checks per longitude variable
+        - (H) longitude has units attribute
+        - (M) longitude has an allowed units attribute
+        - (L) longitude uses degrees_east (if not in rotated pole)
+        - (M) longitude defines either standard_name or axis
+
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: list
         :return: List of results
         '''
         ret_val = []
+        allowed_lon_units = [
+            'degrees_east',
+            'degree_east',
+            'degree_e',
+            'degrees_e',
+            'degreee',
+            'degreese'
+        ]
 
-        recommended = 'degrees_east'
-        acceptable = ['degree_east', 'degree_E', 'degrees_E', 'degreeE', 'degreesE']
+        # Determine the grid mappings in this dataset
+        grid_mapping = []
+        grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
+        for name in grid_mapping_variables:
+            variable = ds.variables[name]
+            grid_mapping_name = getattr(variable, 'grid_mapping_name', None)
+            if grid_mapping_name:
+                grid_mapping.append(grid_mapping_name)
 
-        for k, v in ds.variables.items():
-            if k == 'longitude' or getattr(v, 'standard_name', None) == 'longitude':
-                results = self._coord_has_units(k, 'longitude', v, recommended, acceptable)
-                ret_val.extend(results)
+        longitude_variables = cfutil.get_longitude_variables(ds)
+        for longitude in longitude_variables:
+            variable = ds.variables[longitude]
+            units = getattr(variable, 'units', None)
+            units_is_string = isinstance(units, basestring)
+            standard_name = getattr(variable, 'standard_name', None)
+            axis = getattr(variable, 'axis', None)
+
+            # Check that longitude defines units
+            valid_longitude = TestCtx(BaseCheck.HIGH, '§4.1 Longitude variable {} has required units attribute'.format(longitude))
+            valid_longitude.assert_true(units is not None,
+                                        "longitude variable '{}' must define units".format(longitude))
+            ret_val.append(valid_longitude.to_result())
+
+            # Check that longitude uses allowed units
+            allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Longitude variable {} uses recommended units'.format(longitude))
+            if 'rotated_latitude_longitude' in grid_mapping and standard_name == 'grid_longitude':
+                allowed_units.assert_true(units == 'degrees',
+                                          "longitude variable '{}' should use degrees for units in rotated pole grid"
+                                          "".format(longitude))
+            else:
+                allowed_units.assert_true(units_is_string and units.lower() in allowed_lon_units,
+                                          "longitude variable '{}' should define valid units for longitude"
+                                          "".format(longitude))
+            ret_val.append(allowed_units.to_result())
+
+            # Check that longitude uses degrees_east
+            recommended_units = TestCtx(BaseCheck.LOW, '§4.1 Longitude variable {} defines units using degrees_east'.format(longitude))
+            if standard_name == 'longitude':
+                recommended_units.assert_true(units == 'degrees_east',
+                                              "CF recommends longitude variable '{}' to use units degrees_east"
+                                              "".format(longitude))
+                ret_val.append(recommended_units.to_result())
+
+            # Check that longitude defines either standard_name or axis
+            definition = TestCtx(BaseCheck.MEDIUM, '§4.1 Longitude variable {} defines either standard_name or axis'.format(longitude))
+            definition.assert_true(standard_name == 'longitude' or axis == 'Y',
+                                   "longitude variable '{}' should define standard_name='longitude' or axis='X'"
+                                   "".format(longitude))
+            ret_val.append(definition.to_result())
 
         return ret_val
 
