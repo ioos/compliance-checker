@@ -209,3 +209,9 @@ class TestFeatureDetection(TestCase):
 
             aux_coord_vards = util.get_auxiliary_coordinate_variables(nc)
             assert set(['lat', 'lon']) == set(aux_coord_vards)
+
+    def test_rotated_pole_grid(self):
+        with Dataset(resources.STATIC_FILES['rotated_pole_grid']) as nc:
+            latitudes = util.get_latitude_variables(nc)
+            assert latitudes == ['lat', 'rlat']
+            assert util.is_mapped_grid(nc, 'temperature') is True

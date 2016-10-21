@@ -651,13 +651,12 @@ class CFBaseCheck(BaseCheck):
                 reasoning = []
             else:
                 valid = False
-                reasoning = ['Conventions field is not "CF-1.6"']
+                reasoning = ['Conventions global attribute does not contain "CF-1.6"']
         else:
             valid = False
             reasoning = ['Conventions field is not present']
-        return Result(BaseCheck.HIGH, valid, '§2.6.1 Global Attribute Conventions includes CF-1.6', msgs=reasoning)
+        return Result(BaseCheck.MEDIUM, valid, '§2.6.1 Global Attribute Conventions includes CF-1.6', msgs=reasoning)
 
-    @score_group('§2.6.2 Convention Attributes')
     def check_convention_globals(self, ds):
         '''
         Check the common global attributes are strings if they exist.
@@ -670,15 +669,18 @@ class CFBaseCheck(BaseCheck):
         :return: List of results
         '''
         attrs = ['title', 'history']
-        ret = []
 
-        for a in attrs:
-            if hasattr(ds, a):
-                ret.append(Result(BaseCheck.HIGH, isinstance(getattr(ds, a), basestring), ('§2.6.2 Title/history global attributes', a)))
+        valid_globals = TestCtx(BaseCheck.MEDIUM, '§2.6.2 Recommended Global Attributes')
 
-        return ret
+        for attr in attrs:
+            dataset_attr = getattr(ds, attr, None)
+            is_string = isinstance(dataset_attr, basestring)
+            valid_globals.assert_true(is_string and len(dataset_attr),
+                                      "global attribute {} should exist and be a non-empty string"
+                                      "".format(attr))
 
-    @score_group('§2.6.2 Convention Attributes')
+        return valid_globals.to_result()
+
     def check_convention_possibly_var_attrs(self, ds):
         """
         Check variable and global attributes are strings for recommended attributes under CF §2.6.2
@@ -689,18 +691,44 @@ class CFBaseCheck(BaseCheck):
         precedence.  Must be strings.
         """
         attrs = ['institution', 'source', 'references', 'comment']
-        ret = []
 
-        # check attrs on global ds
+        valid_attributes = TestCtx(BaseCheck.MEDIUM, '§2.6.2 Recommended Attributes')
 
-        # can't predetermine total - we only report attrs we find
-        for k, v in ds.variables.items():
-            vattrs = v.ncattrs()
-            for a in attrs:
-                if a in vattrs:
-                    ret.append(Result(BaseCheck.HIGH, isinstance(getattr(v, a), basestring), ('§2.6.2 Description of file contents', a)))
+        attr_bin = set()
+        # If the attribute is defined for any variable, check it and mark in
+        # the set that we've seen it at least once.
+        for name, variable in ds.variables.items():
+            for attribute in variable.ncattrs():
+                varattr = getattr(variable, attribute)
+                if attribute in attrs:
+                    is_string = isinstance(varattr, basestring)
+                    valid_attributes.assert_true(is_string and len(varattr) > 0,
+                                                 "{}:{} should be a non-empty string"
+                                                 "".format(name, attribute))
+                    attr_bin.add(attribute)
 
-        return ret
+        # Check all the global attributes too and mark if we've seen them
+        for attribute in ds.ncattrs():
+            dsattr = getattr(ds, attribute)
+            if attribute in attrs:
+                is_string = isinstance(dsattr, basestring)
+                valid_attributes.assert_true(is_string and len(dsattr) > 0,
+                                             "{} global attribute should be a non-empty string"
+                                             "".format(attribute))
+                attr_bin.add(attribute)
+        # Make sure we've seen each attribute at least once.
+
+        valid_attributes.assert_true('institution' in attr_bin,
+                                     "institution should be defined")
+        valid_attributes.assert_true('source' in attr_bin,
+                                     "source should be defined")
+        valid_attributes.assert_true('references' in attr_bin,
+                                     "references should be defined")
+
+        # comment is optional and only needs to be a string and non-empty if it
+        # exists.
+
+        return valid_attributes.to_result()
 
     ###############################################################################
     #

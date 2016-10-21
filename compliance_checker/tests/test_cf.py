@@ -216,6 +216,7 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['conv_bad'])
         result = self.cf.check_conventions_are_cf_16(dataset)
         self.assertFalse(result.value)
+        assert result.msgs[0] == 'Conventions global attribute does not contain "CF-1.6"'
 
     def test_check_convention_globals(self):
         """
@@ -224,13 +225,12 @@ class TestCF(BaseTestCase):
         # check for pass
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
         result = self.cf.check_convention_globals(dataset)
-        for each in result:
-            self.assertTrue(each.value)
+        assert result.value == (2, 2)
         # check if it doesn't exist that we pass
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_convention_globals(dataset)
-        for each in result:
-            self.assertTrue(each.value)
+        assert result.value == (0, 2)
+        assert result.msgs[0] == 'global attribute title should exist and be a non-empty string'
 
     def test_check_convention_possibly_var_attrs(self):
         """
@@ -249,13 +249,23 @@ class TestCF(BaseTestCase):
         """
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
         result = self.cf.check_convention_possibly_var_attrs(dataset)
-        for each in result:
-            self.assertTrue(each.value)
+        # 10x comment attrs
+        # 1x institution
+        # 1x source
+        # 1x EMPTY references
+        assert result.value == (15, 16)
+        assert result.msgs[0] == "references global attribute should be a non-empty string"
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_convention_possibly_var_attrs(dataset)
-        for each in result:
-            self.assertFalse(each.value)
+        # no references
+        # institution is a 10L
+        # no source
+        # comments doment matter unless they're empty
+        assert result.value == (1, 4)
+        assert result.msgs[0] == 'salinity:institution should be a non-empty string'
+        assert result.msgs[1] == 'source should be defined'
+        assert result.msgs[2] == 'references should be defined'
 
     def test_check_standard_name(self):
         """
