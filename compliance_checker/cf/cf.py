@@ -695,6 +695,8 @@ class CFBaseCheck(BaseCheck):
         valid_attributes = TestCtx(BaseCheck.MEDIUM, '§2.6.2 Recommended Attributes')
 
         attr_bin = set()
+        # If the attribute is defined for any variable, check it and mark in
+        # the set that we've seen it at least once.
         for name, variable in ds.variables.items():
             for attribute in variable.ncattrs():
                 varattr = getattr(variable, attribute)
@@ -705,6 +707,7 @@ class CFBaseCheck(BaseCheck):
                                                  "".format(name, attribute))
                     attr_bin.add(attribute)
 
+        # Check all the global attributes too and mark if we've seen them
         for attribute in ds.ncattrs():
             dsattr = getattr(ds, attribute)
             if attribute in attrs:
@@ -713,6 +716,8 @@ class CFBaseCheck(BaseCheck):
                                              "{} global attribute should be a non-empty string"
                                              "".format(attribute))
                 attr_bin.add(attribute)
+        # Make sure we've seen each attribute at least once.
+
         valid_attributes.assert_true('institution' in attr_bin,
                                      "institution should be defined")
         valid_attributes.assert_true('source' in attr_bin,
