@@ -216,6 +216,7 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['conv_bad'])
         result = self.cf.check_conventions_are_cf_16(dataset)
         self.assertFalse(result.value)
+        assert result.msgs[0] == 'Conventions global attribute does not contain "CF-1.6"'
 
     def test_check_convention_globals(self):
         """

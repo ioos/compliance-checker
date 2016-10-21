@@ -651,11 +651,11 @@ class CFBaseCheck(BaseCheck):
                 reasoning = []
             else:
                 valid = False
-                reasoning = ['Conventions field is not "CF-1.6"']
+                reasoning = ['Conventions global attribute does not contain "CF-1.6"']
         else:
             valid = False
             reasoning = ['Conventions field is not present']
-        return Result(BaseCheck.HIGH, valid, '§2.6.1 Global Attribute Conventions includes CF-1.6', msgs=reasoning)
+        return Result(BaseCheck.MEDIUM, valid, '§2.6.1 Global Attribute Conventions includes CF-1.6', msgs=reasoning)
 
     @score_group('§2.6.2 Convention Attributes')
     def check_convention_globals(self, ds):
