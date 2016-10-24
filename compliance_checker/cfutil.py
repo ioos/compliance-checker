@@ -3,6 +3,7 @@
 '''
 compliance_checker/cfutil.py
 '''
+from cf_units import Unit
 from pkg_resources import resource_filename
 import csv
 import json
@@ -244,6 +245,43 @@ def get_z_variable(nc):
     if z:
         return z[0].name
     return
+
+
+def get_z_variables(nc):
+    '''
+    Returns a list of all variables matching definitions for Z
+
+    :param netcdf4.dataset nc: an open netcdf dataset object
+    '''
+    z_variables = []
+    # Vertical coordinates will be identifiable by units of pressure or the
+    # presence of the positive attribute with a value of up/down
+
+    # optionally, the vertical type may be indicated by providing the
+    # standard_name attribute or axis='Z'
+
+    total_coords = get_coordinate_variables(nc) + get_auxiliary_coordinate_variables(nc)
+    for coord_name in total_coords:
+        coord_var = nc.variables[coord_name]
+        units = getattr(coord_var, 'units', None)
+        positive = getattr(coord_var, 'positive', None)
+        standard_name = getattr(coord_var, 'standard_name', None)
+        axis = getattr(coord_var, 'axis', None)
+        # If there are no units, we can't identify it as a vertical coordinate
+        # by checking pressure or positive
+        if units is not None:
+            if units_convertible(units, 'bar'):
+                z_variables.append(coord_name)
+            elif isinstance(positive, basestring):
+                if positive.lower() in ['up', 'down']:
+                    z_variables.append(coord_name)
+        # if axis='Z' we're good
+        if coord_name not in z_variables and axis == 'Z':
+            z_variables.append(coord_name)
+        if coord_name not in z_variables and standard_name in ('depth', 'height', 'altitude'):
+            z_variables.append(coord_name)
+
+    return z_variables
 
 
 def get_lat_variable(nc):
@@ -1236,3 +1274,17 @@ def guess_feature_type(nc, variable):
     if is_mapped_grid(nc, variable):
         return 'mapped-grid'
 
+def units_convertible(units1, units2, reftimeistime=True):
+    """
+    Return True if a Unit representing the string units1 can be converted
+    to a Unit representing the string units2, else False.
+
+    :param str units1: A string representing the units
+    :param str units2: A string representing the units
+    """
+    try:
+        u1 = Unit(units1)
+        u2 = Unit(units2)
+    except ValueError:
+        return False
+    return u1.is_convertible(u2)

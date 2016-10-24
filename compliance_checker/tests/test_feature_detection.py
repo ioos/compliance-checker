@@ -215,3 +215,8 @@ class TestFeatureDetection(TestCase):
             latitudes = util.get_latitude_variables(nc)
             assert latitudes == ['lat', 'rlat']
             assert util.is_mapped_grid(nc, 'temperature') is True
+
+    def test_vertical_coords(self):
+        with Dataset(resources.STATIC_FILES['vertical_coords']) as nc:
+            vertical = util.get_z_variables(nc)
+            assert vertical == ['height']
