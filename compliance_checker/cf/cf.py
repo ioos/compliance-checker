@@ -1401,43 +1401,6 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
-    def _coord_has_units(self, name, coordinate, var, recommended, acceptable):
-        '''
-        Returns a list of results that check if the coordinate variable has
-        units and if they are valid for the given coordinate according to CF
-        recommendations.
-
-        :param str name: Name of the coordinate variable
-        :param str coordinate: 'X', 'Y', 'Z', or 'T'
-        :param var: netCDF variable instance for the coordinate
-        :param str recommended: The recommended units for the coordinate variable
-        :param list acceptable: A list of acceptable units that coordinate is allowed to be
-        :rtype: list
-        :return: List of results
-        '''
-        ret_val = []
-        has_units = hasattr(var, 'units')
-        result = Result(BaseCheck.HIGH, has_units, '§4 Coordinate Variable %s contains valid attributes' % coordinate)
-        ret_val.append(result)
-
-        # 0 - does not have units
-        # 1 - incorrect units
-        # 2 - also acceptable units
-        # 3 - recommend units
-        if not has_units:
-            result = Result(BaseCheck.MEDIUM, (0, 3), '§4.1 Coordinates representing %s' % coordinate, ['%s does not have units attribute' % name])
-            ret_val.append(result)
-        elif has_units and var.units == recommended:
-            result = Result(BaseCheck.MEDIUM, (3, 3), '§4.1 Coordinates representing %s' % coordinate)
-            ret_val.append(result)
-        elif has_units and var.units in acceptable:
-            result = Result(BaseCheck.MEDIUM, (2, 3), '§4.1 Coordinates representing %s' % coordinate, ['%s units are acceptable, but not recommended' % name])
-            ret_val.append(result)
-        else:
-            result = Result(BaseCheck.MEDIUM, (1, 3), '§4.1 Coordinates representing %s' % coordinate, ['%s does not have units attribute' % name])
-            ret_val.append(result)
-        return ret_val
-
     def check_latitude(self, ds):
         '''
         Check variable(s) that define latitude and are defined correctly according to CF.
