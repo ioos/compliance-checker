@@ -51,42 +51,6 @@ def guess_dim_type(dimension):
     return None
 
 
-def guess_coord_type(units, positive=None):
-    """
-    Guesses coordinate variable type (X/Y/Z/T) from units and positive attrs
-    """
-    coord_types = {'X': ['degrees_east', 'degree_east', 'degrees_E', 'degree_E', 'degreesE', 'degreeE'],
-                   'Y': ['degrees_north', 'degree_north', 'degrees_N', 'degree_N', 'degreesN', 'degreeN']}
-
-    deprecated = ['level', 'layer', 'sigma_level']
-
-    if not units or not isinstance(units, str) or not (units_known(units) or units in deprecated):
-        return None
-
-    if isinstance(positive, str) and positive.lower() in ['up', 'down']:
-        # only Z if units without positive deos not result in something else
-        if guess_coord_type(units, None) in [None, 'Z']:
-            return 'Z'
-        else:
-            # they differ, then we can't conclude
-            return None
-
-    if units in deprecated or units_convertible(units, 'hPa', reftimeistime=True):
-        return 'Z'
-
-    if positive:
-        return None
-
-    for ctype, unitsposs in coord_types.items():
-        if units in unitsposs:
-            return ctype
-
-    if units_convertible(units, 'days since 1970-01-01', reftimeistime=False):
-        return 'T'
-
-    return None
-
-
 def is_variable(name, var):
     dims = var.dimensions
     if (name,) == dims:
@@ -1435,43 +1399,6 @@ class CFBaseCheck(BaseCheck):
 
         # @TODO: Additional verifiable requirements
 
-        return ret_val
-
-    def _coord_has_units(self, name, coordinate, var, recommended, acceptable):
-        '''
-        Returns a list of results that check if the coordinate variable has
-        units and if they are valid for the given coordinate according to CF
-        recommendations.
-
-        :param str name: Name of the coordinate variable
-        :param str coordinate: 'X', 'Y', 'Z', or 'T'
-        :param var: netCDF variable instance for the coordinate
-        :param str recommended: The recommended units for the coordinate variable
-        :param list acceptable: A list of acceptable units that coordinate is allowed to be
-        :rtype: list
-        :return: List of results
-        '''
-        ret_val = []
-        has_units = hasattr(var, 'units')
-        result = Result(BaseCheck.HIGH, has_units, '§4 Coordinate Variable %s contains valid attributes' % coordinate)
-        ret_val.append(result)
-
-        # 0 - does not have units
-        # 1 - incorrect units
-        # 2 - also acceptable units
-        # 3 - recommend units
-        if not has_units:
-            result = Result(BaseCheck.MEDIUM, (0, 3), '§4.1 Coordinates representing %s' % coordinate, ['%s does not have units attribute' % name])
-            ret_val.append(result)
-        elif has_units and var.units == recommended:
-            result = Result(BaseCheck.MEDIUM, (3, 3), '§4.1 Coordinates representing %s' % coordinate)
-            ret_val.append(result)
-        elif has_units and var.units in acceptable:
-            result = Result(BaseCheck.MEDIUM, (2, 3), '§4.1 Coordinates representing %s' % coordinate, ['%s units are acceptable, but not recommended' % name])
-            ret_val.append(result)
-        else:
-            result = Result(BaseCheck.MEDIUM, (1, 3), '§4.1 Coordinates representing %s' % coordinate, ['%s does not have units attribute' % name])
-            ret_val.append(result)
         return ret_val
 
     def check_latitude(self, ds):
