@@ -3332,10 +3332,11 @@ class CFBaseCheck(BaseCheck):
         instance variable should also contain missing values.
         """
 
+        # Data intensive check; consider flagging as optional
         ret_val = []
 
-        name_list = list(ds.variables.keys())
-        dim_list = list(ds.dimensions.keys())
+        name_list = set(ds.variables.keys())
+        dim_list = set(ds.dimensions.keys())
 
         for name, var in ds.variables.items():
             if hasattr(var, 'coordinates'):
@@ -3345,62 +3346,68 @@ class CFBaseCheck(BaseCheck):
                 valid = False
                 aux_valid = False
 
+                # check if _FillValue attribute present attribute
                 if hasattr(var, '_FillValue'):
+                    dim_index_dict[name] = dict()
+                    aux_index_dict[name] = dict()
                     for coordinate in getattr(var, 'coordinates', '').split(" "):
-                        indices = []
-                        if coordinate in name_list and coordinate not in dim_list:
-                            try:
-                                indices = np.where(ds.variables[coordinate] == var._FillValue).tolist()
-                            except:
-                                indices = np.where(ds.variables[coordinate] == var._FillValue)[0].tolist()
+                        indices = np.where(ds.variables[coordinate][:].mask)[0]
 
-                            dim_index_dict[name + '-' + coordinate] = indices
-                            aux_index_dict[name + '-' + coordinate] = indices
+                        # if the coordinate name is in the list of variables,
+                        # but has no associated dimension name
+                        if coordinate in name_list and \
+                           coordinate not in dim_list:
 
+                            dim_index_dict[name][coordinate] = indices
+                            aux_index_dict[name][coordinate] = indices
+
+                        # if this is a coordinate variable, i.e. a variable
+                        # with the same variable and coordinate name
                         elif coordinate in name_list and coordinate in dim_list:
-                            try:
-                                indices = np.where(ds.variables[coordinate] == var._FillValue).tolist()
-                            except:
-                                indices = np.where(ds.variables[coordinate] == var._FillValue)[0].tolist()
-                            dim_index_dict[name + '-' + coordinate] = indices
+                            dim_index_dict[name][coordinate] = indices
                         else:
-                            dim_index_dict[name + '-' + coordinate] = []
-                # Check to see that all coordinate variable mising data locations are the same
-                aux_index_list = []
-                for each in aux_index_dict:
-                    aux_index_list.append(aux_index_dict[each])
-                if aux_index_list != []:
-                    aux_valid = all(x == aux_index_list[0] for x in aux_index_list)
-                else:
-                    aux_valid = True
+                            dim_index_dict[name][coordinate] = np.array()
+                # Check to see that all coordinate variable mising data
+                # locations are the same
 
-                # Check to see that all auxilliary coordinate variable missing data appears in the coordinate variables
-                dim_index_list = []
-                for each in dim_index_dict:
-                    dim_index_list.append(dim_index_dict[each])
-                if dim_index_list != []:
-                    valid = all(x == dim_index_list[0] for x in dim_index_list)
-                else:
+                # could be refactored to make much more efficient
+                def check_index_dicts(idx_dict):
+                    """
+                    Checks that all indices align and are of the same value
+                    """
+                    # Base case: In the even there are no arrays to check then
+                    # automatically valid
                     valid = True
+                    idx_gen = (d[k] for d in dim_index_dict.itervalues()
+                               for k in d if d[k].size > 0)
+                    first_idx = next(idx_gen, None)
+                    if first_idx is not None:
+                        # if there is only one element, all will return True,
+                        # which is also correct
+                        valid = all(np.array_equal(val, first_idx)
+                                    for val in idx_gen)
+                    return valid
 
-                if aux_valid is False:
+                aux_valid = check_index_dicts(aux_index_dict)
+
+                valid = check_index_dicts(dim_index_dict)
+
+                if not aux_valid:
                     reasoning.append('The auxillary coordinates do not have the same missing data locations')
-                if valid is False:
+                # dimensions not valid
+                if not valid:
                     reasoning.append('The coordinate variables do not have the same missing data locations as the auxillary coordinates')
 
                 # Check to see that all coordinate variable mising data is reflceted in the dataset
                 valid_missing = True
 
                 if hasattr(var, '_FillValue'):
-                    try:
-                        x_indices = np.where(var == var._FillValue).tolist()
-                    except:
-                        x_indices = np.where(var == var._FillValue)[0].tolist()
+                    x_indices = np.where(var[:].mask)[0]
 
                     for coordinate in var.coordinates.split(" "):
-                        coordinate_ind_list = dim_index_dict[name + '-' + coordinate]
-                        valid_missing = all(each in x_indices for each in coordinate_ind_list)
-
+                        coordinate_ind_list = dim_index_dict[name][coordinate]
+                        valid_missing = np.array_equal(x_indices,
+                                                       coordinate_ind_list)
                     if valid_missing is False:
                         reasoning.append('The data does not have the same missing data locations as the coordinates')
 
