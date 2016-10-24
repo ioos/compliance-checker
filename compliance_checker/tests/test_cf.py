@@ -461,24 +461,49 @@ class TestCF(BaseTestCase):
         # Check compliance
         dataset = self.load_dataset(STATIC_FILES['example-grid'])
         results = self.cf.check_latitude(dataset)
-        for r in results:
-            if isinstance(r.value, tuple):
-                self.assertEqual(r.value[0], r.value[1])
-            else:
-                self.assertTrue(r.value)
+        # Four checks per latitude variable
+        assert len(results) == 4
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (4, 4)
 
         # Verify non-compliance
         dataset = self.load_dataset(STATIC_FILES['bad'])
         results = self.cf.check_latitude(dataset)
 
+        result_dict = {result.name: result for result in results}
         scored, out_of, messages = self.get_results(results)
 
-        assert 'lat does not have units attribute' in messages
-        assert 'lat_uv units are acceptable, but not recommended' in messages
-        assert 'lat_like does not have units attribute' in messages
+        result = result_dict[u'§4.1 Latitude variable lat has required units attribute']
+        assert result.value == (0, 1)
+        assert result.msgs[0] == "latitude variable 'lat' must define units"
 
-        assert scored == 5
-        assert out_of == 12
+        result = result_dict[u'§4.1 Latitude variable lat uses recommended units']
+        assert result.value == (0, 1)
+
+        result = result_dict[u'§4.1 Latitude variable lat defines units using degrees_north']
+        assert result.value == (0, 1)
+
+        result = result_dict[u'§4.1 Latitude variable lat defines either standard_name or axis']
+        assert result.value == (1, 1)
+
+        result = result_dict[u'§4.1 Latitude variable lat_uv has required units attribute']
+        assert result.value == (1, 1)
+
+        result = result_dict[u'§4.1 Latitude variable lat_uv uses recommended units']
+        assert result.value == (1, 1)
+
+        result = result_dict[u'§4.1 Latitude variable lat_uv defines units using degrees_north']
+        assert result.value == (0, 1)
+
+        result = result_dict[u'§4.1 Latitude variable lat_uv defines either standard_name or axis']
+        assert result.value == (1, 1)
+
+        assert (scored, out_of) == (6, 12)
+
+        dataset = self.load_dataset(STATIC_FILES['rotated_pole_grid'])
+        results = self.cf.check_latitude(dataset)
+        scored, out_of, messages = self.get_results(results)
+        assert (scored, out_of) == (7, 7)
 
     def test_longitude(self):
         '''
@@ -487,24 +512,47 @@ class TestCF(BaseTestCase):
         # Check compliance
         dataset = self.load_dataset(STATIC_FILES['example-grid'])
         results = self.cf.check_longitude(dataset)
-        for r in results:
-            if isinstance(r.value, tuple):
-                self.assertEqual(r.value[0], r.value[1])
-            else:
-                self.assertTrue(r.value)
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (4, 4)
 
         # Verify non-compliance
         dataset = self.load_dataset(STATIC_FILES['bad'])
         results = self.cf.check_longitude(dataset)
 
+        result_dict = {result.name: result for result in results}
         scored, out_of, messages = self.get_results(results)
 
-        assert 'lon does not have units attribute' in messages
-        assert 'lon_uv units are acceptable, but not recommended' in messages
-        assert 'lon_like does not have units attribute' in messages
+        result = result_dict[u'§4.1 Longitude variable lon has required units attribute']
+        assert result.value == (0, 1)
+        assert result.msgs[0] == "longitude variable 'lon' must define units"
 
-        assert scored == 5
-        assert out_of == 12
+        result = result_dict[u'§4.1 Longitude variable lon uses recommended units']
+        assert result.value == (0, 1)
+
+        result = result_dict[u'§4.1 Longitude variable lon defines units using degrees_east']
+        assert result.value == (0, 1)
+
+        result = result_dict[u'§4.1 Longitude variable lon defines either standard_name or axis']
+        assert result.value == (1, 1)
+
+        result = result_dict[u'§4.1 Longitude variable lon_uv has required units attribute']
+        assert result.value == (1, 1)
+
+        result = result_dict[u'§4.1 Longitude variable lon_uv uses recommended units']
+        assert result.value == (1, 1)
+
+        result = result_dict[u'§4.1 Longitude variable lon_uv defines units using degrees_east']
+        assert result.value == (0, 1)
+
+        result = result_dict[u'§4.1 Longitude variable lon_uv defines either standard_name or axis']
+        assert result.value == (1, 1)
+
+        assert (scored, out_of) == (6, 12)
+
+        dataset = self.load_dataset(STATIC_FILES['rotated_pole_grid'])
+        results = self.cf.check_latitude(dataset)
+        scored, out_of, messages = self.get_results(results)
+        assert (scored, out_of) == (7, 7)
 
     def test_is_vertical_coordinate(self):
         '''
