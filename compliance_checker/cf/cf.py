@@ -51,42 +51,6 @@ def guess_dim_type(dimension):
     return None
 
 
-def guess_coord_type(units, positive=None):
-    """
-    Guesses coordinate variable type (X/Y/Z/T) from units and positive attrs
-    """
-    coord_types = {'X': ['degrees_east', 'degree_east', 'degrees_E', 'degree_E', 'degreesE', 'degreeE'],
-                   'Y': ['degrees_north', 'degree_north', 'degrees_N', 'degree_N', 'degreesN', 'degreeN']}
-
-    deprecated = ['level', 'layer', 'sigma_level']
-
-    if not units or not isinstance(units, str) or not (units_known(units) or units in deprecated):
-        return None
-
-    if isinstance(positive, str) and positive.lower() in ['up', 'down']:
-        # only Z if units without positive deos not result in something else
-        if guess_coord_type(units, None) in [None, 'Z']:
-            return 'Z'
-        else:
-            # they differ, then we can't conclude
-            return None
-
-    if units in deprecated or units_convertible(units, 'hPa', reftimeistime=True):
-        return 'Z'
-
-    if positive:
-        return None
-
-    for ctype, unitsposs in coord_types.items():
-        if units in unitsposs:
-            return ctype
-
-    if units_convertible(units, 'days since 1970-01-01', reftimeistime=False):
-        return 'T'
-
-    return None
-
-
 def is_variable(name, var):
     dims = var.dimensions
     if (name,) == dims:
