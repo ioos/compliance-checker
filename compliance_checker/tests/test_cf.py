@@ -738,7 +738,6 @@ class TestCF(BaseTestCase):
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = self.get_results(results)
 
-        assert 'Variable bad_time_1 should have a calendar attribute' in messages
         assert "Variable bad_time_2 should have a valid calendar: 'nope' is not a valid calendar" in messages
 
     def test_check_grid_coordinates(self):
