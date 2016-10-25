@@ -5,6 +5,7 @@ compliance_checker/cfutil.py
 '''
 from cf_units import Unit
 from pkg_resources import resource_filename
+from collections import defaultdict
 import csv
 import json
 
@@ -431,6 +432,22 @@ def get_time_variable(ds):
     return None
 
 
+def get_time_variables(ds):
+    '''
+    Returns a list of variables describing the time coordinate
+
+    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    '''
+    time_variables = []
+    for variable in ds.get_variables_by_attributes(standard_name='time'):
+        time_variables.append(variable.name)
+
+    for variable in ds.get_variables_by_attributes(axis='T'):
+        if variable.name not in time_variables:
+            time_variables.append(variable.name)
+    return time_variables
+
+
 def get_axis_variables(ds):
     '''
     Returns a list of variables that define an axis of the dataset
@@ -494,6 +511,76 @@ def get_grid_mapping_variables(ds):
         if ncvar.grid_mapping in ds.variables:
             grid_mapping_variables.append(ncvar.grid_mapping)
     return grid_mapping_variables
+
+
+def get_axis_map(ds, variable):
+    '''
+    Returns an axis_map dictionary that contains an axis key and the coordinate
+    names as values.
+
+    For example::
+
+        {'X': ['longitude'], 'Y': ['latitude'], 'T': ['time']}
+
+    The axis C is for compressed coordinates like a reduced grid, and U is for
+    unknown axis. This can sometimes be physical quantities representing a
+    continuous discrete axis, like temperature or density.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    :param str variable: Variable name
+    '''
+    all_coords = get_coordinate_variables(ds) + get_auxiliary_coordinate_variables(ds)
+
+    latitudes = get_latitude_variables(ds)
+    longitudes = get_longitude_variables(ds)
+    times = get_time_variables(ds)
+    heights = get_z_variables(ds)
+
+    coordinates = getattr(ds.variables[variable], "coordinates", None)
+    if not isinstance(coordinates, basestring):
+        coordinates = ''
+
+    # For example
+    # {'x': ['longitude'], 'y': ['latitude'], 't': ['time']}
+    axis_map = defaultdict(list)
+    for coord_name in all_coords:
+
+        if is_compression_coordinate(ds, coord_name):
+            axis = 'C'
+        elif coord_name in times:
+            axis = 'T'
+        elif coord_name in longitudes:
+            axis = 'X'
+        elif coord_name in latitudes:
+            axis = 'Y'
+        elif coord_name in heights:
+            axis = 'Z'
+        else:
+            axis = 'U'
+
+        if coord_name in ds.variables[variable].dimensions:
+            if coord_name not in axis_map[axis]:
+                axis_map[axis].append(coord_name)
+
+        elif coord_name in coordinates:
+            if coord_name not in axis_map[axis]:
+                axis_map[axis].append(coord_name)
+
+    # Sometimes dimensionless coordinates are considered coordinate variables.
+    # I know, it's confusing.
+    if 'X' not in axis_map and longitudes:
+        axis_map['X'] = longitudes
+
+    if 'Y' not in axis_map and latitudes:
+        axis_map['Y'] = latitudes
+
+    if 'T' not in axis_map and times:
+        axis_map['T'] = times
+
+    if 'Z' not in axis_map and heights:
+        axis_map['Z'] = heights
+
+    return axis_map
 
 
 def is_coordinate_variable(ds, variable):
@@ -598,28 +685,22 @@ def is_timeseries(nc, variable):
     :param str variable: name of the variable to check
     '''
 
-    # x, y, z, t(o)
-    # X(o)
+    # x, y, z, t(t)
+    # X(t)
     dims = nc.variables[variable].dimensions
 
     cmatrix = coordinate_dimension_matrix(nc)
-    for req in ('x', 'y', 't'):
-        if req not in cmatrix:
-            return False
-    if len(cmatrix['x']) != 0:
-        return False
-    if len(cmatrix['y']) != 0:
-        return False
-    if 'z' in cmatrix and len(cmatrix['z']) != 0:
+    if 't' not in cmatrix:
         return False
     timevar = get_time_variable(nc)
 
     # time has to be a coordinate variable in this case
     if cmatrix['t'] != (timevar,):
         return False
-    if dims == cmatrix['t']:
-        return True
-    return False
+    if dims != cmatrix['t']:
+        return False
+
+    return True
 
 
 def is_multi_timeseries_orthogonal(nc, variable):
@@ -1255,6 +1336,33 @@ def is_mapped_grid(nc, variable):
     return True
 
 
+def is_reduced_grid(nc, variable):
+    '''
+    Returns True if the feature-type of the variable corresponds to a reduced
+    horizontal grid.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    :param str variable: name of the variable to check
+    '''
+    axis_map = get_axis_map(nc, variable)
+
+    if 'X' not in axis_map:
+        return False
+    if 'Y' not in axis_map:
+        return False
+    if 'C' not in axis_map:
+        return False
+
+    compressed_coordinates = axis_map['C']
+    if len(compressed_coordinates) > 1:
+        return False
+    compressed_coordinate = axis_map['C'][0]
+    for dim in nc.variables[compressed_coordinate].compress.split():
+        if dim not in nc.dimensions:
+            return False
+    return True
+
+
 def guess_feature_type(nc, variable):
     '''
     Returns a string describing the feature type for this variable
@@ -1300,6 +1408,8 @@ def guess_feature_type(nc, variable):
         return '3d-regular-grid'
     if is_mapped_grid(nc, variable):
         return 'mapped-grid'
+    if is_reduced_grid(nc, variable):
+        return 'reduced-grid'
 
 
 def units_convertible(units1, units2, reftimeistime=True):
