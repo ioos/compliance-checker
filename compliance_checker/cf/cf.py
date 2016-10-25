@@ -6,6 +6,7 @@ from functools import wraps
 from collections import defaultdict
 import numpy as np
 import os
+import six
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result, TestCtx
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
@@ -3378,7 +3379,7 @@ class CFBaseCheck(BaseCheck):
                     # Base case: In the even there are no arrays to check then
                     # automatically valid
                     valid = True
-                    idx_gen = (d[k] for d in dim_index_dict.itervalues()
+                    idx_gen = (d[k] for d in six.itervalues(dim_index_dict)
                                for k in d if d[k].size > 0)
                     first_idx = next(idx_gen, None)
                     if first_idx is not None:
