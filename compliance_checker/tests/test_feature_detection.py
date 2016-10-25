@@ -220,3 +220,97 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES['vertical_coords']) as nc:
             vertical = util.get_z_variables(nc)
             assert vertical == ['height']
+
+    def test_reduced_grid(self):
+        with Dataset(resources.STATIC_FILES['reduced_horizontal_grid']) as nc:
+            assert util.guess_feature_type(nc, 'PS') == 'reduced-grid'
+
+    def test_global_feature_detection(self):
+        with Dataset(resources.STATIC_FILES['reduced_horizontal_grid']) as nc:
+            assert util.guess_feature_type(nc, 'PS') == 'reduced-grid'
+
+        with Dataset(resources.STATIC_FILES['vertical_coords']) as nc:
+            assert util.guess_feature_type(nc, 'temperature') == 'timeseries'
+
+            axis_map = util.get_axis_map(nc, 'temperature')
+            assert axis_map['Z'] == ['height']
+            assert axis_map['T'] == ['time']
+
+        with Dataset(resources.STATIC_FILES['2d-regular-grid']) as nc:
+            assert util.guess_feature_type(nc, 'temperature') == '2d-regular-grid'
+
+            axis_map = util.get_axis_map(nc, 'temperature')
+            assert axis_map['T'] == ['time']
+            assert axis_map['Z'] == ['z']
+            assert axis_map['X'] == ['lon']
+            assert axis_map['Y'] == ['lat']
+
+        with Dataset(resources.STATIC_FILES['2dim']) as nc:
+            assert util.guess_feature_type(nc, 'T') == 'mapped-grid'
+
+            axis_map = util.get_axis_map(nc, 'T')
+            assert axis_map['Z'] == ['lev']
+            assert axis_map['Y'] == ['yc', 'lat']
+            assert axis_map['X'] == ['xc', 'lon']
+
+        with Dataset(resources.STATIC_FILES['3d-regular-grid']) as nc:
+            assert util.guess_feature_type(nc, 'temperature') == '3d-regular-grid'
+
+            axis_map = util.get_axis_map(nc, 'temperature')
+            assert axis_map['T'] == ['time']
+            assert axis_map['Z'] == ['z']
+            assert axis_map['Y'] == ['lat']
+            assert axis_map['X'] == ['lon']
+
+        with Dataset(resources.STATIC_FILES['climatology']) as nc:
+            assert util.guess_feature_type(nc, 'temperature') == 'timeseries'
+
+            axis_map = util.get_axis_map(nc, 'temperature')
+            assert axis_map['T'] == ['time']
+            assert axis_map['Y'] == ['lat']
+            assert axis_map['X'] == ['lon']
+
+        with Dataset(resources.STATIC_FILES['index_ragged']) as nc:
+            assert util.guess_feature_type(nc, 'temperature') == 'point'
+
+            axis_map = util.get_axis_map(nc, 'temperature')
+            assert axis_map['T'] == ['time']
+            assert axis_map['Z'] == ['z']
+            assert axis_map['Y'] == ['lat']
+            assert axis_map['X'] == ['lon']
+
+        with Dataset(resources.STATIC_FILES['mapping']) as nc:
+            assert util.guess_feature_type(nc, 'sea_surface_height') == 'multi-timeseries-orthogonal'
+
+            axis_map = util.get_axis_map(nc, 'sea_surface_height')
+            assert axis_map['T'] == ['time']
+            assert axis_map['Z'] == ['z']
+            assert axis_map['Y'] == ['lat']
+            assert axis_map['X'] == ['lon']
+
+        with Dataset(resources.STATIC_FILES['rotated_pole_grid']) as nc:
+            assert util.guess_feature_type(nc, 'temperature') == 'mapped-grid'
+
+            axis_map = util.get_axis_map(nc, 'temperature')
+            assert axis_map['T'] == []
+            assert axis_map['Z'] == ['lev']
+            assert axis_map['Y'] == ['rlat', 'lat']
+            assert axis_map['X'] == ['rlon', 'lon']
+
+        with Dataset(resources.STATIC_FILES['rutgers']) as nc:
+            assert util.guess_feature_type(nc, 'temperature') == 'timeseries'
+
+            axis_map = util.get_axis_map(nc, 'temperature')
+            assert axis_map['T'] == ['time']
+            assert axis_map['Z'] == ['depth']
+            assert axis_map['Y'] == ['lat']
+            assert axis_map['X'] == ['lon']
+
+        with Dataset(resources.STATIC_FILES['self-referencing-var']) as nc:
+            assert util.guess_feature_type(nc, 'TEMP') == 'timeseries'
+
+            axis_map = util.get_axis_map(nc, 'TEMP')
+            assert axis_map['T'] == ['TIME']
+            assert axis_map['Z'] == ['DEPTH']
+            assert axis_map['Y'] == []
+            assert axis_map['X'] == []
