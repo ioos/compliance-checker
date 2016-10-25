@@ -515,7 +515,7 @@ def get_grid_mapping_variables(ds):
 
 def get_axis_map(ds, variable):
     '''
-    Returns a aix_map dictionary that contains an axis key and the coordinate
+    Returns an axis_map dictionary that contains an axis key and the coordinate
     names as values.
 
     For example::
@@ -1356,8 +1356,8 @@ def is_reduced_grid(nc, variable):
     compressed_coordinates = axis_map['C']
     if len(compressed_coordinates) > 1:
         return False
-    comopressed_coordinate = axis_map['C'][0]
-    for dim in nc.variables[comopressed_coordinate].compress.split():
+    compressed_coordinate = axis_map['C'][0]
+    for dim in nc.variables[compressed_coordinate].compress.split():
         if dim not in nc.dimensions:
             return False
     return True
