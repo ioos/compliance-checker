@@ -938,6 +938,16 @@ class TestCF(BaseTestCase):
         assert out_of == 20
         assert messages == []
 
+    def test_check_duplicates(self):
+        '''
+        Test to verify that the check identifies duplicate axes
+        '''
+        dataset = self.load_dataset(STATIC_FILES['duplicate_axis'])
+        results = self.cf.check_duplicate_axis(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§5.0 Variable temp does not contain duplicate coordinates']
+        assert result.msgs[0] == 'duplicate axis X defined by lon_rho'
+
     def test_64bit(self):
         dataset = self.load_dataset(STATIC_FILES['ints64'])
         suite = CheckSuite()
