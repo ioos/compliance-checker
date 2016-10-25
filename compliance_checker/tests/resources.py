@@ -73,4 +73,5 @@ STATIC_FILES = {
     'coordinate_types'                     : get_filename('tests/data/coordinate_types.cdl'),
     'chap2'                                : get_filename('tests/data/chap2.cdl'),
     'vertical_coords'                      : get_filename('tests/data/vertical_coords.cdl'),
+    'reduced_horizontal_grid'              : get_filename('tests/data/reduced_horizontal_grid.cdl'),
 }

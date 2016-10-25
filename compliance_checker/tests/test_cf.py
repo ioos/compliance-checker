@@ -298,6 +298,13 @@ class TestCF(BaseTestCase):
 
         assert len(result_dict) == 8
 
+        dataset = self.load_dataset(STATIC_FILES['reduced_horizontal_grid'])
+        results = self.cf.check_standard_name(dataset)
+        score, out_of, messages = self.get_results(results)
+        # Make sure that the rgrid coordinate variable isn't checked for standard_name
+        # time, lat, lon exist with three checks each
+        assert (score, out_of) == (6, 6)
+
     def test_check_ancillary_variables(self):
         '''
         Test to ensure that ancillary variables are properly checked
@@ -453,6 +460,12 @@ class TestCF(BaseTestCase):
 
         scored, out_of, messages = self.get_results(results)
         assert (scored, out_of) == (21, 25)
+
+        dataset = self.load_dataset(STATIC_FILES['reduced_horizontal_grid'])
+        results = self.cf.check_coordinate_types(dataset)
+        scored, out_of, messages = self.get_results(results)
+        # CF recommends coordinate types defining lat/lon/z be coordinate variables
+        assert (scored, out_of) == (10, 12)
 
     def test_latitude(self):
         '''

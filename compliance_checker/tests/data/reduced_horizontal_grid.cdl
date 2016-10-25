@@ -1,0 +1,24 @@
+netcdf reduced_horizontal_grid {
+dimensions:
+    londim = 128;
+    latdim = 64;
+    rgrid = 6144;
+    time = 2;
+variables:
+    double time(time);
+        time:standard_name = "time";
+        time:units = "seconds since 1970-01-01";
+
+    float PS(time, rgrid);
+        PS:long_name = "surface pressure";
+        PS:units = "Pa";
+        PS:coordinates = "lon lat";
+    float lon(rgrid);
+        lon:units = "degrees_east";
+        lon:standard_name = "longitude";
+    float lat(rgrid);
+        lat:units = "degrees_north";
+        lat:standard_name = "latitude";
+    int rgrid(rgrid);
+        rgrid:compress = "latdim londim";
+}
