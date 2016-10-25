@@ -1956,6 +1956,10 @@ class CFBaseCheck(BaseCheck):
             no_duplicates = TestCtx(BaseCheck.HIGH, '§5.0 Variable {} does not contain duplicate coordinates'.format(name))
             axis_map = cfutil.get_axis_map(ds, name)
             axes = []
+            # For every coordinate associated with this variable, keep track of
+            # which coordinates define an axis and assert that there are no
+            # duplicate axis attributes defined in the set of associated
+            # coordinates.
             for axis, coordinates in axis_map.items():
                 for coordinate in coordinates:
                     axis = getattr(ds.variables[coordinate], 'axis', None)
