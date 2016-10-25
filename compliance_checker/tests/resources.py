@@ -74,4 +74,5 @@ STATIC_FILES = {
     'chap2'                                : get_filename('tests/data/chap2.cdl'),
     'vertical_coords'                      : get_filename('tests/data/vertical_coords.cdl'),
     'reduced_horizontal_grid'              : get_filename('tests/data/reduced_horizontal_grid.cdl'),
+    'duplicate_axis'                       : get_filename('tests/data/duplicate_axis.cdl'),
 }

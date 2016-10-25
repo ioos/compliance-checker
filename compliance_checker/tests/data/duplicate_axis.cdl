@@ -1,0 +1,46 @@
+netcdf duplicate_axis {
+dimensions:
+    time = 2;
+    eta_rho = 4 ;
+    eta_u = 4 ;
+    eta_v = 4 ;
+    s_rho = 1 ;
+    xi_rho = 4 ;
+    xi_u = 4 ;
+    xi_v = 4 ;
+variables:
+    double time(time);
+        time:standard_name = "time";
+        time:units = "seconds since 1970-01-01";
+    double lat_u(eta_u, xi_u) ;
+        lat_u:long_name = "latitude of U-points" ;
+        lat_u:units = "degree_north" ;
+        lat_u:standard_name = "latitude" ;
+        lat_u:field = "lat_u, scalar" ;
+        lat_u:axis = "Y";
+    double lon_u(eta_u, xi_u) ;
+        lon_u:long_name = "longitude of U-points" ;
+        lon_u:units = "degree_east" ;
+        lon_u:standard_name = "longitude" ;
+        lon_u:field = "lon_u, scalar" ;
+        lon_u:axis = "X";
+    double lat_rho(eta_rho, xi_rho) ;
+        lat_rho:long_name = "latitude of RHO-points" ;
+        lat_rho:units = "degree_north" ;
+        lat_rho:standard_name = "latitude" ;
+        lat_rho:field = "lat_rho, scalar" ;
+        lat_rho:axis = "Y";
+    double lon_rho(eta_rho, xi_rho) ;
+        lon_rho:long_name = "longitude of RHO-points" ;
+        lon_rho:units = "degree_east" ;
+        lon_rho:standard_name = "longitude" ;
+        lon_rho:field = "lon_rho, scalar" ;
+        lon_rho:axis = "X";
+    float temp(time, s_rho, eta_rho, xi_rho) ;
+        temp:_FillValue = 1.e+37f ;
+        temp:long_name = "potential temperature" ;
+        temp:units = "deg_C" ;
+        temp:coordinates = "lon_u lon_rho lat_rho time" ;
+        temp:field = "temperature, scalar, series" ;
+
+}

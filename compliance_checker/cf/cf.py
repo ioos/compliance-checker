@@ -1932,6 +1932,48 @@ class CFBaseCheck(BaseCheck):
                 coord_vars.append(name)
         return coord_vars
 
+    def check_duplicate_axis(self, ds):
+        '''
+        Chapter 5 paragraph 6
+
+        If an axis attribute is attached to an auxiliary coordinate variable,
+        it can be used by applications in the same way the `axis` attribute
+        attached to a coordinate variable is used. However, it is not
+        permissible for a [geophysical variable] to have both a coordinate
+        variable and an auxiliary coordinate variable, or more than one of
+        either type of variable, having an `axis` attribute with any given
+        value e.g. there must be no more than one axis attribute for X for any
+        [geophysical variable].
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: Result
+        :return: List of results
+        '''
+
+        ret_val = []
+        geophysical_variables = self._find_geophysical_vars(ds)
+        for name in geophysical_variables:
+            no_duplicates = TestCtx(BaseCheck.HIGH, '§5.0 Variable {} does not contain duplicate coordinates'.format(name))
+            axis_map = cfutil.get_axis_map(ds, name)
+            axes = []
+            # For every coordinate associated with this variable, keep track of
+            # which coordinates define an axis and assert that there are no
+            # duplicate axis attributes defined in the set of associated
+            # coordinates.
+            for axis, coordinates in axis_map.items():
+                for coordinate in coordinates:
+                    axis = getattr(ds.variables[coordinate], 'axis', None)
+
+                    no_duplicates.assert_true(axis is None or axis not in axes,
+                                              "duplicate axis {} defined by {}".format(axis, coordinate))
+
+                    if axis and axis not in axes:
+                        axes.append(axis)
+
+            ret_val.append(no_duplicates.to_result())
+
+        return ret_val
+
     def check_two_dimensional(self, ds):
         """
         5.2 The latitude and longitude coordinates of a horizontal grid that was
