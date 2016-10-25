@@ -770,29 +770,6 @@ class TestCF(BaseTestCase):
         assert scored == 4
         assert "Variable CD_310's coordinate references itself" not in messages
 
-    def test_check_independent_axis_dimensions(self):
-        dataset = self.load_dataset(STATIC_FILES['example-grid'])
-        results = self.cf.check_independent_axis_dimensions(dataset)
-        for r in results:
-            self.assertTrue(r.value)
-
-        dataset = self.load_dataset(STATIC_FILES['bad'])
-        results = self.cf.check_independent_axis_dimensions(dataset)
-
-        scored, out_of, messages = self.get_results(results)
-        assert 'The lev dimension for the variable lev1 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
-            in messages
-        assert 'The lev dimension for the variable lev2 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
-            in messages
-        assert 'The time dimension for the variable bad_time_1 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
-            in messages
-        assert 'The time dimension for the variable bad_time_2 does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
-            in messages
-        assert 'The time dimension for the variable column_temp does not have an associated coordinate variable, but is a Lat/Lon/Time/Height dimension.' \
-            in messages
-        assert scored == 6
-        assert out_of == 11
-
     def test_check_two_dimensional(self):
         dataset = self.load_dataset(STATIC_FILES['2dim'])
         results = self.cf.check_two_dimensional(dataset)
