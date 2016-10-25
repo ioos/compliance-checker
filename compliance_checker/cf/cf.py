@@ -488,6 +488,8 @@ class CFBaseCheck(BaseCheck):
                 coord_axis_map[coord_name] = 'Y'
             elif standard_name in ['height', 'depth', 'altitude']:
                 coord_axis_map[coord_name] = 'Z'
+            elif cfutil.is_compression_coordinate(ds, coord_name):
+                coord_axis_map[coord_name] = 'C'
             else:
                 # mark the coordinate variable as unknown
                 coord_axis_map[coord_name] = 'U'
@@ -536,21 +538,9 @@ class CFBaseCheck(BaseCheck):
 
         :param list dimension_order: A list of axes
         '''
-        regx = re.compile(r'^U*T?Z?Y?X?$')
+        regx = re.compile(r'^U*T?Z?(?:(?:Y?X?)|(?:C?))$')
         dimension_string = ''.join(dimension_order)
         return regx.match(dimension_string) is not None
-
-    # def check_dimension_single_value_applicable(self, ds):
-        """
-        2.4 When a single value of some coordinate applies to all the values in a variable, the recommended means of attaching this
-        information to the variable is by use of a dimension of size unity with a one-element coordinate variable. It is also
-        acceptable to use a scalar coordinate variable which eliminates the need for an associated size one dimension in the data
-        variable.
-        """
-
-        # TODO: We need to identify a non-compliant example of this that can be verified, but I believe
-        #      that if the file is netCDF then this requirement may be met.  When we do we can reinsert this check
-        # pass
 
     def check_fill_value_outside_valid_range(self, ds):
         '''
@@ -730,6 +720,11 @@ class CFBaseCheck(BaseCheck):
         unit_required_variables = coordinate_variables + auxiliary_coordinates + geophysical_variables
 
         for name in unit_required_variables:
+            # For reduced horizontal grids, the compression index variable does
+            # not require units.
+            if cfutil.is_compression_coordinate(ds, name):
+                continue
+
             variable = ds.variables[name]
 
             standard_name = getattr(variable, 'standard_name', None)
@@ -920,6 +915,11 @@ class CFBaseCheck(BaseCheck):
 
         variables_requiring_standard_names = coord_vars + aux_coord_vars + axis_vars + flag_vars + geophysical_vars
         for name in variables_requiring_standard_names:
+            # Compression indices used in reduced horizontal grids or
+            # compression schemes do not require attributes other than compress
+            if cfutil.is_compression_coordinate(ds, name):
+                continue
+
             ncvar = ds.variables[name]
             standard_name = getattr(ncvar, 'standard_name', None)
 
@@ -1221,6 +1221,11 @@ class CFBaseCheck(BaseCheck):
         coord_types = self._find_coord_vars(ds) + self._find_aux_coord_vars(ds)
 
         for name in coord_types:
+            # Coordinate compressions should not be checked as a valid
+            # coordinate, which they are not. They are a mechanism to project
+            # an array of indices onto a 2-d grid containing valid coordinates.
+            if cfutil.is_compression_coordinate(ds, name):
+                continue
             variable = ds.variables[name]
 
             valid_coord = TestCtx(BaseCheck.MEDIUM, '§4 {} is a valid coordinate type'.format(name))
@@ -1229,7 +1234,7 @@ class CFBaseCheck(BaseCheck):
             standard_name = getattr(variable, 'standard_name', None)
 
             valid_coord.assert_true(axis is not None or standard_name is not None,
-                                    "coordinate types are recommended to define either axis or standard_name attributes")
+                                    "coordinate types are should define either axis or standard_name attributes")
             ret_val.append(valid_coord.to_result())
 
             if axis is not None:

@@ -505,7 +505,34 @@ def is_coordinate_variable(ds, variable):
     '''
     if variable not in ds.variables:
         return False
-    return ds.variables[variable].dimensinos == (variable,)
+    return ds.variables[variable].dimensions == (variable,)
+
+
+def is_compression_coordinate(ds, variable):
+    '''
+    Returns True if the variable is a coordinate variable that defines a
+    compression scheme.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    :param str variable: Variable name
+    '''
+    # Must be a coordinate variable
+    if not is_coordinate_variable(ds, variable):
+        return False
+    # must have a string attribute compress
+    compress = getattr(ds.variables[variable], 'compress', None)
+    if not isinstance(compress, basestring):
+        return False
+    if not compress:
+        return False
+    # This should never happen or be allowed
+    if variable in compress:
+        return False
+    # Must point to dimensions
+    for dim in compress.split():
+        if dim not in ds.dimensions:
+            return False
+    return True
 
 
 def coordinate_dimension_matrix(nc):
@@ -1273,6 +1300,7 @@ def guess_feature_type(nc, variable):
         return '3d-regular-grid'
     if is_mapped_grid(nc, variable):
         return 'mapped-grid'
+
 
 def units_convertible(units1, units2, reftimeistime=True):
     """
