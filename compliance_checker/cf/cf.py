@@ -1862,10 +1862,14 @@ class CFBaseCheck(BaseCheck):
             if not util.is_time_variable(k, v):
                 continue
             reasoning = None
+            has_calendar = hasattr(v, 'calendar')
+            result = Result(BaseCheck.LOW,
+                            has_calendar,
+                            '§4.4.1 Time and calendar',
+                            reasoning)
             # if has a calendar, check that it is within the valid values
             # otherwise no calendar is valid
-
-            if hasattr(v, 'calendar'):
+            if has_calendar:
                 reasoning = None
                 valid_calendar = v.calendar in valid_calendars
                 if not valid_calendar:
@@ -1874,7 +1878,7 @@ class CFBaseCheck(BaseCheck):
                                     valid_calendar,
                                     '§4.4.1 Time and calendar',
                                     reasoning)
-                    ret_val.append(result)
+                ret_val.append(result)
 
         return ret_val
 
