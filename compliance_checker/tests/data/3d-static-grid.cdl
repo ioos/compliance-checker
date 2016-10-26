@@ -1,0 +1,21 @@
+netcdf 3d-static-grid {
+dimensions:
+    lat = 2;
+    lon = 2;
+    depth = 6;
+variables:
+    double depth(depth);
+        depth:standard_name = "depth";
+        depth:positive = "down";
+        depth:units = "m";
+    double lat(lat);
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+    double lon(lon);
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+    double T(depth, lat, lon);
+        T:standard_name = "sea_water_temperature";
+        T:units = "deg_C";
+}
+

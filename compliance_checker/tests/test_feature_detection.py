@@ -151,6 +151,14 @@ class TestFeatureDetection(TestCase):
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_2d_regular_grid(nc, variable), "{} is 2D regular grid".format(variable)
 
+    def test_2d_static_grid(self):
+        '''
+        Ensures 2D Static Grid detection works
+        '''
+        with Dataset(resources.STATIC_FILES['2d-static-grid']) as nc:
+            for variable in util.get_geophysical_variables(nc):
+                assert util.is_2d_static_grid(nc, variable), "{} is a 2D static grid".format(variable)
+
     def test_3d_regular_grid(self):
         '''
         Ensures 2U Regular Grid detection works
@@ -158,6 +166,14 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES['3d-regular-grid']) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_3d_regular_grid(nc, variable), "{} is 3d regular grid".format(variable)
+
+    def test_3d_static_grid(self):
+        '''
+        Ensures 3D Static Grid detection works
+        '''
+        with Dataset(resources.STATIC_FILES['3d-static-grid']) as nc:
+            for variable in util.get_geophysical_variables(nc):
+                assert util.is_3d_static_grid(nc, variable), "{} is a 3D static grid".format(variable)
 
     def test_boundaries(self):
         '''
@@ -314,3 +330,21 @@ class TestFeatureDetection(TestCase):
             assert axis_map['Z'] == ['DEPTH']
             assert axis_map['Y'] == []
             assert axis_map['X'] == []
+
+        with Dataset(resources.STATIC_FILES['2d-static-grid']) as nc:
+            assert util.guess_feature_type(nc, 'T') == '2d-static-grid'
+
+            axis_map = util.get_axis_map(nc, 'T')
+            assert axis_map['X'] == ['lon']
+            assert axis_map['Y'] == ['lat']
+            assert axis_map['T'] == []
+            assert axis_map['Z'] == []
+
+        with Dataset(resources.STATIC_FILES['3d-static-grid']) as nc:
+            assert util.guess_feature_type(nc, 'T') == '3d-static-grid'
+
+            axis_map = util.get_axis_map(nc, 'T')
+            assert axis_map['X'] == ['lon']
+            assert axis_map['Y'] == ['lat']
+            assert axis_map['T'] == []
+            assert axis_map['Z'] == ['depth']

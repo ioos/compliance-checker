@@ -1242,6 +1242,39 @@ def is_2d_regular_grid(nc, variable):
     return False
 
 
+def is_2d_static_grid(nc, variable):
+    '''
+    Returns True if the variable is a 2D Regular grid that does not vary with
+    time.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    :param str variable: name of the variable to check
+    '''
+    # x(x), y(y)
+    # X(y, x)
+
+    dims = nc.variables[variable].dimensions
+    cmatrix = coordinate_dimension_matrix(nc)
+
+    for req in ('x', 'y'):
+        if req not in cmatrix:
+            return False
+
+    x = get_lon_variable(nc)
+    y = get_lat_variable(nc)
+
+    if cmatrix['x'] != (x,):
+        return False
+
+    if cmatrix['y'] != (y,):
+        return False
+
+    if len(dims) != 2 or x not in dims or y not in dims:
+        return False
+
+    return True
+
+
 def is_3d_regular_grid(nc, variable):
     '''
     Returns True if the variable is a 3D Regular grid.
@@ -1278,6 +1311,43 @@ def is_3d_regular_grid(nc, variable):
     if len(dims) == 4 and x in dims and y in dims and t in dims and z in dims:
         return True
     return False
+
+
+def is_3d_static_grid(nc, variable):
+    '''
+    Returns True if the variable is a 2D Regular grid that does not vary with
+    time.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    :param str variable: name of the variable to check
+    '''
+    # x(x), y(y), z(z)
+    # X(z, y, x)
+
+    dims = nc.variables[variable].dimensions
+    cmatrix = coordinate_dimension_matrix(nc)
+
+    for req in ('x', 'y', 'z'):
+        if req not in cmatrix:
+            return False
+
+    x = get_lon_variable(nc)
+    y = get_lat_variable(nc)
+    z = get_z_variable(nc)
+
+    if cmatrix['x'] != (x,):
+        return False
+
+    if cmatrix['y'] != (y,):
+        return False
+
+    if cmatrix['z'] != (z,):
+        return False
+
+    if len(dims) != 3 or x not in dims or y not in dims or z not in dims:
+        return False
+
+    return True
 
 
 def is_mapped_grid(nc, variable):
@@ -1404,8 +1474,12 @@ def guess_feature_type(nc, variable):
         return 'trajectory-profile-incomplete'
     if is_2d_regular_grid(nc, variable):
         return '2d-regular-grid'
+    if is_2d_static_grid(nc, variable):
+        return '2d-static-grid'
     if is_3d_regular_grid(nc, variable):
         return '3d-regular-grid'
+    if is_3d_static_grid(nc, variable):
+        return '3d-static-grid'
     if is_mapped_grid(nc, variable):
         return 'mapped-grid'
     if is_reduced_grid(nc, variable):
