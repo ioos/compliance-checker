@@ -75,4 +75,5 @@ STATIC_FILES = {
     'vertical_coords'                      : get_filename('tests/data/vertical_coords.cdl'),
     'reduced_horizontal_grid'              : get_filename('tests/data/reduced_horizontal_grid.cdl'),
     'duplicate_axis'                       : get_filename('tests/data/duplicate_axis.cdl'),
+    'multi-dim-coordinates'                : get_filename('tests/data/multi-dim-coordinates.cdl'),
 }

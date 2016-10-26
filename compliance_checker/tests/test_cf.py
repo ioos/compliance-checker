@@ -948,6 +948,22 @@ class TestCF(BaseTestCase):
         result = result_dict[u'§5.0 Variable temp does not contain duplicate coordinates']
         assert result.msgs[0] == 'duplicate axis X defined by lon_rho'
 
+    def test_check_multi_dimensional_coords(self):
+        '''
+        Test to verify that multi dimensional coordinates are checked for
+        sharing names with dimensions
+        '''
+        dataset = self.load_dataset(STATIC_FILES['multi-dim-coordinates'])
+        results = self.cf.check_multi_dimensional_coords(dataset)
+        scored, out_of, messages = self.get_results(results)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§5.0 multidimensional coordinate xlon should not have the same name as dimension']
+        assert result.msgs[0] == 'xlon shares the same name as one of its dimensions'
+        result = result_dict[u'§5.0 multidimensional coordinate xlat should not have the same name as dimension']
+        assert result.msgs[0] == 'xlat shares the same name as one of its dimensions'
+
+        assert (scored, out_of) == (2, 4)
+
     def test_64bit(self):
         dataset = self.load_dataset(STATIC_FILES['ints64'])
         suite = CheckSuite()

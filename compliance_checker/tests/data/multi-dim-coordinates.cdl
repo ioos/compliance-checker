@@ -1,0 +1,21 @@
+netcdf multi-dim-coordinates {
+dimensions:
+    xlon = 2;
+    xlat = 2;
+variables:
+    double xlon(xlon, xlat);
+        xlon:axis = "X";
+    double xlat(xlon, xlat);
+        xlat:axis = "Y";
+    double lat(xlon, xlat);
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+    double lon(xlon, xlat);
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+    double temperature(xlon, xlat);
+        temperature:standard_name = "sea_water_temperature";
+        temperature:units = "deg_C";
+        temperature:coordinates = "lat lon";
+    
+}

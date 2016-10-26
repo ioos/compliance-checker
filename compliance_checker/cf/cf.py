@@ -1934,6 +1934,9 @@ class CFBaseCheck(BaseCheck):
 
     def check_duplicate_axis(self, ds):
         '''
+        Checks that no variable contains two coordinates defining the same
+        axis.
+
         Chapter 5 paragraph 6
 
         If an axis attribute is attached to an auxiliary coordinate variable,
@@ -1971,6 +1974,34 @@ class CFBaseCheck(BaseCheck):
                         axes.append(axis)
 
             ret_val.append(no_duplicates.to_result())
+
+        return ret_val
+
+    def check_multi_dimensional_coords(self, ds):
+        '''
+        Checks that no multidimensional coordinate shares a name with its
+        dimensions.
+
+        Chapter 5 paragraph 4
+
+        We recommend that the name of a [multidimensional coordinate] should
+        not match the name of any of its dimensions.
+        '''
+        ret_val = []
+
+        # This can only apply to auxiliary coordinate variables
+        for coord in self._find_aux_coord_vars(ds):
+            variable = ds.variables[coord]
+            if variable.ndim < 2:
+                continue
+            not_matching = TestCtx(BaseCheck.MEDIUM,
+                                   '§5.0 multidimensional coordinate {} should not have the same '
+                                   'name as dimension'.format(coord))
+
+            not_matching.assert_true(coord not in variable.dimensions,
+                                     '{} shares the same name as one of its dimensions'
+                                     ''.format(coord))
+            ret_val.append(not_matching.to_result())
 
         return ret_val
 
