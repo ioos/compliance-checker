@@ -1780,7 +1780,8 @@ class CFBaseCheck(BaseCheck):
             if not has_units:
                 result = Result(BaseCheck.HIGH,
                                 False,
-                                '§4.4 Time coordinate variable and attributes', ['%s does not have units' % k])
+                                '§4.4 Time coordinate variable and attributes',
+                                ['%s does not have units' % k])
                 ret_val.append(result)
                 continue
             # Correct and identifiable units
@@ -1791,7 +1792,7 @@ class CFBaseCheck(BaseCheck):
             correct_units = util.units_temporal(v.units)
             reasoning = None
             if not correct_units:
-                reasoning = ['%s doesn not have correct time units' % k]
+                reasoning = ['%s does not have correct time units' % k]
             result = Result(BaseCheck.HIGH,
                             correct_units,
                             '§4.4 Time coordinate variable and attributes',
