@@ -847,6 +847,7 @@ class CFBaseCheck(BaseCheck):
         if standard_entry is not None:
             canonical_units = standard_entry.canonical_units
         else:
+            # Any unit comparisons with None returns False
             canonical_units = None
 
         # Other standard_name modifiers have the same units as the
@@ -868,7 +869,7 @@ class CFBaseCheck(BaseCheck):
         # UDunits can't tell the difference between east and north facing coordinates
         elif standard_name == 'latitude':
             # degrees is allowed if using a transformed grid
-            allowed_units = [i.lower() for i in util._possibleyunits] + ['degrees']
+            allowed_units = cfutil.VALID_LAT_UNITS + ['degrees']
             valid_standard_units.assert_true(units.lower() in allowed_units,
                                              'variables defining latitude must use degrees_north '
                                              'or degrees if defining a transformed grid. Currently '
@@ -876,7 +877,7 @@ class CFBaseCheck(BaseCheck):
         # UDunits can't tell the difference between east and north facing coordinates
         elif standard_name == 'longitude':
             # degrees is allowed if using a transformed grid
-            allowed_units = [i.lower() for i in util._possiblexunits] + ['degrees']
+            allowed_units = cfutil.VALID_LON_UNITS + ['degrees']
             valid_standard_units.assert_true(units.lower() in allowed_units,
                                              'variables defining longitude must use degrees_east '
                                              'or degrees if defining a transformed grid. Currently '
@@ -1577,64 +1578,6 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
-    def check_vertical_coordinate(self, ds):
-        '''
-        Check variables defining height or depth are defined correctly
-        according to CF.
-
-        CF §4.3 Variables representing dimensional height or depth axes must
-        always explicitly include the units attribute; there is no default
-        value.
-
-        The attribute positive is required if the vertical axis units are not a
-        valid unit of pressure. The positive attribute may have the value up or
-        down (case insensitive). This attribute may be applied to either
-        coordinate variables or auxillary coordinate variables that contain
-        vertical coordinate data.
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: list
-        :return: List of results
-        '''
-
-        ret_val = []
-        for k, v in ds.variables.items():
-            if util.is_vertical_coordinate(k, v):
-                # Vertical variables MUST have units
-                has_units = hasattr(v, 'units')
-                result = Result(BaseCheck.HIGH,
-                                has_units,
-                                '§4.3 Vertical coordinates contain valid attributes')
-                ret_val.append(result)
-
-                # If it's not pressure then it must have positive defined
-                if not has_units:
-                    result = Result(BaseCheck.HIGH,
-                                    False,
-                                    '§4.3 Vertical coordinates contain valid attributes', ['%s does not have units' % k])
-                    ret_val.append(result)
-                    continue
-
-                # Do we have pressure?
-                is_pressure = util.units_convertible('dbar', v.units)
-                if is_pressure:
-                    result = Result(BaseCheck.HIGH,
-                                    True,
-                                    '§4.3 Vertical coordinates contain valid attributes')
-                # What about positive?
-                elif getattr(v, 'positive', '').lower() in ('up', 'down'):
-                    result = Result(BaseCheck.HIGH,
-                                    True,
-                                    '§4.3 Vertical coordinates contain valid attributes')
-                # Not-compliant
-                else:
-                    result = Result(BaseCheck.HIGH,
-                                    False,
-                                    '§4.3 Vertical coordinates contain valid attributes',
-                                    ['vertical variable %s needs to define positive attribute' % k])
-                ret_val.append(result)
-        return ret_val
-
     def check_dimensional_vertical_coordinate(self, ds):
         '''
         Check units for variables defining vertical position are valid under
@@ -1662,39 +1605,34 @@ class CFBaseCheck(BaseCheck):
         :return: List of results
         '''
         ret_val = []
-        for k, v in ds.variables.items():
-            # If this is not a vertical coordinate
-            if not util.is_vertical_coordinate(k, v):
+        z_variables = cfutil.get_z_variables(ds)
+        dimless_standard_names = [name for name, regx in dimless_vertical_coordinates]
+        for name in z_variables:
+            variable = ds.variables[name]
+            standard_name = getattr(variable, 'standard_name', None)
+            units = getattr(variable, 'units', None)
+            positive = getattr(variable, 'positive', None)
+            # Skip the variable if it's dimensionless
+            if hasattr(variable, 'formula_terms'):
+                continue
+            if standard_name in dimless_standard_names:
                 continue
 
-            # If this is not height or depth
-            vertical_coordinates = ('height', 'depth')
-            if k not in vertical_coordinates and \
-                    getattr(v, 'standard_name', '') not in vertical_coordinates:
-                continue
+            valid_vertical_coord = TestCtx(BaseCheck.HIGH,
+                                           "§4.3.1 {} is a valid vertical coordinate"
+                                           "".format(name))
+            valid_vertical_coord.assert_true(isinstance(units, basestring) and units,
+                                             "units must be defined for vertical coordinates, there is no default")
 
-            # Satisfies 4.3.1
-            # Pressure or length is okay
-            is_pressure = util.units_convertible(getattr(v, 'units', '1'), 'dbar')
-            is_length   = util.units_convertible(getattr(v, 'units', '1'), 'm')
-            is_temp     = util.units_convertible(getattr(v, 'units', '1'), 'degrees_C')
-            is_density  = util.units_convertible(getattr(v, 'units', '1'), 'kg m-3')
+            if not util.units_convertible('bar', units):
+                valid_vertical_coord.assert_true(positive in ('up', 'down'),
+                                                 "vertical coordinates not defining pressure must include "
+                                                 "a positive attribute that is either 'up' or 'down'")
 
-            if is_pressure or is_length:
-                result = Result(BaseCheck.HIGH, True,
-                                '§4.3.1 Vertical dimension coordinates contain valid attributes',
-                                [])
+            # _check_valid_standard_units, part of the Chapter 3 checks,
+            # already verifies that this coordinate has valid units
 
-            # Temperature or Density are okay as well
-            elif is_temp or is_density:
-                result = Result(BaseCheck.HIGH, True,
-                                '§4.3.1 Vertical dimension coordinates contain valid attributes',
-                                [])
-            else:
-                result = Result(BaseCheck.HIGH, False,
-                                '§4.3.1 Vertical dimension coordinates contain valid attributes',
-                                ['incorrect vertical units'])
-            ret_val.append(result)
+            ret_val.append(valid_vertical_coord.to_result())
 
         return ret_val
 
@@ -1723,51 +1661,83 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
 
         dimless = dict(dimless_vertical_coordinates)
-        for k, v in ds.variables.items():
-            std_name = getattr(v, 'standard_name', '')
-            if std_name not in dimless:
-                continue
-            # Determine if the regex matches for formula_terms
-            valid_formula = re.match(dimless[std_name],
-                                     getattr(v, 'formula_terms', ''))
-
-            if valid_formula is not None:
-                result = Result(BaseCheck.MEDIUM,
-                                True,
-                                '§4.3.2 Dimensionless Coordinates and formula_terms')
-            else:
-                result = Result(BaseCheck.MEDIUM,
-                                False,
-                                '§4.3.2 Dimensionless Coordinates and formula_terms',
-                                ['formula_terms missing from dimensionless coordinate %s' % k])
-            ret_val.append(result)
-
-            # Determine that each of the terms actually exists
-            # If formula_terms wasn't defined then this fails
-            if not valid_formula:
-                result = Result(BaseCheck.MEDIUM,
-                                False,
-                                '§4.3.2 Dimensionless Coordinates and formula_terms',
-                                ['formula_terms not defined for dimensionless coordinate %s' % k])
-                ret_val.append(result)
+        z_variables = cfutil.get_z_variables(ds)
+        deprecated_units = [
+            'level',
+            'layer',
+            'sigma_level'
+        ]
+        for name in z_variables:
+            variable = ds.variables[name]
+            standard_name = getattr(variable, 'standard_name', None)
+            units = getattr(variable, 'units', None)
+            formula_terms = getattr(variable, 'formula_terms', None)
+            # Skip the variable if it's dimensional
+            if formula_terms is None and standard_name not in dimless:
                 continue
 
-            # Check the terms
-            missing_terms = []
-            groups = valid_formula.groups()
-            for i in range(1, len(groups), 2):
-                varname = groups[i]
-                if varname not in ds.variables:
-                    missing_terms.append(varname)
-            # Report the missing terms
-            result = Result(BaseCheck.MEDIUM,
-                            not missing_terms,
-                            '§4.3.2 Dimensionless Coordinates and formula_terms',
-                            ['%s missing for dimensionless coordinate %s' % (i, k) for i in missing_terms])
+            is_not_deprecated = TestCtx(BaseCheck.LOW,
+                                        "§4.3.2 {} does not contain deprecated units"
+                                        "".format(name))
 
-            ret_val.append(result)
+            is_not_deprecated.assert_true(units not in deprecated_units,
+                                          "units are deprecated by CF: {}"
+                                          "".format(units))
+            ret_val.append(is_not_deprecated.to_result())
+            ret_val.append(self._check_formula_terms(ds, name))
 
         return ret_val
+
+    def _check_formula_terms(self, ds, coord):
+        '''
+        Checks a dimensionless vertical coordinate contains valid formula_terms
+
+        - formula_terms is a non-empty string
+        - formula_terms matches regx
+        - every variable defined in formula_terms exists
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        variable = ds.variables[coord]
+        dimless = dict(dimless_vertical_coordinates)
+        standard_name = getattr(variable, 'standard_name', None)
+        formula_terms = getattr(variable, 'formula_terms', None)
+        valid_formula_terms = TestCtx(BaseCheck.HIGH,
+                                      '§4.3.2 {} has valid formula_terms'
+                                      ''.format(coord))
+
+        valid_formula_terms.assert_true(isinstance(formula_terms, basestring) and formula_terms,
+                                        'formula_terms is a required attribute and must be a non-empty string')
+        # We can't check any more
+        if not formula_terms:
+            return valid_formula_terms.to_result()
+
+        valid_formula_terms.assert_true(standard_name in dimless,
+                                        "unknown standard_name for dimensionless vertical coordinate: {}"
+                                        "".format(standard_name))
+        if standard_name not in dimless:
+            return valid_formula_terms.to_result()
+
+        regx_match = re.match(dimless[standard_name], formula_terms)
+        valid_formula_terms.assert_true(regx_match is not None,
+                                        "formula_terms are invalid for {}, please see appendix D of CF 1.6"
+                                        "".format(standard_name))
+
+        if regx_match is None:
+            return valid_formula_terms.to_result()
+
+        # The pattern for formula terms is always component: variable_name
+        # the regex grouping always has component names in even positions and
+        # the corresponding variable name in even positions.
+        match_groups = regx_match.groups()
+
+        for i in range(len(match_groups) / 2):
+            variable_name = match_groups[i * 2 + 1]
+            valid_formula_terms.assert_true(variable_name in ds.variables,
+                                            "variable {} referenced by formula_terms does not exist"
+                                            "".format(variable_name))
+
+        return valid_formula_terms.to_result()
 
     def check_time_coordinate(self, ds):
         '''
