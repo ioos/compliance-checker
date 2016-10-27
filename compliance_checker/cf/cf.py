@@ -2016,10 +2016,8 @@ class CFBaseCheck(BaseCheck):
         :return: List of results
         """
         ret_val = []
-        latitudes = cfutil.get_latitude_variables(ds)
-        latitudes = [lat for lat in latitudes if self._is_true_latitude(ds, lat)]
-        longitudes = cfutil.get_longitude_variables(ds)
-        longitudes = [lon for lon in longitudes if self._is_true_longitude(ds, lon)]
+        latitudes = cfutil.get_true_latitude_variables(ds)
+        longitudes = cfutil.get_true_longitude_variables(ds)
 
         check_featues = [
             '2d-regular-grid',
@@ -2060,7 +2058,7 @@ class CFBaseCheck(BaseCheck):
             for lat in axis_map['Y']:
                 is_subset_dims = set(ds.variables[lat].dimensions).issubset(dimensions)
 
-                if is_subset_dims and self._is_true_latitude(ds, lat):
+                if is_subset_dims and lat in latitudes:
                     found_lat = True
                     break
             has_coords.assert_true(found_lat,
@@ -2072,7 +2070,7 @@ class CFBaseCheck(BaseCheck):
             for lon in axis_map['X']:
                 is_subset_dims = set(ds.variables[lon].dimensions).issubset(dimensions)
 
-                if is_subset_dims and self._is_true_longitude(ds, lon):
+                if is_subset_dims and lon in longitudes:
                     found_lon = True
                     break
             has_coords.assert_true(found_lon,
@@ -2081,60 +2079,6 @@ class CFBaseCheck(BaseCheck):
 
             ret_val.append(has_coords.to_result())
         return ret_val
-
-    def _is_true_latitude(self, ds, variable):
-        '''
-        Returns True if the variable represents true latitude. True latitude
-        has units representing northward degrees and/or a standard_name of
-        latitude.
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :param str variable: Name of the variable
-        '''
-        ncvar = ds.variables[variable]
-        standard_name = getattr(ncvar, 'standard_name', None)
-        units = getattr(ncvar, 'units', None)
-        allowed_lat_units = [
-            'degrees_north',
-            'degree_north',
-            'degree_n',
-            'degrees_n',
-            'degreen',
-            'degreesn'
-        ]
-
-        if standard_name == 'latitude':
-            return True
-        if isinstance(units, basestring) and units.lower() in allowed_lat_units:
-            return True
-        return False
-
-    def _is_true_longitude(self, ds, variable):
-        '''
-        Returns True if the variable represents true longitude. True longitude
-        has units representing eastward degrees and/or a standard_name of
-        longitude.
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :param str variable: Name of the variable
-        '''
-        ncvar = ds.variables[variable]
-        standard_name = getattr(ncvar, 'standard_name', None)
-        units = getattr(ncvar, 'units', None)
-        allowed_lon_units = [
-            'degrees_east',
-            'degree_east',
-            'degree_e',
-            'degrees_e',
-            'degreee',
-            'degreese'
-        ]
-
-        if standard_name == 'longitude':
-            return True
-        if isinstance(units, basestring) and units.lower() in allowed_lon_units:
-            return True
-        return False
 
     def check_reduced_horizontal_grid(self, ds):
         """

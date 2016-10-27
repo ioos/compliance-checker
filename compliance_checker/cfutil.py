@@ -19,6 +19,23 @@ except NameError:
 _UNITLESS_DB = None
 _SEA_NAMES = None
 
+VALID_LAT_UNITS = [
+    'degrees_north',
+    'degree_north',
+    'degree_n',
+    'degrees_n',
+    'degreen',
+    'degreesn'
+]
+VALID_LON_UNITS = [
+    'degrees_east',
+    'degree_east',
+    'degree_e',
+    'degrees_e',
+    'degreee',
+    'degreese'
+]
+
 
 def get_unitless_standard_names():
     '''
@@ -318,14 +335,6 @@ def get_latitude_variables(nc):
 
     :param netcdf4.dataset nc: an open netcdf dataset object
     '''
-    allowed_lat_units = [
-        'degrees_north',
-        'degree_north',
-        'degree_n',
-        'degrees_n',
-        'degreen',
-        'degreesn'
-    ]
     latitude_variables = []
     # standard_name takes precedence
     for variable in nc.get_variables_by_attributes(standard_name="latitude"):
@@ -336,11 +345,37 @@ def get_latitude_variables(nc):
         if variable.name not in latitude_variables:
             latitude_variables.append(variable.name)
 
-    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in allowed_lat_units):
+    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in VALID_LAT_UNITS):
         if variable.name not in latitude_variables:
             latitude_variables.append(variable.name)
 
     return latitude_variables
+
+
+def get_true_latitude_variables(nc):
+    '''
+    Returns a list of variables defining true latitude.
+
+    CF Chapter 4 refers to latitude as a coordinate variable that can also be
+    used in non-standard coordinate systems like rotated pole and other
+    projections. Chapter 5 refers to a concept of true latitude where the
+    variabe defines latitude in a standard projection.
+
+    True latitude, for lack of a better definition, is simply latitude where
+    the standard_name is latitude or the units are degrees_north.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    '''
+    lats = get_latitude_variables(nc)
+    true_lats = []
+    for lat in lats:
+        standard_name = getattr(nc.variables[lat], "standard_name", None)
+        units = getattr(nc.variables[lat], "units", None)
+        if standard_name == 'latitude':
+            true_lats.append(lat)
+        elif isinstance(units, basestring) and units.lower() in VALID_LAT_UNITS:
+            true_lats.append(lat)
+    return true_lats
 
 
 def get_lon_variable(nc):
@@ -361,14 +396,6 @@ def get_longitude_variables(nc):
 
     :param netcdf4.dataset nc: an open netcdf dataset object
     '''
-    allowed_lon_units = [
-        'degrees_east',
-        'degree_east',
-        'degree_e',
-        'degrees_e',
-        'degreee',
-        'degreese'
-    ]
     longitude_variables = []
     # standard_name takes precedence
     for variable in nc.get_variables_by_attributes(standard_name="longitude"):
@@ -379,11 +406,37 @@ def get_longitude_variables(nc):
         if variable.name not in longitude_variables:
             longitude_variables.append(variable.name)
 
-    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in allowed_lon_units):
+    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in VALID_LON_UNITS):
         if variable.name not in longitude_variables:
             longitude_variables.append(variable.name)
 
     return longitude_variables
+
+
+def get_true_longitude_variables(nc):
+    '''
+    Returns a list of variables defining true longitude.
+
+    CF Chapter 4 refers to longitude as a coordinate variable that can also be
+    used in non-standard coordinate systems like rotated pole and other
+    projections. Chapter 5 refers to a concept of true longitude where the
+    variabe defines longitude in a standard projection.
+
+    True longitude, for lack of a better definition, is simply longitude where
+    the standard_name is longitude or the units are degrees_north.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    '''
+    lons = get_longitude_variables(nc)
+    true_lons = []
+    for lon in lons:
+        standard_name = getattr(nc.variables[lon], "standard_name", None)
+        units = getattr(nc.variables[lon], "units", None)
+        if standard_name == 'longitude':
+            true_lons.append(lon)
+        elif isinstance(units, basestring) and units.lower() in VALID_LON_UNITS:
+            true_lons.append(lon)
+    return true_lons
 
 
 def get_platform_variables(ds):
