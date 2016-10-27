@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import unicode_literals, division
 import re
 from functools import wraps
 from collections import defaultdict
@@ -1731,7 +1731,7 @@ class CFBaseCheck(BaseCheck):
         # the corresponding variable name in even positions.
         match_groups = regx_match.groups()
 
-        for i in range(len(match_groups) / 2):
+        for i in range(int(len(match_groups) / 2)):
             variable_name = match_groups[i * 2 + 1]
             valid_formula_terms.assert_true(variable_name in ds.variables,
                                             "variable {} referenced by formula_terms does not exist"
