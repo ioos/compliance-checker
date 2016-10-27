@@ -6,6 +6,7 @@ compliance_checker/cfutil.py
 from cf_units import Unit
 from pkg_resources import resource_filename
 from collections import defaultdict
+from compliance_checker.cf import appendix_d
 import csv
 import json
 
@@ -35,6 +36,8 @@ VALID_LON_UNITS = [
     'degreee',
     'degreese'
 ]
+
+DIMENSIONLESS_VERTICAL_COORDINATES = [name for name, regx in appendix_d.dimless_vertical_coordinates]
 
 
 def get_unitless_standard_names():
@@ -312,6 +315,8 @@ def get_z_variables(nc):
         if coord_name not in z_variables and axis == 'Z':
             z_variables.append(coord_name)
         if coord_name not in z_variables and standard_name in ('depth', 'height', 'altitude'):
+            z_variables.append(coord_name)
+        if coord_name not in z_variables and standard_name in DIMENSIONLESS_VERTICAL_COORDINATES:
             z_variables.append(coord_name)
 
     return z_variables
