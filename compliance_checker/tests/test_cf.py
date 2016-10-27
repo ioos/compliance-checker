@@ -116,10 +116,10 @@ class TestCF(BaseTestCase):
         results = self.cf.check_naming_conventions(dataset)
         result_dict = {result.name: result for result in results}
         result = result_dict[u'§2.3 Naming Conventions for variables']
-        assert result.value == (14, 15)
+        assert result.value == (13, 14)
         assert u'variable _poor_dim should begin with a letter and be composed of letters, digits, and underscores' == result.msgs[0]
         score, out_of, messages = self.get_results(results)
-        assert (score, out_of) == (52, 54)
+        assert (score, out_of) == (49, 51)
 
         dataset = self.load_dataset(STATIC_FILES['chap2'])
         results = self.cf.check_naming_conventions(dataset)
@@ -723,10 +723,8 @@ class TestCF(BaseTestCase):
 
         scored, out_of, messages = self.get_results(results)
 
-        assert 'bad_time_1 does not have units' in messages
-        assert 'bad_time_2 doesn not have correct time units' in messages
-        assert scored == 1
-        assert out_of == 3
+        assert 'time does not have correct time units' in messages
+        assert (scored, out_of) == (1, 2)
 
     def test_check_calendar(self):
         dataset = self.load_dataset(STATIC_FILES['example-grid'])
@@ -738,8 +736,7 @@ class TestCF(BaseTestCase):
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = self.get_results(results)
 
-        assert 'Variable bad_time_1 should have a calendar attribute' in messages
-        assert "Variable bad_time_2 should have a valid calendar: 'nope' is not a valid calendar" in messages
+        assert "Variable time should have a valid calendar: 'nope' is not a valid calendar" in messages
 
     def test_check_grid_coordinates(self):
         dataset = self.load_dataset(STATIC_FILES['2dim'])
@@ -751,6 +748,12 @@ class TestCF(BaseTestCase):
         assert result.value == (2, 2)
         assert (scored, out_of) == (2, 2)
 
+    def test_check_two_dimensional(self):
+        dataset = self.load_dataset(STATIC_FILES['2dim'])
+        results = self.cf.check_grid_coordinates(dataset)
+        for r in results:
+            self.assertTrue(r.value)
+        # Need the bad testing
         dataset = self.load_dataset(STATIC_FILES['bad2dim'])
         results = self.cf.check_grid_coordinates(dataset)
         scored, out_of, messages = self.get_results(results)
@@ -778,7 +781,7 @@ class TestCF(BaseTestCase):
 
         self.assertIn('Coordinate longitude is not a proper variable', rd['PSa'][1])
         self.assertIn("Coordinate latitude's dimension, latdim, is not a dimension of PSb", rd['PSb'][1])
-        assert 'PSc' not in list(rd.keys())
+        assert 'PSc' not in rd
 
     def test_check_horz_crs_grid_mappings_projections(self):
         dataset = self.load_dataset(STATIC_FILES['mapping'])

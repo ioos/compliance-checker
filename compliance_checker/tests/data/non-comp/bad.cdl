@@ -45,14 +45,11 @@ variables:
 		lev2:standard_name = "atmosphere_hybrid_height_coordinate" ;
 		lev2:formula_terms = "a: var1 b: var2 orog: var3" ;
 		lev2:description = "Missing variables from formula_terms" ;
-	double bad_time_1(time) ;
-		bad_time_1:standard_name = "time" ;
-		bad_time_1:description = "lacks units" ;
-	double bad_time_2(time) ;
-		bad_time_2:units = "seconds" ;
-		bad_time_2:description = "incorrect units" ;
-		bad_time_2:standard_name = "time" ;
-		bad_time_2:calendar = "nope" ;
+	double time(time) ;
+		time:units = "seconds" ;
+		time:description = "incorrect units" ;
+		time:standard_name = "time" ;
+		time:calendar = "nope" ;
 	float column_temp(time, sigma) ;
 		column_temp:description = "sigma is not a coordinate variable" ;
 }
