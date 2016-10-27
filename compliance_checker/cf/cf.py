@@ -1858,27 +1858,24 @@ class CFBaseCheck(BaseCheck):
 
         ret_val = []
 
-        for k, v in ds.variables.items():
-            if not util.is_time_variable(k, v):
-                continue
-            reasoning = None
-            has_calendar = hasattr(v, 'calendar')
+        # if has a calendar, check that it is within the valid values
+        # otherwise no calendar is valid
+        for time_var in \
+            ds.get_variables_by_attributes(calendar=lambda c: c is not None):
+            reasoning=None
+            valid_calendar = time_var.calendar in valid_calendars
+
+            if not valid_calendar:
+                reasoning = ["Variable %s should have a valid calendar: '%s' is not a valid calendar" % (time_var.name, time_var.calendar)]
+
+            # passes if the calendar is valid, otherwise notify of invalid
+            # calendar
+
             result = Result(BaseCheck.LOW,
-                            has_calendar,
+                            valid_calendar,
                             '§4.4.1 Time and calendar',
                             reasoning)
-            # if has a calendar, check that it is within the valid values
-            # otherwise no calendar is valid
-            if has_calendar:
-                reasoning = None
-                valid_calendar = v.calendar in valid_calendars
-                if not valid_calendar:
-                    reasoning = ["Variable %s should have a valid calendar: '%s' is not a valid calendar" % (k, v.calendar)]
-                    result = Result(BaseCheck.LOW,
-                                    valid_calendar,
-                                    '§4.4.1 Time and calendar',
-                                    reasoning)
-                ret_val.append(result)
+            ret_val.append(result)
 
         return ret_val
 
