@@ -79,4 +79,5 @@ STATIC_FILES = {
     '2d-static-grid'                       : get_filename('tests/data/2d-static-grid.cdl'),
     '3d-static-grid'                       : get_filename('tests/data/3d-static-grid.cdl'),
     'illegal-vertical'                     : get_filename('tests/data/illegal-vertical.cdl'),
+    'illegal-aux-coords'                   : get_filename('tests/data/illegal-aux-coords.cdl'),
 }

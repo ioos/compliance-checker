@@ -1901,6 +1901,53 @@ class CFBaseCheck(BaseCheck):
                 coord_vars.append(name)
         return coord_vars
 
+    def check_aux_coordinates(self, ds):
+        '''
+        Chapter 5 paragraph 3
+
+        The dimensions of an auxiliary coordinate variable must be a subset of
+        the dimensions of the variable with which the coordinate is associated,
+        with two exceptions. First, string-valued coordinates (Section 6.1,
+        "Labels") have a dimension for maximum string length. Second, in the
+        ragged array representations of data (Chapter 9, Discrete Sampling
+        Geometries), special methods are needed to connect the data and
+        coordinates.
+        '''
+
+        ret_val = []
+        geophysical_variables = self._find_geophysical_vars(ds)
+        for name in geophysical_variables:
+            variable = ds.variables[name]
+            coordinates = getattr(variable, 'coordinates', None)
+            # We use a set so we can assert
+            dim_set = set(variable.dimensions)
+            # No auxiliary coordinates, no check
+            if not isinstance(coordinates, basestring) or coordinates == '':
+                continue
+
+            valid_aux_coords = TestCtx(BaseCheck.HIGH,
+                                       "§5.0 Auxiliary Coordinates of {} must have a subset of {}'s dimensions"
+                                       "".format(name, name))
+
+            for aux_coord in coordinates.split():
+                valid_aux_coords.assert_true(aux_coord in ds.variables,
+                                             "auxiliary coordinate specified by the coordinates attribute, {}, "
+                                             "is not a variable in this dataset"
+                                             "".format(aux_coord))
+                if aux_coord not in ds.variables:
+                    continue
+
+                aux_coord_dims = set(ds.variables[aux_coord].dimensions)
+                valid_aux_coords.assert_true(aux_coord_dims.issubset(dim_set),
+                                             "dimensions for auxiliary coordinate variable {} ({}) "
+                                             "are not a subset of dimensions for variable {} ({})"
+                                             "".format(aux_coord,
+                                                       ', '.join(aux_coord_dims),
+                                                       name,
+                                                       ', '.join(dim_set)))
+            ret_val.append(valid_aux_coords.to_result())
+        return ret_val
+
     def check_duplicate_axis(self, ds):
         '''
         Checks that no variable contains two coordinates defining the same

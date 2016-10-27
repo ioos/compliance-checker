@@ -1,0 +1,31 @@
+netcdf illegal-aux-cords {
+dimensions:
+    xc = 2;
+    yc = 2;
+
+variables:
+    double xc(xc);
+        xc:long_name = "X-coordinate map";
+        xc:axis = "X";
+
+    double yc(yc);
+        yc:long_name = "Y-coordinat map";
+        yc:axis = "Y";
+
+    double lat(xc, yc);
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+
+    double lon(xc, yc);
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+
+    double h_temp(xc);
+        h_temp:long_name = "Fixed temperature bins along the horizontal axis";
+        h_temp:units = "deg_C";
+        h_temp:coordinates = "lat lon"; //illegal
+
+    double sal(xc, yc);
+        sal:standard_name = "sea_water_salinity";
+        sal:coordinates = "lat lon";
+}
