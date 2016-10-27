@@ -598,27 +598,6 @@ class TestCF(BaseTestCase):
         positive.positive = 'up'
         self.assertTrue(is_vertical_coordinate('not_known', positive))
 
-    def test_vertical_coordinate(self):
-        '''
-        Section 4.3 Vertical (Height or Depth) coordinate
-        '''
-        # Check compliance
-
-        dataset = self.load_dataset(STATIC_FILES['example-grid'])
-        results = self.cf.check_vertical_coordinate(dataset)
-        for r in results:
-            self.assertTrue(r.value)
-
-        # Check non-compliance
-        dataset = self.load_dataset(STATIC_FILES['bad'])
-        results = self.cf.check_vertical_coordinate(dataset)
-
-        scored, out_of, messages = self.get_results(results)
-
-        assert 'height does not have units' in messages
-        assert 'vertical variable depth needs to define positive attribute'
-        assert 'vertical variable depth2 needs to define positive attribute'
-
     def test_vertical_dimension(self):
         '''
         Section 4.3.1 Dimensional Vertical Coordinate
@@ -626,14 +605,18 @@ class TestCF(BaseTestCase):
         # Check for compliance
         dataset = self.load_dataset(STATIC_FILES['example-grid'])
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
-        for r in results:
-            self.assertTrue(r.value)
+        assert len(results) == 1
+        assert results[0].name == u'§4.3.1 height is a valid vertical coordinate'
+        assert results[0].value == (2, 2)
 
-        # Check for non-compliance
-        dataset = self.load_dataset(STATIC_FILES['bad'])
+        dataset = self.load_dataset(STATIC_FILES['illegal-vertical'])
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
-        for r in results:
-            self.assertFalse(r.value)
+        assert len(results) == 1
+        assert results[0].name == u'§4.3.1 z is a valid vertical coordinate'
+        assert results[0].value == (0, 2)
+        assert results[0].msgs[0] == 'units must be defined for vertical coordinates, there is no default'
+        assert results[0].msgs[1] == ("vertical coordinates not defining pressure must include a positive attribute that "
+                                      "is either 'up' or 'down'")
 
     def test_appendix_d(self):
         '''
@@ -687,22 +670,29 @@ class TestCF(BaseTestCase):
         # Check affirmative compliance
         dataset = self.load_dataset(STATIC_FILES['dimensionless'])
         results = self.cf.check_dimensionless_vertical_coordinate(dataset)
-        for r in results:
-            self.assertTrue(r.value)
+
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§4.3.2 lev does not contain deprecated units']
+        assert result.value == (1, 1)
+        result = result_dict[u'§4.3.2 lev has valid formula_terms']
+        assert result.value == (6, 6)
 
         # Check negative compliance
         dataset = self.load_dataset(STATIC_FILES['bad'])
         results = self.cf.check_dimensionless_vertical_coordinate(dataset)
 
-        scored, out_of, messages = self.get_results(results)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§4.3.2 lev1 does not contain deprecated units']
+        assert result.value == (1, 1)
+        result = result_dict[u'§4.3.2 lev1 has valid formula_terms']
+        assert result.value == (0, 1)
+        assert result.msgs[0] == u'formula_terms is a required attribute and must be a non-empty string'
 
-        assert 'formula_terms missing from dimensionless coordinate lev1' in messages
-        assert 'formula_terms not defined for dimensionless coordinate lev1' in messages
-        assert 'var1 missing for dimensionless coordinate lev2' in messages
-        assert 'var2 missing for dimensionless coordinate lev2' in messages
-        assert 'var3 missing for dimensionless coordinate lev2' in messages
-        assert scored == 1
-        assert out_of == 4
+        result = result_dict[u'§4.3.2 lev2 has valid formula_terms']
+        assert result.value == (3, 6)
+        assert result.msgs[0] == 'variable var1 referenced by formula_terms does not exist'
+        assert result.msgs[1] == 'variable var2 referenced by formula_terms does not exist'
+        assert result.msgs[2] == 'variable var3 referenced by formula_terms does not exist'
 
     def test_is_time_variable(self):
         var1 = MockVariable()

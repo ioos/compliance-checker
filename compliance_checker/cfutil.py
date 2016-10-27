@@ -37,6 +37,20 @@ VALID_LON_UNITS = [
 ]
 
 
+# We can't import appendix d without getting circular imports
+DIMENSIONLESS_VERTICAL_COORDINATES = [
+    'ocean_s_coordinate',
+    'atmosphere_hybrid_sigma_pressure_coordinate',
+    'atmosphere_hybrid_height_coordinate',
+    'ocean_double_sigma_coordinate',
+    'ocean_sigma_z_coordinate',
+    'ocean_sigma_coordinate',
+    'atmosphere_sigma_coordinate',
+    'atmosphere_ln_pressure_coordinate',
+    'atmosphere_sleve_coordinate'
+]
+
+
 def get_unitless_standard_names():
     '''
     Returns a list of valid standard_names that are allowed to be unitless
@@ -191,6 +205,7 @@ def get_auxiliary_coordinate_variables(ds):
 
     # Last are any variables that define the common coordinate standard names
     coordinate_standard_names = ['time', 'longitude', 'latitude', 'height', 'depth', 'altitude']
+    coordinate_standard_names += DIMENSIONLESS_VERTICAL_COORDINATES
 
     # Some datasets like ROMS use multiple variables to define coordinates
     for ncvar in ds.get_variables_by_attributes(standard_name=lambda x: x in coordinate_standard_names):
@@ -312,6 +327,8 @@ def get_z_variables(nc):
         if coord_name not in z_variables and axis == 'Z':
             z_variables.append(coord_name)
         if coord_name not in z_variables and standard_name in ('depth', 'height', 'altitude'):
+            z_variables.append(coord_name)
+        if coord_name not in z_variables and standard_name in DIMENSIONLESS_VERTICAL_COORDINATES:
             z_variables.append(coord_name)
 
     return z_variables
