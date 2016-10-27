@@ -8,11 +8,10 @@ import numpy as np
 import os
 import six
 
-from compliance_checker.base import BaseCheck, BaseNCCheck, score_group, Result, TestCtx
+from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
-from compliance_checker.cf.util import NCGraph, StandardNameTable, units_known, units_convertible, units_temporal, map_axes, find_coord_vars, is_time_variable, is_vertical_coordinate, create_cached_data_dir, download_cf_standard_name_table, _possiblet, _possiblez, _possiblex, _possibley, _possibleaxis, _possibleaxisunits
+from compliance_checker.cf import util
 from compliance_checker import cfutil
-from compliance_checker.cf.util import _possibleyunits, _possiblexunits
 
 try:
     basestring
@@ -40,10 +39,10 @@ def guess_dim_type(dimension):
     If can't figure it out, None is returned.
     """
 
-    dimclasses = {'T': _possiblet,
-                  'Z': _possiblez,
-                  'Y': _possibley,
-                  'X': _possiblex}
+    dimclasses = {'T': util._possiblet,
+                  'Z': util._possiblez,
+                  'Y': util._possibley,
+                  'X': util._possiblex}
 
     for dcname, dcvals in dimclasses.items():
         if dimension in dcvals:
@@ -108,7 +107,7 @@ class CFBaseCheck(BaseCheck):
         self._geophysical_vars = defaultdict(list)
         self._aux_coords       = defaultdict(list)
 
-        self._std_names        = StandardNameTable()
+        self._std_names        = util.StandardNameTable()
 
     ################################################################################
     #
@@ -154,16 +153,16 @@ class CFBaseCheck(BaseCheck):
 
         # Try to download the version specified
         try:
-            data_directory = create_cached_data_dir()
+            data_directory = util.create_cached_data_dir()
             location = os.path.join(data_directory, 'cf-standard-name-table-test-{0}.xml'.format(version))
             # Did we already download this before?
             if not os.path.isfile(location):
-                download_cf_standard_name_table(version, location)
+                util.download_cf_standard_name_table(version, location)
                 print("Using downloaded standard name table v{0}".format(version))
             else:
                 print("Using cached standard name table v{0} from {1}".format(version, location))
 
-            self._std_names = StandardNameTable(location)
+            self._std_names = util.StandardNameTable(location)
             return True
         except Exception:
             # There was an error downloading the CF table. That's ok, we'll just use the packaged version
@@ -814,7 +813,7 @@ class CFBaseCheck(BaseCheck):
 
         valid_udunits = TestCtx(BaseCheck.LOW,
                                 "§3.1 Variable {}'s units are contained in UDUnits".format(variable_name))
-        are_udunits = (units is not None and units_known(units))
+        are_udunits = (units is not None and util.units_known(units))
         valid_udunits.assert_true(should_be_unitless or are_udunits,
                                   'units for {}, "{}" are not recognized by udunits'.format(variable_name, units))
         return valid_udunits.to_result()
@@ -862,14 +861,14 @@ class CFBaseCheck(BaseCheck):
 
         # UDUnits accepts "s" as a unit of time but it should be <unit> since <epoch>
         if standard_name == 'time':
-            valid_standard_units.assert_true(units_convertible(units, 'seconds since 1970-01-01'),
+            valid_standard_units.assert_true(util.units_convertible(units, 'seconds since 1970-01-01'),
                                              'time must be in a valid units format <unit> since <epoch> '
                                              'not {}'.format(units))
 
         # UDunits can't tell the difference between east and north facing coordinates
         elif standard_name == 'latitude':
             # degrees is allowed if using a transformed grid
-            allowed_units = [i.lower() for i in _possibleyunits] + ['degrees']
+            allowed_units = [i.lower() for i in util._possibleyunits] + ['degrees']
             valid_standard_units.assert_true(units.lower() in allowed_units,
                                              'variables defining latitude must use degrees_north '
                                              'or degrees if defining a transformed grid. Currently '
@@ -877,7 +876,7 @@ class CFBaseCheck(BaseCheck):
         # UDunits can't tell the difference between east and north facing coordinates
         elif standard_name == 'longitude':
             # degrees is allowed if using a transformed grid
-            allowed_units = [i.lower() for i in _possiblexunits] + ['degrees']
+            allowed_units = [i.lower() for i in util._possiblexunits] + ['degrees']
             valid_standard_units.assert_true(units.lower() in allowed_units,
                                              'variables defining longitude must use degrees_east '
                                              'or degrees if defining a transformed grid. Currently '
@@ -887,7 +886,7 @@ class CFBaseCheck(BaseCheck):
             valid_standard_units.assert_true(True, '')
 
         else:
-            valid_standard_units.assert_true(units_convertible(canonical_units, units),
+            valid_standard_units.assert_true(util.units_convertible(canonical_units, units),
                                              'units for variable {} must be convertible to {} '
                                              'currently they are {}'.format(variable_name, canonical_units, units))
 
@@ -1600,7 +1599,7 @@ class CFBaseCheck(BaseCheck):
 
         ret_val = []
         for k, v in ds.variables.items():
-            if is_vertical_coordinate(k, v):
+            if util.is_vertical_coordinate(k, v):
                 # Vertical variables MUST have units
                 has_units = hasattr(v, 'units')
                 result = Result(BaseCheck.HIGH,
@@ -1617,7 +1616,7 @@ class CFBaseCheck(BaseCheck):
                     continue
 
                 # Do we have pressure?
-                is_pressure = units_convertible('dbar', v.units)
+                is_pressure = util.units_convertible('dbar', v.units)
                 if is_pressure:
                     result = Result(BaseCheck.HIGH,
                                     True,
@@ -1665,7 +1664,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         for k, v in ds.variables.items():
             # If this is not a vertical coordinate
-            if not is_vertical_coordinate(k, v):
+            if not util.is_vertical_coordinate(k, v):
                 continue
 
             # If this is not height or depth
@@ -1676,10 +1675,10 @@ class CFBaseCheck(BaseCheck):
 
             # Satisfies 4.3.1
             # Pressure or length is okay
-            is_pressure = units_convertible(getattr(v, 'units', '1'), 'dbar')
-            is_length   = units_convertible(getattr(v, 'units', '1'), 'm')
-            is_temp     = units_convertible(getattr(v, 'units', '1'), 'degrees_C')
-            is_density  = units_convertible(getattr(v, 'units', '1'), 'kg m-3')
+            is_pressure = util.units_convertible(getattr(v, 'units', '1'), 'dbar')
+            is_length   = util.units_convertible(getattr(v, 'units', '1'), 'm')
+            is_temp     = util.units_convertible(getattr(v, 'units', '1'), 'degrees_C')
+            is_density  = util.units_convertible(getattr(v, 'units', '1'), 'kg m-3')
 
             if is_pressure or is_length:
                 result = Result(BaseCheck.HIGH, True,
@@ -1804,7 +1803,7 @@ class CFBaseCheck(BaseCheck):
 
         ret_val = []
         for k, v in ds.variables.items():
-            if not is_time_variable(k, v):
+            if not util.is_time_variable(k, v):
                 continue
             # Has units
             has_units = hasattr(v, 'units')
@@ -1819,7 +1818,7 @@ class CFBaseCheck(BaseCheck):
                             True,
                             '§4.4 Time coordinate variable and attributes')
             ret_val.append(result)
-            correct_units = units_temporal(v.units)
+            correct_units = util.units_temporal(v.units)
             reasoning = None
             if not correct_units:
                 reasoning = ['%s doesn not have correct time units' % k]
@@ -1889,7 +1888,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
 
         for k, v in ds.variables.items():
-            if not is_time_variable(k, v):
+            if not util.is_time_variable(k, v):
                 continue
             reasoning = None
             has_calendar = hasattr(v, 'calendar')
