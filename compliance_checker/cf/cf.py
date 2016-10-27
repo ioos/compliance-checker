@@ -2038,15 +2038,24 @@ class CFBaseCheck(BaseCheck):
         # associated with a true latitude or longitude coordinate.
 
         for variable in self._find_geophysical_vars(ds):
+            # We use a set so we can do set-wise comparisons with coordinate
+            # dimensions
             dimensions = set(ds.variables[variable].dimensions)
+            # If it's not a grid, skip it
             if cfutil.guess_feature_type(ds, variable) not in check_featues:
                 continue
             has_coords = TestCtx(BaseCheck.HIGH,
                                  '§5.6 Grid Feature {} is associated with true latitude and true longitude'
                                  ''.format(variable))
 
+            # axis_map is a defaultdict(list) mapping the axis to a list of
+            # coordinate names. For example:
+            # {'X': ['lon'], 'Y':['lat'], 'Z':['lev']}
+            # The mapping comes from the dimensions of the variable and the
+            # contents of the `coordinates` attribute only.
             axis_map = cfutil.get_axis_map(ds, variable)
 
+            # Make sure we can find latitude and it's dimensions are a subset
             found_lat = False
             for lat in axis_map['Y']:
                 is_subset_dims = set(ds.variables[lat].dimensions).issubset(dimensions)
@@ -2058,6 +2067,7 @@ class CFBaseCheck(BaseCheck):
                                    '{} is not associated with a coordinate defining true latitude '
                                    'and sharing a subset of dimensions'.format(variable))
 
+            # Make sure we can find longitude and it's dimensions are a subset
             found_lon = False
             for lon in axis_map['X']:
                 is_subset_dims = set(ds.variables[lon].dimensions).issubset(dimensions)
