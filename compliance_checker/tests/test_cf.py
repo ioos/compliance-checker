@@ -738,6 +738,19 @@ class TestCF(BaseTestCase):
 
         assert "Variable time should have a valid calendar: 'nope' is not a valid calendar" in messages
 
+    def test_check_aux_coordinates(self):
+        dataset = self.load_dataset(STATIC_FILES['illegal-aux-coords'])
+        results = self.cf.check_aux_coordinates(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u"§5.0 Auxiliary Coordinates of h_temp must have a subset of h_temp's dimensions"]
+        assert result.value == (2, 4)
+        regx = (r"dimensions for auxiliary coordinate variable lat \([xy]c, [xy]c\) are not a subset of dimensions for variable "
+                r"h_temp \(xc\)")
+        assert re.match(regx, result.msgs[0]) is not None
+
+        result = result_dict[u"§5.0 Auxiliary Coordinates of sal must have a subset of sal's dimensions"]
+        assert result.value == (4, 4)
+
     def test_check_grid_coordinates(self):
         dataset = self.load_dataset(STATIC_FILES['2dim'])
         results = self.cf.check_grid_coordinates(dataset)
