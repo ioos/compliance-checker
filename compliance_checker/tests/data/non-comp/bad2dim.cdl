@@ -8,12 +8,12 @@ variables:
 	float T(lev, yc, xc) ;
 		T:long_name = "Temperature" ;
 		T:units = "K" ;
-		T:coordinates = "lon lat" ;
+		T:coordinates = "lon" ;
 		T:description = "lat is missing" ;
 	float C(lev, yc, xc) ;
 		C:long_name = "Conductivity" ;
 		C:units = "S m-1" ;
-		C:coordinates = "lon lat_p" ;
+		C:coordinates = "lon lat" ;
 		C:description = "Dims don\'t match coordinates" ;
 	float xc(xc) ;
 		xc:axis = "X" ;
@@ -29,7 +29,7 @@ variables:
 	float lon(yc, xc) ;
 		lon:long_name = "longitude" ;
 		lon:units = "degrees_east" ;
-	float lat_p(yc, x) ;
-		lat_p:long_name = "latitude_proj" ;
-		lat_p:units = "degrees_north" ;
+	float lat(yc, x) ;
+		lat:long_name = "latitude_proj" ;
+		lat:units = "degrees_north" ;
 }

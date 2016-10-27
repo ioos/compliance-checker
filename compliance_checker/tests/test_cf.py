@@ -751,39 +751,27 @@ class TestCF(BaseTestCase):
         assert 'Variable bad_time_1 should have a calendar attribute' in messages
         assert "Variable bad_time_2 should have a valid calendar: 'nope' is not a valid calendar" in messages
 
-    def test_self_referencing(self):
-        '''
-        This test captures a check where a coordinate has circular references
-        '''
-        dataset = self.load_dataset(STATIC_FILES['self_referencing'])
-        results = self.cf.check_two_dimensional(dataset)
-
-        scored, out_of, messages = self.get_results(results)
-        assert "Variable LATITUDE's coordinate references itself" in messages
-        assert scored == 1
-        assert out_of == 3
-
-        dataset = self.load_dataset(STATIC_FILES['valid_coordinates'])
-        results = self.cf.check_two_dimensional(dataset)
-        scored, out_of, messages = self.get_results(results)
-        assert out_of == 4
-        assert scored == 4
-        assert "Variable CD_310's coordinate references itself" not in messages
-
-    def test_check_two_dimensional(self):
+    def test_check_grid_coordinates(self):
         dataset = self.load_dataset(STATIC_FILES['2dim'])
-        results = self.cf.check_two_dimensional(dataset)
-        for r in results:
-            self.assertTrue(r.value)
-        # Need the bad testing
-        dataset = self.load_dataset(STATIC_FILES['bad2dim'])
-        results = self.cf.check_two_dimensional(dataset)
-
+        results = self.cf.check_grid_coordinates(dataset)
         scored, out_of, messages = self.get_results(results)
 
-        assert "Variable T's coordinate, lat, is not a coordinate or auxiliary variable" in messages
-        assert "coordinate lat is not a correct lat/lon variable" in messages
-        assert "Variable C's coordinate, lat_p, does not share dimension x with the variable" in messages
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§5.6 Grid Feature T is associated with true latitude and true longitude']
+        assert result.value == (2, 2)
+        assert (scored, out_of) == (2, 2)
+
+        dataset = self.load_dataset(STATIC_FILES['bad2dim'])
+        results = self.cf.check_grid_coordinates(dataset)
+        scored, out_of, messages = self.get_results(results)
+
+        result_dict = {result.name: result for result in results}
+        # Missing association
+        result = result_dict[u'§5.6 Grid Feature T is associated with true latitude and true longitude']
+        assert result.msgs[0] == 'T is not associated with a coordinate defining true latitude and sharing a subset of dimensions'
+        # Dimensions aren't a subet of the variables'
+        result = result_dict[u'§5.6 Grid Feature C is associated with true latitude and true longitude']
+        assert result.msgs[0] == 'C is not associated with a coordinate defining true latitude and sharing a subset of dimensions'
 
     def test_check_reduced_horizontal_grid(self):
         dataset = self.load_dataset(STATIC_FILES['rhgrid'])

@@ -2005,122 +2005,126 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
-    def check_two_dimensional(self, ds):
+    def check_grid_coordinates(self, ds):
         """
-        5.2 The latitude and longitude coordinates of a horizontal grid that was
-        not defined as a Cartesian product of latitude and longitude axes, can
-        sometimes be represented using two-dimensional coordinate variables.
-        These variables are identified as coordinates by use of the coordinates
-        attribute.
-
-        For each variable, if the variable has a coordinates attribute:
-          for each coordinate defined, verify that the coordinate:
-            is either a coordinate variable OR comprises coordinate variables
+        5.6 When the coordinate variables for a horizontal grid are not
+        longitude and latitude, it is required that the true latitude and
+        longitude coordinates be supplied via the coordinates attribute.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: list
         :return: List of results
         """
         ret_val = []
-        reported_reference_variables = []
+        latitudes = cfutil.get_latitude_variables(ds)
+        latitudes = [lat for lat in latitudes if self._is_true_latitude(ds, lat)]
+        longitudes = cfutil.get_longitude_variables(ds)
+        longitudes = [lon for lon in longitudes if self._is_true_longitude(ds, lon)]
 
-        for name, var in ds.variables.items():
-            self_reference_variables = set()
-            g = NCGraph(ds, name, var, self_reference_variables)
+        check_featues = [
+            '2d-regular-grid',
+            '2d-static-grid',
+            '3d-regular-grid',
+            '3d-static-grid',
+            'mapped-grid',
+            'reduced-grid'
+        ]
 
-            reasoning = []
+        # This one is tricky because there's a very subtle difference between
+        # latitude as defined in Chapter 4 and "true" latitude as defined in
+        # chapter 5.
 
-            for coord in g.coords:
-                if coord in reported_reference_variables:
-                    continue
-                if coord in self_reference_variables:
-                    reasoning.append("Variable %s's coordinate references itself" % (coord))
+        # For each geophysical variable that defines a grid, assert it is
+        # associated with a true latitude or longitude coordinate.
 
-                    result = Result(BaseCheck.HIGH,
-                                    False,
-                                    ('§5.2 Latitude and longitude coordinates of a horizontal grid', coord, 'coordinates_reference_itself'),
-                                    reasoning)
-                    ret_val.append(result)
-                else:
-                    result = Result(BaseCheck.HIGH,
-                                    True,
-                                    ('§5.2 Latitude and longitude coordinates of a horizontal grid', coord, 'coordinates_reference_itself'),
-                                    [])
-                    ret_val.append(result)
-                reported_reference_variables.append(coord)
+        for variable in self._find_geophysical_vars(ds):
+            dimensions = set(ds.variables[variable].dimensions)
+            if cfutil.guess_feature_type(ds, variable) not in check_featues:
+                continue
+            has_coords = TestCtx(BaseCheck.HIGH,
+                                 '§5.6 Grid Feature {} is associated with true latitude and true longitude'
+                                 ''.format(variable))
 
-            # Determine if 2-D coordinate variables (Lat and Lon are of shape (i,j)
-            valid = True
-            for _, graph in g.coords.items():
-                try:
-                    assert graph.ndim == 2
-                except AssertionError:
-                    valid = False
-                except AttributeError:
-                    # When graph is None
-                    pass
+            axis_map = cfutil.get_axis_map(ds, variable)
 
-            if len(g.coords) == 2 and valid is True:
-                # ------------------------------------------------------------
-                # Check all the dims are coordinate variables
-                # ------------------------------------------------------------
-                valid_dims = True
-                reasoning = []
-                for dim in g.dims.keys():
-                    if dim not in ds.variables:
-                        valid_dims = False
-                        reasoning.append("Variable %s's dimension %s is not a coordinate variable" % (name, dim))
+            found_lat = False
+            for lat in axis_map['Y']:
+                is_subset_dims = set(ds.variables[lat].dimensions).issubset(dimensions)
 
-                result = Result(BaseCheck.HIGH,
-                                valid_dims,
-                                ('§5.2 Latitude and longitude coordinates of a horizontal grid', name, '2d_hgrid_valid_dimensions'),
-                                reasoning)
-                ret_val.append(result)
+                if is_subset_dims and self._is_true_latitude(ds, lat):
+                    found_lat = True
+                    break
+            has_coords.assert_true(found_lat,
+                                   '{} is not associated with a coordinate defining true latitude '
+                                   'and sharing a subset of dimensions'.format(variable))
 
-                # ------------------------------------------------------------
-                # Check that the coordinates are correct
-                # ------------------------------------------------------------
-                valid_2d = True
-                reasoning = []
-                for cname, coord in g.coords.items():
-                    if coord is None:
-                        valid_2d = False
-                        reasoning.append("Variable %s's coordinate, %s, is not a coordinate or auxiliary variable" % (name, cname))
-                        continue
-                    for dim in coord.dims.keys():
-                        if dim not in g.dims:
-                            valid_2d = False
-                            reasoning.append("Variable %s's coordinate, %s, does not share dimension %s with the variable" % (name, cname, dim))
-                result = Result(BaseCheck.MEDIUM,
-                                valid_2d,
-                                ('§5.2 Latitude and longitude coordinates of a horizontal grid', name, 'valid_coordinates'),
-                                reasoning)
-                ret_val.append(result)
-                # ------------------------------------------------------------
-                # Can make lat/lon?
-                # ------------------------------------------------------------
+            found_lon = False
+            for lon in axis_map['X']:
+                is_subset_dims = set(ds.variables[lon].dimensions).issubset(dimensions)
 
-                lat_check = False
-                lon_check = False
-                reasoning = []
-                for cname, coord in g.coords.items():
+                if is_subset_dims and self._is_true_longitude(ds, lon):
+                    found_lon = True
+                    break
+            has_coords.assert_true(found_lon,
+                                   '{} is not associated with a coordinate defining true longitude '
+                                   'and sharing a subset of dimensions'.format(variable))
 
-                    if coord is not None and coord.units in ['degrees_north', 'degree_north', 'degrees_N', 'degree_N', 'degreesN', 'degreeN']:
-                        lat_check = True
-                    elif coord is not None and coord.units in ['degrees_east', 'degree_east', 'degrees_E', 'degree_E', 'degreesE', 'degreeE']:
-                        lon_check = True
-                    else:
-                        reasoning.append("coordinate {} is not a correct lat/lon variable".format(cname))
-
-                result = Result(BaseCheck.HIGH,
-                                lat_check and lon_check,
-                                ('§5.2 Latitude and longitude coordinates of a horizontal grid', name, 'lat_lon_correct'),
-                                reasoning)
-                ret_val.append(result)
-            else:
-                continue  # Not a 2d horizontal grid
-
+            ret_val.append(has_coords.to_result())
         return ret_val
+
+    def _is_true_latitude(self, ds, variable):
+        '''
+        Returns True if the variable represents true latitude. True latitude
+        has units representing northward degrees and/or a standard_name of
+        latitude.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str variable: Name of the variable
+        '''
+        ncvar = ds.variables[variable]
+        standard_name = getattr(ncvar, 'standard_name', None)
+        units = getattr(ncvar, 'units', None)
+        allowed_lat_units = [
+            'degrees_north',
+            'degree_north',
+            'degree_n',
+            'degrees_n',
+            'degreen',
+            'degreesn'
+        ]
+
+        if standard_name == 'latitude':
+            return True
+        if isinstance(units, basestring) and units.lower() in allowed_lat_units:
+            return True
+        return False
+
+    def _is_true_longitude(self, ds, variable):
+        '''
+        Returns True if the variable represents true longitude. True longitude
+        has units representing eastward degrees and/or a standard_name of
+        longitude.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str variable: Name of the variable
+        '''
+        ncvar = ds.variables[variable]
+        standard_name = getattr(ncvar, 'standard_name', None)
+        units = getattr(ncvar, 'units', None)
+        allowed_lon_units = [
+            'degrees_east',
+            'degree_east',
+            'degree_e',
+            'degrees_e',
+            'degreee',
+            'degreese'
+        ]
+
+        if standard_name == 'longitude':
+            return True
+        if isinstance(units, basestring) and units.lower() in allowed_lon_units:
+            return True
+        return False
 
     def check_reduced_horizontal_grid(self, ds):
         """

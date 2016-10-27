@@ -90,6 +90,9 @@ def is_geophysical(ds, variable):
     if variable in get_coordinate_variables(ds):
         return False
 
+    if variable in get_auxiliary_coordinate_variables(ds):
+        return False
+
     # Is it dimensionless and unitless?
     if len(ncvar.shape) == 0 and unitless:
         return False
@@ -238,14 +241,26 @@ def get_z_variable(nc):
 
     :param netCDF4.Dataset nc: netCDF dataset
     '''
-    axis_z = nc.get_variables_by_attributes(axis='Z')
-    if axis_z:
-        return axis_z[0].name
-    valid_standard_names = ('depth', 'height', 'altitude')
-    z = nc.get_variables_by_attributes(standard_name=lambda x: x in valid_standard_names)
-    if z:
-        return z[0].name
-    return
+    z_variables = get_z_variables(nc)
+    if not z_variables:
+        return None
+
+    # Priority is standard_name, units
+    for var in z_variables:
+        ncvar = nc.variables[var]
+        if getattr(ncvar, 'standard_name', None) in ('depth', 'height', 'altitude'):
+            return var
+
+    for var in z_variables:
+        ncvar = nc.variables[var]
+        units = getattr(ncvar, 'units', None)
+        if isinstance(units, basestring):
+            if units_convertible(units, 'bar'):
+                return var
+            if units_convertible(units, 'm'):
+                return var
+
+    return z_variables[0]
 
 
 def get_z_variables(nc):
@@ -1217,6 +1232,9 @@ def is_2d_regular_grid(nc, variable):
     # x(x), y(y), t(t)
     # X(t, y, x)
 
+    if is_mapped_grid(nc, variable):
+        return False
+
     dims = nc.variables[variable].dimensions
 
     cmatrix = coordinate_dimension_matrix(nc)
@@ -1253,6 +1271,9 @@ def is_2d_static_grid(nc, variable):
     # x(x), y(y)
     # X(y, x)
 
+    if is_mapped_grid(nc, variable):
+        return False
+
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
@@ -1284,6 +1305,9 @@ def is_3d_regular_grid(nc, variable):
     '''
     # x(x), y(y), z(z), t(t)
     # X(t, z, y, x)
+
+    if is_mapped_grid(nc, variable):
+        return False
 
     dims = nc.variables[variable].dimensions
 
@@ -1323,6 +1347,9 @@ def is_3d_static_grid(nc, variable):
     '''
     # x(x), y(y), z(z)
     # X(z, y, x)
+
+    if is_mapped_grid(nc, variable):
+        return False
 
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
