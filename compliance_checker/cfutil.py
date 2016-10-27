@@ -19,6 +19,23 @@ except NameError:
 _UNITLESS_DB = None
 _SEA_NAMES = None
 
+VALID_LAT_UNITS = [
+    'degrees_north',
+    'degree_north',
+    'degree_n',
+    'degrees_n',
+    'degreen',
+    'degreesn'
+]
+VALID_LON_UNITS = [
+    'degrees_east',
+    'degree_east',
+    'degree_e',
+    'degrees_e',
+    'degreee',
+    'degreese'
+]
+
 
 def get_unitless_standard_names():
     '''
@@ -88,6 +105,9 @@ def is_geophysical(ds, variable):
         return False
 
     if variable in get_coordinate_variables(ds):
+        return False
+
+    if variable in get_auxiliary_coordinate_variables(ds):
         return False
 
     # Is it dimensionless and unitless?
@@ -238,14 +258,26 @@ def get_z_variable(nc):
 
     :param netCDF4.Dataset nc: netCDF dataset
     '''
-    axis_z = nc.get_variables_by_attributes(axis='Z')
-    if axis_z:
-        return axis_z[0].name
-    valid_standard_names = ('depth', 'height', 'altitude')
-    z = nc.get_variables_by_attributes(standard_name=lambda x: x in valid_standard_names)
-    if z:
-        return z[0].name
-    return
+    z_variables = get_z_variables(nc)
+    if not z_variables:
+        return None
+
+    # Priority is standard_name, units
+    for var in z_variables:
+        ncvar = nc.variables[var]
+        if getattr(ncvar, 'standard_name', None) in ('depth', 'height', 'altitude'):
+            return var
+
+    for var in z_variables:
+        ncvar = nc.variables[var]
+        units = getattr(ncvar, 'units', None)
+        if isinstance(units, basestring):
+            if units_convertible(units, 'bar'):
+                return var
+            if units_convertible(units, 'm'):
+                return var
+
+    return z_variables[0]
 
 
 def get_z_variables(nc):
@@ -303,14 +335,6 @@ def get_latitude_variables(nc):
 
     :param netcdf4.dataset nc: an open netcdf dataset object
     '''
-    allowed_lat_units = [
-        'degrees_north',
-        'degree_north',
-        'degree_n',
-        'degrees_n',
-        'degreen',
-        'degreesn'
-    ]
     latitude_variables = []
     # standard_name takes precedence
     for variable in nc.get_variables_by_attributes(standard_name="latitude"):
@@ -321,11 +345,37 @@ def get_latitude_variables(nc):
         if variable.name not in latitude_variables:
             latitude_variables.append(variable.name)
 
-    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in allowed_lat_units):
+    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in VALID_LAT_UNITS):
         if variable.name not in latitude_variables:
             latitude_variables.append(variable.name)
 
     return latitude_variables
+
+
+def get_true_latitude_variables(nc):
+    '''
+    Returns a list of variables defining true latitude.
+
+    CF Chapter 4 refers to latitude as a coordinate variable that can also be
+    used in non-standard coordinate systems like rotated pole and other
+    projections. Chapter 5 refers to a concept of true latitude where the
+    variabe defines latitude in a standard projection.
+
+    True latitude, for lack of a better definition, is simply latitude where
+    the standard_name is latitude or the units are degrees_north.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    '''
+    lats = get_latitude_variables(nc)
+    true_lats = []
+    for lat in lats:
+        standard_name = getattr(nc.variables[lat], "standard_name", None)
+        units = getattr(nc.variables[lat], "units", None)
+        if standard_name == 'latitude':
+            true_lats.append(lat)
+        elif isinstance(units, basestring) and units.lower() in VALID_LAT_UNITS:
+            true_lats.append(lat)
+    return true_lats
 
 
 def get_lon_variable(nc):
@@ -346,14 +396,6 @@ def get_longitude_variables(nc):
 
     :param netcdf4.dataset nc: an open netcdf dataset object
     '''
-    allowed_lon_units = [
-        'degrees_east',
-        'degree_east',
-        'degree_e',
-        'degrees_e',
-        'degreee',
-        'degreese'
-    ]
     longitude_variables = []
     # standard_name takes precedence
     for variable in nc.get_variables_by_attributes(standard_name="longitude"):
@@ -364,11 +406,37 @@ def get_longitude_variables(nc):
         if variable.name not in longitude_variables:
             longitude_variables.append(variable.name)
 
-    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in allowed_lon_units):
+    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in VALID_LON_UNITS):
         if variable.name not in longitude_variables:
             longitude_variables.append(variable.name)
 
     return longitude_variables
+
+
+def get_true_longitude_variables(nc):
+    '''
+    Returns a list of variables defining true longitude.
+
+    CF Chapter 4 refers to longitude as a coordinate variable that can also be
+    used in non-standard coordinate systems like rotated pole and other
+    projections. Chapter 5 refers to a concept of true longitude where the
+    variabe defines longitude in a standard projection.
+
+    True longitude, for lack of a better definition, is simply longitude where
+    the standard_name is longitude or the units are degrees_north.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    '''
+    lons = get_longitude_variables(nc)
+    true_lons = []
+    for lon in lons:
+        standard_name = getattr(nc.variables[lon], "standard_name", None)
+        units = getattr(nc.variables[lon], "units", None)
+        if standard_name == 'longitude':
+            true_lons.append(lon)
+        elif isinstance(units, basestring) and units.lower() in VALID_LON_UNITS:
+            true_lons.append(lon)
+    return true_lons
 
 
 def get_platform_variables(ds):
@@ -1217,6 +1285,9 @@ def is_2d_regular_grid(nc, variable):
     # x(x), y(y), t(t)
     # X(t, y, x)
 
+    if is_mapped_grid(nc, variable):
+        return False
+
     dims = nc.variables[variable].dimensions
 
     cmatrix = coordinate_dimension_matrix(nc)
@@ -1242,6 +1313,42 @@ def is_2d_regular_grid(nc, variable):
     return False
 
 
+def is_2d_static_grid(nc, variable):
+    '''
+    Returns True if the variable is a 2D Regular grid that does not vary with
+    time.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    :param str variable: name of the variable to check
+    '''
+    # x(x), y(y)
+    # X(y, x)
+
+    if is_mapped_grid(nc, variable):
+        return False
+
+    dims = nc.variables[variable].dimensions
+    cmatrix = coordinate_dimension_matrix(nc)
+
+    for req in ('x', 'y'):
+        if req not in cmatrix:
+            return False
+
+    x = get_lon_variable(nc)
+    y = get_lat_variable(nc)
+
+    if cmatrix['x'] != (x,):
+        return False
+
+    if cmatrix['y'] != (y,):
+        return False
+
+    if len(dims) != 2 or x not in dims or y not in dims:
+        return False
+
+    return True
+
+
 def is_3d_regular_grid(nc, variable):
     '''
     Returns True if the variable is a 3D Regular grid.
@@ -1251,6 +1358,9 @@ def is_3d_regular_grid(nc, variable):
     '''
     # x(x), y(y), z(z), t(t)
     # X(t, z, y, x)
+
+    if is_mapped_grid(nc, variable):
+        return False
 
     dims = nc.variables[variable].dimensions
 
@@ -1278,6 +1388,46 @@ def is_3d_regular_grid(nc, variable):
     if len(dims) == 4 and x in dims and y in dims and t in dims and z in dims:
         return True
     return False
+
+
+def is_3d_static_grid(nc, variable):
+    '''
+    Returns True if the variable is a 2D Regular grid that does not vary with
+    time.
+
+    :param netCDF4.Dataset nc: An open netCDF dataset
+    :param str variable: name of the variable to check
+    '''
+    # x(x), y(y), z(z)
+    # X(z, y, x)
+
+    if is_mapped_grid(nc, variable):
+        return False
+
+    dims = nc.variables[variable].dimensions
+    cmatrix = coordinate_dimension_matrix(nc)
+
+    for req in ('x', 'y', 'z'):
+        if req not in cmatrix:
+            return False
+
+    x = get_lon_variable(nc)
+    y = get_lat_variable(nc)
+    z = get_z_variable(nc)
+
+    if cmatrix['x'] != (x,):
+        return False
+
+    if cmatrix['y'] != (y,):
+        return False
+
+    if cmatrix['z'] != (z,):
+        return False
+
+    if len(dims) != 3 or x not in dims or y not in dims or z not in dims:
+        return False
+
+    return True
 
 
 def is_mapped_grid(nc, variable):
@@ -1404,8 +1554,12 @@ def guess_feature_type(nc, variable):
         return 'trajectory-profile-incomplete'
     if is_2d_regular_grid(nc, variable):
         return '2d-regular-grid'
+    if is_2d_static_grid(nc, variable):
+        return '2d-static-grid'
     if is_3d_regular_grid(nc, variable):
         return '3d-regular-grid'
+    if is_3d_static_grid(nc, variable):
+        return '3d-static-grid'
     if is_mapped_grid(nc, variable):
         return 'mapped-grid'
     if is_reduced_grid(nc, variable):

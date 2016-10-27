@@ -76,4 +76,6 @@ STATIC_FILES = {
     'reduced_horizontal_grid'              : get_filename('tests/data/reduced_horizontal_grid.cdl'),
     'duplicate_axis'                       : get_filename('tests/data/duplicate_axis.cdl'),
     'multi-dim-coordinates'                : get_filename('tests/data/multi-dim-coordinates.cdl'),
+    '2d-static-grid'                       : get_filename('tests/data/2d-static-grid.cdl'),
+    '3d-static-grid'                       : get_filename('tests/data/3d-static-grid.cdl'),
 }
