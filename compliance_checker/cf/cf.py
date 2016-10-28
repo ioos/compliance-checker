@@ -1681,8 +1681,8 @@ class CFBaseCheck(BaseCheck):
                                         "".format(name))
 
             is_not_deprecated.assert_true(units not in deprecated_units,
-                                          "units are deprecated by CF: {}"
-                                          "".format(units))
+                                          "units are deprecated by CF in variable {}: {}"
+                                          "".format(name, units))
             ret_val.append(is_not_deprecated.to_result())
             ret_val.append(self._check_formula_terms(ds, name))
 
