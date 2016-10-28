@@ -798,12 +798,20 @@ class TestCF(BaseTestCase):
         # The dimensions don't line up but another §5.0 check catches it.
         assert result.value == (7, 7)
 
-    def test_check_horz_crs_grid_mappings_projections(self):
+    def test_check_grid_mapping(self):
         dataset = self.load_dataset(STATIC_FILES['mapping'])
-        results = self.cf.check_horz_crs_grid_mappings_projections(dataset)
-        rd = { r.name[1] : r.value for r in results }
-        assert rd['wgs84'] == (3, 3)
-        assert rd['epsg']  == (7, 8)
+        results = self.cf.check_grid_mapping(dataset)
+
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§5.6 Grid Mapping Variable epsg must define a valid grid mapping']
+        assert result.value == (7, 8)
+        assert result.msgs[0] == 'false_easting is a required attribute for grid mapping stereographic'
+
+        result = result_dict[u'§5.6 Grid Mapping Variable wgs84 must define a valid grid mapping']
+        assert result.value == (3, 3)
+
+        result = result_dict[u'§5.6 Variable lat defining a grid mapping has valid grid_mapping attribute']
+        assert result.value == (2, 2)
 
     def test_check_scalar_coordinate_system(self):
         dataset = self.load_dataset(STATIC_FILES['scalar_coordinate_variable'])

@@ -54,3 +54,184 @@ grid_mapping_attrs = [
     'standard_parallel',
     'straight_vertical_longitude_from_pole'
 ]
+
+grid_mapping_dict = {
+    'albers_conical_equal_area': [
+        (
+            'longitude_of_central_meridian',
+            'latitude_of_projection_origin',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        )
+    ],
+    'azimuthal_equidistant': [
+        (
+            'longitude_of_projection_origin',
+            'latitude_of_projection_origin',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        )
+    ],
+    'lambert_cylindrical_equal_area': [
+        (
+            'longitude_of_central_meridian',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        ),
+        (
+            'standard_parallel',
+            'scale_factor_at_projection_origin'
+        )
+    ],
+    'lambert_azimuthal_equal_area': [
+        (
+            'longitude_of_projection_origin',
+            'latitude_of_projection_origin',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        )
+    ],
+    'lambert_conformal_conic': [
+        (
+            'standard_parallel',
+            'longitude_of_central_meridian',
+            'latitude_of_projection_origin',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        )
+    ],
+    'latitude_longitude': [
+        (),
+        (),
+        (
+            'longitude',
+            'latitude'
+        )
+    ],
+    'mercator': [
+        (
+            'longitude_of_projection_origin',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        ),
+        (
+            'standard_parallel',
+            'scale_factor_at_projection_origin'
+        )
+    ],
+    'orthographic': [
+        (
+            'longitude_of_projection_origin',
+            'latitude_of_projection_origin',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        )
+    ],
+    'polar_stereographic': [
+        (
+            'straight_vertical_longitude_from_pole',
+            'latitude_of_projection_origin',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        ),
+        (
+            'standard_parallel',
+            'scale_factor_at_projection_origin'
+        )
+    ],
+    'rotated_latitude_longitude': [
+        (
+            'grid_north_pole_latitude',
+            'grid_north_pole_longitude'
+        ),
+        (
+            'north_pole_grid_longitude'
+        ),
+        (
+            'grid_latitude',
+            'grid_longitude'
+        )
+    ],
+    'stereographic': [
+        (
+            'longitude_of_projection_origin',
+            'latitude_of_projection_origin',
+            'scale_factor_at_projection_origin',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        )
+    ],
+    'transverse_mercator': [
+        (
+            'scale_factor_at_central_meridian',
+            'longitude_of_central_meridian',
+            'latitude_of_projection_origin',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        )
+    ],
+    'vertical_perspective': [
+        (
+            'longitude_of_projection_origin',
+            'latitude_of_projection_origin',
+            'perspective_point_height',
+            'false_easting',
+            'false_northing'
+        ),
+        (),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
+        )
+    ]
+}

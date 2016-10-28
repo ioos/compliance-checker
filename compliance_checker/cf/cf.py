@@ -10,6 +10,7 @@ import six
 
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
+from compliance_checker.cf.appendix_f import grid_mapping_dict
 from compliance_checker.cf import util
 from compliance_checker import cfutil
 
@@ -2153,23 +2154,8 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     # grid mapping dictionary, appendix F
-    grid_mapping_dict = {
-        'albers_conical_equal_area': [('longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-        'azimuthal_equidistant': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-        'lambert_cylindrical_equal_area': [('longitude_of_central_meridian', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
-        'lambert_azimuthal_equal_area': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-        'lambert_conformal_conic': [('standard_parallel', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-        'latitude_longitude': [(), (), ('longitude', 'latitude')],
-        'mercator': [('longitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
-        'orthographic': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-        'polar_stereographic': [('straight_vertical_longitude_from_pole', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate'), ('standard_parallel', 'scale_factor_at_projection_origin')],
-        'rotated_latitude_longitude': [('grid_north_pole_latitude', 'grid_north_pole_longitude'), ('north_pole_grid_longitude'), ('grid_latitude', 'grid_longitude')],
-        'stereographic': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'scale_factor_at_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-        'transverse_mercator': [('scale_factor_at_central_meridian', 'longitude_of_central_meridian', 'latitude_of_projection_origin', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')],
-        'vertical_perspective': [('longitude_of_projection_origin', 'latitude_of_projection_origin', 'perspective_point_height', 'false_easting', 'false_northing'), (), ('projection_x_coordinate', 'projection_y_coordinate')]
-    }
 
-    def check_horz_crs_grid_mappings_projections(self, ds):
+    def check_grid_mapping(self, ds):
         """
         5.6 When the coordinate variables for a horizontal grid are not
         longitude and latitude, it is required that the true latitude and
@@ -2208,53 +2194,77 @@ class CFBaseCheck(BaseCheck):
         """
 
         ret_val = []
-        reasoning = []
+        grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
 
-        for name, var in ds.variables.items():
-            valid_mapping_count = 0
-            total_mapping_count = 0
-            if hasattr(var, 'grid_mapping_name'):
-                total_mapping_count = 1
+        # Check the grid_mapping attribute to be a non-empty string and that it's reference exists
+        for variable in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
+            grid_mapping = getattr(variable, 'grid_mapping', None)
+            defines_grid_mapping = TestCtx(BaseCheck.HIGH,
+                                           "§5.6 Variable {} defining a grid mapping has valid grid_mapping attribute"
+                                           "".format(variable.name))
+            defines_grid_mapping.assert_true(isinstance(grid_mapping, basestring) and grid_mapping,
+                                             "grid_mapping attribute must be a space-separated non-empty string")
 
-                mapping = getattr(var, 'grid_mapping_name', '')
-                if mapping in iter(self.grid_mapping_dict.keys()):
-                    valid_mapping_count = valid_mapping_count + 1
-                else:
-                    reasoning.append('The grid_mapping_name attribute is not an accepted value.  See Appendix F.')
+            if isinstance(grid_mapping, basestring):
+                for grid_var_name in grid_mapping.split():
+                    defines_grid_mapping.assert_true(grid_var_name in ds.variables,
+                                                     "grid mapping variable {} must exist in this dataset"
+                                                     "".format(grid_var_name))
+            ret_val.append(defines_grid_mapping.to_result())
 
-                for each in self.grid_mapping_dict[mapping][0]:
-                    total_mapping_count = total_mapping_count + 1
-                    if each in dir(var):
-                        valid_mapping_count = valid_mapping_count + 1
-                    else:
-                        reasoning.append('The map parameters are not accepted values.  See Appendix F.')
+        # Check the grid mapping variables themselves
+        for grid_var_name in grid_mapping_variables:
+            valid_grid_mapping = TestCtx(BaseCheck.HIGH,
+                                         "§5.6 Grid Mapping Variable {} must define a valid grid mapping"
+                                         "".format(grid_var_name))
+            grid_var = ds.variables[grid_var_name]
 
-                if len(self.grid_mapping_dict[mapping]) >= 4:
-                    for each in self.grid_mapping_dict[mapping][3:]:
-                        every_flag = 0
-                        total_mapping_count = total_mapping_count + 1
-                        for every in each:
-                            if every in dir(var):
-                                valid_mapping_count = valid_mapping_count + 1
-                                every_flag = every_flag + 1
+            grid_mapping_name = getattr(grid_var, 'grid_mapping_name', None)
 
-                        if every_flag == 0:
-                            reasoning.append('Neither of the "either/or" parameters are present')
-                        if every_flag == 2:
-                            valid_mapping_count = valid_mapping_count - 2
+            # Grid mapping name must be in appendix F
+            valid_grid_mapping.assert_true(grid_mapping_name in grid_mapping_dict,
+                                           "{} is not a valid grid_mapping_name. See Appendix F for valid grid mappings"
+                                           "".format(grid_mapping_name))
 
-                total_mapping_count = total_mapping_count + len(self.grid_mapping_dict[mapping][2])
-                for name_again, var_again in ds.variables.items():
-                    if hasattr(var_again, 'standard_name'):
-                        if var_again.standard_name in self.grid_mapping_dict[mapping][2]:
-                            valid_mapping_count = valid_mapping_count + 1
+            # The grid_mapping_dict has a values of:
+            # - required attributes
+            # - optional attributes (can't check)
+            # - required standard_names defined
+            # - at least one of these attributes must be defined
 
-                result = Result(BaseCheck.MEDIUM,
-                                (valid_mapping_count, total_mapping_count),
-                                ('§5.6 Grid mapping projection present', name, 'horz_crs_grid_mappings_projections'),
-                                reasoning)
+            # We can't do any of the other grid mapping checks if it's not a valid grid mapping name
+            if grid_mapping_name not in grid_mapping_dict:
+                ret_val.append(valid_grid_mapping.to_result())
+                continue
 
-                ret_val.append(result)
+            grid_mapping = grid_mapping_dict[grid_mapping_name]
+            required_attrs = grid_mapping[0]
+            # Make sure all the required attributes are defined
+            for req in required_attrs:
+                valid_grid_mapping.assert_true(hasattr(grid_var, req),
+                                               "{} is a required attribute for grid mapping {}"
+                                               "".format(req, grid_mapping_name))
+
+            # Make sure that exactly one of the exclusive attributes exist
+            if len(grid_mapping_dict) == 4:
+                at_least_attr = grid_mapping_dict[3]
+                number_found = 0
+                for attr in at_least_attr:
+                    if hasattr(grid_var, attr):
+                        number_found += 1
+                valid_grid_mapping.assert_true(number_found == 1,
+                                               "grid mapping {} must define exactly one of these attributes: "
+                                               "{}".format(grid_mapping_name, ' or '.join(at_least_attr)))
+
+            # Make sure that exactly one variable is defined for each of the required standard_names
+            expected_std_names = grid_mapping[2]
+            for expected_std_name in expected_std_names:
+                found_vars = ds.get_variables_by_attributes(standard_name=expected_std_name)
+                valid_grid_mapping.assert_true(len(found_vars) == 1,
+                                               "grid mapping {} requires exactly one variable with standard_name "
+                                               "{} to be defined".format(grid_mapping_name, expected_std_name))
+
+            ret_val.append(valid_grid_mapping.to_result())
 
         return ret_val
 
@@ -2972,9 +2982,9 @@ class CFBaseCheck(BaseCheck):
                 # DO GRIDMAPPING CHECKS FOR X,Y,Z,T
                 flag = 1
                 for name_again, var_again in ds.variables.items():
-                    if getattr(var_again, "standard_name", "") == self.grid_mapping_dict[getattr(coord_var, "grid_mapping_name", "")][2][0]:
+                    if getattr(var_again, "standard_name", "") == grid_mapping_dict[getattr(coord_var, "grid_mapping_name", "")][2][0]:
                         x = name_again
-                    if getattr(var_again, "standard_name", "") == self.grid_mapping_dict[getattr(coord_var, "grid_mapping_name", "")][2][1]:
+                    if getattr(var_again, "standard_name", "") == grid_mapping_dict[getattr(coord_var, "grid_mapping_name", "")][2][1]:
                         y = name_again
 
         for coord_name in self._find_coord_vars(ds):
