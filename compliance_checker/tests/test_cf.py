@@ -839,6 +839,14 @@ class TestCF(BaseTestCase):
         self.assertTrue(results[2].value)
         self.assertFalse(results[3].value)
 
+    def test_check_instance_variable(self):
+        dataset = self.load_dataset(STATIC_FILES['bad-instance'])
+        results = self.cf.check_instance_variables(dataset)
+
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§9.5 Instance Variable station_name is not referenced as a coordinate variable']
+        assert result.value == (0, 1)
+
     def test_check_compression(self):
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         results = self.cf.check_compression(dataset)
