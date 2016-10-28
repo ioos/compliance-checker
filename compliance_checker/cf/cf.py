@@ -2930,6 +2930,24 @@ class CFBaseCheck(BaseCheck):
     #
     ###############################################################################
 
+    def check_instance_variables(self, ds):
+        '''
+        Check that no referenced coordinates (coordinate variables or auxiliary coordinates) define cf_role
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+
+        ret_val = []
+        all_coords = self._find_coord_vars(ds) + self._find_aux_coord_vars(ds)
+        for variable in ds.get_variables_by_attributes(cf_role=lambda x: x is not None):
+            is_not_coord = TestCtx(BaseCheck.HIGH,
+                                   "§9.5 Instance Variable {} is not referenced as a coordinate variable"
+                                   "".format(variable.name))
+            is_not_coord.assert_true(variable.name not in all_coords,
+                                     "{} must not be referenced as a coordinate".format(variable.name))
+            ret_val.append(is_not_coord.to_result())
+        return ret_val
+
     @is_likely_dsg
     def check_all_features_are_same_type(self, ds):
         """

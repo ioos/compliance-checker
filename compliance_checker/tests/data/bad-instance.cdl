@@ -1,0 +1,23 @@
+netcdf {
+dimensions:
+    time = 2;
+    max_strlen = 50; 
+    station_id = 2;
+variables:
+    double time(time);
+        time:units = "seconds since 1970-01-01";
+        time:standard_name = "time";
+    char station_name(station_id, max_strlen);
+        station_name:cf_role = "timeseries_id";
+    float temp(time);
+        temp:standard_name = "air_temperature";
+        temp:units = "deg_C";
+        temp:coordinates = "time lat lon station_name"; // illegal in cf 1.6
+    double lat;
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+    double lon;
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+
+}
