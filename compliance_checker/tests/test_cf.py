@@ -813,18 +813,6 @@ class TestCF(BaseTestCase):
         result = result_dict[u'§5.6 Variable lat defining a grid mapping has valid grid_mapping attribute']
         assert result.value == (2, 2)
 
-    def test_check_scalar_coordinate_system(self):
-        dataset = self.load_dataset(STATIC_FILES['scalar_coordinate_variable'])
-        results = self.cf.check_scalar_coordinate_system(dataset)
-        self.assertEqual(len(results), 2)
-        for r in results:
-            if r.name[1] == 'HEIGHT':
-                self.assertEqual(r.value, (0, 1))
-            elif r.name[1] == 'DEPTH':
-                self.assertEqual(r.value, (2, 2))
-            else:
-                self.assertTrue(False, 'Unexpected variable in results of check_scalar_coordinate_system')
-
     def test_check_geographic_region(self):
         dataset = self.load_dataset(STATIC_FILES['bad_region'])
         results = self.cf.check_geographic_region(dataset)
