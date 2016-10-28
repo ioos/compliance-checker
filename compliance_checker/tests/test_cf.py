@@ -782,19 +782,21 @@ class TestCF(BaseTestCase):
     def test_check_reduced_horizontal_grid(self):
         dataset = self.load_dataset(STATIC_FILES['rhgrid'])
         results = self.cf.check_reduced_horizontal_grid(dataset)
-        rd = { r.name[1] : r.value for r in results }
-        self.assertTrue(rd['PS'])
+
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§5.3 PS is a valid reduced horizontal grid']
+        assert result.value == (7, 7)
 
         dataset = self.load_dataset(STATIC_FILES['bad-rhgrid'])
         results = self.cf.check_reduced_horizontal_grid(dataset)
-        rd = { r.name[1] : (r.value, r.msgs) for r in results }
 
-        for name, (value, msg) in rd.items():
-            self.assertFalse(value)
-
-        self.assertIn('Coordinate longitude is not a proper variable', rd['PSa'][1])
-        self.assertIn("Coordinate latitude's dimension, latdim, is not a dimension of PSb", rd['PSb'][1])
-        assert 'PSc' not in rd
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§5.3 PSa is a valid reduced horizontal grid']
+        assert result.value == (6, 7)
+        assert result.msgs[0] == "PSa must be associated with a valid longitude coordinate"
+        result = result_dict[u'§5.3 PSb is a valid reduced horizontal grid']
+        # The dimensions don't line up but another §5.0 check catches it.
+        assert result.value == (7, 7)
 
     def test_check_horz_crs_grid_mappings_projections(self):
         dataset = self.load_dataset(STATIC_FILES['mapping'])
