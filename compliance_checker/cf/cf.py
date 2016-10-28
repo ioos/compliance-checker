@@ -2268,44 +2268,6 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
-    def check_scalar_coordinate_system(self, ds):
-        """
-        5.7 When a variable has an associated coordinate which is single-valued, that coordinate may be represented as a
-        scalar variable. Since there is no associated dimension these scalar coordinate variables should be attached to a
-        data variable via the coordinates attribute.
-
-        Once a name is used for a scalar coordinate variable it can not be used for a 1D coordinate variable. For this
-        reason we strongly recommend against using a name for a scalar coordinate variable that matches the name of any
-        dimension in the file.
-        """
-        ret_val = []
-
-        for name, var in ds.variables.items():
-            valid_scalar_coordinate_var = 0
-            total_scalar_coordinate_var = 0
-            reasoning = []
-
-            if not hasattr(var, 'coordinates'):
-                continue
-
-            for coordinate in getattr(var, 'coordinates', '').split(" "):
-                if coordinate in ds.variables:
-                    if ds.variables[coordinate].shape == ():
-                        total_scalar_coordinate_var += 1
-                        if coordinate not in list(ds.dimensions.keys()):
-                            valid_scalar_coordinate_var += 1
-                        else:
-                            reasoning.append('Scalar coordinate var (%s) of var (%s) is correct size but is present in the dimensions list, which is not allowed.' % (coordinate, name))
-
-            if total_scalar_coordinate_var > 0:
-                result = Result(BaseCheck.MEDIUM,
-                                (valid_scalar_coordinate_var, total_scalar_coordinate_var),
-                                ('§5.7 Scalar coordinate variables', name, 'scalar_coordinates'),
-                                reasoning)
-                ret_val.append(result)
-
-        return ret_val
-
     ###############################################################################
     #
     # Chapter 6: Labels and Alternative Coordinates
@@ -2323,7 +2285,6 @@ class CFBaseCheck(BaseCheck):
         attribute with the value region.
         """
         ret_val = []
-        reasoning = []
         region_list = [
             'africa',
             'antarctica',
@@ -2395,20 +2356,14 @@ class CFBaseCheck(BaseCheck):
             'yellow_sea'
         ]
 
-        for name, var in ds.variables.items():
-            if getattr(var, 'standard_name', '') == 'region':
-                if ''.join(var[:].astype(str)).lower() in region_list:
-                    result = Result(BaseCheck.LOW,
-                                    True,
-                                    ('§6.1.1 Geographic region specified', name, 'geographic_region'),
-                                    reasoning)
-                else:
-                    reasoning.append('The Region Value is not from the allowable list.')
-                    result = Result(BaseCheck.LOW,
-                                    False,
-                                    ('§6.1.1 Geographic region specified', name, 'geographic_region'),
-                                    reasoning)
-                ret_val.append(result)
+        for var in ds.get_variables_by_attributes(standard_name='region'):
+            valid_region = TestCtx(BaseCheck.MEDIUM,
+                                   "§6.1.1 Geographic region specified by {} is valid"
+                                   "".format(var.name))
+            valid_region.assert_true(''.join(var[:].astype(str)).lower() in region_list,
+                                     "{} is not a valid region"
+                                     "".format(''.join(var[:].astype(str))))
+            ret_val.append(valid_region.to_result())
         return ret_val
 
     ###############################################################################
