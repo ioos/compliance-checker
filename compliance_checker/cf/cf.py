@@ -2822,7 +2822,7 @@ class CFBaseCheck(BaseCheck):
                         valid = False
                         reasoning.append("Variable is not of type byte, short, or int.")
 
-            result = Result(BaseCheck.MEDIUM, valid, ('§8.1 Packed Data', name, 'packed_data'), reasoning)
+            result = Result(BaseCheck.MEDIUM, valid, '§8.1 Packed Data defined by {} contains valid packing', reasoning)
             ret_val.append(result)
             reasoning = []
 
@@ -2849,46 +2849,14 @@ class CFBaseCheck(BaseCheck):
                     reasoning.append("Type of valid_range attribute (%s) does not match variable type (%s)" %
                                      (var.valid_range.dtype, var.dtype))
 
-            result = Result(BaseCheck.MEDIUM, valid, ('§8.1 Packed Data', name, 'fillvalue_valid_range_attributes'), reasoning)
+            result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            '§8.1 Packed Data defined by {} contains valid data types'.format(name),
+                            reasoning)
             ret_val.append(result)
 
         return ret_val
 
-    def check_compression(self, ds):
-        """
-        8.2 To save space in the netCDF file, it may be desirable to eliminate points from data arrays that are invariably
-        missing. Such a compression can operate over one or more adjacent axes, and is accomplished with reference to a list
-        of the points to be stored.
-
-        The list is stored as the coordinate variable for the compressed axis of the data array. Thus, the list variable and
-        its dimension have the same name. The list variable has a string attribute compress, containing a blank-separated
-        list of the dimensions which were affected by the compression in the order of the CDL declaration of the uncompressed
-        array.
-        """
-        ret_val = []
-
-        for name, var in ds.variables.items():
-            valid_dim = 0
-            valid_form = 0
-            reasoning = []
-            if hasattr(var, 'compress'):
-                totals = 2
-                if name in var.dimensions and var.ndim == 1:
-                    valid_dim = 1
-                else:
-                    reasoning.append("The 'compress' attribute is not assigned to a coordinate variable.")
-                if all([each in list(ds.dimensions.keys()) for each in getattr(var, 'compress', '').split(" ")]):
-                    valid_form = 1
-                else:
-                    reasoning.append("The 'compress' attribute is not in the form of a coordinate.")
-
-                result = Result(BaseCheck.MEDIUM,
-                                (valid_form + valid_dim, totals),
-                                ('§8.2 Dataset Compression', name, 'compressed_data'),
-                                reasoning)
-                ret_val.append(result)
-
-        return ret_val
     ###############################################################################
     #
     # Chapter 9: Discrete Sampling Geometries

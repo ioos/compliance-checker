@@ -840,12 +840,6 @@ class TestCF(BaseTestCase):
         result = result_dict[u'§9.5 Instance Variable station_name is not referenced as a coordinate variable']
         assert result.value == (0, 1)
 
-    def test_check_compression(self):
-        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        results = self.cf.check_compression(dataset)
-        assert results[0].value == (2, 2)
-        assert results[1].value == (0, 2)
-
     def test_check_all_features_are_same_type(self):
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
         results = self.cf.check_all_features_are_same_type(dataset)
