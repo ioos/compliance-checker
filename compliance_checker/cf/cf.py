@@ -1235,7 +1235,7 @@ class CFBaseCheck(BaseCheck):
             standard_name = getattr(variable, 'standard_name', None)
 
             valid_coord.assert_true(axis is not None or standard_name is not None,
-                                    "coordinate types are should define either axis or standard_name attributes")
+                                    "coordinate types should define either axis or standard_name attributes")
             ret_val.append(valid_coord.to_result())
 
             if axis is not None:
@@ -2105,60 +2105,50 @@ class CFBaseCheck(BaseCheck):
 
         """
         ret_val = []
-        coord_vars = self._get_coord_vars(ds)
+        # Create a set of coordinate varaibles defining `compress`
+        lats = set(cfutil.get_latitude_variables(ds))
+        lons = set(cfutil.get_longitude_variables(ds))
 
-        for name, var in ds.variables.items():
-            if name in coord_vars:
+        for name in self._find_geophysical_vars(ds):
+            coords = getattr(ds.variables[name], 'coordinates', None)
+            axis_map = cfutil.get_axis_map(ds, name)
+            # If this variable has no coordinate that defines compression
+            if 'C' not in axis_map:
                 continue
-            if not hasattr(var, 'coordinates'):
+
+            valid_rgrid = TestCtx(BaseCheck.HIGH, '§5.3 {} is a valid reduced horizontal grid'.format(name))
+            # Make sure reduced grid features define coordinates
+            valid_rgrid.assert_true(isinstance(coords, basestring) and coords,
+                                    "reduced grid feature {} must define coordinates attribute"
+                                    "".format(name))
+            # We can't check anything else if there are no defined coordinates
+            if not isinstance(coords, basestring) and coords:
                 continue
 
-            reasoning = []
-            valid_in_variables = True
-            valid_dim = True
-            valid_coord = True
-            valid_cdim = True
-            result = None
+            coord_set = set(coords.split())
 
-            coords = var.coordinates.split(' ')
-            for coord in coords:
-                is_reduced_horizontal_grid = True
-                if coord not in ds.variables:
-                    valid_in_variables = False
-                    reasoning.append("Coordinate %s is not a proper variable" % coord)
+            # Make sure it's associated with valid lat and valid lon
+            valid_rgrid.assert_true(len(coord_set.intersection(lons)) > 0,
+                                    '{} must be associated with a valid longitude coordinate'.format(name))
+            valid_rgrid.assert_true(len(coord_set.intersection(lats)) > 0,
+                                    '{} must be associated with a valid latitude coordinate'.format(name))
+            valid_rgrid.assert_true(len(axis_map['C']) == 1,
+                                    '{} can not be associated with more than one compressed coordinates: '
+                                    '({})'.format(name, ', '.join(axis_map['C'])))
+
+            for compressed_coord in axis_map['C']:
+                coord = ds.variables[compressed_coord]
+                compress = getattr(coord, 'compress', None)
+                valid_rgrid.assert_true(isinstance(compress, basestring) and compress,
+                                        "compress attribute for compression coordinate {} must be a non-empty string"
+                                        "".format(compressed_coord))
+                if not isinstance(compress, basestring):
                     continue
-
-                for dim_name in ds.variables[coord].dimensions:
-
-                    if dim_name not in var.dimensions:
-                        valid_dim = False
-                        reasoning.append("Coordinate %s's dimension, %s, is not a dimension of %s" % (coord, dim_name, name))
-                        continue
-
-                    if dim_name not in coord_vars:
-                        valid_coord = False
-                        reasoning.append("Coordinate %s's dimension, %s, is not a coordinate variable" % (coord, dim_name))
-                        continue
-
-                    dim = ds.variables[dim_name]
-                    if not hasattr(dim, 'compress'):
-                        is_reduced_horizontal_grid = False
-                        continue
-
-                    compress_dims = dim.compress.split(' ')
-                    for cdim in compress_dims:
-                        if cdim not in ds.dimensions:
-                            valid_cdim = False
-                            reasoning.append("Dimension %s compresses non-existent dimension, %s" % (dim_name, cdim))
-                            continue
-            if is_reduced_horizontal_grid is True:
-                result = Result(BaseCheck.MEDIUM,
-                                (valid_in_variables and valid_dim and valid_coord and valid_cdim),
-                                ('§5.3 Is reduced horizontal grid', name, 'is_reduced_horizontal_grid'),
-                                reasoning)
-
-            if result:
-                ret_val.append(result)
+                for dim in compress.split():
+                    valid_rgrid.assert_true(dim in ds.dimensions,
+                                            "dimension {} referenced by {}:compress must exist"
+                                            "".format(dim, compressed_coord))
+            ret_val.append(valid_rgrid.to_result())
 
         return ret_val
 
