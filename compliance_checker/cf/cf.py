@@ -2822,7 +2822,7 @@ class CFBaseCheck(BaseCheck):
                         valid = False
                         reasoning.append("Variable is not of type byte, short, or int.")
 
-            result = Result(BaseCheck.MEDIUM, valid, ('§8.1 Packed Data', name, 'packed_data'), reasoning)
+            result = Result(BaseCheck.MEDIUM, valid, '§8.1 Packed Data defined by {} contains valid packing', reasoning)
             ret_val.append(result)
             reasoning = []
 
@@ -2849,7 +2849,10 @@ class CFBaseCheck(BaseCheck):
                     reasoning.append("Type of valid_range attribute (%s) does not match variable type (%s)" %
                                      (var.valid_range.dtype, var.dtype))
 
-            result = Result(BaseCheck.MEDIUM, valid, ('§8.1 Packed Data', name, 'fillvalue_valid_range_attributes'), reasoning)
+            result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            '§8.1 Packed Data defined by {} contains valid data types'.format(name),
+                            reasoning)
             ret_val.append(result)
 
         return ret_val
