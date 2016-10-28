@@ -817,14 +817,11 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['bad_region'])
         results = self.cf.check_geographic_region(dataset)
 
-        self.assertFalse(results[0].value)
-        self.assertTrue(results[1].value)
-
-    # def test_check_cell_boundaries(self):
-    #    dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-    #    results = self.cf.check_cell_boundaries(dataset)
-    #    print results
-    #    self.assertTrue(results[0].value)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§6.1.1 Geographic region specified by neverland is valid']
+        assert result.value == (0, 1)
+        result = result_dict[u'§6.1.1 Geographic region specified by geo_region is valid']
+        assert result.value == (1, 1)
 
     def test_check_packed_data(self):
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
