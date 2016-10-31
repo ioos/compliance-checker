@@ -92,6 +92,7 @@ class TestCF(BaseTestCase):
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_data_types(dataset)
+        assert result.msgs[0] == 'The variable temp failed because the datatype is int64'
         assert result.value == (6, 7)
 
         dataset = self.load_dataset(STATIC_FILES['chap2'])
