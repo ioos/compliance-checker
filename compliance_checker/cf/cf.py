@@ -478,8 +478,12 @@ class CFBaseCheck(BaseCheck):
             coord_var = ds.variables[coord_name]
             axis = getattr(coord_var, 'axis', None)
             standard_name = getattr(coord_var, 'standard_name', None)
+
+            # Unlimited dimensions must come first
+            if ds.dimensions[coord_name].isunlimited():
+                coord_axis_map[coord_name] = 'L'
             # axis takes precedence over standard_name
-            if axis in expected:
+            elif axis in expected:
                 coord_axis_map[coord_name] = axis
             elif standard_name == 'time':
                 coord_axis_map[coord_name] = 'T'
@@ -507,11 +511,22 @@ class CFBaseCheck(BaseCheck):
                 dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
                 valid_dimension_order.assert_true(self._dims_in_order(dimension_order),
                                                   "{}'s dimensions are not in the recommended order "
-                                                  "T, X, Y, Z. They are {}"
-                                                  "".format(name,
-                                                            ", ".join(dimension_order)))
+                                                  "T, Z, Y, X. They are {}"
+                                                  "".format(name, self._get_pretty_dimension_order(ds, name)))
 
         return valid_dimension_order.to_result()
+
+    def _get_pretty_dimension_order(self, ds, name):
+        '''
+        Returns a comma seperated string of the dimensions
+        '''
+        dim_names = []
+        for dim in ds.variables[name].dimensions:
+            dim_name = dim
+            if ds.dimensions[dim].isunlimited():
+                dim_name += ' (Unlimited)'
+            dim_names.append(dim_name)
+        return ', '.join(dim_names)
 
     def _get_dimension_order(self, ds, name, coord_axis_map):
         '''
@@ -539,7 +554,7 @@ class CFBaseCheck(BaseCheck):
 
         :param list dimension_order: A list of axes
         '''
-        regx = re.compile(r'^U*T?Z?(?:(?:Y?X?)|(?:C?))$')
+        regx = re.compile(r'^L?U*T?Z?(?:(?:Y?X?)|(?:C?))$')
         dimension_string = ''.join(dimension_order)
         return regx.match(dimension_string) is not None
 
@@ -2002,13 +2017,12 @@ class CFBaseCheck(BaseCheck):
             # coordinates.
             for axis, coordinates in axis_map.items():
                 for coordinate in coordinates:
-                    axis = getattr(ds.variables[coordinate], 'axis', None)
+                    axis_attr = getattr(ds.variables[coordinate], 'axis', None)
+                    no_duplicates.assert_true(axis_attr is None or axis_attr not in axes,
+                                              "duplicate axis {} defined by {}".format(axis_attr, coordinate))
 
-                    no_duplicates.assert_true(axis is None or axis not in axes,
-                                              "duplicate axis {} defined by {}".format(axis, coordinate))
-
-                    if axis and axis not in axes:
-                        axes.append(axis)
+                    if axis_attr and axis_attr not in axes:
+                        axes.append(axis_attr)
 
             ret_val.append(no_duplicates.to_result())
 

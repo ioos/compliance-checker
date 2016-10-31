@@ -1,0 +1,53 @@
+netcdf {
+dimensions:
+    station = UNLIMITED ;
+    obs = 13 ;
+    name_strlen = 12;
+variables:
+    float lon(station) ;
+        lon:standard_name = "longitude";
+        lon:long_name = "station longitude";
+        lon:units = "degrees_east";
+    float lat(station) ;
+        lat:standard_name = "latitude";
+        lat:long_name = "station latitude" ;
+        lat:units = "degrees_north" ;
+    float alt(station) ;
+        alt:long_name = "vertical distance above the surface" ;
+        alt:standard_name = "height" ;
+        alt:units = "m";
+        alt:positive = "up";
+        alt:axis = "Z";
+    char station_name(station, name_strlen) ;
+        station_name:long_name = "station name" ;
+        station_name:cf_role = "timeseries_id";
+    int station_info(station) ;
+        station_info:long_name = "any kind of station info" ;
+    float station_elevation(station) ;
+        station_elevation:long_name = "height above the geoid" ;
+        station_elevation:standard_name = "surface_altitude" ;
+        station_elevation:units = "m";
+    double time(station, obs) ;
+        time:standard_name = "time";
+        time:long_name = "time of measurement" ;
+        time:units = "days since 1970-01-01 00:00:00" ;
+        time:missing_value = -999.9;
+    float humidity(station, obs) ;
+        humidity:standard_name = "specific_humidity" ;
+        humidity:coordinates = "time lat lon alt" ;
+        humidity:_FillValue = -999.9;
+    float temp(station, obs) ;
+        temp:standard_name = "air_temperature" ;
+        temp:units = "Celsius" ;
+        temp:coordinates = "time lat lon alt" ;
+        temp:_FillValue = -999.9;
+
+// attributes
+    :featureType = "timeSeries";
+    :Conventions = "CF-1.6";
+    :institution = "CF";
+    :source = "fake";
+    :references = "http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_point_data";
+    :title = "CF-1.6 H.2.1 Incomplete multidimensional array representation of time series";
+    :history = "2016-10-31T18:32Z - File Created";
+}
