@@ -838,7 +838,7 @@ class TestCF(BaseTestCase):
         results = self.cf.check_instance_variables(dataset)
 
         result_dict = {result.name: result for result in results}
-        result = result_dict[u'§9.5 Instance Variable station_name is not referenced as a coordinate variable']
+        result = result_dict[u'§9.5 Instance Variable station_name should not be referenced as a coordinate variable']
         assert result.value == (0, 1)
 
     def test_check_all_features_are_same_type(self):

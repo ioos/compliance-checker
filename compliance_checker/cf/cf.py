@@ -779,7 +779,7 @@ class CFBaseCheck(BaseCheck):
         standard_name, standard_name_modifier = self._split_standard_name(standard_name)
         unitless_standard_names = cfutil.get_unitless_standard_names()
 
-        should_be_unitless = standard_name in unitless_standard_names
+        should_be_unitless = standard_name in unitless_standard_names or variable.ndim == 0 or variable.dtype.char == 'S'
 
         # 1) Units must exist
         valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(variable_name))
@@ -810,7 +810,7 @@ class CFBaseCheck(BaseCheck):
         unitless_standard_names = cfutil.get_unitless_standard_names()
 
         # If the variable is supposed to be unitless, it automatically passes
-        should_be_unitless = standard_name in unitless_standard_names
+        should_be_unitless = standard_name in unitless_standard_names or variable.ndim == 0 or variable.dtype.char == 'S'
 
         valid_udunits = TestCtx(BaseCheck.LOW,
                                 "§3.1 Variable {}'s units are contained in UDUnits".format(variable_name))
@@ -923,8 +923,18 @@ class CFBaseCheck(BaseCheck):
                 continue
 
             ncvar = ds.variables[name]
-            standard_name = getattr(ncvar, 'standard_name', None)
 
+            # §9 doesn't explicitly allow instance variables as coordinates but
+            # it's loosely implied. Just in case, skip it.
+            if hasattr(ncvar, 'cf_role'):
+                continue
+
+            # Unfortunately, §6.1 allows for string types to be listed as
+            # coordinates.
+            if ncvar.dtype.char == 'S':
+                continue
+
+            standard_name = getattr(ncvar, 'standard_name', None)
             standard_name, standard_name_modifier = self._split_standard_name(standard_name)
             # §1.3 The long_name and standard_name attributes are used to
             # describe the content of each variable. For backwards
@@ -1228,7 +1238,18 @@ class CFBaseCheck(BaseCheck):
             # an array of indices onto a 2-d grid containing valid coordinates.
             if cfutil.is_compression_coordinate(ds, name):
                 continue
+
             variable = ds.variables[name]
+            # Even though it's not allowed in CF 1.6, it is allowed in CF 1.7
+            # and we see people do it, often.
+            if hasattr(variable, 'cf_role'):
+                continue
+
+            # §6.1 allows for labels to be referenced as auxiliary coordinate
+            # variables, which should not be checked like the rest of the
+            # coordinates.
+            if variable.dtype.char == 'S':
+                continue
 
             valid_coord = TestCtx(BaseCheck.MEDIUM, '§4 {} is a valid coordinate type'.format(name))
 
@@ -1932,6 +1953,10 @@ class CFBaseCheck(BaseCheck):
                                              "is not a variable in this dataset"
                                              "".format(aux_coord))
                 if aux_coord not in ds.variables:
+                    continue
+
+                # §6.1 Allows for "labels" to be referenced as coordinates
+                if ds.variables[aux_coord].dtype.char == 'S':
                     continue
 
                 aux_coord_dims = set(ds.variables[aux_coord].dimensions)
@@ -2874,7 +2899,7 @@ class CFBaseCheck(BaseCheck):
         all_coords = self._find_coord_vars(ds) + self._find_aux_coord_vars(ds)
         for variable in ds.get_variables_by_attributes(cf_role=lambda x: x is not None):
             is_not_coord = TestCtx(BaseCheck.HIGH,
-                                   "§9.5 Instance Variable {} is not referenced as a coordinate variable"
+                                   "§9.5 Instance Variable {} should not be referenced as a coordinate variable"
                                    "".format(variable.name))
             is_not_coord.assert_true(variable.name not in all_coords,
                                      "{} must not be referenced as a coordinate".format(variable.name))
