@@ -1,9 +1,9 @@
 netcdf bad_data_type {
 dimensions:
-    time = 3 ; // (3 currently)
+    time = 3 ;
     latitude = 1 ;
     longitude = 1 ;
-    power = 1;
+    power = 1 ;
 variables:
     double time(time) ;
     double latitude(latitude) ;
@@ -35,7 +35,7 @@ variables:
     double longitudeZZ(longitude) ;
         longitudeZZ:_FillValue = 1. ;
         longitudeZZ:coordinates = "longitude" ;
-    double really_bad(latitude, power);
+    double really_bad(latitude, power) ;
 
 // global attributes:
         :featureType = "pointzz" ;
@@ -48,12 +48,16 @@ data:
  longitude = _ ;
 
  temp =
-  {1, 0, 1},
-  {1, 1, 0},
-  {_, 1, 0} ;
+  _, _, _,
+  _, _, _,
+  _, _, _ ;
 
  salinity =
-  {0.0776476799782908, 0.774116051694633, _} ;
+  _, _, _ ;
 
  longitudeZZ = _ ;
+
+ really_bad =
+  _ ;
 }
+

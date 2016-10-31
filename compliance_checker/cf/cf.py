@@ -2881,7 +2881,6 @@ class CFBaseCheck(BaseCheck):
             ret_val.append(is_not_coord.to_result())
         return ret_val
 
-    @is_likely_dsg
     def check_all_features_are_same_type(self, ds):
         """
         9.1 The features contained within a collection must always be of the same type; and all the collections in a CF file
@@ -2892,77 +2891,23 @@ class CFBaseCheck(BaseCheck):
         The space-time coordinates that are indicated for each feature are mandatory.  However a featureType may also include
         other space-time coordinates which are not mandatory (notably the z coordinate).
         """
-        flag = 0
-        x = ''
-        y = ''
-        z = ''
-        t = ''
+        all_the_same = TestCtx(BaseCheck.HIGH,
+                               '§9.1 Feature Types are all the same')
+        discovered_feature = None
+        for name in self._find_geophysical_vars(ds):
+            feature = cfutil.guess_feature_type(ds, name)
+            all_the_same.assert_true(feature is not None,
+                                     "Unidentifiable feature for variable {}"
+                                     "".format(name))
+            if discovered_feature is None and feature:
+                discovered_feature = feature
 
-        flag = 0
-        for coord_name in self._find_coord_vars(ds):
-            coord_var = ds.variables[coord_name]
-            if getattr(coord_var, "grid_mapping_name", ""):
-                # DO GRIDMAPPING CHECKS FOR X,Y,Z,T
-                flag = 1
-                for name_again, var_again in ds.variables.items():
-                    if getattr(var_again, "standard_name", "") == grid_mapping_dict[getattr(coord_var, "grid_mapping_name", "")][2][0]:
-                        x = name_again
-                    if getattr(var_again, "standard_name", "") == grid_mapping_dict[getattr(coord_var, "grid_mapping_name", "")][2][1]:
-                        y = name_again
+            if discovered_feature is not None:
+                all_the_same.assert_true(feature == discovered_feature,
+                                         "variable {} has defined a different feature type than some of the other variables"
+                                         "".format(name))
 
-        for coord_name in self._find_coord_vars(ds):
-            coord_var = ds.variables[coord_name]
-            # DO STANDARD SEARCH
-            if getattr(coord_name, 'units', '').lower() in ['pa', 'kpa', 'mbar', 'bar', 'atm', 'hpa', 'dbar'] or getattr(coord_name, 'positive', '') or getattr(coord_name, 'standard_name', '') == 'z' or getattr(coord_var, 'axis', '') == 'z':
-                z = coord_name
-            if coord_name.lower() in ['lon', 'longitude'] and flag == 0:
-                x = coord_name
-            elif coord_name.lower()in ['lat', 'latitude'] and flag == 0:
-                y = coord_name
-            elif coord_name.lower() == 'time':
-                t = coord_name
-
-            if getattr(coord_var, '_CoordinateAxisType', ''):
-                axis_type = getattr(coord_var, '_CoordinateAxisType', '')
-                if axis_type.lower() in ['lon', 'longitude'] and flag == 0:
-                    x = coord_name
-                elif axis_type.lower()in ['lat', 'latitude'] and flag == 0:
-                    y = coord_name
-                elif axis_type.lower() == 'time':
-                    t = coord_name
-
-        valid = False
-        feature_tuple_list = []
-
-        # create shape size tuple
-        if x == '' or y == '' or t == '':
-            return
-        elif z == '':
-            feature_tuple = (ds.variables[x].ndim, ds.variables[y].ndim, ds.variables[t].ndim)
-        else:
-            feature_tuple = (ds.variables[x].ndim, ds.variables[y].ndim, ds.variables[t].ndim, ds.variables[z].ndim)
-
-        feature_tuple_list.append(feature_tuple)
-
-        data_vars = self._find_geophysical_vars(ds)
-
-        feature_map = {}
-        for var_name in data_vars:
-            variable = ds.variables[var_name]
-            feature = variable.dimensions
-            feature_map[var_name] = feature
-
-        features = list(feature_map.values())
-        valid = all((features[0] == feature for feature in features))
-        reasoning = []
-        if not valid:
-            reasoning.append("At least one of the variables has a different feature type than the rest of the variables.")
-            feature_mess = []
-            for var_name, feature in feature_map.items():
-                feature_mess.append("%s(%s)" % (var_name, ', '.join(feature) ))
-            reasoning.append(' '.join(feature_mess))
-
-        return Result(BaseCheck.HIGH, valid, '§9.1 Feature Types are all the same', reasoning)
+        return all_the_same.to_result()
 
     @is_likely_dsg
     def check_orthogonal_multidim_array(self, ds):

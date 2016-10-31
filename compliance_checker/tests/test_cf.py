@@ -92,6 +92,7 @@ class TestCF(BaseTestCase):
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_data_types(dataset)
+        assert result.msgs[0] == 'The variable temp failed because the datatype is int64'
         assert result.value == (6, 7)
 
         dataset = self.load_dataset(STATIC_FILES['chap2'])
@@ -842,16 +843,16 @@ class TestCF(BaseTestCase):
 
     def test_check_all_features_are_same_type(self):
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
-        results = self.cf.check_all_features_are_same_type(dataset)
-        assert results is None
+        result = self.cf.check_all_features_are_same_type(dataset)
+        assert result
 
         dataset = self.load_dataset(STATIC_FILES['featureType'])
-        results = self.cf.check_all_features_are_same_type(dataset)
-        self.assertTrue(results.value)
+        result = self.cf.check_all_features_are_same_type(dataset)
+        assert result
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        results = self.cf.check_all_features_are_same_type(dataset)
-        self.assertFalse(results.value)
+        result = self.cf.check_all_features_are_same_type(dataset)
+        assert result.value == (0, 2)
 
     def test_check_orthogonal_multidim_array(self):
         dataset = self.load_dataset(STATIC_FILES['rutgers'])

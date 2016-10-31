@@ -774,15 +774,12 @@ def is_timeseries(nc, variable):
     # X(t)
     dims = nc.variables[variable].dimensions
 
-    cmatrix = coordinate_dimension_matrix(nc)
-    if 't' not in cmatrix:
-        return False
-    timevar = get_time_variable(nc)
+    time_variables = get_time_variables(nc)
 
-    # time has to be a coordinate variable in this case
-    if cmatrix['t'] != (timevar,):
+    if len(dims) != 1:
         return False
-    if dims != cmatrix['t']:
+    dim = dims[0]
+    if dim not in time_variables:
         return False
 
     return True
