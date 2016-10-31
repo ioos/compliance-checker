@@ -1,0 +1,40 @@
+netcdf point-example {
+dimensions:
+  obs = 2 ;
+
+variables:
+  double time(obs) ;
+      time:standard_name = "time";
+      time:long_name = "time of measurement" ;
+      time:units = "days since 1970-01-01 00:00:00" ;
+  float lon(obs) ;
+      lon:standard_name = "longitude";
+      lon:long_name = "longitude of the observation";
+      lon:units = "degrees_east";
+  float lat(obs) ;
+      lat:standard_name = "latitude";
+      lat:long_name = "latitude of the observation" ;
+      lat:units = "degrees_north" ;
+  float alt(obs) ;
+      alt:long_name = "vertical distance above the surface" ;
+      alt:standard_name = "height" ;
+      alt:units = "m";
+      alt:positive = "up";
+      alt:axis = "Z";
+  float humidity(obs) ;
+      humidity:standard_name = "specific_humidity" ;
+      humidity:coordinates = "time lat lon alt" ;
+  float temp(obs) ;
+      temp:standard_name = "air_temperature" ;
+      temp:units = "Celsius" ;
+      temp:coordinates = "time lat lon alt" ;
+
+//attributes:
+  :featureType = "point";
+  :Conventions = "CF-1.6";
+  :institution = "CF";
+  :source = "fake";
+  :references = "http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_point_data";
+  :title = "CF-1.6 H.1 Point Data Example";
+  :history = "2016-10-31T18:32Z - File Created";
+}

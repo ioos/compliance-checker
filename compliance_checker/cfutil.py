@@ -310,6 +310,8 @@ def get_z_variables(nc):
 
     total_coords = get_coordinate_variables(nc) + get_auxiliary_coordinate_variables(nc)
     for coord_name in total_coords:
+        if coord_name in z_variables:
+            continue
         coord_var = nc.variables[coord_name]
         units = getattr(coord_var, 'units', None)
         positive = getattr(coord_var, 'positive', None)
