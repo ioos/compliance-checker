@@ -1773,16 +1773,15 @@ class CFBaseCheck(BaseCheck):
         '''
 
         ret_val = []
-        for k, v in ds.variables.items():
-            if not util.is_time_variable(k, v):
-                continue
+        for name in cfutil.get_time_variables(ds):
+            variable = ds.variables[name]
             # Has units
-            has_units = hasattr(v, 'units')
+            has_units = hasattr(variable, 'units')
             if not has_units:
                 result = Result(BaseCheck.HIGH,
                                 False,
                                 '§4.4 Time coordinate variable and attributes',
-                                ['%s does not have units' % k])
+                                ['%s does not have units' % name])
                 ret_val.append(result)
                 continue
             # Correct and identifiable units
@@ -1790,10 +1789,10 @@ class CFBaseCheck(BaseCheck):
                             True,
                             '§4.4 Time coordinate variable and attributes')
             ret_val.append(result)
-            correct_units = util.units_temporal(v.units)
+            correct_units = util.units_temporal(variable.units)
             reasoning = None
             if not correct_units:
-                reasoning = ['%s does not have correct time units' % k]
+                reasoning = ['%s does not have correct time units' % name]
             result = Result(BaseCheck.HIGH,
                             correct_units,
                             '§4.4 Time coordinate variable and attributes',
