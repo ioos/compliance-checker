@@ -379,9 +379,8 @@ class TestCF(BaseTestCase):
 
         result = result_dict[u'§3.1 Variable time contains valid CF units']
         # Since no units are specified, they can't be deprecated
-        assert result.value == (1, 3)
+        assert result.value == (0, 1)
         assert 'units attribute is required for time' in result.msgs
-        assert 'units attribute for time needs to be a string' in result.msgs
 
         # it's Degrees_E which is a valid udunits. The preferred units are
         # degrees_east and they are checked in the check_longitude check

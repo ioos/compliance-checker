@@ -746,17 +746,18 @@ class CFBaseCheck(BaseCheck):
             standard_name = getattr(variable, 'standard_name', None)
             standard_name, standard_name_modifier = self._split_standard_name(standard_name)
 
+            units = getattr(variable, 'units', None)
+
             valid_units = self._check_valid_cf_units(ds, name)
             ret_val.append(valid_units)
 
-            valid_udunits = self._check_valid_udunits(ds, name)
-            ret_val.append(valid_udunits)
+            if isinstance(units, basestring):
+                valid_udunits = self._check_valid_udunits(ds, name)
+                ret_val.append(valid_udunits)
 
-            if standard_name is None:
-                continue
-
-            valid_standard_units = self._check_valid_standard_units(ds, name)
-            ret_val.append(valid_standard_units)
+            if isinstance(standard_name, basestring):
+                valid_standard_units = self._check_valid_standard_units(ds, name)
+                ret_val.append(valid_standard_units)
 
         return ret_val
 
@@ -801,6 +802,9 @@ class CFBaseCheck(BaseCheck):
         valid_units.assert_true(should_be_unitless or units is not None,
                                 'units attribute is required for {}'.format(variable_name))
 
+        # Don't bother checking the rest
+        if units is None and not should_be_unitless:
+            return valid_units.to_result()
         # 2) units attribute must be a string
         valid_units.assert_true(should_be_unitless or isinstance(units, basestring),
                                 'units attribute for {} needs to be a string'.format(variable_name))
