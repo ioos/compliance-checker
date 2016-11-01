@@ -1249,9 +1249,9 @@ class CFBaseCheck(BaseCheck):
         :return: List of results
         '''
         ret_val = []
-        coord_types = self._find_coord_vars(ds) + self._find_aux_coord_vars(ds)
 
-        for name in coord_types:
+        for variable in ds.get_variables_by_attributes(axis=lambda x: x is not None):
+            name = variable.name
             # Coordinate compressions should not be checked as a valid
             # coordinate, which they are not. They are a mechanism to project
             # an array of indices onto a 2-d grid containing valid coordinates.
@@ -1270,26 +1270,11 @@ class CFBaseCheck(BaseCheck):
             if variable.dtype.char == 'S':
                 continue
 
-            valid_coord = TestCtx(BaseCheck.MEDIUM, '§4 {} is a valid coordinate type'.format(name))
-
             axis = getattr(variable, 'axis', None)
-            standard_name = getattr(variable, 'standard_name', None)
-
-            valid_coord.assert_true(axis is not None or standard_name is not None,
-                                    "coordinate types should define either axis or standard_name attributes")
-            ret_val.append(valid_coord.to_result())
 
             if axis is not None:
                 valid_axis = self._check_axis(ds, name)
                 ret_val.append(valid_axis)
-
-            if standard_name is not None:
-                valid_standard_name = self._check_coord_standard_name(ds, name)
-                ret_val.append(valid_standard_name)
-
-            if axis is not None and standard_name is not None:
-                valid_mapping = self._check_coord_mapping(ds, name)
-                ret_val.append(valid_mapping)
 
             valid_coordinate_type = self._check_coordinate_type(ds, name)
             ret_val.append(valid_coordinate_type)
@@ -1322,83 +1307,6 @@ class CFBaseCheck(BaseCheck):
 
         return valid_axis.to_result()
 
-    def _check_coord_standard_name(self, ds, name):
-        '''
-        Checks that the standard_name attribute for a coordinate type is a suggested value.
-
-        :param netCDF4.Dataset ds: An open netCDF Dataset
-        :param str name: Name of the variable
-        '''
-        allowed_standard_names = [
-            'time',
-            'longitude',
-            'latitude',
-            'height',
-            'depth',
-            'altitude'
-        ]
-
-        variable = ds.variables[name]
-        standard_name = variable.standard_name
-
-        # §4.5 Discrete Axis states that it is only recommended that the
-        # coordinate types map to coordinate positions time, lat, lon etc.
-        # Discrete axes are also ok.
-        valid_standard_name = TestCtx(BaseCheck.LOW, '§4 {} has suggested standard_name for coordinate type'.format(name))
-        valid_standard_name.assert_true(isinstance(standard_name, basestring),
-                                        "standard_name is not a string")
-
-        if not isinstance(standard_name, basestring):
-            return valid_standard_name.to_result()
-
-        valid_standard_name.assert_true(standard_name in allowed_standard_names,
-                                        "standard_name attribute for coordinate types is suggested to be "
-                                        "time, longitude, latitude, height, depth or altitude")
-
-        return valid_standard_name.to_result()
-
-    def _check_coord_mapping(self, ds, name):
-        '''
-        Checks that the axis maps to a suggested coordinate
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :param str name: Name of the variable
-        '''
-        variable = ds.variables[name]
-        axis = variable.axis
-        standard_name = variable.standard_name
-
-        allowed_map = {
-            'T': ['time'],
-            'X': ['longitude'],
-            'Y': ['latitude'],
-            'Z': ['height', 'depth', 'altitude']
-        }
-
-        valid_coord_mapping = TestCtx(BaseCheck.LOW, '§4 {} has suggested mapping from axis to standard_name'.format(name))
-        axis_is_string = isinstance(axis, basestring)
-        standard_name_is_string = isinstance(standard_name, basestring)
-
-        valid_coord_mapping.assert_true(axis_is_string and standard_name_is_string,
-                                        "axis and standard_name must be strings")
-
-        if not standard_name_is_string or not axis_is_string:
-            return valid_coord_mapping.to_result()
-
-        valid_coord_mapping.assert_true(axis in allowed_map,
-                                        "axis must be T, X, Y, or Z")
-        if axis not in allowed_map:
-            return valid_coord_mapping.to_result()
-
-        valid_coord_mapping.assert_true(standard_name in allowed_map[axis],
-                                        "standard_name for axis {} is suggested to be "
-                                        "{}. Is currently {}"
-                                        "".format(axis,
-                                                  ', '.join(allowed_map[axis]),
-                                                  standard_name))
-
-        return valid_coord_mapping.to_result()
-
     def _check_coordinate_type(self, ds, name):
         '''
         Checks that the coordinate type is a coordinate variable
@@ -1415,38 +1323,6 @@ class CFBaseCheck(BaseCheck):
         valid_coordinate_type.assert_true(is_coordinate_variable or is_dimensionless,
                                           "{} is not a coordinate variable".format(name))
         return valid_coordinate_type.to_result()
-
-    def check_coordinate_vars_for_all_coordinate_types(self, ds):
-        '''
-        Check that coordinate variables exist for X, Y, Z, and T axes of the
-        physical world.
-
-        CF §4 We strongly recommend that coordinate variables be used for all
-        coordinate types whenever they are applicable.
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: list
-        :return: List of results
-        '''
-        ret_val = []
-        # 1. Verify that for any known or common coordinate name as a dmension
-        #    there is a coordinate variable for that dimension.
-        known_coordinate_names = ('longitude', 'lon'   , 'x',
-                                  'latitude' , 'lat'   , 'y',
-                                  'vertical' , 'height', 'z',
-                                  'time'               , 't')
-        for k, v in ds.dimensions.items():
-            if k.lower() in known_coordinate_names:
-                valid = k in ds.variables
-                result = Result(BaseCheck.MEDIUM, valid, '§4 Coordinate Variables')
-                if not valid:
-                    result.msgs = ['No coordinate variable for coordinate type %s' % k]
-
-                ret_val.append(result)
-
-        # @TODO: Additional verifiable requirements
-
-        return ret_val
 
     def check_latitude(self, ds):
         '''

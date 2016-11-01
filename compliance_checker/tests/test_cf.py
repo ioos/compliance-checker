@@ -429,44 +429,6 @@ class TestCF(BaseTestCase):
                              u"the standard_name atmospheric_temperature number_of_observations"]
         assert result.value == (1, 1)
 
-    def test_coordinate_types(self):
-        '''
-        Section 4 Coordinate Types
-
-        We strongly recommend that coordinate variables be used for all coordinate types whenever they are applicable.
-        '''
-        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        result = self.cf.check_coordinate_vars_for_all_coordinate_types(dataset)
-        for each in result:
-            self.assertTrue(each.value)
-
-    def test_check_coordinate_types(self):
-
-        dataset = self.load_dataset(STATIC_FILES['coordinate_types'])
-        results = self.cf.check_coordinate_types(dataset)
-        result_dict = {result.name: result for result in results}
-        result = result_dict[u'§4 time is a valid coordinate type']
-        assert result.value == (1, 1)
-
-        result = result_dict[u'§4 time has suggested standard_name for coordinate type']
-        assert result.value == (2, 2)
-
-        result = result_dict[u'§4 lat has suggested mapping from axis to standard_name']
-        assert result.value == (2, 3)
-        assert result.msgs[0] == 'standard_name for axis X is suggested to be longitude. Is currently latitude'
-
-        result = result_dict[u'§4 temperature has suggested standard_name for coordinate type']
-        assert result.value == (1, 2)
-
-        scored, out_of, messages = self.get_results(results)
-        assert (scored, out_of) == (21, 25)
-
-        dataset = self.load_dataset(STATIC_FILES['reduced_horizontal_grid'])
-        results = self.cf.check_coordinate_types(dataset)
-        scored, out_of, messages = self.get_results(results)
-        # CF recommends coordinate types defining lat/lon/z be coordinate variables
-        assert (scored, out_of) == (10, 12)
-
     def test_latitude(self):
         '''
         Section 4.1 Latitude Coordinate
