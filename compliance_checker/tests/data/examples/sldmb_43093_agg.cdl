@@ -1,0 +1,73 @@
+netcdf sldmb_43093_agg {
+dimensions:
+	maxStrlen64 = 64 ;
+	time = 2 ;
+variables:
+	char trajectory_id(maxStrlen64) ;
+		trajectory_id:cf_role = "trajectory_id" ;
+		trajectory_id:standard_name = "43093" ;
+		trajectory_id:long_name = "43093" ;
+	int crs ;
+		crs:epsg_code = "EPSG:4326" ;
+		crs:semi_major_axis = 6378137. ;
+		crs:inverse_flattening = 298.257223563 ;
+		crs:long_name = "http://www.opengis.net/def/crs/EPSG/0/4326" ;
+		crs:grid_mapping_name = "latitude_longitude" ;
+	int platform ;
+		platform:ioos_code = "urn:ioos:station:maracoos:43093" ;
+		platform:short_name = "titleurn:ioos:station:maracoos:43093" ;
+		platform:long_name = "descriptionurn:ioos:station:maracoos:43093" ;
+	int instrument ;
+		instrument:definition = "http://mmisw.org/ont/ioos/definition/sensorID" ;
+		instrument:long_name = "urn:ioos:sensor:maracoos:43093" ;
+	double time(time) ;
+		time:units = "seconds since 1970-01-01T00:00:00Z" ;
+		time:standard_name = "time" ;
+		time:long_name = "time of measurement" ;
+		time:calendar = "gregorian" ;
+		time:_CoordianteAxisType = "Time" ;
+		time:_ChunkSizes = 1 ;
+	float lat(time) ;
+		lat:units = "degrees_north" ;
+		lat:standard_name = "latitude" ;
+		lat:long_name = "station latitude" ;
+		lat:_CoordianteAxisType = "Lat" ;
+		lat:_ChunkSizes = 1 ;
+	float lon(time) ;
+		lon:units = "degrees_east" ;
+		lon:standard_name = "longitude" ;
+		lon:long_name = "station longitude" ;
+		lon:_CoordianteAxisType = "Lon" ;
+		lon:_ChunkSizes = 1 ;
+	float temperature(time) ;
+		temperature:_FillValue = -999.9f ;
+		temperature:coordinates = "time lat lon precise_lat precise_lon" ;
+		temperature:standard_name = "temperature" ;
+		temperature:units = "K" ;
+		temperature:_ChunkSizes = 1 ;
+
+// global attributes:
+		:Conventions = "CF-1.6" ;
+		:date_created = "2015-04-13T08:00:00Z" ;
+		:time_coverage_start = 1428728400. ;
+		:time_coverage_end = 1428809400. ;
+		:time_coverage_duration = "P81000S" ;
+		:time_coverage_resolution = "P3600S" ;
+		:featureType = "trajectory" ;
+		:project = "MARACOOS SLDMB" ;
+		:title = "Mid-Atlantic Regional Association Coastal Ocean Observing System Self-Locating Datum Marker Buoy" ;
+		:institution = "MARACOOS" ;
+		:keywords = "MARACOOS, SLDMB, Temperature, SST" ;
+		:references = "http://www.MARACOOS.org" ;
+		:geospatial_lat_min = 24.755482 ;
+		:geospatial_lat_max = 24.803719 ;
+		:geospatial_lon_min = -81.147547 ;
+		:geospatial_lon_max = -81.117936 ;
+		:publisher_name = "RPS ASA on behalf of MARACOOS." ;
+		:publisher_phone = "(401) 789-6224" ;
+		:publisher_email = "devops@asascience.com" ;
+		:publisher_url = "http://www.asascience.com/" ;
+		:DODS.strlen = 5 ;
+		:DODS.dimName = "name_strlen" ;
+}
+
