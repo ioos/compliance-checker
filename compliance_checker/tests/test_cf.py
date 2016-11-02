@@ -12,6 +12,7 @@ from compliance_checker.tests import BaseTestCase
 import unittest
 import os
 import re
+import sys
 
 
 class MockVariable(object):
@@ -305,6 +306,41 @@ class TestCF(BaseTestCase):
         # Make sure that the rgrid coordinate variable isn't checked for standard_name
         # time, lat, lon exist with three checks each
         assert (score, out_of) == (6, 6)
+
+    def test_cell_bounds(self):
+        dataset = self.load_dataset(STATIC_FILES['grid-boundaries'])
+        results = self.cf.check_cell_boundaries(dataset)
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (2, 2)
+
+        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
+        results = self.cf.check_cell_boundaries(dataset)
+
+        dataset = self.load_dataset(STATIC_FILES['bounds_bad_order'])
+        results = self.cf.check_cell_boundaries(dataset)
+        score, out_of, messages = self.get_results(results)
+        # Make sure that the rgrid coordinate variable isn't checked for standard_name
+        assert (score, out_of) == (0, 2)
+
+        # hacky, but handles issues with Python 2/3 string interpolation
+        if sys.version_info.major == 3:
+            tuple_format = "('nv', 'lat')"
+        else:
+            tuple_format = "(u'nv', u'lat')"
+
+        assert u"Boundary variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(tuple_format) in messages
+
+        dataset = self.load_dataset(STATIC_FILES['bounds_bad_num_coords'])
+        results = self.cf.check_cell_boundaries(dataset)
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (0, 2)
+        assert ('The number of dimensions of the variable lat is 1, but the number of dimensions of the boundary variable lat_bnds is 1. The boundary variable should have either 2 or 3 dimensions' in
+                messages)
+
+        dataset = self.load_dataset(STATIC_FILES['1d_bound_bad'])
+        results = self.cf.check_cell_boundaries(dataset)
+        score, out_of, messages = self.get_results(results)
+        assert "Boundary variable dimension nv must have either two or four elements." in messages
 
     def test_check_ancillary_variables(self):
         '''

@@ -81,4 +81,7 @@ STATIC_FILES = {
     'illegal-vertical'                     : get_filename('tests/data/illegal-vertical.cdl'),
     'illegal-aux-coords'                   : get_filename('tests/data/illegal-aux-coords.cdl'),
     'bad-instance'                         : get_filename('tests/data/bad-instance.cdl'),
+    'bounds_bad_order'                     : get_filename('tests/data/non-comp/bounds_bad_order.cdl'),
+    'bounds_bad_num_coords'                : get_filename('tests/data/non-comp/bounds_bad_num_coords.cdl'),
+    '1d_bound_bad'                         : get_filename('tests/data/non-comp/1d_bound_bad.cdl'),
 }
