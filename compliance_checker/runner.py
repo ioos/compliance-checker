@@ -50,6 +50,9 @@ class ComplianceChecker(object):
         score_groups = cs.run(ds, [] if skip_checks is None else skip_checks,
                               *checker_names)
 
+        if not score_groups:
+            raise ValueError("No checks found, please check the name of the checker(s) and that they are installed")
+
         if criteria == 'normal':
             limit = 2
         elif criteria == 'strict':
