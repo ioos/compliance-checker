@@ -1,0 +1,43 @@
+netcdf grid-boundaries-bad-order {
+dimensions:
+    time = 2;
+    lat = 2;
+    lon = 2;
+    nv = 1;
+variables:
+    double time(time);
+        time:standard_name = "time";
+        time:long_name = "Time";
+        time:axis = "T";
+        time:units = "seconds since 1970-01-01T00:00:00Z";
+    float lat(lat);
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+        lat:axis = "Y";
+        lat:long_name = "Latitude";
+        lat:bounds = "lat_bnds";
+    float lat_bnds(lat, nv);
+        lat_bnds:units = "degrees_north";
+        lat_bnds:long_name = "Latitude Cell Boundaries";
+    float lon(lon);
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+        lon:axis = "X";
+        lon:long_name = "Longitude";
+        lon:bounds = "lon_bnds";
+    float lon_bnds(lon, nv);
+        lon_bnds:units = "degrees_east";
+        lon_bnds:long_name = "Longitude Cell Boundaries";
+    float z;
+        z:standard_name = "depth";
+        z:positive = "down";
+        z:units = "m";
+        z:long_name = "Depth below surface";
+
+    float temperature(time, lat, lon);
+        temperature:standard_name = "sea_water_temperature";
+        temperature:units = "deg_C";
+        temperature:long_name = "Seawater Temperature";
+        temperature:coordinates = "time lat lon z";
+
+} 
