@@ -1,0 +1,58 @@
+netcdf timeseries-non-static {
+   dimensions:
+      time = 100233 ;
+      name_strlen = 23 ;
+
+   variables:
+      float lon ;
+          lon:standard_name = "longitude";
+          lon:long_name = "station longitude";
+          lon:units = "degrees_east";
+          lon:axis = "X";
+      float lat ;
+          lat:standard_name = "latitude";
+          lat:long_name = "station latitude" ;
+          lat:units = "degrees_north" ;
+          lat: axis = "Y" ;
+      float precise_lon (time);
+          precise_lon:standard_name = "longitude";
+          precise_lon:long_name = "station longitude";
+          precise_lon:units = "degrees_east";
+      float precise_lat (time);
+          precise_lat:standard_name = "latitude";
+          precise_lat:long_name = "station latitude" ;
+          precise_lat:units = "degrees_north" ;
+      float alt ;
+          alt:long_name = "vertical distance above the surface" ;
+          alt:standard_name = "height" ;
+          alt:units = "m";
+          alt:positive = "up";
+          alt:axis = "Z";
+      char station_name(name_strlen) ;
+          station_name:long_name = "station name" ;
+          station_name:cf_role = "timeseries_id";
+
+      double time(time) ;
+          time:standard_name = "time";
+          time:long_name = "time of measurement" ;
+          time:units = "days since 1970-01-01 00:00:00" ;
+          time:missing_value = -999.9;
+      float humidity(time) ;
+          humidity:standard_name = "specific_humidity" ;
+          humidity:coordinates = "time lat lon alt precise_lon precise_lat" ;
+          humidity:_FillValue = -999.9;
+      float temp(time) ;
+          temp:standard_name = "air_temperature" ;
+          temp:units = "Celsius" ;
+          temp:coordinates = "time lat lon alt precise_lon precise_lat " ;
+          temp:_FillValue = -999.9;
+
+   //attributes:
+          :featureType = "timeSeries";
+          :Conventions = "CF-1.6";
+          :institution = "CF";
+          :source = "fake";
+          :references = "http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_single_time_series_including_deviations_from_a_nominal_fixed_spatial_location";
+          :title = "CF-1.6 H.4 Single Time Series with time-varying deviations";
+          :history = "2016-11-01 - File Created";
+}
