@@ -2473,16 +2473,16 @@ class CFBaseCheck(BaseCheck):
                                "snow",
                                "trees"
                                "vegetation"]
-        methods = [ 'point',
-                    'sum',
-                    'mean',
-                    'maximum',
-                    'minimum',
-                    'mid_range',
-                    'standard_deviation',
-                    'variance',
-                    'mode',
-                    'median']
+        methods = ['point',
+                   'sum',
+                   'mean',
+                   'maximum',
+                   'minimum',
+                   'mid_range',
+                   'standard_deviation',
+                   'variance',
+                   'mode',
+                   'median']
 
         ret_val = []
         reasoning = []
@@ -2804,6 +2804,70 @@ class CFBaseCheck(BaseCheck):
             result = Result(BaseCheck.MEDIUM,
                             valid,
                             '§8.1 Packed Data defined by {} contains valid data types'.format(name),
+                            reasoning)
+            ret_val.append(result)
+
+        return ret_val
+
+
+    def check_compression_gathering(self, ds):
+        """
+        At the current time the netCDF interface does not provide for packing
+        data. However a simple packing may be achieved through the use of the
+        optional NUG defined attributes scale_factor and add_offset . After the
+        data values of a variable have been read, they are to be multiplied by
+        the scale_factor , and have add_offset added to them. If both
+        attributes are present, the data are scaled before the offset is added.
+        When scaled data are written, the application should first subtract the
+        offset and then divide by the scale factor. The units of a variable
+        should be representative of the unpacked data.
+
+        This standard is more restrictive than the NUG with respect to the use
+        of the scale_factor and add_offset attributes; ambiguities and
+        precision problems related to data type conversions are resolved by
+        these restrictions. If the scale_factor and add_offset attributes are
+        of the same data type as the associated variable, the unpacked data is
+        assumed to be of the same data type as the packed data. However, if the
+        scale_factor and add_offset attributes are of a different data type
+        from the variable (containing the packed data) then the unpacked data
+        should match the type of these attributes, which must both be of type
+        float or both be of type double . An additional restriction in this
+        case is that the variable containing the packed data must be of type
+        byte , short or int . It is not advised to unpack an int into a float
+        as there is a potential precision loss.
+
+        When data to be packed contains missing values the attributes that
+        indicate missing values ( _FillValue , valid_min , valid_max ,
+                                 valid_range ) must be of the same data type as
+        the packed data. See Section 2.5.1, “Missing Data” for a discussion of
+        how applications should treat variables that have attributes indicating
+        both missing values and transformations defined by a scale and/or
+        offset.
+        """
+        ret_val = []
+        for compress_var in ds.get_variables_by_attributes(compress=lambda s: s is not None):
+            valid = True
+            reasoning = []
+            # puts the referenced variable being compressed into a set
+            compress_set = set(compress_var.compress.split(' '))
+            if compress_var.ndim != 1:
+                valid=False
+                reasoning.append("Compression variable {} may only have one dimension".format(compress_var.name))
+            # ensure compression variable is a proper index, and thus is an
+            # signed or unsigned integer type of some sort
+            if compress_var.dtype.kind not in {'i', 'u'}:
+                valid=False
+                reasoning.append("Compression variable {} must be an integer type to form a proper array index".format(compress_var.name))
+            # make sure all the variables referred to are contained by the
+            # variables.
+            if not compress_set.issubset(ds.dimensions):
+                not_in_dims = sorted(compress_set.difference(ds.dimensions))
+                valid = False
+                reasoning.append("The following dimensions referenced by the compress attribute of variable {} do not exist: {}".format(compress_var.name, not_in_dims))
+
+            result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            '§8.2 Compression by gathering for variable {}'.format(compress_var.name),
                             reasoning)
             ret_val.append(result)
 
