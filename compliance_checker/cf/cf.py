@@ -2355,7 +2355,7 @@ class CFBaseCheck(BaseCheck):
                                   variable.ndim + 1, variable.ndim + 2))
             # check that coordinate bounds are in the proper order.
             # make sure last elements are boundary variable specific dimensions
-            elif (variable.dimensions[:] !=
+            if (variable.dimensions[:] !=
                   boundary_variable.dimensions[:variable.ndim]):
                 valid = False
                 reasoning.append(u"Boundary variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
@@ -2369,7 +2369,7 @@ class CFBaseCheck(BaseCheck):
                     reasoning.append("Boundary variable dimension {} must have either two or four elements.".format(boundary_variable.dimensions[-1]))
                 # ensure p vertices form a valid simplex given n dimensions
                 # of auxiliary coordinates
-                elif (boundary_variable.ndim == variable.ndim + 2 and
+                if (boundary_variable.ndim == variable.ndim + 2 and
                       ds.dimensions[boundary_variable.dimensions[-1]].size <
                       ds.dimensions[boundary_variable.dimensions[-2]].size + 1):
                     valid = False
