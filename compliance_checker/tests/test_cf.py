@@ -342,6 +342,11 @@ class TestCF(BaseTestCase):
         score, out_of, messages = self.get_results(results)
         assert "Boundary variable dimension nv must have either two or four elements." in messages
 
+    def test_climatology(self):
+        dataset = self.load_dataset(STATIC_FILES['climatology'])
+        results = self.cf.check_climatological_statistics(dataset)
+        score, out_of, messages = self.get_results(results)
+
     def test_check_ancillary_variables(self):
         '''
         Test to ensure that ancillary variables are properly checked
