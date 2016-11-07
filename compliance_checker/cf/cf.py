@@ -2630,12 +2630,12 @@ class CFBaseCheck(BaseCheck):
         # variable, we need to make sure it has the attribute "climatology",
         # but not the attribute "bounds"
         meth_regex = "(?:{})".format("|".join(methods))
-        clim_containing_vars = ds.get_variables_by_attributes(climatology=lambda s:
-                                                              s is not None)
+        clim_containing_vars = ds.get_variables_by_attributes(
+                                        climatology=lambda s: s is not None)
         clim_var = clim_containing_vars[0] if clim_containing_vars else None
         if clim_var:
             if hasattr(clim_var, 'bounds'):
-                reasoning.append('When variable has a climatology attribute, it cannot also have a bounds attribute.')
+                reasoning.append('Variable {} has a climatology attribute and cannot also have a bounds attribute.'.format(clim_var.name))
                 result = Result(BaseCheck.MEDIUM,
                                 False,
                                 ('§7.3 Cell Methods', clim_var, 'cell_methods_climatology'),
@@ -2700,8 +2700,6 @@ class CFBaseCheck(BaseCheck):
                 reasoning.append('The "time: method within years/days over years/days" format is not correct in variable {}.'.format(cell_method_var.name))
             else:
                 valid_climate_count += 1
-
-
 
             result = Result(BaseCheck.MEDIUM,
                             (valid_climate_count, total_climate_count),
