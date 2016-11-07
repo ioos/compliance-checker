@@ -137,3 +137,14 @@ class TestCFIntegration(BaseTestCase):
                 "of letters, digits, and underscores") in messages
         assert (u"global attribute DODS.strlen should begin with a letter and be composed of "
                 "letters, digits, and underscores") in messages
+
+    def test_ncei_point_2(self):
+        dataset = self.load_dataset(STATIC_FILES['ncei_gold_point_2'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        # The score can't be checked because the check_cell_methods is broke
+        #assert (scored, out_of) == (365, 370)
+
+        assert (u"global attribute DODS.strlen should begin with a letter and be composed of "
+                "letters, digits, and underscores") in messages
+        assert (u"The name field does not match a dimension, area or coordinate.") in messages
