@@ -982,7 +982,7 @@ class CFBaseCheck(BaseCheck):
             valid_std_name = TestCtx(BaseCheck.HIGH, '§3.3 Variable {} has valid standard_name attribute'.format(name))
 
             valid_std_name.assert_true(isinstance(standard_name, basestring),
-                                       "variable {}'s attribute standard_name must be a string".format(name))
+                                       "variable {}'s attribute standard_name must be a non-empty string".format(name))
 
             if isinstance(standard_name, basestring):
                 valid_std_name.assert_true(standard_name in self._std_names,
