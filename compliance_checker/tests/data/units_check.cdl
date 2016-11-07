@@ -1,6 +1,7 @@
 netcdf units_check {
 dimensions:
 	time = 1 ;
+	strlen = 14 ;
 variables:
 	uint64 time(time) ;
 		time:units = "seconds since 1970-01-01" ;
@@ -27,8 +28,16 @@ variables:
 		platform:long_name = "Annapolis" ;
 		platform:comment = "CBIBS Annapolis Buoy" ;
 		platform:wmo_code = "44041" ;
-
+		platform:long_name = "Annapolis" ;
+		platform:comment = "CBIBS Annapolis Buoy" ;
+		platform:wmo_code = "44041" ;
+	char region(strlen) ;
+		region:long_name = "Geographic Region" ;
+		region:standard_name = "region" ;
 // global attributes:
 		:featureType = "timeSeries" ;
 		:platform = "platform" ;
+	data:
+		// there was no Chesapeake Bay in the region list, so this seemed closest
+		region = "atlantic_ocean" ;
 }
