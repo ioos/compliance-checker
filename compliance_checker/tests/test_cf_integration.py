@@ -2,15 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from compliance_checker.suite import CheckSuite
-from compliance_checker.cf import CFBaseCheck, dimless_vertical_coordinates
-from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal, StandardNameTable, create_cached_data_dir, download_cf_standard_name_table
 from netCDF4 import Dataset
 from tempfile import gettempdir
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests import BaseTestCase
 
+import pytest
 import os
-import re
+
 
 class TestCFIntegration(BaseTestCase):
 
@@ -89,6 +88,7 @@ class TestCFIntegration(BaseTestCase):
         assert (u'global attribute DODS.dimName should begin with a letter and be composed of '
                 'letters, digits, and underscores') in messages
 
+    @pytest.mark.slowtest
     def test_ocos(self):
         dataset = self.load_dataset(STATIC_FILES['ocos'])
         check_results = self.cs.run(dataset, [], 'cf')
@@ -105,7 +105,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['l01-met'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (852, 870)
+        assert (scored, out_of) == (841, 859)
 
         # The variable is supposed to be a status flag but it's mislabled
         assert (u'units for variable air_temperature_qc must be convertible to K currently they are 1') in messages
@@ -118,5 +118,22 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['usgs_dem_saipan'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (110, 111)
+        assert (scored, out_of) == (111, 112)
         assert (u'Conventions global attribute does not contain "CF-1.6"') == messages[0]
+
+    def test_sp041(self):
+        dataset = self.load_dataset(STATIC_FILES['sp041'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (2068, 2079)
+
+        assert (u"lat_qc is not a variable in this dataset") in messages
+        assert (u"TrajectoryProfile is not a valid CF featureType. It must be one of point, "
+                "timeSeries, trajectory, profile, timeSeriesProfile, trajectoryProfile") in messages
+        assert (u"Different feature types discovered in this dataset: mapped-grid (u, v), "
+                "trajectory-profile-incomplete (pressure, temperature, conductivity, salinity, "
+                "density, platform_meta)") in messages
+        assert (u"attribute time:_CoordinateAxisType should begin with a letter and be composed "
+                "of letters, digits, and underscores") in messages
+        assert (u"global attribute DODS.strlen should begin with a letter and be composed of "
+                "letters, digits, and underscores") in messages

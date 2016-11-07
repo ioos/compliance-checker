@@ -2892,19 +2892,20 @@ class CFBaseCheck(BaseCheck):
         """
         all_the_same = TestCtx(BaseCheck.HIGH,
                                '§9.1 Feature Types are all the same')
-        discovered_feature = None
+        feature_types_found = defaultdict(list)
         for name in self._find_geophysical_vars(ds):
             feature = cfutil.guess_feature_type(ds, name)
+            if feature is not None:
+                feature_types_found[feature].append(name)
+
             all_the_same.assert_true(feature is not None,
                                      "Unidentifiable feature for variable {}"
                                      "".format(name))
-            if discovered_feature is None and feature:
-                discovered_feature = feature
+        feature_description = ', '.join(['{} ({})'.format(ftr, ', '.join(vrs)) for ftr, vrs in feature_types_found.items()])
 
-            if discovered_feature is not None:
-                all_the_same.assert_true(feature == discovered_feature,
-                                         "variable {} has defined a different feature type than some of the other variables"
-                                         "".format(name))
+        all_the_same.assert_true(len(feature_types_found) < 2,
+                                 "Different feature types discovered in this dataset: {}"
+                                 "".format(feature_description))
 
         return all_the_same.to_result()
 

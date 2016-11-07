@@ -93,4 +93,5 @@ STATIC_FILES = {
     'ocos'                                 : get_filename('tests/data/examples/ocos.cdl'),
     'l01-met'                              : get_filename('tests/data/examples/l01-met.cdl'),
     'usgs_dem_saipan'                      : get_filename('tests/data/examples/usgs_dem_saipan.cdl'),
+    'sp041'                                : get_filename('tests/data/examples/sp041.cdl'),
 }

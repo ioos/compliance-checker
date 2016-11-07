@@ -851,7 +851,7 @@ class TestCF(BaseTestCase):
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_all_features_are_same_type(dataset)
-        assert result.value == (0, 2)
+        assert result.value == (1, 3)
 
     def test_check_units(self):
         '''
