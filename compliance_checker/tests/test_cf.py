@@ -840,14 +840,6 @@ class TestCF(BaseTestCase):
         self.assertFalse(results[0].value)
         self.assertFalse(results[1].value)
 
-    def test_check_instance_variable(self):
-        dataset = self.load_dataset(STATIC_FILES['bad-instance'])
-        results = self.cf.check_instance_variables(dataset)
-
-        result_dict = {result.name: result for result in results}
-        result = result_dict[u'§9.5 Instance Variable station_name should not be referenced as a coordinate variable']
-        assert result.value == (0, 1)
-
     def test_check_all_features_are_same_type(self):
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
         result = self.cf.check_all_features_are_same_type(dataset)
