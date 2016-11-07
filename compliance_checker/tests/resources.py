@@ -91,4 +91,6 @@ STATIC_FILES = {
     'sldmb_43093_agg'                      : get_filename('tests/data/examples/sldmb_43093_agg.cdl'),
     'hycom_global'                         : get_filename('tests/data/examples/hycom_global.cdl'),
     'ocos'                                 : get_filename('tests/data/examples/ocos.cdl'),
+    'l01-met'                              : get_filename('tests/data/examples/l01-met.cdl'),
+    'usgs_dem_saipan'                      : get_filename('tests/data/examples/usgs_dem_saipan.cdl'),
 }

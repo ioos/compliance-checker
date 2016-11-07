@@ -100,3 +100,23 @@ class TestCFIntegration(BaseTestCase):
                 "ocean_time, eta_rho, xi_rho") in messages
         assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
         assert (u"CF recommends latitude variable 'lat_psi' to use units degrees_north") in messages
+
+    def test_l01_met(self):
+        dataset = self.load_dataset(STATIC_FILES['l01-met'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (852, 870)
+
+        # The variable is supposed to be a status flag but it's mislabled
+        assert (u'units for variable air_temperature_qc must be convertible to K currently they are 1') in messages
+        assert (u'standard_name barometric_pressure is not defined in Standard Name Table v36') in messages
+        assert (u'standard_name use_wind is not defined in Standard Name Table v36') in messages
+        assert (u'standard_name modifier data_quality is not a valid modifier according to appendix C') in messages
+        assert (u"CF recommends latitude variable 'lat' to use units degrees_north") in messages
+
+    def test_usgs_dem_saipan(self):
+        dataset = self.load_dataset(STATIC_FILES['usgs_dem_saipan'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (110, 111)
+        assert (u'Conventions global attribute does not contain "CF-1.6"') == messages[0]

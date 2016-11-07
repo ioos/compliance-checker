@@ -1,0 +1,64 @@
+
+netcdf usgs_dem_10m_saipan {
+dimensions:
+	lat = 2 ;
+	lon = 2 ;
+variables:
+	double lat(lat) ;
+		lat:standard_name = "latitude" ;
+		lat:long_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	double lon(lon) ;
+		lon:standard_name = "longitude" ;
+		lon:long_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	float elev(lat, lon) ;
+		elev:long_name = "elevation" ;
+		elev:_FillValue = NaNf ;
+		elev:standard_name = "height" ;
+		elev:units = "meters" ;
+		elev:positive = "up" ;
+
+// global attributes:
+		:Conventions = "Unidata Dataset Discovery v1.0, CF-1.4" ;
+		:id = "usgs_dem_10m_saipan" ;
+		:naming_authority = "org.pacioos" ;
+		:Metadata_Conventions = "Unidata Dataset Discovery v1.0, CF-1.4" ;
+		:Metadata_Link = "http://pacioos.org/metadata/usgs_dem_10m_saipan.html" ;
+		:ISO_Topic_Categories = "elevation" ;
+		:title = "USGS 10-m Digital Elevation Model (DEM): CNMI: Saipan" ;
+		:summary = "A 10-meter resolution land surface digital elevation model (DEM) for the island of Saipan in the Commonwealth of the Northern Mariana Islands (CNMI) from United States Geological Survey (USGS) 1/3 arc-second DEM quadrangles." ;
+		:keywords = "Earth Science > Land Surface > Topography > Terrain Elevation > Digital Elevation/Terrain Model (DEM)" ;
+		:keywords_vocabulary = "GCMD Science Keywords" ;
+		:standard_name_vocabulary = "CF-1.4" ;
+		:history = "PacIOOS obtained ArcInfo Binary Grids from The National Map Viewer of USGS then mosaicked and converted to NetCDF format and EPSG:4326 spatial reference system (05/2015)." ;
+		:comment = "These data are provided by the United States Geological Survey (USGS) and subsequently distributed via THREDDS Data Server (TDS) and other OPeNDAP servers by the Pacific Islands Ocean Observing System (PacIOOS)." ;
+		:geospatial_lat_min = 15.087774 ;
+		:geospatial_lat_max = 15.296387 ;
+		:geospatial_lon_min = 145.680835 ;
+		:geospatial_lon_max = 145.836855 ;
+		:geospatial_vertical_min = 0. ;
+		:geospatial_vertical_max = 463.26 ;
+		:geospatial_lat_units = "degrees_north" ;
+		:geospatial_lon_units = "degrees_east" ;
+		:geospatial_vertical_units = "m" ;
+		:geospatial_vertical_positive = "up" ;
+		:creator_email = "ddecker@usgs.gov" ;
+		:creator_name = "United States Geological Survey (USGS)" ;
+		:creator_url = "http://www.usgs.gov" ;
+		:date_created = "2015-05-11" ;
+		:date_issued = "2015-05-11" ;
+		:date_modified = "2015-05-11" ;
+		:institution = "United States Geological Survey (USGS)" ;
+		:project = "Pacific Islands Ocean Observing System (PacIOOS)" ;
+		:contributor_name = "Jim Potemra" ;
+		:contributor_role = "distributor" ;
+		:publisher_email = "info@pacioos.org" ;
+		:publisher_name = "Pacific Islands Ocean Observing System (PacIOOS)" ;
+		:publisher_url = "http://pacioos.org" ;
+		:license = "The data may be used and redistributed for free but is not intended for legal use, since it may contain inaccuracies. Neither the data Contributor, University of Hawaii, PacIOOS, NOAA, State of Hawaii nor the United States Government, nor any of their employees or contractors, makes any warranty, express or implied, including warranties of merchantability and fitness for a particular purpose, or assumes any legal liability for the accuracy, completeness, or usefulness, of this information." ;
+		:acknowledgment = "The Pacific Islands Ocean Observing System (PacIOOS) is funded through the National Oceanic and Atmospheric Administration (NOAA) as a Regional Association within the U.S. Integrated Ocean Observing System (IOOS). PacIOOS is coordinated by the University of Hawaii School of Ocean and Earth Science and Technology (SOEST)." ;
+		:cdm_data_type = "Grid" ;
+		:source = "USGS 1/3 arc-second DEM quadrangles" ;
+		:references = "http://viewer.nationalmap.gov, http://pacioos.org" ;
+}
