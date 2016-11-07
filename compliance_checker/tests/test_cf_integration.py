@@ -93,7 +93,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ocos'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (2058, 2119)
+        assert (scored, out_of) == (2037, 2098)
         assert (u'units attribute is required for user') in messages
         assert (u'Unidentifiable feature for variable Akt_bak') in messages
         assert (u"zeta's dimensions are not in the recommended order T, Z, Y, X. They are "
