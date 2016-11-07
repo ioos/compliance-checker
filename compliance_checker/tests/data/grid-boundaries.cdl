@@ -17,7 +17,6 @@ variables:
         lat:long_name = "Latitude";
         lat:bounds = "lat_bnds";
     float lat_bnds(lat, nv);
-        lat_bnds:units = "degrees_north";
         lat_bnds:long_name = "Latitude Cell Boundaries";
     float lon(lon);
         lon:standard_name = "longitude";
@@ -26,7 +25,6 @@ variables:
         lon:long_name = "Longitude";
         lon:bounds = "lon_bnds";
     float lon_bnds(lon, nv);
-        lon_bnds:units = "degrees_east";
         lon_bnds:long_name = "Longitude Cell Boundaries";
     float z;
         z:standard_name = "depth";

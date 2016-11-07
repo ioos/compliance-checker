@@ -505,8 +505,16 @@ class CFBaseCheck(BaseCheck):
             if dimension not in coord_axis_map:
                 coord_axis_map[dimension] = 'U'
 
-        # Check each variable's dimension order
+        # Check each variable's dimension order, excluding climatology and
+        # bounds variables
+        any_clim = cfutil.get_climatology_variable(ds)
+        any_bounds = cfutil.get_cell_boundary_variables(ds)
         for name, variable in ds.variables.items():
+            # Skip bounds/climatology variables, as they should implicitly
+            # have the same order except for the bounds specific dimension.
+            # This is tested later in the respective checks
+            if name in any_bounds or name == any_clim:
+                continue
             if variable.dimensions:
                 dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
                 valid_dimension_order.assert_true(self._dims_in_order(dimension_order),

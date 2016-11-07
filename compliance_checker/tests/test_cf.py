@@ -177,10 +177,8 @@ class TestCF(BaseTestCase):
         """
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_dimension_order(dataset)
-        assert result.value == (5, 7)
-        assert result.msgs[0] == ("salinity's dimensions are not in the recommended order "
-                                  "T, Z, Y, X. They are latitude, longitude, time")
-        assert result.msgs[1] == ("really_bad's dimensions are not in the recommended order "
+        assert result.value == (5, 6)
+        assert result.msgs[0] == ("really_bad's dimensions are not in the recommended order "
                                   "T, Z, Y, X. They are latitude, power")
 
     def test_check_fill_value_outside_valid_range(self):
