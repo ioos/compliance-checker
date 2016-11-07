@@ -90,4 +90,5 @@ STATIC_FILES = {
     'h_timeseries-single'                  : get_filename('tests/data/appendix_h/timeseries-single.cdl'),
     'sldmb_43093_agg'                      : get_filename('tests/data/examples/sldmb_43093_agg.cdl'),
     'hycom_global'                         : get_filename('tests/data/examples/hycom_global.cdl'),
+    'ocos'                                 : get_filename('tests/data/examples/ocos.cdl'),
 }

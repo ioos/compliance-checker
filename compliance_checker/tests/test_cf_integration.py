@@ -88,3 +88,15 @@ class TestCFIntegration(BaseTestCase):
 
         assert (u'global attribute DODS.dimName should begin with a letter and be composed of '
                 'letters, digits, and underscores') in messages
+
+    def test_ocos(self):
+        dataset = self.load_dataset(STATIC_FILES['ocos'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (2058, 2119)
+        assert (u'units attribute is required for user') in messages
+        assert (u'Unidentifiable feature for variable Akt_bak') in messages
+        assert (u"zeta's dimensions are not in the recommended order T, Z, Y, X. They are "
+                "ocean_time, eta_rho, xi_rho") in messages
+        assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
+        assert (u"CF recommends latitude variable 'lat_psi' to use units degrees_north") in messages

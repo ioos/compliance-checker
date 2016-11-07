@@ -53,12 +53,13 @@ DIMENSIONLESS_VERTICAL_COORDINATES = [
 
 def get_unitless_standard_names(xml_tree, units):
     '''
-    Given the XML tree for the standard name table and a units, string,
-    return True
+    Returns True if the units are unitless. Unitless includes units that have
+    no units and units that are defined as '1'.
     '''
     found_standard_name = xml_tree.find(".//entry[@id='{}']".format(units))
     if found_standard_name is not None:
-        return found_standard_name.find('canonical_units') is None
+        canonical_units = found_standard_name.find('canonical_units')
+        return canonical_units is None or canonical_units.text == '1'
     # if the standard name is not found, assume we need units for the time being
     else:
         return False
