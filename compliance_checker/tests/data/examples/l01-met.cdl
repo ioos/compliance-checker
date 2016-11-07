@@ -1,0 +1,247 @@
+
+netcdf Agg {
+dimensions:
+	maxStrlen64 = 64 ;
+	time = 2 ;
+variables:
+	float lon ;
+		lon:units = "degree_east" ;
+		lon:standard_name = "longitude" ;
+	float lat ;
+		lat:units = "degree_north" ;
+		lat:standard_name = "latitude" ;
+	float depth ;
+		depth:units = "m" ;
+		depth:standard_name = "depth" ;
+		depth:positive = "down" ;
+		depth:axis = "Z" ;
+	char station(maxStrlen64) ;
+		station:name = "L01" ;
+		station:short_name = "L01" ;
+		station:cf_role = "timeseries_id" ;
+		station:standard_name = "station_name" ;
+		station:long_name = "L01 Scotian Shelf Met" ;
+	double time(time) ;
+		time:units = "days since 1858-11-17 00:00:00 +0:00" ;
+		time:standard_name = "time" ;
+		time:calendar = "gregorian" ;
+	float air_temperature(time) ;
+		air_temperature:long_name = "Air Temperature" ;
+		air_temperature:standard_name = "air_temperature" ;
+		air_temperature:short_name = "AT" ;
+		air_temperature:_FillValue = -999.f ;
+		air_temperature:units = "celsius" ;
+		air_temperature:valid_range = -40.f, 40.f ;
+		air_temperature:epic_code = 21 ;
+		air_temperature:ancillary_variables = "air_temperature_qc" ;
+		air_temperature:coordinates = "time lon lat depth" ;
+	byte air_temperature_qc(time) ;
+		air_temperature_qc:long_name = "Air Temperature Quality" ;
+		air_temperature_qc:short_name = "AT QC" ;
+		air_temperature_qc:_FillValue = -128b ;
+		air_temperature_qc:units = "1" ;
+		air_temperature_qc:valid_range = -127s, 127s ;
+		air_temperature_qc:quality_good = 0b ;
+		air_temperature_qc:quality_bad = 1b ;
+		air_temperature_qc:intent = "data_quality" ;
+		air_temperature_qc:standard_name = "air_temperature data_quality" ;
+		air_temperature_qc:coordinates = "time lon lat depth" ;
+	float barometric_pressure(time) ;
+		barometric_pressure:long_name = "Barometric Pressure" ;
+		barometric_pressure:standard_name = "barometric_pressure" ;
+		barometric_pressure:short_name = "BP" ;
+		barometric_pressure:ancillary_variables = "barometric_pressure_qc" ;
+		barometric_pressure:_FillValue = -999.f ;
+		barometric_pressure:units = "millibars" ;
+		barometric_pressure:valid_range = 800.f, 1100.f ;
+		barometric_pressure:is_dead = 0 ;
+		barometric_pressure:calibration_coeffs = 0.06, 799.978 ;
+		barometric_pressure:epic_code = 915 ;
+		barometric_pressure:coordinates = "time lon lat depth" ;
+	byte barometric_pressure_qc(time) ;
+		barometric_pressure_qc:long_name = "Barometric Pressure QC" ;
+		barometric_pressure_qc:short_name = "BPQC" ;
+		barometric_pressure_qc:intent = "data_quality" ;
+		barometric_pressure_qc:standard_name = "barometric_pressure data_quality" ;
+		barometric_pressure_qc:_FillValue = -128b ;
+		barometric_pressure_qc:units = "1" ;
+		barometric_pressure_qc:valid_range = -127s, 127s ;
+		barometric_pressure_qc:flag_values = 0b, 1b, 2b, 3b ;
+		barometric_pressure_qc:flag_meanings = "quality_good out_of_range sensor_nonfunctional questionable" ;
+		barometric_pressure_qc:coordinates = "time lon lat depth" ;
+	float wind_gust(time) ;
+		wind_gust:long_name = "Wind Gust" ;
+		wind_gust:short_name = "GST" ;
+		wind_gust:_FillValue = -999.f ;
+		wind_gust:units = "m/s" ;
+		wind_gust:valid_range = 0., 200. ;
+		wind_gust:epic_code = 402 ;
+		wind_gust:ancillary_variables = "wind_gust_qc" ;
+		wind_gust:coordinates = "time lon lat depth" ;
+	byte wind_gust_qc(time) ;
+		wind_gust_qc:long_name = "Wind Gust Quality" ;
+		wind_gust_qc:short_name = "GSTQC" ;
+		wind_gust_qc:_FillValue = -128b ;
+		wind_gust_qc:units = "1" ;
+		wind_gust_qc:valid_range = -127s, 127s ;
+		wind_gust_qc:quality_good = 0b ;
+		wind_gust_qc:quality_bad = 1b ;
+		wind_gust_qc:intent = "data_quality" ;
+		wind_gust_qc:standard_name = "wind_gust data_quality" ;
+		wind_gust_qc:coordinates = "time lon lat depth" ;
+	float wind_speed(time) ;
+		wind_speed:long_name = "Wind Speed" ;
+		wind_speed:standard_name = "wind_speed" ;
+		wind_speed:short_name = "WSPD" ;
+		wind_speed:_FillValue = -999.f ;
+		wind_speed:units = "m/s" ;
+		wind_speed:valid_range = 0., 200. ;
+		wind_speed:epic_code = 401 ;
+		wind_speed:ancillary_variables = "wind_speed_qc" ;
+		wind_speed:coordinates = "time lon lat depth" ;
+	byte wind_speed_qc(time) ;
+		wind_speed_qc:long_name = "Wind Speed Quality" ;
+		wind_speed_qc:short_name = "WSPD QC" ;
+		wind_speed_qc:_FillValue = -128b ;
+		wind_speed_qc:units = "1" ;
+		wind_speed_qc:valid_range = -127s, 127s ;
+		wind_speed_qc:quality_good = 0b ;
+		wind_speed_qc:quality_bad = 1b ;
+		wind_speed_qc:intent = "data_quality" ;
+		wind_speed_qc:standard_name = "wind_speed data_quality" ;
+		wind_speed_qc:coordinates = "time lon lat depth" ;
+	float wind_direction(time) ;
+		wind_direction:long_name = "Wind Direction" ;
+		wind_direction:standard_name = "wind_from_direction" ;
+		wind_direction:short_name = "WD" ;
+		wind_direction:_FillValue = -999.f ;
+		wind_direction:valid_range = 0., 360. ;
+		wind_direction:epic_code = 410 ;
+		wind_direction:ancillary_variables = "wind_direction_qc" ;
+		wind_direction:coordinates = "time lon lat depth" ;
+		wind_direction:units = "degrees_true" ;
+	byte wind_direction_qc(time) ;
+		wind_direction_qc:long_name = "Wind Direction Quality" ;
+		wind_direction_qc:short_name = "WDIR QC" ;
+		wind_direction_qc:_FillValue = -128b ;
+		wind_direction_qc:units = "1" ;
+		wind_direction_qc:valid_range = -127s, 127s ;
+		wind_direction_qc:quality_good = 0b ;
+		wind_direction_qc:quality_bad = 1b ;
+		wind_direction_qc:intent = "data_quality" ;
+		wind_direction_qc:standard_name = "wind_direction data_quality" ;
+		wind_direction_qc:coordinates = "time lon lat depth" ;
+	byte use_wind(time) ;
+		use_wind:long_name = "Use Wind" ;
+		use_wind:short_name = "USEWIND" ;
+		use_wind:intent = "data_quality" ;
+		use_wind:standard_name = "use_wind" ;
+		use_wind:units = "1" ;
+		use_wind:_FillValue = -127b ;
+		use_wind:valid_range = 1b, 2b ;
+		use_wind:flag_value = 1b, 2b ;
+		use_wind:flag_value_meanings = "Use Primary; Use Secondary" ;
+		use_wind:coordinates = "time lon lat depth" ;
+	float visibility(time) ;
+		visibility:long_name = "Visibility" ;
+		visibility:standard_name = "visibility_in_air" ;
+		visibility:short_name = "VIS" ;
+		visibility:_FillValue = -999.f ;
+		visibility:units = "meters" ;
+		visibility:valid_range = 0.f, 3000.f ;
+		visibility:ancillary_variables = "visibility_qc" ;
+		visibility:coordinates = "time lon lat depth" ;
+	byte visibility_qc(time) ;
+		visibility_qc:long_name = "Visibility Quality" ;
+		visibility_qc:short_name = "VIS QC" ;
+		visibility_qc:_FillValue = -128b ;
+		visibility_qc:units = "1" ;
+		visibility_qc:valid_range = -127s, 127s ;
+		visibility_qc:quality_good = 0b ;
+		visibility_qc:quality_bad = 1b ;
+		visibility_qc:intent = "data_quality" ;
+		visibility_qc:standard_name = "visibility data_quality" ;
+		visibility_qc:coordinates = "time lon lat depth" ;
+
+// global attributes:
+		:comment = "processed with MATLAB" ;
+		:mooring_site_desc = "Scotian Shelf" ;
+		:breakout_id = 1 ;
+		:mooring_site_id = "L01" ;
+		:ending_julian_day_number = 54500.125 ;
+		:publisher_email = "info@neracoos.org" ;
+		:project_url = "http://gomoos.org" ;
+		:julian_day_convention = "Julian date convention starts at 00:00:00 UTC on 17 November 1858 AD" ;
+		:long_name = "L01" ;
+		:references = "http://gyre.umeoce.maine.edu/data/gomoos/doc/buoy_system_doc/buoy_system/book1.html" ;
+		:starting_julian_day_string = "2002-01-06 00:00:00" ;
+		:keywords = "Oceans > Ocean Temperature > Water Temperature,Oceans > Ocean Pressure > Sea Level Pressure,Oceans > Ocean Chemistry > Oxygen,Oceans > Ocean Chemistry > Chlorophyll,Oceans > Ocean Optics > Turbidity,Oceans > Salinity/Density > Conductivity,Oceans > Salinity/Density > Salinity,Oceans > Salinity/Density > Density,Oceans > Ocean Waves > Significant Wave Height,Oceans > Ocean Waves > Wave Period,Oceans > Ocean Winds > Surface Winds,Oceans > Ocean Circulation > Ocean Currents " ;
+		:summary = "Ocean observation data from the Northeastern Regional Association of Coastal &amp; Ocean Observing Systems (NERACOOS). The NERACOOS region includes the northeast United States and Canadian Maritime provinces, as part of the United States Integrated Ocean Observing System (IOOS).  These data are served by Unidata\'s Thematic Realtime Environmental Distributed Data Services (THREDDS) Data Server (TDS) in a variety of interoperable data services and output formats." ;
+		:publisher_name = "Northeastern Regional Association of Coastal and Ocean Observing Systems (NERACOOS)" ;
+		:id = "L01" ;
+		:naming_authority = "edu.maine" ;
+		:ending_julian_day_string = "2008-02-04 03:00:00" ;
+		:keywords_vocabulary = "GCMD Science Keywords" ;
+		:title = "NERACOOS Gulf of Maine Ocean Array: Realtime Buoy Observations: L01 Scotian Shelf: L01 MET Scotian Shelf" ;
+		:standard_name_vocabulary = "CF-1.6" ;
+		:source = "surface observation" ;
+		:publisher_url = "http://www.neracoos.org/" ;
+		:latitude = 43.624796184289 ;
+		:creator_name = "Neal Pettigrew" ;
+		:featureType = "timeSeries" ;
+		:magnetic_variation = -18.2 ;
+		:starting_julian_day_number = 52280. ;
+		:short_name = "L01" ;
+		:delta_t = 60 ;
+		:publisher_phone = "(603) 319 1785" ;
+		:processing = "historical" ;
+		:creator_email = "nealp@maine.edu,ljm@umeoce.maine.edu,jevans@umeoce.maine.edu" ;
+		:station_name = "L01" ;
+		:water_depth = 100. ;
+		:institution = "NERACOOS" ;
+		:institution_url = "http://gyre.umeoce.maine.edu" ;
+		:publisher = "Department of Physical Oceanography, School of Marine Sciences, University of Maine" ;
+		:nco_openmp_thread_number = 1 ;
+		:buffer_type = "met" ;
+		:time_zone = "UTC" ;
+		:longitude = -66.55310494182 ;
+		:Conventions = "CF-1.6" ;
+		:project = "NERACOOS" ;
+		:cdm_data_type = "Station" ;
+		:contact = "nealp@maine.edu,ljm@umeoce.maine.edu,jevans@umeoce.maine.edu" ;
+		:creator_url = "http://gyre.umeoce.maine.edu" ;
+		:history = "Tue Jan 27 14:53:37 2009: /usr/local/bin/ncrcat L01.met.historical.nc L0114.met.realtime.nc L01.met.historical.nc.new\n",
+			"Mon Feb  4 03:36:09 2008: /usr/local/bin/ncrcat L01.met.historical.nc L0113.met.realtime.nc L01.met.historical.nc.new\n",
+			"Wed May 23 13:30:27 2007: /usr/local/bin/ncrcat L01.met.historical.nc L0111.met.realtime.nc L01.met.historical.nc.new\n",
+			"Wed Apr 11 16:43:03 2007: /usr/local/bin/ncrcat -d time,0 /data/gomoos/buoy/archive/L01/L01.met.historical.nc /data/gomoos/buoy/archive/L01/L01.met.historical.nc.save000\n",
+			"Wed Nov  8 17:40:53 2006: ncks -a L01.met.historical.nc new.nc\n",
+			"Sun Sep 17 13:03:40 2006: /usr/local/bin/ncrcat L01.met.historical.nc L0110.met.realtime.nc L01.met.historical.nc.new\n",
+			"Wed Jul 19 15:52:37 2006: /usr/local/nco/bin/ncrcat L01.met.historical.nc L0109.met.realtime.nc L01.met.historical.nc.new\n",
+			"Sun Oct  2 04:19:15 2005: /usr/local/nco/bin/ncrcat L01.met.historical.nc L0108.met.realtime.nc L01.met.historical.nc.new\n",
+			"Wed Feb  9 04:41:12 2005: /usr/local/nco/bin/ncrcat L01.met.historical.nc L0107.met.realtime.nc L01.met.historical.nc.new\n",
+			"Sat Nov 20 01:46:13 2004: ncks -A L01.met.historical.nc L01.met.historical_newbaro.nc\n",
+			"Thu Nov 18 20:58:20 2004: /usr/local/nco/bin/ncrcat L01.met.historical.nc L0106.met.realtime.nc L01.met.historical.nc.new\n",
+			"Tue Oct 12 14:12:55 2004: /usr/local/nco/bin/ncrcat L01.met.historical.nc L0105.met.realtime.nc L01.met.historical.nc.new\n",
+			"Tue Oct 12 13:50:37 2004: ncrcat -d time,2415295.0,2453281.5833333 L01.met.historical.nc L01.met.historical.nc.new\n",
+			"Mon Oct  4 20:10:30 2004: /usr/local/nco/bin/ncrcat L01.met.historical.nc L0106.met.realtime.nc L01.met.historical.nc.new\n",
+			"Tue Jun  8 13:48:33 2004: /usr/local/nco/bin/ncrcat L01.met.historical.nc L0104.met.realtime.nc L01.met.historical.nc.new\n",
+			"09-Oct-2003 12:44:18:  Tentatively appended L0103 realtime data starting at julian date 2452789.31527778.\n",
+			"Thu Oct  9 12:39:07 2003: ncrcat /data/gomoos/buoy/archive/L01/L01.met.historical.nc /data/gomoos/buoy/archive/L0103/realtime/L0103.met.realtime.nc L01.met.historical.nc\n",
+			"27-Jun-2003 13:01:32:  Added ancillary_variables, intent attributes for CF compliance.\n",
+			"07-Apr-2003 16:03:23:  Moved air_temperature back to celsius.\n",
+			"24-Feb-2003 14:52:00:  Created this file from L0102.met.raw.nc.  No data retrieved from L0101." ;
+		:Metadata_Conventions = "Unidata Dataset Discovery v1.6" ;
+		:Metadata_Link = "http://p5.neracoos.org/WAF/NERACOOS.xml" ;
+		:description = "L01 Scotian Shelf" ;
+		:shortName = "L01" ;
+		:longName = "L01 Meteorology" ;
+		:wmo_code = "44038" ;
+		:platform_type = "moored_buoy" ;
+		:sponsor = "NERACOOS" ;
+		:operator_sector = "gov_federal" ;
+		:creator_country = "USA" ;
+		:creator_phone = "(603) 319 1785" ;
+		:publisher_country = "USA" ;
+		:DODS.strlen = 5 ;
+		:DODS.dimName = "name_strlen" ;
+}
