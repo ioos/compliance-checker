@@ -148,3 +148,16 @@ class TestCFIntegration(BaseTestCase):
         assert (u"global attribute DODS.strlen should begin with a letter and be composed of "
                 "letters, digits, and underscores") in messages
         assert (u"The name field does not match a dimension, area or coordinate.") in messages
+
+    def test_3mf07(self):
+        dataset = self.load_dataset(STATIC_FILES['3mf07'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (577, 586)
+        assert (u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for "
+                "variable flag (profile)") in messages
+        assert (u"Unidentifiable feature for variable flag") in messages
+        assert (u"attribute latitude:_CoordinateAxisType should begin with a letter and be composed of "
+                "letters, digits, and underscores") in messages
+        assert (u"references global attribute should be a non-empty string") in messages
+        assert (u"comment global attribute should be a non-empty string") in messages
