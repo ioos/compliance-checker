@@ -2851,12 +2851,12 @@ class CFBaseCheck(BaseCheck):
             # puts the referenced variable being compressed into a set
             compress_set = set(compress_var.compress.split(' '))
             if compress_var.ndim != 1:
-                valid=False
+                valid = False
                 reasoning.append("Compression variable {} may only have one dimension".format(compress_var.name))
             # ensure compression variable is a proper index, and thus is an
             # signed or unsigned integer type of some sort
             if compress_var.dtype.kind not in {'i', 'u'}:
-                valid=False
+                valid = False
                 reasoning.append("Compression variable {} must be an integer type to form a proper array index".format(compress_var.name))
             # make sure all the variables referred to are contained by the
             # variables.
