@@ -830,6 +830,19 @@ class TestCF(BaseTestCase):
         self.assertTrue(results[2].value)
         self.assertFalse(results[3].value)
 
+    def test_compress_packed(self):
+        """Tests compressed indexed coordinates"""
+        dataset = self.load_dataset(STATIC_FILES['reduced_horizontal_grid'])
+        results = self.cf.check_compression_gathering(dataset)
+        self.assertTrue(results[0].value)
+
+        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
+        results = self.cf.check_compression_gathering(dataset)
+        self.assertFalse(results[0].value)
+        self.assertFalse(results[1].value)
+
+
+
     def test_check_instance_variable(self):
         dataset = self.load_dataset(STATIC_FILES['bad-instance'])
         results = self.cf.check_instance_variables(dataset)
