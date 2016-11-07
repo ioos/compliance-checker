@@ -1,0 +1,46 @@
+netcdf hycomglobal_20161104 {
+dimensions:
+	time = 2 ; // (9 currently)
+	depth = 1 ;
+	x = 4 ;
+	y = 4 ;
+variables:
+	float time(time) ;
+		time:units = "days since 1900-12-31 00:00:00" ;
+		time:calendar = "standard" ;
+	short water_u(time, depth, y, x) ;
+		water_u:long_name = "Eastward Water Velocity" ;
+		water_u:units = "m/s" ;
+		water_u:add_offset = "0.f" ;
+		water_u:scale_factor = "0.001f" ;
+		water_u:_FillValue = "-30000" ;
+	short water_v(time, depth, y, x) ;
+		water_v:long_name = "Northward Water Velocity" ;
+		water_v:units = "m/s" ;
+		water_v:add_offset = "0.f" ;
+		water_v:scale_factor = "0.001f" ;
+		water_v:_FillValue = "-30000" ;
+	float lat(y, x) ;
+		lat:long_name = "Latitude" ;
+		lat:units = "degrees_north" ;
+		lat:axis = "Y" ;
+	float lon(y, x) ;
+		lon:long_name = "Longitude" ;
+		lon:units = "degrees_east" ;
+		lon:axis = "X" ;
+	float depth(depth) ;
+		depth:long_name = "Depth" ;
+		depth:units = "meter" ;
+		depth:axis = "Z" ;
+
+// global attributes:
+		:title = "Environmental Data" ;
+		:version = "1.0" ;
+		:netcdf_class = "3" ;
+		:time_var = "time" ;
+		:lat_var = "lat" ;
+		:lon_var = "lon" ;
+		:view_style = "1" ;
+		:Conventions = "CF-1.0" ;
+		:DODS_EXTRA.Unlimited_Dimension = "time" ;
+}

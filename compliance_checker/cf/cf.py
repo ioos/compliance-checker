@@ -743,6 +743,14 @@ class CFBaseCheck(BaseCheck):
 
             variable = ds.variables[name]
 
+            # Skip instance coordinate variables
+            if getattr(variable, 'cf_role', None) is not None:
+                continue
+
+            # Skip labels
+            if variable.dtype.char == 'S':
+                continue
+
             standard_name = getattr(variable, 'standard_name', None)
             standard_name, standard_name_modifier = self._split_standard_name(standard_name)
 
@@ -907,7 +915,10 @@ class CFBaseCheck(BaseCheck):
                                              'or degrees if defining a transformed grid. Currently '
                                              '{}'.format(units))
         # Standard Name table agrees the unit should be unitless
-        else:
+        elif std_name_unitless:
+            valid_standard_units.assert_true(True, '')
+
+        elif canonical_units is not None:
             valid_standard_units.assert_true(util.units_convertible(canonical_units, units),
                                              'units for variable {} must be convertible to {} '
                                              'currently they are {}'.format(variable_name, canonical_units, units))
@@ -971,12 +982,13 @@ class CFBaseCheck(BaseCheck):
             valid_std_name = TestCtx(BaseCheck.HIGH, '§3.3 Variable {} has valid standard_name attribute'.format(name))
 
             valid_std_name.assert_true(isinstance(standard_name, basestring),
-                                       "variable {}'s attribute standard_name must be a string".format(name))
+                                       "variable {}'s attribute standard_name must be a non-empty string".format(name))
 
-            valid_std_name.assert_true(standard_name in self._std_names,
-                                       "standard_name {} is not defined in Standard Name Table v{}".format(
-                                           standard_name or 'undefined',
-                                           self._std_names._version))
+            if isinstance(standard_name, basestring):
+                valid_std_name.assert_true(standard_name in self._std_names,
+                                           "standard_name {} is not defined in Standard Name Table v{}".format(
+                                               standard_name or 'undefined',
+                                               self._std_names._version))
 
             ret_val.append(valid_std_name.to_result())
 
@@ -1277,9 +1289,6 @@ class CFBaseCheck(BaseCheck):
                 valid_axis = self._check_axis(ds, name)
                 ret_val.append(valid_axis)
 
-            valid_coordinate_type = self._check_coordinate_type(ds, name)
-            ret_val.append(valid_coordinate_type)
-
         return ret_val
 
     def _check_axis(self, ds, name):
@@ -1307,23 +1316,6 @@ class CFBaseCheck(BaseCheck):
                                "currently {}".format(axis))
 
         return valid_axis.to_result()
-
-    def _check_coordinate_type(self, ds, name):
-        '''
-        Checks that the coordinate type is a coordinate variable
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :param str name: Name of the variable
-        '''
-        variable = ds.variables[name]
-        valid_coordinate_type = TestCtx(BaseCheck.LOW, '§4 recommends that coordinate types be coordinate variables')
-        is_coordinate_variable = variable.dimensions == (name,)
-        is_dimensionless = variable.ndim == 0
-        # dimensionless coordinate types are loosely considered coordinate
-        # variables of dimension size 1
-        valid_coordinate_type.assert_true(is_coordinate_variable or is_dimensionless,
-                                          "{} is not a coordinate variable".format(name))
-        return valid_coordinate_type.to_result()
 
     def check_latitude(self, ds):
         '''
@@ -2775,7 +2767,11 @@ class CFBaseCheck(BaseCheck):
                         valid = False
                         reasoning.append("Variable is not of type byte, short, or int.")
 
-            result = Result(BaseCheck.MEDIUM, valid, '§8.1 Packed Data defined by {} contains valid packing', reasoning)
+            result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            '§8.1 Packed Data defined by {} contains valid packing'
+                            ''.format(name),
+                            reasoning)
             ret_val.append(result)
             reasoning = []
 
@@ -2880,26 +2876,10 @@ class CFBaseCheck(BaseCheck):
     #
     ###############################################################################
 
-    def check_instance_variables(self, ds):
-        '''
-        Check that no referenced coordinates (coordinate variables or auxiliary coordinates) define cf_role
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
-
-        ret_val = []
-        all_coords = self._find_coord_vars(ds) + self._find_aux_coord_vars(ds)
-        for variable in ds.get_variables_by_attributes(cf_role=lambda x: x is not None):
-            is_not_coord = TestCtx(BaseCheck.HIGH,
-                                   "§9.5 Instance Variable {} should not be referenced as a coordinate variable"
-                                   "".format(variable.name))
-            is_not_coord.assert_true(variable.name not in all_coords,
-                                     "{} must not be referenced as a coordinate".format(variable.name))
-            ret_val.append(is_not_coord.to_result())
-        return ret_val
-
     def check_all_features_are_same_type(self, ds):
         """
+        Check that the feature types in a dataset are all the same.
+
         9.1 The features contained within a collection must always be of the same type; and all the collections in a CF file
         must be of the same feature type.
 
@@ -2907,6 +2887,8 @@ class CFBaseCheck(BaseCheck):
 
         The space-time coordinates that are indicated for each feature are mandatory.  However a featureType may also include
         other space-time coordinates which are not mandatory (notably the z coordinate).
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
         """
         all_the_same = TestCtx(BaseCheck.HIGH,
                                '§9.1 Feature Types are all the same')
@@ -2926,374 +2908,45 @@ class CFBaseCheck(BaseCheck):
 
         return all_the_same.to_result()
 
-    @is_likely_dsg
-    def check_orthogonal_multidim_array(self, ds):
-        """
-        9.3.1 The orthogonal multidimensional array representation, the simplest representation, can be used if each feature
-        instance in the collection has identical coordinates along the element axis of the features.
-
-        Data variables have both an instance dimension and an element dimension.  The dimensions may be given in any order.
-        If there is a need for either the instance or an element dimension to be the netCDF unlimited dimension (so that more
-        features or more elements can be appended), then that dimension must be the outer dimension of the data variable
-        i.e. the leading dimension in CDL.
-        """
-        ret_val = []
-        reasoning = []
-
-        for name, var in ds.variables.items():
-            reasoning = []
-            if not hasattr(var, 'count_variable') and not hasattr(var, 'index_variable'):
-                if hasattr(var, '_FillValue'):
-                    pass
-                else:
-                    result = Result(BaseCheck.MEDIUM,
-                                    True,
-                                    ('§9.3.1 Orthogonal Multidimensional Array', name, 'orthogonal_multidimensional'),
-                                    reasoning)
-                    ret_val.append(result)
-        return ret_val
-
-    @is_likely_dsg
-    def check_incomplete_multidim_array(self, ds):
-        """
-        9.3.2 The incomplete multidimensional array representation can used if the features within a collection do not all have
-        the same number of elements, but sufficient storage space is available to allocate the number of elements required by
-        the longest feature to all features.  That is, features that are shorter than the longest feature must be padded with
-        missing values to bring all instances to the same storage size.
-
-        Data variables have both an instance dimension and an element dimension.  The dimensions may be given in any order.
-        If there is a need for either the instance or an element dimension to be the netCDF unlimited dimension (so that more
-        features or more elements can be appended), thlen that dimension must be the outer dimension of the data variable
-        i.e. the leading dimension in CDL.
-        """
-
-        ret_val = []
-        for name, var in ds.variables.items():
-            reasoning = []
-            if not hasattr(var, 'count_variable') and not hasattr(var, 'index_variable'):
-                if hasattr(var, '_FillValue'):
-                    result = Result(BaseCheck.MEDIUM,
-                                    True,
-                                    ('§9.3.2 Incomplete Multidimensional Array', name, 'ragged_multidimensional'),
-                                    reasoning)
-                    ret_val.append(result)
-                else:
-                    pass
-
-        return ret_val
-
-    @is_likely_dsg
-    def check_contiguous_ragged_array(self, ds):
-        """
-        9.3.3 The contiguous ragged array representation can be used only if the size of each feature is known at the time
-        that it is created.
-
-        In this representation, the file contains a count variable, which must be of type integer and must have the instance
-        dimension as its sole dimension.  The count variable contains the number of elements that each feature has. This
-        representation and its count variable are identifiable by the presence of an attribute, sample_dimension, found on
-        the count variable, which names the sample dimension being counted. For indices that correspond to features, whose
-        data have not yet been written, the count variable should  have a value of zero or a missing value.
-
-        In the ragged array representations, the instance dimension (i), which sequences the individual features within the
-        collection, and the element dimension, which sequences the data elements of each feature (o and p), both occupy the
-        same dimension (the sample dimension).   If the sample dimension is the netCDF unlimited dimension, new data can be
-        appended to the file.
-        """
-        ret_val = []
-        reasoning = []
-        for name, var in ds.variables.items():
-            if getattr(var, 'sample_dimension', ''):
-                result = Result(BaseCheck.MEDIUM,
-                                True,
-                                ('§9.3.3 Continuous ragged array', name, 'continuous_ragged'),
-                                reasoning)
-                ret_val.append(result)
-            else:
-                return []
-
-        return ret_val
-
-    @is_likely_dsg
-    def check_indexed_ragged_array(self, ds):
-        """
-        9.3.4 The indexed ragged array representation stores the features interleaved along the sample dimension in the data
-        variable.
-
-        In this representation, the file contains an index variable, which must be of type integer, and must have the sample
-        dimension as its single dimension. The index variable contains the zero-based index of the feature to which each
-        element belongs. This representation is identifiable by the presence of an attribute, instance_dimension, on the index
-        variable, which names the dimension of the instance variables. For those indices of the sample dimension, into which
-        data have not yet been written, the index variable should be pre-filled with missing values.
-
-        In the ragged array representations, the instance dimension (i), which sequences the individual features within the
-        collection, and the element dimension, which sequences the data elements of each feature (o and p), both occupy the
-        same dimension (the sample dimension).   If the sample dimension is the netCDF unlimited dimension, new data can be
-        appended to the file.
-        """
-        ret_val = []
-        reasoning = []
-        for name, var in ds.variables.items():
-            if getattr(var, 'instance_dimension', ''):
-                result = Result(BaseCheck.MEDIUM,
-                                True,
-                                ('§9.3.4 Indexed ragged array', name, 'continuous_ragged'),
-                                reasoning)
-                ret_val.append(result)
-            else:
-                return []
-
-        return ret_val
-
-    @is_likely_dsg
     def check_feature_type(self, ds):
         """
+        Check the global attribute featureType for valid CF featureTypes
+
         9.4 A global attribute, featureType, is required for all Discrete Geometry representations except the orthogonal
         multidimensional array representation, for which it is highly recommended.
 
         The value assigned to the featureType attribute is case-insensitive.
         """
-        reasoning = []
-        feature_list = ['point', 'timeseries', 'trajectory', 'profile', 'timeseriesprofile', 'trajectoryprofile']
+        feature_list = ['point', 'timeSeries', 'trajectory', 'profile', 'timeSeriesProfile', 'trajectoryProfile']
 
-        if getattr(ds, 'featureType', '').lower() in feature_list:
-            return Result(BaseCheck.MEDIUM,
-                          True, '§9.4 featureType attribute',
-                          reasoning)
+        feature_type = getattr(ds, 'featureType', None)
 
-        elif getattr(ds, 'featureType', ''):
-            reasoning.append('The featureType is provided and is not from the featureType list.')
-            return Result(BaseCheck.MEDIUM,
-                          False, '§9.4 featureType attribute',
-                          reasoning)
+        valid_feature_type = TestCtx(BaseCheck.HIGH, '§9.1 Dataset contains a valid featureType')
+        valid_feature_type.assert_true(feature_type is None or feature_type in feature_list,
+                                       "{} is not a valid CF featureType. It must be one of {}"
+                                       "".format(feature_type, ', '.join(feature_list)))
 
-    @is_likely_dsg
-    def check_coordinates_and_metadata(self, ds):
+        return valid_feature_type.to_result()
+
+    def check_cf_role(self, ds):
         """
-        9.5 Every feature within a Discrete Geometry CF file must be unambiguously associated with an extensible collection
-        of instance variables that identify the feature and provide other metadata as needed to describe it.  Every element of
-        every feature must be unambiguously associated with its space and time coordinates and with the feature that contains
-        it.
+        Check variables defining cf_role for legal cf_role values.
 
-        The coordinates attribute must be attached to every data variable to indicate the spatiotemporal coordinate variables
-        that are needed to geo-locate the data.
+        §9.5 The only acceptable values of cf_role for Discrete Geometry CF
+        data sets are timeseries_id, profile_id, and trajectory_id
 
-
-        Where feasible a variable with the attribute cf_role should be included.  The only acceptable values of cf_role for
-        Discrete Geometry CF data sets are timeseries_id, profile_id, and trajectory_id.   The variable carrying the cf_role
-        attribute may have any data type.  When a variable is assigned this attribute, it must provide a unique identifier
-        for each feature instance.
-
-        CF files that contain timeSeries, profile or trajectory featureTypes, should include only a single occurrence of a
-        cf_role attribute;  CF files that contain timeSeriesProfile or trajectoryProfile may contain two occurrences,
-        corresponding to the two levels of structure in these feature types.
-
-        CF Discrete Geometries provides a mechanism to encode both the nominal and the precise positions, while retaining the
-        semantics of the idealized feature type. Only the set of coordinates which are regarded as the nominal (default or
-        preferred) positions should be indicated by the attribute axis, which should be assigned string values to indicate
-        the orientations of the axes (X, Y, Z, or T).
-
-        Auxiliary coordinate variables containing the nominal and the precise positions should be listed in the relevant
-        coordinates attributes of data variables. In orthogonal representations the nominal positions could be  coordinate
-        variables, which do not need to be listed in the coordinates attribute, rather than auxiliary coordinate variables.
-
-        Coordinate bounds may optionally be associated with coordinate variables and auxiliary coordinate variables using
-        the bounds attribute.
-
-        If there is a vertical coordinate variable or auxiliary coordinate variable, it must be identified by the means
-        specified in section 4.3.   The use of the attribute axis=Z is recommended for clarity.  A standard_name attribute
-        that identifies the vertical coordinate is recommended.
+        :param netCDF4.Dataset ds: An open netCDF dataset
         """
         ret_val = []
-        reasoning = []
-
-        non_data_list = []
-
-        # Build a list of variables that are not geophysical variables
-        for name, var in ds.variables.items():
-            if name in self._find_coord_vars(ds):
-                non_data_list.append(name)
-            elif name in self._find_ancillary_vars(ds):
-                non_data_list.append(name)
-
-            # If there's a variable that is referenced in another variable's
-            # coordinates attribute, put that on the non-data list as well.
-            elif hasattr(var, 'coordinates'):
-                for coord in getattr(var, 'coordinates', '').split(' '):
-                    if coord in ds.variables:
-                        non_data_list.append(coord)
-
-            # If the variable has a dimension and is not a station identifier
-            elif var.dimensions == tuple() or var.dimensions == (name,):
-                non_data_list.append(name)
-
-            elif self._is_station_var(var):
-                non_data_list.append(name)
-
-            elif hasattr(var, 'cf_role'):
-                non_data_list.append(name)
-
-        for data_entry in ds.variables:
-            # If the variable is not a geophysical variable, skip checking it
-            if data_entry in non_data_list:
-                continue
-
-            # If the variable has a coordinates attribute, then it passes
-            if getattr(ds.variables[data_entry], 'coordinates', ''):
-                result = Result(BaseCheck.MEDIUM,
-                                True,
-                                ('§9.5 Discrete Geometry', data_entry, 'check_coordinates'),
-                                reasoning)
-                ret_val.append(result)
-                reasoning = []
-            else:
-                reasoning.append('The variable {} does not have associated coordinates'.format(data_entry))
-                result = Result(BaseCheck.MEDIUM,
-                                False,
-                                ('§9.5 Discrete Geometry', data_entry, 'check_coordinates'),
-                                reasoning)
-                ret_val.append(result)
-                reasoning = []
-
-        role_list = [getattr(var, 'cf_role', '').split(' ') for name, var in ds.variables.items() if hasattr(var, 'cf_role')]
-        single_role = ['timeseries', 'profile', 'trajectory']
-        dual_role = ['timeseries', 'profile', 'trajectory', 'timeseriesprofile', 'trajectoryprofile']
-        if getattr(ds, 'featureType', '').lower() in single_role and len(np.ravel(role_list)) == 1:
-            reasoning = []
-            valid = True
-        elif getattr(ds, 'featureType', '').lower() in dual_role and len(np.ravel(role_list)) in [1, 2]:
-            reasoning = []
-            valid = True
-        else:
-            valid = False
-            reasoning = []
-            reasoning.append('The cf_role featureType is not properly defined.')
-
-        result = Result(BaseCheck.MEDIUM,
-                        valid,
-                        ('§9.5 Discrete Geometry', 'dataset'),
-                        reasoning)
-        ret_val.append(result)
-
+        valid_roles = ['timeseries_id', 'profile_id', 'trajectory_id']
+        for variable in ds.get_variables_by_attributes(cf_role=lambda x: x is not None):
+            name = variable.name
+            valid_cf_role = TestCtx(BaseCheck.HIGH, '§9.5 {} contains a valid cf_role attribute'.format(name))
+            cf_role = variable.cf_role
+            valid_cf_role.assert_true(cf_role in valid_roles,
+                                      "{} is not a valid cf_role value. It must be one of {}"
+                                      "".format(name, ', '.join(valid_roles)))
         return ret_val
-
-    @is_likely_dsg
-    def check_missing_data(self, ds):
-        """
-        9.6 Auxiliary coordinate variables (spatial and time) must contain missing values to indicate a void in data storage
-        in the file but must not have missing data for any other reason.
-
-        It is not permitted for auxiliary coordinate variables to have missing values for elements where there is non-missing
-        data. Where any auxiliary coordinate variable contains a missing value, all other coordinate, auxiliary coordinate
-        and data values corresponding to that element should also contain missing values. Data variables should (as usual)
-        also contain missing values to indicate when there is no valid data available for the element, although the
-        coordinates are valid.
-
-        Similarly, for indices where the instance variable identified by cf_role contains a missing value indicator, all other
-        instance variable should also contain missing values.
-        """
-
-        # Data intensive check; consider flagging as optional
-        ret_val = []
-
-        name_list = set(ds.variables.keys())
-        dim_list = set(ds.dimensions.keys())
-
-        for name, var in ds.variables.items():
-            if hasattr(var, 'coordinates'):
-                aux_index_dict = {}
-                dim_index_dict = {}
-                reasoning = []
-                valid = False
-                aux_valid = False
-
-                # check if _FillValue attribute present attribute
-                if hasattr(var, '_FillValue'):
-                    dim_index_dict[name] = dict()
-                    aux_index_dict[name] = dict()
-                    for coordinate in getattr(var, 'coordinates', '').split(" "):
-                        indices = np.where(ds.variables[coordinate][:].mask)[0]
-
-                        # if the coordinate name is in the list of variables,
-                        # but has no associated dimension name
-                        if coordinate in name_list and \
-                           coordinate not in dim_list:
-
-                            dim_index_dict[name][coordinate] = indices
-                            aux_index_dict[name][coordinate] = indices
-
-                        # if this is a coordinate variable, i.e. a variable
-                        # with the same variable and coordinate name
-                        elif coordinate in name_list and coordinate in dim_list:
-                            dim_index_dict[name][coordinate] = indices
-                        else:
-                            dim_index_dict[name][coordinate] = np.array()
-                # Check to see that all coordinate variable mising data
-                # locations are the same
-
-                # could be refactored to make much more efficient
-                def check_index_dicts(idx_dict):
-                    """
-                    Checks that all indices align and are of the same value
-                    """
-                    # Base case: In the even there are no arrays to check then
-                    # automatically valid
-                    valid = True
-                    idx_gen = (d[k] for d in six.itervalues(dim_index_dict)
-                               for k in d if d[k].size > 0)
-                    first_idx = next(idx_gen, None)
-                    if first_idx is not None:
-                        # if there is only one element, all will return True,
-                        # which is also correct
-                        valid = all(np.array_equal(val, first_idx)
-                                    for val in idx_gen)
-                    return valid
-
-                aux_valid = check_index_dicts(aux_index_dict)
-
-                valid = check_index_dicts(dim_index_dict)
-
-                if not aux_valid:
-                    reasoning.append('The auxillary coordinates do not have the same missing data locations')
-                # dimensions not valid
-                if not valid:
-                    reasoning.append('The coordinate variables do not have the same missing data locations as the auxillary coordinates')
-
-                # Check to see that all coordinate variable mising data is reflceted in the dataset
-                valid_missing = True
-
-                if hasattr(var, '_FillValue'):
-                    x_indices = np.where(var[:].mask)[0]
-
-                    for coordinate in var.coordinates.split(" "):
-                        coordinate_ind_list = dim_index_dict[name][coordinate]
-                        valid_missing = np.array_equal(x_indices,
-                                                       coordinate_ind_list)
-                    if valid_missing is False:
-                        reasoning.append('The data does not have the same missing data locations as the coordinates')
-
-                result = Result(BaseCheck.MEDIUM,
-                                valid and aux_valid and valid_missing,
-                                ('§9.6 Missing Data', name, 'missing_data'),
-                                reasoning)
-                ret_val.append(result)
-        return ret_val
-
-    def _find_container_variables(self, ds):
-        container_vars = []
-        platform_name = getattr(ds, 'platform', None)
-        if platform_name is not None:
-            container_vars.append(platform_name)
-        for k, v in ds.variables.items():
-            if k in ('crs', 'instrument', 'station'):
-                if not v.shape:  # Empty dimension
-                    container_vars.append(k)
-            platform_name = getattr(v, 'platform', None)
-            if platform_name is not None:
-                container_vars.append(platform_name)
-            instrument_name = getattr(v, 'instrument_name', None)
-            if instrument_name is not None:
-                container_vars.append(instrument_name)
-        return list(set(container_vars))
 
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):

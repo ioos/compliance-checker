@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 from compliance_checker.suite import CheckSuite
 from compliance_checker.cf import CFBaseCheck, dimless_vertical_coordinates
@@ -9,7 +9,6 @@ from tempfile import gettempdir
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests import BaseTestCase
 
-import unittest
 import os
 import re
 import sys
@@ -284,12 +283,12 @@ class TestCF(BaseTestCase):
         results = self.cf.check_standard_name(dataset)
         result_dict = {result.name: result for result in results}
         result = result_dict[u'§3.3 Variable time has valid standard_name attribute']
-        assert result.value == (0, 2)
-        assert 'standard_name undefined is not defined' in result.msgs[1]
+        assert result.value == (0, 1)
+        assert 'variable time\'s attribute standard_name must be a non-empty string' == result.msgs[0]
 
         result = result_dict[u'§3.3 Variable latitude has valid standard_name attribute']
-        assert result.value == (0, 2)
-        assert 'standard_name undefined is not defined' in result.msgs[1]
+        assert result.value == (0, 1)
+        assert 'variable latitude\'s attribute standard_name must be a non-empty string' == result.msgs[0]
 
         result = result_dict[u'§3.3 Variable salinity has valid standard_name attribute']
         assert result.value == (1, 2)
@@ -841,16 +840,6 @@ class TestCF(BaseTestCase):
         self.assertFalse(results[0].value)
         self.assertFalse(results[1].value)
 
-
-
-    def test_check_instance_variable(self):
-        dataset = self.load_dataset(STATIC_FILES['bad-instance'])
-        results = self.cf.check_instance_variables(dataset)
-
-        result_dict = {result.name: result for result in results}
-        result = result_dict[u'§9.5 Instance Variable station_name should not be referenced as a coordinate variable']
-        assert result.value == (0, 1)
-
     def test_check_all_features_are_same_type(self):
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
         result = self.cf.check_all_features_are_same_type(dataset)
@@ -863,67 +852,6 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         result = self.cf.check_all_features_are_same_type(dataset)
         assert result.value == (0, 2)
-
-    def test_check_orthogonal_multidim_array(self):
-        dataset = self.load_dataset(STATIC_FILES['rutgers'])
-        results = self.cf.check_orthogonal_multidim_array(dataset)
-        for each in results:
-            self.assertTrue(each.value)
-
-    def test_check_incomplete_multidim_array(self):
-        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        results = self.cf.check_incomplete_multidim_array(dataset)
-        for each in results:
-            self.assertTrue(each.value)
-
-    def test_check_contiguous_ragged_array(self):
-        dataset = self.load_dataset(STATIC_FILES['cont_ragged'])
-        results = self.cf.check_contiguous_ragged_array(dataset)
-        for each in results:
-            self.assertTrue(each.value)
-
-    def test_check_indexed_ragged_array(self):
-        dataset = self.load_dataset(STATIC_FILES['index_ragged'])
-        results = self.cf.check_indexed_ragged_array(dataset)
-        for each in results:
-            self.assertTrue(each.value)
-
-    def test_check_feature_type(self):
-        dataset = self.load_dataset(STATIC_FILES['index_ragged'])
-        results = self.cf.check_feature_type(dataset)
-        self.assertTrue(results.value)
-
-        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        results = self.cf.check_feature_type(dataset)
-        self.assertFalse(results.value)
-
-    def test_check_coordinates_and_metadata(self):
-        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
-        results = self.cf.check_coordinates_and_metadata(dataset)
-        self.assertFalse(results[0].value)
-        self.assertTrue(results[1].value)
-        self.assertFalse(results[2].value)
-
-        dataset = self.load_dataset(STATIC_FILES['index_ragged'])
-        results = self.cf.check_coordinates_and_metadata(dataset)
-        self.assertTrue(results[-1].value)
-
-        dataset = self.load_dataset(STATIC_FILES['coordinates_and_metadata'])
-        results = self.cf.check_coordinates_and_metadata(dataset)
-        self.assertTrue(len(results) == 2)
-        self.assertFalse(results[0].value)
-        self.assertFalse(results[1].value)
-
-    def test_check_missing_data(self):
-        dataset = self.load_dataset(STATIC_FILES['index_ragged'])
-        results = self.cf.check_missing_data(dataset)
-        for each in results:
-            self.assertTrue(each.value)
-
-        dataset = self.load_dataset(STATIC_FILES['bad_missing_data'])
-        results = self.cf.check_missing_data(dataset)
-        for each in results:
-            self.assertFalse(each.value)
 
     def test_check_units(self):
         '''
@@ -987,43 +915,3 @@ class TestCF(BaseTestCase):
         self.assertFalse(units_temporal('hours'))
         self.assertFalse(units_temporal('days since the big bang'))
 
-
-
-
-def breakpoint(scope=None, global_scope=None):
-    import traceback
-    from IPython.config.loader import Config
-    ipy_config = Config()
-    ipy_config.PromptManager.in_template = '><> '
-    ipy_config.PromptManager.in2_template = '... '
-    ipy_config.PromptManager.out_template = '--> '
-    ipy_config.InteractiveShellEmbed.confirm_exit = False
-
-    # First import the embeddable shell class
-    from IPython.frontend.terminal.embed import InteractiveShellEmbed
-    from mock import patch
-    if scope is not None:
-        locals().update(scope)
-    if global_scope is not None:
-        globals().update(global_scope)
-
-    # Update namespace of interactive shell
-    # TODO: Cleanup namespace even further
-    # Now create an instance of the embeddable shell. The first argument is a
-    # string with options exactly as you would type them if you were starting
-    # IPython at the system command line. Any parameters you want to define for
-    # configuration can thus be specified here.
-    with patch("IPython.core.interactiveshell.InteractiveShell.init_virtualenv"):
-        ipshell = InteractiveShellEmbed(config=ipy_config,
-                                        banner1="Entering Breakpoint Shell",
-                                        exit_msg = 'Returning...')
-
-        stack = traceback.extract_stack(limit=2)
-        message = 'File %s, line %s, in %s' % stack[0][:-1]
-
-        try:
-            import growl
-            growl.growl('breakpoint', 'Ready')
-        except:
-            pass
-        ipshell('(%s) Breakpoint @ %s' % ('breakpoint', message))
