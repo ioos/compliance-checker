@@ -51,15 +51,17 @@ DIMENSIONLESS_VERTICAL_COORDINATES = [
 ]
 
 
-def get_unitless_standard_names():
+def get_unitless_standard_names(xml_tree, units):
     '''
-    Returns a list of valid standard_names that are allowed to be unitless
+    Given the XML tree for the standard name table and a units, string,
+    return True
     '''
-    global _UNITLESS_DB
-    if _UNITLESS_DB is None:
-        with open(resource_filename('compliance_checker', 'data/unitless.json'), 'r') as f:
-            _UNITLESS_DB = json.load(f)
-    return _UNITLESS_DB
+    found_standard_name = xml_tree.find(".//entry[@id='{}']".format(units))
+    if found_standard_name is not None:
+        return found_standard_name.find('canonical_units') is None
+    # if the standard name is not found, assume we need units for the time being
+    else:
+        return False
 
 
 def get_sea_names():

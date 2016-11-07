@@ -791,11 +791,13 @@ class CFBaseCheck(BaseCheck):
         variable = ds.variables[variable_name]
 
         units = getattr(variable, 'units', None)
-        standard_name = getattr(variable, 'standard_name', None)
-        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
-        unitless_standard_names = cfutil.get_unitless_standard_names()
-
-        should_be_unitless = standard_name in unitless_standard_names or variable.ndim == 0 or variable.dtype.char == 'S'
+        standard_name_full = getattr(variable, 'standard_name', None)
+        standard_name, standard_name_modifier = self._split_standard_name(standard_name_full)
+        std_name_unitless = cfutil.get_unitless_standard_names(self._std_names._root,
+                                                               standard_name)
+        # is this even in the database
+        should_be_unitless = (variable.ndim == 0 or variable.dtype.char == 'S'
+                              or std_name_unitless)
 
         # 1) Units must exist
         valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(variable_name))
@@ -812,6 +814,7 @@ class CFBaseCheck(BaseCheck):
         # 3) units are not deprecated
         valid_units.assert_true(units not in deprecated,
                                 'units for {}, "{}" are deprecated by CF 1.6'.format(variable_name, units))
+
         return valid_units.to_result()
 
     def _check_valid_udunits(self, ds, variable_name):
@@ -826,10 +829,12 @@ class CFBaseCheck(BaseCheck):
         units = getattr(variable, 'units', None)
         standard_name = getattr(variable, 'standard_name', None)
         standard_name, standard_name_modifier = self._split_standard_name(standard_name)
-        unitless_standard_names = cfutil.get_unitless_standard_names()
+        std_name_unitless = cfutil.get_unitless_standard_names(self._std_names._root,
+                                                               standard_name)
 
         # If the variable is supposed to be unitless, it automatically passes
-        should_be_unitless = standard_name in unitless_standard_names or variable.ndim == 0 or variable.dtype.char == 'S'
+        should_be_unitless = (variable.ndim == 0 or variable.dtype.char == 'S'
+                              or std_name_unitless)
 
         valid_udunits = TestCtx(BaseCheck.LOW,
                                 "§3.1 Variable {}'s units are contained in UDUnits".format(variable_name))
@@ -851,15 +856,14 @@ class CFBaseCheck(BaseCheck):
         units = getattr(variable, 'units', None)
         standard_name = getattr(variable, 'standard_name', None)
 
-        unitless_standard_names = cfutil.get_unitless_standard_names()
-
-        # If the variable is supposed to be unitless, it automatically passes
-        should_be_unitless = standard_name in unitless_standard_names
-
         valid_standard_units = TestCtx(BaseCheck.HIGH,
                                        "§3.1 Variable {}'s units are appropriate for "
                                        "the standard_name {}".format(variable_name,
                                                                      standard_name or "unspecified"))
+
+        # If the variable is supposed to be unitless, it automatically passes
+        std_name_unitless = cfutil.get_unitless_standard_names(self._std_names._root,
+                                                               standard_name)
 
         standard_name, standard_name_modifier = self._split_standard_name(standard_name)
 
@@ -903,9 +907,6 @@ class CFBaseCheck(BaseCheck):
                                              'or degrees if defining a transformed grid. Currently '
                                              '{}'.format(units))
         # Standard Name table agrees the unit should be unitless
-        elif should_be_unitless:
-            valid_standard_units.assert_true(True, '')
-
         else:
             valid_standard_units.assert_true(util.units_convertible(canonical_units, units),
                                              'units for variable {} must be convertible to {} '
