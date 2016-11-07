@@ -3147,7 +3147,12 @@ class CFBaseCheck(BaseCheck):
                     dim_index_dict[name] = dict()
                     aux_index_dict[name] = dict()
                     for coordinate in getattr(var, 'coordinates', '').split(" "):
-                        indices = np.where(ds.variables[coordinate][:].mask)[0]
+                        # check if there is actually a masked for the data
+                        coord_vals = ds.variables[coordinate][:]
+                        if hasattr(coord_vals, 'mask'):
+                            indices = np.where(coord_vals.mask)[0]
+                        else:
+                            indices = coord_vals
 
                         # if the coordinate name is in the list of variables,
                         # but has no associated dimension name
