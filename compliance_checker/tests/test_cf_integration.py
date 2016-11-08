@@ -137,11 +137,6 @@ class TestCFIntegration(BaseTestCase):
         else:
             assert False, "'Different feature types discovered' was not found in the checker messages"
 
-        match = re.match(r'^Different feature types discovered in this dataset: '
-                         'mapped-grid \(.*\), trajectory-profile-incomplete \(.*\)$',
-                         messages[i])
-        assert match is not None
-
         assert (u"Different feature types discovered in this dataset: mapped-grid (u, v), "
                 "trajectory-profile-incomplete (pressure, temperature, conductivity, salinity, "
                 "density, platform_meta)") in messages
