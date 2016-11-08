@@ -282,11 +282,11 @@ class TestCF(BaseTestCase):
         result_dict = {result.name: result for result in results}
         result = result_dict[u'§3.3 Variable time has valid standard_name attribute']
         assert result.value == (0, 1)
-        assert 'variable time\'s attribute standard_name must be a non-empty string' == result.msgs[0]
+        assert 'variable time\'s attribute standard_name must be a non-empty string or it should define a long_name attribute.' == result.msgs[0]
 
         result = result_dict[u'§3.3 Variable latitude has valid standard_name attribute']
         assert result.value == (0, 1)
-        assert 'variable latitude\'s attribute standard_name must be a non-empty string' == result.msgs[0]
+        assert 'variable latitude\'s attribute standard_name must be a non-empty string or it should define a long_name attribute.' == result.msgs[0]
 
         result = result_dict[u'§3.3 Variable salinity has valid standard_name attribute']
         assert result.value == (1, 2)

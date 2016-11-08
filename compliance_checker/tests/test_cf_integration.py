@@ -94,7 +94,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ocos'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (2037, 2098)
+        assert (scored, out_of) == (2076, 2137)
         assert (u'units attribute is required for user') in messages
         assert (u'Unidentifiable feature for variable Akt_bak') in messages
         assert (u"zeta's dimensions are not in the recommended order T, Z, Y, X. They are "
@@ -154,3 +154,19 @@ class TestCFIntegration(BaseTestCase):
                 "letters, digits, and underscores") in messages
         assert (u"references global attribute should be a non-empty string") in messages
         assert (u"comment global attribute should be a non-empty string") in messages
+
+    def test_ooi_glider(self):
+        dataset = self.load_dataset(STATIC_FILES['ooi_glider'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (906, 917)
+        assert (u"units attribute is required for deployment") in messages
+        assert (u"units attribute is required for nobs") in messages
+        assert (u"variable deployment's attribute standard_name must be a non-empty string or "
+                "it should define a long_name attribute.") in messages
+        assert (u"comment global attribute should be a non-empty string") in messages
+        assert (u"Unidentifiable feature for variable nobs") in messages
+        assert (u"Unidentifiable feature for variable preferred_timestamp") in messages
+        assert (u"comment global attribute should be a non-empty string") in messages
+        assert (u"latitude variable 'latitude' should define standard_name='latitude' or axis='Y'") in messages
+        assert (u"longitude variable 'longitude' should define standard_name='longitude' or axis='X'") in messages

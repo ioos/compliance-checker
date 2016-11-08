@@ -95,4 +95,5 @@ STATIC_FILES = {
     'usgs_dem_saipan'                      : get_filename('tests/data/examples/usgs_dem_saipan.cdl'),
     'sp041'                                : get_filename('tests/data/examples/sp041.cdl'),
     '3mf07'                                : get_filename('tests/data/examples/3mf07.cdl'),
+    'ooi_glider'                           : get_filename('tests/data/examples/ooi_glider.cdl'),
 }
