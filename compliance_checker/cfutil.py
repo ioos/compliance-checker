@@ -765,22 +765,41 @@ def is_point(nc, variable):
     dims = nc.variables[variable].dimensions
 
     cmatrix = coordinate_dimension_matrix(nc)
-    for req in ('x', 'y', 't'):
-        if req not in cmatrix:
+    first_coord = None
+    if 't' in cmatrix:
+        first_coord = cmatrix['t']
+        if len(cmatrix['t']) > 1:
             return False
-    t = get_time_variable(nc)
-    if cmatrix['x'] != cmatrix['y'] or cmatrix['x'] != cmatrix['t']:
+    if 'x' in cmatrix:
+        if first_coord is None:
+            first_coord = cmatrix['x']
+        if first_coord != cmatrix['x']:
+            return False
+        if len(cmatrix['x']) > 1:
+            return False
+    if 'y' in cmatrix:
+        if first_coord is None:
+            first_coord = cmatrix['y']
+        if first_coord != cmatrix['y']:
+            return False
+        if len(cmatrix['y']) > 1:
+            return False
+    if 'z' in cmatrix:
+        if first_coord is None:
+            first_coord = cmatrix['z']
+        if first_coord != cmatrix['z']:
+            return False
+        if len(cmatrix['z']) > 1:
+            return False
+    if first_coord and dims != first_coord:
         return False
-    # This is a trajectory
-    if cmatrix['t'] == (t,):
+    # Point is indistinguishable from trajectories where the instance dimension
+    # is implied (scalar)
+    traj_ids = nc.get_variables_by_attributes(cf_role="trajectory_id")
+    if traj_ids:
         return False
-    if len(cmatrix['x']) != 1:
-        return False
-    if 'z' in cmatrix and cmatrix['x'] != cmatrix['z']:
-        return False
-    if dims == cmatrix['x']:
-        return True
-    return False
+
+    return True
 
 
 def is_timeseries(nc, variable):
@@ -794,7 +813,7 @@ def is_timeseries(nc, variable):
     # x, y, z, t(t)
     # X(t)
     dims = nc.variables[variable].dimensions
-
+    cmatrix = coordinate_dimension_matrix(nc)
     time_variables = get_time_variables(nc)
 
     if len(dims) != 1:
@@ -802,6 +821,16 @@ def is_timeseries(nc, variable):
     dim = dims[0]
     if dim not in time_variables:
         return False
+    # No other coordinates can vary with time
+    if 'x' in cmatrix:
+        if len(cmatrix['x']) != 0:
+            return False
+    if 'y' in cmatrix:
+        if len(cmatrix['y']) != 0:
+            return False
+    if 'z' in cmatrix:
+        if len(cmatrix['z']) != 0:
+            return False
 
     return True
 
@@ -914,26 +943,31 @@ def is_single_trajectory(nc, variable):
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
     '''
-    # x(t), y(t), z(t), t(t)
-    # X(t)
+    # x(o), y(o), z(o), t(o)
+    # X(o)
+    # cf_role must be trajectory
     dims = nc.variables[variable].dimensions
-    cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 't'):
-        if req not in cmatrix:
+    cmatrix = coordinate_dimension_matrix(nc)
+    # Time is required for trajectories
+    if 't' not in cmatrix:
+        return False
+    # Coordinates changing with time are optional
+    if 'x' in cmatrix:
+        if cmatrix['x'] != cmatrix['t']:
             return False
-    t = get_time_variable(nc)
-    if cmatrix['x'] != (t,):
+    if 'y' in cmatrix:
+        if cmatrix['y'] != cmatrix['t']:
+            return False
+    if 'z' in cmatrix:
+        if cmatrix['z'] != cmatrix['t']:
+            return False
+    if dims != cmatrix['t']:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    traj_ids = nc.get_variables_by_attributes(cf_role="trajectory_id")
+    if len(traj_ids) != 1:
         return False
-    if cmatrix['x'] != cmatrix['t']:
-        return False
-    if 'z' in cmatrix and cmatrix['x'] != cmatrix['z']:
-        return False
-    if dims == cmatrix['x']:
-        return True
-    return False
+    return True
 
 
 def is_profile_orthogonal(nc, variable):

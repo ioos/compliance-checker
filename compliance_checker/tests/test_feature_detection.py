@@ -246,7 +246,7 @@ class TestFeatureDetection(TestCase):
             assert util.guess_feature_type(nc, 'PS') == 'reduced-grid'
 
         with Dataset(resources.STATIC_FILES['vertical_coords']) as nc:
-            assert util.guess_feature_type(nc, 'temperature') == 'timeseries'
+            assert util.guess_feature_type(nc, 'temperature') == 'point'
 
             axis_map = util.get_axis_map(nc, 'temperature')
             assert axis_map['Z'] == ['height']
@@ -287,7 +287,7 @@ class TestFeatureDetection(TestCase):
             assert axis_map['X'] == ['lon']
 
         with Dataset(resources.STATIC_FILES['index_ragged']) as nc:
-            assert util.guess_feature_type(nc, 'temperature') == 'point'
+            assert util.guess_feature_type(nc, 'temperature') == "single-trajectory"
 
             axis_map = util.get_axis_map(nc, 'temperature')
             assert axis_map['T'] == ['time']
@@ -314,7 +314,7 @@ class TestFeatureDetection(TestCase):
             assert axis_map['X'] == ['rlon', 'lon']
 
         with Dataset(resources.STATIC_FILES['rutgers']) as nc:
-            assert util.guess_feature_type(nc, 'temperature') == 'timeseries'
+            assert util.guess_feature_type(nc, 'temperature') == 'single-trajectory'
 
             axis_map = util.get_axis_map(nc, 'temperature')
             assert axis_map['T'] == ['time']
@@ -323,7 +323,7 @@ class TestFeatureDetection(TestCase):
             assert axis_map['X'] == ['lon']
 
         with Dataset(resources.STATIC_FILES['self-referencing-var']) as nc:
-            assert util.guess_feature_type(nc, 'TEMP') == 'timeseries'
+            assert util.guess_feature_type(nc, 'TEMP') == 'point'
 
             axis_map = util.get_axis_map(nc, 'TEMP')
             assert axis_map['T'] == ['TIME']

@@ -3017,6 +3017,64 @@ class CFBaseCheck(BaseCheck):
                                       "".format(name, ', '.join(valid_roles)))
         return ret_val
 
+    def check_variable_features(self, ds):
+        '''
+        Checks the variable feature types match the dataset featureType attribute
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        ret_val = []
+        feature_list = ['point', 'timeSeries', 'trajectory', 'profile', 'timeSeriesProfile', 'trajectoryProfile']
+        # Don't bother checking if it's not a legal featureType
+        feature_type = getattr(ds, 'featureType', None)
+        if feature_type not in feature_list:
+            return []
+
+        feature_type_map = {
+            'point': [
+                'point'
+            ],
+            'timeSeries': [
+                'timeseries',
+                'multi-timeseries-orthogonal',
+                'multi-timeseries-incomplete',
+            ],
+            'trajectory': [
+                'cf-trajectory',
+                'single-trajectory',
+            ],
+            'profile': [
+                'profile-orthogonal',
+                'profile-incomplete'
+            ],
+            'timeSeriesProfile': [
+                'timeseries-profile-single-station',
+                'timeseries-profile-multi-station',
+                'timeseries-profile-single-ortho-time',
+                'timeseries-profile-multi-ortho-time',
+                'timeseries-profile-ortho-depth',
+                'timeseries-profile-incomplete'
+            ],
+            'trajectoryProfile': [
+                'trajectory-profile-orthogonal',
+                'trajectory-profile-incomplete'
+            ]
+        }
+        for name in self._find_geophysical_vars(ds):
+            variable_feature = cfutil.guess_feature_type(ds, name)
+            # If we can't figure it out, don't check it.
+            if variable_feature is None:
+                continue
+            matching_feature = TestCtx(BaseCheck.MEDIUM,
+                                       '§9.1 Feature Type for {} is valid {}'
+                                       ''.format(name, feature_type))
+            matching_feature.assert_true(variable_feature in feature_type_map[feature_type],
+                                         '{} is not a {}, it is detected as a {}'
+                                         ''.format(name, feature_type, variable_feature))
+            ret_val.append(matching_feature.to_result())
+
+        return ret_val
+
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
 
