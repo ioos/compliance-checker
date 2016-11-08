@@ -339,6 +339,11 @@ class TestCF(BaseTestCase):
         score, out_of, messages = self.get_results(results)
         assert "Boundary variable dimension nv must have either two or four elements." in messages
 
+    def test_cell_measures(self):
+        dataset = self.load_dataset(STATIC_FILES['cf_example_cell_measures'])
+        results = self.cf.check_climatological_statistics(dataset)
+        score, out_of, messages = self.get_results(results)
+
     def test_climatology(self):
         dataset = self.load_dataset(STATIC_FILES['climatology'])
         results = self.cf.check_climatological_statistics(dataset)

@@ -2414,31 +2414,49 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
         reasoning = []
-        for name, var in ds.variables.items():
-            for dim in var.dimensions:
-                if getattr(var, 'cell_measures', ''):
-                    measures = getattr(var, 'coordinates', '')
-                    measures = measures.split(': ')
-                    if measures[0] not in ['area', 'volume']:
-                        reasoning.append("The 'measures' field is not equal to 'area' or 'volume'.")
-                        return Result(BaseCheck.MEDIUM,
-                                      False,
-                                      ('§7.2 Cell measures', name, 'cell_measures'),
-                                      reasoning)
-                    for every, attri in ds.variables.items():
-                        if every == measures[1]:
-                            for dimi in attri.dimensions:
-                                if dimi in var.dimensions:
-                                    valid = True
-                                else:
-                                    reasoning.append('The measure variable dimensions are not a set or subset of the cell_measure variable.')
-                                    valid = False
+        var_names = ds.get_variables_by_attributes(cell_measures=lambda c:
+                                                   c is not None)
+        for var_name in var_names:
+            var = ds.variables[var_name]
+            search_str = '^(?:area|volume): (\w+)$'
+            search_res = re.search(search_str, var.cell_measures)
+            if not search_res:
+                valid = False
+                reasoning.append("The cell_measures attribute for variable {} "
+                                 "is formatted incorrectly.  It should take the"
+                                 " form of either 'area: cell_var' or "
+                                 "'volume: cell_var' where cell_var is the "
+                                 "variable describing the cell measures".format(
+                                     var_name))
+            else:
+                valid = True
+                cell_meas_var_name = search_res.groups[0]
+                # TODO: cache previous results
+                if not cell_meas_var_name in ds.variables:
+                    valid = False
+                    reasoning.append("Cell measure variable {} referred to by "
+                                     "{} is not present in dataset variables".format(
+                                                var_name, cell_meas_var_name))
+                else:
+                    cell_meas_var = ds.variables[cell_meas_var_name]
+                    if not hasattr(cell_meas_var, 'units'):
+                        valid = False
+                        reasoning.append("Cell measure variable {} is required "
+                                         "to have units attribute defined.".format(
+                                                        cell_meas_var_name))
+                    if not set(cell_meas_var.dimensions).issubset(
+                                               var.dimensions):
+                        valid = False
+                        reasoning.append("Cell measure variable {} must have "
+                                         "dimensions which are a subset of "
+                                         "those defined in variable {}.".format(
+                                                  cell_meas_var_name, var_name))
 
-                    result = Result(BaseCheck.MEDIUM,
-                                    valid,
-                                    ('§7.2 Cell measures', name, 'cell_measures'),
-                                    reasoning)
-                    ret_val.append(result)
+            result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            ('§7.2 Cell measures', var_name, 'cell_measures'),
+                            reasoning)
+            ret_val.append(result)
 
         return ret_val
 
