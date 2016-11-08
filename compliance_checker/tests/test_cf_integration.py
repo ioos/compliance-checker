@@ -127,8 +127,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['sp041'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (1311, 1320)
-        assert len(messages) == 9
+        assert (scored, out_of) == (1311, 1315)
+        assert len(messages) == 4
 
         assert (u"lat_qc is not a variable in this dataset") in messages
         assert (u"TrajectoryProfile is not a valid CF featureType. It must be one of point, "
@@ -139,20 +139,15 @@ class TestCFIntegration(BaseTestCase):
         else:
             assert False, "'Different feature types discovered' was not found in the checker messages"
 
-        assert (u"attribute time:_CoordinateAxisType should begin with a letter and be composed "
-                "of letters, digits, and underscores") in messages
-
     def test_3mf07(self):
         dataset = self.load_dataset(STATIC_FILES['3mf07'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (427, 436)
-        assert len(messages) == 9
+        assert (scored, out_of) == (427, 433)
+        assert len(messages) == 6
         assert (u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for "
                 "variable flag (profile)") in messages
         assert (u"Unidentifiable feature for variable flag") in messages
-        assert (u"attribute latitude:_CoordinateAxisType should begin with a letter and be composed of "
-                "letters, digits, and underscores") in messages
         assert (u"references global attribute should be a non-empty string") in messages
         assert (u"comment global attribute should be a non-empty string") in messages
 
@@ -173,8 +168,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['swan'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (370, 385)
-        assert len(messages) == 15
+        assert (scored, out_of) == (370, 380)
+        assert len(messages) == 10
         assert (u"units for variable time_offset must be convertible to s currently they are hours "
                 "since 2013-02-18T00:00:00Z") in messages
         assert (u"axis attribute must be T, X, Y, or Z, currently y") in messages
