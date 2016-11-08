@@ -394,7 +394,10 @@ class CFBaseCheck(BaseCheck):
                 # Special attributes made by THREDDS
                 if attr.startswith('DODS'):
                     continue
-                if attr == '_ChunkSize':
+                if attr == '_ChunkSizes':
+                    continue
+                # Ignore model produced attributes
+                if attr.startswith('_Coordinate'):
                     continue
                 attribute_naming.assert_true(rname.match(attr) is not None,
                                              "attribute {}:{} should begin with a letter and be composed of "
@@ -609,7 +612,10 @@ class CFBaseCheck(BaseCheck):
             else:
                 continue
 
-            valid = (fill_value < rmin or fill_value > rmax)
+            if np.isnan(fill_value):
+                valid = True
+            else:
+                valid = (fill_value < rmin or fill_value > rmax)
 
             valid_fill_range.assert_true(valid,
                                          "{}:_FillValue ({}) should be outside the range specified by {} ({}, {})"
@@ -750,7 +756,7 @@ class CFBaseCheck(BaseCheck):
         geophysical_variables = self._find_geophysical_vars(ds)
         unit_required_variables = coordinate_variables + auxiliary_coordinates + geophysical_variables
 
-        for name in unit_required_variables:
+        for name in set(unit_required_variables):
             # For reduced horizontal grids, the compression index variable does
             # not require units.
             if cfutil.is_compression_coordinate(ds, name):
@@ -962,7 +968,7 @@ class CFBaseCheck(BaseCheck):
         geophysical_vars = self._find_geophysical_vars(ds)
 
         variables_requiring_standard_names = coord_vars + aux_coord_vars + axis_vars + flag_vars + geophysical_vars
-        for name in variables_requiring_standard_names:
+        for name in set(variables_requiring_standard_names):
             # Compression indices used in reduced horizontal grids or
             # compression schemes do not require attributes other than compress
             if cfutil.is_compression_coordinate(ds, name):

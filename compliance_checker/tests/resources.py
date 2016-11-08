@@ -99,4 +99,6 @@ STATIC_FILES = {
     'trajectory-complete'                  : get_filename('tests/data/trajectory-complete.cdl'),
     'trajectory-implied'                   : get_filename('tests/data/trajectory-implied.cdl'),
     'bad-trajectory'                       : get_filename('tests/data/bad-trajectory.cdl'),
+    'swan'                                 : get_filename('tests/data/examples/swan.cdl'),
+    'kibesillah'                           : get_filename('tests/data/examples/kibesillah.cdl'),
 }

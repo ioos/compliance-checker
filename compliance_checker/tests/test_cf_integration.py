@@ -92,7 +92,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ocos'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (2076, 2137)
+        assert (scored, out_of) == (1768, 1829)
         assert len(messages) == 61
         assert (u'units attribute is required for user') in messages
         assert (u'Unidentifiable feature for variable Akt_bak') in messages
@@ -105,7 +105,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['l01-met'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (853, 869)
+        assert (scored, out_of) == (599, 615)
         assert len(messages) == 16
 
         # The variable is supposed to be a status flag but it's mislabled
@@ -127,8 +127,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['sp041'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (2068, 2077)
-        assert len(messages) == 9
+        assert (scored, out_of) == (1311, 1315)
+        assert len(messages) == 4
 
         assert (u"lat_qc is not a variable in this dataset") in messages
         assert (u"TrajectoryProfile is not a valid CF featureType. It must be one of point, "
@@ -139,20 +139,15 @@ class TestCFIntegration(BaseTestCase):
         else:
             assert False, "'Different feature types discovered' was not found in the checker messages"
 
-        assert (u"attribute time:_CoordinateAxisType should begin with a letter and be composed "
-                "of letters, digits, and underscores") in messages
-
     def test_3mf07(self):
         dataset = self.load_dataset(STATIC_FILES['3mf07'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (582, 591)
-        assert len(messages) == 9
+        assert (scored, out_of) == (427, 433)
+        assert len(messages) == 6
         assert (u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for "
                 "variable flag (profile)") in messages
         assert (u"Unidentifiable feature for variable flag") in messages
-        assert (u"attribute latitude:_CoordinateAxisType should begin with a letter and be composed of "
-                "letters, digits, and underscores") in messages
         assert (u"references global attribute should be a non-empty string") in messages
         assert (u"comment global attribute should be a non-empty string") in messages
 
@@ -160,7 +155,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ooi_glider'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (898, 903)
+        assert (scored, out_of) == (610, 615)
         assert len(messages) == 5
         assert (u"units attribute is required for deployment") in messages
         assert (u"variable deployment's attribute standard_name must be a non-empty string or "
@@ -168,3 +163,28 @@ class TestCFIntegration(BaseTestCase):
         assert (u"comment global attribute should be a non-empty string") in messages
         assert (u"latitude variable 'latitude' should define standard_name='latitude' or axis='Y'") in messages
         assert (u"longitude variable 'longitude' should define standard_name='longitude' or axis='X'") in messages
+
+    def test_swan(self):
+        dataset = self.load_dataset(STATIC_FILES['swan'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (370, 380)
+        assert len(messages) == 10
+        assert (u"units for variable time_offset must be convertible to s currently they are hours "
+                "since 2013-02-18T00:00:00Z") in messages
+        assert (u"axis attribute must be T, X, Y, or Z, currently y") in messages
+        assert (u"vertical coordinates not defining pressure must include a positive attribute that "
+                "is either 'up' or 'down'") in messages
+        assert (u"GRID is not a valid CF featureType. It must be one of point, timeSeries, "
+                "trajectory, profile, timeSeriesProfile, trajectoryProfile") in messages
+        assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
+
+    def test_kibesillah(self):
+        dataset = self.load_dataset(STATIC_FILES['kibesillah'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (201, 204)
+        assert len(messages) == 3
+        assert (u"source should be defined") in messages
+        assert (u"references should be defined") in messages
+        assert (u"global attribute title should exist and be a non-empty string") in messages
