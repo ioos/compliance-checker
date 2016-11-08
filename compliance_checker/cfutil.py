@@ -8,6 +8,7 @@ from pkg_resources import resource_filename
 from collections import defaultdict
 import csv
 import json
+import re
 
 # For python2/python3 support
 try:
@@ -519,6 +520,15 @@ def get_time_variable(ds):
                 if candidate.dimensions == (candidate.name,):
                     return candidate.name
 
+    # If we still haven't found the candidate
+    time_variables = set(get_time_variables(ds))
+    coordinate_variables = set(get_coordinate_variables(ds))
+    if len(time_variables.intersection(coordinate_variables)) == 1:
+        return list(time_variables.intersection(coordinate_variables))[0]
+
+    auxiliary_coordinates = set(get_auxiliary_coordinate_variables(ds))
+    if len(time_variables.intersection(auxiliary_coordinates)) == 1:
+        return list(time_variables.intersection(auxiliary_coordinates))[0]
     return None
 
 
@@ -535,6 +545,12 @@ def get_time_variables(ds):
     for variable in ds.get_variables_by_attributes(axis='T'):
         if variable.name not in time_variables:
             time_variables.append(variable.name)
+
+    regx = r'^(?:day|d|hour|hr|h|minute|min|second|s)s? since .*$'
+    for variable in ds.get_variables_by_attributes(units=lambda x: isinstance(x, basestring)):
+        if re.match(regx, variable.units) and variable.name not in time_variables:
+            time_variables.append(variable.name)
+
     return time_variables
 
 
