@@ -2,6 +2,8 @@ netcdf trajectory-single {
 dimensions:
     time = 2;
 variables:
+    int trajectory_id;
+        trajectory_id:cf_role = "trajectory_id";
     double time(time);
         time:standard_name = "time";
         time:long_name = "Time";

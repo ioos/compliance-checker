@@ -1,0 +1,28 @@
+netcdf bad-trajectory {
+dimensions:
+    obs = 2;
+variables:
+    double time(obs);
+        time:standard_name = "time";
+        time:units = "seconds since 1970-01-01";
+    double lat(obs);
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+    double lon(obs);
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+    double temperature(obs);
+        temperature:standard_name = "air_temperature";
+        temperature:units = "deg_C";
+        temperature:coordinates = "time lat lon";
+
+    // Global Attributes
+    :title = "bad-trajectory";
+    :Conventions = "CF-1.6";
+    :source = "imagination";
+    :references = "none";
+    :history = "2016-11-08 Dataset created";
+    :institution = "IOOS";
+    :featureType = "trajectory";
+}
+

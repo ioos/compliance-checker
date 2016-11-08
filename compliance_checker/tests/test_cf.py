@@ -905,6 +905,14 @@ class TestCF(BaseTestCase):
         }
         suite.run(dataset, 'cf')
 
+    def test_variable_feature_check(self):
+        dataset = self.load_dataset(STATIC_FILES['bad-trajectory'])
+        results = self.cf.check_variable_features(dataset)
+        scored, out_of, messages = self.get_results(results)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§9.1 Feature Type for temperature is valid trajectory']
+        assert result.msgs[0] == 'temperature is not a trajectory, it is detected as a point'
+
     # --------------------------------------------------------------------------------
     # Utility Method Tests
     # --------------------------------------------------------------------------------

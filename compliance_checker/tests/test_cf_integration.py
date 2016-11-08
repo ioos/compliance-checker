@@ -76,7 +76,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['sldmb_43093_agg'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (140, 150)
+        assert (scored, out_of) == (141, 151)
+        assert len(messages) == 10
         assert u'standard_name temperature is not defined in Standard Name Table v36' in messages
         assert (u'auxiliary coordinate specified by the coordinates attribute, precise_lat, '
                 'is not a variable in this dataset') in messages
@@ -95,6 +96,7 @@ class TestCFIntegration(BaseTestCase):
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
         assert (scored, out_of) == (2076, 2137)
+        assert len(messages) == 61
         assert (u'units attribute is required for user') in messages
         assert (u'Unidentifiable feature for variable Akt_bak') in messages
         assert (u"zeta's dimensions are not in the recommended order T, Z, Y, X. They are "
@@ -106,7 +108,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['l01-met'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (841, 859)
+        assert (scored, out_of) == (853, 871)
+        assert len(messages) == 18
 
         # The variable is supposed to be a status flag but it's mislabled
         assert (u'units for variable air_temperature_qc must be convertible to K currently they are 1') in messages
@@ -120,6 +123,7 @@ class TestCFIntegration(BaseTestCase):
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
         assert (scored, out_of) == (111, 112)
+        assert len(messages) == 1
         assert (u'Conventions global attribute does not contain "CF-1.6"') == messages[0]
 
     def test_sp041(self):
@@ -127,6 +131,7 @@ class TestCFIntegration(BaseTestCase):
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
         assert (scored, out_of) == (2068, 2079)
+        assert len(messages) == 11
 
         assert (u"lat_qc is not a variable in this dataset") in messages
         assert (u"TrajectoryProfile is not a valid CF featureType. It must be one of point, "
@@ -146,7 +151,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['3mf07'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (577, 586)
+        assert (scored, out_of) == (582, 591)
+        assert len(messages) == 9
         assert (u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for "
                 "variable flag (profile)") in messages
         assert (u"Unidentifiable feature for variable flag") in messages
@@ -159,7 +165,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ooi_glider'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (906, 917)
+        assert (scored, out_of) == (921, 932)
+        assert len(messages) == 11
         assert (u"units attribute is required for deployment") in messages
         assert (u"units attribute is required for nobs") in messages
         assert (u"variable deployment's attribute standard_name must be a non-empty string or "

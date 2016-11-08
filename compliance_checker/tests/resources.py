@@ -96,4 +96,7 @@ STATIC_FILES = {
     'sp041'                                : get_filename('tests/data/examples/sp041.cdl'),
     '3mf07'                                : get_filename('tests/data/examples/3mf07.cdl'),
     'ooi_glider'                           : get_filename('tests/data/examples/ooi_glider.cdl'),
+    'trajectory-complete'                  : get_filename('tests/data/trajectory-complete.cdl'),
+    'trajectory-implied'                   : get_filename('tests/data/trajectory-implied.cdl'),
+    'bad-trajectory'                       : get_filename('tests/data/bad-trajectory.cdl'),
 }
