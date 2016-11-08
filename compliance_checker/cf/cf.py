@@ -394,7 +394,7 @@ class CFBaseCheck(BaseCheck):
                 # Special attributes made by THREDDS
                 if attr.startswith('DODS'):
                     continue
-                if attr == '_ChunkSize':
+                if attr == '_ChunkSizes':
                     continue
                 attribute_naming.assert_true(rname.match(attr) is not None,
                                              "attribute {}:{} should begin with a letter and be composed of "

@@ -184,3 +184,12 @@ class TestCFIntegration(BaseTestCase):
                 "trajectory, profile, timeSeriesProfile, trajectoryProfile") in messages
         assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
 
+    def test_kibesillah(self):
+        dataset = self.load_dataset(STATIC_FILES['kibesillah'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (201, 204)
+        assert len(messages) == 3
+        assert (u"source should be defined") in messages
+        assert (u"references should be defined") in messages
+        assert (u"global attribute title should exist and be a non-empty string") in messages
