@@ -137,9 +137,6 @@ class TestCFIntegration(BaseTestCase):
         else:
             assert False, "'Different feature types discovered' was not found in the checker messages"
 
-        assert (u"Different feature types discovered in this dataset: mapped-grid (u, v), "
-                "trajectory-profile-incomplete (pressure, temperature, conductivity, salinity, "
-                "density, platform_meta)") in messages
         assert (u"attribute time:_CoordinateAxisType should begin with a letter and be composed "
                 "of letters, digits, and underscores") in messages
         assert (u"global attribute DODS.strlen should begin with a letter and be composed of "
