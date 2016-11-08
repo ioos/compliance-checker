@@ -911,7 +911,7 @@ class CFBaseCheck(BaseCheck):
         # appropriate under CF
 
         # UDUnits accepts "s" as a unit of time but it should be <unit> since <epoch>
-        if standard_name in 'time':
+        if standard_name == 'time':
             valid_standard_units.assert_true(util.units_convertible(units, 'seconds since 1970-01-01'),
                                              'time must be in a valid units format <unit> since <epoch> '
                                              'not {}'.format(units))
