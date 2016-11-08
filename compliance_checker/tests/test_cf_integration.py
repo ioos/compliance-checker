@@ -76,8 +76,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['sldmb_43093_agg'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (141, 151)
-        assert len(messages) == 10
+        assert (scored, out_of) == (141, 149)
+        assert len(messages) == 8
         assert u'standard_name temperature is not defined in Standard Name Table v36' in messages
         assert (u'auxiliary coordinate specified by the coordinates attribute, precise_lat, '
                 'is not a variable in this dataset') in messages
@@ -86,9 +86,6 @@ class TestCFIntegration(BaseTestCase):
 
         assert (u'attribute time:_CoordianteAxisType should begin with a letter and be composed '
                 'of letters, digits, and underscores') in messages
-
-        assert (u'global attribute DODS.dimName should begin with a letter and be composed of '
-                'letters, digits, and underscores') in messages
 
     @pytest.mark.slowtest
     def test_ocos(self):
@@ -108,8 +105,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['l01-met'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (853, 871)
-        assert len(messages) == 18
+        assert (scored, out_of) == (853, 869)
+        assert len(messages) == 16
 
         # The variable is supposed to be a status flag but it's mislabled
         assert (u'units for variable air_temperature_qc must be convertible to K currently they are 1') in messages
@@ -130,8 +127,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['sp041'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (2068, 2079)
-        assert len(messages) == 11
+        assert (scored, out_of) == (2068, 2077)
+        assert len(messages) == 9
 
         assert (u"lat_qc is not a variable in this dataset") in messages
         assert (u"TrajectoryProfile is not a valid CF featureType. It must be one of point, "
@@ -144,8 +141,6 @@ class TestCFIntegration(BaseTestCase):
 
         assert (u"attribute time:_CoordinateAxisType should begin with a letter and be composed "
                 "of letters, digits, and underscores") in messages
-        assert (u"global attribute DODS.strlen should begin with a letter and be composed of "
-                "letters, digits, and underscores") in messages
 
     def test_3mf07(self):
         dataset = self.load_dataset(STATIC_FILES['3mf07'])
@@ -165,15 +160,11 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ooi_glider'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (921, 932)
-        assert len(messages) == 11
+        assert (scored, out_of) == (898, 903)
+        assert len(messages) == 5
         assert (u"units attribute is required for deployment") in messages
-        assert (u"units attribute is required for nobs") in messages
         assert (u"variable deployment's attribute standard_name must be a non-empty string or "
                 "it should define a long_name attribute.") in messages
-        assert (u"comment global attribute should be a non-empty string") in messages
-        assert (u"Unidentifiable feature for variable nobs") in messages
-        assert (u"Unidentifiable feature for variable preferred_timestamp") in messages
         assert (u"comment global attribute should be a non-empty string") in messages
         assert (u"latitude variable 'latitude' should define standard_name='latitude' or axis='Y'") in messages
         assert (u"longitude variable 'longitude' should define standard_name='longitude' or axis='X'") in messages

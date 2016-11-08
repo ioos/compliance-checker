@@ -391,6 +391,11 @@ class CFBaseCheck(BaseCheck):
                 # ignore reserved attrs
                 if attr == '_FillValue':
                     continue
+                # Special attributes made by THREDDS
+                if attr.startswith('DODS'):
+                    continue
+                if attr == '_ChunkSize':
+                    continue
                 attribute_naming.assert_true(rname.match(attr) is not None,
                                              "attribute {}:{} should begin with a letter and be composed of "
                                              "letters, digits, and underscores".format(name, attr))
@@ -404,6 +409,8 @@ class CFBaseCheck(BaseCheck):
         ret_val.append(dimension_naming.to_result())
 
         for global_attr in ds.ncattrs():
+            if global_attr.startswith('DODS'):
+                continue
             attribute_naming.assert_true(rname.match(global_attr) is not None,
                                          "global attribute {} should begin with a letter and be composed of "
                                          "letters, digits, and underscores".format(global_attr))

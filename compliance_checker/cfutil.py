@@ -144,7 +144,7 @@ def is_geophysical(ds, variable):
         return False
 
     # Is it a string but with no defined units?
-    if ncvar.dtype.char == 'S' and unitless:
+    if ncvar.dtype.char == 'S':
         return False
 
     # Is it an instrument descriptor?
@@ -153,6 +153,10 @@ def is_geophysical(ds, variable):
 
     # What about a platform descriptor?
     if variable in get_platform_variables(ds):
+        return False
+
+    # Skip count variables too
+    if hasattr(ncvar, 'sample_dimension'):
         return False
 
     return True
