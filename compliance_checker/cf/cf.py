@@ -3018,6 +3018,11 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     def check_variable_features(self, ds):
+        '''
+        Checks the variable feature types match the dataset featureType attribute
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
         ret_val = []
         feature_list = ['point', 'timeSeries', 'trajectory', 'profile', 'timeSeriesProfile', 'trajectoryProfile']
         # Don't bother checking if it's not a legal featureType
