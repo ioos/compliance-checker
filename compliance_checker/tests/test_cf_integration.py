@@ -9,6 +9,7 @@ from compliance_checker.tests import BaseTestCase
 
 import pytest
 import os
+import re
 
 
 class TestCFIntegration(BaseTestCase):
@@ -130,6 +131,17 @@ class TestCFIntegration(BaseTestCase):
         assert (u"lat_qc is not a variable in this dataset") in messages
         assert (u"TrajectoryProfile is not a valid CF featureType. It must be one of point, "
                 "timeSeries, trajectory, profile, timeSeriesProfile, trajectoryProfile") in messages
+        for i, msg in enumerate(messages):
+            if msg.startswith("Different feature types"):
+                break
+        else:
+            assert False, "'Different feature types discovered' was not found in the checker messages"
+
+        match = re.match(r'^Different feature types discovered in this dataset: '
+                         'mapped-grid \(.*\), trajectory-profile-incomplete \(.*\)$',
+                         messages[i])
+        assert match is not None
+
         assert (u"Different feature types discovered in this dataset: mapped-grid (u, v), "
                 "trajectory-profile-incomplete (pressure, temperature, conductivity, salinity, "
                 "density, platform_meta)") in messages
