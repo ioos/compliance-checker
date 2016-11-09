@@ -210,8 +210,13 @@ class TestCFIntegration(BaseTestCase):
         assert (scored, out_of) == (646, 651)
         assert len(messages) == 24
 
-        assert (u"dimensions for auxiliary coordinate variable siglay (node, siglay) "
-                "are not a subset of dimensions for variable u (siglay, nele, time)") in messages
+        for msg in messages:
+            if msg.startswith("dimensions for auxiliary coordinate variable siglay"):
+                break
+        else:
+            raise AssertionError(u"\"dimensions for auxiliary coordinate variable siglay (node, siglay) "
+                                 "are not a subset of dimensions for variable u (siglay, nele, time)\""
+                                 " not in messages")
         assert (u"Unidentifiable feature for variable x") in messages
         assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
         assert (u"siglay shares the same name as one of its dimensions") in messages
