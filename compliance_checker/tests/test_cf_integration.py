@@ -215,3 +215,15 @@ class TestCFIntegration(BaseTestCase):
         assert (u"Unidentifiable feature for variable x") in messages
         assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
         assert (u"siglay shares the same name as one of its dimensions") in messages
+
+    def test_ww3(self):
+        dataset = self.load_dataset(STATIC_FILES['ww3'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (111, 121)
+        assert len(messages) == 10
+
+        assert (u"variable lat's attribute standard_name must be a non-empty string or it "
+                "should define a long_name attribute.") in messages
+        assert (u"Conventions field is not present") in messages
+        assert (u"latitude variable 'lat' should define standard_name='latitude' or axis='Y'") in messages
