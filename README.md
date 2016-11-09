@@ -43,7 +43,7 @@ The compliance-checker can work against local files (`.nc` files, `.cdl` metadat
 ```
 usage: compliance-checker [-h] [--test <test>[ <test>...]]
                    [--criteria [{lenient,normal,strict}]] [--verbose]
-                   [-f {stdout,html}] [-o OUTPUT] [-d]
+                   [-f {text,json,html}] [-o OUTPUT] [-d]
                    dataset_location [dataset_location ...]
 
 positional arguments:
