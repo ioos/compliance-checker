@@ -41,31 +41,33 @@ The compliance-checker can work against local files (`.nc` files, `.cdl` metadat
 > **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPeNDAP URL, please be sure the size is reasonable!
 
 ```
-usage: compliance-checker [-h] [--test <test>[ <test>...]]
-                   [--criteria [{lenient,normal,strict}]] [--verbose]
-                   [-f {stdout,html}] [-o OUTPUT] [-d]
-                   dataset_location [dataset_location ...]
+usage: compliance-checker [-h] [--test TEST]
+                          [--criteria [{lenient,normal,strict}]] [--verbose]
+                          [--skip-checks SKIP_CHECKS] [-f {text,html,json}]
+                          [-o OUTPUT] [-V] [-l] [-d DOWNLOAD_STANDARD_NAMES]
+                          [dataset_location [dataset_location ...]]
 
 positional arguments:
   dataset_location      Defines the location of the dataset to be checked.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --test {gliderdac|acdd|cf|ioos[:version]}[ gliderdac|acdd|cf|ioos[:version]...] -t {gliderdac|acdd|cf|ioos[:version]}[ gliderdac|acdd|cf|ioos[:version]...] --test= {gliderdac|acdd|cf|ioos[:version]}[ gliderdac|acdd|cf|ioos[:version]...], -t= {gliderdac|acdd|cf|ioos[:version]}[ gliderdac|acdd|cf|ioos[:version]...]
-                        Select the Checks you want to perform. Versions may be specified by using a colon followed by a version number.  Using a specification without a version number or with `:latest` will select the latest version of the standard.  Multiple tests may be specified by separating with a comma
+  --test TEST, -t TEST, --test= TEST, -t= TEST
+                        Select the Checks you want to perform. Defaults to
+                        'acdd' if unspecified
   --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
                         Define the criteria for the checks. Either Strict,
                         Normal, or Lenient. Defaults to Normal.
   --verbose, -v         Increase output. May be specified up to three times.
-  -f {stdout,html}, --format {stdout,html}
+  --skip-checks SKIP_CHECKS, -s SKIP_CHECKS
+                        Specifies tests to skip
+  -f {text,html,json}, --format {text,html,json}
                         Output format
   -o OUTPUT, --output OUTPUT
                         Output filename
-  -s check1 [-s check2] ..., --skip-checks check1 [--skip-checks check2] ...
-                        Skips the any check functions contained within the
-                        check suites selected which have the same function
-                        name(s) as the string(s) specified.  May be specified
-                        multiple times in order to skip multiple checks.
+  -V, --version         Display the IOOS Compliance Checker version
+                        information.
+  -l, --list-tests      List the available tests
   -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
                         Specify a version of the cf standard name table to
                         download as packaged version

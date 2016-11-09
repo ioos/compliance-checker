@@ -41,6 +41,8 @@ VALID_LON_UNITS = [
 # We can't import appendix d without getting circular imports
 DIMENSIONLESS_VERTICAL_COORDINATES = [
     'ocean_s_coordinate',
+    'ocean_s_coordinate_g1',
+    'ocean_s_coordinate_g2',
     'atmosphere_hybrid_sigma_pressure_coordinate',
     'atmosphere_hybrid_height_coordinate',
     'ocean_double_sigma_coordinate',
@@ -203,7 +205,7 @@ def get_auxiliary_coordinate_variables(ds):
         referenced_variables = ncvar.coordinates.split(' ')
         # if the variable names exist, add them
         for referenced_variable in referenced_variables:
-            if referenced_variable in ds.variables:
+            if referenced_variable in ds.variables and referenced_variable not in aux_vars:
                 aux_vars.append(referenced_variable)
 
     # axis variables are automatically in

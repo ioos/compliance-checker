@@ -1,18 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, division
-import re
-from functools import wraps
-from collections import defaultdict
-import numpy as np
-import os
-import six
-
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.appendix_f import grid_mapping_dict
 from compliance_checker.cf import util
 from compliance_checker import cfutil
+from functools import wraps
+from collections import defaultdict
+import numpy as np
+import os
+import re
+
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 try:
     basestring
@@ -479,10 +482,55 @@ class CFBaseCheck(BaseCheck):
         dimensions.
         '''
         valid_dimension_order = TestCtx(BaseCheck.MEDIUM, '§2.4 Dimension Order')
+        # Build a map from coordinate variable to axis
+        coord_axis_map = self._get_coord_axis_map(ds)
+
+        # Check each variable's dimension order, excluding climatology and
+        # bounds variables
+        any_clim = cfutil.get_climatology_variable(ds)
+        any_bounds = cfutil.get_cell_boundary_variables(ds)
+        for name, variable in ds.variables.items():
+            # Skip bounds/climatology variables, as they should implicitly
+            # have the same order except for the bounds specific dimension.
+            # This is tested later in the respective checks
+            if name in any_bounds or name == any_clim:
+                continue
+            # Skip strings/labels
+            if variable.dtype.char == 'S':
+                continue
+            if variable.dimensions:
+                dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
+                valid_dimension_order.assert_true(self._dims_in_order(dimension_order),
+                                                  "{}'s dimensions are not in the recommended order "
+                                                  "T, Z, Y, X. They are {}"
+                                                  "".format(name, self._get_pretty_dimension_order(ds, name)))
+
+        return valid_dimension_order.to_result()
+
+    def _get_coord_axis_map(self, ds):
+        '''
+        Returns a dictionary mapping each coordinate to a letter identifier
+        describing the _kind_ of coordinate.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: dict
+        '''
         expected = ['T', 'Z', 'Y', 'X']
         coord_vars = self._find_coord_vars(ds)
-        # Build a map from coordinate variable to axis
         coord_axis_map = {}
+
+        # L - Unlimited Coordinates
+        # T - Time coordinates
+        # Z - Depth/Altitude Coordinate
+        # Y - Y-Coordinate (latitude)
+        # X - X-Coordinate (longitude)
+        # A - Auxiliary Coordinate
+        # I - Instance Coordinate
+
+        time_variables = cfutil.get_time_variables(ds)
+        lat_variables = cfutil.get_latitude_variables(ds)
+        lon_variables = cfutil.get_longitude_variables(ds)
+        z_variables = cfutil.get_z_variables(ds)
 
         for coord_name in coord_vars:
             coord_var = ds.variables[coord_name]
@@ -505,9 +553,33 @@ class CFBaseCheck(BaseCheck):
                 coord_axis_map[coord_name] = 'Z'
             elif cfutil.is_compression_coordinate(ds, coord_name):
                 coord_axis_map[coord_name] = 'C'
+            elif coord_name in time_variables:
+                coord_axis_map[coord_name] = 'T'
+            elif coord_name in z_variables:
+                coord_axis_map[coord_name] = 'Z'
+            elif coord_name in lat_variables:
+                coord_axis_map[coord_name] = 'Y'
+            elif coord_name in lon_variables:
+                coord_axis_map[coord_name] = 'X'
             else:
                 # mark the coordinate variable as unknown
                 coord_axis_map[coord_name] = 'U'
+
+        for dimension in self._get_instance_dimensions(ds):
+            if dimension not in coord_axis_map:
+                coord_axis_map[dimension] = 'I'
+
+        # Dimensions of auxiliary coordinate variables will be marked with A.
+        # This is useful to help determine if the dimensions are used like a
+        # mapping from grid coordinates to physical lat/lon
+        for coord_name in self._find_aux_coord_vars(ds):
+            coord_var = ds.variables[coord_name]
+            # Skip label auxiliary coordinates
+            if coord_var.dtype.char == 'S':
+                continue
+            for dimension in coord_var.dimensions:
+                if dimension not in coord_axis_map:
+                    coord_axis_map[dimension] = 'A'
 
         # If a dimension does not have a coordinate variable mark it as unknown
         # 'U'
@@ -515,24 +587,17 @@ class CFBaseCheck(BaseCheck):
             if dimension not in coord_axis_map:
                 coord_axis_map[dimension] = 'U'
 
-        # Check each variable's dimension order, excluding climatology and
-        # bounds variables
-        any_clim = cfutil.get_climatology_variable(ds)
-        any_bounds = cfutil.get_cell_boundary_variables(ds)
-        for name, variable in ds.variables.items():
-            # Skip bounds/climatology variables, as they should implicitly
-            # have the same order except for the bounds specific dimension.
-            # This is tested later in the respective checks
-            if name in any_bounds or name == any_clim:
-                continue
-            if variable.dimensions:
-                dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
-                valid_dimension_order.assert_true(self._dims_in_order(dimension_order),
-                                                  "{}'s dimensions are not in the recommended order "
-                                                  "T, Z, Y, X. They are {}"
-                                                  "".format(name, self._get_pretty_dimension_order(ds, name)))
+        return coord_axis_map
 
-        return valid_dimension_order.to_result()
+    def _get_instance_dimensions(self, ds):
+        '''
+        Returns a list of dimensions marked as instance dimensions
+        '''
+        ret_val = []
+        for variable in ds.get_variables_by_attributes(cf_role=lambda x: isinstance(x, basestring)):
+            if variable.ndim > 0:
+                ret_val.append(variable.dimensions[0])
+        return ret_val
 
     def _get_pretty_dimension_order(self, ds, name):
         '''
@@ -572,7 +637,7 @@ class CFBaseCheck(BaseCheck):
 
         :param list dimension_order: A list of axes
         '''
-        regx = re.compile(r'^L?U*T?Z?(?:(?:Y?X?)|(?:C?))$')
+        regx = re.compile(r'^L?I?U*T?Z?(?:(?:Y?X?)|(?:C?)|(?:A+))$')
         dimension_string = ''.join(dimension_order)
         return regx.match(dimension_string) is not None
 
@@ -824,9 +889,10 @@ class CFBaseCheck(BaseCheck):
         standard_name, standard_name_modifier = self._split_standard_name(standard_name_full)
         std_name_unitless = cfutil.get_unitless_standard_names(self._std_names._root,
                                                                standard_name)
-        # is this even in the database
-        should_be_unitless = (variable.ndim == 0 or variable.dtype.char == 'S'
-                              or std_name_unitless)
+        # Is this even in the database? also, if there is no standard_name,
+        # there's no way to know if it is unitless.
+        should_be_unitless = (variable.ndim == 0 or variable.dtype.char == 'S' or
+                              std_name_unitless or standard_name is None)
 
         # 1) Units must exist
         valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(variable_name))
@@ -1409,16 +1475,21 @@ class CFBaseCheck(BaseCheck):
             ret_val.append(allowed_units.to_result())
 
             # Check that latitude uses degrees_north
-            recommended_units = TestCtx(BaseCheck.LOW, '§4.1 Latitude variable {} defines units using degrees_north'.format(latitude))
-            if standard_name == 'latitude':
-                recommended_units.assert_true(units == 'degrees_north',
-                                              "CF recommends latitude variable '{}' to use units degrees_north"
-                                              "".format(latitude))
-                ret_val.append(recommended_units.to_result())
+            if standard_name == 'latitude' and units != 'degrees_north':
+                # This is only a recommendation and we won't penalize but we
+                # will include a recommended action.
+                msg = ("CF recommends latitude variable '{}' to use units degrees_north"
+                       "".format(latitude))
+                recommended_units = Result(BaseCheck.LOW,
+                                           True,
+                                           '§4.1 Latitude variable {} defines units using degrees_north'.format(latitude),
+                                           [msg])
+                ret_val.append(recommended_units)
 
+            y_variables = ds.get_variables_by_attributes(axis='Y')
             # Check that latitude defines either standard_name or axis
             definition = TestCtx(BaseCheck.MEDIUM, '§4.1 Latitude variable {} defines either standard_name or axis'.format(latitude))
-            definition.assert_true(standard_name == 'latitude' or axis == 'Y',
+            definition.assert_true(standard_name == 'latitude' or axis == 'Y' or y_variables != [],
                                    "latitude variable '{}' should define standard_name='latitude' or axis='Y'"
                                    "".format(latitude))
             ret_val.append(definition.to_result())
@@ -1495,15 +1566,21 @@ class CFBaseCheck(BaseCheck):
 
             # Check that longitude uses degrees_east
             recommended_units = TestCtx(BaseCheck.LOW, '§4.1 Longitude variable {} defines units using degrees_east'.format(longitude))
-            if standard_name == 'longitude':
-                recommended_units.assert_true(units == 'degrees_east',
-                                              "CF recommends longitude variable '{}' to use units degrees_east"
-                                              "".format(longitude))
-                ret_val.append(recommended_units.to_result())
+            if standard_name == 'longitude' and units != 'degrees_east':
+                # This is only a recommendation and we won't penalize but we
+                # will include a recommended action.
+                msg = ("CF recommends longitude variable '{}' to use units degrees_east"
+                       "".format(longitude))
+                recommended_units = Result(BaseCheck.LOW,
+                                           True,
+                                           '§4.1 Longitude variable {} defines units using degrees_east'.format(longitude),
+                                           [msg])
+                ret_val.append(recommended_units)
 
+            x_variables = ds.get_variables_by_attributes(axis='X')
             # Check that longitude defines either standard_name or axis
             definition = TestCtx(BaseCheck.MEDIUM, '§4.1 Longitude variable {} defines either standard_name or axis'.format(longitude))
-            definition.assert_true(standard_name == 'longitude' or axis == 'Y',
+            definition.assert_true(standard_name == 'longitude' or axis == 'Y' or x_variables != [],
                                    "longitude variable '{}' should define standard_name='longitude' or axis='X'"
                                    "".format(longitude))
             ret_val.append(definition.to_result())
@@ -2996,12 +3073,13 @@ class CFBaseCheck(BaseCheck):
         feature_types_found = defaultdict(list)
         for name in self._find_geophysical_vars(ds):
             feature = cfutil.guess_feature_type(ds, name)
+            # If we can't figure out the feature type, don't penalize, just
+            # make a note of it in the messages
             if feature is not None:
                 feature_types_found[feature].append(name)
-
-            all_the_same.assert_true(feature is not None,
-                                     "Unidentifiable feature for variable {}"
-                                     "".format(name))
+            else:
+                all_the_same.messages.append("Unidentifiable feature for variable {}"
+                                             "".format(name))
         feature_description = ', '.join(['{} ({})'.format(ftr, ', '.join(vrs)) for ftr, vrs in feature_types_found.items()])
 
         all_the_same.assert_true(len(feature_types_found) < 2,
@@ -3105,6 +3183,35 @@ class CFBaseCheck(BaseCheck):
                                          '{} is not a {}, it is detected as a {}'
                                          ''.format(name, feature_type, variable_feature))
             ret_val.append(matching_feature.to_result())
+
+        return ret_val
+
+    def check_hints(self, ds):
+        '''
+        Checks for potentially mislabeled metadata and makes suggestions for how to correct
+        '''
+        ret_val = []
+
+        ret_val.extend(self._check_hint_bounds(ds))
+
+        return ret_val
+
+    def _check_hint_bounds(self, ds):
+        '''
+        Checks for variables ending with _bounds, if they are not cell methods,
+        make the recommendation
+        '''
+        ret_val = []
+        boundary_variables = cfutil.get_cell_boundary_variables(ds)
+        for name in ds.variables:
+            if name.endswith('_bounds') and name not in boundary_variables:
+                msg = ('{} might be a cell boundary variable but there are no variables that define it '
+                       'as a boundary using the `bounds` attribute.'.format(name))
+                result = Result(BaseCheck.LOW,
+                                True,
+                                '§7.1 {} is a potential cell boundary variable'.format(name),
+                                [msg])
+                ret_val.append(result)
 
         return ret_val
 
