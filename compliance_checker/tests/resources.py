@@ -101,4 +101,5 @@ STATIC_FILES = {
     'bad-trajectory'                       : get_filename('tests/data/bad-trajectory.cdl'),
     'swan'                                 : get_filename('tests/data/examples/swan.cdl'),
     'kibesillah'                           : get_filename('tests/data/examples/kibesillah.cdl'),
+    'cf_example_cell_measures'             : get_filename('tests/data/examples/cf_example_cell_measures.cdl'),
 }
