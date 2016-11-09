@@ -106,4 +106,5 @@ STATIC_FILES = {
     'fvcom'                                : get_filename('tests/data/examples/fvcom.cdl'),
     'ww3'                                  : get_filename('tests/data/examples/ww3.cdl'),
     'glcfs'                                : get_filename('tests/data/examples/glcfs.cdl'),
+    'NCEI_profile_template_v2_0'           : get_filename('tests/data/NCEI_profile_template_v2.0_2016-09-22_181835.151325.cdl')
 }
