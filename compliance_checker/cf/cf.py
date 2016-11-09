@@ -2664,6 +2664,7 @@ class CFBaseCheck(BaseCheck):
                                 False,
                                 ('§7.3 Cell Methods', clim_var, 'cell_methods_climatology'),
                                 reasoning)
+                ret_val.append(result)
                 return ret_val
             # handle 1-d and 2d coordinate bounds
             if (clim_var.ndim + 1 != ds.variables[clim_var.climatology].ndim):
@@ -2691,7 +2692,8 @@ class CFBaseCheck(BaseCheck):
                 valid = False
                 reasoning.append(u"Climatology dimension {} should only contain two elements".format(
                                 boundary_variable.dimensions))
-                return ret_val
+        # catchall
+        return ret_val
 
 
         # otherwise match the following values with for variable with
