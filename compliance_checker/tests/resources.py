@@ -105,4 +105,5 @@ STATIC_FILES = {
     'pr_inundation'                        : get_filename('tests/data/examples/pr_inundation.cdl'),
     'fvcom'                                : get_filename('tests/data/examples/fvcom.cdl'),
     'ww3'                                  : get_filename('tests/data/examples/ww3.cdl'),
+    'glcfs'                                : get_filename('tests/data/examples/glcfs.cdl'),
 }

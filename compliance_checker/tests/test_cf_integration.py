@@ -232,3 +232,22 @@ class TestCFIntegration(BaseTestCase):
                 "should define a long_name attribute.") in messages
         assert (u"Conventions field is not present") in messages
         assert (u"latitude variable 'lat' should define standard_name='latitude' or axis='Y'") in messages
+
+    def test_glcfs(self):
+        dataset = self.load_dataset(STATIC_FILES['glcfs'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (330, 339)
+        assert len(messages) == 10
+
+        assert (u"units for variable time_offset must be convertible to s currently "
+                "they are hours since 2016-01-01T12:00:00Z") in messages
+        assert (u"standard_name cloud_cover is not defined in Standard Name Table v36") in messages
+        assert (u"standard_name dew_point is not defined in Standard Name Table v36") in messages
+        assert (u"variable eta referenced by formula_terms does not exist") in messages
+        assert (u"GRID is not a valid CF featureType. It must be one of point, timeSeries, "
+                "trajectory, profile, timeSeriesProfile, trajectoryProfile") in messages
+        assert (u"global attribute _CoordSysBuilder should begin with a letter and "
+                "be composed of letters, digits, and underscores") in messages
+        assert (u"source should be defined")
+        assert (u'units for cl, "fraction" are not recognized by udunits') in messages
