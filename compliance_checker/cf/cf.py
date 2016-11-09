@@ -2349,54 +2349,50 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         reasoning = []
 
-
-        # Here variable is usually a coordinate variable and is mapped to a boundary variable
         for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(ds).items():
             variable = ds.variables[variable_name]
-            boundary_variable = ds.variables[boundary_variable_name]
             valid = True
             reasoning = []
-
-            # handle 1-d and 2d coordinate bounds
-            if (boundary_variable.ndim != variable.ndim + 1 and
-                boundary_variable.ndim != variable.ndim + 2):
+            if boundary_variable_name not in ds.variables:
+                valid = False
+                reasoning.append("Boundary variable {} referenced by {} not "
+                                 "found in dataset variables".format(boundary_variable.name,
+                                                                     variable.name))
+            else:
+                boundary_variable = ds.variables[boundary_variable_name]
+            # The number of dimensions in the bounds variable should always be
+            # the number of dimensions in the referring variable + 1
+            if (boundary_variable.ndim < 2):
+                valid = False
+                reasoning.append('Boundary variable {} should have at least two'
+                                 'dimensions to enclose the base case of a one dimensionsal variable'.format(boundary_variable.name))
+            if (boundary_variable.ndim != variable.ndim + 1):
                 valid = False
                 reasoning.append('The number of dimensions of the variable %s is %s, but the '
                                  'number of dimensions of the boundary variable %s is %s. The boundary variable '
-                                 'should have either %s or %s dimensions' %
+                                 'should have %s dimensions' %
                                  (variable.name, variable.ndim,
                                   boundary_variable.name,
                                   boundary_variable.ndim,
-                                  variable.ndim + 1, variable.ndim + 2))
-            # check that coordinate bounds are in the proper order.
-            # make sure last elements are boundary variable specific dimensions
+                                  variable.ndim + 1))
             if (variable.dimensions[:] !=
                   boundary_variable.dimensions[:variable.ndim]):
                 valid = False
                 reasoning.append(u"Boundary variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
                                 boundary_variable.dimensions))
 
-            else:
-                if (boundary_variable.ndim == variable.ndim + 1 and
-                    ds.dimensions[boundary_variable.dimensions[-1]].size != 2
-                    and ds.dimensions[boundary_variable.dimensions[-1]] != 4):
-                    valid = False
-                    reasoning.append("Boundary variable dimension {} must have either two or four elements.".format(boundary_variable.dimensions[-1]))
-                # ensure p vertices form a valid simplex given n dimensions
-                # of auxiliary coordinates
-                if (boundary_variable.ndim == variable.ndim + 2 and
-                      ds.dimensions[boundary_variable.dimensions[-1]].size <
-                      ds.dimensions[boundary_variable.dimensions[-2]].size + 1):
-                    valid = False
-                    reasoning.append("Boundary variable dimension {} must have at least {} to form a simplex/closed cell with dimension {}.".format(boundary_variable.dimensions[-1],
-                                                                                                     len(boundary_variable.dimensions[-2]) + 1,
-                                                                                                     boundary_variable.dimensions[-2].name))
-
+            # ensure p vertices form a valid simplex given previous a...n
+            # previous auxiliary coordinates
+            if (ds.dimensions[boundary_variable.dimensions[-1]].size <
+                len(boundary_variable.dimensions[:-1]) + 1):
+                valid = False
+                reasoning.append("Boundary variable dimension {} must have at least {} elements to form a simplex/closed cell with previous dimensions {}.".format(boundary_variable.name,
+                                                                                                                                                          len(variable.dimensions) + 1,
+                                                                                                                                                          boundary_variable.dimensions[:-1]))
             result = Result(BaseCheck.MEDIUM, valid,
                             "§7.1 Cell boundaries are valid for variable {}".format(variable_name),
                             reasoning)
             ret_val.append(result)
-        # could possibly simplify this
 
         return ret_val
 
@@ -2501,12 +2497,11 @@ class CFBaseCheck(BaseCheck):
 
         ret_val = []
         reasoning = []
-        paragraph = ''
         pvars = re.compile('\(.*?\)|(\w*?):')
         psep = re.compile('((?P<var>\w+): (?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) ?(?P<over>over (?P<otypevar>\w+))?| ?)(?P<brace>\(((?P<brace_wunit>\w+): (\d+) (?P<unit>\w+)|(?P<brace_opt>\w+): (\w+))\))*)')
 
         for name, var in ds.variables.items():
-            if getattr(var, 'cell_methods', '') :
+            if getattr(var, 'cell_methods', ''):
                 method = getattr(var, 'cell_methods', '')
 
                 total_name_count = 0

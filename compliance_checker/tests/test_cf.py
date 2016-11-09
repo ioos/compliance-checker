@@ -310,6 +310,9 @@ class TestCF(BaseTestCase):
         score, out_of, messages = self.get_results(results)
         assert (score, out_of) == (2, 2)
 
+        dataset = self.load_dataset(STATIC_FILES['cf_example_cell_measures'])
+        results = self.cf.check_cell_boundaries(dataset)
+
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         results = self.cf.check_cell_boundaries(dataset)
 
@@ -331,13 +334,17 @@ class TestCF(BaseTestCase):
         results = self.cf.check_cell_boundaries(dataset)
         score, out_of, messages = self.get_results(results)
         assert (score, out_of) == (0, 2)
-        assert ('The number of dimensions of the variable lat is 1, but the number of dimensions of the boundary variable lat_bnds is 1. The boundary variable should have either 2 or 3 dimensions' in
+        assert ('The number of dimensions of the variable lat is 1, but the number of dimensions of the boundary variable lat_bnds is 1. The boundary variable should have 2 dimensions' in
                 messages)
 
         dataset = self.load_dataset(STATIC_FILES['1d_bound_bad'])
         results = self.cf.check_cell_boundaries(dataset)
         score, out_of, messages = self.get_results(results)
-        assert "Boundary variable dimension nv must have either two or four elements." in messages
+        if sys.version_info.major == 3:
+            tuple_format = "('lon',)"
+        else:
+            tuple_format = "(u'lon',)"
+        assert u"Boundary variable dimension lon_bnds must have at least 2 elements to form a simplex/closed cell with previous dimensions {}.".format(tuple_format) in messages
 
     def test_climatology(self):
         dataset = self.load_dataset(STATIC_FILES['climatology'])
@@ -935,4 +942,3 @@ class TestCF(BaseTestCase):
         self.assertTrue(units_temporal('hours since 2000-01-01'))
         self.assertFalse(units_temporal('hours'))
         self.assertFalse(units_temporal('days since the big bang'))
-
