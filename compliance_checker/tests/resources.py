@@ -103,4 +103,6 @@ STATIC_FILES = {
     'kibesillah'                           : get_filename('tests/data/examples/kibesillah.cdl'),
     'cf_example_cell_measures'             : get_filename('tests/data/examples/cf_example_cell_measures.cdl'),
     'pr_inundation'                        : get_filename('tests/data/examples/pr_inundation.cdl'),
+    'fvcom'                                : get_filename('tests/data/examples/fvcom.cdl'),
+    'ww3'                                  : get_filename('tests/data/examples/ww3.cdl'),
 }

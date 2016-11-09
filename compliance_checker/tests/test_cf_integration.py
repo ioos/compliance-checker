@@ -202,3 +202,33 @@ class TestCFIntegration(BaseTestCase):
         assert (u"institution global attribute should be a non-empty string") in messages
         assert (u"time_bounds might be a cell boundary variable but there are no variables that "
                 "define it as a boundary using the `bounds` attribute.") in messages
+
+    def test_fvcom(self):
+        dataset = self.load_dataset(STATIC_FILES['fvcom'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (646, 651)
+        assert len(messages) == 24
+
+        for msg in messages:
+            if msg.startswith("dimensions for auxiliary coordinate variable siglay"):
+                break
+        else:
+            raise AssertionError(u"\"dimensions for auxiliary coordinate variable siglay (node, siglay) "
+                                 "are not a subset of dimensions for variable u (siglay, nele, time)\""
+                                 " not in messages")
+        assert (u"Unidentifiable feature for variable x") in messages
+        assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
+        assert (u"siglay shares the same name as one of its dimensions") in messages
+
+    def test_ww3(self):
+        dataset = self.load_dataset(STATIC_FILES['ww3'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (111, 121)
+        assert len(messages) == 10
+
+        assert (u"variable lat's attribute standard_name must be a non-empty string or it "
+                "should define a long_name attribute.") in messages
+        assert (u"Conventions field is not present") in messages
+        assert (u"latitude variable 'lat' should define standard_name='latitude' or axis='Y'") in messages

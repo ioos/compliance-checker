@@ -1,0 +1,38 @@
+netcdf ww3 {
+dimensions:
+    lat = 4 ;
+    lon = 4 ;
+    time = 4 ;
+variables:
+    double lat(lat) ;
+        lat:units = "degrees_north" ;
+    double lon(lon) ;
+        lon:units = "degrees_east" ;
+    int time(time) ;
+        time:units = "hours since 2016-11-08 12:00Z" ;
+    short hs(time, lat, lon) ;
+        hs:long_name = "Significant Wave Height" ;
+        hs:standard_name = "sea_surface_wave_significant_height" ;
+        hs:scale_factor = 0.01f ;
+        hs:add_offset = 0.f ;
+        hs:units = "m" ;
+        hs:_FillValue = -999s ;
+    short swp(time, lat, lon) ;
+        swp:long_name = "sea_surface_wave_frequency" ;
+        swp:scale_factor = 0.01f ;
+        swp:add_offset = 0.f ;
+        swp:units = "s" ;
+        swp:_FillValue = -999s ;
+    short dir(time, lat, lon) ;
+        dir:long_name = "Dominant Wave Direction" ;
+        dir:scale_factor = 1.f ;
+        dir:add_offset = 0.f ;
+        dir:units = "degree_true" ;
+        dir:_FillValue = -999s ;
+
+// global attributes:
+        :institution = "Bedford Institute of Oceanography" ;
+        :Metadata_Conventions = "Unidata Dataset Discovery v1.0" ;
+        :Metadata_Link = "http://p5.neracoos.org/WAF/NERACOOS.xml" ;
+        :standard_name_vocabulary = "CF-1.0" ;
+}
