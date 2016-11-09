@@ -140,13 +140,17 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['3mf07'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (418, 422)
-        assert len(messages) == 6
+        assert (scored, out_of) == (418, 426)
+        assert len(messages) == 10
         assert (u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for "
                 "variable flag (profile)") in messages
         assert (u"Unidentifiable feature for variable flag") in messages
         assert (u"references global attribute should be a non-empty string") in messages
         assert (u"comment global attribute should be a non-empty string") in messages
+        assert (u"latitude:valid_min must be a numeric type not a string") in messages
+        assert (u"latitude:valid_max must be a numeric type not a string") in messages
+        assert (u"longitude:valid_min must be a numeric type not a string") in messages
+        assert (u"longitude:valid_max must be a numeric type not a string") in messages
 
     def test_ooi_glider(self):
         dataset = self.load_dataset(STATIC_FILES['ooi_glider'])

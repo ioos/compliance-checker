@@ -667,10 +667,20 @@ class CFBaseCheck(BaseCheck):
             attrs = variable.ncattrs()
 
             if 'valid_range' in attrs:
+                if isinstance(variable.valid_range, basestring):
+                    valid_fill_range.assert_true(False, '{}:valid_range must be a numeric type not a string'.format(name))
+                    continue
                 rmin, rmax = variable.valid_range
                 spec_by = 'valid_range'
 
             elif 'valid_min' in attrs and 'valid_max' in attrs:
+                if isinstance(variable.valid_min, basestring):
+                    valid_fill_range.assert_true(False, '{}:valid_min must be a numeric type not a string'.format(name))
+                if isinstance(variable.valid_max, basestring):
+                    valid_fill_range.assert_true(False, '{}:valid_max must be a numeric type not a string'.format(name))
+                if isinstance(variable.valid_min, basestring) or \
+                   isinstance(variable.valid_max, basestring):
+                    continue
                 rmin = variable.valid_min
                 rmax = variable.valid_max
                 spec_by = 'valid_min/valid_max'
