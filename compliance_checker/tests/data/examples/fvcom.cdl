@@ -1,0 +1,215 @@
+netcdf NECOFS_GOM3_FORECAST {
+dimensions:
+    time = 4 ; // (145 currently)
+    maxStrlen64 = 64 ;
+    nele = 9 ;
+    node = 6 ;
+    siglay = 3 ;
+    three = 3 ;
+variables:
+    float x(node) ;
+        x:long_name = "nodal x-coordinate" ;
+        x:units = "meters" ;
+    float y(node) ;
+        y:long_name = "nodal y-coordinate" ;
+        y:units = "meters" ;
+    float lon(node) ;
+        lon:long_name = "nodal longitude" ;
+        lon:standard_name = "longitude" ;
+        lon:units = "degrees_east" ;
+    float lat(node) ;
+        lat:long_name = "nodal latitude" ;
+        lat:standard_name = "latitude" ;
+        lat:units = "degrees_north" ;
+    float xc(nele) ;
+        xc:long_name = "zonal x-coordinate" ;
+        xc:units = "meters" ;
+    float yc(nele) ;
+        yc:long_name = "zonal y-coordinate" ;
+        yc:units = "meters" ;
+    float lonc(nele) ;
+        lonc:long_name = "zonal longitude" ;
+        lonc:standard_name = "longitude" ;
+        lonc:units = "degrees_east" ;
+    float latc(nele) ;
+        latc:long_name = "zonal latitude" ;
+        latc:standard_name = "latitude" ;
+        latc:units = "degrees_north" ;
+    float siglay(siglay, node) ;
+        siglay:long_name = "Sigma Layers" ;
+        siglay:standard_name = "ocean_sigma_coordinate" ;
+        siglay:positive = "up" ;
+        siglay:valid_min = -1. ;
+        siglay:valid_max = 0. ;
+        siglay:formula_terms = "sigma: siglay eta: zeta depth: h" ;
+    float h(node) ;
+        h:long_name = "Bathymetry" ;
+        h:standard_name = "sea_floor_depth_below_geoid" ;
+        h:units = "m" ;
+        h:coordinates = "lat lon" ;
+        h:type = "data" ;
+        h:mesh = "fvcom_mesh" ;
+        h:location = "node" ;
+    int nv(three, nele) ;
+        nv:long_name = "nodes surrounding element" ;
+        nv:cf_role = "face_node_connnectivity" ;
+        nv:start_index = 1 ;
+    float time(time) ;
+        time:long_name = "time" ;
+        time:units = "days since 1858-11-17 00:00:00" ;
+        time:format = "modified julian day (MJD)" ;
+        time:time_zone = "UTC" ;
+        time:standard_name = "time" ;
+    char Times(time, maxStrlen64) ;
+        Times:time_zone = "UTC" ;
+    float zeta(time, node) ;
+        zeta:long_name = "Water Surface Elevation" ;
+        zeta:units = "meters" ;
+        zeta:standard_name = "sea_surface_height_above_geoid" ;
+        zeta:coordinates = "time lat lon" ;
+        zeta:type = "data" ;
+        zeta:missing_value = -999. ;
+        zeta:field = "elev, scalar" ;
+        zeta:coverage_content_type = "modelResult" ;
+        zeta:mesh = "fvcom_mesh" ;
+        zeta:location = "node" ;
+    int nbe(three, nele) ;
+        nbe:long_name = "elements surrounding each element" ;
+    float aw0(three, nele) ;
+        aw0:long_name = "aw0" ;
+    float awx(three, nele) ;
+        awx:long_name = "awx" ;
+    float awy(three, nele) ;
+        awy:long_name = "awy" ;
+    float u(time, siglay, nele) ;
+        u:long_name = "Eastward Water Velocity" ;
+        u:units = "meters s-1" ;
+        u:type = "data" ;
+        u:missing_value = -999. ;
+        u:field = "ua, scalar" ;
+        u:coverage_content_type = "modelResult" ;
+        u:standard_name = "eastward_sea_water_velocity" ;
+        u:coordinates = "time siglay latc lonc" ;
+        u:mesh = "fvcom_mesh" ;
+        u:location = "face" ;
+    float v(time, siglay, nele) ;
+        v:long_name = "Northward Water Velocity" ;
+        v:units = "meters s-1" ;
+        v:type = "data" ;
+        v:missing_value = -999. ;
+        v:field = "va, scalar" ;
+        v:coverage_content_type = "modelResult" ;
+        v:standard_name = "northward_sea_water_velocity" ;
+        v:coordinates = "time siglay latc lonc" ;
+        v:mesh = "fvcom_mesh" ;
+        v:location = "face" ;
+    float ww(time, siglay, nele) ;
+        ww:long_name = "Upward Water Velocity" ;
+        ww:units = "meters s-1" ;
+        ww:type = "data" ;
+        ww:coverage_content_type = "modelResult" ;
+        ww:standard_name = "upward_sea_water_velocity" ;
+        ww:coordinates = "time siglay latc lonc" ;
+        ww:mesh = "fvcom_mesh" ;
+        ww:location = "face" ;
+    float ua(time, nele) ;
+        ua:long_name = "Vertically Averaged x-velocity" ;
+        ua:units = "meters s-1" ;
+        ua:type = "data" ;
+        ua:missing_value = -999. ;
+        ua:field = "ua, scalar" ;
+        ua:coverage_content_type = "modelResult" ;
+        ua:standard_name = "barotropic_eastward_sea_water_velocity" ;
+        ua:coordinates = "time latc lonc" ;
+        ua:mesh = "fvcom_mesh" ;
+        ua:location = "face" ;
+    float va(time, nele) ;
+        va:long_name = "Vertically Averaged y-velocity" ;
+        va:units = "meters s-1" ;
+        va:type = "data" ;
+        va:missing_value = -999. ;
+        va:field = "va, scalar" ;
+        va:coverage_content_type = "modelResult" ;
+        va:standard_name = "barotropic_northward_sea_water_velocity" ;
+        va:coordinates = "time latc lonc" ;
+        va:mesh = "fvcom_mesh" ;
+        va:location = "face" ;
+    float temp(time, siglay, node) ;
+        temp:long_name = "temperature" ;
+        temp:standard_name = "sea_water_potential_temperature" ;
+        temp:units = "degrees_C" ;
+        temp:coordinates = "time siglay lat lon" ;
+        temp:type = "data" ;
+        temp:coverage_content_type = "modelResult" ;
+        temp:mesh = "fvcom_mesh" ;
+        temp:location = "node" ;
+    float salinity(time, siglay, node) ;
+        salinity:long_name = "salinity" ;
+        salinity:standard_name = "sea_water_salinity" ;
+        salinity:units = "0.001" ;
+        salinity:coordinates = "time siglay lat lon" ;
+        salinity:type = "data" ;
+        salinity:coverage_content_type = "modelResult" ;
+        salinity:mesh = "fvcom_mesh" ;
+        salinity:location = "node" ;
+    float icing_0kts(time, node) ;
+        icing_0kts:long_name = "Icing Hazard@0knots" ;
+        icing_0kts:units = "m C s^-1" ;
+        icing_0kts:type = "data" ;
+        icing_0kts:coordinates = "time lat lon" ;
+        icing_0kts:coverage_content_type = "modelResult" ;
+        icing_0kts:mesh = "fvcom_mesh" ;
+        icing_0kts:location = "node" ;
+    float icing_10kts(time, node) ;
+        icing_10kts:long_name = "Icing Hazard@10knots" ;
+        icing_10kts:units = "m C s^-1" ;
+        icing_10kts:type = "data" ;
+        icing_10kts:coordinates = "time lat lon" ;
+        icing_10kts:coverage_content_type = "modelResult" ;
+        icing_10kts:mesh = "fvcom_mesh" ;
+        icing_10kts:location = "node" ;
+    int fvcom_mesh ;
+        fvcom_mesh:cf_role = "mesh_topology" ;
+        fvcom_mesh:topology_dimension = 2 ;
+        fvcom_mesh:node_coordinates = "lon lat" ;
+        fvcom_mesh:face_coordinates = "lonc latc" ;
+        fvcom_mesh:face_node_connectivity = "nv" ;
+
+// global attributes:
+        :title = "NECOFS GOM3 (FVCOM) - Northeast US - Latest Forecast" ;
+        :institution = "School for Marine Science and Technology" ;
+        :source = "FVCOM_3.0" ;
+        :history = "Wed Nov  9 03:38:09 2016: ncrcat -O -v x,y,lat,lon,xc,yc,lonc,latc,siglay,siglev,nv,nbe,aw0,awx,awy,h,temp,salinity,u,v,ww,ua,va,zeta,icing_0kts,icing_10kts,Times -d time,5976,6120 /data01/necofs/FVCOM/beta_test_gom3v7/gom3v7_0001.nc -o /data01/necofs/NECOFS_NC/NECOFS_GOM3_FORECAST.nc\n",
+            "Tue Mar 29 16:25:19 2016: ncrcat -d time,7752,8496 gom_hot_0001.nc gom_hot_0001_v1.nc\n",
+            "model started at: 13/04/2015   16:22" ;
+        :references = "http://fvcom.smast.umassd.edu, http://codfish.smast.umassd.edu" ;
+        :Conventions = "CF-1.0, UGRID-1.0" ;
+        :CoordinateSystem = "Cartesian" ;
+        :CoordinateProjection = "init=nad83:1802" ;
+        :Tidal_Forcing = "Tidal Forcing Time Series Title: JULIAN FVCOM TIDAL FORCING DATA CREATED FROM OLD FILE TYPE: No comments found... this is mystery data!" ;
+        :River_Forcing = "THERE ARE NO RIVERS IN THIS MODEL" ;
+        :GroundWater_Forcing = "GROUND WATER FORCING IS OFF!" ;
+        :Surface_Heat_Forcing = "FVCOM variable surface heat forcing file:\n",
+            "FILE NAME:wrf_for.nc\n",
+            "SOURCE:wrf2fvcom version 0.13 (2007-07-19) (Bulk method: COARE 2.6Z)\n",
+            "MET DATA START DATE:2015-04-03_00:00:00" ;
+        :Surface_Wind_Forcing = "FVCOM variable surface Wind forcing:\n",
+            "FILE NAME:wrf_for.nc\n",
+            "SOURCE:wrf2fvcom version 0.13 (2007-07-19) (Bulk method: COARE 2.6Z)\n",
+            "MET DATA START DATE:2015-04-03_00:00:00" ;
+        :Surface_PrecipEvap_Forcing = "FVCOM periodic surface precip forcing:\n",
+            "FILE NAME:wrf_for.nc\n",
+            "SOURCE:wrf2fvcom version 0.13 (2007-07-19) (Bulk method: COARE 2.6Z)\n",
+            "MET DATA START DATE:2015-04-03_00:00:00" ;
+        :Icing_Model_Forcing = "FVCOM variable surface icing forcing:\n",
+            "FILE NAME:wrf_for.nc\n",
+            "SOURCE:wrf2fvcom version 0.13 (2007-07-19) (Bulk method: COARE 2.6Z)\n",
+            "MET DATA START DATE:2015-04-03_00:00:00" ;
+        :Special_Physical_processes = "long shore flow adjustment for thermal wind and wind driven setup" ;
+        :nco_openmp_thread_number = 1 ;
+        :cdm_data_type = "any" ;
+        :summary = "Latest forecast from the FVCOM Northeast Coastal Ocean Forecast System using an newer, higher-resolution GOM3 mesh (GOM2 was the preceding mesh)" ;
+        :DODS.strlen = 26 ;
+        :DODS.dimName = "DateStrLen" ;
+        :DODS_EXTRA.Unlimited_Dimension = "time" ;
+}
