@@ -76,7 +76,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['sldmb_43093_agg'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (141, 149)
+        assert (scored, out_of) == (137, 145)
         assert len(messages) == 8
         assert u'standard_name temperature is not defined in Standard Name Table v36' in messages
         assert (u'auxiliary coordinate specified by the coordinates attribute, precise_lat, '
@@ -92,12 +92,9 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ocos'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (1768, 1829)
-        assert len(messages) == 61
-        assert (u'units attribute is required for user') in messages
+        assert (scored, out_of) == (1840, 1841)
+        assert len(messages) == 41
         assert (u'Unidentifiable feature for variable Akt_bak') in messages
-        assert (u"zeta's dimensions are not in the recommended order T, Z, Y, X. They are "
-                "ocean_time, eta_rho, xi_rho") in messages
         assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
         assert (u"CF recommends latitude variable 'lat_psi' to use units degrees_north") in messages
 
@@ -105,7 +102,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['l01-met'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (599, 615)
+        assert (scored, out_of) == (588, 602)
         assert len(messages) == 16
 
         # The variable is supposed to be a status flag but it's mislabled
@@ -119,7 +116,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['usgs_dem_saipan'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (111, 112)
+        assert (scored, out_of) == (109, 110)
         assert len(messages) == 1
         assert (u'Conventions global attribute does not contain "CF-1.6"') == messages[0]
 
@@ -127,7 +124,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['sp041'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (1311, 1315)
+        assert (scored, out_of) == (1188, 1192)
         assert len(messages) == 4
 
         assert (u"lat_qc is not a variable in this dataset") in messages
@@ -143,7 +140,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['3mf07'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (427, 433)
+        assert (scored, out_of) == (418, 422)
         assert len(messages) == 6
         assert (u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for "
                 "variable flag (profile)") in messages
@@ -155,9 +152,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ooi_glider'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (610, 615)
-        assert len(messages) == 5
-        assert (u"units attribute is required for deployment") in messages
+        assert (scored, out_of) == (593, 597)
+        assert len(messages) == 4
         assert (u"variable deployment's attribute standard_name must be a non-empty string or "
                 "it should define a long_name attribute.") in messages
         assert (u"comment global attribute should be a non-empty string") in messages
@@ -168,7 +164,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['swan'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (370, 380)
+        assert (scored, out_of) == (363, 372)
         assert len(messages) == 10
         assert (u"units for variable time_offset must be convertible to s currently they are hours "
                 "since 2013-02-18T00:00:00Z") in messages
@@ -183,8 +179,26 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['kibesillah'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (201, 204)
+        assert (scored, out_of) == (197, 200)
         assert len(messages) == 3
         assert (u"source should be defined") in messages
         assert (u"references should be defined") in messages
         assert (u"global attribute title should exist and be a non-empty string") in messages
+
+    def test_pr_inundation(self):
+        dataset = self.load_dataset(STATIC_FILES['pr_inundation'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (534, 542)
+        assert len(messages) == 11
+        assert (u"units for variable area must be convertible to m2 currently "
+                "they are degrees2") in messages
+        assert (u"vertical coordinates not defining pressure must include a positive "
+                "attribute that is either 'up' or 'down'") in messages
+        assert (u"Unidentifiable feature for variable time_bounds")in messages
+        assert (u"grid_longitude's dimensions are not in the recommended order T, "
+                "Z, Y, X. They are m, n, bounds4") in messages
+        assert (u"depth:comment should be a non-empty string") in messages
+        assert (u"institution global attribute should be a non-empty string") in messages
+        assert (u"time_bounds might be a cell boundary variable but there are no variables that "
+                "define it as a boundary using the `bounds` attribute.") in messages
