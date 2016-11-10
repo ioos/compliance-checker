@@ -928,6 +928,18 @@ class TestCF(BaseTestCase):
         scored, out_of, messages = self.get_results(results)
         assert scored == out_of
 
+    def test_check_cell_methods(self):
+        dataset = self.load_dataset(STATIC_FILES['climatology'])
+        results = self.cf.check_cell_methods(dataset)
+        scored, out_of, messages = self.get_results(results)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§7.1 temperature has a valid cell_methods attribute format']
+        assert result
+        result = result_dict[u'§7.3 temperature has valid methods in cell_methods attribute']
+        assert result
+        result = result_dict[u'§7.3 temperature has valid names in cell_methods attribute']
+        assert result
+
     # --------------------------------------------------------------------------------
     # Utility Method Tests
     # --------------------------------------------------------------------------------

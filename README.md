@@ -75,35 +75,41 @@ optional arguments:
 
 ```
 $ compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170228_rt0.nc
-Running Compliance Checker on the dataset from: compliance_checker/tests/data/ru07-20130824T170228_rt0.nc
 
 
 --------------------------------------------------------------------------------
-                    The dataset scored 100 out of 188 points
-                             during the acdd check
+                     The dataset scored 69 out of 93 points                     
+                             during the acdd check                              
 --------------------------------------------------------------------------------
-                               Scoring Breakdown:
+                               Scoring Breakdown:                               
 
 
-                                 High Priority
+                                 High Priority                                  
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
+Conventions                             :3:     1/2
 keywords                                :3:     1/1
 summary                                 :3:     1/1
 title                                   :3:     1/1
-varattr                                 :3:    69/150
+varattr                                 :3:    32/44
 
 
-                                Medium Priority
+                                Medium Priority                                 
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
-acknowledgement                         :2:     0/1
-cdm_data_type                           :2:     1/2
+acknowledgment/acknowledgement          :2:     1/1
 comment                                 :2:     1/1
 creator_email                           :2:     1/1
 creator_name                            :2:     1/1
 creator_url                             :2:     1/1
 date_created                            :2:     1/1
+date_created_is_iso                     :2:     0/1
+date_issued_is_iso                      :2:     0/1
+date_metadata_modified_is_iso           :2:     0/0
+date_modified_is_iso                    :2:     0/1
+geospatial_bounds                       :2:     0/1
+geospatial_bounds_crs                   :2:     0/1
+geospatial_bounds_vertical_crs          :2:     0/1
 geospatial_lat_extents_match            :2:     1/2
 geospatial_lat_max                      :2:     1/1
 geospatial_lat_min                      :2:     1/1
@@ -113,14 +119,19 @@ geospatial_lon_min                      :2:     1/1
 geospatial_vertical_extents_match       :2:     0/2
 geospatial_vertical_max                 :2:     1/1
 geospatial_vertical_min                 :2:     1/1
+geospatial_vertical_positive            :2:     1/1
 history                                 :2:     1/1
 id                                      :2:     1/1
 institution                             :2:     1/1
-keywords_vocabulary                     :2:     1/1
 license                                 :2:     1/1
 naming_authority                        :2:     1/1
+no_blanks_in_id                         :2:     1/1
 processing_level                        :2:     1/1
 project                                 :2:     1/1
+publisher_email                         :2:     1/1
+publisher_name                          :2:     1/1
+publisher_url                           :2:     1/1
+source                                  :2:     1/1
 standard_name_vocabulary                :2:     1/1
 time_coverage_duration                  :2:     0/1
 time_coverage_end                       :2:     1/1
@@ -130,244 +141,212 @@ time_coverage_start                     :2:     1/1
 
 
 --------------------------------------------------------------------------------
-                  Reasoning for the failed tests given below:
+                  Reasoning for the failed tests given below:                   
 
 
 Name                             Priority:     Score:Reasoning
 --------------------------------------------------------------------------------
-varattr                                :3:    69/150 :
-    conductivity                       :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var conductivity missing
+Conventions                            :3:     1/ 2 : Attr Conventions does not
+                                                      contain 'ACDD-1.3'
+varattr                                :3:    32/44 :  
+    conductivity                       :3:     3/ 4 :  
+        coverage_content_type          :3:     0/ 1 : Var conductivity missing
                                                       attr coverage_content_type
-    conductivity_qc                    :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var conductivity_qc
-                                                      missing attr
+    density                            :3:     3/ 4 :  
+        coverage_content_type          :3:     0/ 1 : Var density missing attr
                                                       coverage_content_type
-        var_units                      :3:     0/ 1 : Var conductivity_qc
-                                                      missing attr units
-    density                            :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var density missing attr
-                                                      coverage_content_type
-    density_qc                         :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var density_qc missing
+    profile_id                         :3:     1/ 4 :  
+        coverage_content_type          :3:     0/ 1 : Var profile_id missing
                                                       attr coverage_content_type
-        var_units                      :3:     0/ 1 : Var density_qc missing
-                                                      attr units
-    depth                              :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var depth missing attr
-                                                      coverage_content_type
-    depth_qc                           :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var depth_qc missing attr
-                                                      coverage_content_type
-        var_units                      :3:     0/ 1 : Var depth_qc missing attr
-                                                      units
-    instrument_ctd                     :3:     1/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var instrument_ctd missing
-                                                      attr coverage_content_type
-        var_std_name                   :3:     0/ 1 : Var instrument_ctd missing
-                                                      attr standard_name
-        var_units                      :3:     0/ 1 : Var instrument_ctd missing
-                                                      attr units
-    lat                                :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var lat missing attr
-                                                      coverage_content_type
-    lat_qc                             :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var lat_qc missing attr
-                                                      coverage_content_type
-        var_units                      :3:     0/ 1 : Var lat_qc missing attr
-                                                      units
-    lat_uv                             :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var lat_uv missing attr
-                                                      coverage_content_type
-    lon                                :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var lon missing attr
-                                                      coverage_content_type
-    lon_qc                             :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var lon_qc missing attr
-                                                      coverage_content_type
-        var_units                      :3:     0/ 1 : Var lon_qc missing attr
-                                                      units
-    lon_uv                             :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var lon_uv missing attr
-                                                      coverage_content_type
-    platform                           :3:     1/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var platform missing attr
-                                                      coverage_content_type
-        var_std_name                   :3:     0/ 1 : Var platform missing attr
-                                                      standard_name
-        var_units                      :3:     0/ 1 : Var platform missing attr
-                                                      units
-    pressure                           :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var pressure missing attr
-                                                      coverage_content_type
-    pressure_qc                        :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var pressure_qc missing
-                                                      attr coverage_content_type
-        var_units                      :3:     0/ 1 : Var pressure_qc missing
-                                                      attr units
-    profile_id                         :3:     1/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var profile_id missing
-                                                      attr coverage_content_type
-        var_std_name                   :3:     0/ 1 : Var profile_id missing
+        var_std_name                   :3:     1/ 2 : Var profile_id missing
                                                       attr standard_name
         var_units                      :3:     0/ 1 : Var profile_id missing
                                                       attr units
-    salinity                           :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var salinity missing attr
+    salinity                           :3:     3/ 4 :  
+        coverage_content_type          :3:     0/ 1 : Var salinity missing attr
                                                       coverage_content_type
-    salinity_qc                        :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var salinity_qc missing
+    segment_id                         :3:     1/ 4 :  
+        coverage_content_type          :3:     0/ 1 : Var segment_id missing
                                                       attr coverage_content_type
-        var_units                      :3:     0/ 1 : Var salinity_qc missing
-                                                      attr units
-    segment_id                         :3:     1/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var segment_id missing
-                                                      attr coverage_content_type
-        var_std_name                   :3:     0/ 1 : Var segment_id missing
+        var_std_name                   :3:     1/ 2 : Var segment_id missing
                                                       attr standard_name
         var_units                      :3:     0/ 1 : Var segment_id missing
                                                       attr units
-    temperature                        :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var temperature missing
+    temperature                        :3:     3/ 4 :  
+        coverage_content_type          :3:     0/ 1 : Var temperature missing
                                                       attr coverage_content_type
-    temperature_qc                     :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var temperature_qc missing
-                                                      attr coverage_content_type
-        var_units                      :3:     0/ 1 : Var temperature_qc missing
-                                                      attr units
-    time                               :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var time missing attr
+    u                                  :3:     3/ 4 :  
+        coverage_content_type          :3:     0/ 1 : Var u missing attr
                                                       coverage_content_type
-    time_qc                            :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var time_qc missing attr
+    v                                  :3:     3/ 4 :  
+        coverage_content_type          :3:     0/ 1 : Var v missing attr
                                                       coverage_content_type
-        var_units                      :3:     0/ 1 : Var time_qc missing attr
-                                                      units
-    time_uv                            :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var time_uv missing attr
-                                                      coverage_content_type
-    trajectory                         :3:     1/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var trajectory missing
-                                                      attr coverage_content_type
-        var_std_name                   :3:     0/ 1 : Var trajectory missing
-                                                      attr standard_name
-        var_units                      :3:     0/ 1 : Var trajectory missing
-                                                      attr units
-    u                                  :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var u missing attr
-                                                      coverage_content_type
-    u_qc                               :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var u_qc missing attr
-                                                      coverage_content_type
-        var_units                      :3:     0/ 1 : Var u_qc missing attr
-                                                      units
-    v                                  :3:     3/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var v missing attr
-                                                      coverage_content_type
-    v_qc                               :3:     2/ 5 :
-        var_coverage_content_type      :3:     0/ 2 : Var v_qc missing attr
-                                                      coverage_content_type
-        var_units                      :3:     0/ 1 : Var v_qc missing attr
-                                                      units
-acknowledgement                        :2:     0/ 1 : Attr acknowledgement not
+date_created_is_iso                    :2:     0/ 1 : Datetime provided is not
+                                                      in a valid ISO 8601 format
+date_issued_is_iso                     :2:     0/ 1 : Datetime provided is not
+                                                      in a valid ISO 8601 format
+date_modified_is_iso                   :2:     0/ 1 : Datetime provided is not
+                                                      in a valid ISO 8601 format
+geospatial_bounds                      :2:     0/ 1 : Attr geospatial_bounds not
                                                       present
-cdm_data_type                          :2:     1/ 2 : Attr cdm_data_type present
-                                                      but not in expected value
-                                                      list (['vector', 'grid',
-                                                      'textTable', 'tin',
-                                                      'stereoModel', 'video'])
+geospatial_bounds_crs                  :2:     0/ 1 : Attr geospatial_bounds_crs
+                                                      not present
+geospatial_bounds_vertical_crs         :2:     0/ 1 : Attr
+                                                      geospatial_bounds_vertical
+                                                      _crs not present
 geospatial_lat_extents_match           :2:     1/ 2 : Data for possible latitude
                                                       variables ({u'lat':
-                                                      9.969209968386869e+36,
+                                                      9.9692099683868702e+36,
                                                       u'lat_uv':
-                                                      9.969209968386869e+36})
+                                                      9.9692099683868702e+36})
                                                       did not match
                                                       geospatial_lat_max value
                                                       (34.85172)
 geospatial_lon_extents_match           :2:     1/ 2 : Data for possible
                                                       longitude variables
                                                       ({u'lon_uv':
-                                                      9.969209968386869e+36,
+                                                      9.9692099683868702e+36,
                                                       u'lon':
-                                                      9.969209968386869e+36})
+                                                      9.9692099683868702e+36})
                                                       did not match
                                                       geospatial_lon_max value
                                                       (-120.78092)
-geospatial_vertical_extents_match      :2:     0/ 2 : Data for possible vertical
-                                                      variables ({u'pressure':
-                                                      0.10999999999999999,
-                                                      u'depth':
-                                                      0.10999999999999999}) did
-                                                      not match
-                                                      geospatial_vertical_min
-                                                      value (1.1) Data for
-                                                      possible vertical
-                                                      variables ({u'pressure':
-                                                      9.969209968386869e+36,
-                                                      u'depth':
-                                                      9.969209968386869e+36})
-                                                      did not match
-                                                      geospatial_vertical_max
-                                                      value (589.0)
+geospatial_vertical_extents_match      :2:     0/ 2 : geospatial_vertical_min !=
+                                                      min(depth) values, 1.1 !=
+                                                      0.11,
+                                                      geospatial_vertical_max !=
+                                                      max(depth) values, 1.1 !=
+                                                      58.9
 time_coverage_duration                 :2:     0/ 1 : Attr
                                                       time_coverage_duration not
                                                       present
-contributor_role                       :1:     1/ 2 : Attr contributor_role
-                                                      present but not in
-                                                      expected value list
-                                                      (['principalInvestigator',
-                                                      'author'])
+creator_institution                    :1:     0/ 1 : Attr creator_institution
+                                                      not present
+creator_type                           :1:     0/ 2 : Attr creator_type not
+                                                      present
+date_metadata_modified                 :1:     0/ 1 : Attr
+                                                      date_metadata_modified not
+                                                      present
+instrument                             :1:     0/ 1 : Attr instrument not
+                                                      present
+instrument_vocabulary                  :1:     0/ 1 : Attr instrument_vocabulary
+                                                      not present
+metadata_link                          :1:     0/ 1 : Attr metadata_link is
+                                                      empty or completely
+                                                      whitespace
+metadata_link_valid                    :1:     0/ 1 : Metadata URL should
+                                                      include http:// or
+                                                      https://
+platform                               :1:     0/ 1 : Attr platform not present
+platform_vocabulary                    :1:     0/ 1 : Attr platform_vocabulary
+                                                      not present
+product_version                        :1:     0/ 1 : Attr product_version not
+                                                      present
+program                                :1:     0/ 1 : Attr program not present
+publisher_institution                  :1:     0/ 1 : Attr publisher_institution
+                                                      not present
+publisher_type                         :1:     0/ 2 : Attr publisher_type not
+                                                      present
+references                             :1:     0/ 1 : Attr references is empty
+                                                      or completely whitespace
 
+```
 
-
-$ compliance-checker --test=cf compliance_checker/tests/data/sss20140107.v2.0cap.nc
-
-Running Compliance Checker on the dataset from: compliance_checker/tests/data/sss20140107.v2.0cap.nc
+```
+$ compliance-checker --test=cf compliance_checker/tests/data/examples/hycom_global.nc
 
 
 --------------------------------------------------------------------------------
-                     The dataset scored 12 out of 14 points
-                              during the cf check
+                    The dataset scored 113 out of 122 points                    
+                              during the cf check                               
 --------------------------------------------------------------------------------
-                               Scoring Breakdown:
+                               Scoring Breakdown:                               
 
 
-                                 High Priority
+                                 High Priority                                  
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
-Variable names                          :3:     3/3
-conventions                             :3:     0/1
-data_types                              :3:     3/3
-dimension_names                         :3:     3/3
-units                                   :3:     0/1
+§2.2 Valid netCDF data types            :3:     6/6
+§2.4 Unique dimensions                  :3:     6/6
+§3.1 Variable depth contains valid CF u :3:     3/3
+§3.1 Variable lat contains valid CF uni :3:     3/3
+§3.1 Variable lon contains valid CF uni :3:     3/3
+§3.1 Variable time contains valid CF un :3:     3/3
+§3.1 Variable water_u contains valid CF :3:     3/3
+§3.1 Variable water_v contains valid CF :3:     3/3
+§3.3 Variable time has valid standard_n :3:     0/1
+§4 depth contains a valid axis          :3:     2/2
+§4 lat contains a valid axis            :3:     2/2
+§4 lon contains a valid axis            :3:     2/2
+§4.1 Latitude variable lat has required :3:     1/1
+§4.1 Longitude variable lon has require :3:     1/1
+§4.3.1 depth is a valid vertical coordi :3:     1/2
+§4.4 Time coordinate variable and attri :3:     2/2
+§5.0 Variable water_u does not contain  :3:     4/4
+§5.0 Variable water_v does not contain  :3:     4/4
+§5.6 Grid Feature water_u is associated :3:     2/2
+§5.6 Grid Feature water_v is associated :3:     2/2
+§9.1 Dataset contains a valid featureTy :3:     1/1
+§9.1 Feature Types are all the same     :3:     1/1
 
 
-                                Medium Priority
+                                Medium Priority                                 
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
-all_features_are_same_type              :2:     0/0
-contiguous_ragged_array                 :2:     0/0
-coordinate_type                         :2:     2/2
-coordinates_and_metadata                :2:     0/0
-feature_type                            :2:     0/0
-incomplete_multidim_array               :2:     0/0
-indexed_ragged_array                    :2:     0/0
-missing_data                            :2:     0/0
-orthogonal_multidim_array               :2:     0/0
-var                                     :2:     1/1
+cell_methods                            :2:     0/0
+§2.3 Naming Conventions for attributes  :2:    27/27
+§2.3 Naming Conventions for dimensions  :2:     4/4
+§2.3 Naming Conventions for variables   :2:     6/6
+§2.3 Unique variable names              :2:     6/6
+§2.4 Dimension Order                    :2:     6/6
+§2.5.1 Fill Values should be outside th :2:     0/0
+§2.6.1 Global Attribute Conventions inc :2:     0/1
+§2.6.2 Recommended Attributes           :2:     0/3
+§2.6.2 Recommended Global Attributes    :2:     1/2
+§4.1 Latitude variable lat defines eith :2:     1/1
+§4.1 Latitude variable lat uses recomme :2:     1/1
+§4.1 Longitude variable lon defines eit :2:     1/1
+§4.1 Longitude variable lon uses recomm :2:     1/1
+§5.0 multidimensional coordinate lat sh :2:     1/1
+§5.0 multidimensional coordinate lon sh :2:     1/1
+§8.1 Packed Data defined by water_u con :2:     1/1
+§8.1 Packed Data defined by water_u con :2:     0/1
+§8.1 Packed Data defined by water_v con :2:     1/1
+§8.1 Packed Data defined by water_v con :2:     0/1
 
 
 --------------------------------------------------------------------------------
-                  Reasoning for the failed tests given below:
+                  Reasoning for the failed tests given below:                   
 
 
 Name                             Priority:     Score:Reasoning
 --------------------------------------------------------------------------------
-conventions                            :3:     0/ 1 : Conventions field is not
-                                                      present
-units                                  :3:     0/ 1 :
-    sss_cap                            :3:     0/ 1 :
-        known                          :3:     0/ 1 : unknown units type (PSU)
+§3.3 Variable time has valid standard_n:3:     0/ 1 : variable time's attribute
+                                                      standard_name must be a
+                                                      non-empty string or it
+                                                      should define a long_name
+                                                      attribute.
+§4.3.1 depth is a valid vertical coordi:3:     1/ 2 : vertical coordinates not
+                                                      defining pressure must
+                                                      include a positive
+                                                      attribute that is either
+                                                      'up' or 'down'
+§2.6.1 Global Attribute Conventions inc:2:     0/ 1 : Conventions global
+                                                      attribute does not contain
+                                                      "CF-1.6"
+§2.6.2 Recommended Attributes          :2:     0/ 3 : institution should be
+                                                      defined, source should be
+                                                      defined, references should
+                                                      be defined
+§2.6.2 Recommended Global Attributes   :2:     1/ 2 : global attribute history
+                                                      should exist and be a non-
+                                                      empty string
+§8.1 Packed Data defined by water_u con:2:     0/ 1 : Attributes add_offset and
+                                                      scale_factor are not of
+                                                      type float or double.
+§8.1 Packed Data defined by water_v con:2:     0/ 1 : Attributes add_offset and
+                                                      scale_factor are not of
+                                                      type float or double.
 
 
 
@@ -486,11 +465,11 @@ https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e603
 
 ## Contributors
 
-- Dave Foster <dave@axiomdatascience.com>
-- Dan Maher <dmaher@asascience.com>
-- Luke Campbell <lcampbell@asascience.com>
-- [Kyle Wilcox](https://github.com/kwilcox) <kyle@axiomdatascience.com>
-- Ben Adams <ben.adams@rpsgroup.com>
+- [Dave Foster](https://github.com/daf) &lt;dave@axiomdatascience.com&gt;
+- [Dan Maher](https://github.com/danieljmaher) &lt;daniel.maher@rpsgroup.com&gt;
+- [Luke Campbell](https://github.com/lukecampbell) &lt;luke.campbell@rpsgroup.com&gt;
+- [Kyle Wilcox](https://github.com/kwilcox) &lt;kyle@axiomdatascience.com&gt;
+- [Ben Adams](https://github.com/benjwadams) &lt;ben.adams@rpsgroup.com&gt;
 
 And many more testers!
 

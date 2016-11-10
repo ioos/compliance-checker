@@ -2563,147 +2563,82 @@ class CFBaseCheck(BaseCheck):
         spatio-temporal dimension and each spatio-temporal scalar coordinate variable.
         """
 
-        _areatype_names     = ["bare_ground",
-                               "all_area_types",
-                               "burnt_vegetation",
-                               "c3_plant_functional_types",
-                               "c4_plant_functional_types",
-                               "clear_sky",
-                               "cloud",
-                               "crops",
-                               "floating_ice",
-                               "ice_free_land",
-                               "ice_free_sea",
-                               "lake_ice_or_sea_ice",
-                               "land",
-                               "land_ice",
-                               "natural_grasses",
-                               "pastures",
-                               "primary_deciduous_trees",
-                               "primary_evergreen_trees",
-                               "sea",
-                               "sea_ice",
-                               "secondary_deciduous_trees",
-                               "secondary_evergreen_trees",
-                               "shrubs"
-                               "snow",
-                               "trees"
-                               "vegetation"]
-        methods = ['point',
-                   'sum',
-                   'mean',
-                   'maximum',
-                   'minimum',
-                   'mid_range',
-                   'standard_deviation',
-                   'variance',
-                   'mode',
-                   'median']
+        methods = [
+            "point",
+            "sum",
+            "mean",
+            "maximum",
+            "minimum",
+            "mid_range",
+            "standard_deviation",
+            "variance",
+            "mode",
+            "median"
+        ]
 
         ret_val = []
-        reasoning = []
-        pvars = re.compile('\(.*?\)|(\w*?):')
-        psep = re.compile('((?P<var>\w+): (?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) ?(?P<over>over (?P<otypevar>\w+))?| ?)(?P<brace>\(((?P<brace_wunit>\w+): (\d+) (?P<unit>\w+)|(?P<brace_opt>\w+): (\w+))\))*)')
+        # The basic format is `name: method (
+        psep = re.compile(r'((?P<var>\w+): (?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
+                          '?(?P<over>over (?P<otypevar>\w+))?| ?)(?P<brace>\(((?P<brace_wunit>\w+): '
+                          '(\d+) (?P<unit>\w+)|(?P<brace_opt>\w+): (\w+))\))*)')
 
-        for name, var in ds.variables.items():
-            if getattr(var, 'cell_methods', ''):
-                method = getattr(var, 'cell_methods', '')
+        for var in ds.get_variables_by_attributes(cell_methods=lambda x: x is not None):
+            if not getattr(var, 'cell_methods', ''):
+                continue
 
-                total_name_count = 0
-                cell_dims = []
-                for match in re.finditer(pvars, method):
-                    if (match.groups()[0] is not None):
-                        cell_dims.append(match.groups()[0])
-                        total_name_count = total_name_count + 1
+            method = getattr(var, 'cell_methods', '')
 
-                # print "cell_methods_check: number DIMs", total_name_count
+            valid_attribute = TestCtx(BaseCheck.HIGH,
+                                      '§7.1 {} has a valid cell_methods attribute format'.format(var.name))
+            valid_attribute.assert_true(re.match(psep, method) is not None,
+                                        '"{}" is not a valid format for cell_methods attribute'
+                                        ''.format(method))
+            ret_val.append(valid_attribute.to_result())
 
-                # check that the name is valid
-                valid_name_count = 0
-                for match in re.finditer(psep, method):
-                    # print 'dict ', match.groupdict()
-                    if match.group('var') in ds.variables[name].dimensions:
-                        valid_name_count = valid_name_count + 1
-                    elif match.group('var') == 'area':
-                        valid_name_count = valid_name_count + 1
-                    elif match.group('var') in getattr(var, "coordinates", ""):
-                        valid_name_count = valid_name_count + 1
-                    else:
-                        reasoning.append('The name field does not match a dimension, area or coordinate.')
+            valid_cell_names = TestCtx(BaseCheck.MEDIUM,
+                                       '§7.3 {} has valid names in cell_methods attribute'.format(var.name))
 
-                result = Result(BaseCheck.MEDIUM,
-                                (valid_name_count, total_name_count),
-                                ('§7.3 Cell Methods', name, 'cell_methods_name'),
-                                reasoning)
-                ret_val.append(result)
+            # check that the name is valid
+            for match in re.finditer(psep, method):
+                valid = False
+                if match.group('var') in var.dimensions:
+                    valid = True
+                elif match.group('var') == 'area':
+                    valid = True
+                elif match.group('var') in getattr(var, "coordinates", ""):
+                    valid = True
 
-                # Checks if the method value of the 'name: method' pair is acceptable
-                reasoning = []
-                methods = ['point', 'sum', 'mean', 'maximum', 'minimum',
-                           'mid_range', 'standard_deviation', 'variance',
-                           'mode', 'median']
+                valid_cell_names.assert_true(valid,
+                                             'cell_methods name component {} does not match a dimension, area or auxiliary coordinate'
+                                             ''.format(match.group('var')))
 
-                valid_method_count = 0
-                for match in re.finditer(psep, method):
-                    # print 'dict ', match.groupdict()
-                    if match.group('method') in methods:
-                        valid_method_count = valid_method_count + 1
-                    else:
-                        reasoning.append('The method field does not match a valid method value.')
+            ret_val.append(valid_cell_names.to_result())
 
-                total_method_count = total_name_count  # all dims must have a valid method
+            # Checks if the method value of the 'name: method' pair is acceptable
+            valid_cell_methods = TestCtx(BaseCheck.MEDIUM,
+                                         '§7.3 {} has valid methods in cell_methods attribute'.format(var.name))
 
-                result = Result(BaseCheck.MEDIUM,
-                                (valid_method_count, total_method_count),
-                                ('§7.3 Cell Methods', name, 'cell_methods_method'),
-                                reasoning)
-                ret_val.append(result)
+            for match in re.finditer(psep, method):
+                valid_cell_methods.assert_true(match.group('method') in methods,
+                                               '{}:cell_methods contains an invalid method: {}'
+                                               ''.format(var.name, match.group('method')))
 
-                # check the method modifier 'name: method (modifier)'
-                reasoning = []
-                valid_brace_count = 0
-                total_brace_count = 0
+            ret_val.append(valid_cell_methods.to_result())
 
-                for match in re.finditer(psep, method):
-                    if match.group('brace') is not None:
-                        total_brace_count = total_brace_count + 1
-                        if match.group('brace_wunit') == 'interval':
-                            valid_brace_count = valid_brace_count + 1
-                        elif match.group('brace_wunit') in ['comment', 'area']:
-                            valid_brace_count = valid_brace_count + 1
-                        else:
-                            reasoning.append('The method modifier not valid.')
+            valid_modifier = TestCtx(BaseCheck.MEDIUM,
+                                     '§7.3.3 {} has valid cell_methods modifiers'.format(var.name))
 
-                result = Result(BaseCheck.MEDIUM,
-                                (valid_brace_count, total_brace_count),
-                                ('§7.3 Cell Methods', name, 'cell_methods_method_modifier'),
-                                reasoning)
-                ret_val.append(result)
+            for match in re.finditer(psep, method):
+                if match.group('brace') is not None:
+                    valid_modifier.assert_true(match.group('brace_wunit') in ('interval', 'comment', 'area'),
+                                               '{}:cell_methods contains an invalid modifier: {}. It should be one '
+                                               'of interval, comment or area.'
+                                               ''.format(var.name, match.group('brace_wunit')))
 
-                # Checks the 'method where' formats
-                reasoning = []
-                valid_area_count = 0
-                total_area_count = 0
+            if valid_modifier.out_of > 0:
+                ret_val.append(valid_modifier.to_result())
 
-                for match in re.finditer(psep, method):
-                    if len(match.group('where')) != 0:
-                        if match.group('wtypevar') in _areatype_names:
-                            total_area_count = total_area_count + 1
-                            if match.group('otypevar') is not None:
-                                if match.group('otypevar') in _areatype_names:
-                                    valid_area_count = valid_area_count + 1
-                                else:
-                                    reasoning.append('The "name: method where type over _areatype_names" (' + match.group('otypevar') + ') format is not correct.')
-                            else:
-                                valid_area_count = valid_area_count + 1
-                        else:
-                            reasoning.append('The "name: method where _areatype_names" (' + match.group('wvartype') + ') format is not correct.')
-
-                result = Result(BaseCheck.MEDIUM,
-                                (valid_area_count, total_area_count),
-                                ('§7.3 Cell Methods', name, 'cell_methods_area'),
-                                reasoning)
-                ret_val.append(result)
+        return ret_val
 
     def check_climatological_statistics(self, ds):
         """
