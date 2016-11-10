@@ -193,7 +193,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['pr_inundation'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (534, 542)
+        assert (scored, out_of) == (549, 557)
         assert len(messages) == 11
         assert (u"units for variable area must be convertible to m2 currently "
                 "they are degrees2") in messages
@@ -264,4 +264,4 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['NCEI_profile_template_v2_0'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (332, 332)
+        assert (scored, out_of) == (342, 346)
