@@ -255,3 +255,13 @@ class TestCFIntegration(BaseTestCase):
                 "be composed of letters, digits, and underscores") in messages
         assert (u"source should be defined")
         assert (u'units for cl, "fraction" are not recognized by udunits') in messages
+
+    def test_ncei_templates(self):
+        """
+        Tests some of the NCEI NetCDF templates, which usually should get a
+        perfect score.
+        """
+        dataset = self.load_dataset(STATIC_FILES['NCEI_profile_template_v2_0'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (332, 332)
