@@ -36,34 +36,6 @@ def print_exceptions(f):
 __stdname_table__ = "v29"
 
 
-def guess_dim_type(dimension):
-    """
-    Guesses the type of dimension of a variable X/Y/Z/T
-
-    If can't figure it out, None is returned.
-    """
-
-    dimclasses = {'T': util._possiblet,
-                  'Z': util._possiblez,
-                  'Y': util._possibley,
-                  'X': util._possiblex}
-
-    for dcname, dcvals in dimclasses.items():
-        if dimension in dcvals:
-            return dcname
-
-    return None
-
-
-def is_variable(name, var):
-    dims = var.dimensions
-    if (name,) == dims:
-        # Coordinate Type
-        return False
-    # Probably a variable
-    return True
-
-
 # helper to see if we should do DSG tests
 def is_likely_dsg(func):
     @wraps(func)
@@ -85,9 +57,6 @@ class CFBaseCheck(BaseCheck):
     _cc_description = 'Climate and Forecast Conventions (CF)'
     _cc_url = 'http://cfconventions.org'
 
-    @classmethod
-    def beliefs(cls):  # @TODO
-        return {}
     """
     CF Convention Checker (1.6)
 
@@ -120,6 +89,12 @@ class CFBaseCheck(BaseCheck):
     ################################################################################
 
     def setup(self, ds):
+        """
+        Initialize various special variable types within the class.
+        Mutates a number of instance variables.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        """
         self._find_coord_vars(ds)
         self._find_aux_coord_vars(ds)
         self._find_ancillary_vars(ds)
@@ -132,9 +107,13 @@ class CFBaseCheck(BaseCheck):
     def _find_cf_standard_name_table(self, ds):
         '''
         Parse out the `standard_name_vocabulary` attribute and download that
-        version of the cf standard name table
+        version of the cf standard name table.  If the standard name table has
+        already been downloaded, use the cached version.  Modifies `_std_names`
+        attribute to store standard names.  Returns True if the file exists and
+        False if it fails to download.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: bool
         '''
         # Get the standard name vocab
         standard_name_vocabulary = getattr(ds, 'standard_name_vocabulary', '')
@@ -263,6 +242,12 @@ class CFBaseCheck(BaseCheck):
         Returns a list of netCDF variable instances for those that are likely metadata variables
 
         :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        :rtype: list
+        :return:   List of variable names (str) that are likely metadata
+                   variable candidates.
+
         '''
         if self._metadata_vars.get(ds, None) and refresh is False:
             return self._metadata_vars[ds]
@@ -286,10 +271,15 @@ class CFBaseCheck(BaseCheck):
 
     def _find_geophysical_vars(self, ds, refresh=False):
         '''
-        Returns a list of geophysical variables
+        Returns a list of geophysical variables.  Modifies
+        `self._geophysical_vars`
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: dict
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        :rtype: list
+        :return: A list containing strings with geophysical variable
+                 names.
         '''
         if self._geophysical_vars.get(ds, None) and refresh is False:
             return self._geophysical_vars[ds]
@@ -305,6 +295,9 @@ class CFBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param bool refresh: if refresh is set to True, the cache is
                              invalidated.
+        :rtype: list
+        :return: A list containing strings with geophysical variable
+                 names.
         '''
 
         if self._clim_vars.get(ds, None) and refresh is False:
@@ -324,6 +317,8 @@ class CFBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param bool refresh: if refresh is set to True, the cache is
                              invalidated.
+        :rtype: list
+        :return: A list containing strings with boundary variable names.
         '''
         if self._boundary_vars.get(ds, None) and refresh is False:
             return self._boundary_vars[ds]
@@ -347,7 +342,7 @@ class CFBaseCheck(BaseCheck):
         double are all acceptable
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: compliance_checker.base.Result
         '''
         fails = []
         total = len(ds.variables)
@@ -375,7 +370,7 @@ class CFBaseCheck(BaseCheck):
         and be composed of letters, digits, and underscores.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: compliance_checker.base.Result
         '''
         ret_val = []
         variable_naming = TestCtx(BaseCheck.MEDIUM, '§2.3 Naming Conventions for variables')
@@ -432,7 +427,7 @@ class CFBaseCheck(BaseCheck):
         is disregarded, no two names should be the same.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: compliance_checker.base.Result
         '''
         fails = []
         total = len(ds.variables)
@@ -452,7 +447,7 @@ class CFBaseCheck(BaseCheck):
         and the dimensions must all have different names.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: compliance_checker.base.Result
         '''
         fails = []
         total = len(ds.variables)
@@ -480,6 +475,9 @@ class CFBaseCheck(BaseCheck):
         definition corresponding to the file. All other dimensions should,
         whenever possible, be placed to the left of the spatiotemporal
         dimensions.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: compliance_checker.base.Result
         '''
         valid_dimension_order = TestCtx(BaseCheck.MEDIUM, '§2.4 Dimension Order')
         # Build a map from coordinate variable to axis
@@ -513,7 +511,10 @@ class CFBaseCheck(BaseCheck):
         describing the _kind_ of coordinate.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
+
         :rtype: dict
+        :return: A dictionary with variable names mapped to axis abbreviations,
+                 i.e. {'longitude': 'X', ... 'pressure': 'Z'}
         '''
         expected = ['T', 'Z', 'Y', 'X']
         coord_vars = self._find_coord_vars(ds)
@@ -592,6 +593,11 @@ class CFBaseCheck(BaseCheck):
     def _get_instance_dimensions(self, ds):
         '''
         Returns a list of dimensions marked as instance dimensions
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+
+        :rtype: list
+        :returns: A list of variable dimensions
         '''
         ret_val = []
         for variable in ds.get_variables_by_attributes(cf_role=lambda x: isinstance(x, basestring)):
@@ -601,7 +607,14 @@ class CFBaseCheck(BaseCheck):
 
     def _get_pretty_dimension_order(self, ds, name):
         '''
-        Returns a comma seperated string of the dimensions
+        Returns a comma seperated string of the dimensions for a specified
+        variable
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: A string with a valid NetCDF variable name for the
+                         dataset
+        :rtype: str
+        :return: A comma separated string of the variable's dimensions
         '''
         dim_names = []
         for dim in ds.variables[name].dimensions:
@@ -622,7 +635,9 @@ class CFBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param str name: Name of the variable
         :param dict coord_axis_map: A dictionary mapping each coordinate variable and dimension to a named axis
+
         :rtype: list
+        :return: A list of strings corresponding to the named axis of the dimensions for a variable
         '''
 
         retval = []
@@ -636,6 +651,9 @@ class CFBaseCheck(BaseCheck):
         Returns True if the dimensions are in order U*, T, Z, Y, X
 
         :param list dimension_order: A list of axes
+        :rtype: bool
+        :return: Returns True if the dimensions are in order U*, T, Z, Y, X,
+                 False otherwise
         '''
         regx = re.compile(r'^L?I?U*T?Z?(?:(?:Y?X?)|(?:C?)|(?:A+))$')
         dimension_string = ''.join(dimension_order)
@@ -651,7 +669,7 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: list
-        :return: List of results
+        :return: List of Results
         '''
         valid_fill_range = TestCtx(BaseCheck.MEDIUM,
                                    '§2.5.1 Fill Values should be outside the range specified by valid_range')
@@ -706,7 +724,7 @@ class CFBaseCheck(BaseCheck):
         value "CF-1.6"
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: compliance_checker.base.Result
         '''
 
         valid_conventions = ['CF-1.6']
@@ -732,7 +750,7 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: list
-        :return: List of results
+        :return: List of Results
         '''
         attrs = ['title', 'history']
 
@@ -755,6 +773,10 @@ class CFBaseCheck(BaseCheck):
         or assigned to individual variables.  When an attribute appears both
         globally and as a variable attribute, the variable's version has
         precedence.  Must be strings.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of Results
         """
         attrs = ['institution', 'source', 'references', 'comment']
 
@@ -817,7 +839,7 @@ class CFBaseCheck(BaseCheck):
 
         - units required
         - type must be recognized by udunits
-        - if std name specified, must be consistent with standard name table, must also be consistent with a
+        - if standard name specified, must be consistent with standard name table, must also be consistent with a
           specified cell_methods attribute if present
 
         :param netCDF4.Dataset ds: An open netCDF dataset
@@ -872,6 +894,7 @@ class CFBaseCheck(BaseCheck):
         Nones are used to represent the absence of a modifier or standard_name
 
         :rtype: tuple
+        :return: 2-tuple of standard_name and modifier as strings
         '''
         standard_name_modifier = None
         if not isinstance(standard_name, basestring):
@@ -889,6 +912,8 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param str variable_name: Name of the variable to be checked
+        :rtype:
+        :return: List of results
         '''
         # This list is straight from section 3
         deprecated = ['level', 'layer', 'sigma_level']
@@ -1227,6 +1252,7 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param str name: Name of variable to check
+        :rtype: compliance_checker.base.Result
         '''
         variable = ds.variables[name]
 
@@ -1271,6 +1297,7 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param str name: Variable name
+        :rtype: compliance_checker.base.Result
         '''
         variable = ds.variables[name]
 
@@ -1313,6 +1340,7 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param str name: Variable name
+        :rtype: compliance_checker.base.Result
         '''
         variable = ds.variables[name]
         flag_meanings = getattr(variable, 'flag_meanings', None)
@@ -1391,10 +1419,12 @@ class CFBaseCheck(BaseCheck):
 
     def _check_axis(self, ds, name):
         '''
-        Checks that the axis attribute is a string and an allowed value
+        Checks that the axis attribute is a string and an allowed value, namely
+        one of 'T', 'X', 'Y', or 'Z'.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param str name: Name of the variable
+        :rtype: compliance_checker.base.Result
         '''
         allowed_axis = ['T', 'X', 'Y', 'Z']
         variable = ds.variables[name]
@@ -1716,6 +1746,7 @@ class CFBaseCheck(BaseCheck):
         - every variable defined in formula_terms exists
 
         :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: compliance_checker.base.Result
         '''
         variable = ds.variables[coord]
         dimless = dict(dimless_vertical_coordinates)
@@ -1904,6 +1935,16 @@ class CFBaseCheck(BaseCheck):
     ###############################################################################
 
     def _is_station_var(self, var):
+        """
+        Returns True if the NetCDF variable is associated with a station, False
+        otherwise.
+
+        :param netCDF4.Variable var: a variable in an existing NetCDF dataset
+        :rtype: bool
+        :return: Status of whether variable appears to be associated with a
+                 station
+        """
+
         if getattr(var, 'standard_name', None) in ('platform_name', 'station_name', 'instrument_name'):
             return True
         return False
@@ -1926,6 +1967,10 @@ class CFBaseCheck(BaseCheck):
         ragged array representations of data (Chapter 9, Discrete Sampling
         Geometries), special methods are needed to connect the data and
         coordinates.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         '''
 
         ret_val = []
@@ -1983,7 +2028,7 @@ class CFBaseCheck(BaseCheck):
         [geophysical variable].
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: Result
+        :rtype: compliance_checker.base.Result
         :return: List of results
         '''
 
@@ -2019,6 +2064,10 @@ class CFBaseCheck(BaseCheck):
 
         We recommend that the name of a [multidimensional coordinate] should
         not match the name of any of its dimensions.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
 
@@ -2124,6 +2173,9 @@ class CFBaseCheck(BaseCheck):
         compressed latitude and longitude auxiliary coordinate variables are
         identified by the coordinates attribute.
 
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         """
         ret_val = []
         # Create a set of coordinate varaibles defining `compress`
@@ -2211,6 +2263,10 @@ class CFBaseCheck(BaseCheck):
         assigning a standard_name to the coordinate variable. The appropriate
         values of the standard_name depend on the grid mapping and are given in
         Appendix F, Grid Mappings.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         """
 
         ret_val = []
@@ -2303,6 +2359,10 @@ class CFBaseCheck(BaseCheck):
         Recommend that the names be chosen from the list of standardized region names whenever possible. To indicate
         that the label values are standardized the variable that contains the labels must be given the standard_name
         attribute with the value region.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         """
         ret_val = []
         region_list = [
@@ -2430,6 +2490,7 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: list
+        :return: List of results
         """
 
         # Note that test does not check monotonicity
@@ -2494,6 +2555,10 @@ class CFBaseCheck(BaseCheck):
         related, but their order is not restricted.
 
         The variable must have a units attribute and may have other attributes such as a standard_name.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         """
         ret_val = []
         reasoning = []
@@ -2561,6 +2626,10 @@ class CFBaseCheck(BaseCheck):
         of its dimensions and each of its scalar coordinate variables the cell_methods information of interest (unless this
         information would not be meaningful). It is especially recommended that cell_methods be explicitly specified for each
         spatio-temporal dimension and each spatio-temporal scalar coordinate variable.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         """
 
         _areatype_names     = ["bare_ground",
@@ -2723,9 +2792,12 @@ class CFBaseCheck(BaseCheck):
 
         The methods which can be specified are those listed in Appendix E, Cell Methods and each entry in the cell_methods
         attribute may also, contain non-standardised information in parentheses after the method.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         """
         reasoning = []
-        paragraph = []
         ret_val = []
         total_climate_count = 0
         valid_climate_count = 0
@@ -2826,73 +2898,6 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
-    # def check_cell_methods_for_multi_axes(self, ds):
-        """
-        7.3.1 If a data value is representative of variation over a combination of axes, a single method should be prefixed by the
-        names of all the dimensions involved (listed in any order, since in this case the order must be immaterial).
-
-        There is no way to check this.  A warning should be posted explaining this method to the user!"
-
-        """
-
-    # def check_spacing_and_extra_info(self, ds):
-        """
-        7.3.2 To indicate more precisely how the cell method was applied, extra information may be included in parentheses ()
-        after the identification of the method. This information includes standardized and non-standardized parts.
-
-        The only standardized information is to provide the typical interval between the original data values to which the method
-        was applied, in the situation where the present data values are statistically representative of original data values which
-        had a finer spacing.
-
-        The syntax is (interval: value unit), where value is a numerical value and unit is a string that can be recognized by
-        UNIDATA's Udunits package.
-
-        If the cell method applies to a combination of axes, they may have a common original interval. Alternatively, they may have
-        separate intervals, which are matched to the names of axes by position.
-
-        If there is both standardized and non-standardized information, the non-standardized follows the standardized information
-        and the keyword comment:. If there is no standardized information, the keyword comment: should be omitted.
-
-        A dimension of size one may be the result of "collapsing" an axis by some statistical operation, for instance by
-        calculating a variance from time series data. We strongly recommend that dimensions of size one be retained (or scalar
-        coordinate variables be defined) to enable documentation of the method (through the cell_methods attribute) and its
-        domain (through the cell_bounds attribute).
-        """
-
-    # def check_stats_applying_to_portions_of_cells(self, ds):
-        """
-        7.3.3 By default, the statistical method indicated by cell_methods is assumed to have been evaluated over the entire
-        horizontal area of the cell. Sometimes, however, it is useful to limit consideration to only a portion of a cell.
-
-        One of two conventions may be used.
-
-        The first convention is a method that can be used for the common case of a single area-type. In this case, the
-        cell_methods attribute may include a string of the form "name: method where type".
-
-        The second convention is the more general. In this case, the cell_methods entry is of the form "name: method where
-        _areatype_names". Here _areatype_names is a string-valued auxiliary coordinate variable or string-valued scalar coordinate variable
-        with a standard_name of area_type. The variable _areatype_names contains the name(s) of the selected portion(s) of the grid
-        cell to which the method is applied.
-
-        If the method is mean, various ways of calculating the mean can be distinguished in the cell_methods attribute with
-        a string of the form "mean where type1 [over type2]". Here, type1 can be any of the possibilities allowed for _areatype_names
-        or type (as specified in the two paragraphs preceding above Example). The same options apply to type2, except it is
-        not allowed to be the name of an auxiliary coordinate variable with a dimension greater than one (ignoring the
-        dimension accommodating the maximum string length)
-        """
-
-    # def check_cell_methods_with_no_coords(self, ds):
-        """
-        7.3.4 To provide an indication that a particular cell method is relevant to the data without having to provide a
-        precise description of the corresponding cell, the "name" that appears in a "name: method" pair may be an
-        appropriate standard_name (which identifies the dimension) or the string, "area" (rather than the name of a scalar
-        coordinate variable or a dimension with a coordinate variable). This convention cannot be used, however, if the name
-        of a dimension or scalar coordinate variable is identical to name.
-
-        Recommend that whenever possible, cell bounds should be supplied by giving the variable a dimension of size one
-        and attaching bounds to the associated coordinate variable.
-        """
-
 
     ###############################################################################
     #
@@ -2917,6 +2922,10 @@ class CFBaseCheck(BaseCheck):
 
         When data to be packed contains missing values the attributes that indicate missing values (_FillValue, valid_min,
         valid_max, valid_range) must be of the same data type as the packed data.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         """
         ret_val = []
         for name, var in ds.variables.items():
@@ -3023,6 +3032,10 @@ class CFBaseCheck(BaseCheck):
         how applications should treat variables that have attributes indicating
         both missing values and transformations defined by a scale and/or
         offset.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         """
         ret_val = []
         for compress_var in ds.get_variables_by_attributes(compress=lambda s: s is not None):
@@ -3072,6 +3085,7 @@ class CFBaseCheck(BaseCheck):
         other space-time coordinates which are not mandatory (notably the z coordinate).
 
         :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: compliance_checker.base.Result
         """
         all_the_same = TestCtx(BaseCheck.HIGH,
                                '§9.1 Feature Types are all the same')
@@ -3101,6 +3115,9 @@ class CFBaseCheck(BaseCheck):
         multidimensional array representation, for which it is highly recommended.
 
         The value assigned to the featureType attribute is case-insensitive.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: compliance_checker.base.Result
         """
         feature_list = ['point', 'timeSeries', 'trajectory', 'profile', 'timeSeriesProfile', 'trajectoryProfile']
 
@@ -3121,6 +3138,7 @@ class CFBaseCheck(BaseCheck):
         data sets are timeseries_id, profile_id, and trajectory_id
 
         :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: compliance_checker.base.Result
         """
         ret_val = []
         valid_roles = ['timeseries_id', 'profile_id', 'trajectory_id']
@@ -3138,6 +3156,8 @@ class CFBaseCheck(BaseCheck):
         Checks the variable feature types match the dataset featureType attribute
 
         :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
         feature_list = ['point', 'timeSeries', 'trajectory', 'profile', 'timeSeriesProfile', 'trajectoryProfile']
@@ -3194,6 +3214,10 @@ class CFBaseCheck(BaseCheck):
     def check_hints(self, ds):
         '''
         Checks for potentially mislabeled metadata and makes suggestions for how to correct
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
 
@@ -3205,6 +3229,10 @@ class CFBaseCheck(BaseCheck):
         '''
         Checks for variables ending with _bounds, if they are not cell methods,
         make the recommendation
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
         '''
         ret_val = []
         boundary_variables = cfutil.get_cell_boundary_variables(ds)
