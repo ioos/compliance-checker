@@ -93,7 +93,7 @@ class Result(object):
     Stores the checker instance and the check method that produced this result.
     """
 
-    def __init__(self, 
+    def __init__(self,
                  weight=BaseCheck.MEDIUM,
                  value=None,
                  name=None,
@@ -161,7 +161,8 @@ class TestCtx(object):
     '''
     Simple struct object that holds score values and messages to compile into a result
     '''
-    def __init__(self, category=None, description='', out_of=0, score=0, messages=None, variable=None):
+    def __init__(self, category=None, description='', out_of=0, score=0,
+                 messages=None, variable=None):
         self.category = category or BaseCheck.LOW
         self.out_of = out_of
         self.score = score
