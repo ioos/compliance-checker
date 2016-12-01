@@ -396,6 +396,9 @@ class CFBaseCheck(BaseCheck):
             for attr in variable.ncattrs():
                 if attr in ignore_attributes:
                     continue
+                # Special attributes made by THREDDS
+                if attr.startswith('DODS'):
+                    continue
                 # Ignore model produced attributes
                 if attr.startswith('_Coordinate'):
                     continue
