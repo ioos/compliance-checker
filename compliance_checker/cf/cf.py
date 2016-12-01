@@ -377,6 +377,14 @@ class CFBaseCheck(BaseCheck):
         dimension_naming = TestCtx(BaseCheck.MEDIUM, '§2.3 Naming Conventions for dimensions')
         attribute_naming = TestCtx(BaseCheck.MEDIUM, '§2.3 Naming Conventions for attributes')
 
+        ignore_attributes = [
+            '_FillValue',
+            'DODS',
+            '_ChunkSizes',
+            '_Coordinate',
+            '_Unsigned'
+        ]
+
         rname = re.compile("^[A-Za-z][A-Za-z0-9_]*$")
 
         for name, variable in ds.variables.items():
@@ -386,13 +394,7 @@ class CFBaseCheck(BaseCheck):
 
             # Keep track of all the attributes, we'll need to check them
             for attr in variable.ncattrs():
-                # ignore reserved attrs
-                if attr == '_FillValue':
-                    continue
-                # Special attributes made by THREDDS
-                if attr.startswith('DODS'):
-                    continue
-                if attr == '_ChunkSizes':
+                if attr in ignore_attributes:
                     continue
                 # Ignore model produced attributes
                 if attr.startswith('_Coordinate'):
