@@ -498,9 +498,13 @@ class CFBaseCheck(BaseCheck):
             # This is tested later in the respective checks
             if name in any_bounds or name == any_clim:
                 continue
+
             # Skip strings/labels
-            if variable.dtype.char == 'S':
+            if hasattr(variable.dtype, 'char') and variable.dtype.char == 'S':
                 continue
+            elif variable.dtype == str:
+                continue
+
             if variable.dimensions:
                 dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
                 valid_dimension_order.assert_true(self._dims_in_order(dimension_order),
