@@ -532,16 +532,7 @@ class ACDD1_1Check(ACDDNCCheck):
     def __init__(self):
         super(ACDD1_1Check, self).__init__()
         self.rec_atts.extend([
-            'keywords_vocabulary',
-            ('cdm_data_type', [
-                'Grid',
-                'Image',
-                'Point',
-                'Radial',
-                'Station',
-                'Swath',
-                'Trajectory'
-            ])
+            'keywords_vocabulary'
         ])
 
         self.sug_atts.extend([
@@ -580,15 +571,6 @@ class ACDD1_3Check(ACDDNCCheck):
                 'position'
             ]),
             'creator_institution',
-            ('cdm_data_type', [
-                'Grid',
-                'Image',
-                'Point',
-                'Radial',
-                'Station',
-                'Swath',
-                'Trajectory'
-            ]),
             'platform',
             'platform_vocabulary',
             'keywords_vocabulary',

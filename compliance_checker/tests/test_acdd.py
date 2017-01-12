@@ -46,7 +46,6 @@ class TestACDD1_1(BaseTestCase):
             "id",
             "naming_authority",
             "keywords_vocabulary",
-            "cdm_data_type",
             "history",
             "comment",
             "date_created",
@@ -238,7 +237,6 @@ class TestACDD1_3(BaseTestCase):
             "platform_vocabulary",
             "instrument",
             "instrument_vocabulary",
-            "cdm_data_type",
             "metadata_link",
             "references"
         ],
