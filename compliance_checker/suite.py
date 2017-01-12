@@ -520,7 +520,7 @@ class CheckSuite(object):
         if pr.netloc:       # looks like a remote url
             rhead = requests.head(ds_str, allow_redirects=True)
             # if we get a 400 here, it's likely a Dataset openable OpenDAP url
-            if rhead.status_code == 400:
+            if rhead.status_code == 400 or rhead.status_code == 401:
                 pass
             elif rhead.status_code == 200 and rhead.headers['content-type'] == 'text/xml':
                 # probably interesting, grab it
