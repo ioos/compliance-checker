@@ -412,7 +412,7 @@ check_suite.load_all_available_checkers()
 # Run cf and adcc checks with normal strictness, verbose text format to stdout
 return_value, errors = ComplianceChecker.run_checker(
                                 '/path/or/url/to/your/dataset',
-                                ['cf', 'acdd'], True, 'normal', '-', 'text')
+                                ['cf', 'acdd'], 0, 'normal', '-', 'text')
 ```
 
 
