@@ -52,7 +52,7 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
         Check all global NC attributes for existence.
         """
         return [
-            self._has_attr(ds, 'acknowledgment', 'Platform Sponsor'),
+            self._has_attr(ds, 'acknowledgement', 'Platform Sponsor'),
             self._has_attr(ds, 'publisher_email', 'Station Publisher Email'),
             self._has_attr(ds, 'publisher_email', 'Service Contact Email', BaseCheck.MEDIUM),
             self._has_attr(ds, 'institution', 'Service Provider Name', BaseCheck.MEDIUM),
