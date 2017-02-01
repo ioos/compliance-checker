@@ -430,7 +430,7 @@ non-0 for a failure.
 
 - [CF 1.6](http://cfconventions.org/)
 - [ACDD 1.1, 1.3](http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/metadata/DataDiscoveryAttConvention.html)
-- [IOOS](http://www.ioos.noaa.gov/data/contribute_data.html)
+- [IOOS](http://ioos.noaa.gov/data/contribute-data/)
 
 ## Available Test Suites as Plugins
 
