@@ -15,7 +15,10 @@ def isstring(obj):
 def datetime_is_iso(dt):
     """Attempts to parse a date formatted in ISO 8601 format"""
     try:
-        isodate.parse_datetime(dt)
+        if len(dt) > 10:
+            isodate.parse_datetime(dt)
+        else:
+            isodate.parse_date(dt)
         return True, []
     except isodate.ISO8601Error:
         return False, ['Datetime provided is not in a valid ISO 8601 format']
