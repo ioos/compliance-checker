@@ -16,6 +16,7 @@ before_install:
     - conda config --add channels conda-forge --force
     - travis_retry conda create --yes -n test --file requirements.txt $CONDA
     - travis_retry conda install -n test --yes pytest flake8
+    - travis_retry conda install -n test --yes libxml2==2.9.3
     - source activate test
 
 install:
