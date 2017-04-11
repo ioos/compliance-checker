@@ -2,28 +2,41 @@ language: python
 
 sudo: false
 
-env:
-    - CONDA="python=2.7"
-    - CONDA="python=3.4"
-    - CONDA="python=3.5"
+matrix:
+  fast_finish: true
+  include:
+  - python: 2.7
+    env: TEST_TARGET=default
+  - python: 3.4
+    env: TEST_TARGET=default
+  - python: 3.5
+    env: TEST_TARGET=default
+  - python: 3.6
+    env: TEST_TARGET=default
+  - python: 3.6
+    env: TEST_TARGET=coding_standards
+  allow_failures:
+  - python: 3.6
+    env: TEST_TARGET=coding_standards
 
 before_install:
-    - URL=http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-    - wget $URL -O miniconda.sh
+    - wget http://bit.ly/miniconda -O miniconda.sh
     - bash miniconda.sh -b -p $HOME/miniconda
     - export PATH="$HOME/miniconda/bin:$PATH"
-    - conda update --yes --all
+    - conda update conda --yes
     - conda config --add channels conda-forge --force
-    - travis_retry conda create --yes -n test --file requirements.txt $CONDA
-    - travis_retry conda install -n test --yes pytest flake8
-    - travis_retry conda install -n test --yes libxml2==2.9.3
-    - source activate test
+    - conda create --yes -n TEST python=$TRAVIS_PYTHON_VERSION --file requirements.txt --file test_requirements.txt
+    - source activate TEST
 
+# Test source distribution.
 install:
-    - pip install -r requirements.txt
-    - pip install -r test_requirements.txt
-    - pip install -e .
+    - python setup.py sdist && version=$(python setup.py --version) && pushd dist  && pip install compliance-checker-${version}.tar.gz && popd
 
 script:
-    - py.test -s -rxs -v
-    - flake8 --ignore=E501,E251,E221,E201,E202,E203 -qq --statistics . || true
+  - if [[ $TEST_TARGET == "default" ]]; then
+      py.test -s -rxs -v ;
+    fi
+
+  - if [[ $TEST_TARGET == "coding_standards" ]]; then
+      flake8 --ignore=E501,E251,E221,E201,E202,E203 -qq --statistics . ;
+    fi

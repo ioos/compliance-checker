@@ -2894,7 +2894,7 @@ class CFBaseCheck(BaseCheck):
                 reasoning.append("Attributes add_offset and scale_factor have different data type.")
             elif type(scale_factor) != var.dtype:
                 # Check both attributes are type float or double
-                if not type(scale_factor) in [np.float, np.float16, np.float32, np.float64, np.float128]:
+                if not isinstance(scale_factor, (float, np.floating)):
                     valid = False
                     reasoning.append("Attributes add_offset and scale_factor are not of type float or double.")
                 else:
