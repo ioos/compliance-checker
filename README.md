@@ -1,6 +1,7 @@
 # IOOS Compliance Checker
 
 [![Build Status](https://travis-ci.org/ioos/compliance-checker.svg)](https://travis-ci.org/ioos/compliance-checker)
+[![Build status](https://ci.appveyor.com/api/projects/status/lcc9co38pi6o45ho/branch/master?svg=true)](https://ci.appveyor.com/project/ocefpaf/compliance-checker/branch/master)
 
 The IOOS Compliance Checker is a Python tool to check local/remote datasets against a variety of compliance standards.
 It is primarily a command-line tool (tested on OS X/Linux) and can also be used as a library import.
@@ -78,13 +79,13 @@ $ compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170
 
 
 --------------------------------------------------------------------------------
-                     The dataset scored 69 out of 93 points                     
-                             during the acdd check                              
+                     The dataset scored 69 out of 93 points
+                             during the acdd check
 --------------------------------------------------------------------------------
-                               Scoring Breakdown:                               
+                               Scoring Breakdown:
 
 
-                                 High Priority                                  
+                                 High Priority
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
 Conventions                             :3:     1/2
@@ -94,7 +95,7 @@ title                                   :3:     1/1
 varattr                                 :3:    32/44
 
 
-                                Medium Priority                                 
+                                Medium Priority
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
 acknowledgment/acknowledgement          :2:     1/1
@@ -141,44 +142,44 @@ time_coverage_start                     :2:     1/1
 
 
 --------------------------------------------------------------------------------
-                  Reasoning for the failed tests given below:                   
+                  Reasoning for the failed tests given below:
 
 
 Name                             Priority:     Score:Reasoning
 --------------------------------------------------------------------------------
 Conventions                            :3:     1/ 2 : Attr Conventions does not
                                                       contain 'ACDD-1.3'
-varattr                                :3:    32/44 :  
-    conductivity                       :3:     3/ 4 :  
+varattr                                :3:    32/44 :
+    conductivity                       :3:     3/ 4 :
         coverage_content_type          :3:     0/ 1 : Var conductivity missing
                                                       attr coverage_content_type
-    density                            :3:     3/ 4 :  
+    density                            :3:     3/ 4 :
         coverage_content_type          :3:     0/ 1 : Var density missing attr
                                                       coverage_content_type
-    profile_id                         :3:     1/ 4 :  
+    profile_id                         :3:     1/ 4 :
         coverage_content_type          :3:     0/ 1 : Var profile_id missing
                                                       attr coverage_content_type
         var_std_name                   :3:     1/ 2 : Var profile_id missing
                                                       attr standard_name
         var_units                      :3:     0/ 1 : Var profile_id missing
                                                       attr units
-    salinity                           :3:     3/ 4 :  
+    salinity                           :3:     3/ 4 :
         coverage_content_type          :3:     0/ 1 : Var salinity missing attr
                                                       coverage_content_type
-    segment_id                         :3:     1/ 4 :  
+    segment_id                         :3:     1/ 4 :
         coverage_content_type          :3:     0/ 1 : Var segment_id missing
                                                       attr coverage_content_type
         var_std_name                   :3:     1/ 2 : Var segment_id missing
                                                       attr standard_name
         var_units                      :3:     0/ 1 : Var segment_id missing
                                                       attr units
-    temperature                        :3:     3/ 4 :  
+    temperature                        :3:     3/ 4 :
         coverage_content_type          :3:     0/ 1 : Var temperature missing
                                                       attr coverage_content_type
-    u                                  :3:     3/ 4 :  
+    u                                  :3:     3/ 4 :
         coverage_content_type          :3:     0/ 1 : Var u missing attr
                                                       coverage_content_type
-    v                                  :3:     3/ 4 :  
+    v                                  :3:     3/ 4 :
         coverage_content_type          :3:     0/ 1 : Var v missing attr
                                                       coverage_content_type
 date_created_is_iso                    :2:     0/ 1 : Datetime provided is not
@@ -257,13 +258,13 @@ $ compliance-checker --test=cf compliance_checker/tests/data/examples/hycom_glob
 
 
 --------------------------------------------------------------------------------
-                    The dataset scored 113 out of 122 points                    
-                              during the cf check                               
+                    The dataset scored 113 out of 122 points
+                              during the cf check
 --------------------------------------------------------------------------------
-                               Scoring Breakdown:                               
+                               Scoring Breakdown:
 
 
-                                 High Priority                                  
+                                 High Priority
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
 §2.2 Valid netCDF data types            :3:     6/6
@@ -290,7 +291,7 @@ $ compliance-checker --test=cf compliance_checker/tests/data/examples/hycom_glob
 §9.1 Feature Types are all the same     :3:     1/1
 
 
-                                Medium Priority                                 
+                                Medium Priority
 --------------------------------------------------------------------------------
     Name                            :Priority: Score
 cell_methods                            :2:     0/0
@@ -316,7 +317,7 @@ cell_methods                            :2:     0/0
 
 
 --------------------------------------------------------------------------------
-                  Reasoning for the failed tests given below:                   
+                  Reasoning for the failed tests given below:
 
 
 Name                             Priority:     Score:Reasoning
