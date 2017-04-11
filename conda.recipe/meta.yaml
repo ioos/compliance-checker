@@ -1,0 +1,41 @@
+package:
+  name: compliance-checker
+  version: 3.0.1
+
+source:
+  path: ../
+
+build:
+  script: python setup.py install --single-version-externally-managed --record record.txt
+  entry_points:
+    - compliance-checker = cchecker:main
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - setuptools
+    - arrow
+    - cf_units
+    - isodate
+    - jinja2
+    - lxml
+    - owslib
+    - pygeoif
+    - requests
+
+test:
+  source_files:
+    - compliance_checker
+  requires:
+    - pytest
+    - httpretty  # [not py3k]
+  imports:
+    - compliance_checker
+    - compliance_checker.cf
+    - compliance_checker.tests
+  commands:
+    - py.test -s -rxs -v compliance_checker
+    - compliance-checker --help
