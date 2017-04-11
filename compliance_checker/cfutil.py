@@ -7,7 +7,6 @@ from cf_units import Unit
 from pkg_resources import resource_filename
 from collections import defaultdict
 import csv
-import json
 import re
 
 # For python2/python3 support

@@ -4,7 +4,7 @@ from compliance_checker.runner import ComplianceChecker
 import os
 import sys
 
-if sys.version_info < (3,0):
+if sys.version_info < (3, 0):
     import httpretty
 else:
     httpretty = False
@@ -15,12 +15,11 @@ if httpretty:
 
         def setUp(self):
             with open(os.path.join(os.path.dirname(__file__),
-                        'data/http_mocks/ncsos_getcapabilities.xml')) as f:
+                                   'data/http_mocks/ncsos_getcapabilities.xml')) as f:
                 self.resp = f.read()
             # need to monkey patch checkers prior to running tests, or no checker
             # classes will show up
             CheckSuite().load_all_available_checkers()
-
 
         @httpretty.activate
         def test_retrieve_getcaps(self):
@@ -31,19 +30,18 @@ if httpretty:
             # recognizes this as some sort of XML doc instead of an OPeNDAP
             # source
             httpretty.register_uri(httpretty.HEAD, url, status=200,
-                                    content_type='text/xml')
+                                   content_type='text/xml')
             ComplianceChecker.run_checker(url, ['ioos'], 1, 'normal')
 
     class TestIOOSSOSDescribeSensor(unittest.TestCase):
 
         def setUp(self):
             with open(os.path.join(os.path.dirname(__file__),
-                        'data/http_mocks/ncsos_describesensor.xml')) as f:
+                                   'data/http_mocks/ncsos_describesensor.xml')) as f:
                 self.resp = f.read()
             # need to monkey patch checkers prior to running tests, or no checker
             # classes will show up
             CheckSuite().load_all_available_checkers()
-
 
         @httpretty.activate
         def test_retrieve_describesensor(self):
@@ -54,5 +52,5 @@ if httpretty:
             # recognizes this as some sort of XML doc instead of an OPeNDAP
             # source
             httpretty.register_uri(httpretty.HEAD, url, status=200,
-                                    content_type='text/xml')
+                                   content_type='text/xml')
             ComplianceChecker.run_checker(url, ['ioos'], 1, 'normal')

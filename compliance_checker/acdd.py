@@ -8,13 +8,12 @@ project for the verification and scoring of attributes for datasets.
 from __future__ import unicode_literals
 
 import numpy as np
-import numpy.ma as ma
 from netCDF4 import num2date
 from datetime import timedelta
 
 from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
                                      score_group, Result, ratable_result)
-from compliance_checker.cf.util import is_vertical_coordinate, _possiblexunits, _possibleyunits
+from compliance_checker.cf.util import _possiblexunits, _possibleyunits
 from compliance_checker.util import datetime_is_iso, dateparse
 from compliance_checker import cfutil
 from pygeoif import from_wkt
@@ -701,4 +700,3 @@ class ACDD1_3Check(ACDDNCCheck):
                             % (variable, sorted(valid_ctypes)))
 
         return results
-

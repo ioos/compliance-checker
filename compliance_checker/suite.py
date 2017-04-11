@@ -10,7 +10,6 @@ import subprocess
 import inspect
 import itertools
 from operator import itemgetter
-import json
 from netCDF4 import Dataset
 from lxml import etree as ET
 from compliance_checker.base import fix_return_value, Result
@@ -539,14 +538,14 @@ class CheckSuite(object):
                 # http://stackoverflow.com/a/7392391/84732
                 if sys.version_info >= (3, ):
                     join_str = ''
-                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27]
-                                                  + list(range(0x20, 0x100)))).encode()
+                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27] +
+                                                  list(range(0x20, 0x100)))).encode()
                 else:
                     # because of `unicode_literals` import, we need to convert
                     # to a Py2 string/bytes
                     join_str = str('')
-                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27]
-                                                  + list(range(0x20, 0x100))))
+                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27] +
+                                                  list(range(0x20, 0x100))))
                 return bool(bts.translate(None, textchars))
 
             def is_cdl_file(filename, data):

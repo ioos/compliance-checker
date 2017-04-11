@@ -337,6 +337,7 @@ def download_cf_standard_name_table(version, location=None):
         r.raise_for_status()
     return
 
+
 def create_cached_data_dir():
     '''
     Returns the path to the data directory to download CF standard names.
@@ -349,6 +350,7 @@ def create_cached_data_dir():
         os.makedirs(data_directory)
 
     return data_directory
+
 
 def units_known(units):
     try:
