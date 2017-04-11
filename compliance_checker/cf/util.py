@@ -1,3 +1,4 @@
+import io
 import itertools
 import requests
 import os
@@ -261,7 +262,7 @@ class StandardNameTable(object):
     def __init__(self, cached_location=None):
         if cached_location:
             try:
-                with open(cached_location, 'r') as fp:
+                with io.open(cached_location, 'r', encoding='utf-8') as fp:
                     resource_text = fp.read()
             except Exception:
                 resource_text = get_data("compliance_checker", "data/cf-standard-name-table.xml")
