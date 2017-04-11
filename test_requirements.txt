@@ -1,3 +1,2 @@
 flake8
 pytest>=2.9.0
-httpretty==0.8.14
