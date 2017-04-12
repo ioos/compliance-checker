@@ -23,10 +23,11 @@ class TestCLI(TestCase):
     '''
 
     def setUp(self):
-        _, self.path = tempfile.mkstemp()
+        self.fid, self.path = tempfile.mkstemp()
 
     def tearDown(self):
         if os.path.isfile(self.path):
+            os.close(self.fid)
             os.remove(self.path)
 
     def shortDescription(self):

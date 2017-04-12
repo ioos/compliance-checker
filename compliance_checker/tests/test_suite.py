@@ -114,6 +114,7 @@ class TestSuite(unittest.TestCase):
             score_list, cdl_points, cdl_out_of = cs.standard_output(limit, checker, groups)
             # This asserts that print is able to generate all of the unicode output
             cs.non_verbose_output_generation(score_list, groups, limit, cdl_points, cdl_out_of)
+        ds.close()
 
         # Ok now load the nc file that it came from
         ds = cs.load_dataset(static_files['test_cdl_nc'])
@@ -125,6 +126,7 @@ class TestSuite(unittest.TestCase):
             score_list, nc_points, nc_out_of = cs.standard_output(limit, checker, groups)
             # This asserts that print is able to generate all of the unicode output
             cs.non_verbose_output_generation(score_list, groups, limit, nc_points, nc_out_of)
+        ds.close()
 
         nc_file_path = static_files['test_cdl'].replace('.cdl', '.nc')
         self.addCleanup(os.remove, nc_file_path)
