@@ -37,7 +37,7 @@ install:
 
 script:
   - if [[ $TEST_TARGET == "default" ]]; then
-      py.test -s -rxs -v ;
+      py.test -k "not integration" -s -rxs -v ;
     fi
 
   - if [[ $TEST_TARGET == "coding_standards" ]]; then
