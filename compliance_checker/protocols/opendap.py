@@ -19,5 +19,3 @@ def is_opendap(url):
     if 'xdods-server' in response.headers:
         return True
     return False
-
-

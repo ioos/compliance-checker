@@ -533,6 +533,8 @@ class CheckSuite(object):
         if opendap.is_opendap(ds_str):
             return Dataset(ds_str)
         else:
+            # Check if the HTTP response is XML, if it is, it's likely SOS so
+            # we'll attempt to parse the response as SOS
             response = requests.get(ds_str, allow_redirects=True)
             if 'text/xml' in response.headers['content-type']:
                 return self.process_doc(response.content)

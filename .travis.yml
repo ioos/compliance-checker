@@ -18,6 +18,10 @@ matrix:
   allow_failures:
   - python: 3.6
     env: TEST_TARGET=coding_standards
+  - python: 2.7
+    env: TEST_TARGET=integration
+  - python: 3.6
+    env: TEST_TARGET=integration
 
 before_install:
   - wget http://bit.ly/miniconda -O miniconda.sh
@@ -42,4 +46,8 @@ script:
 
   - if [[ $TEST_TARGET == "coding_standards" ]]; then
       flake8 --ignore=E501,E251,E221,E201,E202,E203 -qq --statistics . ;
+    fi
+
+  - if [[ $TEST_TARGET == "integration" ]]; then
+      py.test -m "integration" -s -rxs -v ;
     fi

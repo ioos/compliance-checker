@@ -8,7 +8,7 @@ Functions to assist in determining if the URL points to a netCDF file
 
 def is_netcdf(url):
     '''
-    Returns True if the URL is a valid OPeNDAP URL
+    Returns True if the URL points to a valid local netCDF file
 
     :param str url: Location of file on the file system
     '''
