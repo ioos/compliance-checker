@@ -7,6 +7,8 @@ matrix:
   include:
   - python: 2.7
     env: TEST_TARGET=default
+  - python: 2.7
+    env: TEST_TARGET=integration
   - python: 3.4
     env: TEST_TARGET=default
   - python: 3.5
@@ -15,9 +17,15 @@ matrix:
     env: TEST_TARGET=default
   - python: 3.6
     env: TEST_TARGET=coding_standards
+  - python: 3.6
+    env: TEST_TARGET=integration
   allow_failures:
   - python: 3.6
     env: TEST_TARGET=coding_standards
+  - python: 2.7
+    env: TEST_TARGET=integration
+  - python: 3.6
+    env: TEST_TARGET=integration
 
 before_install:
   - wget http://bit.ly/miniconda -O miniconda.sh
@@ -37,9 +45,13 @@ install:
 
 script:
   - if [[ $TEST_TARGET == "default" ]]; then
-      py.test -s -rxs -v ;
+      py.test -k "not integration" -s -rxs -v ;
     fi
 
   - if [[ $TEST_TARGET == "coding_standards" ]]; then
       flake8 --ignore=E501,E251,E221,E201,E202,E203 -qq --statistics . ;
+    fi
+
+  - if [[ $TEST_TARGET == "integration" ]]; then
+      py.test -m "integration" -s -rxs -v ;
     fi

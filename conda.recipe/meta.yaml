@@ -37,5 +37,5 @@ test:
     - compliance_checker.cf
     - compliance_checker.tests
   commands:
-    - py.test -s -rxs -v compliance_checker
+    - py.test -s -rxs -v -k "not integration" compliance_checker
     - compliance-checker --help

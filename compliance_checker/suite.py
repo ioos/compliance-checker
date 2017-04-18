@@ -16,6 +16,7 @@ from lxml import etree as ET
 from compliance_checker.base import fix_return_value, Result
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
+from compliance_checker.protocols import opendap, netcdf, cdl
 try:
     from urlparse import urlparse
 except ImportError:
@@ -511,87 +512,48 @@ class CheckSuite(object):
 
     def load_dataset(self, ds_str):
         """
-        Helper method to load a dataset or SOS GC/DS url.
+        Returns an instantiated instance of either a netCDF file or an SOS
+        mapped DS object.
+
+        :param str ds_str: URL of the resource to load
         """
-        ds = None
-        # try to figure out if this is a local NetCDF Dataset, a remote one, or an SOS GC/DS url
-        doc = None
+        # If it's a remote URL load it as a remote resource, otherwise treat it
+        # as a local resource.
         pr = urlparse(ds_str)
-        if pr.netloc:       # looks like a remote url
-            rhead = requests.head(ds_str, allow_redirects=True)
-            # if we get a 400 here, it's likely a Dataset openable OpenDAP url
-            if rhead.status_code == 400 or rhead.status_code == 401:
-                pass
-            elif rhead.status_code == 200 and rhead.headers['content-type'] == 'text/xml':
-                # probably interesting, grab it
-                r = requests.get(ds_str)
-                r.raise_for_status()
+        if pr.netloc:
+            return self.load_remote_dataset(ds_str)
+        return self.load_local_dataset(ds_str)
 
-                # need to use content to get bytes, as text will return unicode
-                # in Python3, which will break etree.fromstring if encoding
-                # is also declared in the XML doc
-                doc = r.content
-            else:
-                raise Exception("Could not understand response code %s and content-type %s" % (rhead.status_code, rhead.headers.get('content-type', 'none')))
+    def load_remote_dataset(self, ds_str):
+        '''
+        Returns a dataset instance for the remote resource, either OPeNDAP or SOS
+
+        :param str ds_str: URL to the remote resource
+        '''
+        if opendap.is_opendap(ds_str):
+            return Dataset(ds_str)
         else:
-            def is_binary_string(bts):
-                # do a cheap imitation of libmagic
-                # http://stackoverflow.com/a/7392391/84732
-                if sys.version_info >= (3, ):
-                    join_str = ''
-                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27]
-                                                  + list(range(0x20, 0x100)))).encode()
-                else:
-                    # because of `unicode_literals` import, we need to convert
-                    # to a Py2 string/bytes
-                    join_str = str('')
-                    textchars = join_str.join(map(chr, [7, 8, 9, 10, 12, 13, 27]
-                                                  + list(range(0x20, 0x100))))
-                return bool(bts.translate(None, textchars))
+            # Check if the HTTP response is XML, if it is, it's likely SOS so
+            # we'll attempt to parse the response as SOS
+            response = requests.get(ds_str, allow_redirects=True)
+            if 'text/xml' in response.headers['content-type']:
+                return self.process_doc(response.content)
 
-            def is_cdl_file(filename, data):
-                '''
-                Quick check for .cdl ascii file
+            raise ValueError("Unknown service with content-type: {}".format(response.headers['content-type']))
 
-                Example:
-                    netcdf sample_file {
-                    dimensions:
-                        name_strlen = 7 ;
-                        time = 96 ;
-                    variables:
-                        float lat ;
-                            lat:units = "degrees_north" ;
-                            lat:standard_name = "latitude" ;
-                            lat:long_name = "station latitude" ;
-                    etc...
+    def load_local_dataset(self, ds_str):
+        '''
+        Returns a dataset instance for the local resource
 
-                :param str filename: Absolute path of file to check
-                :param str data: First chuck of data from file to check
-                '''
-                if os.path.splitext(filename)[-1] == '.cdl':
-                    return True
-                if data.startswith(b'netcdf') or b'dimensions' in data:
-                    return True
-                return False
+        :param ds_str: Path to the resource
+        '''
+        if cdl.is_cdl(ds_str):
+            ds_str = self.generate_dataset(ds_str)
 
-            with open(ds_str, 'rb') as f:
-                first_chunk = f.read(1024)
-                if is_binary_string(first_chunk):
-                    # likely netcdf file
-                    pass
-                elif is_cdl_file(ds_str, first_chunk):
-                    ds_str = self.generate_dataset(ds_str)
-                else:
-                    f.seek(0)
-                    doc = f.read()
+        if netcdf.is_netcdf(ds_str):
+            return Dataset(ds_str)
 
-        if doc is not None:
-            ds = self.process_doc(doc)
-        else:
-            # no doc? try the dataset constructor
-            ds = Dataset(ds_str)
-
-        return ds
+        raise ValueError("File is an unknown format")
 
     def scores(self, raw_scores):
         """

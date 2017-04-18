@@ -26,12 +26,10 @@ if httpretty:
         def test_retrieve_getcaps(self):
             """Method that simulates retrieving SOS GetCapabilities"""
             url = "http://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml"
-            httpretty.register_uri(httpretty.GET, url, body=self.resp)
+            httpretty.register_uri(httpretty.GET, url, content_type="text/xml", body=self.resp)
             # need to mock out the HEAD response so that compliance checker
             # recognizes this as some sort of XML doc instead of an OPeNDAP
             # source
-            httpretty.register_uri(httpretty.HEAD, url, status=200,
-                                    content_type='text/xml')
             ComplianceChecker.run_checker(url, ['ioos'], 1, 'normal')
 
     class TestIOOSSOSDescribeSensor(unittest.TestCase):
@@ -49,10 +47,8 @@ if httpretty:
         def test_retrieve_describesensor(self):
             """Method that simulates retrieving SOS DescribeSensor"""
             url = "http://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml?request=describesensor&service=sos&procedure=urn:ioos:station:ncsos:VIA&outputFormat=text/xml%3Bsubtype%3D%22sensorML/1.0.1/profiles/ioos_sos/1.0%22&version=1.0.0"
-            httpretty.register_uri(httpretty.GET, url, body=self.resp)
+            httpretty.register_uri(httpretty.GET, url, content_type="text/xml", body=self.resp)
             # need to mock out the HEAD response so that compliance checker
             # recognizes this as some sort of XML doc instead of an OPeNDAP
             # source
-            httpretty.register_uri(httpretty.HEAD, url, status=200,
-                                    content_type='text/xml')
             ComplianceChecker.run_checker(url, ['ioos'], 1, 'normal')
