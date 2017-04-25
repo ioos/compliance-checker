@@ -12,6 +12,7 @@ from compliance_checker.tests import BaseTestCase
 import os
 import re
 import sys
+import pytest
 
 
 class MockVariable(object):
@@ -389,6 +390,13 @@ class TestCF(BaseTestCase):
         std_names = StandardNameTable(location)
         self.assertEqual(std_names._version, version)
         self.addCleanup(os.remove, location)
+
+    def test_bad_standard_name_table(self):
+        """
+        Test that failure in case a bad standard name table is passed.
+        """
+        with pytest.raises(IOError):
+            StandardNameTable('dummy_non_existent_file.ext')
 
     def test_check_flags(self):
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
