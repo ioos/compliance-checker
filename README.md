@@ -37,7 +37,13 @@ See the [Development](//github.com/ioos/compliance-checker/wiki/Development) wik
 
 ## Usage (command line)
 
-The compliance-checker can work against local files (`.nc` files, `.cdl` metadata files, `.xml` files of SOS GetCapabilities/DescribeSensor requests) or against remote URLs (OPeNDAP data URLs, SOS GetCapabilities/DescribeSensor URLs).
+The compliance-checker can work against local files (`.nc` files, `.cdl`
+metadata files) or against remote URLs (OPeNDAP data URLs, SOS
+GetCapabilities/DescribeSensor URLs).
+
+If you are aiming to check a netCDF-dump also known as a CDL file, the file
+must be named to end with a `.cdl` for the check-suite to be able to correctly
+parse it's contents.
 
 > **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPeNDAP URL, please be sure the size is reasonable!
 
