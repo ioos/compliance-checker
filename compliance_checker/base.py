@@ -13,7 +13,6 @@ from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
 from compliance_checker import __version__
-from distutils.version import StrictVersion as V
 from lxml import etree
 import sys
 
@@ -108,7 +107,7 @@ class Result(object):
         if value is None:
             self.value = None
         elif isinstance(value, tuple):
-            assert len(value)==2, 'Result value must be 2-tuple or boolean!'
+            assert len(value) == 2, 'Result value must be 2-tuple or boolean!'
             self.value = value
         else:
             self.value = bool(value)
@@ -206,9 +205,11 @@ def std_check(dataset, name):
 
     return False
 
+
 def xpath_check(tree, xpath):
     """Checks whether tree contains one or more elements matching xpath"""
     return len(xpath(tree)) > 0
+
 
 def attr_check(l, ds, priority, ret_val):
     """
@@ -314,9 +315,11 @@ def fix_return_value(v, method_name, method=None, checker=None):
 
     return v
 
+
 def ratable_result(value, name, msgs):
     """Returns a partial function with a Result that has not been weighted."""
     return lambda w: Result(w, value, name, msgs)
+
 
 def score_group(group_name=None):
     def _inner(func):

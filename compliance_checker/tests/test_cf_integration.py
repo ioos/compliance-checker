@@ -9,7 +9,6 @@ from compliance_checker.tests import BaseTestCase
 
 import pytest
 import os
-import re
 
 
 class TestCFIntegration(BaseTestCase):

@@ -8,6 +8,7 @@ import json
 from contextlib import contextmanager
 from compliance_checker.suite import CheckSuite
 
+
 # Py 3.4+ has contextlib.redirect_stdout to redirect stdout to a different
 # stream, but use this decorated function in order to redirect output in
 # previous versions
@@ -19,6 +20,7 @@ def stdout_redirector(stream):
         yield
     finally:
         sys.stdout = old_stdout
+
 
 class ComplianceChecker(object):
     """
