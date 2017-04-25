@@ -8,6 +8,7 @@ from netCDF4 import Dataset
 from compliance_checker import base
 import os
 
+
 class TestBase(TestCase):
     '''
     Tests functionality of the base compliance checker class
@@ -27,17 +28,17 @@ class TestBase(TestCase):
         attr = 'test'
         base.attr_check(attr, self.ds, priority, rv1)
         assert rv1[0] == base.Result(priority, False, 'test',
-                                  ['Attr test not present'])
+                                     ['Attr test not present'])
         # test with empty string
         self.ds.test = ''
         base.attr_check(attr, self.ds, priority, rv2)
         assert rv2[0] == base.Result(priority, False, 'test',
-                                ["Attr test is empty or completely whitespace"])
+                                     ["Attr test is empty or completely whitespace"])
         # test with whitespace in the form of a space and a tab
         self.ds.test = ' 	'
         base.attr_check(attr, self.ds, priority, rv3)
         assert rv3[0] == base.Result(priority, False, 'test',
-                                ["Attr test is empty or completely whitespace"])
+                                     ["Attr test is empty or completely whitespace"])
         # test with actual string contents
         self.ds.test = 'abc 123'
         base.attr_check(attr, self.ds, priority, rv4)
@@ -73,7 +74,7 @@ class TestBase(TestCase):
         attr = ('dummy', verify_dummy)
         base.attr_check(attr, self.ds, priority, rv1)
         assert rv1[0] == base.Result(priority, False, 'dummy',
-                                  ['Attr dummy not present'])
+                                     ['Attr dummy not present'])
         self.ds.dummy = 'doomy'
         base.attr_check(attr, self.ds, priority, rv2)
         assert rv2[0] == base.Result(priority, False, 'dummy', ['not "dummyy"'])
