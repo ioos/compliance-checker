@@ -1,4 +1,3 @@
-from compliance_checker import acdd
 from pkg_resources import resource_filename
 from compliance_checker.suite import CheckSuite
 from compliance_checker.base import Result, BaseCheck
@@ -39,10 +38,7 @@ class TestSuite(unittest.TestCase):
         cs = CheckSuite()
         cs.load_all_available_checkers()
         ds = cs.load_dataset(static_files['2dim'])
-        vals = cs.run(ds, 'acdd')
-
-        # run no longer returns the summed score, so this test.. just runs
-        # assert vals['acdd'][0] == (43.5, 78)
+        cs.run(ds, 'acdd')
 
     def test_unicode_formatting(self):
         cs = CheckSuite()
@@ -87,11 +83,12 @@ class TestSuite(unittest.TestCase):
         # if some assumptions are not met, e.g. if a Result object has
         # a value attribute of unexpected type
         cs = CheckSuite()
-        res = [Result(BaseCheck.MEDIUM, True, 'one'),
-               Result(BaseCheck.MEDIUM, (1, 3), 'one'),
-               Result(BaseCheck.MEDIUM, None, 'one'),
-               Result(BaseCheck.MEDIUM, True, 'two'),
-               Result(BaseCheck.MEDIUM, np.isnan(1), 'two')  # value is type numpy.bool_
+        res = [
+            Result(BaseCheck.MEDIUM, True, 'one'),
+            Result(BaseCheck.MEDIUM, (1, 3), 'one'),
+            Result(BaseCheck.MEDIUM, None, 'one'),
+            Result(BaseCheck.MEDIUM, True, 'two'),
+            Result(BaseCheck.MEDIUM, np.isnan(1), 'two')  # value is type numpy.bool_
         ]
         score = cs.scores(res)
         self.assertEqual(score[0].name, 'one')

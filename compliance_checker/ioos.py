@@ -12,7 +12,6 @@ class IOOSBaseCheck(BaseCheck):
     # requires login
     _cc_url = 'https://docs.google.com/spreadsheets/d/1huUFauh7rPj2oKfiRhLE1ZCsnes8SmAm6fKE95dsybE/'
 
-
     @classmethod
     def _has_attr(cls, ds, attr, concept_name, priority=BaseCheck.HIGH):
         """
@@ -198,7 +197,7 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
             ('service_type_version', XPath("/sos:Capabilities/ows:ServiceIdentification/ows:ServiceTypeVersion", namespaces=self.ns)),
             # ds.identification[0].observed_properties has this as well, but
             # don't want to try to shoehorn a function here
-            #('variable_names', len(ds.identification[0].observed_properties) > 0)
+            # ('variable_names', len(ds.identification[0].observed_properties) > 0)
             ('variable_names', XPath("/sos:Capabilities/sos:Contents/sos:ObservationOfferingList/sos:ObservationOffering/sos:observedProperty",
              namespaces=self.ns)),
             ('data_format_template_version', XPath("/sos:Capabilities/ows:OperationsMetadata/ows:ExtendedCapabilities/gml:metaDataProperty[@xlink:title='ioosTemplateVersion']/gml:version",

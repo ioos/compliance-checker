@@ -17,6 +17,7 @@ def get_filename(path):
 def generate_dataset(cdl_path, nc_path):
     subprocess.call(['ncgen', '-o', nc_path, cdl_path])
 
+
 STATIC_FILES = {
     'rutgers'                              : get_filename('tests/data/ru07-20130824T170228_rt0.cdl'),
     'conv_multi'                           : get_filename('tests/data/conv_multi.cdl'),
@@ -84,7 +85,6 @@ STATIC_FILES = {
     'bounds_bad_order'                     : get_filename('tests/data/non-comp/bounds_bad_order.cdl'),
     'bounds_bad_num_coords'                : get_filename('tests/data/non-comp/bounds_bad_num_coords.cdl'),
     '1d_bound_bad'                         : get_filename('tests/data/non-comp/1d_bound_bad.cdl'),
-    'cf_example_cell_measures'             : get_filename('tests/data/cf_example_cell_measures.cdl'),
     'h_point'                              : get_filename('tests/data/appendix_h/point.cdl'),
     'h_timeseries-incomplete'              : get_filename('tests/data/appendix_h/timeseries-incomplete.cdl'),
     'h_timeseries-orthogonal'              : get_filename('tests/data/appendix_h/timeseries-orthogonal.cdl'),

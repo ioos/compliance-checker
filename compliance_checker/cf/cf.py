@@ -33,6 +33,7 @@ def print_exceptions(f):
             print_exc()
     return wrapper
 
+
 __stdname_table__ = "v29"
 
 
@@ -972,8 +973,11 @@ class CFBaseCheck(BaseCheck):
                                                                standard_name)
 
         # If the variable is supposed to be unitless, it automatically passes
-        should_be_unitless = (variable.ndim == 0 or variable.dtype.char == 'S'
-                              or std_name_unitless)
+        should_be_unitless = (
+            variable.ndim == 0 or
+            variable.dtype.char == 'S' or
+            std_name_unitless
+        )
 
         valid_udunits = TestCtx(BaseCheck.LOW,
                                 "§3.1 Variable {}'s units are contained in UDUnits".format(variable_name))
@@ -1918,9 +1922,8 @@ class CFBaseCheck(BaseCheck):
 
         # if has a calendar, check that it is within the valid values
         # otherwise no calendar is valid
-        for time_var in \
-            ds.get_variables_by_attributes(calendar=lambda c: c is not None):
-            reasoning=None
+        for time_var in ds.get_variables_by_attributes(calendar=lambda c: c is not None):
+            reasoning = None
             valid_calendar = time_var.calendar in valid_calendars
 
             if not valid_calendar:
@@ -2513,7 +2516,7 @@ class CFBaseCheck(BaseCheck):
             if boundary_variable_name not in ds.variables:
                 valid = False
                 reasoning.append("Boundary variable {} referenced by {} not "
-                                 "found in dataset variables".format(boundary_variable.name,
+                                 "found in dataset variables".format(boundary_variable_name,
                                                                      variable.name))
             else:
                 boundary_variable = ds.variables[boundary_variable_name]
@@ -2532,20 +2535,22 @@ class CFBaseCheck(BaseCheck):
                                   boundary_variable.name,
                                   boundary_variable.ndim,
                                   variable.ndim + 1))
-            if (variable.dimensions[:] !=
-                  boundary_variable.dimensions[:variable.ndim]):
+            if (variable.dimensions[:] != boundary_variable.dimensions[:variable.ndim]):
                 valid = False
-                reasoning.append(u"Boundary variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
-                                boundary_variable.dimensions))
+                reasoning.append(
+                    u"Boundary variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
+                        boundary_variable.dimensions)
+                )
 
             # ensure p vertices form a valid simplex given previous a...n
             # previous auxiliary coordinates
-            if (ds.dimensions[boundary_variable.dimensions[-1]].size <
-                len(boundary_variable.dimensions[:-1]) + 1):
+            if (ds.dimensions[boundary_variable.dimensions[-1]].size < len(boundary_variable.dimensions[:-1]) + 1):
                 valid = False
-                reasoning.append("Boundary variable dimension {} must have at least {} elements to form a simplex/closed cell with previous dimensions {}.".format(boundary_variable.name,
-                                                                                                                                                          len(variable.dimensions) + 1,
-                                                                                                                                                          boundary_variable.dimensions[:-1]))
+                reasoning.append("Boundary variable dimension {} must have at least {} elements to form a simplex/closed cell with previous dimensions {}.".format(
+                    boundary_variable.name,
+                    len(variable.dimensions) + 1,
+                    boundary_variable.dimensions[:-1])
+                )
             result = Result(BaseCheck.MEDIUM, valid,
                             "§7.1 Cell boundaries are valid for variable {}".format(variable_name),
                             reasoning)
@@ -2589,25 +2594,30 @@ class CFBaseCheck(BaseCheck):
                 valid = True
                 cell_meas_var_name = search_res.groups[0]
                 # TODO: cache previous results
-                if not cell_meas_var_name in ds.variables:
+                if cell_meas_var_name not in ds.variables:
                     valid = False
-                    reasoning.append("Cell measure variable {} referred to by "
-                                     "{} is not present in dataset variables".format(
-                                                var_name, cell_meas_var_name))
+                    reasoning.append(
+                        "Cell measure variable {} referred to by "
+                        "{} is not present in dataset variables".format(
+                            var_name, cell_meas_var_name)
+                    )
                 else:
                     cell_meas_var = ds.variables[cell_meas_var_name]
                     if not hasattr(cell_meas_var, 'units'):
                         valid = False
-                        reasoning.append("Cell measure variable {} is required "
-                                         "to have units attribute defined.".format(
-                                                        cell_meas_var_name))
-                    if not set(cell_meas_var.dimensions).issubset(
-                                               var.dimensions):
+                        reasoning.append(
+                            "Cell measure variable {} is required "
+                            "to have units attribute defined.".format(
+                                cell_meas_var_name)
+                        )
+                    if not set(cell_meas_var.dimensions).issubset(var.dimensions):
                         valid = False
-                        reasoning.append("Cell measure variable {} must have "
-                                         "dimensions which are a subset of "
-                                         "those defined in variable {}.".format(
-                                                  cell_meas_var_name, var_name))
+                        reasoning.append(
+                            "Cell measure variable {} must have "
+                            "dimensions which are a subset of "
+                            "those defined in variable {}.".format(
+                                cell_meas_var_name, var_name)
+                        )
 
             result = Result(BaseCheck.MEDIUM,
                             valid,
@@ -2762,7 +2772,7 @@ class CFBaseCheck(BaseCheck):
         # but not the attribute "bounds"
         meth_regex = "(?:{})".format("|".join(methods))
         clim_containing_vars = ds.get_variables_by_attributes(
-                                        climatology=lambda s: s is not None)
+            climatology=lambda s: s is not None)
         clim_var = clim_containing_vars[0] if clim_containing_vars else None
         if clim_var:
             if hasattr(clim_var, 'bounds'):
@@ -2784,7 +2794,6 @@ class CFBaseCheck(BaseCheck):
                 return ret_val
             # handle 1-d and 2d coordinate bounds
             if (clim_var.ndim + 1 != ds.variables[clim_var.climatology].ndim):
-                valid = False
                 # Probably realistically need two dimensions in majority of
                 # practical cases.
                 reasoning.append('The number of dimensions of the climatology variable %s is %s, but the '
@@ -2800,17 +2809,18 @@ class CFBaseCheck(BaseCheck):
             # make sure last elements are boundary variable specific dimensions
             elif (clim_var.dimensions[:] !=
                   ds.variables[clim_var.climatology].dimensions[:clim_var.ndim]):
-                valid = False
-                reasoning.append(u"Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
-                                ds.variables[clim_var.climatology].dimensions))
+                reasoning.append(
+                    u"Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
+                        ds.variables[clim_var.climatology].dimensions)
+                )
                 return ret_val
             elif ds.dimensions[ds.variables[clim_var.climatology].dimensions[-1]].size != 2:
-                valid = False
-                reasoning.append(u"Climatology dimension {} should only contain two elements".format(
-                                boundary_variable.dimensions))
+                reasoning.append(
+                    u"Climatology dimension {} should only contain two elements".format(
+                        boundary_variable.dimensions)
+                )
         # catchall
         return ret_val
-
 
         # otherwise match the following values with for variable with
         # `cell_methods` attributes
@@ -2841,7 +2851,6 @@ class CFBaseCheck(BaseCheck):
             ret_val.append(result)
 
         return ret_val
-
 
     ###############################################################################
     #
@@ -2941,7 +2950,6 @@ class CFBaseCheck(BaseCheck):
             ret_val.append(result)
 
         return ret_val
-
 
     def check_compression_gathering(self, ds):
         """

@@ -5,12 +5,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import sys
-import os
 import subprocess
 import inspect
 import itertools
 from operator import itemgetter
-import json
 from netCDF4 import Dataset
 from lxml import etree as ET
 from compliance_checker.base import fix_return_value, Result
@@ -129,7 +127,7 @@ class CheckSuite(object):
         Returns a dictionary mapping checker names to a 2-tuple of their grouped scores and errors/exceptions while running checks.
         """
 
-        ret_val  = {}
+        ret_val = {}
         checkers = self._get_valid_checkers(ds, checker_names)
 
         if len(checkers) == 0:
@@ -140,9 +138,9 @@ class CheckSuite(object):
             checker = checker_class()
             checker.setup(ds)
 
-            checks             = self._get_checks(checker, skip_checks)
-            vals               = []
-            errs               = {}   # check method name -> (exc, traceback)
+            checks = self._get_checks(checker, skip_checks)
+            vals = []
+            errs = {}   # check method name -> (exc, traceback)
 
             for c in checks:
                 try:
@@ -196,14 +194,14 @@ class CheckSuite(object):
 
         aggregates['scored_points'] = 0
         aggregates['possible_points'] = 0
-        high_priorities   = []
+        high_priorities = []
         medium_priorities = []
-        low_priorities    = []
-        all_priorities    = []
+        low_priorities = []
+        all_priorities = []
 
-        aggregates['high_count']   = 0
+        aggregates['high_count'] = 0
         aggregates['medium_count'] = 0
-        aggregates['low_count']    = 0
+        aggregates['low_count'] = 0
 
         def named_function(result):
             for child in result.children:
@@ -239,12 +237,12 @@ class CheckSuite(object):
             # do total the points and display the messages
             named_function(res)
 
-        aggregates['high_priorities']   = high_priorities
+        aggregates['high_priorities'] = high_priorities
         aggregates['medium_priorities'] = medium_priorities
-        aggregates['low_priorities']    = low_priorities
-        aggregates['all_priorities']    = all_priorities
-        aggregates['testname']          = check_name
-        aggregates['source_name']       = source_name
+        aggregates['low_priorities'] = low_priorities
+        aggregates['all_priorities'] = all_priorities
+        aggregates['testname'] = check_name
+        aggregates['source_name'] = source_name
         return aggregates
 
     def dict_output(self, check_name, groups, source_name, limit):
@@ -338,31 +336,31 @@ class CheckSuite(object):
             print('\n')
             priority_flag = 3
             for x in range(len(score_list)):
-                if score_list[x][1] == 3 and limit <= 3 :
+                if score_list[x][1] == 3 and limit <= 3:
                     if priority_flag == 3:
                         print('{:^80}'.format("High Priority"))
                         print("-" * 80)
                         print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
                         priority_flag -= 1
-                    print('%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
+                    print('%-40s:%s:%6s/%1s' % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
 
-                elif score_list[x][1] == 2 and limit <= 2 :
+                elif score_list[x][1] == 2 and limit <= 2:
                     if priority_flag == 2:
                         print('\n')
                         print('{:^80}'.format("Medium Priority"))
                         print("-" * 80)
                         print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
                         priority_flag -= 1
-                    print('%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
+                    print('%-40s:%s:%6s/%1s' % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
 
-                elif score_list[x][1] == 1 and limit == 1 :
+                elif score_list[x][1] == 1 and limit == 1:
                     if priority_flag == 1:
                         print('\n')
                         print('{:^80}'.format("Low Priority"))
                         print("-" * 80)
                         print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
                         priority_flag -= 1
-                    print('%-40s:%s:%6s/%1s'  % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
+                    print('%-40s:%s:%6s/%1s' % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
 
                 elif score_list[x][1] == 1 and limit == 1 and priority_flag == 2:
                     print('{:^80}'.format('No medium priority tests present'))
@@ -453,7 +451,7 @@ class CheckSuite(object):
             if res.children:
                 self.print_routine(res.children, indent + 1, priority_flag)
 
-    def reasoning_routine(self, list_of_results, indent, line = True):
+    def reasoning_routine(self, list_of_results, indent, line=True):
         """
         print routine performed
         """
@@ -467,13 +465,18 @@ class CheckSuite(object):
         grouped_sorted = []
         grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)
 
-        wrapper = textwrap.TextWrapper(initial_indent = '', width = 80, subsequent_indent = ' ' * 54)
+        wrapper = textwrap.TextWrapper(initial_indent='', width=80, subsequent_indent=' ' * 54)
         for res in grouped_sorted:
             if (res.value[0] != res.value[1]) and not res.msgs:
                 print('%-39s:%1s:%6s/%2s : %s' % ((indent * '    ' + res.name)[0:39], res.weight, res.value[0], res.value[1], ' '))
 
             if (res.value[0] != res.value[1]) and res.msgs:
-                print(wrapper.fill('%-39s:%1s:%6s/%2s : %s' % ((indent * '    ' + res.name)[0:39], res.weight, res.value[0], res.value[1], ", ".join(res.msgs))))
+                print(wrapper.fill('%-39s:%1s:%6s/%2s : %s' %
+                      ((indent * '    ' + res.name)[0:39],
+                       res.weight,
+                       res.value[0],
+                       res.value[1],
+                       ", ".join(res.msgs))))
 
             if res.children:
                 self.reasoning_routine(res.children, indent + 1, False)
@@ -571,10 +574,10 @@ class CheckSuite(object):
         """
 
         def build_group(label=None, weight=None, value=None, sub=None):
-            label  = label
+            label = label
             weight = weight
-            value  = self._translate_value(value)
-            sub    = sub or []
+            value = self._translate_value(value)
+            sub = sub or []
 
             return Result(weight=weight,
                           value=value,

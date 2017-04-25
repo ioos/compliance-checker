@@ -38,4 +38,3 @@ class BaseTestCase(unittest.TestCase):
             assert result.value is False
         else:
             assert result.value[0] != result.value[1]
-
