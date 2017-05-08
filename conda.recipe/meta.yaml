@@ -1,6 +1,6 @@
 package:
   name: compliance-checker
-  version: 3.0.1
+  version: {{ GIT_DESCRIBE_TAG|replace("v","") }}
 
 source:
   path: ../
@@ -19,11 +19,11 @@ requirements:
     - setuptools
     - arrow
     - cf_units
-    - isodate
+    - isodate 0.5.4
     - jinja2
     - lxml
     - owslib
-    - pygeoif
+    - pygeoif 0.6
     - requests
 
 test:
