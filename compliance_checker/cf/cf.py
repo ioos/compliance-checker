@@ -8,6 +8,7 @@ from compliance_checker.cf import util
 from compliance_checker import cfutil
 from functools import wraps
 from collections import defaultdict
+from warnings import warn
 import numpy as np
 import os
 import re
@@ -148,9 +149,11 @@ class CFBaseCheck(BaseCheck):
 
             self._std_names = util.StandardNameTable(location)
             return True
-        except Exception:
+        except Exception as e:
             # There was an error downloading the CF table. That's ok, we'll just use the packaged version
-            print("Error fetching standard name table. Using packaged v{0}".format(self._std_names._version))
+            msg = ("Problem fetching standard name table:\n{0}\n"
+                   "Using packaged v{1}").format
+            warn(msg(e, self._std_names._version))
             return False
 
     def _find_coord_vars(self, ds, refresh=False):
