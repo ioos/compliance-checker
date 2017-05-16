@@ -348,9 +348,25 @@ class TestCF(BaseTestCase):
         assert u"Boundary variable dimension lon_bnds must have at least 2 elements to form a simplex/closed cell with previous dimensions {}.".format(tuple_format) in messages
 
     def test_cell_measures(self):
-        dataset = self.load_dataset(STATIC_FILES['cf_example_cell_measures'])
-        results = self.cf.check_climatological_statistics(dataset)
+        dataset = self.load_dataset(STATIC_FILES['cell_measure'])
+        results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = self.get_results(results)
+        assert score == out_of
+        assert score > 0
+
+        dataset = self.load_dataset(STATIC_FILES['bad_cell_measure1'])
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = self.get_results(results)
+        message = ("The cell_measures attribute for variable PS is formatted incorrectly.  "
+                   "It should take the form of either 'area: cell_var' or 'volume: cell_var' "
+                   "where cell_var is the variable describing the cell measures")
+        assert message in messages
+
+        dataset = self.load_dataset(STATIC_FILES['bad_cell_measure2'])
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = self.get_results(results)
+        message = 'Cell measure variable PS referred to by box_area is not present in dataset variables'
+        assert message in messages
 
     def test_climatology(self):
         dataset = self.load_dataset(STATIC_FILES['climatology'])
