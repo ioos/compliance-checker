@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, division
+from __future__ import unicode_literals, division, print_function
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.appendix_f import grid_mapping_dict
@@ -11,6 +11,7 @@ from collections import defaultdict
 import numpy as np
 import os
 import re
+import sys
 
 import logging
 
@@ -132,7 +133,7 @@ class CFBaseCheck(BaseCheck):
 
         # If the packaged version is what we're after, then we're good
         if version == self._std_names._version:
-            print("Using packaged standard name table v{0}".format(version))
+            print("Using packaged standard name table v{0}".format(version), file=sys.stderr)
             return False
 
         # Try to download the version specified
@@ -142,15 +143,15 @@ class CFBaseCheck(BaseCheck):
             # Did we already download this before?
             if not os.path.isfile(location):
                 util.download_cf_standard_name_table(version, location)
-                print("Using downloaded standard name table v{0}".format(version))
+                print("Using downloaded standard name table v{0}".format(version), file=sys.stderr)
             else:
-                print("Using cached standard name table v{0} from {1}".format(version, location))
+                print("Using cached standard name table v{0} from {1}".format(version, location), file=sys.stderr)
 
             self._std_names = util.StandardNameTable(location)
             return True
         except Exception:
             # There was an error downloading the CF table. That's ok, we'll just use the packaged version
-            print("Error fetching standard name table. Using packaged v{0}".format(self._std_names._version))
+            print("Error fetching standard name table. Using packaged v{0}".format(self._std_names._version), file=sys.stderr)
             return False
 
     def _find_coord_vars(self, ds, refresh=False):
