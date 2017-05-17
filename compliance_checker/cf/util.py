@@ -1,7 +1,9 @@
+from __future__ import print_function
 import io
 import itertools
 import requests
 import os
+import sys
 from copy import deepcopy
 from collections import defaultdict
 from lxml import etree
@@ -327,7 +329,7 @@ def download_cf_standard_name_table(version, location=None):
     url = "http://cfconventions.org/Data/cf-standard-names/{0}/src/cf-standard-name-table.xml".format(version)
     r = requests.get(url, allow_redirects=True)
     if r.status_code == 200:
-        print("Downloading cf-standard-names table version {0} from: {1}".format(version, url))
+        print("Downloading cf-standard-names table version {0} from: {1}".format(version, url), file=sys.stderr)
         with open(location, 'wb') as f:
             f.write(r.content)
     else:
