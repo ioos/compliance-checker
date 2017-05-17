@@ -2595,40 +2595,40 @@ class CFBaseCheck(BaseCheck):
                                  "'volume: cell_var' where cell_var is the "
                                  "variable describing the cell measures".format(
                                      var.name))
-                continue
-            valid = True
-            cell_meas_var_name = search_res.groups()[0]
-            # TODO: cache previous results
-            if cell_meas_var_name not in ds.variables:
-                valid = False
-                reasoning.append(
-                    "Cell measure variable {} referred to by "
-                    "{} is not present in dataset variables".format(
-                        var.name, cell_meas_var_name)
-                )
             else:
-                cell_meas_var = ds.variables[cell_meas_var_name]
-                if not hasattr(cell_meas_var, 'units'):
+                valid = True
+                cell_meas_var_name = search_res.groups()[0]
+                # TODO: cache previous results
+                if cell_meas_var_name not in ds.variables:
                     valid = False
                     reasoning.append(
-                        "Cell measure variable {} is required "
-                        "to have units attribute defined.".format(
-                            cell_meas_var_name)
+                        "Cell measure variable {} referred to by "
+                        "{} is not present in dataset variables".format(
+                            var.name, cell_meas_var_name)
                     )
-                if not set(cell_meas_var.dimensions).issubset(var.dimensions):
-                    valid = False
-                    reasoning.append(
-                        "Cell measure variable {} must have "
-                        "dimensions which are a subset of "
-                        "those defined in variable {}.".format(
-                            cell_meas_var_name, var.name)
-                    )
+                else:
+                    cell_meas_var = ds.variables[cell_meas_var_name]
+                    if not hasattr(cell_meas_var, 'units'):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} is required "
+                            "to have units attribute defined.".format(
+                                cell_meas_var_name)
+                        )
+                    if not set(cell_meas_var.dimensions).issubset(var.dimensions):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} must have "
+                            "dimensions which are a subset of "
+                            "those defined in variable {}.".format(
+                                cell_meas_var_name, var.name)
+                        )
 
-        result = Result(BaseCheck.MEDIUM,
-                        valid,
-                        ('§7.2 Cell measures', var.name, 'cell_measures'),
-                        reasoning)
-        ret_val.append(result)
+            result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            ('§7.2 Cell measures', var.name, 'cell_measures'),
+                            reasoning)
+            ret_val.append(result)
 
         return ret_val
 
