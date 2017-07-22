@@ -200,7 +200,8 @@ class TestCF(BaseTestCase):
 
     def test_check_conventions_are_cf_16(self):
         """
-        2.6.1 the NUG defined global attribute Conventions to the string value "CF-1.6"
+        2.6.1 the NUG defined global attribute Conventions to the string value
+        "CF-1.6"
         """
         # :Conventions = "CF-1.6"
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
@@ -216,7 +217,9 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['conv_bad'])
         result = self.cf.check_conventions_are_cf_16(dataset)
         self.assertFalse(result.value)
-        assert result.msgs[0] == 'Conventions global attribute does not contain "CF-1.6"'
+        assert result.msgs[0] == ('Conventions global attribute does not contain '
+                                  '"CF-1.6". The CF Checker only supports CF-1.6 '
+                                  'at this time.')
 
     def test_check_convention_globals(self):
         """
