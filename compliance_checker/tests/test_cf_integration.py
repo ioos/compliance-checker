@@ -75,7 +75,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['sldmb_43093_agg'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (137, 145)
+        assert (scored, out_of) == (139, 147)
         assert len(messages) == 8
         assert u'standard_name temperature is not defined in Standard Name Table v36' in messages
         assert (u'auxiliary coordinate specified by the coordinates attribute, precise_lat, '
@@ -101,7 +101,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['l01-met'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (588, 602)
+        assert (scored, out_of) == (590, 604)
         assert len(messages) == 16
 
         # The variable is supposed to be a status flag but it's mislabled
@@ -123,8 +123,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['sp041'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (1188, 1192)
-        assert len(messages) == 4
+        assert (scored, out_of) == (1189, 1194)
+        assert len(messages) == 5
 
         assert (u"lat_qc is not a variable in this dataset") in messages
         assert (u"TrajectoryProfile is not a valid CF featureType. It must be one of point, "
@@ -139,7 +139,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['3mf07'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (418, 426)
+        assert (scored, out_of) == (420, 428)
         assert len(messages) == 10
         assert (u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for "
                 "variable flag (profile)") in messages
@@ -155,7 +155,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ooi_glider'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (593, 597)
+        assert (scored, out_of) == (595, 599)
         assert len(messages) == 4
         assert (u"variable deployment's attribute standard_name must be a non-empty string or "
                 "it should define a long_name attribute.") in messages
@@ -182,7 +182,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['kibesillah'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (197, 200)
+        assert (scored, out_of) == (199, 202)
         assert len(messages) == 3
         assert (u"source should be defined") in messages
         assert (u"references should be defined") in messages
@@ -210,8 +210,8 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['fvcom'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (646, 651)
-        assert len(messages) == 24
+        assert (scored, out_of) == (646, 653)
+        assert len(messages) == 26
 
         for msg in messages:
             if msg.startswith("dimensions for auxiliary coordinate variable siglay"):
@@ -263,4 +263,16 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['NCEI_profile_template_v2_0'])
         check_results = self.cs.run(dataset, [], 'cf')
         scored, out_of, messages = self.get_results(check_results)
-        assert (scored, out_of) == (342, 346)
+        assert (scored, out_of) == (344, 348)
+
+    def test_bad_cf_roles(self):
+        '''
+        Tests the CF checker detects datasets with more than 2 defined cf_role variables
+        '''
+        dataset = self.load_dataset(STATIC_FILES['bad_cf_role'])
+        check_results = self.cs.run(dataset, [], 'cf')
+        scored, out_of, messages = self.get_results(check_results)
+        assert (scored, out_of) == (92, 100)
+        assert ('§9.5 states that datasets should not contain more than two '
+                'variables defining a cf_role attribute.') in messages
+
