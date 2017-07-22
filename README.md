@@ -473,8 +473,8 @@ https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e603
 ## Contributors
 
 - [Dave Foster](https://github.com/daf) &lt;dave@axiomdatascience.com&gt;
-- [Dan Maher](https://github.com/danieljmaher) &lt;daniel.maher@rpsgroup.com&gt;
-- [Luke Campbell](https://github.com/lukecampbell) &lt;luke.campbell@rpsgroup.com&gt;
+- [Dan Maher](https://github.com/danieljmaher) &lt;daniel.maher@gdit.com&gt;
+- [Luke Campbell](https://github.com/lukecampbell) &lt;luke.campbell@gdit.com&gt;
 - [Kyle Wilcox](https://github.com/kwilcox) &lt;kyle@axiomdatascience.com&gt;
 - [Ben Adams](https://github.com/benjwadams) &lt;ben.adams@rpsgroup.com&gt;
 
