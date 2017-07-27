@@ -94,7 +94,9 @@ class TestCFIntegration(BaseTestCase):
         assert (scored, out_of) == (1840, 1841)
         assert len(messages) == 41
         assert (u'Unidentifiable feature for variable Akt_bak') in messages
-        assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
+        assert (u'Conventions global attribute does not contain '
+                 '"CF-1.6". The CF Checker only supports CF-1.6 '
+                 'at this time.') in messages
         assert (u"CF recommends latitude variable 'lat_psi' to use units degrees_north") in messages
 
     def test_l01_met(self):
@@ -117,7 +119,9 @@ class TestCFIntegration(BaseTestCase):
         scored, out_of, messages = self.get_results(check_results)
         assert (scored, out_of) == (109, 110)
         assert len(messages) == 1
-        assert (u'Conventions global attribute does not contain "CF-1.6"') == messages[0]
+        assert (u'Conventions global attribute does not contain '
+                 '"CF-1.6". The CF Checker only supports CF-1.6 '
+                 'at this time.') in messages
 
     def test_sp041(self):
         dataset = self.load_dataset(STATIC_FILES['sp041'])
@@ -176,7 +180,9 @@ class TestCFIntegration(BaseTestCase):
                 "is either 'up' or 'down'") in messages
         assert (u"GRID is not a valid CF featureType. It must be one of point, timeSeries, "
                 "trajectory, profile, timeSeriesProfile, trajectoryProfile") in messages
-        assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
+        assert (u'Conventions global attribute does not contain '
+                 '"CF-1.6". The CF Checker only supports CF-1.6 '
+                 'at this time.') in messages
 
     def test_kibesillah(self):
         dataset = self.load_dataset(STATIC_FILES['kibesillah'])
@@ -221,7 +227,9 @@ class TestCFIntegration(BaseTestCase):
                                  "are not a subset of dimensions for variable u (siglay, nele, time)\""
                                  " not in messages")
         assert (u"Unidentifiable feature for variable x") in messages
-        assert (u'Conventions global attribute does not contain "CF-1.6"') in messages
+        assert (u'Conventions global attribute does not contain '
+                 '"CF-1.6". The CF Checker only supports CF-1.6 '
+                 'at this time.') in messages
         assert (u"siglay shares the same name as one of its dimensions") in messages
 
     def test_ww3(self):

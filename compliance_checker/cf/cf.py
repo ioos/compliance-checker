@@ -738,15 +738,18 @@ class CFBaseCheck(BaseCheck):
         :rtype: compliance_checker.base.Result
         '''
 
-        valid_conventions = ['CF-1.6']
+        valid = False
+        reasoning = []
         if hasattr(ds, 'Conventions'):
             conventions = re.split(',|\s+', getattr(ds, 'Conventions', ''))
-            if any((c.strip() in valid_conventions for c in conventions)):
-                valid = True
-                reasoning = []
+            for convention in conventions:
+                if convention == 'CF-1.6':
+                    valid = True
+                    break
             else:
-                valid = False
-                reasoning = ['Conventions global attribute does not contain "CF-1.6"']
+                reasoning = ['Conventions global attribute does not contain '
+                             '"CF-1.6". The CF Checker only supports CF-1.6 '
+                             'at this time.']
         else:
             valid = False
             reasoning = ['Conventions field is not present']
