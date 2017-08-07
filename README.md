@@ -416,10 +416,14 @@ from compliance_checker.runner import ComplianceChecker, CheckSuite
 check_suite = CheckSuite()
 check_suite.load_all_available_checkers()
 
-# Run cf and adcc checks with normal strictness, verbose text format to stdout
+# Run cf and adcc checks with verbosity level 0, normal strictness,
+# do not skip checks and output text format to stdout
 return_value, errors = ComplianceChecker.run_checker(
                                 '/path/or/url/to/your/dataset',
-                                ['cf', 'acdd'], 0, 'normal', '-', 'text')
+                                ['cf', 'acdd'], 0, 'normal',
+                                skip_checks=None,
+                                output_filename='-',
+                                output_format='text')
 ```
 
 
