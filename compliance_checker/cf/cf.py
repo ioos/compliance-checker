@@ -1181,7 +1181,7 @@ class CFBaseCheck(BaseCheck):
                 continue
 
             for ancillary_variable in ancillary_variables.split():
-                valid_ancillary.assert_true(ancillary_variables in ds.variables,
+                valid_ancillary.assert_true(ancillary_variable in ds.variables,
                                             "{} is not a variable in this dataset".format(ancillary_variable))
 
             ret_val.append(valid_ancillary.to_result())
