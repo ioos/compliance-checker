@@ -3100,16 +3100,21 @@ class CFBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: compliance_checker.base.Result
         """
-        ret_val = []
         valid_roles = ['timeseries_id', 'profile_id', 'trajectory_id']
+        variable_count = 0
         for variable in ds.get_variables_by_attributes(cf_role=lambda x: x is not None):
+            variable_count += 1
             name = variable.name
             valid_cf_role = TestCtx(BaseCheck.HIGH, '§9.5 {} contains a valid cf_role attribute'.format(name))
             cf_role = variable.cf_role
             valid_cf_role.assert_true(cf_role in valid_roles,
                                       "{} is not a valid cf_role value. It must be one of {}"
                                       "".format(name, ', '.join(valid_roles)))
-        return ret_val
+        valid_cf_role.assert_true(variable_count < 3,
+                                  ('§9.5 states that datasets should not '
+                                   'contain more than two variables defining a '
+                                   'cf_role attribute.'))
+        return valid_cf_role.to_result()
 
     def check_variable_features(self, ds):
         '''

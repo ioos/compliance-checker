@@ -111,4 +111,5 @@ STATIC_FILES = {
     'cell_measure'                         : get_filename('tests/data/cell_measure.cdl'),
     'bad_cell_measure1'                    : get_filename('tests/data/bad_cell_measure1.cdl'),
     'bad_cell_measure2'                    : get_filename('tests/data/bad_cell_measure2.cdl'),
+    'bad_cf_role'                          : get_filename('tests/data/bad_cf_role.cdl'),
 }
