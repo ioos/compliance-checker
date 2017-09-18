@@ -6,11 +6,12 @@ from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
 from compliance_checker.cf.appendix_f import grid_mapping_dict
 from compliance_checker.cf import util
 from compliance_checker import cfutil
+from cf_units import Unit
 from functools import wraps
 from collections import defaultdict
 import numpy as np
 import os
-import re
+import regex
 import sys
 
 import logging
@@ -387,7 +388,7 @@ class CFBaseCheck(BaseCheck):
             '_Unsigned'
         ]
 
-        rname = re.compile("^[A-Za-z][A-Za-z0-9_]*$")
+        rname = regex.compile("^[A-Za-z][A-Za-z0-9_]*$")
 
         for name, variable in ds.variables.items():
             variable_naming.assert_true(rname.match(name) is not None,
@@ -659,14 +660,12 @@ class CFBaseCheck(BaseCheck):
 
     def _dims_in_order(self, dimension_order):
         '''
-        Returns True if the dimensions are in order U*, T, Z, Y, X
-
         :param list dimension_order: A list of axes
         :rtype: bool
         :return: Returns True if the dimensions are in order U*, T, Z, Y, X,
                  False otherwise
         '''
-        regx = re.compile(r'^L?I?U*T?Z?(?:(?:Y?X?)|(?:C?)|(?:A+))$')
+        regx = regex.compile(r'^L?I?U*T?Z?(?:(?:Y?X?)|(?:C?)|(?:A+))$')
         dimension_string = ''.join(dimension_order)
         return regx.match(dimension_string) is not None
 
@@ -741,7 +740,7 @@ class CFBaseCheck(BaseCheck):
         valid = False
         reasoning = []
         if hasattr(ds, 'Conventions'):
-            conventions = re.split(',|\s+', getattr(ds, 'Conventions', ''))
+            conventions = regex.split(',|\s+', getattr(ds, 'Conventions', ''))
             for convention in conventions:
                 if convention == 'CF-1.6':
                     valid = True
@@ -896,7 +895,8 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(valid_udunits)
 
             if isinstance(standard_name, basestring):
-                valid_standard_units = self._check_valid_standard_units(ds, name)
+                valid_standard_units = self._check_valid_standard_units(ds,
+                                                                        name)
                 ret_val.append(valid_standard_units)
 
         return ret_val
@@ -1376,7 +1376,7 @@ class CFBaseCheck(BaseCheck):
         valid_meanings.assert_true(len(flag_meanings) > 0,
                                    "flag_meanings can't be empty")
 
-        flag_regx = re.compile("^[0-9A-Za-z_\-.+@]+$")
+        flag_regx = regex.compile("^[0-9A-Za-z_\-.+@]+$")
         meanings = flag_meanings.split()
         for meaning in meanings:
             if flag_regx.match(meaning) is None:
@@ -1785,7 +1785,7 @@ class CFBaseCheck(BaseCheck):
         if standard_name not in dimless:
             return valid_formula_terms.to_result()
 
-        regx_match = re.match(dimless[standard_name], formula_terms)
+        regx_match = regex.match(dimless[standard_name], formula_terms)
         valid_formula_terms.assert_true(regx_match is not None,
                                         "formula_terms are invalid for {}, please see appendix D of CF 1.6"
                                         "".format(standard_name))
@@ -2589,7 +2589,7 @@ class CFBaseCheck(BaseCheck):
                                                    c is not None)
         for var in variables:
             search_str = '^(?:area|volume): (\w+)$'
-            search_res = re.search(search_str, var.cell_measures)
+            search_res = regex.search(search_str, var.cell_measures)
             if not search_res:
                 valid = False
                 reasoning.append("The cell_measures attribute for variable {} "
@@ -2659,7 +2659,7 @@ class CFBaseCheck(BaseCheck):
         :return: List of results
         """
 
-        methods = [
+        methods = {
             "point",
             "sum",
             "mean",
@@ -2670,13 +2670,12 @@ class CFBaseCheck(BaseCheck):
             "variance",
             "mode",
             "median"
-        ]
+        }
 
         ret_val = []
-        # The basic format is `name: method (
-        psep = re.compile(r'((?P<var>\w+): (?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
-                          '?(?P<over>over (?P<otypevar>\w+))?| ?)(?P<brace>\(((?P<brace_wunit>\w+): '
-                          '(\d+) (?P<unit>\w+)|(?P<brace_opt>\w+): (\w+))\))*)')
+        psep = regex.compile(r'((?P<vars>\w+: )+(?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
+                              '?(?P<over>over (?P<otypevar>\w+))?| ?)(?P<brace>\(((?P<brace_wunit>\w+): '
+                              '(?P<interval_val>\w+) (?P<interval_unit>\w+)|(?P<brace_opt>\w+): (\w+))\))?)*')
 
         for var in ds.get_variables_by_attributes(cell_methods=lambda x: x is not None):
             if not getattr(var, 'cell_methods', ''):
@@ -2686,7 +2685,7 @@ class CFBaseCheck(BaseCheck):
 
             valid_attribute = TestCtx(BaseCheck.HIGH,
                                       '§7.1 {} has a valid cell_methods attribute format'.format(var.name))
-            valid_attribute.assert_true(re.match(psep, method) is not None,
+            valid_attribute.assert_true(regex.match(psep, method) is not None,
                                         '"{}" is not a valid format for cell_methods attribute'
                                         ''.format(method))
             ret_val.append(valid_attribute.to_result())
@@ -2695,18 +2694,23 @@ class CFBaseCheck(BaseCheck):
                                        '§7.3 {} has valid names in cell_methods attribute'.format(var.name))
 
             # check that the name is valid
-            for match in re.finditer(psep, method):
-                valid = False
-                if match.group('var') in var.dimensions:
-                    valid = True
-                elif match.group('var') == 'area':
-                    valid = True
-                elif match.group('var') in getattr(var, "coordinates", ""):
-                    valid = True
+            for match in regex.finditer(psep, method):
+                # it is possible to have "var1: var2: ... varn: ...", so handle
+                # that case
+                for var_raw_str in match.captures('vars'):
+                    # strip off the ' :' at the end of each match
+                    var_str = var_raw_str[:-2]
+                    if (var_str in var.dimensions or
+                        var_str == 'area' or
+                        var_str in getattr(var, "coordinates", "")):
 
-                valid_cell_names.assert_true(valid,
-                                             'cell_methods name component {} does not match a dimension, area or auxiliary coordinate'
-                                             ''.format(match.group('var')))
+                        valid = True
+                    else:
+                        valid = False
+
+                    valid_cell_names.assert_true(valid,
+                                                'cell_methods name component {} does not match a dimension, area or auxiliary coordinate'
+                                                ''.format(var_str))
 
             ret_val.append(valid_cell_names.to_result())
 
@@ -2714,7 +2718,7 @@ class CFBaseCheck(BaseCheck):
             valid_cell_methods = TestCtx(BaseCheck.MEDIUM,
                                          '§7.3 {} has valid methods in cell_methods attribute'.format(var.name))
 
-            for match in re.finditer(psep, method):
+            for match in regex.finditer(psep, method):
                 valid_cell_methods.assert_true(match.group('method') in methods,
                                                '{}:cell_methods contains an invalid method: {}'
                                                ''.format(var.name, match.group('method')))
@@ -2724,12 +2728,29 @@ class CFBaseCheck(BaseCheck):
             valid_modifier = TestCtx(BaseCheck.MEDIUM,
                                      '§7.3.3 {} has valid cell_methods modifiers'.format(var.name))
 
-            for match in re.finditer(psep, method):
+            for match in regex.finditer(psep, method):
                 if match.group('brace') is not None:
-                    valid_modifier.assert_true(match.group('brace_wunit') in ('interval', 'comment', 'area'),
+                    valid_modifier.assert_true(match.group('brace_wunit') in {'interval', 'comment', 'area'},
                                                '{}:cell_methods contains an invalid modifier: {}. It should be one '
                                                'of interval, comment or area.'
                                                ''.format(var.name, match.group('brace_wunit')))
+                    if match.group('brace_wunit') == 'interval':
+                        # attempt to get the number for the interval
+                        valid_modifier.out_of += 2
+                        try:
+                            float(match.group('interval_val'))
+                        except ValueError:
+                            valid_modifier.messages.append('{}:cell_methods contains an interval value that does not parse as a numeric value: "{}".'.format(var.name, match.group('interval_val')))
+                        else:
+                            valid_modifier.score += 1
+
+                        # then the units
+                        try:
+                            Unit(match.group('interval_unit'))
+                        except ValueError:
+                            valid_modifier.messages.append('{}:cell_methods interval units "{}" is not parsable by UDUNITS.'.format(var.name, match.group('interval_unit')))
+                        else:
+                            valid_modifier.score += 1
 
             if valid_modifier.out_of > 0:
                 ret_val.append(valid_modifier.to_result())
@@ -2847,7 +2868,7 @@ class CFBaseCheck(BaseCheck):
         for cell_method_var in ds.get_variables_by_attributes(cell_methods=lambda s: s is not
                                                               None):
             total_climate_count += 1
-            if not re.search(re_string, cell_method_var.cell_methods):
+            if not regex.search(re_string, cell_method_var.cell_methods):
                 reasoning.append('The "time: method within years/days over years/days" format is not correct in variable {}.'.format(cell_method_var.name))
             else:
                 valid_climate_count += 1
