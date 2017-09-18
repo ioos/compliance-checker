@@ -8,19 +8,14 @@ from netCDF4 import Dataset
 from tempfile import gettempdir
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests import BaseTestCase
+from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
 
 import os
 import re
 import sys
 import pytest
 
-
-class MockVariable(object):
-    '''
-    For mocking a dataset variable
-    '''
-    pass
-
+from operator import sub
 
 class TestCF(BaseTestCase):
 
@@ -966,6 +961,29 @@ class TestCF(BaseTestCase):
         assert result
         result = result_dict[u'§7.3 temperature has valid names in cell_methods attribute']
         assert result
+
+        nc_obj = MockTimeSeries()
+        nc_obj.createVariable('temperature', 'd', ('time',))
+
+        temp = nc_obj.variables['temperature']
+        temp.cell_methods = 'lat: lon: mean depth: mean (interval: 20 meters)'
+        results = self.cf.check_cell_methods(nc_obj)
+        scored, out_of, messages = self.get_results(results)
+        result_dict = {result.name: result for result in results}
+        modifier_results = result_dict[u'§7.3.3 temperature has valid cell_methods modifiers']
+        self.assertTrue(sub(*modifier_results.value[::-1]) == 0)
+        # modify the cell methods to something invalid
+        temp.cell_methods = 'lat: lon: mean depth: mean (interval: x whizbangs)'
+        results = self.cf.check_cell_methods(nc_obj)
+        scored, out_of, messages = self.get_results(results)
+        result_dict = {result.name: result for result in results}
+        modifier_results = result_dict[u'§7.3.3 temperature has valid cell_methods modifiers']
+        self.assertFalse(sub(*modifier_results.value[::-1]) == 0)
+        self.assertTrue('temperature:cell_methods contains an interval value that does not parse as a numeric value: "x".'
+                        in messages)
+        self.assertTrue('temperature:cell_methods interval units "whizbangs" is not parsable by UDUNITS.'
+                        in messages)
+
 
     # --------------------------------------------------------------------------------
     # Utility Method Tests
