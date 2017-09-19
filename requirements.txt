@@ -7,7 +7,5 @@ Jinja2>=2.7.3
 setuptools>=15.0
 pygeoif>=0.6
 netCDF4>=1.2.2
-# note that `pip freeze` will report the version as "regex==2017.7.28", but
-# conda must use "regex==2017.07.28"
 regex==2017.07.28
 arrow>=0.7.0

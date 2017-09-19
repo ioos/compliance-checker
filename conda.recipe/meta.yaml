@@ -24,6 +24,7 @@ requirements:
     - lxml
     - owslib
     - pygeoif
+    - regex=2017.07.28
     - requests
 
 test:
