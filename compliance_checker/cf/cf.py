@@ -1521,10 +1521,14 @@ class CFBaseCheck(BaseCheck):
 
             # Check that latitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Latitude variable {} uses recommended units'.format(latitude))
-            if 'rotated_latitude_longitude' in grid_mapping and standard_name == 'grid_latitude':
-                allowed_units.assert_true(units == 'degrees',
-                                          "latitude variable '{}' should use degrees for units in rotated pole grid"
-                                          "".format(latitude))
+            if standard_name == 'grid_latitude':
+                e_n_units = cfutil.VALID_LAT_UNITS + cfutil.VALID_LON_UNITS
+                # check that the units aren't in east and north degrees units,
+                # but are convertible to angular units
+                allowed_units.assert_true(units not in e_n_units and
+                                          Unit(units).origin == 'degree',
+                                          "Grid latitude variable '{}' should use degree equivalent units without east or north components."
+                                          "Current units are {}".format(latitude, units))
             else:
                 allowed_units.assert_true(units_is_string and units.lower() in allowed_lat_units,
                                           "latitude variable '{}' should define valid units for latitude"
@@ -1611,10 +1615,14 @@ class CFBaseCheck(BaseCheck):
 
             # Check that longitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Longitude variable {} uses recommended units'.format(longitude))
-            if 'rotated_latitude_longitude' in grid_mapping and standard_name == 'grid_longitude':
-                allowed_units.assert_true(units == 'degrees',
-                                          "longitude variable '{}' should use degrees for units in rotated pole grid"
-                                          "".format(longitude))
+            if standard_name == 'grid_longitude':
+                e_n_units = cfutil.VALID_LAT_UNITS + cfutil.VALID_LON_UNITS
+                # check that the units aren't in east and north degrees units,
+                # but are convertible to angular units
+                allowed_units.assert_true(units not in e_n_units and
+                                          Unit(units).origin == 'degree',
+                                          "Grid longitude variable '{}' should use degree equivalent units without east or north components."
+                                          "Current units are {}".format(longitude, units))
             else:
                 allowed_units.assert_true(units_is_string and units.lower() in allowed_lon_units,
                                           "longitude variable '{}' should define valid units for longitude"
@@ -2151,7 +2159,7 @@ class CFBaseCheck(BaseCheck):
             # contents of the `coordinates` attribute only.
             axis_map = cfutil.get_axis_map(ds, variable)
 
-            # Make sure we can find latitude and it's dimensions are a subset
+            # Make sure we can find latitude and its dimensions are a subset
             found_lat = False
             for lat in axis_map['Y']:
                 is_subset_dims = set(ds.variables[lat].dimensions).issubset(dimensions)
@@ -2163,7 +2171,7 @@ class CFBaseCheck(BaseCheck):
                                    '{} is not associated with a coordinate defining true latitude '
                                    'and sharing a subset of dimensions'.format(variable))
 
-            # Make sure we can find longitude and it's dimensions are a subset
+            # Make sure we can find longitude and its dimensions are a subset
             found_lon = False
             for lon in axis_map['X']:
                 is_subset_dims = set(ds.variables[lon].dimensions).issubset(dimensions)
@@ -2288,7 +2296,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
 
-        # Check the grid_mapping attribute to be a non-empty string and that it's reference exists
+        # Check the grid_mapping attribute to be a non-empty string and that its reference exists
         for variable in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
             grid_mapping = getattr(variable, 'grid_mapping', None)
             defines_grid_mapping = TestCtx(BaseCheck.HIGH,
