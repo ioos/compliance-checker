@@ -74,10 +74,12 @@ class ComplianceChecker(object):
                                                    limit)
 
         elif output_format == 'html':
-            groups = cls.html_output(cs, score_groups, output_filename, ds_loc, limit)
+            groups = cls.html_output(cs, score_groups, output_filename, ds_loc,
+                                     limit)
 
         elif output_format == 'json':
-            groups = cls.json_output(cs, score_groups, output_filename, ds_loc, limit)
+            groups = cls.json_output(cs, score_groups, output_filename, ds_loc,
+                                     limit)
 
         else:
             raise TypeError('Invalid format %s' % output_format)
@@ -167,7 +169,7 @@ class ComplianceChecker(object):
         '''
         errors_occurred = False
         for checker, rpair in score_groups.items():
-            groups, errors = rpair
+            errors = rpair[-1]
             if len(errors):
                 errors_occurred = True
                 print("WARNING: The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker, file=sys.stderr)

@@ -14,6 +14,8 @@ requirements:
   build:
     - python
     - setuptools
+  # FIXME: the packages here should have specific versions tagged like the pip
+  #        requirements to avoid accidentally breaking the build
   run:
     - python
     - setuptools
@@ -24,6 +26,7 @@ requirements:
     - lxml
     - owslib
     - pygeoif
+    - regex 2017.07.28
     - requests
 
 test:
