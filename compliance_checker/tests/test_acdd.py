@@ -416,3 +416,26 @@ class TestACDD1_3(BaseTestCase):
 
         result = self.acdd.check_vertical_extents(self.ds)
         self.assert_result_is_good(result)
+
+    def test_time_extents(self):
+        '''
+        Test that the time extents are being checked
+        '''
+        result = self.acdd.check_time_extents(self.ds)
+        self.assert_result_is_good(result)
+
+        empty_ds = Dataset(os.devnull, 'w', diskless=True)
+        self.addCleanup(empty_ds.close)
+
+        # The dataset needs at least one variable to check that it's missing
+        # all the required attributes.
+        empty_ds.createDimension('time', 1)
+        time_var = empty_ds.createVariable('time', 'float32', ('time',))
+        time_var.units = 'seconds since 1970-01-01 00:00:00 UTC'
+        time_var[:] = [1451692800]  # 20160102T000000Z in seconds since epoch
+        empty_ds.time_coverage_start = '20160102T000000Z'
+        empty_ds.time_coverage_end = '20160102T000000Z'
+
+
+        result = self.acdd.check_time_extents(empty_ds)
+        self.assert_result_is_good(result)

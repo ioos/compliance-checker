@@ -452,7 +452,7 @@ class ACDDBaseCheck(BaseCheck):
         if not (hasattr(ds, 'time_coverage_start') and hasattr(ds, 'time_coverage_end')):
             return
 
-        # allows non-ISO 8601 formatted dates
+        # Parse the ISO 8601 formatted dates
         try:
             t_min = dateparse(ds.time_coverage_start)
             t_max = dateparse(ds.time_coverage_end)
@@ -460,7 +460,7 @@ class ACDDBaseCheck(BaseCheck):
             return Result(BaseCheck.MEDIUM,
                           False,
                           'time_coverage_extents_match',
-                          ['time_coverage variables are not formatted properly. Please ensure they are valid ISO-8601 time strings'])
+                          ['time_coverage attributes are not formatted properly. Use the ISO 8601:2004 date format, preferably the extended format.'])
 
         timevar = cfutil.get_time_variable(ds)
 
