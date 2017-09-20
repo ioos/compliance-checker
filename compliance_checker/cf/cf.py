@@ -2719,7 +2719,8 @@ class CFBaseCheck(BaseCheck):
                                          '§7.3 {} has valid methods in cell_methods attribute'.format(var.name))
 
             for match in regex.finditer(psep, method):
-                valid_cell_methods.assert_true(match.group('method') in methods,
+                # CF section 7.3 - "Case is not significant in the method name."
+                valid_cell_methods.assert_true(match.group('method').lower() in methods,
                                                '{}:cell_methods contains an invalid method: {}'
                                                ''.format(var.name, match.group('method')))
 
