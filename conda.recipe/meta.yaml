@@ -19,7 +19,6 @@ requirements:
   run:
     - python
     - setuptools
-    - arrow
     - cf_units
     - isodate
     - jinja2
@@ -28,6 +27,7 @@ requirements:
     - pygeoif
     - regex 2017.07.28
     - requests
+    - pendulum
 
 test:
   source_files:

@@ -14,7 +14,7 @@ from datetime import timedelta
 from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
                                      score_group, Result, ratable_result)
 from compliance_checker.cf.util import _possiblexunits, _possibleyunits
-from compliance_checker.util import datetime_is_iso, dateparse_iso
+from compliance_checker.util import datetime_is_iso, dateparse
 from compliance_checker import cfutil
 from pygeoif import from_wkt
 
@@ -454,13 +454,13 @@ class ACDDBaseCheck(BaseCheck):
 
         # Parse the ISO 8601 formatted dates
         try:
-            t_min = dateparse_iso(ds.time_coverage_start)
-            t_max = dateparse_iso(ds.time_coverage_end)
+            t_min = dateparse(ds.time_coverage_start)
+            t_max = dateparse(ds.time_coverage_end)
         except:
             return Result(BaseCheck.MEDIUM,
                           False,
                           'time_coverage_extents_match',
-                          ['time_coverage attributes are not formatted properly. Use the ISO 8601:2004 date format, preferably the extended format as recommended in the Attribute Content Guidance section.'])
+                          ['time_coverage attributes are not formatted properly. Use the ISO 8601:2004 date format, preferably the extended format.'])
 
         timevar = cfutil.get_time_variable(ds)
 
