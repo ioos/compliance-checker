@@ -995,6 +995,10 @@ class TestCF(BaseTestCase):
         temp.cell_methods = 'lat: lon: mean depth: mean (invalid_keyword: this is invalid)'
         results = self.cf.check_cell_methods(nc_obj)
         self.assertTrue('Invalid cell_methods keyword "invalid_keyword" for variable temperature. Must be one of [interval, comment]')
+        temp.cell_methods = 'lat: lon: mean depth: mean (interval: 0.2 m comment: This should come last interval: 0.01 degrees)'
+        results = self.cf.check_cell_methods(nc_obj)
+        self.assertTrue('The non-standard "comment:" element must come after any standard elements in cell_methods for variable temperature')
+
 
 
     # --------------------------------------------------------------------------------
