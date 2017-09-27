@@ -971,14 +971,14 @@ class TestCF(BaseTestCase):
         scored, out_of, messages = self.get_results(results)
         result_dict = {result.name: result for result in results}
         modifier_results = result_dict[u'§7.3.3 temperature has valid cell_methods modifiers']
-        self.assertTrue(modifier_results.value == (2, 2))
+        self.assertTrue(modifier_results.value == (3, 3))
         # modify the cell methods to something invalid
         temp.cell_methods = 'lat: lon: mean depth: mean (interval: x whizbangs)'
         results = self.cf.check_cell_methods(nc_obj)
         scored, out_of, messages = self.get_results(results)
         result_dict = {result.name: result for result in results}
         modifier_results = result_dict[u'§7.3.3 temperature has valid cell_methods modifiers']
-        self.assertFalse(modifier_results.value == (2, 2))
+        self.assertFalse(modifier_results.value == (3, 3))
         self.assertTrue('temperature:cell_methods contains an interval value that does not parse as a numeric value: "x".'
                         in messages)
         self.assertTrue('temperature:cell_methods interval units "whizbangs" is not parsable by UDUNITS.'
@@ -998,6 +998,9 @@ class TestCF(BaseTestCase):
         temp.cell_methods = 'lat: lon: mean depth: mean (interval: 0.2 m comment: This should come last interval: 0.01 degrees)'
         results = self.cf.check_cell_methods(nc_obj)
         self.assertTrue('The non-standard "comment:" element must come after any standard elements in cell_methods for variable temperature')
+        temp.cell_methods = 'lat: lon: mean depth: mean (interval 0.2 m interval: 0.01 degrees)'
+        results = self.cf.check_cell_methods(nc_obj)
+        self.assertTrue('Parenthetical content inside cell_methods is not well formed: interval 0.2 m interval: 0.01 degrees')
 
 
 

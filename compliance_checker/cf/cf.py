@@ -2635,6 +2635,7 @@ class CFBaseCheck(BaseCheck):
 
         return ret_val
 
+
     def check_cell_methods(self, ds):
         """
         7.3 To describe the characteristic of a field that is represented by cell values, we define the cell_methods attribute
@@ -2673,7 +2674,6 @@ class CFBaseCheck(BaseCheck):
         }
 
         ret_val = []
-        # use zero-width assertion here?
         psep = regex.compile(r'(?P<vars>\w+: )+(?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
                              '?(?P<over>over (?P<otypevar>\w+))?| ?)(?:\((?P<paren_contents>[^)]*)\))?')
 
@@ -2726,71 +2726,87 @@ class CFBaseCheck(BaseCheck):
 
             ret_val.append(valid_cell_methods.to_result())
 
-            valid_modifier = TestCtx(BaseCheck.MEDIUM,
-                                     '§7.3.3 {} has valid cell_methods modifiers'.format(var.name))
-
             for match in regex.finditer(psep, method):
                 if match.group('paren_contents') is not None:
                     # split along spaces followed by words with a colon
                     # not sure what to do if a comment contains a colon!
-                    paren_pairs = regex.split(r'\s+(?=\w+:)',
-                                              match.group('paren_contents'))
-                    split_vals = [regex.split('(?<=:)\s*', pp, 1) for pp in
-                                    paren_pairs]
-                    # if there are no colons, this is a simple comment
-                    # TODO: are empty comments considered valid?
-                    if sum(len(subl) for subl in split_vals) == 1:
-                        valid_modifier.out_of += 1
-                        valid_modifier.score += 1
-                    else:
-                        # otherwise, we must split further with intervals coming
-                        # first, followed by non-standard comments
-                        for i, (keyword, val) in enumerate(split_vals):
-                            if keyword == 'interval:':
-                                valid_modifier.out_of += 2
-                                matches = regex.match(r'^\s*(?P<interval_number>\S+)\s+(?P<interval_units>\S+)\s*$', val)
-                                # attempt to get the number for the interval
-                                if not matches:
-                                    valid_modifier.messages.append('{}:cell_methods contains an interval specification that does not parse: "{}". Should be in format "interval: <number> <units>"'.format(var.name, val))
-                                else:
-                                    try:
-                                        float(matches.group('interval_number'))
-                                    except ValueError:
-                                        valid_modifier.messages.append('{}:cell_methods contains an interval value that does not parse as a numeric value: "{}".'.format(var.name, matches.group('interval_number')))
-                                    else:
-                                        valid_modifier.score += 1
-
-                                    # then the units
-                                    try:
-                                        Unit(matches.group('interval_units'))
-                                    except ValueError:
-                                        valid_modifier.messages.append('{}:cell_methods interval units "{}" is not parsable by UDUNITS.'.format(var.name, matches.group('interval_units')))
-                                    else:
-                                        valid_modifier.score += 1
-                            elif keyword == 'comment:':
-                                # comments can't really be invalid, except
-                                # if they come first or aren't last, and
-                                # maybe if they contain colons embedded in the
-                                # comment string
-                                valid_modifier.out_of += 1
-                                if len(split_vals) == 1:
-                                    valid_modifier.messages.append('If there is no standardized information, the keyword comment: should be omitted for variable {}'.format(var.name))
-                                # otherwise check that the comment is the last
-                                # item in the parentheses
-                                elif i != len(split_vals) - 1:
-                                    valid_modifier.messages.append('The non-standard "comment:" element must come after any standard elements in cell_methods for variable {}'.format(var.name))
-                                #
-                                else:
-                                    valid_modifier.score += 1
-                            else:
-                                valid_modifier.out_of += 1
-                                valid_modifier.messages.append('Invalid cell_methods keyword "{}" for variable {}. Must be one of [interval, comment]'.format(keyword, var.name))
-
-
-            if valid_modifier.out_of > 0:
-                ret_val.append(valid_modifier.to_result())
+                    ret_val.append(self._check_cell_methods_paren_info(match.group('paren_contents'), var).to_result())
 
         return ret_val
+
+    def _check_cell_methods_paren_info(self, paren_contents, var):
+        """
+        Checks that the spacing and/or comment info contained inside the
+        parentheses in cell_methods is well-formed
+        """
+        #valid_info = TestCtx(BaseCheck.MEDIUM,
+        #                            '§7.3.2 {} has valid cell_methods spacing/other info'.format(var.name))
+        valid_info = TestCtx(BaseCheck.MEDIUM,
+                             '§7.3.3 {} has valid cell_methods modifiers'.format(var.name))
+        # if there are no colons, this is a simple comment
+        # TODO: are empty comments considered valid?
+        if ':' not in paren_contents:
+            valid_info.out_of += 1
+            valid_info.score += 1
+            return valid_info
+        # otherwise, split into k/v pairs
+        kv_pair_pat = r'(\S+:)\s+(.*(?=\s+\w+:)|[^:]+$)\s*'
+        # otherwise, we must split further with intervals coming
+        # first, followed by non-standard comments
+        # we need the count of the matches, and re.findall() only returns
+        # groups if they are present and we wish to see if the entire match
+        # object concatenated together is the same as the original string
+        pmatches = [m for m in regex.finditer(kv_pair_pat, paren_contents)]
+        for i, pmatch in enumerate(pmatches):
+            keyword, val = pmatch.groups()
+            if keyword == 'interval:':
+                valid_info.out_of += 2
+                interval_matches = regex.match(r'^\s*(?P<interval_number>\S+)\s+(?P<interval_units>\S+)\s*$', val)
+                # attempt to get the number for the interval
+                if not interval_matches:
+                    valid_info.messages.append('{}:cell_methods contains an interval specification that does not parse: "{}". Should be in format "interval: <number> <units>"'.format(var.name, val))
+                else:
+                    try:
+                        float(interval_matches.group('interval_number'))
+                    except ValueError:
+                        valid_info.messages.append('{}:cell_methods contains an interval value that does not parse as a numeric value: "{}".'.format(var.name, interval_matches.group('interval_number')))
+                    else:
+                        valid_info.score += 1
+
+                    # then the units
+                    try:
+                        Unit(interval_matches.group('interval_units'))
+                    except ValueError:
+                        valid_info.messages.append('{}:cell_methods interval units "{}" is not parsable by UDUNITS.'.format(var.name, interval_matches.group('interval_units')))
+                    else:
+                        valid_info.score += 1
+            elif keyword == 'comment:':
+                # comments can't really be invalid, except
+                # if they come first or aren't last, and
+                # maybe if they contain colons embedded in the
+                # comment string
+                valid_info.out_of += 1
+                if len(pmatches) == 1:
+                    valid_info.messages.append('If there is no standardized information, the keyword comment: should be omitted for variable {}'.format(var.name))
+                # otherwise check that the comment is the last
+                # item in the parentheses
+                elif i != len(pmatches) - 1:
+                    valid_info.messages.append('The non-standard "comment:" element must come after any standard elements in cell_methods for variable {}'.format(var.name))
+                #
+                else:
+                    valid_info.score += 1
+            else:
+                valid_info.out_of += 1
+                valid_info.messages.append('Invalid cell_methods keyword "{}" for variable {}. Must be one of [interval, comment]'.format(keyword, var.name))
+
+
+        # Ensure concatenated reconstructed matches are the same as the
+        # original string.  If they're not, there's likely a formatting error
+        valid_info.assert_true(''.join(m.group(0)
+                                       for m in pmatches) == paren_contents,
+                   "Parenthetical content inside cell_methods is not well formed: {}".format(paren_contents))
+
+        return valid_info
 
     def check_climatological_statistics(self, ds):
         """
