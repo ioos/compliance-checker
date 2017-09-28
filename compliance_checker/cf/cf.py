@@ -1526,8 +1526,8 @@ class CFBaseCheck(BaseCheck):
                 # check that the units aren't in east and north degrees units,
                 # but are convertible to angular units
                 allowed_units.assert_true(units not in e_n_units and
-                                          Unit(units).origin == 'degree',
-                                          "Grid latitude variable '{}' should use degree equivalent units without east or north components."
+                                          Unit(units) == Unit('degree'),
+                                          "Grid latitude variable '{}' should use degree equivalent units without east or north components. "
                                           "Current units are {}".format(latitude, units))
             else:
                 allowed_units.assert_true(units_is_string and units.lower() in allowed_lat_units,
@@ -1620,8 +1620,8 @@ class CFBaseCheck(BaseCheck):
                 # check that the units aren't in east and north degrees units,
                 # but are convertible to angular units
                 allowed_units.assert_true(units not in e_n_units and
-                                          Unit(units).origin == 'degree',
-                                          "Grid longitude variable '{}' should use degree equivalent units without east or north components."
+                                          Unit(units) == Unit('degree'),
+                                          "Grid longitude variable '{}' should use degree equivalent units without east or north components. "
                                           "Current units are {}".format(longitude, units))
             else:
                 allowed_units.assert_true(units_is_string and units.lower() in allowed_lon_units,
