@@ -546,6 +546,20 @@ class TestCF(BaseTestCase):
         results = self.cf.check_latitude(dataset)
         scored, out_of, messages = self.get_results(results)
         assert (scored, out_of) == (6, 6)
+        # hack to avoid writing to read-only file
+        dataset.variables['rlat'] = MockVariable(dataset.variables['rlat'])
+        rlat = dataset.variables['rlat']
+        rlat.name = 'rlat'
+        # test with a bad value
+        rlat.units = 'degrees_north'
+        results = self.cf.check_latitude(dataset)
+        scored, out_of, messages = self.get_results(results)
+        wrong_format = "Grid latitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
+        self.assertTrue(wrong_format.format(rlat.name, rlat.units) in messages)
+        rlat.units = 'radians'
+        results = self.cf.check_latitude(dataset)
+        scored, out_of, messages = self.get_results(results)
+        self.assertTrue(wrong_format.format(rlat.name, rlat.units) in messages)
 
     def test_longitude(self):
         '''
@@ -597,6 +611,20 @@ class TestCF(BaseTestCase):
         results = self.cf.check_latitude(dataset)
         scored, out_of, messages = self.get_results(results)
         assert (scored, out_of) == (6, 6)
+        # hack to avoid writing to read-only file
+        dataset.variables['rlon'] = MockVariable(dataset.variables['rlon'])
+        rlon = dataset.variables['rlon']
+        rlon.name = 'rlon'
+        # test with a bad value
+        rlon.units = 'degrees_east'
+        results = self.cf.check_latitude(dataset)
+        scored, out_of, messages = self.get_results(results)
+        wrong_format = "Grid latitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
+        self.assertTrue(wrong_format.format(rlon.name, rlon.units) in messages)
+        rlon.units = 'radians'
+        results = self.cf.check_latitude(dataset)
+        scored, out_of, messages = self.get_results(results)
+        self.assertTrue(wrong_format.format(rlon.name, rlon.units) in messages)
 
     def test_is_vertical_coordinate(self):
         '''
