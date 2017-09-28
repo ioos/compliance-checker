@@ -617,12 +617,12 @@ class TestCF(BaseTestCase):
         rlon.name = 'rlon'
         # test with a bad value
         rlon.units = 'degrees_east'
-        results = self.cf.check_latitude(dataset)
+        results = self.cf.check_longitude(dataset)
         scored, out_of, messages = self.get_results(results)
-        wrong_format = "Grid latitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
+        wrong_format = "Grid longitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
         self.assertTrue(wrong_format.format(rlon.name, rlon.units) in messages)
         rlon.units = 'radians'
-        results = self.cf.check_latitude(dataset)
+        results = self.cf.check_longitude(dataset)
         scored, out_of, messages = self.get_results(results)
         self.assertTrue(wrong_format.format(rlon.name, rlon.units) in messages)
 
