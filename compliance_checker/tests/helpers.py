@@ -30,7 +30,12 @@ class MockTimeSeries(MockNetCDF):
 
 class MockVariable(object):
     '''
-    For mocking a dataset variable
+    For mocking a dataset variable. Constructor optionally takes a NetCDF
+    variable, the NetCDF attributes of which will be copied over to this
+    object.
     '''
-    pass
 
+    def __init__(self, copy_var=None):
+        if copy_var is not None:
+            for att in copy_var.ncattrs():
+                setattr(self, att, getattr(copy_var, att))
