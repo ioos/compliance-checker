@@ -435,7 +435,11 @@ class TestACDD1_3(BaseTestCase):
         time_var[:] = [1451692800]  # 20160102T000000Z in seconds since epoch
         empty_ds.time_coverage_start = '20160102T000000Z'
         empty_ds.time_coverage_end = '20160102T000000Z'
-
-
+        result = self.acdd.check_time_extents(empty_ds)
+        self.assert_result_is_good(result)
+        # try the same thing with time offsets
+        time_var.units = 'seconds since 1970-01-01 00:00:00-10:00'
+        empty_ds.time_coverage_start = '20160102T000000-1000'
+        empty_ds.time_coverage_end = '20160102T000000-1000'
         result = self.acdd.check_time_extents(empty_ds)
         self.assert_result_is_good(result)
