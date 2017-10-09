@@ -279,13 +279,14 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         results = self.cf.check_standard_name(dataset)
         result_dict = {result.name: result for result in results}
-        result = result_dict[u'§3.3 Variable time has valid standard_name attribute']
+        result = result_dict[u'§3.2 Either long_name or standard_name is highly recommended for variable time']
         assert result.value == (0, 1)
-        assert 'variable time\'s attribute standard_name must be a non-empty string or it should define a long_name attribute.' == result.msgs[0]
+        assert "Attribute long_name or/and standard_name is highly recommended for variable time" in result.msgs
 
-        result = result_dict[u'§3.3 Variable latitude has valid standard_name attribute']
+        result = result_dict[u'§3.2 Either long_name or standard_name is highly recommended for variable latitude']
         assert result.value == (0, 1)
-        assert 'variable latitude\'s attribute standard_name must be a non-empty string or it should define a long_name attribute.' == result.msgs[0]
+        assert "Attribute long_name or/and standard_name is highly recommended for variable latitude" in result.msgs
+        #assert 'variable latitude\'s attribute standard_name must be a non-empty string or it should define a long_name attribute.' == result.msgs[0]
 
         result = result_dict[u'§3.3 Variable salinity has valid standard_name attribute']
         assert result.value == (1, 2)
@@ -294,14 +295,14 @@ class TestCF(BaseTestCase):
         result = result_dict[u'§3.3 standard_name modifier for salinity is valid']
         assert result.value == (0, 1)
 
-        assert len(result_dict) == 8
+        assert len(result_dict) == 9
 
         dataset = self.load_dataset(STATIC_FILES['reduced_horizontal_grid'])
         results = self.cf.check_standard_name(dataset)
         score, out_of, messages = self.get_results(results)
         # Make sure that the rgrid coordinate variable isn't checked for standard_name
         # time, lat, lon exist with three checks each
-        assert (score, out_of) == (6, 6)
+        assert (score, out_of) == (11, 11)
 
     def test_cell_bounds(self):
         dataset = self.load_dataset(STATIC_FILES['grid-boundaries'])

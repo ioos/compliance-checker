@@ -1106,6 +1106,14 @@ class CFBaseCheck(BaseCheck):
 
             standard_name = getattr(ncvar, 'standard_name', None)
             standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+            long_name = getattr(ncvar, 'long_name', None)
+            long_or_std_name = TestCtx(BaseCheck.HIGH, '§3.2 Either long_name or standard_name is highly recommended for variable {}'.format(name))
+            if long_name is not None:
+                long_name_present = True
+                long_or_std_name.assert_true(isinstance(long_name, basestring),
+                                             "Attribute long_name for variable {} must be a string".format(name))
+            else:
+                long_name_present = False
             # §1.3 The long_name and standard_name attributes are used to
             # describe the content of each variable. For backwards
             # compatibility with COARDS neither is required, but use of at
@@ -1113,38 +1121,39 @@ class CFBaseCheck(BaseCheck):
 
             # If standard_name is not defined but long_name is, don't continue
             # the check for this variable
-            if standard_name is None:
-                long_name = getattr(ncvar, 'long_name', None)
-                if long_name is not None:
-                    continue
+            if standard_name is not None:
+                standard_name_present = True
+                valid_std_name = TestCtx(BaseCheck.HIGH, '§3.3 Variable {} has valid standard_name attribute'.format(name))
+                valid_std_name.assert_true(isinstance(standard_name, basestring),
+                                        "Attribute standard_name for variable {} must be a string".format(name))
 
-            valid_std_name = TestCtx(BaseCheck.HIGH, '§3.3 Variable {} has valid standard_name attribute'.format(name))
+                if isinstance(standard_name, basestring):
+                    valid_std_name.assert_true(standard_name in self._std_names,
+                                            "standard_name {} is not defined in Standard Name Table v{}".format(
+                                                standard_name or 'undefined',
+                                                self._std_names._version))
 
-            valid_std_name.assert_true(isinstance(standard_name, basestring),
-                                       "variable {}'s attribute standard_name must be a non-empty string "
-                                       "or it should define a long_name attribute.".format(name))
+                ret_val.append(valid_std_name.to_result())
 
-            if isinstance(standard_name, basestring):
-                valid_std_name.assert_true(standard_name in self._std_names,
-                                           "standard_name {} is not defined in Standard Name Table v{}".format(
-                                               standard_name or 'undefined',
-                                               self._std_names._version))
+                # 2) optional - if modifiers, should be in table
+                if standard_name_modifier is not None:
+                    valid_modifier = TestCtx(BaseCheck.HIGH, "§3.3 standard_name modifier for {} is valid".format(name))
+                    allowed = ['detection_minimum',
+                            'number_of_observations',
+                            'standard_error',
+                            'status_flag']
+                    valid_modifier.assert_true(standard_name_modifier in allowed,
+                                            "standard_name modifier {} is not a valid modifier "
+                                            "according to appendix C".format(standard_name_modifier))
 
-            ret_val.append(valid_std_name.to_result())
+                    ret_val.append(valid_modifier.to_result())
+            else:
+                standard_name_present = False
 
-            # 2) optional - if modifiers, should be in table
-            if standard_name_modifier is not None:
-                valid_modifier = TestCtx(BaseCheck.HIGH, "§3.3 standard_name modifier for {} is valid".format(name))
-                allowed = ['detection_minimum',
-                           'number_of_observations',
-                           'standard_error',
-                           'status_flag']
-                valid_modifier.assert_true(standard_name_modifier in allowed,
-                                           "standard_name modifier {} is not a valid modifier "
-                                           "according to appendix C".format(standard_name_modifier))
-
-                ret_val.append(valid_modifier.to_result())
-
+            long_or_std_name.assert_true(long_name_present or
+                                            standard_name_present,
+                                            "Attribute long_name or/and standard_name is highly recommended for variable {}".format(name))
+            ret_val.append(long_or_std_name.to_result())
         return ret_val
 
     def check_ancillary_variables(self, ds):
