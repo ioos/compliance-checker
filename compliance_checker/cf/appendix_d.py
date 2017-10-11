@@ -34,7 +34,7 @@ dimless_vertical_coordinates = [
      r'(sigma): ([A-Za-z][A-Za-z0-9_]*) (ps): ([A-Za-z][A-Za-z0-9_]*) (ptop): ([A-Za-z][A-Za-z0-9_]*)'),
     ("atmosphere_hybrid_sigma_pressure_coordinate",
      # "a: var1 b: var2 ps: var3 p0: var4"
-     r'(a): ([A-Za-z][A-Za-z0-9_]*) (b): ([A-Za-z][A-Za-z0-9_]*) (ps): ([A-Za-z][A-Za-z0-9_]*) (p0): ([A-Za-z][A-Za-z0-9_]*)'),
+     r'(ap?): ([A-Za-z][A-Za-z0-9_]*) (b): ([A-Za-z][A-Za-z0-9_]*) (ps): ([A-Za-z][A-Za-z0-9_]*) (p0): ([A-Za-z][A-Za-z0-9_]*)'),
     ("atmosphere_hybrid_height_coordinate",
      # "a: var1 b: var2 orog: var3"
      r'(a): ([A-Za-z][A-Za-z0-9_]*) (b): ([A-Za-z][A-Za-z0-9_]*) (orog): ([A-Za-z][A-Za-z0-9_]*)'),
