@@ -733,9 +733,9 @@ class TestCF(BaseTestCase):
 
         result_dict = {result.name: result for result in results}
         result = result_dict[u'§4.3.2 lev does not contain deprecated units']
-        assert result.value == (1, 1)
+        assert result.value[0] == result.value[1]
         result = result_dict[u'§4.3.2 lev has valid formula_terms']
-        assert result.value == (6, 6)
+        assert result.value[0] == result.value[1]
 
         # Check negative compliance
         dataset = self.load_dataset(STATIC_FILES['bad'])
@@ -749,10 +749,22 @@ class TestCF(BaseTestCase):
         assert result.msgs[0] == u'formula_terms is a required attribute and must be a non-empty string'
 
         result = result_dict[u'§4.3.2 lev2 has valid formula_terms']
-        assert result.value == (3, 6)
-        assert result.msgs[0] == 'variable var1 referenced by formula_terms does not exist'
-        assert result.msgs[1] == 'variable var2 referenced by formula_terms does not exist'
-        assert result.msgs[2] == 'variable var3 referenced by formula_terms does not exist'
+        assert result.value == (4, 5)
+        err_str = "The following variable(s) referenced in formula_terms are not present in the dataset variables: ['var1', 'var2', 'var3']"
+        self.assertTrue(err_str in result.msgs)
+
+        # test with an invalid formula_terms
+        dataset.variables['lev2'] = MockVariable(dataset.variables['lev2'])
+        lev2 = dataset.variables['lev2']
+        lev2.formula_terms = 'a: var1 b:var2 orog:'
+        # create a malformed formula_terms attribute and check that it fails
+        results = self.cf.check_dimensionless_vertical_coordinate(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§4.3.2 lev2 has valid formula_terms']
+        self.assertTrue('Attribute formula_terms is not well-formed'
+                        in result.msgs)
+
+
 
     def test_is_time_variable(self):
         var1 = MockVariable()

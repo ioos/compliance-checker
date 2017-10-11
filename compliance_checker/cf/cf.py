@@ -1796,6 +1796,24 @@ class CFBaseCheck(BaseCheck):
         if not formula_terms:
             return valid_formula_terms.to_result()
 
+        # check that the formula_terms are well formed and are present
+        # The pattern for formula terms is always component: variable_name
+        # the regex grouping always has component names in even positions and
+        # the corresponding variable name in even positions.
+        matches = regex.findall(r'([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)',
+                                variable.formula_terms)
+        # get the variables named in the formula terms and check if any
+        # are not present in the dataset
+        missing_vars = sorted(set(m[1] for m in matches) - set(ds.variables))
+        valid_formula_terms.assert_true(len(missing_vars) == 0,
+                                        "The following variable(s) referenced in formula_terms are not present in the dataset variables: {}".format(missing_vars))
+        # try to reconstruct formula_terms by adding space in between the regex
+        # matches.  If it doesn't exactly match the original, the formatting
+        # of the attribute is incorrect
+        reconstructed_formula = ' '.join(m[0] + m[1] for m in matches)
+        valid_formula_terms.assert_true(reconstructed_formula == formula_terms,
+                                        "Attribute formula_terms is not well-formed")
+
         valid_formula_terms.assert_true(standard_name in dimless,
                                         "unknown standard_name for dimensionless vertical coordinate: {}"
                                         "".format(standard_name))
@@ -1806,20 +1824,6 @@ class CFBaseCheck(BaseCheck):
         valid_formula_terms.assert_true(regx_match is not None,
                                         "formula_terms are invalid for {}, please see appendix D of CF 1.6"
                                         "".format(standard_name))
-
-        if regx_match is None:
-            return valid_formula_terms.to_result()
-
-        # The pattern for formula terms is always component: variable_name
-        # the regex grouping always has component names in even positions and
-        # the corresponding variable name in even positions.
-        match_groups = regx_match.groups()
-
-        for i in range(int(len(match_groups) / 2)):
-            variable_name = match_groups[i * 2 + 1]
-            valid_formula_terms.assert_true(variable_name in ds.variables,
-                                            "variable {} referenced by formula_terms does not exist"
-                                            "".format(variable_name))
 
         return valid_formula_terms.to_result()
 
