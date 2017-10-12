@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, division, print_function
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
-from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
+from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates,
+                                              no_missing_terms)
 from compliance_checker.cf.appendix_f import grid_mapping_dict
 from compliance_checker.cf import util
 from compliance_checker import cfutil
@@ -1689,16 +1690,15 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
         z_variables = cfutil.get_z_variables(ds)
-        dimless_standard_names = [name for name, regx in dimless_vertical_coordinates]
+        #dimless_standard_names = [name for name, regx in dimless_vertical_coordinates]
         for name in z_variables:
             variable = ds.variables[name]
             standard_name = getattr(variable, 'standard_name', None)
             units = getattr(variable, 'units', None)
             positive = getattr(variable, 'positive', None)
             # Skip the variable if it's dimensionless
-            if hasattr(variable, 'formula_terms'):
-                continue
-            if standard_name in dimless_standard_names:
+            if (hasattr(variable, 'formula_terms') or
+                standard_name in dimless_vertical_coordinates):
                 continue
 
             valid_vertical_coord = TestCtx(BaseCheck.HIGH,
@@ -1802,6 +1802,7 @@ class CFBaseCheck(BaseCheck):
         # the corresponding variable name in even positions.
         matches = regex.findall(r'([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)',
                                 variable.formula_terms)
+        terms = set(m[0][:-2] for m in matches)
         # get the variables named in the formula terms and check if any
         # are not present in the dataset
         missing_vars = sorted(set(m[1] for m in matches) - set(ds.variables))
@@ -1821,8 +1822,8 @@ class CFBaseCheck(BaseCheck):
         if standard_name not in dimless:
             return valid_formula_terms.to_result()
 
-        regx_match = regex.match(dimless[standard_name], formula_terms)
-        valid_formula_terms.assert_true(regx_match is not None,
+        #regx_match = regex.match(dimless[standard_name], formula_terms)
+        valid_formula_terms.assert_true(no_missing_terms(standard_name, terms),
                                         "formula_terms are invalid for {}, please see appendix D of CF 1.6"
                                         "".format(standard_name))
 

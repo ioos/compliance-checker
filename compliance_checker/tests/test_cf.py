@@ -9,6 +9,7 @@ from tempfile import gettempdir
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
+from compliance_checker.cf.appendix_d import no_missing_terms
 
 import os
 import re
@@ -696,32 +697,33 @@ class TestCF(BaseTestCase):
         for that term. The order of elements is not significant.
         '''
 
-        dimless = dict(dimless_vertical_coordinates)
-
-        def verify(std_name, test_str):
-            regex_matches = re.match(dimless[std_name], test_str)
-            self.assertIsNotNone(regex_matches)
-
         # For each of the listed dimensionless vertical coordinates,
-        # verify that the formula_terms match the provided regex
-        verify('atmosphere_ln_pressure_coordinate',
-               "p0: var1 lev: var2")
-        verify('atmosphere_sigma_coordinate',
-               "sigma: var1 ps: var2 ptop: var3")
-        verify('atmosphere_hybrid_sigma_pressure_coordinate',
-               "a: var1 b: var2 ps: var3 p0: var4")
-        verify('atmosphere_hybrid_height_coordinate',
-               "a: var1 b: var2 orog: var3")
-        verify('atmosphere_sleve_coordinate',
-               "a: var1 b1: var2 b2: var3 ztop: var4 zsurf1: var5 zsurf2: var6")
-        verify('ocean_sigma_coordinate',
-               "sigma: var1 eta: var2 depth: var3")
-        verify('ocean_s_coordinate',
-               "s: var1 eta: var2 depth: var3 a: var4 b: var5 depth_c: var6")
-        verify('ocean_sigma_z_coordinate',
-               "sigma: var1 eta: var2 depth: var3 depth_c: var4 nsigma: var5 zlev: var6")
-        verify('ocean_double_sigma_coordinate',
-               "sigma: var1 depth: var2 z1: var3 z2: var4 a: var5 href: var6 k_c: var7")
+        # verify that the formula_terms match the provided set of terms
+        self.assertTrue(no_missing_terms('atmosphere_ln_pressure_coordinate',
+                                         {"p0", "lev"}))
+        self.assertTrue(no_missing_terms('atmosphere_sigma_coordinate',
+                                         {"sigma", "ps", "ptop"}))
+        self.assertTrue(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
+                                         {'a', 'b', 'ps', 'p0'}))
+        # check that an invalid set of terms fails
+        self.assertFalse(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
+                                         {'a', 'b', 'p'}))
+        self.assertTrue(no_missing_terms('atmosphere_hybrid_height_coordinate',
+                                         {"a", "b", "orog"}))
+        self.assertTrue(no_missing_terms('atmosphere_sleve_coordinate',
+                                         {"a", "b1", "b2", "ztop", "zsurf1",
+                                          "zsurf2"}))
+        self.assertTrue(no_missing_terms('ocean_sigma_coordinate',
+                                         {"sigma", "eta", "depth"}))
+        self.assertTrue(no_missing_terms('ocean_s_coordinate',
+                                         {"s", "eta", "depth", "a", "b",
+                                          "depth_c"}))
+        self.assertTrue(no_missing_terms('ocean_sigma_z_coordinate',
+                                         {"sigma", "eta", "depth", "depth_c",
+                                          "nsigma", "zlev", "var6"}))
+        self.assertTrue(no_missing_terms('ocean_double_sigma_coordinate',
+                                         {"sigma", "depth", "z1", "z2", "a",
+                                          "href", "k_c"}))
 
     def test_dimensionless_vertical(self):
         '''

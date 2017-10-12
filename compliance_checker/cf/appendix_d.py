@@ -25,39 +25,39 @@ is omitted from the formula_terms attribute should be assumed to be zero.
 # a list of tuples
 # Each tuple contains the standard name followed by a regex for the formula
 # terms
-dimless_vertical_coordinates = [
-    ("atmosphere_ln_pressure_coordinate",
-     # "p0: var1 lev: var2"
-     r'(p0): ([A-Za-z][A-Za-z0-9_]*) (lev): ([A-Za-z][A-Za-z0-9_]*)'),
-    ("atmosphere_sigma_coordinate",
-     # "sigma: var1 ps: var2 ptop: var3"
-     r'(sigma): ([A-Za-z][A-Za-z0-9_]*) (ps): ([A-Za-z][A-Za-z0-9_]*) (ptop): ([A-Za-z][A-Za-z0-9_]*)'),
-    ("atmosphere_hybrid_sigma_pressure_coordinate",
-     # "a: var1 b: var2 ps: var3 p0: var4"
-     r'(ap?): ([A-Za-z][A-Za-z0-9_]*) (b): ([A-Za-z][A-Za-z0-9_]*) (ps): ([A-Za-z][A-Za-z0-9_]*) (p0): ([A-Za-z][A-Za-z0-9_]*)'),
-    ("atmosphere_hybrid_height_coordinate",
-     # "a: var1 b: var2 orog: var3"
-     r'(a): ([A-Za-z][A-Za-z0-9_]*) (b): ([A-Za-z][A-Za-z0-9_]*) (orog): ([A-Za-z][A-Za-z0-9_]*)'),
-    ("atmosphere_sleve_coordinate",
-     # "a: var1 b1: var2 b2: var3 ztop: var4 zsurf1: var5 zsurf2: var6"
-     r'(a): ([A-Za-z][A-Za-z0-9_]*) (b1): ([A-Za-z][A-Za-z0-9_]*) (b2): ([A-Za-z][A-Za-z0-9_]*) (ztop): ([A-Za-z][A-Za-z0-9_]*) (zsurf1): ([A-Za-z][A-Za-z0-9_]*) (zsurf2): ([A-Za-z][A-Za-z0-9_]*)'),
-    ("ocean_sigma_coordinate",
-     # "sigma: var1 eta: var2 depth: var3"
-     r'(sigma): ([A-Za-z][A-Za-z0-9_]*) (eta): ([A-Za-z][A-Za-z0-9_]*) (depth): ([A-Za-z][A-Za-z0-9_]*)'),
-    ("ocean_s_coordinate",
-     # "s: var1 eta: var2 depth: var3 a: var4 b: var5 depth_c: var6"
-     r'(s): ([A-Za-z][A-Za-z0-9_]*) (eta): ([A-Za-z][A-Za-z0-9_]*) (depth): ([A-Za-z][A-Za-z0-9_]*) (a): ([A-Za-z][A-Za-z0-9_]*) (b): ([A-Za-z][A-Za-z0-9_]*) (depth_c): ([A-Za-z][A-Za-z0-9_]*)'),
-    ("ocean_sigma_z_coordinate",
-     # "sigma: var1 eta: var2 depth: var3 depth_c: var4 nsigma: var5 zlev: var6"
-     r'(sigma): ([A-Za-z][A-Za-z0-9_]*) (eta): ([A-Za-z][A-Za-z0-9_]*) (depth): ([A-Za-z][A-Za-z0-9_]*) (depth_c): ([A-Za-z][A-Za-z0-9_]*) (nsigma): ([A-Za-z][A-Za-z0-9_]*) (zlev): ([A-Za-z][A-Za-z0-9_]*)'),
-    ("ocean_double_sigma_coordinate",
-     # "sigma: var1 depth: var2 z1: var3 z2: var4 a: var5 href: var6 k_c: var7"
-     r'(sigma): ([A-Za-z][A-Za-z0-9_]*) (depth): ([A-Za-z][A-Za-z0-9_]*) (z1): ([A-Za-z][A-Za-z0-9_]*) (z2): ([A-Za-z][A-Za-z0-9_]*) (a): ([A-Za-z][A-Za-z0-9_]*) (href): ([A-Za-z][A-Za-z0-9_]*) (k_c): ([A-Za-z][A-Za-z0-9_]*)'),
+dimless_vertical_coordinates = {
+    "atmosphere_ln_pressure_coordinate": {'p0', 'lev'},
+    "atmosphere_sigma_coordinate": {'sigma', 'ps', 'ptop'},
+    "atmosphere_hybrid_sigma_pressure_coordinate":
+       ({'a', 'b', 'ps'}, {'ap', 'b', 'ps'}),
+    "atmosphere_hybrid_height_coordinate": {'a', 'b', 'orog'},
+    "atmosphere_sleve_coordinate":
+       {'a', 'b1', 'b2', 'ztop', 'zsurf1', 'zsurf2'},
+    "ocean_sigma_coordinate": {'sigma', 'eta', 'depth'},
+    "ocean_s_coordinate": {'s', 'eta', 'depth', 'a', 'b', 'depth_c'},
+    "ocean_sigma_z_coordinate":
+       {'sigma', 'eta', 'depth', 'depth_c', 'nsigma', 'zlev'},
+    "ocean_double_sigma_coordinate":
+       {'sigma', 'depth', 'z1', 'z2', 'a', 'href', 'k_c'},
     # This comes from CF 1.7 but is used in circulation so we include it
-    ("ocean_s_coordinate_g1",
-     # "s: var1 C: var2 eta: var3 depth: var4 depth_c: var5"
-     r'(s): ([A-Za-z][A-Za-z0-9_]*) (C): ([A-Za-z][A-Za-z0-9_]*) (eta): ([A-Za-z][A-Za-z0-9_]*) (depth): ([A-Za-z][A-Za-z0-9_]*) (depth_c): ([A-Za-z][A-Za-z0-9_]*)'),
-    ("ocean_s_coordinate_g2",
-     # "s: var1 C: var2 eta: var3 depth: var4 depth_c: var5"
-     r'(s): ([A-Za-z][A-Za-z0-9_]*) (C): ([A-Za-z][A-Za-z0-9_]*) (eta): ([A-Za-z][A-Za-z0-9_]*) (depth): ([A-Za-z][A-Za-z0-9_]*) (depth_c): ([A-Za-z][A-Za-z0-9_]*)'),
-]
+    # TODO (badams): include these *only* with the CF 1.7 checker once we get
+    # around to writing it
+    "ocean_s_coordinate_g1": {'s', 'C', 'eta', 'depth', 'depth_c'},
+    "ocean_s_coordinate_g2": {'s', 'C', 'eta', 'depth', 'depth_c'}
+ }
+
+def no_missing_terms(formula_name, term_set):
+    """
+    Returns true if the set is not missing missing terms corresponding to the
+    entries in Appendix D, False otherwise
+    """
+    reqd_terms = dimless_vertical_coordinates[formula_name]
+    def has_all_terms(reqd_termset):
+        return len(reqd_termset - term_set) == 0
+
+    if isinstance(reqd_terms, set):
+        return has_all_terms(reqd_terms)
+    # if it's not a set, it's likely some other form of iterable with multiple
+    # possible definitions i.e. a/ap are interchangeable in
+    else:
+        return any(has_all_terms(req) for req in reqd_terms)
