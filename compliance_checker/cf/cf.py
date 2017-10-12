@@ -3199,11 +3199,12 @@ class CFBaseCheck(BaseCheck):
             valid_cf_role.assert_true(cf_role in valid_roles,
                                       "{} is not a valid cf_role value. It must be one of {}"
                                       "".format(name, ', '.join(valid_roles)))
-        valid_cf_role.assert_true(variable_count < 3,
-                                  ('§9.5 states that datasets should not '
-                                   'contain more than two variables defining a '
-                                   'cf_role attribute.'))
-        return valid_cf_role.to_result()
+        if variable_count > 0:
+            valid_cf_role.assert_true(variable_count < 3,
+                                      ('§9.5 states that datasets should not '
+                                       'contain more than two variables defining a '
+                                       'cf_role attribute.'))
+            return valid_cf_role.to_result()
 
     def check_variable_features(self, ds):
         '''
