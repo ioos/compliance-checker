@@ -750,7 +750,7 @@ class TestCF(BaseTestCase):
 
         result = result_dict[u'§4.3.2 lev2 has valid formula_terms']
         assert result.value == (4, 5)
-        err_str = "The following variable(s) referenced in formula_terms are not present in the dataset variables: ['var1', 'var2', 'var3']"
+        err_str = "The following variable(s) referenced in formula_terms are not present in the dataset variables: var1, var2, var3"
         self.assertTrue(err_str in result.msgs)
 
         # test with an invalid formula_terms

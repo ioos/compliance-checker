@@ -1805,8 +1805,9 @@ class CFBaseCheck(BaseCheck):
         # get the variables named in the formula terms and check if any
         # are not present in the dataset
         missing_vars = sorted(set(m[1] for m in matches) - set(ds.variables))
+        missing_fmt = "The following variable(s) referenced in formula_terms are not present in the dataset variables: {}"
         valid_formula_terms.assert_true(len(missing_vars) == 0,
-                                        "The following variable(s) referenced in formula_terms are not present in the dataset variables: {}".format(missing_vars))
+                                    missing_fmt.format(', '.join(missing_vars)))
         # try to reconstruct formula_terms by adding space in between the regex
         # matches.  If it doesn't exactly match the original, the formatting
         # of the attribute is incorrect
