@@ -109,9 +109,6 @@ class IOOS0_1Check(IOOSNCCheck):
     _cc_description = 'IOOS Inventory Metadata'
     register_checker = True
 
-    def __init__(self):
-        super(IOOS0_1Check, self).__init__()
-
     def check_global_attributes(self, ds):
         """
         Check all global NC attributes for existence.
@@ -205,8 +202,6 @@ class IOOS1_1Check(IOOSNCCheck):
     register_checker = True
 
     def __init__(self):
-        super(IOOS1_1Check, self).__init__()
-
         # Define the global attributes
         self.required_atts = [
             'contributor_name',
