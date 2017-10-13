@@ -22,9 +22,7 @@ in general forms that may be simplified by omitting certain terms. A term that
 is omitted from the formula_terms attribute should be assumed to be zero.
 '''
 
-# a list of tuples
-# Each tuple contains the standard name followed by a regex for the formula
-# terms
+# Contains the standard name followed by the set of expected formula terms
 dimless_vertical_coordinates = {
     "atmosphere_ln_pressure_coordinate": {'p0', 'lev'},
     "atmosphere_sigma_coordinate": {'sigma', 'ps', 'ptop'},

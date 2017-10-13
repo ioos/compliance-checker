@@ -1743,7 +1743,6 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
 
-        dimless = dict(dimless_vertical_coordinates)
         z_variables = cfutil.get_z_variables(ds)
         deprecated_units = [
             'level',
@@ -1756,7 +1755,8 @@ class CFBaseCheck(BaseCheck):
             units = getattr(variable, 'units', None)
             formula_terms = getattr(variable, 'formula_terms', None)
             # Skip the variable if it's dimensional
-            if formula_terms is None and standard_name not in dimless:
+            if (formula_terms is None and
+                standard_name not in dimless_vertical_coordinates):
                 continue
 
             is_not_deprecated = TestCtx(BaseCheck.LOW,
@@ -1783,7 +1783,6 @@ class CFBaseCheck(BaseCheck):
         :rtype: compliance_checker.base.Result
         '''
         variable = ds.variables[coord]
-        dimless = dict(dimless_vertical_coordinates)
         standard_name = getattr(variable, 'standard_name', None)
         formula_terms = getattr(variable, 'formula_terms', None)
         valid_formula_terms = TestCtx(BaseCheck.HIGH,
@@ -1816,13 +1815,13 @@ class CFBaseCheck(BaseCheck):
         valid_formula_terms.assert_true(reconstructed_formula == formula_terms,
                                         "Attribute formula_terms is not well-formed")
 
-        valid_formula_terms.assert_true(standard_name in dimless,
+        valid_formula_terms.assert_true(standard_name in
+                                        dimless_vertical_coordinates,
                                         "unknown standard_name for dimensionless vertical coordinate: {}"
                                         "".format(standard_name))
-        if standard_name not in dimless:
+        if standard_name not in dimless_vertical_coordinates:
             return valid_formula_terms.to_result()
 
-        #regx_match = regex.match(dimless[standard_name], formula_terms)
         valid_formula_terms.assert_true(no_missing_terms(standard_name, terms),
                                         "formula_terms are invalid for {}, please see appendix D of CF 1.6"
                                         "".format(standard_name))
