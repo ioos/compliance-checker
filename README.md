@@ -69,13 +69,14 @@ available on the Compliance Checker Web [wiki page](https://github.com/ioos/comp
 
 Here are a couple examples:
 
-**JSON Output**
-
-https://data.ioos.us/compliance/api/run?report_format=json&test=cf:1.6&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
-
 **HTML Output**
 
-https://data.ioos.us/compliance/api/run?report_format=html&test=cf:1.6&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
+https://data.ioos.us/compliance/api/run?report_format=html&test=acdd&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
+
+**JSON Output**
+
+https://data.ioos.us/compliance/api/run?report_format=json&test=acdd&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
+
 
 # The Compliance Checker Command Line Tool
 
