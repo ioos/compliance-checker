@@ -37,5 +37,7 @@ class MockVariable(object):
 
     def __init__(self, copy_var=None):
         if copy_var is not None:
+            self.name = copy_var.name
+            self.dimensions = copy_var.dimensions
             for att in copy_var.ncattrs():
                 setattr(self, att, getattr(copy_var, att))

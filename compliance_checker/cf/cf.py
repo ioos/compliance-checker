@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, division, print_function
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
-from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
+from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates,
+                                              no_missing_terms)
 from compliance_checker.cf.appendix_f import grid_mapping_dict
 from compliance_checker.cf import util
 from compliance_checker import cfutil
@@ -1689,16 +1690,15 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
         z_variables = cfutil.get_z_variables(ds)
-        dimless_standard_names = [name for name, regx in dimless_vertical_coordinates]
+        #dimless_standard_names = [name for name, regx in dimless_vertical_coordinates]
         for name in z_variables:
             variable = ds.variables[name]
             standard_name = getattr(variable, 'standard_name', None)
             units = getattr(variable, 'units', None)
             positive = getattr(variable, 'positive', None)
             # Skip the variable if it's dimensionless
-            if hasattr(variable, 'formula_terms'):
-                continue
-            if standard_name in dimless_standard_names:
+            if (hasattr(variable, 'formula_terms') or
+                standard_name in dimless_vertical_coordinates):
                 continue
 
             valid_vertical_coord = TestCtx(BaseCheck.HIGH,
@@ -1743,7 +1743,6 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
 
-        dimless = dict(dimless_vertical_coordinates)
         z_variables = cfutil.get_z_variables(ds)
         deprecated_units = [
             'level',
@@ -1756,7 +1755,8 @@ class CFBaseCheck(BaseCheck):
             units = getattr(variable, 'units', None)
             formula_terms = getattr(variable, 'formula_terms', None)
             # Skip the variable if it's dimensional
-            if formula_terms is None and standard_name not in dimless:
+            if (formula_terms is None and
+                standard_name not in dimless_vertical_coordinates):
                 continue
 
             is_not_deprecated = TestCtx(BaseCheck.LOW,
@@ -1783,7 +1783,6 @@ class CFBaseCheck(BaseCheck):
         :rtype: compliance_checker.base.Result
         '''
         variable = ds.variables[coord]
-        dimless = dict(dimless_vertical_coordinates)
         standard_name = getattr(variable, 'standard_name', None)
         formula_terms = getattr(variable, 'formula_terms', None)
         valid_formula_terms = TestCtx(BaseCheck.HIGH,
@@ -1796,30 +1795,36 @@ class CFBaseCheck(BaseCheck):
         if not formula_terms:
             return valid_formula_terms.to_result()
 
-        valid_formula_terms.assert_true(standard_name in dimless,
-                                        "unknown standard_name for dimensionless vertical coordinate: {}"
-                                        "".format(standard_name))
-        if standard_name not in dimless:
-            return valid_formula_terms.to_result()
-
-        regx_match = regex.match(dimless[standard_name], formula_terms)
-        valid_formula_terms.assert_true(regx_match is not None,
-                                        "formula_terms are invalid for {}, please see appendix D of CF 1.6"
-                                        "".format(standard_name))
-
-        if regx_match is None:
-            return valid_formula_terms.to_result()
-
+        # check that the formula_terms are well formed and are present
         # The pattern for formula terms is always component: variable_name
         # the regex grouping always has component names in even positions and
         # the corresponding variable name in even positions.
-        match_groups = regx_match.groups()
+        matches = regex.findall(r'([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)',
+                                variable.formula_terms)
+        terms = set(m[0][:-2] for m in matches)
+        # get the variables named in the formula terms and check if any
+        # are not present in the dataset
+        missing_vars = sorted(set(m[1] for m in matches) - set(ds.variables))
+        missing_fmt = "The following variable(s) referenced in formula_terms are not present in the dataset variables: {}"
+        valid_formula_terms.assert_true(len(missing_vars) == 0,
+                                    missing_fmt.format(', '.join(missing_vars)))
+        # try to reconstruct formula_terms by adding space in between the regex
+        # matches.  If it doesn't exactly match the original, the formatting
+        # of the attribute is incorrect
+        reconstructed_formula = ' '.join(m[0] + m[1] for m in matches)
+        valid_formula_terms.assert_true(reconstructed_formula == formula_terms,
+                                        "Attribute formula_terms is not well-formed")
 
-        for i in range(int(len(match_groups) / 2)):
-            variable_name = match_groups[i * 2 + 1]
-            valid_formula_terms.assert_true(variable_name in ds.variables,
-                                            "variable {} referenced by formula_terms does not exist"
-                                            "".format(variable_name))
+        valid_formula_terms.assert_true(standard_name in
+                                        dimless_vertical_coordinates,
+                                        "unknown standard_name for dimensionless vertical coordinate: {}"
+                                        "".format(standard_name))
+        if standard_name not in dimless_vertical_coordinates:
+            return valid_formula_terms.to_result()
+
+        valid_formula_terms.assert_true(no_missing_terms(standard_name, terms),
+                                        "formula_terms are invalid for {}, please see appendix D of CF 1.6"
+                                        "".format(standard_name))
 
         return valid_formula_terms.to_result()
 
