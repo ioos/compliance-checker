@@ -84,7 +84,7 @@ https://data.ioos.us/compliance/api/run?report_format=html&test=cf:1.6&url=http:
 
 Each compliance standard is executed by a Check Suite,
 which functions similar to a Python standard Unit Test.
-A Check Suite rruns checks against a dataset based on a metadata standard,
+A Check Suite runs checks against a dataset based on a metadata standard,
 returning a list of Results which are then aggregated into a summary.
 
 Each Result has a (# passed / # total) score, a weight (HIGH/MEDIUM/LOW),
