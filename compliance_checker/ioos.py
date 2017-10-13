@@ -1,16 +1,19 @@
+'''
+Check for IOOS-approved attributes
+'''
 from __future__ import unicode_literals
 from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, Result
 from owslib.namespaces import Namespaces
 from lxml.etree import XPath
+from compliance_checker.cfutil import get_geophysical_variables
+from compliance_checker.cf.cf import CFBaseCheck
 
 
 class IOOSBaseCheck(BaseCheck):
-    register_checker = True
     _cc_spec = 'ioos'
     _cc_spec_version = '0.1'
     _cc_description = 'IOOS Inventory Metadata'
-    # requires login
-    _cc_url = 'https://docs.google.com/spreadsheets/d/1huUFauh7rPj2oKfiRhLE1ZCsnes8SmAm6fKE95dsybE/'
+    _cc_url = 'https://ioos.github.io/ioos-netcdf/ioos-netcdf-metadata-description-v1-1.html#ioos-netcdf-metadata-profile-attributes'
 
     @classmethod
     def _has_attr(cls, ds, attr, concept_name, priority=BaseCheck.HIGH):
@@ -24,9 +27,6 @@ class IOOSBaseCheck(BaseCheck):
             msgs.append("Attr '{}' (IOOS concept: '{}') not found in dataset".format(attr, concept_name))
 
         return Result(priority, val, concept_name, msgs)
-
-
-class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
 
     @classmethod
     def _has_var_attr(cls, dataset, vname, attr, concept_name, priority=BaseCheck.HIGH):
@@ -46,32 +46,8 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
 
         return Result(priority, val, concept_name, msgs)
 
-    def check_global_attributes(self, ds):
-        """
-        Check all global NC attributes for existence.
-        """
-        return [
-            self._has_attr(ds, 'acknowledgement', 'Platform Sponsor'),
-            self._has_attr(ds, 'publisher_email', 'Station Publisher Email'),
-            self._has_attr(ds, 'publisher_email', 'Service Contact Email', BaseCheck.MEDIUM),
-            self._has_attr(ds, 'institution', 'Service Provider Name', BaseCheck.MEDIUM),
-            self._has_attr(ds, 'publisher_name', 'Service Contact Name', BaseCheck.MEDIUM),
-            self._has_attr(ds, 'Conventions', 'Data Format Template Version', BaseCheck.MEDIUM),
-            self._has_attr(ds, 'publisher_name', 'Station Publisher Name', BaseCheck.HIGH),
-        ]
 
-    def check_variable_attributes(self, ds):
-        """
-        Check IOOS concepts that come from NC variable attributes.
-        """
-        return [
-            self._has_var_attr(ds, 'platform', 'long_name', 'Station Long Name'),
-            self._has_var_attr(ds, 'platform', 'short_name', 'Station Short Name'),
-            self._has_var_attr(ds, 'platform', 'source', 'Platform Type'),
-            self._has_var_attr(ds, 'platform', 'ioos_name', 'Station ID'),
-            self._has_var_attr(ds, 'platform', 'wmo_id', 'Station WMO ID'),
-            self._has_var_attr(ds, 'platform', 'comment', 'Station Description'),
-        ]
+class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
 
     def check_time_period(self, ds):
         """
@@ -89,7 +65,7 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
             count -= 1
             msgs.append("Attr 'time_coverage_end' is missing")
 
-        return Result(BaseCheck.HIGH, (count, 2), 'Time Period', msgs)
+        return Result(BaseCheck.HIGH, (count, 2), 'time coverage start/end', msgs)
 
     def check_station_location_lat(self, ds):
         """
@@ -107,7 +83,7 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
             count -= 1
             msgs.append("Attr 'geospatial_lat_max' is missing")
 
-        return Result(BaseCheck.HIGH, (count, 2), 'Station Location Lat', msgs)
+        return Result(BaseCheck.HIGH, (count, 2), 'geospatial lat min/max', msgs)
 
     def check_station_location_lon(self, ds):
         """
@@ -125,7 +101,44 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
             count -= 1
             msgs.append("Attr 'geospatial_lon_max' is missing")
 
-        return Result(BaseCheck.HIGH, (count, 2), 'Station Location Lon', msgs)
+        return Result(BaseCheck.HIGH, (count, 2), 'geospatial lon min/max', msgs)
+
+
+class IOOS0_1Check(IOOSNCCheck):
+    _cc_spec_version = '0.1'
+    _cc_description = 'IOOS Inventory Metadata'
+    register_checker = True
+
+    def check_global_attributes(self, ds):
+        """
+        Check all global NC attributes for existence.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        """
+        return [
+            self._has_attr(ds, 'acknowledgement', 'Platform Sponsor'),
+            self._has_attr(ds, 'publisher_email', 'Station Publisher Email'),
+            self._has_attr(ds, 'publisher_email', 'Service Contact Email', BaseCheck.MEDIUM),
+            self._has_attr(ds, 'institution', 'Service Provider Name', BaseCheck.MEDIUM),
+            self._has_attr(ds, 'publisher_name', 'Service Contact Name', BaseCheck.MEDIUM),
+            self._has_attr(ds, 'Conventions', 'Data Format Template Version', BaseCheck.MEDIUM),
+            self._has_attr(ds, 'publisher_name', 'Station Publisher Name', BaseCheck.HIGH),
+        ]
+
+    def check_variable_attributes(self, ds):
+        """
+        Check IOOS concepts that come from NC variable attributes.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        """
+        return [
+            self._has_var_attr(ds, 'platform', 'long_name', 'Station Long Name'),
+            self._has_var_attr(ds, 'platform', 'short_name', 'Station Short Name'),
+            self._has_var_attr(ds, 'platform', 'source', 'Platform Type'),
+            self._has_var_attr(ds, 'platform', 'ioos_name', 'Station ID'),
+            self._has_var_attr(ds, 'platform', 'wmo_id', 'Station WMO ID'),
+            self._has_var_attr(ds, 'platform', 'comment', 'Station Description'),
+        ]
 
     def check_variable_names(self, ds):
         """
@@ -142,6 +155,22 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
 
         return Result(BaseCheck.MEDIUM, (count, len(ds.variables)), 'Variable Names', msgs)
 
+    def check_altitude_units(self, ds):
+        """
+        If there's a variable named z, it must have units.
+
+        @TODO: this is duplicated with check_variable_units
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        """
+        if 'z' in ds.variables:
+            msgs = []
+            val = 'units' in ds.variables['z'].ncattrs()
+            if not val:
+                msgs.append("Variable 'z' has no units attr")
+            return Result(BaseCheck.LOW, val, 'Altitude Units', msgs)
+
+        return Result(BaseCheck.LOW, (0, 0), 'Altitude Units', ["Dataset has no 'z' variable"])
+
     def check_variable_units(self, ds):
         """
         Ensures all variables have units.
@@ -157,23 +186,173 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
 
         return Result(BaseCheck.MEDIUM, (count, len(ds.variables)), 'Variable Units', msgs)
 
-    def check_altitude_units(self, ds):
-        """
-        If there's a variable named z, it must have units.
 
-        @TODO: this is duplicated with check_variable_units
-        """
-        if 'z' in ds.variables:
-            msgs = []
-            val = 'units' in ds.variables['z'].ncattrs()
-            if not val:
-                msgs.append("Variable 'z' has no units attr")
-            return Result(BaseCheck.LOW, val, 'Altitude Units', msgs)
+class IOOS1_1Check(IOOSNCCheck):
+    '''
+    Compliance checker implementation of IOOS Metadata Profile for NetCDF, Version 1.1
 
-        return Result(BaseCheck.LOW, (0, 0), 'Altitude Units', ["Dataset has no 'z' variable"])
+    Related links:
+    https://ioos.github.io/ioos-netcdf/ioos-netcdf-metadata-description-v1-1.html#ioos-netcdf-metadata-profile-attributes
+    https://github.com/ioos/compliance-checker/issues/69
+    https://github.com/ioos/compliance-checker/issues/358
+    '''
+    _cc_spec_version = '1.1'
+    _cc_description = 'IOOS Metadata Profile for NetCDF, Version 1.1'
+    _cc_url = 'https://ioos.github.io/ioos-netcdf/ioos-netcdf-metadata-description-v1-1.html#ioos-netcdf-metadata-profile-attributes'
+    register_checker = True
+
+    def __init__(self):
+        # Define the global attributes
+        self.required_atts = [
+            'contributor_name',
+            'contributor_role',
+            'creator_country',
+            'creator_email',
+            'creator_sector',
+            'featureType',
+            'id',
+            'institution',
+            'naming_authority',
+            'platform',
+            'platform_vocabulary',
+            'publisher_country',
+            'publisher_email',
+            'publisher_name',
+            'standard_name_vocabulary',
+            'title'
+        ]
+
+        self.rec_atts = [
+            'creator_address',
+            'creator_city',
+            'creator_name',
+            'creator_phone',
+            'creator_state',
+            'creator_url',
+            'creator_zipcode',
+            'keywords',
+            'license',
+            'publisher_address',
+            'publisher_city',
+            'publisher_phone',
+            'publisher_state',
+            'publisher_url',
+            'publisher_zipcode',
+            'summary'
+        ]
+
+    @check_has(BaseCheck.HIGH)
+    def check_high(self, ds):
+        '''
+        Performs a check on each highly recommended attributes' existence in the dataset
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        return self.required_atts
+
+    @check_has(BaseCheck.MEDIUM)
+    def check_recommended(self, ds):
+        '''
+        Performs a check on each recommended attributes' existence in the dataset
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        return self.rec_atts
+
+    def check_platform_variables(self, ds):
+        '''
+        The value of platform attribute should be set to another variable which
+        contains the details of the platform. There can be multiple platforms
+        involved depending on if all the instances of the featureType in the
+        collection share the same platform or not. If multiple platforms are
+        involved, a variable should be defined for each platform and referenced
+        from the geophysical variable in a space separated string.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        platform_names = getattr(ds, 'platform', '').split(' ')
+        val = all(platform_name in ds.variables for platform_name in platform_names)
+        msgs = []
+        if not val:
+            msgs = [('The value of "platform" global attribute should be set to another variable '
+                     'which contains the details of the platform. If multiple platforms are '
+                     'involved, a variable should be defined for each platform and referenced '
+                     'from the geophysical variable in a space separated string.')]
+        return [Result(BaseCheck.HIGH, val, 'platform variables', msgs)]
+
+    def check_platform_variable_attributes(self, ds):
+        '''
+        Platform variables must contain the following attributes:
+            ioos_code
+            long_name
+            short_name
+            type
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        results = []
+        platform_name = getattr(ds, 'platform', '')
+        # There can be multiple platforms defined here (space separated)
+        for platform in platform_name.split(' '):
+            if platform in ds.variables:
+                results += [
+                    self._has_var_attr(ds, platform, 'long_name', 'Platform Long Name'),
+                    self._has_var_attr(ds, platform, 'short_name', 'Platform Short Name'),
+                    self._has_var_attr(ds, platform, 'ioos_code', 'Platform IOOS Code'),
+                    self._has_var_attr(ds, platform, 'type', 'Platform Type')
+                ]
+        return results
+
+    def check_geophysical_vars_fill_value(self, ds):
+        '''
+        Check that geophysical variables contain fill values.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        results = []
+        for geo_var in get_geophysical_variables(ds):
+            results.append(
+                self._has_var_attr(ds, geo_var, '_FillValue', '_FillValue', BaseCheck.MEDIUM),
+            )
+        return results
+
+    def check_geophysical_vars_standard_name(self, ds):
+        '''
+        Check that geophysical variables contain standard names.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        results = []
+        for geo_var in get_geophysical_variables(ds):
+            results.append(
+                self._has_var_attr(ds, geo_var, 'standard_name', 'geophysical variables standard_name'),
+            )
+        return results
+
+    def check_units(self, ds):
+        '''
+        Required for most all variables that represent dimensional quantities.
+        The value should come from udunits authoritative vocabulary, which is
+        documented in the CF standard name table with it's corresponding
+        standard name.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        cf_base = CFBaseCheck()
+        return cf_base.check_units(ds)
 
 
-class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
+class IOOSBaseSOSCheck(BaseCheck):
+    _cc_spec = 'ioos_sos'
+    _cc_spec_version = '0.1'
+    _cc_description = ('IOOS Inventory Metadata checks for the Sensor Observation System (SOS). '
+                       'Checks SOS functions GetCapabilities and DescribeSensor.')
+    register_checker = True
+    # requires login
+    _cc_url = 'http://sdf.ndbc.noaa.gov/sos/'
+
+
+class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseSOSCheck):
 
     # set up namespaces for XPath
     ns = Namespaces().get_namespaces(['sos', 'gml', 'xlink'])
@@ -211,7 +390,7 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseCheck):
         ]
 
 
-class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseCheck):
+class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseSOSCheck):
 
     # set up namespaces for XPath
     ns = Namespaces().get_namespaces(['sml', 'swe', 'gml', 'xlink'])
