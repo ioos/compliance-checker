@@ -3,23 +3,88 @@
 [![Build Status](https://travis-ci.org/ioos/compliance-checker.svg)](https://travis-ci.org/ioos/compliance-checker)
 [![Build status](https://ci.appveyor.com/api/projects/status/lcc9co38pi6o45ho/branch/master?svg=true)](https://ci.appveyor.com/project/ocefpaf/compliance-checker/branch/master)
 
-The IOOS Compliance Checker is a Python tool to check local/remote datasets against a variety of compliance standards.
-It is primarily a command-line tool (tested on OS X/Linux) and can also be used as a library import.
+The IOOS Compliance Checker is a python based tool for data providers to check
+for completeness and community standard compliance of local or remote
+[netCDF](https://en.wikipedia.org/wiki/NetCDF) files against
+[CF](https://en.wikipedia.org/wiki/NetCDF) and
+[ACDD](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3)
+file standards. The python module can be used as a command-line tool or as a
+library that can be integrated into other software.
+
+A [web-based version](https://data.ioos.us/compliance/index.html) of the Compliance
+Checker was developed to enable a broader audience and improve accessibility for the
+checker. With the web version, providers can simply provide a link or upload their
+datasets and get the full suite of capabilities that Compliance Checker offers.
+
 
 It currently supports the following sources and standards:
 
-| Standard                                                                                             | Source                                                            | .nc/OPeNDAP | SOS                             |
-| ---------------------------------------------------------------------------------------------------- | -----------                                                       | ------      | ------------------------------- |
-| [ACDD (1.1)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_%28ACDD%29)   | Built-in                                                          | X           | -                               |
-| [CF (1.6)](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html)                       | Built-in                                                          | X           | -                               |
-| IOOS Asset Concept                                                                                   | Built-in                                                          | -           | GetCapabilities, DescribeSensor |
-| [Glider DAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2)              | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | X           | -                               |
+| Standard                                                                                                                            | Source                                                            | .nc/OPeNDAP/.cdl | SOS                             |
+| ----------------------------------------------------------------------------------------------------                                | -----------                                                       | ------           | ------------------------------- |
+| [ACDD (1.1, 1.3)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3)                                    | Built-in                                                          | X                | -                               |
+| [CF (1.6)](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html)                                                      | Built-in                                                          | X                | -                               |
+| IOOS SOS                                                                                                                            | Built-in                                                          | -                | GetCapabilities, DescribeSensor |
+| [IOOS (1.1)](https://ioos.github.io/ioos-netcdf/ioos-netcdf-metadata-description-v1-1.html#ioos-netcdf-metadata-profile-attributes) | Built-in                                                          | X                | -                               |
+| [Glider DAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2)                                             | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | X                | -                               |
+| [NCEI (1.1, 2.0)](https://www.nodc.noaa.gov/data/formats/netcdf/v2.0/)                                                              | [ioos/cc-plugin-ncei](https://github.com/ioos/cc-plugin-ncei)     | X                | -                               |
+
+
+## Advice to data providers
+
+While the command-line version of this tool can be run in a loop, it is not necessary to check
+every file if they are all created the same way. In short, this tool is not meant for
+identifying bugs in your data processing stream. It is, however, intended to help you identify
+your process procedure compliance to the standards.  If you change your processing procedure
+for any reason it would be worth your while to run one file through the Compliance Checker to
+insure you procedure change does not impact your file’s compliance.
+
+If you feel you will need to run a batch of files through the Compliance Checker, please contact
+the IOOS Program Office Operations Division for assistance.
+
+
+# [The Compliance Checker Web Tool](https://data.ioos.us/compliance/)
+
+The IOOS Compliance Checker front end companion.
+
+[https://data.ioos.us/compliance/](https://data.ioos.us/compliance/)
+
+Source Code is available on GitHub:
+
+[https://github.com/ioos/compliance-checker-web](https://github.com/ioos/compliance-checker-web)
+
+## Usage
+Select the test you want to run from the dropdown menu. Then, either upload your dataset or provide a url to a
+remote dataset (OPeNDAP) and click 'Submit'.
+
+The output of the Compliance Checker will give you an overall score and a scoring breakdown.
+You may download the Compliance Checker report as a text file by clicking the 'Download Report' button
+
+![Compliance-Checker-Web](https://user-images.githubusercontent.com/5702672/30527267-b4bb136c-9bf4-11e7-8345-dd9b8e2e859f.png)
+
+## API
+
+In addition to a web-based front-end for the IOOS Compliance Checker project, an API is provided for
+users interested in batch processing files hosted via OPeNDAP. Details on how to use the API are
+available on the Compliance Checker Web [wiki page](https://github.com/ioos/compliance-checker-web/wiki/API).
+
+Here are a couple examples:
+
+**JSON Output**
+
+https://data.ioos.us/compliance/api/run?report_format=json&test=cf:1.6&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
+
+**HTML Output**
+
+https://data.ioos.us/compliance/api/run?report_format=html&test=cf:1.6&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
+
+# The Compliance Checker Command Line Tool
+
 
 ## Concepts & Terminology
 
 Each compliance standard is executed by a Check Suite,
 which functions similar to a Python standard Unit Test.
-A Check Suite runs one or more checks against a dataset,
+A Check Suite rruns checks against a dataset based on a metadata standard,
 returning a list of Results which are then aggregated into a summary.
 
 Each Result has a (# passed / # total) score, a weight (HIGH/MEDIUM/LOW),
@@ -35,13 +100,17 @@ Grouped results will only add up to a single top-level entry.
 
 See the [Development](//github.com/ioos/compliance-checker/wiki/Development) wiki page for more details on implementation.
 
-## Usage (command line)
+## Installation
+
+Check out the [Installation wiki](https://github.com/ioos/compliance-checker/wiki/Installation) for instructions on how to install.
+
+## Command Line Usage
 
 The compliance-checker can work against local files (`.nc` files, `.cdl`
-metadata files) or against remote URLs (OPeNDAP data URLs, SOS
-GetCapabilities/DescribeSensor URLs).
+metadata files, .xml files of SOS GetCapabilities/DescribeSensor requests)
+or against remote URLs (OPeNDAP data URLs, SOS GetCapabilities/DescribeSensor URLs).
 
-If you are aiming to check a netCDF-dump also known as a CDL file, the file
+If you are aiming to check a netCDF-dump, also known as a CDL file, the file
 must be named to end with a `.cdl` for the check-suite to be able to correctly
 parse it's contents.
 
@@ -80,187 +149,12 @@ optional arguments:
                         download as packaged version
 ```
 
+
+## Examples
+
+### Check a local file against CF 1.6
 ```
-$ compliance-checker --test=acdd compliance_checker/tests/data/ru07-20130824T170228_rt0.nc
-
-
---------------------------------------------------------------------------------
-                     The dataset scored 69 out of 93 points
-                             during the acdd check
---------------------------------------------------------------------------------
-                               Scoring Breakdown:
-
-
-                                 High Priority
---------------------------------------------------------------------------------
-    Name                            :Priority: Score
-Conventions                             :3:     1/2
-keywords                                :3:     1/1
-summary                                 :3:     1/1
-title                                   :3:     1/1
-varattr                                 :3:    32/44
-
-
-                                Medium Priority
---------------------------------------------------------------------------------
-    Name                            :Priority: Score
-acknowledgment/acknowledgement          :2:     1/1
-comment                                 :2:     1/1
-creator_email                           :2:     1/1
-creator_name                            :2:     1/1
-creator_url                             :2:     1/1
-date_created                            :2:     1/1
-date_created_is_iso                     :2:     0/1
-date_issued_is_iso                      :2:     0/1
-date_metadata_modified_is_iso           :2:     0/0
-date_modified_is_iso                    :2:     0/1
-geospatial_bounds                       :2:     0/1
-geospatial_bounds_crs                   :2:     0/1
-geospatial_bounds_vertical_crs          :2:     0/1
-geospatial_lat_extents_match            :2:     1/2
-geospatial_lat_max                      :2:     1/1
-geospatial_lat_min                      :2:     1/1
-geospatial_lon_extents_match            :2:     1/2
-geospatial_lon_max                      :2:     1/1
-geospatial_lon_min                      :2:     1/1
-geospatial_vertical_extents_match       :2:     0/2
-geospatial_vertical_max                 :2:     1/1
-geospatial_vertical_min                 :2:     1/1
-geospatial_vertical_positive            :2:     1/1
-history                                 :2:     1/1
-id                                      :2:     1/1
-institution                             :2:     1/1
-license                                 :2:     1/1
-naming_authority                        :2:     1/1
-no_blanks_in_id                         :2:     1/1
-processing_level                        :2:     1/1
-project                                 :2:     1/1
-publisher_email                         :2:     1/1
-publisher_name                          :2:     1/1
-publisher_url                           :2:     1/1
-source                                  :2:     1/1
-standard_name_vocabulary                :2:     1/1
-time_coverage_duration                  :2:     0/1
-time_coverage_end                       :2:     1/1
-time_coverage_extents_match             :2:     2/2
-time_coverage_resolution                :2:     1/1
-time_coverage_start                     :2:     1/1
-
-
---------------------------------------------------------------------------------
-                  Reasoning for the failed tests given below:
-
-
-Name                             Priority:     Score:Reasoning
---------------------------------------------------------------------------------
-Conventions                            :3:     1/ 2 : Attr Conventions does not
-                                                      contain 'ACDD-1.3'
-varattr                                :3:    32/44 :
-    conductivity                       :3:     3/ 4 :
-        coverage_content_type          :3:     0/ 1 : Var conductivity missing
-                                                      attr coverage_content_type
-    density                            :3:     3/ 4 :
-        coverage_content_type          :3:     0/ 1 : Var density missing attr
-                                                      coverage_content_type
-    profile_id                         :3:     1/ 4 :
-        coverage_content_type          :3:     0/ 1 : Var profile_id missing
-                                                      attr coverage_content_type
-        var_std_name                   :3:     1/ 2 : Var profile_id missing
-                                                      attr standard_name
-        var_units                      :3:     0/ 1 : Var profile_id missing
-                                                      attr units
-    salinity                           :3:     3/ 4 :
-        coverage_content_type          :3:     0/ 1 : Var salinity missing attr
-                                                      coverage_content_type
-    segment_id                         :3:     1/ 4 :
-        coverage_content_type          :3:     0/ 1 : Var segment_id missing
-                                                      attr coverage_content_type
-        var_std_name                   :3:     1/ 2 : Var segment_id missing
-                                                      attr standard_name
-        var_units                      :3:     0/ 1 : Var segment_id missing
-                                                      attr units
-    temperature                        :3:     3/ 4 :
-        coverage_content_type          :3:     0/ 1 : Var temperature missing
-                                                      attr coverage_content_type
-    u                                  :3:     3/ 4 :
-        coverage_content_type          :3:     0/ 1 : Var u missing attr
-                                                      coverage_content_type
-    v                                  :3:     3/ 4 :
-        coverage_content_type          :3:     0/ 1 : Var v missing attr
-                                                      coverage_content_type
-date_created_is_iso                    :2:     0/ 1 : Datetime provided is not
-                                                      in a valid ISO 8601 format
-date_issued_is_iso                     :2:     0/ 1 : Datetime provided is not
-                                                      in a valid ISO 8601 format
-date_modified_is_iso                   :2:     0/ 1 : Datetime provided is not
-                                                      in a valid ISO 8601 format
-geospatial_bounds                      :2:     0/ 1 : Attr geospatial_bounds not
-                                                      present
-geospatial_bounds_crs                  :2:     0/ 1 : Attr geospatial_bounds_crs
-                                                      not present
-geospatial_bounds_vertical_crs         :2:     0/ 1 : Attr
-                                                      geospatial_bounds_vertical
-                                                      _crs not present
-geospatial_lat_extents_match           :2:     1/ 2 : Data for possible latitude
-                                                      variables ({u'lat':
-                                                      9.9692099683868702e+36,
-                                                      u'lat_uv':
-                                                      9.9692099683868702e+36})
-                                                      did not match
-                                                      geospatial_lat_max value
-                                                      (34.85172)
-geospatial_lon_extents_match           :2:     1/ 2 : Data for possible
-                                                      longitude variables
-                                                      ({u'lon_uv':
-                                                      9.9692099683868702e+36,
-                                                      u'lon':
-                                                      9.9692099683868702e+36})
-                                                      did not match
-                                                      geospatial_lon_max value
-                                                      (-120.78092)
-geospatial_vertical_extents_match      :2:     0/ 2 : geospatial_vertical_min !=
-                                                      min(depth) values, 1.1 !=
-                                                      0.11,
-                                                      geospatial_vertical_max !=
-                                                      max(depth) values, 1.1 !=
-                                                      58.9
-time_coverage_duration                 :2:     0/ 1 : Attr
-                                                      time_coverage_duration not
-                                                      present
-creator_institution                    :1:     0/ 1 : Attr creator_institution
-                                                      not present
-creator_type                           :1:     0/ 2 : Attr creator_type not
-                                                      present
-date_metadata_modified                 :1:     0/ 1 : Attr
-                                                      date_metadata_modified not
-                                                      present
-instrument                             :1:     0/ 1 : Attr instrument not
-                                                      present
-instrument_vocabulary                  :1:     0/ 1 : Attr instrument_vocabulary
-                                                      not present
-metadata_link                          :1:     0/ 1 : Attr metadata_link is
-                                                      empty or completely
-                                                      whitespace
-metadata_link_valid                    :1:     0/ 1 : Metadata URL should
-                                                      include http:// or
-                                                      https://
-platform                               :1:     0/ 1 : Attr platform not present
-platform_vocabulary                    :1:     0/ 1 : Attr platform_vocabulary
-                                                      not present
-product_version                        :1:     0/ 1 : Attr product_version not
-                                                      present
-program                                :1:     0/ 1 : Attr program not present
-publisher_institution                  :1:     0/ 1 : Attr publisher_institution
-                                                      not present
-publisher_type                         :1:     0/ 2 : Attr publisher_type not
-                                                      present
-references                             :1:     0/ 1 : Attr references is empty
-                                                      or completely whitespace
-
-```
-
-```
-$ compliance-checker --test=cf compliance_checker/tests/data/examples/hycom_global.nc
+$ compliance-checker --test=cf:1.6 compliance_checker/tests/data/examples/hycom_global.nc
 
 
 --------------------------------------------------------------------------------
@@ -355,60 +249,52 @@ Name                             Priority:     Score:Reasoning
                                                       scale_factor are not of
                                                       type float or double.
 
+```
 
+### Check a remote file against ACDD 1.3
 
+The remote dataset url is taken from the Data URL section of an OPeNDAP endpoint.
+
+```shell
+$ compliance-checker --test=acdd:1.3 http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
+```
+
+### Write results to text file
+
+```shell
+$ compliance-checker --test=acdd:1.3 --format=text --output=/tmp/report.txt compliance_checker/tests/data/examples/hycom_global.nc
+```
+
+### Write results to JSON file
+
+```shell
+$ compliance-checker --test=acdd:1.3 --format=json --output=/tmp/report.json compliance_checker/tests/data/examples/hycom_global.nc
+```
+
+### Write results to HTML file
+
+```shell
+$ compliance-checker --test=acdd:1.3 --format=html --output=/tmp/report.html compliance_checker/tests/data/examples/hycom_global.nc
+```
+
+### Download a particular CF standard names table for use in the test
+
+**Note**
+During the CF test, if a file has a particular version of the cf standard name table specified in the global attributes
+(i.e. ```:standard_name_vocabulary = "CF Standard Name Table v30" ;```) that doesn't match the packaged version, it will
+try to download the specified version. If it fails, it will fall back to packaged version.
+
+```
 $ compliance-checker -d 35
 
 Downloading cf-standard-names table version 35 from: http://cfconventions.org/Data/cf-standard-names/35/src/cf-standard-name-table.xml
 ```
 
-## Installation
 
-### Conda users
 
-`compliance-checker` depends on many external C libraries,
-so the easiest way to install it on MS-Windows/OS X/Linux is with `conda`.
+## Python Usage
 
-```shell
-$ conda install -c conda-forge compliance-checker
-```
-
-For more information on `conda` and installing the IOOS software stack see:
-
-https://github.com/ioos/notebooks_demos/wiki/Installing-Conda-Python-with-the-IOOS-environment
-
-### Pip users
-
-When using pip the user must install the non-Python dependencies first.
-Known C library dependencies include:
-  - UDUNITS (2.x series)
-  - HDF5
-  - NetCDF4
-  - libxml2/libxslt
-
-Installation for these libraries will vary depending on your choice of operating system and method of installation
-(i.e. binary packages versus compiling from source).
-For more information on installing these libraries,
-reference the documentation from the individual libraries.
-(Check our [Ubuntu Install Guide](doc/ubuntu-install-guide.md) out.)
-
-To install locally, set up a virtual environment (recommend using
-[virtualenv-burrito](https://github.com/brainsik/virtualenv-burrito);
-
-```
-$ mkvirtualenv --no-site-packages compliance-checker
-$ workon compliance-checker
-```
-
-The Python dependencies require several underlying system packages that most package managers should have.
-See the [Installation](//github.com/ioos/compliance-checker/wiki/Installation) wiki page for more information.
-
-```shell
-$ pip install compliance-checker
-```
-
-## Usage (from Python code)
-
+If you are interested in incorporating the IOOS Compliance Checker into your own python projects, check out the following python code example:
 ```python
 from compliance_checker.runner import ComplianceChecker, CheckSuite
 
@@ -416,63 +302,106 @@ from compliance_checker.runner import ComplianceChecker, CheckSuite
 check_suite = CheckSuite()
 check_suite.load_all_available_checkers()
 
-# Run cf and adcc checks with verbosity level 0, normal strictness,
-# do not skip checks and output text format to stdout
-return_value, errors = ComplianceChecker.run_checker(
-                                '/path/or/url/to/your/dataset',
-                                ['cf', 'acdd'], 0, 'normal',
-                                skip_checks=None,
-                                output_filename='-',
-                                output_format='text')
+# Run cf and adcc checks
+path = '/path/or/url/to/your/dataset'
+checker_names = ['cf', 'acdd']
+verbose = 0
+criteria = 'normal'
+output_filename = '/output/report.json'
+output_format = 'json'
+"""
+Inputs to ComplianceChecker.run_checker
+
+path            Dataset location (url or file)
+checker_names   List of string names to run, should match keys of checkers dict (empty list means run all)
+verbose         Verbosity of the output (0, 1, 2)
+criteria        Determines failure (lenient, normal, strict)
+output_filename Path to the file for output
+output_format   Format of the output
+
+@returns                If the tests failed (based on the criteria)
+"""
+return_value, errors = ComplianceChecker.run_checker(path,
+                                                     checker_names,
+                                                     verbose,
+                                                     criteria,
+                                                     output_filename=output_filename,
+                                                     output_format=output_format)
+
+# Open the JSON output and get the compliance scores
+with open(output_filename, 'r') as fp:
+    cc_data = json.load(fp)
+    scored = cc_data[cc_test[0]]['scored_points']
+    possible = cc_data[cc_test[0]]['possible_points']
+    log.debug('CC Scored {} out of {} possible points'.format(scored, possible))
+```
+
+## Compliance Checker Plug-Ins
+
+Separate Plug-ins have been developed to complement the master Compliance Checker tool with
+specifications for preparing data to be submitted to different data assembly centers.
+The version numbering of these plug-ins are not necessarily link to the version of the
+master Compliance Checker, but they are all designed to run with the master Compliance Checker tool.
+
+### Current Plug-in Releases:
+
+- [GliderDAC](https://github.com/ioos/cc-plugin-glider/releases)
+
+This is a checker for [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2) files
+
+- [NCEI](https://github.com/ioos/cc-plugin-ncei/releases) - [link](https://github.com/ioos/cc-plugin-ncei)
+
+This is a checker for NCEI netCDF Templates [v1.1](https://www.nodc.noaa.gov/data/formats/netcdf/v1.1/) and [v2.0](https://www.nodc.noaa.gov/data/formats/netcdf/v2.0/) files.
+
+These plug-ins must be installed separately but work on top of the base compliance checker software.
+
+```
+pip install cc-plugin-ncei
+```
+
+Check to see if it installed correctly, list the tests:
+
+```
+compliance-checker -l
+```
+
+You should see
+
+```
+ IOOS compliance checker available checker suites (code version):
+ - ncei-grid (2.1.0)
+ - ncei-grid:1.1 (2.1.0)
+ - ncei-grid:2.0 (2.3.0)
+ - ncei-grid:latest (2.1.0)
+ - ncei-point (2.3.0)
+ - ncei-point:1.1 (2.1.0)
+ - ncei-point:2.0 (2.3.0)
+ etc ....
+```
+
+Once installing the plug-in the usage is similar to the built in checkers.
+
+### Examples of how to use the Plug-Ins
+
+1. Run the NCEI Point check on a THREDDS endpoint
+
+```python
+compliance-check -t ncei-point -v https://data.nodc.noaa.gov/thredds/dodsC/testdata/mbiddle/GOLD_STANDARD_NETCDF/1.1/NODC_point_template_v1.1_2016-06-14_125317.379316.nc
+```
+
+2. Run NCEI Trajectory Profile Orthogonal Check on local dataset
+
+```python
+compliance-checker -t ncei-trajectory-profile-orthogonal -v ~/data/sample-trajectory-profile.nc
+
+```
+
+3. Outputting JSON from a gridded file check
+```
+compliance-checker -t ncei-grid -f json -o ~/Documents/sample_grid_report.json ~/Documents/sample_grid_report.nc
 ```
 
 
-## Usage (Command Line)
-
-```
-compliance-checker <data-source> -t <test>[ <test>...]
-```
-
-The compliance checker command line tool will print out (to STDOUT) the test
-results. The command line tool will also return 0 for a successful run and
-non-0 for a failure.
-
-## Available Test Suites
-
-- [CF 1.6](http://cfconventions.org/)
-- [ACDD 1.1, 1.3](http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/metadata/DataDiscoveryAttConvention.html)
-- [IOOS](http://ioos.noaa.gov/data/contribute-data/)
-
-## Available Test Suites as Plugins
-
-- [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2) - [link](https://github.com/ioos/cc-plugin-glider)
-
-## Development
-
-The compliance-checker is designed to be simple and hackable to edit existing compliance suites or introduce new ones. See the [Development](https://github.com/ioos/compliance-checker/wiki/Development) wiki page for more information.
-
-#### Testing
-
-Please run any new code through `flake8` and `pep8`. You can easily do this by using `pylama` (config is already setup in `pytest.ini`).
-
-```bash
-$ pip install pylama
-$ py.test --pylama
-```
-
-Take a look at the failed tests and fix accordingly. Travis does not run with the `--pylama` flag so you MUSt do this yourself!
-
-
-## Resource materials
-
-[Compliance checker Webinar](
-https://mmancusa.webex.com/mmancusa/ldr.php?RCID=e5e6fc5b6d218307f9eec863111e6034)
-
-
-## Roadmap
-
-- Improved text output (\#12)
-- UGRID compliance (\#33)
 
 ## Contributors
 
