@@ -704,12 +704,22 @@ class TestCF(BaseTestCase):
         self.assertTrue(no_missing_terms('atmosphere_sigma_coordinate',
                                          {"sigma", "ps", "ptop"}))
         self.assertTrue(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
-                                         {'a', 'b', 'ps', 'p0'}))
+                                         {'a', 'b', 'ps'}))
+        # test alternative terms for
+        # 'atmosphere_hybrid_sigma_pressure_coordinate'
+        self.assertTrue(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
+                                         {'ap', 'b', 'ps'}))
         # check that an invalid set of terms fails
         self.assertFalse(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
-                                         {'a', 'b', 'p'}))
+                                          {'a', 'b', 'p'}))
         self.assertTrue(no_missing_terms('atmosphere_hybrid_height_coordinate',
-                                         {"a", "b", "orog"}))
+                                          {"a", "b", "orog"}))
+        # missing terms should cause failure
+        self.assertFalse(no_missing_terms('atmosphere_hybrid_height_coordinate',
+                                          {"a", "b"}))
+        # excess terms should cause failure
+        self.assertFalse(no_missing_terms('atmosphere_hybrid_height_coordinate',
+                                         {"a", "b", "c", "orog"}))
         self.assertTrue(no_missing_terms('atmosphere_sleve_coordinate',
                                          {"a", "b1", "b2", "ztop", "zsurf1",
                                           "zsurf2"}))
@@ -720,7 +730,7 @@ class TestCF(BaseTestCase):
                                           "depth_c"}))
         self.assertTrue(no_missing_terms('ocean_sigma_z_coordinate',
                                          {"sigma", "eta", "depth", "depth_c",
-                                          "nsigma", "zlev", "var6"}))
+                                          "nsigma", "zlev"}))
         self.assertTrue(no_missing_terms('ocean_double_sigma_coordinate',
                                          {"sigma", "depth", "z1", "z2", "a",
                                           "href", "k_c"}))

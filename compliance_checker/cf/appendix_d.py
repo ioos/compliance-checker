@@ -46,12 +46,13 @@ dimless_vertical_coordinates = {
 
 def no_missing_terms(formula_name, term_set):
     """
-    Returns true if the set is not missing missing terms corresponding to the
-    entries in Appendix D, False otherwise
+    Returns true if the set is not missing terms corresponding to the
+    entries in Appendix D, False otherwise.  The set of terms should be exactly
+    equal, and not contain more or less terms than expected.
     """
     reqd_terms = dimless_vertical_coordinates[formula_name]
     def has_all_terms(reqd_termset):
-        return len(reqd_termset - term_set) == 0
+        return len(reqd_termset ^ term_set) == 0
 
     if isinstance(reqd_terms, set):
         return has_all_terms(reqd_terms)
