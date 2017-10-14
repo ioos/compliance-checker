@@ -17,6 +17,14 @@ matrix:
     env: TEST_TARGET=coding_standards
   - python: 3.6
     env: TEST_TARGET=integration
+  - python: 3.6
+    env: TEST_TARGET=cc-plugin-glider
+  - python: 3.6
+    env: TEST_TARGET=cc-plugin-ncei
+  - python: 3.6
+    env: TEST_TARGET=cc-plugin-sgrid
+  - python: 3.6
+    env: TEST_TARGET=cc-checker-ugrid
   allow_failures:
   - python: 3.6
     env: TEST_TARGET=coding_standards
@@ -24,6 +32,14 @@ matrix:
     env: TEST_TARGET=integration
   - python: 3.6
     env: TEST_TARGET=integration
+  - python: 3.6
+    env: TEST_TARGET=cc-plugin-glider
+  - python: 3.6
+    env: TEST_TARGET=cc-plugin-ncei
+  - python: 3.6
+    env: TEST_TARGET=cc-plugin-sgrid
+  - python: 3.6
+    env: TEST_TARGET=cc-checker-ugrid
 
 before_install:
   - wget http://bit.ly/miniconda -O miniconda.sh
@@ -52,4 +68,24 @@ script:
 
   - if [[ $TEST_TARGET == "integration" ]]; then
       py.test -m "integration" -s -rxs -v ;
+    fi
+
+  - if [[ $TEST_TARGET == 'cc-plugin-glider' ]]; then
+      git clone https://github.com/ioos/cc-plugin-glider.git && cd cc-plugin-glider ;
+      py.test -s -rxs -v ;
+    fi
+
+  - if [[ $TEST_TARGET == 'cc-plugin-ncei' ]]; then
+      git clone https://github.com/ioos/cc-plugin-ncei.git && cd cc-plugin-ncei ;
+      py.test -s -rxs -v ;
+    fi
+
+  - if [[ $TEST_TARGET == 'cc-plugin-sgrid' ]]; then
+      git clone https://github.com/ioos/cc-plugin-sgrid.git && cd cc-plugin-sgrid ;
+      py.test -s -rxs -v ;
+    fi
+
+  - if [[ $TEST_TARGET == 'cc-checker-ugrid' ]]; then
+      git clone https://github.com/ioos/cc-checker-ugrid.git && cd cc-checker-ugrid ;
+      py.test -s -rxs -v ;
     fi
