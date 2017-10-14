@@ -45,9 +45,10 @@ before_install:
   - wget http://bit.ly/miniconda -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
-  - conda update conda --yes
+  - conda config --set always_yes yes --set changeps1 no --set show_channel_urls true
+  - conda update conda
   - conda config --add channels conda-forge --force
-  - conda create --yes -n TEST python=$TRAVIS_PYTHON_VERSION --file requirements.txt --file test_requirements.txt
+  - conda create --name TEST python=$TRAVIS_PYTHON_VERSION --file requirements.txt --file test_requirements.txt
   - source activate TEST
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       conda install --yes httpretty ;
@@ -72,20 +73,24 @@ script:
 
   - if [[ $TEST_TARGET == 'cc-plugin-glider' ]]; then
       git clone https://github.com/ioos/cc-plugin-glider.git && cd cc-plugin-glider ;
+      conda install --file requirements.txt --file requirements-dev.txt ;
       py.test -s -rxs -v ;
     fi
 
   - if [[ $TEST_TARGET == 'cc-plugin-ncei' ]]; then
       git clone https://github.com/ioos/cc-plugin-ncei.git && cd cc-plugin-ncei ;
+      conda install --file requirements.txt --file requirements-dev.txt ;
       py.test -s -rxs -v ;
     fi
 
   - if [[ $TEST_TARGET == 'cc-plugin-sgrid' ]]; then
       git clone https://github.com/ioos/cc-plugin-sgrid.git && cd cc-plugin-sgrid ;
+      conda install --file requirements.txt --file requirements-dev.txt ;
       py.test -s -rxs -v ;
     fi
 
   - if [[ $TEST_TARGET == 'cc-checker-ugrid' ]]; then
       git clone https://github.com/ioos/cc-checker-ugrid.git && cd cc-checker-ugrid ;
+      conda install --file requirements.txt --file requirements-dev.txt ;
       py.test -s -rxs -v ;
     fi
