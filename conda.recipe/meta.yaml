@@ -17,14 +17,16 @@ requirements:
   run:
     - python
     - setuptools
-    - arrow
-    - cf_units
-    - isodate 0.5.4
-    - jinja2
-    - lxml
-    - owslib
-    - pygeoif 0.6
-    - requests
+    - cf_units >=0.1.1
+    - isodate >=0.5.4
+    - jinja2 >=2.7.3
+    - lxml >=3.2.1
+    - netcdf4 >=1.3.0
+    - owslib >=0.8.3
+    - pendulum >=1.2.4
+    - pygeoif >=0.6
+    - regex 2017.07.28
+    - requests >=2.2.1
 
 test:
   source_files:
