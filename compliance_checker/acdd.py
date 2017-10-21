@@ -16,6 +16,7 @@ from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
 from compliance_checker.cf.util import _possiblexunits, _possibleyunits
 from compliance_checker.util import datetime_is_iso, dateparse
 from compliance_checker import cfutil
+import pendulum
 from pygeoif import from_wkt
 
 
@@ -452,7 +453,7 @@ class ACDDBaseCheck(BaseCheck):
         if not (hasattr(ds, 'time_coverage_start') and hasattr(ds, 'time_coverage_end')):
             return
 
-        # allows non-ISO 8601 formatted dates
+        # Parse the ISO 8601 formatted dates
         try:
             t_min = dateparse(ds.time_coverage_start)
             t_max = dateparse(ds.time_coverage_end)
@@ -460,7 +461,7 @@ class ACDDBaseCheck(BaseCheck):
             return Result(BaseCheck.MEDIUM,
                           False,
                           'time_coverage_extents_match',
-                          ['time_coverage variables are not formatted properly. Please ensure they are valid ISO-8601 time strings'])
+                          ['time_coverage attributes are not formatted properly. Use the ISO 8601:2004 date format, preferably the extended format.'])
 
         timevar = cfutil.get_time_variable(ds)
 
@@ -472,8 +473,15 @@ class ACDDBaseCheck(BaseCheck):
 
         # Time should be monotonically increasing, so we make that assumption here so we don't have to download THE ENTIRE ARRAY
         try:
-            time0 = num2date(ds.variables[timevar][0], ds.variables[timevar].units)
-            time1 = num2date(ds.variables[timevar][-1], ds.variables[timevar].units)
+            # num2date returns as naive date, but with time adjusted to UTC
+            # we need to attach timezone information here, or the date
+            # subtraction from t_min/t_max will assume that a naive timestamp is
+            # in the same time zone and cause erroneous results.
+            # Pendulum uses UTC by default, but we are being explicit here
+            time0 = pendulum.instance(num2date(ds.variables[timevar][0],
+                                      ds.variables[timevar].units), 'UTC')
+            time1 = pendulum.instance(num2date(ds.variables[timevar][-1],
+                                      ds.variables[timevar].units), 'UTC')
         except:
             return Result(BaseCheck.MEDIUM,
                           False,

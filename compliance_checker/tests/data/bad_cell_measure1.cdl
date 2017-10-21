@@ -1,0 +1,29 @@
+netcdf bad_cell_measure1 {
+// This dataset uses an invalid measurement for cell_measures
+dimensions:
+    cell = 4;
+    time = 2;
+    nv = 4;
+variables:
+    float PS(time, cell);
+        PS:units = "Pa";
+        PS:coordinates = "lon lat";
+        PS:cell_measures = "box: cell_area";
+    float lon(cell);
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+    float lat(cell);
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+    float time(time);
+        time:standard_name = "time";
+        time:units = "seconds since 1970-01-01";
+    float cell_area(cell);
+        cell_area:long_name = "area of grid cell";
+        cell_area:standard_name = "area";
+        cell_area:units = "m2";
+    float lon_vertices(cell, nv);
+    float lat_vertices(cell, nv);
+}
+
+

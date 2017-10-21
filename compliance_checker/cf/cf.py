@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, division
+from __future__ import unicode_literals, division, print_function
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
-from compliance_checker.cf.appendix_d import dimless_vertical_coordinates
+from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates,
+                                              no_missing_terms)
 from compliance_checker.cf.appendix_f import grid_mapping_dict
 from compliance_checker.cf import util
 from compliance_checker import cfutil
+from cf_units import Unit
 from functools import wraps
 from collections import defaultdict
 from warnings import warn
 import numpy as np
 import os
-import re
+import regex
+import sys
 
 import logging
 
@@ -139,7 +142,7 @@ class CFBaseCheck(BaseCheck):
 
         # If the packaged version is what we're after, then we're good
         if version == self._std_names._version:
-            print("Using packaged standard name table v{0}".format(version))
+            print("Using packaged standard name table v{0}".format(version), file=sys.stderr)
             return False
 
         # Try to download the version specified
@@ -149,9 +152,9 @@ class CFBaseCheck(BaseCheck):
             # Did we already download this before?
             if not os.path.isfile(location):
                 util.download_cf_standard_name_table(version, location)
-                print("Using downloaded standard name table v{0}".format(version))
+                print("Using downloaded standard name table v{0}".format(version), file=sys.stderr)
             else:
-                print("Using cached standard name table v{0} from {1}".format(version, location))
+                print("Using cached standard name table v{0} from {1}".format(version, location), file=sys.stderr)
 
             self._std_names = util.StandardNameTable(location)
             return True
@@ -394,7 +397,7 @@ class CFBaseCheck(BaseCheck):
             '_Unsigned'
         ]
 
-        rname = re.compile("^[A-Za-z][A-Za-z0-9_]*$")
+        rname = regex.compile("^[A-Za-z][A-Za-z0-9_]*$")
 
         for name, variable in ds.variables.items():
             variable_naming.assert_true(rname.match(name) is not None,
@@ -666,14 +669,12 @@ class CFBaseCheck(BaseCheck):
 
     def _dims_in_order(self, dimension_order):
         '''
-        Returns True if the dimensions are in order U*, T, Z, Y, X
-
         :param list dimension_order: A list of axes
         :rtype: bool
         :return: Returns True if the dimensions are in order U*, T, Z, Y, X,
                  False otherwise
         '''
-        regx = re.compile(r'^L?I?U*T?Z?(?:(?:Y?X?)|(?:C?)|(?:A+))$')
+        regx = regex.compile(r'^L?I?U*T?Z?(?:(?:Y?X?)|(?:C?)|(?:A+))$')
         dimension_string = ''.join(dimension_order)
         return regx.match(dimension_string) is not None
 
@@ -745,15 +746,18 @@ class CFBaseCheck(BaseCheck):
         :rtype: compliance_checker.base.Result
         '''
 
-        valid_conventions = ['CF-1.6']
+        valid = False
+        reasoning = []
         if hasattr(ds, 'Conventions'):
-            conventions = re.split(',|\s+', getattr(ds, 'Conventions', ''))
-            if any((c.strip() in valid_conventions for c in conventions)):
-                valid = True
-                reasoning = []
+            conventions = regex.split(',|\s+', getattr(ds, 'Conventions', ''))
+            for convention in conventions:
+                if convention == 'CF-1.6':
+                    valid = True
+                    break
             else:
-                valid = False
-                reasoning = ['Conventions global attribute does not contain "CF-1.6"']
+                reasoning = ['Conventions global attribute does not contain '
+                             '"CF-1.6". The CF Checker only supports CF-1.6 '
+                             'at this time.']
         else:
             valid = False
             reasoning = ['Conventions field is not present']
@@ -900,7 +904,8 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(valid_udunits)
 
             if isinstance(standard_name, basestring):
-                valid_standard_units = self._check_valid_standard_units(ds, name)
+                valid_standard_units = self._check_valid_standard_units(ds,
+                                                                        name)
                 ret_val.append(valid_standard_units)
 
         return ret_val
@@ -1110,6 +1115,14 @@ class CFBaseCheck(BaseCheck):
 
             standard_name = getattr(ncvar, 'standard_name', None)
             standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+            long_name = getattr(ncvar, 'long_name', None)
+            long_or_std_name = TestCtx(BaseCheck.HIGH, '§3.2 Either long_name or standard_name is highly recommended for variable {}'.format(name))
+            if long_name is not None:
+                long_name_present = True
+                long_or_std_name.assert_true(isinstance(long_name, basestring),
+                                             "Attribute long_name for variable {} must be a string".format(name))
+            else:
+                long_name_present = False
             # §1.3 The long_name and standard_name attributes are used to
             # describe the content of each variable. For backwards
             # compatibility with COARDS neither is required, but use of at
@@ -1117,38 +1130,39 @@ class CFBaseCheck(BaseCheck):
 
             # If standard_name is not defined but long_name is, don't continue
             # the check for this variable
-            if standard_name is None:
-                long_name = getattr(ncvar, 'long_name', None)
-                if long_name is not None:
-                    continue
+            if standard_name is not None:
+                standard_name_present = True
+                valid_std_name = TestCtx(BaseCheck.HIGH, '§3.3 Variable {} has valid standard_name attribute'.format(name))
+                valid_std_name.assert_true(isinstance(standard_name, basestring),
+                                        "Attribute standard_name for variable {} must be a string".format(name))
 
-            valid_std_name = TestCtx(BaseCheck.HIGH, '§3.3 Variable {} has valid standard_name attribute'.format(name))
+                if isinstance(standard_name, basestring):
+                    valid_std_name.assert_true(standard_name in self._std_names,
+                                            "standard_name {} is not defined in Standard Name Table v{}".format(
+                                                standard_name or 'undefined',
+                                                self._std_names._version))
 
-            valid_std_name.assert_true(isinstance(standard_name, basestring),
-                                       "variable {}'s attribute standard_name must be a non-empty string "
-                                       "or it should define a long_name attribute.".format(name))
+                ret_val.append(valid_std_name.to_result())
 
-            if isinstance(standard_name, basestring):
-                valid_std_name.assert_true(standard_name in self._std_names,
-                                           "standard_name {} is not defined in Standard Name Table v{}".format(
-                                               standard_name or 'undefined',
-                                               self._std_names._version))
+                # 2) optional - if modifiers, should be in table
+                if standard_name_modifier is not None:
+                    valid_modifier = TestCtx(BaseCheck.HIGH, "§3.3 standard_name modifier for {} is valid".format(name))
+                    allowed = ['detection_minimum',
+                            'number_of_observations',
+                            'standard_error',
+                            'status_flag']
+                    valid_modifier.assert_true(standard_name_modifier in allowed,
+                                            "standard_name modifier {} is not a valid modifier "
+                                            "according to appendix C".format(standard_name_modifier))
 
-            ret_val.append(valid_std_name.to_result())
+                    ret_val.append(valid_modifier.to_result())
+            else:
+                standard_name_present = False
 
-            # 2) optional - if modifiers, should be in table
-            if standard_name_modifier is not None:
-                valid_modifier = TestCtx(BaseCheck.HIGH, "§3.3 standard_name modifier for {} is valid".format(name))
-                allowed = ['detection_minimum',
-                           'number_of_observations',
-                           'standard_error',
-                           'status_flag']
-                valid_modifier.assert_true(standard_name_modifier in allowed,
-                                           "standard_name modifier {} is not a valid modifier "
-                                           "according to appendix C".format(standard_name_modifier))
-
-                ret_val.append(valid_modifier.to_result())
-
+            long_or_std_name.assert_true(long_name_present or
+                                            standard_name_present,
+                                            "Attribute long_name or/and standard_name is highly recommended for variable {}".format(name))
+            ret_val.append(long_or_std_name.to_result())
         return ret_val
 
     def check_ancillary_variables(self, ds):
@@ -1185,7 +1199,7 @@ class CFBaseCheck(BaseCheck):
                 continue
 
             for ancillary_variable in ancillary_variables.split():
-                valid_ancillary.assert_true(ancillary_variables in ds.variables,
+                valid_ancillary.assert_true(ancillary_variable in ds.variables,
                                             "{} is not a variable in this dataset".format(ancillary_variable))
 
             ret_val.append(valid_ancillary.to_result())
@@ -1380,7 +1394,7 @@ class CFBaseCheck(BaseCheck):
         valid_meanings.assert_true(len(flag_meanings) > 0,
                                    "flag_meanings can't be empty")
 
-        flag_regx = re.compile("^[0-9A-Za-z_\-.+@]+$")
+        flag_regx = regex.compile("^[0-9A-Za-z_\-.+@]+$")
         meanings = flag_meanings.split()
         for meaning in meanings:
             if flag_regx.match(meaning) is None:
@@ -1525,10 +1539,14 @@ class CFBaseCheck(BaseCheck):
 
             # Check that latitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Latitude variable {} uses recommended units'.format(latitude))
-            if 'rotated_latitude_longitude' in grid_mapping and standard_name == 'grid_latitude':
-                allowed_units.assert_true(units == 'degrees',
-                                          "latitude variable '{}' should use degrees for units in rotated pole grid"
-                                          "".format(latitude))
+            if standard_name == 'grid_latitude':
+                e_n_units = cfutil.VALID_LAT_UNITS + cfutil.VALID_LON_UNITS
+                # check that the units aren't in east and north degrees units,
+                # but are convertible to angular units
+                allowed_units.assert_true(units not in e_n_units and
+                                          Unit(units) == Unit('degree'),
+                                          "Grid latitude variable '{}' should use degree equivalent units without east or north components. "
+                                          "Current units are {}".format(latitude, units))
             else:
                 allowed_units.assert_true(units_is_string and units.lower() in allowed_lat_units,
                                           "latitude variable '{}' should define valid units for latitude"
@@ -1615,10 +1633,14 @@ class CFBaseCheck(BaseCheck):
 
             # Check that longitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Longitude variable {} uses recommended units'.format(longitude))
-            if 'rotated_latitude_longitude' in grid_mapping and standard_name == 'grid_longitude':
-                allowed_units.assert_true(units == 'degrees',
-                                          "longitude variable '{}' should use degrees for units in rotated pole grid"
-                                          "".format(longitude))
+            if standard_name == 'grid_longitude':
+                e_n_units = cfutil.VALID_LAT_UNITS + cfutil.VALID_LON_UNITS
+                # check that the units aren't in east and north degrees units,
+                # but are convertible to angular units
+                allowed_units.assert_true(units not in e_n_units and
+                                          Unit(units) == Unit('degree'),
+                                          "Grid longitude variable '{}' should use degree equivalent units without east or north components. "
+                                          "Current units are {}".format(longitude, units))
             else:
                 allowed_units.assert_true(units_is_string and units.lower() in allowed_lon_units,
                                           "longitude variable '{}' should define valid units for longitude"
@@ -1676,16 +1698,15 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
         z_variables = cfutil.get_z_variables(ds)
-        dimless_standard_names = [name for name, regx in dimless_vertical_coordinates]
+        #dimless_standard_names = [name for name, regx in dimless_vertical_coordinates]
         for name in z_variables:
             variable = ds.variables[name]
             standard_name = getattr(variable, 'standard_name', None)
             units = getattr(variable, 'units', None)
             positive = getattr(variable, 'positive', None)
             # Skip the variable if it's dimensionless
-            if hasattr(variable, 'formula_terms'):
-                continue
-            if standard_name in dimless_standard_names:
+            if (hasattr(variable, 'formula_terms') or
+                standard_name in dimless_vertical_coordinates):
                 continue
 
             valid_vertical_coord = TestCtx(BaseCheck.HIGH,
@@ -1730,7 +1751,6 @@ class CFBaseCheck(BaseCheck):
         '''
         ret_val = []
 
-        dimless = dict(dimless_vertical_coordinates)
         z_variables = cfutil.get_z_variables(ds)
         deprecated_units = [
             'level',
@@ -1743,7 +1763,8 @@ class CFBaseCheck(BaseCheck):
             units = getattr(variable, 'units', None)
             formula_terms = getattr(variable, 'formula_terms', None)
             # Skip the variable if it's dimensional
-            if formula_terms is None and standard_name not in dimless:
+            if (formula_terms is None and
+                standard_name not in dimless_vertical_coordinates):
                 continue
 
             is_not_deprecated = TestCtx(BaseCheck.LOW,
@@ -1770,7 +1791,6 @@ class CFBaseCheck(BaseCheck):
         :rtype: compliance_checker.base.Result
         '''
         variable = ds.variables[coord]
-        dimless = dict(dimless_vertical_coordinates)
         standard_name = getattr(variable, 'standard_name', None)
         formula_terms = getattr(variable, 'formula_terms', None)
         valid_formula_terms = TestCtx(BaseCheck.HIGH,
@@ -1783,30 +1803,36 @@ class CFBaseCheck(BaseCheck):
         if not formula_terms:
             return valid_formula_terms.to_result()
 
-        valid_formula_terms.assert_true(standard_name in dimless,
-                                        "unknown standard_name for dimensionless vertical coordinate: {}"
-                                        "".format(standard_name))
-        if standard_name not in dimless:
-            return valid_formula_terms.to_result()
-
-        regx_match = re.match(dimless[standard_name], formula_terms)
-        valid_formula_terms.assert_true(regx_match is not None,
-                                        "formula_terms are invalid for {}, please see appendix D of CF 1.6"
-                                        "".format(standard_name))
-
-        if regx_match is None:
-            return valid_formula_terms.to_result()
-
+        # check that the formula_terms are well formed and are present
         # The pattern for formula terms is always component: variable_name
         # the regex grouping always has component names in even positions and
         # the corresponding variable name in even positions.
-        match_groups = regx_match.groups()
+        matches = regex.findall(r'([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)',
+                                variable.formula_terms)
+        terms = set(m[0][:-2] for m in matches)
+        # get the variables named in the formula terms and check if any
+        # are not present in the dataset
+        missing_vars = sorted(set(m[1] for m in matches) - set(ds.variables))
+        missing_fmt = "The following variable(s) referenced in formula_terms are not present in the dataset variables: {}"
+        valid_formula_terms.assert_true(len(missing_vars) == 0,
+                                    missing_fmt.format(', '.join(missing_vars)))
+        # try to reconstruct formula_terms by adding space in between the regex
+        # matches.  If it doesn't exactly match the original, the formatting
+        # of the attribute is incorrect
+        reconstructed_formula = ' '.join(m[0] + m[1] for m in matches)
+        valid_formula_terms.assert_true(reconstructed_formula == formula_terms,
+                                        "Attribute formula_terms is not well-formed")
 
-        for i in range(int(len(match_groups) / 2)):
-            variable_name = match_groups[i * 2 + 1]
-            valid_formula_terms.assert_true(variable_name in ds.variables,
-                                            "variable {} referenced by formula_terms does not exist"
-                                            "".format(variable_name))
+        valid_formula_terms.assert_true(standard_name in
+                                        dimless_vertical_coordinates,
+                                        "unknown standard_name for dimensionless vertical coordinate: {}"
+                                        "".format(standard_name))
+        if standard_name not in dimless_vertical_coordinates:
+            return valid_formula_terms.to_result()
+
+        valid_formula_terms.assert_true(no_missing_terms(standard_name, terms),
+                                        "formula_terms are invalid for {}, please see appendix D of CF 1.6"
+                                        "".format(standard_name))
 
         return valid_formula_terms.to_result()
 
@@ -2155,7 +2181,7 @@ class CFBaseCheck(BaseCheck):
             # contents of the `coordinates` attribute only.
             axis_map = cfutil.get_axis_map(ds, variable)
 
-            # Make sure we can find latitude and it's dimensions are a subset
+            # Make sure we can find latitude and its dimensions are a subset
             found_lat = False
             for lat in axis_map['Y']:
                 is_subset_dims = set(ds.variables[lat].dimensions).issubset(dimensions)
@@ -2167,7 +2193,7 @@ class CFBaseCheck(BaseCheck):
                                    '{} is not associated with a coordinate defining true latitude '
                                    'and sharing a subset of dimensions'.format(variable))
 
-            # Make sure we can find longitude and it's dimensions are a subset
+            # Make sure we can find longitude and its dimensions are a subset
             found_lon = False
             for lon in axis_map['X']:
                 is_subset_dims = set(ds.variables[lon].dimensions).issubset(dimensions)
@@ -2292,7 +2318,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
 
-        # Check the grid_mapping attribute to be a non-empty string and that it's reference exists
+        # Check the grid_mapping attribute to be a non-empty string and that its reference exists
         for variable in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
             grid_mapping = getattr(variable, 'grid_mapping', None)
             defines_grid_mapping = TestCtx(BaseCheck.HIGH,
@@ -2568,15 +2594,20 @@ class CFBaseCheck(BaseCheck):
 
     def check_cell_measures(self, ds):
         """
-        7.2 To indicate extra information about the spatial properties of a variable's grid cells, a cell_measures attribute may
-        be defined for a variable. This is a string attribute comprising a list of blank-separated pairs of words of the form
-        "measure: name". "area" and "volume" are the only defined measures.
+        7.2 To indicate extra information about the spatial properties of a
+        variable's grid cells, a cell_measures attribute may be defined for a
+        variable. This is a string attribute comprising a list of
+        blank-separated pairs of words of the form "measure: name". "area" and
+        "volume" are the only defined measures.
 
-        The "name" is the name of the variable containing the measure values, which we refer to as a "measure variable". The
-        dimensions of the measure variable should be the same as or a subset of the dimensions of the variable to which they are
-        related, but their order is not restricted.
+        The "name" is the name of the variable containing the measure values,
+        which we refer to as a "measure variable". The dimensions of the
+        measure variable should be the same as or a subset of the dimensions of
+        the variable to which they are related, but their order is not
+        restricted.
 
-        The variable must have a units attribute and may have other attributes such as a standard_name.
+        The variable must have a units attribute and may have other attributes
+        such as a standard_name.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: list
@@ -2584,12 +2615,11 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
         reasoning = []
-        var_names = ds.get_variables_by_attributes(cell_measures=lambda c:
+        variables = ds.get_variables_by_attributes(cell_measures=lambda c:
                                                    c is not None)
-        for var_name in var_names:
-            var = ds.variables[var_name]
+        for var in variables:
             search_str = '^(?:area|volume): (\w+)$'
-            search_res = re.search(search_str, var.cell_measures)
+            search_res = regex.search(search_str, var.cell_measures)
             if not search_res:
                 valid = False
                 reasoning.append("The cell_measures attribute for variable {} "
@@ -2597,17 +2627,17 @@ class CFBaseCheck(BaseCheck):
                                  " form of either 'area: cell_var' or "
                                  "'volume: cell_var' where cell_var is the "
                                  "variable describing the cell measures".format(
-                                     var_name))
+                                     var.name))
             else:
                 valid = True
-                cell_meas_var_name = search_res.groups[0]
+                cell_meas_var_name = search_res.groups()[0]
                 # TODO: cache previous results
                 if cell_meas_var_name not in ds.variables:
                     valid = False
                     reasoning.append(
                         "Cell measure variable {} referred to by "
                         "{} is not present in dataset variables".format(
-                            var_name, cell_meas_var_name)
+                            var.name, cell_meas_var_name)
                     )
                 else:
                     cell_meas_var = ds.variables[cell_meas_var_name]
@@ -2624,16 +2654,17 @@ class CFBaseCheck(BaseCheck):
                             "Cell measure variable {} must have "
                             "dimensions which are a subset of "
                             "those defined in variable {}.".format(
-                                cell_meas_var_name, var_name)
+                                cell_meas_var_name, var.name)
                         )
 
             result = Result(BaseCheck.MEDIUM,
                             valid,
-                            ('§7.2 Cell measures', var_name, 'cell_measures'),
+                            ('§7.2 Cell measures', var.name, 'cell_measures'),
                             reasoning)
             ret_val.append(result)
 
         return ret_val
+
 
     def check_cell_methods(self, ds):
         """
@@ -2659,7 +2690,7 @@ class CFBaseCheck(BaseCheck):
         :return: List of results
         """
 
-        methods = [
+        methods = {
             "point",
             "sum",
             "mean",
@@ -2670,13 +2701,11 @@ class CFBaseCheck(BaseCheck):
             "variance",
             "mode",
             "median"
-        ]
+        }
 
         ret_val = []
-        # The basic format is `name: method (
-        psep = re.compile(r'((?P<var>\w+): (?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
-                          '?(?P<over>over (?P<otypevar>\w+))?| ?)(?P<brace>\(((?P<brace_wunit>\w+): '
-                          '(\d+) (?P<unit>\w+)|(?P<brace_opt>\w+): (\w+))\))*)')
+        psep = regex.compile(r'(?P<vars>\w+: )+(?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
+                             '?(?P<over>over (?P<otypevar>\w+))?| ?)(?:\((?P<paren_contents>[^)]*)\))?')
 
         for var in ds.get_variables_by_attributes(cell_methods=lambda x: x is not None):
             if not getattr(var, 'cell_methods', ''):
@@ -2686,7 +2715,7 @@ class CFBaseCheck(BaseCheck):
 
             valid_attribute = TestCtx(BaseCheck.HIGH,
                                       '§7.1 {} has a valid cell_methods attribute format'.format(var.name))
-            valid_attribute.assert_true(re.match(psep, method) is not None,
+            valid_attribute.assert_true(regex.match(psep, method) is not None,
                                         '"{}" is not a valid format for cell_methods attribute'
                                         ''.format(method))
             ret_val.append(valid_attribute.to_result())
@@ -2695,18 +2724,23 @@ class CFBaseCheck(BaseCheck):
                                        '§7.3 {} has valid names in cell_methods attribute'.format(var.name))
 
             # check that the name is valid
-            for match in re.finditer(psep, method):
-                valid = False
-                if match.group('var') in var.dimensions:
-                    valid = True
-                elif match.group('var') == 'area':
-                    valid = True
-                elif match.group('var') in getattr(var, "coordinates", ""):
-                    valid = True
+            for match in regex.finditer(psep, method):
+                # it is possible to have "var1: var2: ... varn: ...", so handle
+                # that case
+                for var_raw_str in match.captures('vars'):
+                    # strip off the ' :' at the end of each match
+                    var_str = var_raw_str[:-2]
+                    if (var_str in var.dimensions or
+                        var_str == 'area' or
+                        var_str in getattr(var, "coordinates", "")):
 
-                valid_cell_names.assert_true(valid,
-                                             'cell_methods name component {} does not match a dimension, area or auxiliary coordinate'
-                                             ''.format(match.group('var')))
+                        valid = True
+                    else:
+                        valid = False
+
+                    valid_cell_names.assert_true(valid,
+                                                'cell_methods name component {} does not match a dimension, area or auxiliary coordinate'
+                                                ''.format(var_str))
 
             ret_val.append(valid_cell_names.to_result())
 
@@ -2714,27 +2748,95 @@ class CFBaseCheck(BaseCheck):
             valid_cell_methods = TestCtx(BaseCheck.MEDIUM,
                                          '§7.3 {} has valid methods in cell_methods attribute'.format(var.name))
 
-            for match in re.finditer(psep, method):
-                valid_cell_methods.assert_true(match.group('method') in methods,
+            for match in regex.finditer(psep, method):
+                # CF section 7.3 - "Case is not significant in the method name."
+                valid_cell_methods.assert_true(match.group('method').lower() in methods,
                                                '{}:cell_methods contains an invalid method: {}'
                                                ''.format(var.name, match.group('method')))
 
             ret_val.append(valid_cell_methods.to_result())
 
-            valid_modifier = TestCtx(BaseCheck.MEDIUM,
-                                     '§7.3.3 {} has valid cell_methods modifiers'.format(var.name))
-
-            for match in re.finditer(psep, method):
-                if match.group('brace') is not None:
-                    valid_modifier.assert_true(match.group('brace_wunit') in ('interval', 'comment', 'area'),
-                                               '{}:cell_methods contains an invalid modifier: {}. It should be one '
-                                               'of interval, comment or area.'
-                                               ''.format(var.name, match.group('brace_wunit')))
-
-            if valid_modifier.out_of > 0:
-                ret_val.append(valid_modifier.to_result())
+            for match in regex.finditer(psep, method):
+                if match.group('paren_contents') is not None:
+                    # split along spaces followed by words with a colon
+                    # not sure what to do if a comment contains a colon!
+                    ret_val.append(self._check_cell_methods_paren_info(match.group('paren_contents'), var).to_result())
 
         return ret_val
+
+    def _check_cell_methods_paren_info(self, paren_contents, var):
+        """
+        Checks that the spacing and/or comment info contained inside the
+        parentheses in cell_methods is well-formed
+        """
+        #valid_info = TestCtx(BaseCheck.MEDIUM,
+        #                            '§7.3.2 {} has valid cell_methods spacing/other info'.format(var.name))
+        valid_info = TestCtx(BaseCheck.MEDIUM,
+                             '§7.3.3 {} has valid cell_methods modifiers'.format(var.name))
+        # if there are no colons, this is a simple comment
+        # TODO: are empty comments considered valid?
+        if ':' not in paren_contents:
+            valid_info.out_of += 1
+            valid_info.score += 1
+            return valid_info
+        # otherwise, split into k/v pairs
+        kv_pair_pat = r'(\S+:)\s+(.*(?=\s+\w+:)|[^:]+$)\s*'
+        # otherwise, we must split further with intervals coming
+        # first, followed by non-standard comments
+        # we need the count of the matches, and re.findall() only returns
+        # groups if they are present and we wish to see if the entire match
+        # object concatenated together is the same as the original string
+        pmatches = [m for m in regex.finditer(kv_pair_pat, paren_contents)]
+        for i, pmatch in enumerate(pmatches):
+            keyword, val = pmatch.groups()
+            if keyword == 'interval:':
+                valid_info.out_of += 2
+                interval_matches = regex.match(r'^\s*(?P<interval_number>\S+)\s+(?P<interval_units>\S+)\s*$', val)
+                # attempt to get the number for the interval
+                if not interval_matches:
+                    valid_info.messages.append('{}:cell_methods contains an interval specification that does not parse: "{}". Should be in format "interval: <number> <units>"'.format(var.name, val))
+                else:
+                    try:
+                        float(interval_matches.group('interval_number'))
+                    except ValueError:
+                        valid_info.messages.append('{}:cell_methods contains an interval value that does not parse as a numeric value: "{}".'.format(var.name, interval_matches.group('interval_number')))
+                    else:
+                        valid_info.score += 1
+
+                    # then the units
+                    try:
+                        Unit(interval_matches.group('interval_units'))
+                    except ValueError:
+                        valid_info.messages.append('{}:cell_methods interval units "{}" is not parsable by UDUNITS.'.format(var.name, interval_matches.group('interval_units')))
+                    else:
+                        valid_info.score += 1
+            elif keyword == 'comment:':
+                # comments can't really be invalid, except
+                # if they come first or aren't last, and
+                # maybe if they contain colons embedded in the
+                # comment string
+                valid_info.out_of += 1
+                if len(pmatches) == 1:
+                    valid_info.messages.append('If there is no standardized information, the keyword comment: should be omitted for variable {}'.format(var.name))
+                # otherwise check that the comment is the last
+                # item in the parentheses
+                elif i != len(pmatches) - 1:
+                    valid_info.messages.append('The non-standard "comment:" element must come after any standard elements in cell_methods for variable {}'.format(var.name))
+                #
+                else:
+                    valid_info.score += 1
+            else:
+                valid_info.out_of += 1
+                valid_info.messages.append('Invalid cell_methods keyword "{}" for variable {}. Must be one of [interval, comment]'.format(keyword, var.name))
+
+
+        # Ensure concatenated reconstructed matches are the same as the
+        # original string.  If they're not, there's likely a formatting error
+        valid_info.assert_true(''.join(m.group(0)
+                                       for m in pmatches) == paren_contents,
+                   "Parenthetical content inside cell_methods is not well formed: {}".format(paren_contents))
+
+        return valid_info
 
     def check_climatological_statistics(self, ds):
         """
@@ -2847,7 +2949,7 @@ class CFBaseCheck(BaseCheck):
         for cell_method_var in ds.get_variables_by_attributes(cell_methods=lambda s: s is not
                                                               None):
             total_climate_count += 1
-            if not re.search(re_string, cell_method_var.cell_methods):
+            if not regex.search(re_string, cell_method_var.cell_methods):
                 reasoning.append('The "time: method within years/days over years/days" format is not correct in variable {}.'.format(cell_method_var.name))
             else:
                 valid_climate_count += 1
@@ -3100,16 +3202,22 @@ class CFBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: compliance_checker.base.Result
         """
-        ret_val = []
         valid_roles = ['timeseries_id', 'profile_id', 'trajectory_id']
+        variable_count = 0
         for variable in ds.get_variables_by_attributes(cf_role=lambda x: x is not None):
+            variable_count += 1
             name = variable.name
             valid_cf_role = TestCtx(BaseCheck.HIGH, '§9.5 {} contains a valid cf_role attribute'.format(name))
             cf_role = variable.cf_role
             valid_cf_role.assert_true(cf_role in valid_roles,
                                       "{} is not a valid cf_role value. It must be one of {}"
                                       "".format(name, ', '.join(valid_roles)))
-        return ret_val
+        if variable_count > 0:
+            valid_cf_role.assert_true(variable_count < 3,
+                                      ('§9.5 states that datasets should not '
+                                       'contain more than two variables defining a '
+                                       'cf_role attribute.'))
+            return valid_cf_role.to_result()
 
     def check_variable_features(self, ds):
         '''

@@ -107,5 +107,10 @@ STATIC_FILES = {
     'fvcom'                                : get_filename('tests/data/examples/fvcom.cdl'),
     'ww3'                                  : get_filename('tests/data/examples/ww3.cdl'),
     'glcfs'                                : get_filename('tests/data/examples/glcfs.cdl'),
-    'NCEI_profile_template_v2_0'           : get_filename('tests/data/NCEI_profile_template_v2.0_2016-09-22_181835.151325.cdl')
+    'NCEI_profile_template_v2_0'           : get_filename('tests/data/NCEI_profile_template_v2.0_2016-09-22_181835.151325.cdl'),
+    'cell_measure'                         : get_filename('tests/data/cell_measure.cdl'),
+    'bad_cell_measure1'                    : get_filename('tests/data/bad_cell_measure1.cdl'),
+    'bad_cell_measure2'                    : get_filename('tests/data/bad_cell_measure2.cdl'),
+    'bad_cf_role'                          : get_filename('tests/data/bad_cf_role.cdl'),
+    'ioos_gold_1_1'                        : get_filename('tests/data/ioos_1_1.cdl'),
 }

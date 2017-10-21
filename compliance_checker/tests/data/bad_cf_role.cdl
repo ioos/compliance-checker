@@ -1,0 +1,32 @@
+netcdf 3d-static-grid {
+dimensions:
+    station_id = 1;
+    profile_id = 1;
+    trajectory_id = 1;
+    lat = 2;
+    lon = 2;
+    depth = 6;
+variables:
+    char station(station_id);
+        station:cf_role = "timeseries_id";
+    char profile(profile_id);
+        profile:cf_role = "profile_id";
+    char trajectory(trajectory_id);
+        trajectory:cf_role = "trajectory_id";
+    double depth(station_id, profile_id);
+        depth:standard_name = "depth";
+        depth:positive = "down";
+        depth:units = "m";
+    double lat(station_id);
+        lat:standard_name = "latitude";
+        lat:units = "degrees_north";
+    double lon(station_id);
+        lon:standard_name = "longitude";
+        lon:units = "degrees_east";
+    double T(depth, lat, lon);
+        T:standard_name = "sea_water_temperature";
+        T:units = "deg_C";
+}
+
+
+

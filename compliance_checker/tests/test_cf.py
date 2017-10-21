@@ -8,19 +8,15 @@ from netCDF4 import Dataset
 from tempfile import gettempdir
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests import BaseTestCase
+from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
+from compliance_checker.cf.appendix_d import no_missing_terms
 
 import os
 import re
 import sys
 import pytest
 
-
-class MockVariable(object):
-    '''
-    For mocking a dataset variable
-    '''
-    pass
-
+from operator import sub
 
 class TestCF(BaseTestCase):
 
@@ -200,7 +196,8 @@ class TestCF(BaseTestCase):
 
     def test_check_conventions_are_cf_16(self):
         """
-        2.6.1 the NUG defined global attribute Conventions to the string value "CF-1.6"
+        2.6.1 the NUG defined global attribute Conventions to the string value
+        "CF-1.6"
         """
         # :Conventions = "CF-1.6"
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
@@ -216,7 +213,9 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['conv_bad'])
         result = self.cf.check_conventions_are_cf_16(dataset)
         self.assertFalse(result.value)
-        assert result.msgs[0] == 'Conventions global attribute does not contain "CF-1.6"'
+        assert result.msgs[0] == ('Conventions global attribute does not contain '
+                                  '"CF-1.6". The CF Checker only supports CF-1.6 '
+                                  'at this time.')
 
     def test_check_convention_globals(self):
         """
@@ -281,13 +280,14 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         results = self.cf.check_standard_name(dataset)
         result_dict = {result.name: result for result in results}
-        result = result_dict[u'§3.3 Variable time has valid standard_name attribute']
+        result = result_dict[u'§3.2 Either long_name or standard_name is highly recommended for variable time']
         assert result.value == (0, 1)
-        assert 'variable time\'s attribute standard_name must be a non-empty string or it should define a long_name attribute.' == result.msgs[0]
+        assert "Attribute long_name or/and standard_name is highly recommended for variable time" in result.msgs
 
-        result = result_dict[u'§3.3 Variable latitude has valid standard_name attribute']
+        result = result_dict[u'§3.2 Either long_name or standard_name is highly recommended for variable latitude']
         assert result.value == (0, 1)
-        assert 'variable latitude\'s attribute standard_name must be a non-empty string or it should define a long_name attribute.' == result.msgs[0]
+        assert "Attribute long_name or/and standard_name is highly recommended for variable latitude" in result.msgs
+        #assert 'variable latitude\'s attribute standard_name must be a non-empty string or it should define a long_name attribute.' == result.msgs[0]
 
         result = result_dict[u'§3.3 Variable salinity has valid standard_name attribute']
         assert result.value == (1, 2)
@@ -296,14 +296,14 @@ class TestCF(BaseTestCase):
         result = result_dict[u'§3.3 standard_name modifier for salinity is valid']
         assert result.value == (0, 1)
 
-        assert len(result_dict) == 8
+        assert len(result_dict) == 9
 
         dataset = self.load_dataset(STATIC_FILES['reduced_horizontal_grid'])
         results = self.cf.check_standard_name(dataset)
         score, out_of, messages = self.get_results(results)
         # Make sure that the rgrid coordinate variable isn't checked for standard_name
         # time, lat, lon exist with three checks each
-        assert (score, out_of) == (6, 6)
+        assert (score, out_of) == (11, 11)
 
     def test_cell_bounds(self):
         dataset = self.load_dataset(STATIC_FILES['grid-boundaries'])
@@ -348,9 +348,25 @@ class TestCF(BaseTestCase):
         assert u"Boundary variable dimension lon_bnds must have at least 2 elements to form a simplex/closed cell with previous dimensions {}.".format(tuple_format) in messages
 
     def test_cell_measures(self):
-        dataset = self.load_dataset(STATIC_FILES['cf_example_cell_measures'])
-        results = self.cf.check_climatological_statistics(dataset)
+        dataset = self.load_dataset(STATIC_FILES['cell_measure'])
+        results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = self.get_results(results)
+        assert score == out_of
+        assert score > 0
+
+        dataset = self.load_dataset(STATIC_FILES['bad_cell_measure1'])
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = self.get_results(results)
+        message = ("The cell_measures attribute for variable PS is formatted incorrectly.  "
+                   "It should take the form of either 'area: cell_var' or 'volume: cell_var' "
+                   "where cell_var is the variable describing the cell measures")
+        assert message in messages
+
+        dataset = self.load_dataset(STATIC_FILES['bad_cell_measure2'])
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = self.get_results(results)
+        message = 'Cell measure variable PS referred to by box_area is not present in dataset variables'
+        assert message in messages
 
     def test_climatology(self):
         dataset = self.load_dataset(STATIC_FILES['climatology'])
@@ -532,6 +548,20 @@ class TestCF(BaseTestCase):
         results = self.cf.check_latitude(dataset)
         scored, out_of, messages = self.get_results(results)
         assert (scored, out_of) == (6, 6)
+        # hack to avoid writing to read-only file
+        dataset.variables['rlat'] = MockVariable(dataset.variables['rlat'])
+        rlat = dataset.variables['rlat']
+        rlat.name = 'rlat'
+        # test with a bad value
+        rlat.units = 'degrees_north'
+        results = self.cf.check_latitude(dataset)
+        scored, out_of, messages = self.get_results(results)
+        wrong_format = "Grid latitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
+        self.assertTrue(wrong_format.format(rlat.name, rlat.units) in messages)
+        rlat.units = 'radians'
+        results = self.cf.check_latitude(dataset)
+        scored, out_of, messages = self.get_results(results)
+        self.assertTrue(wrong_format.format(rlat.name, rlat.units) in messages)
 
     def test_longitude(self):
         '''
@@ -583,6 +613,20 @@ class TestCF(BaseTestCase):
         results = self.cf.check_latitude(dataset)
         scored, out_of, messages = self.get_results(results)
         assert (scored, out_of) == (6, 6)
+        # hack to avoid writing to read-only file
+        dataset.variables['rlon'] = MockVariable(dataset.variables['rlon'])
+        rlon = dataset.variables['rlon']
+        rlon.name = 'rlon'
+        # test with a bad value
+        rlon.units = 'degrees_east'
+        results = self.cf.check_longitude(dataset)
+        scored, out_of, messages = self.get_results(results)
+        wrong_format = "Grid longitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
+        self.assertTrue(wrong_format.format(rlon.name, rlon.units) in messages)
+        rlon.units = 'radians'
+        results = self.cf.check_longitude(dataset)
+        scored, out_of, messages = self.get_results(results)
+        self.assertTrue(wrong_format.format(rlon.name, rlon.units) in messages)
 
     def test_is_vertical_coordinate(self):
         '''
@@ -653,32 +697,43 @@ class TestCF(BaseTestCase):
         for that term. The order of elements is not significant.
         '''
 
-        dimless = dict(dimless_vertical_coordinates)
-
-        def verify(std_name, test_str):
-            regex_matches = re.match(dimless[std_name], test_str)
-            self.assertIsNotNone(regex_matches)
-
         # For each of the listed dimensionless vertical coordinates,
-        # verify that the formula_terms match the provided regex
-        verify('atmosphere_ln_pressure_coordinate',
-               "p0: var1 lev: var2")
-        verify('atmosphere_sigma_coordinate',
-               "sigma: var1 ps: var2 ptop: var3")
-        verify('atmosphere_hybrid_sigma_pressure_coordinate',
-               "a: var1 b: var2 ps: var3 p0: var4")
-        verify('atmosphere_hybrid_height_coordinate',
-               "a: var1 b: var2 orog: var3")
-        verify('atmosphere_sleve_coordinate',
-               "a: var1 b1: var2 b2: var3 ztop: var4 zsurf1: var5 zsurf2: var6")
-        verify('ocean_sigma_coordinate',
-               "sigma: var1 eta: var2 depth: var3")
-        verify('ocean_s_coordinate',
-               "s: var1 eta: var2 depth: var3 a: var4 b: var5 depth_c: var6")
-        verify('ocean_sigma_z_coordinate',
-               "sigma: var1 eta: var2 depth: var3 depth_c: var4 nsigma: var5 zlev: var6")
-        verify('ocean_double_sigma_coordinate',
-               "sigma: var1 depth: var2 z1: var3 z2: var4 a: var5 href: var6 k_c: var7")
+        # verify that the formula_terms match the provided set of terms
+        self.assertTrue(no_missing_terms('atmosphere_ln_pressure_coordinate',
+                                         {"p0", "lev"}))
+        self.assertTrue(no_missing_terms('atmosphere_sigma_coordinate',
+                                         {"sigma", "ps", "ptop"}))
+        self.assertTrue(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
+                                         {'a', 'b', 'ps'}))
+        # test alternative terms for
+        # 'atmosphere_hybrid_sigma_pressure_coordinate'
+        self.assertTrue(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
+                                         {'ap', 'b', 'ps'}))
+        # check that an invalid set of terms fails
+        self.assertFalse(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
+                                          {'a', 'b', 'p'}))
+        self.assertTrue(no_missing_terms('atmosphere_hybrid_height_coordinate',
+                                          {"a", "b", "orog"}))
+        # missing terms should cause failure
+        self.assertFalse(no_missing_terms('atmosphere_hybrid_height_coordinate',
+                                          {"a", "b"}))
+        # excess terms should cause failure
+        self.assertFalse(no_missing_terms('atmosphere_hybrid_height_coordinate',
+                                         {"a", "b", "c", "orog"}))
+        self.assertTrue(no_missing_terms('atmosphere_sleve_coordinate',
+                                         {"a", "b1", "b2", "ztop", "zsurf1",
+                                          "zsurf2"}))
+        self.assertTrue(no_missing_terms('ocean_sigma_coordinate',
+                                         {"sigma", "eta", "depth"}))
+        self.assertTrue(no_missing_terms('ocean_s_coordinate',
+                                         {"s", "eta", "depth", "a", "b",
+                                          "depth_c"}))
+        self.assertTrue(no_missing_terms('ocean_sigma_z_coordinate',
+                                         {"sigma", "eta", "depth", "depth_c",
+                                          "nsigma", "zlev"}))
+        self.assertTrue(no_missing_terms('ocean_double_sigma_coordinate',
+                                         {"sigma", "depth", "z1", "z2", "a",
+                                          "href", "k_c"}))
 
     def test_dimensionless_vertical(self):
         '''
@@ -690,9 +745,9 @@ class TestCF(BaseTestCase):
 
         result_dict = {result.name: result for result in results}
         result = result_dict[u'§4.3.2 lev does not contain deprecated units']
-        assert result.value == (1, 1)
+        assert result.value[0] == result.value[1]
         result = result_dict[u'§4.3.2 lev has valid formula_terms']
-        assert result.value == (6, 6)
+        assert result.value[0] == result.value[1]
 
         # Check negative compliance
         dataset = self.load_dataset(STATIC_FILES['bad'])
@@ -706,10 +761,22 @@ class TestCF(BaseTestCase):
         assert result.msgs[0] == u'formula_terms is a required attribute and must be a non-empty string'
 
         result = result_dict[u'§4.3.2 lev2 has valid formula_terms']
-        assert result.value == (3, 6)
-        assert result.msgs[0] == 'variable var1 referenced by formula_terms does not exist'
-        assert result.msgs[1] == 'variable var2 referenced by formula_terms does not exist'
-        assert result.msgs[2] == 'variable var3 referenced by formula_terms does not exist'
+        assert result.value == (4, 5)
+        err_str = "The following variable(s) referenced in formula_terms are not present in the dataset variables: var1, var2, var3"
+        self.assertTrue(err_str in result.msgs)
+
+        # test with an invalid formula_terms
+        dataset.variables['lev2'] = MockVariable(dataset.variables['lev2'])
+        lev2 = dataset.variables['lev2']
+        lev2.formula_terms = 'a: var1 b:var2 orog:'
+        # create a malformed formula_terms attribute and check that it fails
+        results = self.cf.check_dimensionless_vertical_coordinate(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[u'§4.3.2 lev2 has valid formula_terms']
+        self.assertTrue('Attribute formula_terms is not well-formed'
+                        in result.msgs)
+
+
 
     def test_is_time_variable(self):
         var1 = MockVariable()
@@ -947,6 +1014,48 @@ class TestCF(BaseTestCase):
         assert result
         result = result_dict[u'§7.3 temperature has valid names in cell_methods attribute']
         assert result
+
+        nc_obj = MockTimeSeries()
+        nc_obj.createVariable('temperature', 'd', ('time',))
+
+        temp = nc_obj.variables['temperature']
+        temp.cell_methods = 'lat: lon: mean depth: mean (interval: 20 meters)'
+        results = self.cf.check_cell_methods(nc_obj)
+        scored, out_of, messages = self.get_results(results)
+        result_dict = {result.name: result for result in results}
+        modifier_results = result_dict[u'§7.3.3 temperature has valid cell_methods modifiers']
+        self.assertTrue(modifier_results.value == (3, 3))
+        # modify the cell methods to something invalid
+        temp.cell_methods = 'lat: lon: mean depth: mean (interval: x whizbangs)'
+        results = self.cf.check_cell_methods(nc_obj)
+        scored, out_of, messages = self.get_results(results)
+        result_dict = {result.name: result for result in results}
+        modifier_results = result_dict[u'§7.3.3 temperature has valid cell_methods modifiers']
+        self.assertFalse(modifier_results.value == (3, 3))
+        self.assertTrue('temperature:cell_methods contains an interval value that does not parse as a numeric value: "x".'
+                        in messages)
+        self.assertTrue('temperature:cell_methods interval units "whizbangs" is not parsable by UDUNITS.'
+                        in messages)
+        temp.cell_methods = 'lat: lon: mean depth: mean (comment: should not go here interval: 2.5 m)'
+        results = self.cf.check_cell_methods(nc_obj)
+        self.assertTrue('The non-standard "comment:" element must come after any standard elements in cell_methods for variable temperature')
+        # standalone comments require no keyword
+        temp.cell_methods = 'lon: mean (This is a standalone comment)'
+        results = self.cf.check_cell_methods(nc_obj)
+        result_dict = {result.name: result for result in results}
+        modifier_results = result_dict[u'§7.3.3 temperature has valid cell_methods modifiers']
+        self.assertTrue(modifier_results.value == (1, 1))
+        temp.cell_methods = 'lat: lon: mean depth: mean (invalid_keyword: this is invalid)'
+        results = self.cf.check_cell_methods(nc_obj)
+        self.assertTrue('Invalid cell_methods keyword "invalid_keyword" for variable temperature. Must be one of [interval, comment]')
+        temp.cell_methods = 'lat: lon: mean depth: mean (interval: 0.2 m comment: This should come last interval: 0.01 degrees)'
+        results = self.cf.check_cell_methods(nc_obj)
+        self.assertTrue('The non-standard "comment:" element must come after any standard elements in cell_methods for variable temperature')
+        temp.cell_methods = 'lat: lon: mean depth: mean (interval 0.2 m interval: 0.01 degrees)'
+        results = self.cf.check_cell_methods(nc_obj)
+        self.assertTrue('Parenthetical content inside cell_methods is not well formed: interval 0.2 m interval: 0.01 degrees')
+
+
 
     # --------------------------------------------------------------------------------
     # Utility Method Tests
