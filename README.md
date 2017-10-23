@@ -257,7 +257,7 @@ Name                             Priority:     Score:Reasoning
 The remote dataset url is taken from the Data URL section of an OPeNDAP endpoint.
 
 ```shell
-$ compliance-checker --test=acdd:1.3 http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
+$ compliance-checker --test=acdd:1.3 "http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml"
 ```
 
 ### Write results to text file
@@ -387,7 +387,7 @@ Once installing the plug-in the usage is similar to the built in checkers.
 1. Run the NCEI Point check on a THREDDS endpoint
 
 ```python
-compliance-check -t ncei-point -v https://data.nodc.noaa.gov/thredds/dodsC/testdata/mbiddle/GOLD_STANDARD_NETCDF/1.1/NODC_point_template_v1.1_2016-06-14_125317.379316.nc
+compliance-checker -t ncei-point -v "https://data.nodc.noaa.gov/thredds/dodsC/testdata/mbiddle/GOLD_STANDARD_NETCDF/1.1/NODC_point_template_v1.1_2016-06-15_133710.844375.nc"
 ```
 
 2. Run NCEI Trajectory Profile Orthogonal Check on local dataset
