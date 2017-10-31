@@ -411,6 +411,7 @@ compliance-checker -t ncei-grid -f json -o ~/Documents/sample_grid_report.json ~
 - [Luke Campbell](https://github.com/lukecampbell) &lt;luke.campbell@gdit.com&gt;
 - [Kyle Wilcox](https://github.com/kwilcox) &lt;kyle@axiomdatascience.com&gt;
 - [Ben Adams](https://github.com/benjwadams) &lt;ben.adams@rpsgroup.com&gt;
+- [Bob Fratantonio](https://github.com/bobfrat &lt;robert.fratantonio@rpsgroup.com&gt;
 
 And many more testers!
 
