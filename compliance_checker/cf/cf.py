@@ -10,6 +10,7 @@ from compliance_checker import cfutil
 from cf_units import Unit
 from functools import wraps
 from collections import defaultdict
+from warnings import warn
 import numpy as np
 import os
 import regex
@@ -125,7 +126,13 @@ class CFBaseCheck(BaseCheck):
         # Try to parse this attribute to get version
         version = None
         if 'cf standard name table' in standard_name_vocabulary.lower():
-            version = standard_name_vocabulary.split()[-1]
+            version = [s.strip('(').strip(')').strip('v').strip(',') for s in standard_name_vocabulary.split()]
+            # This assumes that table version number won't start with 0.
+            version = [s for s in version if s.isdigit() and len(s) <= 2 and not s.startswith('0')]
+            if len(version) > 1:
+                return False
+            else:
+                version = version[0]
         else:
             # Can't parse the attribute, use the packaged version
             return False
@@ -151,9 +158,10 @@ class CFBaseCheck(BaseCheck):
 
             self._std_names = util.StandardNameTable(location)
             return True
-        except Exception:
+        except Exception as e:
             # There was an error downloading the CF table. That's ok, we'll just use the packaged version
-            print("Error fetching standard name table. Using packaged v{0}".format(self._std_names._version), file=sys.stderr)
+            warn("Problem fetching standard name table:\n{0}\n"
+                 "Using packaged v{1}".format(e, self._std_names._version))
             return False
 
     def _find_coord_vars(self, ds, refresh=False):
