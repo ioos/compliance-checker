@@ -1,6 +1,6 @@
 from pkg_resources import resource_filename
 from compliance_checker.suite import CheckSuite
-from compliance_checker.base import Result, BaseCheck
+from compliance_checker.base import Result, BaseCheck, GenericFile
 import numpy as np
 import unittest
 import os
@@ -11,6 +11,7 @@ static_files = {
     'bad_data_type'              : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
     'test_cdl'                   : resource_filename('compliance_checker', 'tests/data/test_cdl.cdl'),
     'test_cdl_nc'                : resource_filename('compliance_checker', 'tests/data/test_cdl_nc_file.nc'),
+    'empty'                    : resource_filename('compliance_checker', 'tests/data/non-comp/empty.file'),
 }
 
 
@@ -131,3 +132,9 @@ class TestSuite(unittest.TestCase):
         # Ok the scores should be equal!
         self.assertEqual(nc_points, cdl_points)
         self.assertEqual(nc_out_of, cdl_out_of)
+
+    def test_load_local_dataset_GenericFile(self):
+        cs = CheckSuite()
+        resp = cs.load_local_dataset(static_files['empty'])
+        assert isinstance(resp, GenericFile) ==  True
+        

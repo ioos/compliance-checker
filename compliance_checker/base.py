@@ -24,6 +24,18 @@ def get_namespaces():
     return ns
 
 
+# Simple class for Generic File type (default to this if file not recognised)
+class GenericFile(object):
+    """
+    Simple class for any file. Has same path lookup as netCDF4.Dataset.
+    """
+    def __init__(self, fpath):
+        self.fpath = fpath
+
+    def filepath(self):
+        return self.fpath
+
+
 class BaseCheck(object):
     HIGH   = 3
     MEDIUM = 2

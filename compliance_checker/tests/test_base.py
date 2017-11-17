@@ -81,3 +81,18 @@ class TestBase(TestCase):
         self.ds.dummy = 'dummy'
         base.attr_check(attr, self.ds, priority, rv3)
         assert rv3[0] == base.Result(priority, True, 'dummy', [])
+
+
+class TestGenericFile(TestCase):
+    '''
+    Tests the GenericFile class.
+    '''
+
+    def test_create_GenericFile_success(self):
+        path = '/tmp/test.txt'
+        gf = base.GenericFile(path)
+        self.assertEqual(gf.filepath(), path)
+
+    def test_create_GenericFile_failure(self):
+        gf = base.GenericFile("will not match")
+        self.assertNotEqual(gf.filepath(), "do NOT MATCH") 
