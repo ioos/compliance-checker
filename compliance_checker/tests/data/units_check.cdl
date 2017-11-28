@@ -3,7 +3,7 @@ dimensions:
 	time = 1 ;
 	strlen = 14 ;
 variables:
-	uint64 time(time) ;
+	float time(time) ;
 		time:units = "seconds since 1970-01-01" ;
 		time:standard_name = "time" ;
 		time:calendar = "gregorian" ;
