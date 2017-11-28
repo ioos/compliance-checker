@@ -4,6 +4,7 @@ Compliance Checker suite runner
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import sys
 import subprocess
 import inspect
@@ -11,7 +12,7 @@ import itertools
 from operator import itemgetter
 from netCDF4 import Dataset
 from lxml import etree as ET
-from compliance_checker.base import fix_return_value, Result
+from compliance_checker.base import fix_return_value, Result, GenericFile
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from compliance_checker.protocols import opendap, netcdf, cdl
@@ -555,6 +556,10 @@ class CheckSuite(object):
 
         if netcdf.is_netcdf(ds_str):
             return Dataset(ds_str)
+
+        # Assume this is just a Generic File if it exists
+        if os.path.isfile(ds_str):
+            return GenericFile(ds_str)
 
         raise ValueError("File is an unknown format")
 
