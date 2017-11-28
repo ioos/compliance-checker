@@ -92,11 +92,6 @@ class TestCF(BaseTestCase):
         assert result.msgs[0] == 'The variable temp failed because the datatype is int64'
         assert result.value == (6, 7)
 
-        dataset = self.load_dataset(STATIC_FILES['chap2'])
-        result = self.cf.check_data_types(dataset)
-        assert result.value == (6, 7)
-        assert 'The variable bad_dtype failed because the datatype is uint16' == result.msgs[0]
-
     def test_naming_conventions(self):
         '''
         Section 2.3 Naming Conventions

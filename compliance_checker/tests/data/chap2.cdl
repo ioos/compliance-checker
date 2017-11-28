@@ -2,7 +2,7 @@ netcdf chap2 {
 dimensions:
     time = 16;
 variables:
-    ushort bad_dtype; // ushort or uint16 is an illegal type
+    float bad_dtype;
     float bad\ name; // PLEASE DON'T DO THIS
     double not_unique;
     double NOT_UNIQUE;
@@ -20,7 +20,7 @@ variables:
         wind_speed:valid_min = 0.;
         wind_speed:valid_max = 20.;
         wind_speed:units = "knots";
-    
+
     :title = "A succint description of what is in the dataset";
     :institution = "CF";
     :history = "history goes here";
