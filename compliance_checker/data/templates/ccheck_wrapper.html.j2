@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="description" content="IOOS Compliance Checker Results">
+    <title>Compliance Checker</title>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <style>
+.navbar-custom {
+  background-color: #c6d4e1;
+  border-size: 0px;
+  margin-bottom: 0px;
+  border-radius: 0px;
+}
+
+.navbar-custom .navbar-img-brand {
+  float: left;
+}
+
+.navbar-custom .navbar-img-brand img {
+  height: 47px;
+}
+
+.navbar-custom .navbar-brand {
+  color: #565c61;
+}
+.navbar-custom .navbar-brand:hover,
+.navbar-custom .navbar-brand:focus {
+  color: #3e4246;
+  background-color: transparent;
+}
+.navbar-custom .navbar-text {
+  color: #565c61;
+}
+.navbar-custom .navbar-nav > li > a {
+  color: #565c61;
+}
+.navbar-custom .navbar-nav > li > a:hover,
+.navbar-custom .navbar-nav > li > a:focus {
+  color: #333333;
+  background-color: transparent;
+}
+.navbar-custom .navbar-nav > .active > a,
+.navbar-custom .navbar-nav > .active > a:hover,
+.navbar-custom .navbar-nav > .active > a:focus {
+  color: #333333;
+  background-color: #b0c4d6;
+}
+.navbar-custom .navbar-nav > .disabled > a,
+.navbar-custom .navbar-nav > .disabled > a:hover,
+.navbar-custom .navbar-nav > .disabled > a:focus {
+  color: #cccccc;
+  background-color: transparent;
+}
+.navbar-custom .navbar-toggle {
+  border-color: #dddddd;
+}
+.navbar-custom .navbar-toggle:hover,
+.navbar-custom .navbar-toggle:focus {
+  background-color: #dddddd;
+}
+.navbar-custom .navbar-toggle .icon-bar {
+  background-color: #cccccc;
+}
+.navbar-custom .navbar-collapse,
+.navbar-custom .navbar-form {
+  border-color: #afc2d5;
+}
+.navbar-custom .navbar-nav > .dropdown > a:hover .caret,
+.navbar-custom .navbar-nav > .dropdown > a:focus .caret {
+  border-top-color: #333333;
+  border-bottom-color: #333333;
+}
+.navbar-custom .navbar-nav > .open > a,
+.navbar-custom .navbar-nav > .open > a:hover,
+.navbar-custom .navbar-nav > .open > a:focus {
+  background-color: #b0c4d6;
+  color: #333333;
+}
+.navbar-custom .navbar-nav > .open > a .caret,
+.navbar-custom .navbar-nav > .open > a:hover .caret,
+.navbar-custom .navbar-nav > .open > a:focus .caret {
+  border-top-color: #333333;
+  border-bottom-color: #333333;
+}
+.navbar-custom .navbar-nav > .dropdown > a .caret {
+  border-top-color: #565c61;
+  border-bottom-color: #565c61;
+}
+@media (max-width: 767) {
+  .navbar-custom .navbar-nav .open .dropdown-menu > li > a {
+    color: #565c61;
+  }
+  .navbar-custom .navbar-nav .open .dropdown-menu > li > a:hover,
+  .navbar-custom .navbar-nav .open .dropdown-menu > li > a:focus {
+    color: #333333;
+    background-color: transparent;
+  }
+  .navbar-custom .navbar-nav .open .dropdown-menu > .active > a,
+  .navbar-custom .navbar-nav .open .dropdown-menu > .active > a:hover,
+  .navbar-custom .navbar-nav .open .dropdown-menu > .active > a:focus {
+    color: #333333;
+    background-color: #b0c4d6;
+  }
+  .navbar-custom .navbar-nav .open .dropdown-menu > .disabled > a,
+  .navbar-custom .navbar-nav .open .dropdown-menu > .disabled > a:hover,
+  .navbar-custom .navbar-nav .open .dropdown-menu > .disabled > a:focus {
+    color: #cccccc;
+    background-color: transparent;
+  }
+}
+.navbar-custom .navbar-link {
+  color: #565c61;
+}
+.navbar-custom .navbar-link:hover {
+  color: #333333;
+}
+
+.bad-score {
+  color: #D70834;
+}
+
+thead .tname {
+  width: 60%;
+}
+thead .tpriority {
+  width: 20%;
+}
+
+thead .tscore {
+  width: 20%;
+}
+
+thead .cname {
+  width: 25%;
+}
+
+thead .cpriority {
+  width: 5%;
+}
+
+thead .ccorrection {
+  width: 70%;
+}
+
+.table-collapse {
+  display: inline;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.table-collapse a{
+  color: #333;
+}
+
+.table-collapse a:hover {
+  color: #777;
+  text-decoration: none;
+}
+
+.failures {
+  display: inline;
+}
+
+.label-as-badge {
+  border-radius: 1em;
+}
+    </style>
+
+  </head>
+  <body>
+  <header>
+      <nav class="navbar navbar-custom">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#nb-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-img-brand" href="http://ioos.noaa.gov/">
+              <img src="http://catalog.ioos.us/static/img/ioos.png" alt="IOOS Catalog" />
+            </a>
+            <div class="navbar-brand">
+              Compliance Checker
+            </div>
+          </div>
+      </nav>
+    </header>
+
+    <div class="container">
+    {% for check in checkers %}
+      <div class='check_wrapper'>{{ check }}</div>
+    {% endfor %}
+    </div>
+    <script type="text/javascript">
+$(document).ready(function() {
+    $('.high-priority-table').collapse({toggle: false});
+    $('.table-collapse').click(function(e) {
+      e.preventDefault();
+      // Find table to toggle within this check
+      var checkWrapper = $(e.target).closest(".check_wrapper");
+      $(checkWrapper).find('.' + $(e.target).data('target')).collapse('toggle');
+
+      var glyph = $(e.target).find('.glyphicon');
+      if(glyph.hasClass('glyphicon-collapse-up')) {
+        glyph.removeClass('glyphicon-collapse-up');
+        glyph.addClass('glyphicon-collapse-down');
+      } else {
+        glyph.removeClass('glyphicon-collapse-down');
+        glyph.addClass('glyphicon-collapse-up');
+      }
+    });
+});
+    </script>
+  </body>
+</html>
