@@ -275,14 +275,13 @@ class CheckSuite(object):
             return self.serialize(o.serialize())
         return o
 
-    def html_output(self, check_name, groups, file_object, source_name, limit):
+    def checker_html_output(self, check_name, groups, source_name, limit):
         '''
-        Renders an HTML file using Jinja2 and saves the output to the file specified.
+        Renders the HTML output for a single test using Jinja2 and returns it
+        as a string.
 
         @param check_name      The test which was run
         @param groups          List of results from compliance checker
-        @param output_filename Path to file to save output
-        @param file_object     A python file object where the output should be written to
         @param source_name     Source of the dataset, used for title
         @param limit           Integer value for limiting output
         '''
@@ -291,10 +290,19 @@ class CheckSuite(object):
         template = self.j2.get_template('ccheck.html.j2')
 
         template_vars = self.build_structure(check_name, groups, source_name, limit)
+        return template.render(**template_vars)
 
-        buf = template.render(**template_vars)
+    def html_output(self, checkers_html):
+        '''
+        Renders the HTML output for multiple tests and returns it as a string.
 
-        file_object.write(buf)
+        @param checkers_html     List of HTML for single tests as returned by
+                                 checker_html_output
+        '''
+        # Note: This relies on checker_html_output having been called so that
+        # self.j2 is initialised
+        template = self.j2.get_template('ccheck_wrapper.html.j2')
+        return template.render(checkers=checkers_html)
 
     def get_points(self, groups, limit):
         score_list = []

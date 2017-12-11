@@ -119,16 +119,18 @@ class ComplianceChecker(object):
         @param ds_loc          Location of the source dataset
         @param limit           The degree of strictness, 1 being the strictest, and going up from there.
         '''
+        checkers_html = []
         for checker, rpair in score_groups.items():
             groups, errors = rpair
-            if output_filename == '-':
-                f = io.StringIO()
-                cs.html_output(checker, groups, f, ds_loc, limit)
-                f.seek(0)
-                print(f.read())
-            else:
-                with io.open(output_filename, 'w', encoding='utf8') as f:
-                    cs.html_output(checker, groups, f, ds_loc, limit)
+            checkers_html.append(cs.checker_html_output(checker, groups, ds_loc,
+                                                        limit))
+
+        html = cs.html_output(checkers_html)
+        if output_filename == '-':
+            print(html)
+        else:
+            with io.open(output_filename, 'w', encoding='utf8') as f:
+                f.write(html)
 
         return groups
 
