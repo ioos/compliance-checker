@@ -34,8 +34,8 @@ def main():
 
     parser.add_argument('-f', '--format', default='text',
                         choices=['text', 'html', 'json'], help='Output format')
-    parser.add_argument('-o', '--output', default='-', action='store',
-                        help='Output filename')
+    parser.add_argument('-o', '--output', default=[], action='append',
+                        help='Output filename(s)')
     parser.add_argument('-V', '--version', action='store_true',
                         help='Display the IOOS Compliance Checker version information.')
     parser.add_argument('dataset_location', nargs='*',
@@ -59,9 +59,16 @@ def main():
     if args.download_standard_names:
         download_cf_standard_name_table(args.download_standard_names)
 
+    if not args.output:
+        args.output = ['-'] * len(args.dataset_location)
+
+    if len(args.output) != len(args.dataset_location):
+        print('The number of output files must be the same as the number of datasets', file=sys.stderr)
+        sys.exit(2)
+
     return_values = []
     had_errors = []
-    for dataset in args.dataset_location:
+    for output, dataset in zip(args.output, args.dataset_location):
         if args.format != 'json':
             print("Running Compliance Checker on the dataset from: {}".format(dataset), file=sys.stderr)
         return_value, errors = ComplianceChecker.run_checker(dataset,
@@ -69,7 +76,7 @@ def main():
                                                              args.verbose,
                                                              args.criteria,
                                                              args.skip_checks,
-                                                             args.output,
+                                                             output,
                                                              args.format)
         return_values.append(return_value)
         had_errors.append(errors)

@@ -141,7 +141,7 @@ optional arguments:
   -f {text,html,json}, --format {text,html,json}
                         Output format
   -o OUTPUT, --output OUTPUT
-                        Output filename
+                        Output filename(s)
   -V, --version         Display the IOOS Compliance Checker version
                         information.
   -l, --list-tests      List the available tests
@@ -149,7 +149,6 @@ optional arguments:
                         Specify a version of the cf standard name table to
                         download as packaged version
 ```
-
 
 ## Examples
 
