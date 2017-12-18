@@ -64,7 +64,7 @@ def main():
     for dataset in args.dataset_location:
         if args.format != 'json':
             print("Running Compliance Checker on the dataset from: {}".format(dataset), file=sys.stderr)
-        return_value, errors = ComplianceChecker.run_checker(args.dataset_location[0],
+        return_value, errors = ComplianceChecker.run_checker(dataset,
                                                              args.test or ['acdd'],
                                                              args.verbose,
                                                              args.criteria,
