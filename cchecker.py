@@ -55,7 +55,7 @@ def main():
             version = getattr(check_suite.checkers[checker], '_cc_checker_version', "???")
             if args.verbose:
                 print(" - {} (v{})".format(checker, version))
-            elif ':' in checker and 'latest' not in checker:  # Skip the "latest" output
+            elif ':' in checker and not checker.endswith(':latest'):  # Skip the "latest" output
                 print(" - {}".format(checker))
         return 0
 
