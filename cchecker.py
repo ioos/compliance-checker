@@ -50,10 +50,13 @@ def main():
         return 0
 
     if args.list_tests:
-        print("IOOS compliance checker available checker suites (code version):")
+        print("IOOS compliance checker available checker suites:")
         for checker in sorted(check_suite.checkers.keys()):
             version = getattr(check_suite.checkers[checker], '_cc_checker_version', "???")
-            print(" - {} ({})".format(checker, version))
+            if args.verbose:
+                print(" - {} (v{})".format(checker, version))
+            elif ':' in checker and not checker.endswith(':latest'):  # Skip the "latest" output
+                print(" - {}".format(checker))
         return 0
 
     if args.download_standard_names:
