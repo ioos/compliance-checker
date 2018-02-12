@@ -312,7 +312,6 @@ class CheckSuite(object):
         score_only_list = []
 
         for g in groups:
-            score_list.append([g.name, g.weight, g.value, g.children])
             if g.weight >= limit:
                 score_only_list.append(g.value)
 
@@ -322,7 +321,7 @@ class CheckSuite(object):
         points = sum(points)
         out_of = sum(out_of)
         # sorts lists into high/medium/low order
-        score_list.sort(key=lambda x: x[1], reverse=True)
+        score_list.sort(key=lambda x: x.weight, reverse=True)
 
         return score_list, points, out_of
 
@@ -333,13 +332,18 @@ class CheckSuite(object):
         Returns the dataset needed for the verbose output, as well as the failure flags.
         """
         score_list, points, out_of = self.get_points(groups, limit)
+        issue_count = out_of - points
         print('\n')
         print("-" * 80)
         print('{:^80}'.format("IOOS Compliance Checker Report"))
         print('{:^80}'.format("%s check" % check_name))
+        if issue_count > 0:
+            plural = '' if issue_count == 1 else 's'
+            print("The dataset had {} potential issue{} discovered".format(issue_count, plural))
+            print('{:^80}'.format("during the %s check" % check_name))
         print("-" * 80)
 
-        return [score_list, points, out_of]
+        return [groups, points, out_of]
 
     def standard_output_generation(self, groups, limit, points, out_of):
         '''
@@ -347,61 +351,55 @@ class CheckSuite(object):
         '''
         if points < out_of:
             # print("\n" + "\n" + '-' * 80)
-            self.reasoning_routine(groups, 0)
+            self.reasoning_routine(groups, 0, priority_flag=limit)
         else:
             print("All tests passed!")
 
-    def reasoning_routine(self, list_of_results, indent, line=True, priority_flag=3):
+    def reasoning_routine(self, groups, indent, line=True, priority_flag=3):
         """
         print routine performed
         """
-        def weight_func(r):
-            """
-            Function that returns the weight, used for sorting by priority
-            """
-            return r.weight
-        # Sorting method used to properly sort the output by priority.
-        grouped_sorted = []
-        grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)
 
-        wrapper = textwrap.TextWrapper(initial_indent='', width=80, subsequent_indent=' ' * 54)
-        for res in grouped_sorted:
-            # If statements to print the proper Headings
-            if res.weight == 3 and indent == 0 and priority_flag == 3:
-                print('\n')
-                print('{:^80}'.format("High Priority"))
+
+        sort_fn = lambda x: x.weight
+        groups_sorted = sorted(groups, key=sort_fn, reverse=True)
+        result = {key: [v for v in valuesiter if v.value[0] != v.value[1]]
+                    for key, valuesiter in itertools.groupby(groups_sorted,
+                                                             key=sort_fn)}
+
+        wrapper = textwrap.TextWrapper(initial_indent='', width=80,
+                                       subsequent_indent=' ' * 54)
+
+        print('{:^80}'.format("Scoring Breakdown:"))
+        print('\n')
+        # handle high priority
+        priorities = {3: 'High Priority',
+                      2: 'Medium Priority',
+                      1: 'Low Priority'}
+        # iterate up to the min priority requested
+        for level in range(3, priority_flag - 1, -1):
+            level_name = priorities.get(level, level)
+            # print headers
+            if len(result[level]) > 0:
+                print('{:^80}'.format(level_name))
                 print("-" * 80)
                 print('%-39s:%6s' % ('    Name', ' Reasoning'))
-                print("-" * 80)
+                # print the errors and any associated messages
+                for res in result[level]:
+                    #if (res.value[0] != res.value[1]):
+                    if (res.value[0] != res.value[1]):
+                        if not res.msgs:
+                            print('%-39s' %
+                                ((indent * '    ' + res.name)[0:39]))
+                        else:
+                            print(wrapper.fill('%-39s: %s' %
+                                ((indent * '    ' + res.name)[0:39],
+                                ", ".join(res.msgs))))
 
-                priority_flag -= 1
-            if res.weight == 2 and indent == 0 and priority_flag == 2:
-                print('\n')
-                print('{:^80}'.format("Medium Priority"))
-                print("-" * 80)
-                print('%-39s:%6s' % ('    Name', ' Reasoning'))
-                print("-" * 80)
+                # create a sublevel for any children
+                if res.children:
+                    self.reasoning_routine(res.children, indent + 1, False)
 
-                priority_flag -= 1
-            if res.weight == 1 and indent == 0 and priority_flag == 1:
-                print('\n')
-                print('{:^80}'.format("Low Priority"))
-                print("-" * 80)
-                print('%-39s:%6s' % ('    Name', ' Reasoning'))
-                print("-" * 80)
-                priority_flag -= 1
-
-            if (res.value[0] != res.value[1]) and not res.msgs:
-                print('%-39s' %
-                      ((indent * '    ' + res.name)[0:39]))
-
-            if (res.value[0] != res.value[1]) and res.msgs:
-                print(wrapper.fill('%-39s: %s' %
-                      ((indent * '    ' + res.name)[0:39],
-                       ", ".join(res.msgs))))
-
-            if res.children:
-                self.reasoning_routine(res.children, indent + 1, False)
 
     def process_doc(self, doc):
         """
