@@ -316,8 +316,9 @@ def fix_return_value(v, method_name, method=None, checker=None):
     """
     Transforms scalar return values into Result.
     """
-    method_name = (method_name or method.__func__.__name__).replace("check_", "")     # remove common check prefix
-
+    # remove common check prefix
+    method_name = (method_name or method.__func__.__name__).replace("check_",
+                                                                    "")
     if v is None or not isinstance(v, Result):
         v = Result(value=v, name=method_name)
 
