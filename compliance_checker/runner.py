@@ -103,10 +103,7 @@ class ComplianceChecker(object):
         for checker, rpair in score_groups.items():
             groups, errors = rpair
             score_list, points, out_of = cs.standard_output(limit, checker, groups)
-            if not verbose:
-                cs.non_verbose_output_generation(score_list, groups, limit, points, out_of)
-            else:
-                cs.verbose_output_generation(groups, limit, points, out_of)
+            cs.standard_output_generation(groups, limit, points, out_of)
         return groups
 
     @classmethod
