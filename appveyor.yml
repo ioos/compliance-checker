@@ -23,15 +23,15 @@ install:
 
     # Add path, activate `conda` and update conda.
     - cmd: set "PATH=%CONDA_INSTALL_LOCN%\\Scripts;%CONDA_INSTALL_LOCN%\\Library\\bin;%PATH%"
-    - cmd: conda update --yes --quiet conda
     - cmd: call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
+    - cmd: conda.exe config --set always_yes yes --set changeps1 no --set show_channel_urls true
+    - cmd: conda.exe update conda
 
     - cmd: set PYTHONUNBUFFERED=1
 
-    - cmd: conda config --set show_channel_urls true
-    - cmd: conda config --add channels conda-forge
-    - cmd: conda install --yes conda-build
-    - cmd: conda info
+    - cmd: conda.exe config --add channels conda-forge
+    - cmd: conda.exe install conda-build
+    - cmd: conda.exe info
 
 # Skip .NET project specific build phase.
 build: off
