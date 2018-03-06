@@ -36,6 +36,10 @@ class CheckSuite(object):
 
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
 
+    #def __init__(self, loc):
+    #    # TODO: move more of the CheckSuite logic into the constructor
+    #    self.ds_loc = loc
+
     @classmethod
     def load_all_available_checkers(cls):
         """
@@ -323,7 +327,7 @@ class CheckSuite(object):
 
         return score_list, points, out_of
 
-    def standard_output(self, limit, check_name, groups):
+    def standard_output(self, ds, limit, check_name, groups):
         """
         Generates the Terminal Output for Standard cases
 
@@ -332,7 +336,9 @@ class CheckSuite(object):
         score_list, points, out_of = self.get_points(groups, limit)
         print('\n')
         print("-" * 80)
-        print('{:^80}'.format("The dataset scored %r out of %r points" % (points, out_of)))
+        # ew
+        print('{:^80}'.format('The dataset "%s" scored %r out of %r points' %
+                              (ds, points, out_of)))
         print('{:^80}'.format("during the %s check" % check_name))
         print("-" * 80)
 
