@@ -25,8 +25,9 @@ import requests
 import textwrap
 import codecs
 
-from tabulate import tabulate
+import tabulate
 
+tabulate.PRESERVE_WHITESPACE = True
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
@@ -370,7 +371,7 @@ class CheckSuite(object):
                                                              key=sort_fn)}
 
         wrapper = textwrap.TextWrapper(initial_indent='',
-                                       width=max(int(40 / 2**indent), 20))
+                                       width=max(int(80 / 2**indent), 40))
 
         if _top_level:
             print('{:^80}'.format("Scoring Breakdown:"))
@@ -380,7 +381,7 @@ class CheckSuite(object):
                       2: 'Medium Priority',
                       1: 'Low Priority'}
         def process_table(res):
-            issue = wrapper.fill(res.name)
+            issue = wrapper.fill("{}:".format(res.name))
             if not res.children:
                 reason = wrapper.fill(', '.join(res.msgs))
             else:
@@ -389,7 +390,7 @@ class CheckSuite(object):
                                                         _top_level=False)
                 # there shouldn't be messages if there are children
                 # is this a valid assumption?
-                reason = child_reasons
+                reason = "\n{}".format(child_reasons)
 
             return issue, reason
 
@@ -414,11 +415,11 @@ class CheckSuite(object):
                 data_issues = [process_table(res) for res in result[level]]
 
                 if _top_level:
-                    proc_str = tabulate(data_issues, ('Name', 'Reasoning'),
-                                        'grid')
+                    proc_str = tabulate.tabulate(data_issues, ('Name', 'Reasoning'),
+                                        'plain')
                     print(proc_str)
                 else:
-                    proc_str = tabulate(data_issues, tablefmt='grid')
+                    proc_str = tabulate.tabulate(data_issues, tablefmt='plain')
                 proc_strs.append(proc_str)
         return "\n".join(proc_strs)
 
