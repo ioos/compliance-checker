@@ -6,14 +6,14 @@ source:
   path: ../
 
 build:
-  script: python setup.py install --single-version-externally-managed --record record.txt
+  script: python -m pip install --no-deps --ignore-installed .
   entry_points:
     - compliance-checker = cchecker:main
 
 requirements:
   build:
     - python
-    - setuptools
+    - pip
   # FIXME: the packages here should have specific versions tagged like the pip
   #        requirements to avoid accidentally breaking the build
   run:
@@ -29,6 +29,7 @@ requirements:
     - pygeoif >=0.6
     - regex 2017.07.28
     - requests >=2.2.1
+    - tabulate ==0.8.2
 
 test:
   source_files:
