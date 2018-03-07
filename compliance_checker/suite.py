@@ -25,6 +25,8 @@ import requests
 import textwrap
 import codecs
 
+from tabulate import tabulate
+
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
@@ -350,12 +352,12 @@ class CheckSuite(object):
         Generates the Terminal Output
         '''
         if points < out_of:
-            # print("\n" + "\n" + '-' * 80)
             self.reasoning_routine(groups, 0, priority_flag=limit)
         else:
             print("All tests passed!")
 
-    def reasoning_routine(self, groups, indent, line=True, priority_flag=3):
+    def reasoning_routine(self, groups, indent, line=True, priority_flag=3,
+                          _top_level=True):
         """
         print routine performed
         """
@@ -367,38 +369,52 @@ class CheckSuite(object):
                     for key, valuesiter in itertools.groupby(groups_sorted,
                                                              key=sort_fn)}
 
-        wrapper = textwrap.TextWrapper(initial_indent='', width=80,
-                                       subsequent_indent=' ' * 54)
+        wrapper = textwrap.TextWrapper(initial_indent='',
+                                       width=max(int(40 / 2**indent), 20))
 
-        print('{:^80}'.format("Scoring Breakdown:"))
-        print('\n')
+        if _top_level:
+            print('{:^80}'.format("Scoring Breakdown:"))
+            print('\n')
         # handle high priority
         priorities = {3: 'High Priority',
                       2: 'Medium Priority',
                       1: 'Low Priority'}
+        def process_table(res):
+            issue = wrapper.fill(res.name)
+            if not res.children:
+                reason = wrapper.fill(', '.join(res.msgs))
+            else:
+                child_reasons = self.reasoning_routine(res.children,
+                                                        indent + 1,
+                                                        _top_level=False)
+                # there shouldn't be messages if there are children
+                # is this a valid assumption?
+                reason = child_reasons
+
+            return issue, reason
+
         # iterate up to the min priority requested
         for level in range(3, priority_flag - 1, -1):
             level_name = priorities.get(level, level)
             # print headers
+            proc_strs = []
             if len(result[level]) > 0:
-                print('{:^80}'.format(level_name))
-                print("-" * 80)
-                print('%-39s:%6s' % ('    Name', ' Reasoning'))
-                # print the errors and any associated messages
-                for res in result[level]:
-                    #if (res.value[0] != res.value[1]):
-                    if (res.value[0] != res.value[1]):
-                        if not res.msgs:
-                            print('%-39s' %
-                                ((indent * '    ' + res.name)[0:39]))
-                        else:
-                            print(wrapper.fill('%-39s: %s' %
-                                ((indent * '    ' + res.name)[0:39],
-                                ", ".join(res.msgs))))
+                # only print priority headers at top level, i.e. non-child
+                # datasets
+                if _top_level:
+                    print('{:^80}'.format(level_name))
+                    print("-" * 80)
 
-                # create a sublevel for any children
-                if res.children:
-                    self.reasoning_routine(res.children, indent + 1, False)
+                data_issues = [process_table(res) for res in result[level]]
+
+                if _top_level:
+                    proc_str = tabulate(data_issues, ('Name', 'Reasoning'),
+                                        'grid')
+                    print(proc_str)
+                else:
+                    proc_str = tabulate(data_issues, tablefmt='grid')
+                proc_strs.append(proc_str)
+        return "\n".join(proc_strs)
 
 
     def process_doc(self, doc):
