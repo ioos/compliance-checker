@@ -398,6 +398,12 @@ class CheckSuite(object):
             level_name = priorities.get(level, level)
             # print headers
             proc_strs = []
+
+            # skip any levels that aren't in the result
+            if level not in result:
+                continue
+
+            # skip any empty result levels
             if len(result[level]) > 0:
                 # only print priority headers at top level, i.e. non-child
                 # datasets
