@@ -25,6 +25,9 @@ import requests
 import textwrap
 import codecs
 
+import tabulate
+
+tabulate.PRESERVE_WHITESPACE = True
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
@@ -312,7 +315,6 @@ class CheckSuite(object):
         score_only_list = []
 
         for g in groups:
-            score_list.append([g.name, g.weight, g.value, g.children])
             if g.weight >= limit:
                 score_only_list.append(g.value)
 
@@ -322,7 +324,7 @@ class CheckSuite(object):
         points = sum(points)
         out_of = sum(out_of)
         # sorts lists into high/medium/low order
-        score_list.sort(key=lambda x: x[1], reverse=True)
+        score_list.sort(key=lambda x: x.weight, reverse=True)
 
         return score_list, points, out_of
 
@@ -333,75 +335,94 @@ class CheckSuite(object):
         Returns the dataset needed for the verbose output, as well as the failure flags.
         """
         score_list, points, out_of = self.get_points(groups, limit)
+        issue_count = out_of - points
         print('\n')
         print("-" * 80)
         print('{:^80}'.format("IOOS Compliance Checker Report"))
         print('{:^80}'.format("%s check" % check_name))
+        if issue_count > 0:
+            plural = '' if issue_count == 1 else 's'
+            print("The dataset had {} potential issue{} discovered".format(issue_count, plural))
+            print('{:^80}'.format("during the %s check" % check_name))
         print("-" * 80)
 
-        return [score_list, points, out_of]
+        return [groups, points, out_of]
 
     def standard_output_generation(self, groups, limit, points, out_of):
         '''
         Generates the Terminal Output
         '''
         if points < out_of:
-            # print("\n" + "\n" + '-' * 80)
-            self.reasoning_routine(groups, 0)
+            self.reasoning_routine(groups, 0, priority_flag=limit)
         else:
             print("All tests passed!")
 
-    def reasoning_routine(self, list_of_results, indent, line=True, priority_flag=3):
+    def reasoning_routine(self, groups, indent, line=True, priority_flag=3,
+                          _top_level=True):
         """
         print routine performed
         """
-        def weight_func(r):
-            """
-            Function that returns the weight, used for sorting by priority
-            """
-            return r.weight
-        # Sorting method used to properly sort the output by priority.
-        grouped_sorted = []
-        grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)
 
-        wrapper = textwrap.TextWrapper(initial_indent='', width=80, subsequent_indent=' ' * 54)
-        for res in grouped_sorted:
-            # If statements to print the proper Headings
-            if res.weight == 3 and indent == 0 and priority_flag == 3:
-                print('\n')
-                print('{:^80}'.format("High Priority"))
-                print("-" * 80)
-                print('%-39s:%6s' % ('    Name', ' Reasoning'))
-                print("-" * 80)
 
-                priority_flag -= 1
-            if res.weight == 2 and indent == 0 and priority_flag == 2:
-                print('\n')
-                print('{:^80}'.format("Medium Priority"))
-                print("-" * 80)
-                print('%-39s:%6s' % ('    Name', ' Reasoning'))
-                print("-" * 80)
+        sort_fn = lambda x: x.weight
+        groups_sorted = sorted(groups, key=sort_fn, reverse=True)
+        result = {key: [v for v in valuesiter if v.value[0] != v.value[1]]
+                    for key, valuesiter in itertools.groupby(groups_sorted,
+                                                             key=sort_fn)}
 
-                priority_flag -= 1
-            if res.weight == 1 and indent == 0 and priority_flag == 1:
-                print('\n')
-                print('{:^80}'.format("Low Priority"))
-                print("-" * 80)
-                print('%-39s:%6s' % ('    Name', ' Reasoning'))
-                print("-" * 80)
-                priority_flag -= 1
+        wrapper = textwrap.TextWrapper(initial_indent='',
+                                       width=max(int(80 / 2**indent), 40))
 
-            if (res.value[0] != res.value[1]) and not res.msgs:
-                print('%-39s' %
-                      ((indent * '    ' + res.name)[0:39]))
+        if _top_level:
+            print('{:^80}'.format("Scoring Breakdown:"))
+            print('\n')
+        # handle high priority
+        priorities = {3: 'High Priority',
+                      2: 'Medium Priority',
+                      1: 'Low Priority'}
+        def process_table(res):
+            issue = wrapper.fill("{}:".format(res.name))
+            if not res.children:
+                reason = wrapper.fill(', '.join(res.msgs))
+            else:
+                child_reasons = self.reasoning_routine(res.children,
+                                                        indent + 1,
+                                                        _top_level=False)
+                # there shouldn't be messages if there are children
+                # is this a valid assumption?
+                reason = "\n{}".format(child_reasons)
 
-            if (res.value[0] != res.value[1]) and res.msgs:
-                print(wrapper.fill('%-39s: %s' %
-                      ((indent * '    ' + res.name)[0:39],
-                       ", ".join(res.msgs))))
+            return issue, reason
 
-            if res.children:
-                self.reasoning_routine(res.children, indent + 1, False)
+        # iterate up to the min priority requested
+        for level in range(3, priority_flag - 1, -1):
+            level_name = priorities.get(level, level)
+            # print headers
+            proc_strs = []
+
+            # skip any levels that aren't in the result
+            if level not in result:
+                continue
+
+            # skip any empty result levels
+            if len(result[level]) > 0:
+                # only print priority headers at top level, i.e. non-child
+                # datasets
+                if _top_level:
+                    print('{:^80}'.format(level_name))
+                    print("-" * 80)
+
+                data_issues = [process_table(res) for res in result[level]]
+
+                if _top_level:
+                    proc_str = tabulate.tabulate(data_issues, ('Name', 'Reasoning'),
+                                        'plain')
+                    print(proc_str)
+                else:
+                    proc_str = tabulate.tabulate(data_issues, tablefmt='plain')
+                proc_strs.append(proc_str)
+        return "\n".join(proc_strs)
+
 
     def process_doc(self, doc):
         """
