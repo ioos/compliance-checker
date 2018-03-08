@@ -33,7 +33,8 @@ def main():
                         action='append')
 
     parser.add_argument('-f', '--format', default='text',
-                        choices=['text', 'html', 'json'], help='Output format')
+                        choices=['text', 'html', 'json', 'json_new'],
+                        help='Output format')
     parser.add_argument('-o', '--output', default=[], action='append',
                         help='Output filename(s)')
     parser.add_argument('-V', '--version', action='store_true',

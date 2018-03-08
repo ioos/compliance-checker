@@ -85,9 +85,9 @@ class ComplianceChecker(object):
             groups = cls.html_output(cs, score_dict, output_filename, ds_loc,
                                      limit)
 
-        elif output_format == 'json':
+        elif output_format == 'json' or 'json_new':
             groups = cls.json_output(cs, score_dict, output_filename, ds_loc,
-                                     limit)
+                                     limit, output_format)
 
         else:
             raise TypeError('Invalid format %s' % output_format)
@@ -148,23 +148,37 @@ class ComplianceChecker(object):
         return groups
 
     @classmethod
-    def json_output(cls, cs, score_dict, output_filename, ds_loc, limit):
+    def json_output(cls, cs, score_dict, output_filename, ds_loc, limit,
+                    output_type='json'):
         '''
         Generates JSON output for the ocmpliance score(s)
         @param cs              Compliance Checker Suite
         @param score_groups    List of results
         @param output_filename The file path to output to
         @param ds_loc          Location of the source dataset
-        @param limit           The degree of strictness, 1 being the strictest, and going up from there.
+        @param limit           The degree of strictness, 1 being the strictest,
+                               and going up from there.
         '''
         results = {}
-        for ds, score_groups in six.iteritems(score_dict):
-            for checker, rpair in six.iteritems(score_groups):
-                groups, errors = rpair
-                results[checker] = cs.dict_output(
-                    checker, groups, ds_loc, limit
-                )
-        import ipdb; ipdb.set_trace()
+        # json output keys out at the top level by
+        if len(score_dict) > 1 and output_type != 'json_new':
+            raise ValueError("output_type must be set to 'json_new' if outputting multiple datasets to a single json file or stdout")
+
+        if output_type == 'json':
+            for ds, score_groups in six.iteritems(score_dict):
+                for checker, rpair in six.iteritems(score_groups):
+                    groups, errors = rpair
+                    results[checker] = cs.dict_output(
+                        checker, groups, ds_loc, limit,
+                    )
+        elif output_type == 'json_new':
+            for ds, score_groups in six.iteritems(score_dict):
+                for checker, rpair in six.iteritems(score_groups):
+                    groups, errors = rpair
+                    results[ds] = {}
+                    results[ds][checker] = cs.dict_output(
+                        checker, groups, ds_loc, limit
+                    )
         json_results = json.dumps(results, indent=2, ensure_ascii=False)
 
         if output_filename == '-':
