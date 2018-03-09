@@ -16,8 +16,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', '-t', '--test=', '-t=', default=[],
                         action='append',
-                        help="Select the Checks you want to perform.  Defaults to 'acdd' if unspecified")
-
+                        help="Select the Checks you want to perform. Defaults to 'acdd' if unspecified.  Versions of standards can be specified via `-t <test_standard>:<version>`.  If `<version>` is omitted, or is \"latest\", the latest version of the test standard is used.")
     parser.add_argument('--criteria', '-c',
                         help="Define the criteria for the checks.  Either Strict, Normal, or Lenient.  Defaults to Normal.",
                         nargs='?', default='normal',
@@ -34,9 +33,9 @@ def main():
 
     parser.add_argument('-f', '--format', default='text',
                         choices=['text', 'html', 'json', 'json_new'],
-                        help='Output format')
+                        help="Output format. The difference between the 'json' and the 'json_new' formats is that the 'json' format has the check as the top level key, whereas the 'json_new' format has the dataset name(s) as the main key in the output follow by any checks as subkeys.  Also, 'json' format can be only be run against one input file, whereas 'json_new' can be run against multiple files.")
     parser.add_argument('-o', '--output', default=[], action='append',
-                        help='Output filename(s)')
+                        help="Output filename(s).  If '-' is supplied, output to stdout.  Can either be one or many files.  If one file is supplied, but the checker is run against many files, all the output from the checks goes to that file (does not presently work with 'json' format).  If more than one output file is supplied, the number of input datasets supplied must match the number of output files.")
     parser.add_argument('-V', '--version', action='store_true',
                         help='Display the IOOS Compliance Checker version information.')
     parser.add_argument('dataset_location', nargs='*',
