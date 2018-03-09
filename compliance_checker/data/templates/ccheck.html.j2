@@ -13,7 +13,7 @@
     <h4>Corrective Actions</h4>
     <div class="col-md-12">
       <div class="table-collapse">
-        <a data-target="high-priority-table" href="#">High Priority <i class="glyphicon glyphicon-collapse-up"></i></a>
+        <a data-target="high-priority-table" href="#"> {{scoreheader.get(3)}} <i class="glyphicon glyphicon-collapse-up"></i></a>
       </div>
       {% if high_count -%}
       <div class="failures">
@@ -59,7 +59,7 @@
     </div> <!-- .col-md-12 -->
     <div class="col-md-12">
       <div class="table-collapse">
-        <a data-target="medium-priority-table" href="#">Medium Priority <i class="glyphicon glyphicon-collapse-up"></i></a>
+        <a data-target="medium-priority-table" href="#"> {{scoreheader.get(2)}} <i class="glyphicon glyphicon-collapse-up"></i></a>
       </div>
       {% if medium_count -%}
       <div class="failures">
@@ -104,7 +104,7 @@
     </div> <!-- .col-md-12 -->
     <div class="col-md-12">
       <div class="table-collapse">
-        <a data-target="low-priority-table" href="#">Low Priority <i class="glyphicon glyphicon-collapse-up"></i></a>
+        <a data-target="low-priority-table" href="#"> {{scoreheader.get(1)}} <i class="glyphicon glyphicon-collapse-up"></i></a>
       </div>
       {% if low_count -%}
       <div class="failures">
