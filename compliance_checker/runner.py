@@ -34,7 +34,7 @@ class ComplianceChecker(object):
     the command line or can be used via import.
     """
     @classmethod
-    def run_checker(cls, ds_locs, checker_names, verbose, criteria,
+    def run_checker(cls, ds_loc, checker_names, verbose, criteria,
                     skip_checks=None, output_filename='-',
                     output_format='text'):
         """
@@ -52,8 +52,13 @@ class ComplianceChecker(object):
         """
         cs = CheckSuite()
         score_dict = OrderedDict()
-        for ds_loc in ds_locs:
-            ds = cs.load_dataset(ds_loc)
+        if not isinstance(ds_loc, str) and hasattr(ds_loc, '__iter__'):
+            locs = ds_loc
+        else:
+            locs = [ds_loc]
+
+        for loc in locs:
+            ds = cs.load_dataset(loc)
 
             score_groups = cs.run(ds, [] if skip_checks is None else skip_checks,
                                 *checker_names)
