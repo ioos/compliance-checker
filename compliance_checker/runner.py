@@ -52,7 +52,7 @@ class ComplianceChecker(object):
         """
         cs = CheckSuite()
         score_dict = OrderedDict()
-        if not isinstance(ds_loc, str) and hasattr(ds_loc, '__iter__'):
+        if not isinstance(ds_loc, six.string_types):
             locs = ds_loc
         else:
             locs = [ds_loc]
