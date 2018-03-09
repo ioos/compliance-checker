@@ -42,6 +42,38 @@ class CheckSuite(object):
     def __init__(self):
         self.col_width = 80
 
+    # @classmethod
+    def priorityheader(self, check):
+        """
+        Method to determine which scoring terminology to use for the headers.
+        @param check  name of the check being run
+
+        @return headerout  dict of header priorities
+        """
+        headermap = {1:  {3: 'Highly Recommended',
+                          2: 'Recommended',
+                          1: 'Suggested'},
+                     2:  {3: 'Errors',
+                          2: 'Warnings',
+                          1: 'Info'},
+                     3:  {3: 'Required',
+                          2: 'Recommended',
+                          1: 'Suggested'},
+                     4:  {3: 'High Priority',
+                          2: 'Medium Priority',
+                          1: 'Low Priority'}}
+        if check.startswith('acdd') or check.startswith('ioos'):
+            headerout = headermap.get(1)
+        elif check.startswith('cf'):
+            headerout = headermap.get(2)
+        elif check.startswith('ncei'):
+            headerout = headermap.get(3)
+        elif check.startswith('UGRID'):
+            headerout = headermap.get(4)
+        else:
+            headerout = headermap.get(4)
+        return headerout
+
     @classmethod
     def load_all_available_checkers(cls):
         """
@@ -250,6 +282,7 @@ class CheckSuite(object):
         aggregates['all_priorities'] = all_priorities
         aggregates['testname'] = check_name
         aggregates['source_name'] = source_name
+        aggregates['scoreheader'] = self.priorityheader(check_name)
         return aggregates
 
     def dict_output(self, check_name, groups, source_name, limit):
@@ -348,17 +381,17 @@ class CheckSuite(object):
 
         return [groups, points, out_of]
 
-    def standard_output_generation(self, groups, limit, points, out_of):
+    def standard_output_generation(self, groups, limit, points, out_of, check=None):
         '''
         Generates the Terminal Output
         '''
         if points < out_of:
-            self.reasoning_routine(groups, 0, priority_flag=limit)
+            self.reasoning_routine(groups, 0, priority_flag=limit, check=check)
         else:
             print("All tests passed!")
 
     def reasoning_routine(self, groups, indent, line=True, priority_flag=3,
-                          _top_level=True):
+                          _top_level=True, check=None):
         """
         print routine performed
         """
@@ -376,10 +409,8 @@ class CheckSuite(object):
         if _top_level:
             print('{:^80}'.format("Scoring Breakdown:"))
             print('\n')
-        # handle high priority
-        priorities = {3: 'High Priority',
-                      2: 'Medium Priority',
-                      1: 'Low Priority'}
+        check = check
+        priorities = self.priorityheader(check)
         def process_table(res):
             issue = wrapper.fill("{}:".format(res.name))
             if not res.children:
