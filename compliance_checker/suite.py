@@ -12,6 +12,7 @@ import itertools
 from operator import itemgetter
 from netCDF4 import Dataset
 from lxml import etree as ET
+from distutils.version import StrictVersion
 from compliance_checker.base import fix_return_value, Result, GenericFile
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
@@ -67,11 +68,17 @@ class CheckSuite(object):
                 print("Could not load", x, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
-        ver_checkers = [c.split(':', 1) for c in cls.checkers if ':' in c]
+        ver_checkers = sorted([c.split(':', 1) for c
+                               in cls.checkers if ':' in c])
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
-            # right now this looks for character order. May break if
-            # version specifications become more complicated
-            latest_version = max(v[-1] for v in versions)
+            version_nums = [v[-1] for v in versions]
+            try:
+                latest_version = str(max(StrictVersion(v) for v
+                                         in version_nums))
+            # if the version can't be parsed as a StrictVersion, parse
+            # according to character collation
+            except ValueError:
+                latest_version = max(version_nums)
             cls.checkers[spec] = cls.checkers[spec + ':latest'] = \
                 cls.checkers[':'.join((spec, latest_version))]
 
