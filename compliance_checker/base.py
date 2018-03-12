@@ -340,6 +340,12 @@ def ratable_result(value, name, msgs):
 
 
 def score_group(group_name=None):
+    '''
+    Warning this is deprecated as of Compliance Checker v3.2!
+
+    Please do not using scoring groups and update your plugins
+    if necessary
+    '''
     def _inner(func):
         def _dec(s, ds):
             ret_val = func(s, ds)

@@ -943,6 +943,7 @@ class CFBaseCheck(BaseCheck):
         :rtype:
         :return: List of results
         '''
+
         # This list is straight from section 3
         deprecated = ['level', 'layer', 'sigma_level']
         variable = ds.variables[variable_name]

@@ -364,11 +364,11 @@ class CheckSuite(object):
         print("-" * 80)
         print('{:^80}'.format("IOOS Compliance Checker Report"))
         print('{:^80}'.format("%s check" % check_name))
-        if issue_count > 0:
-            plural = '' if issue_count == 1 else 's'
-            print("The dataset had {} potential issue{} discovered".format(issue_count, plural))
-            print('{:^80}'.format("during the %s check" % check_name))
         print("-" * 80)
+        if issue_count > 0:
+            print('{:^80}'.format("Corrective Actions"))
+            plural = '' if issue_count == 1 else 's'
+            print("The dataset has {} potential issue{}".format(issue_count, plural))
 
         return [groups, points, out_of]
 
@@ -395,9 +395,6 @@ class CheckSuite(object):
         wrapper = textwrap.TextWrapper(initial_indent='',
                                        width=max(int(80 / 2**indent), 40))
 
-        if _top_level:
-            print('{:^80}'.format("Scoring Breakdown:"))
-            print('\n')
         priorities = self.checkers[check]._cc_display_headers
         def process_table(res, check):
             issue = wrapper.fill("{}:".format(res.name))
@@ -429,6 +426,7 @@ class CheckSuite(object):
                 # only print priority headers at top level, i.e. non-child
                 # datasets
                 if _top_level:
+                    print("\n")
                     print('{:^80}'.format(level_name))
                     print("-" * 80)
 
