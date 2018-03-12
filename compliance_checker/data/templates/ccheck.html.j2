@@ -58,10 +58,10 @@
       {% endif -%}
     </div> <!-- .col-md-12 -->
     <div class="col-md-12">
+      {% if medium_count -%}
       <div class="table-collapse">
         <a data-target="medium-priority-table" href="#"> {{scoreheader.get(2)}} <i class="glyphicon glyphicon-collapse-up"></i></a>
       </div>
-      {% if medium_count -%}
       <div class="failures">
         | <span class="label label-danger label-as-badge">{{ medium_count }}</span>
       </div>
@@ -87,26 +87,13 @@
           </tbody>
         </table>
       </div> <!-- .medium-priority-table -->
-      {% else -%}
-      <div class="failures">
-        | <span class="label label-success label-as-badge">{{ medium_count }}</span>
-      </div>
-      <div class="medium-priority-table collapse in">
-        <table class="table">
-          <tbody>
-            <tr>
-              <td>All medium priority checks passed!</th>
-            </tr>
-          </tbody>
-        </table>
-      </div>
       {% endif -%}
     </div> <!-- .col-md-12 -->
     <div class="col-md-12">
+      {% if low_count -%}
       <div class="table-collapse">
         <a data-target="low-priority-table" href="#"> {{scoreheader.get(1)}} <i class="glyphicon glyphicon-collapse-up"></i></a>
       </div>
-      {% if low_count -%}
       <div class="failures">
         | <span class="label label-danger label-as-badge">{{ low_count }}</span>
       </div>
@@ -132,19 +119,6 @@
           </tbody>
         </table>
       </div> <!-- .low-priority-table -->
-      {% else -%}
-      <div class="failures">
-        | <span class="label label-success label-as-badge">{{ low_count }}</span>
-      </div>
-      <div class="low-priority-table collapse in">
-        <table class="table">
-          <tbody>
-            <tr>
-              <td>All low priority checks passed!</th>
-            </tr>
-          </tbody>
-        </table>
-      </div>
       {% endif -%}
     </div> <!-- .col-md-12 -->
   </div> <!-- .col-md-12 -->
