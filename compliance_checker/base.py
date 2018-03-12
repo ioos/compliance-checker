@@ -42,6 +42,11 @@ class BaseCheck(object):
     LOW    = 1
 
     _cc_checker_version = __version__
+    _cc_display_headers = {
+        3: 'High Priority',
+        2: 'Medium Priority',
+        1: 'Low Priority'
+    }
 
     supported_ds = []
 

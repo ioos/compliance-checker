@@ -103,7 +103,7 @@ class ComplianceChecker(object):
         for checker, rpair in score_groups.items():
             groups, errors = rpair
             score_list, points, out_of = cs.standard_output(limit, checker, groups)
-            cs.standard_output_generation(groups, limit, points, out_of, check=checker)
+            cs.standard_output_generation(groups, limit, points, out_of, checker)
         return groups
 
     @classmethod
