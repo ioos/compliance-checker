@@ -55,7 +55,7 @@ class TestSuite(unittest.TestCase):
                                                             limit, checker,
                                                             groups)
             # This asserts that print is able to generate all of the unicode output
-            cs.non_verbose_output_generation(score_list, groups, limit, points, out_of)
+            cs.standard_output_generation(groups, limit, points, out_of, check=checker)
 
     def test_skip_checks(self):
         """Tests that checks are properly skipped when specified"""
@@ -82,7 +82,7 @@ class TestSuite(unittest.TestCase):
                                                             limit, checker,
                                                             groups)
             # This asserts that print is able to generate all of the unicode output
-            cs.non_verbose_output_generation(score_list, groups, limit, points, out_of)
+            cs.standard_output_generation(groups, limit, points, out_of, check=checker)
 
     def test_score_grouping(self):
         # Testing the grouping of results for output, which can fail
@@ -119,7 +119,7 @@ class TestSuite(unittest.TestCase):
                                                                     checker,
                                                                     groups)
             # This asserts that print is able to generate all of the unicode output
-            cs.non_verbose_output_generation(score_list, groups, limit, cdl_points, cdl_out_of)
+            cs.standard_output_generation(groups, limit, cdl_points, cdl_out_of, check=checker)
         ds.close()
 
         # Ok now load the nc file that it came from
@@ -134,7 +134,7 @@ class TestSuite(unittest.TestCase):
                                                                   checker,
                                                                   groups)
             # This asserts that print is able to generate all of the unicode output
-            cs.non_verbose_output_generation(score_list, groups, limit, nc_points, nc_out_of)
+            cs.standard_output_generation(groups, limit, nc_points, nc_out_of, check=checker)
         ds.close()
 
         nc_file_path = static_files['test_cdl'].replace('.cdl', '.nc')
@@ -148,4 +148,3 @@ class TestSuite(unittest.TestCase):
         cs = CheckSuite()
         resp = cs.load_local_dataset(static_files['empty'])
         assert isinstance(resp, GenericFile) ==  True
-

@@ -40,9 +40,8 @@ class ComplianceChecker(object):
         """
         Static check runner.
 
-        @param  ds_locs          List of dataset locations (url or file)
-        @param  checker_names    List of string names to run, should match keys of checkers dict (empty list means run all)
-        @param  verbose         Verbosity of the output (0, 1, 2)
+        @param  ds_loc          Dataset location (url or file)
+        @param  checker_names   List of string names to run, should match keys of checkers dict (empty list means run all)
         @param  criteria        Determines failure (lenient, normal, strict)
         @param  output_filename Path to the file for output
         @param  skip_checks     Names of checks to skip
@@ -120,11 +119,8 @@ class ComplianceChecker(object):
                 score_list, points, out_of = cs.standard_output(ds, limit,
                                                                 checker,
                                                                 groups)
-                if not verbose:
-                    cs.non_verbose_output_generation(score_list, groups, limit,
-                                                     points, out_of)
-                else:
-                    cs.verbose_output_generation(groups, limit, points, out_of)
+                cs.standard_output_generation(groups, limit, points, out_of,
+                                              check=checker)
         return groups
 
     @classmethod

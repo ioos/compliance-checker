@@ -125,7 +125,7 @@ class ACDDBaseCheck(BaseCheck):
                 self.applicable_variables.append(varname)
         return self.applicable_variables
 
-    @score_group('varattr')
+    @score_group('Variable Attributes')
     def check_var_long_name(self, ds):
         '''
         Checks each applicable variable for the long_name attribute
@@ -142,12 +142,12 @@ class ACDDBaseCheck(BaseCheck):
             long_name = getattr(ds.variables[variable], 'long_name', None)
             check = long_name is not None
             if not check:
-                msgs.append("Var %s missing attr long_name" % variable)
+                msgs.append("Var %s missing attribute long_name" % variable)
             results.append(Result(BaseCheck.HIGH, check, (variable, "var_std_name"), msgs))
 
         return results
 
-    @score_group('varattr')
+    @score_group('Variable Attributes')
     def check_var_standard_name(self, ds):
         '''
         Checks each applicable variable for the standard_name attribute
@@ -160,12 +160,12 @@ class ACDDBaseCheck(BaseCheck):
             std_name = getattr(ds.variables[variable], 'standard_name', None)
             check = std_name is not None
             if not check:
-                msgs.append("Var %s missing attr standard_name" % variable)
+                msgs.append("Var %s missing attribute standard_name" % variable)
             results.append(Result(BaseCheck.HIGH, check, (variable, "var_std_name"), msgs))
 
         return results
 
-    @score_group('varattr')
+    @score_group('Variable Attributes')
     def check_var_units(self, ds):
         '''
         Checks each applicable variable for the units attribute
@@ -183,14 +183,14 @@ class ACDDBaseCheck(BaseCheck):
                 continue
             # Check if we have no units
             if not unit_check:
-                msgs.append("Var %s missing attr units" % variable)
+                msgs.append("Var %s missing attribute units" % variable)
             results.append(Result(BaseCheck.HIGH, unit_check, (variable, "var_units"), msgs))
 
         return results
 
     def check_acknowledgment(self, ds):
         '''
-        Check if acknowledgment/acknowledgment attr is present.
+        Check if acknowledgment/acknowledgment attribute is present.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         '''
@@ -519,7 +519,7 @@ class ACDDBaseCheck(BaseCheck):
         # Conventions attribute is present, but does not include
         # proper ACDD version
         messages = [
-            "Attr Conventions does not contain 'ACDD-{}'".format(self._cc_spec_version)
+            "Global Attribute 'Conventions' does not contain 'ACDD-{}'".format(self._cc_spec_version)
         ]
         return ratable_result((1, 2),
                               'Conventions',
@@ -671,7 +671,7 @@ class ACDD1_3Check(ACDDNCCheck):
         return Result(BaseCheck.MEDIUM, date_created_check,
                       'date_created_is_iso', msgs)
 
-    @score_group('varattr')
+    @score_group('Variable Attributes')
     def check_var_coverage_content_type(self, ds):
         '''
         Check coverage content type against valid ISO-19115-1 codes
@@ -685,7 +685,7 @@ class ACDD1_3Check(ACDDNCCheck):
                             'coverage_content_type', None)
             check = ctype is not None
             if not check:
-                msgs.append("Var %s missing attr coverage_content_type" %
+                msgs.append("Var %s missing attribute coverage_content_type" %
                             variable)
                 results.append(Result(BaseCheck.HIGH, check,
                                       (variable, "coverage_content_type"),

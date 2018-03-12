@@ -12,6 +12,7 @@ import itertools
 from operator import itemgetter
 from netCDF4 import Dataset
 from lxml import etree as ET
+from distutils.version import StrictVersion
 from compliance_checker.base import fix_return_value, Result, GenericFile
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
@@ -25,6 +26,9 @@ import requests
 import textwrap
 import codecs
 
+import tabulate
+
+tabulate.PRESERVE_WHITESPACE = True
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
@@ -36,9 +40,8 @@ class CheckSuite(object):
 
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
 
-    #def __init__(self, loc):
-    #    # TODO: move more of the CheckSuite logic into the constructor
-    #    self.ds_loc = loc
+    def __init__(self):
+        self.col_width = 80
 
     @classmethod
     def load_all_available_checkers(cls):
@@ -65,11 +68,17 @@ class CheckSuite(object):
                 print("Could not load", x, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
-        ver_checkers = [c.split(':', 1) for c in cls.checkers if ':' in c]
+        ver_checkers = sorted([c.split(':', 1) for c
+                               in cls.checkers if ':' in c])
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
-            # right now this looks for character order. May break if
-            # version specifications become more complicated
-            latest_version = max(v[-1] for v in versions)
+            version_nums = [v[-1] for v in versions]
+            try:
+                latest_version = str(max(StrictVersion(v) for v
+                                         in version_nums))
+            # if the version can't be parsed as a StrictVersion, parse
+            # according to character collation
+            except ValueError:
+                latest_version = max(version_nums)
             cls.checkers[spec] = cls.checkers[spec + ':latest'] = \
                 cls.checkers[':'.join((spec, latest_version))]
 
@@ -94,6 +103,19 @@ class CheckSuite(object):
 
         return [fix_return_value(val, check_method.__func__.__name__, check_method, check_method.__self__)]
 
+    def _get_check_versioned_name(self, check_name):
+        """
+        The compliance checker allows the user to specify a
+        check without a version number but we want the report
+        to specify the version number.
+
+        Returns the check name with the version number it checked
+        """
+        if ':' not in check_name or ':latest' in check_name:
+            check_name = ':'.join((check_name.split(':')[0],
+                                   self.checkers[check_name]._cc_spec_version))
+        return check_name
+
     def _get_valid_checkers(self, ds, checker_names):
         """
         Returns a filtered list of 2-tuples: (name, valid checker) based on the ds object's type and
@@ -109,7 +131,6 @@ class CheckSuite(object):
 
         all_checked = set([a[1] for a in args])  # only class types
         checker_queue = set(args)
-
         while len(checker_queue):
             name, a = checker_queue.pop()
             # is the current dataset type in the supported filetypes
@@ -172,6 +193,51 @@ class CheckSuite(object):
                 return False
 
         return True
+
+    def get_priority_headers(self, check):
+        """
+        Method to determine which scoring terminology to use for the headers.
+        @param check name of the check being run
+
+        @return header_out  dict of header priorities
+        """
+        header_map = {
+            1: {  # Default
+                3: 'High Priority',
+                2: 'Medium Priority',
+                1: 'Low Priority'
+            },
+            2: {  # ACDD, IOOS
+                3: 'Highly Recommended',
+                2: 'Recommended',
+                1: 'Suggested'
+            },
+            3: {  # CF
+                3: 'Errors',
+                2: 'Warnings',
+                1: 'Info'
+            },
+            4: {  # NCEI
+                3: 'Required',
+                2: 'Recommended',
+                1: 'Suggested'
+            },
+        }
+        # Make a default selection
+        header_out = header_map.get(1)
+        # If check isn't defined, just use the default
+        if check is None:
+            return header_out
+
+        check = check.lower()
+        if check.startswith('acdd') or check.startswith('ioos'):
+            header_out = header_map.get(2)
+        elif check.startswith('cf'):
+            header_out = header_map.get(3)
+        elif check.startswith('ncei'):
+            header_out = header_map.get(4)
+
+        return header_out
 
     def build_structure(self, check_name, groups, source_name, limit=1):
         '''
@@ -246,8 +312,10 @@ class CheckSuite(object):
         aggregates['medium_priorities'] = medium_priorities
         aggregates['low_priorities'] = low_priorities
         aggregates['all_priorities'] = all_priorities
-        aggregates['testname'] = check_name
+        aggregates['testname'] = self._get_check_versioned_name(check_name)
         aggregates['source_name'] = source_name
+        aggregates['scoreheader'] = self.get_priority_headers(check_name)
+        aggregates['cc_spec_version'] = self.checkers[check_name]._cc_spec_version
         return aggregates
 
     def dict_output(self, check_name, groups, source_name, limit):
@@ -313,7 +381,6 @@ class CheckSuite(object):
         score_only_list = []
 
         for g in groups:
-            score_list.append([g.name, g.weight, g.value, g.children])
             if g.weight >= limit:
                 score_only_list.append(g.value)
 
@@ -323,7 +390,7 @@ class CheckSuite(object):
         points = sum(points)
         out_of = sum(out_of)
         # sorts lists into high/medium/low order
-        score_list.sort(key=lambda x: x[1], reverse=True)
+        score_list.sort(key=lambda x: x.weight, reverse=True)
 
         return score_list, points, out_of
 
@@ -334,167 +401,93 @@ class CheckSuite(object):
         Returns the dataset needed for the verbose output, as well as the failure flags.
         """
         score_list, points, out_of = self.get_points(groups, limit)
+        issue_count = out_of - points
+
+        # Let's add the version number to the check name if it's missing
+        check_name = self._get_check_versioned_name(check_name)
         print('\n')
         print("-" * 80)
-        # ew
-        print('{:^80}'.format('The dataset "%s" scored %r out of %r points' %
-                              (ds, points, out_of)))
-        print('{:^80}'.format("during the %s check" % check_name))
+        print('{:^80}'.format("IOOS Compliance Checker Report"))
+        print('{:^80}'.format("%s check" % check_name))
+        if issue_count > 0:
+            plural = '' if issue_count == 1 else 's'
+            print("The dataset had {} potential issue{} discovered".format(issue_count, plural))
+            print('{:^80}'.format("during the %s check" % check_name))
         print("-" * 80)
 
-        return [score_list, points, out_of]
+        return [groups, points, out_of]
 
-    def non_verbose_output_generation(self, score_list, groups, limit, points, out_of):
-
+    def standard_output_generation(self, groups, limit, points, out_of, check=None):
+        '''
+        Generates the Terminal Output
+        '''
         if points < out_of:
-            print('{:^80}'.format("Scoring Breakdown:"))
-            print('\n')
-            priority_flag = 3
-            for x in range(len(score_list)):
-                if score_list[x][1] == 3 and limit <= 3:
-                    if priority_flag == 3:
-                        print('{:^80}'.format("High Priority"))
-                        print("-" * 80)
-                        print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
-                        priority_flag -= 1
-                    print('%-40s:%s:%6s/%1s' % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
-
-                elif score_list[x][1] == 2 and limit <= 2:
-                    if priority_flag == 2:
-                        print('\n')
-                        print('{:^80}'.format("Medium Priority"))
-                        print("-" * 80)
-                        print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
-                        priority_flag -= 1
-                    print('%-40s:%s:%6s/%1s' % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
-
-                elif score_list[x][1] == 1 and limit == 1:
-                    if priority_flag == 1:
-                        print('\n')
-                        print('{:^80}'.format("Low Priority"))
-                        print("-" * 80)
-                        print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
-                        priority_flag -= 1
-                    print('%-40s:%s:%6s/%1s' % (score_list[x][0][0:39], score_list[x][1], score_list[x][2][0], score_list[x][2][1]))
-
-                elif score_list[x][1] == 1 and limit == 1 and priority_flag == 2:
-                    print('{:^80}'.format('No medium priority tests present'))
-                    print('-' * 80)
-                    priority_flag -= 1
-            # Catch All for pretty presentation
-            if priority_flag == 2 and limit == 2:
-                print('{:^80}'.format('No Medium priority tests present'))
-                print('-' * 80)
-
-            if priority_flag == 2 and limit == 1:
-                print('{:^80}'.format('No Medium priority tests present'))
-                print('-' * 80)
-                print('')
-                print('{:^80}'.format('No Low priority tests present'))
-                print('-' * 80)
-
-            if priority_flag == 1 and limit == 1:
-                print('{:^80}'.format('No Low priority tests present'))
-                print('-' * 80)
-
-            print("\n" + "\n" + '-' * 80)
-            print('{:^80}'.format('Reasoning for the failed tests given below:'))
-            print('\n')
-            print('%s%37s:%10s:%8s' % ('Name', 'Priority', '  Score', 'Reasoning'))
-            print("-" * 80)
-            self.reasoning_routine(groups, 0)
-
+            self.reasoning_routine(groups, 0, priority_flag=limit, check=check)
         else:
             print("All tests passed!")
 
-    def verbose_output_generation(self, groups, limit, points, out_of):
-        '''
-        Generates the Terminal Output for Verbose cases
-        '''
-        priority_flag = 3
-        print('{:^80}'.format("Verbose Scoring Breakdown:"), end=' ')
-        self.print_routine(groups, 0, priority_flag)
-        if points < out_of:
-            print("\n" + "\n" + '-' * 80)
-            print('{:^80}'.format('Reasoning for the failed tests given below:'))
+    def reasoning_routine(self, groups, indent, line=True, priority_flag=3,
+                          _top_level=True, check=None):
+        """
+        print routine performed
+        """
+
+        sort_fn = lambda x: x.weight
+        groups_sorted = sorted(groups, key=sort_fn, reverse=True)
+        result = {key: [v for v in valuesiter if v.value[0] != v.value[1]]
+                    for key, valuesiter in itertools.groupby(groups_sorted,
+                                                             key=sort_fn)}
+        wrapper = textwrap.TextWrapper(initial_indent='',
+                                       width=max(int(80 / 2**indent), 40))
+
+        if _top_level:
+            print('{:^80}'.format("Scoring Breakdown:"))
             print('\n')
-            print('%s%37s:%10s:%8s' % ('Name', 'Priority', '  Score', 'Reasoning'))
-            print("-" * 80)
-            self.reasoning_routine(groups, 0)
+        check = check
+        priorities = self.get_priority_headers(check)
+        def process_table(res, check):
+            issue = wrapper.fill("{}:".format(res.name))
+            if not res.children:
+                reason = wrapper.fill(', '.join(res.msgs))
+            else:
+                child_reasons = self.reasoning_routine(res.children,
+                                                        indent + 1,
+                                                        _top_level=False, check=check)
+                # there shouldn't be messages if there are children
+                # is this a valid assumption?
+                reason = "\n{}".format(child_reasons)
 
-        pass
+            return issue, reason
 
-    def print_routine(self, list_of_results, indent, priority_flag):
-        """
-        print routine performed
-        """
-        def weight_func(r):
-            """
-            Function that returns the weight, used for sorting by priority
-            """
-            return r.weight
+        # iterate up to the min priority requested
+        for level in range(3, priority_flag - 1, -1):
+            level_name = priorities.get(level, level)
+            # print headers
+            proc_strs = []
 
-        # Sorting method used to properly sort the output by priority.
-        grouped_sorted = []
-        grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)
+            # skip any levels that aren't in the result
+            if level not in result:
+                continue
 
-        # Loop over input
-        for res in grouped_sorted:
-            # If statements to print the proper Headings
-            if res.weight == 3 and indent == 0 and priority_flag == 3:
-                print('\n')
-                print('{:^80}'.format("High Priority"))
-                print("-" * 80)
-                print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
+            # skip any empty result levels
+            if len(result[level]) > 0:
+                # only print priority headers at top level, i.e. non-child
+                # datasets
+                if _top_level:
+                    print('{:^80}'.format(level_name))
+                    print("-" * 80)
 
-                priority_flag -= 1
-            if res.weight == 2 and indent == 0 and priority_flag == 2:
-                print('\n')
-                print('{:^80}'.format("Medium Priority"))
-                print("-" * 80)
-                print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
+                data_issues = [process_table(res, check) for res in result[level]]
 
-                priority_flag -= 1
-            if res.weight == 1 and indent == 0 and priority_flag == 1:
-                print('\n')
-                print('{:^80}'.format("Low Priority"))
-                print("-" * 80)
-                print('%-36s:%8s:%6s' % ('    Name', 'Priority', 'Score'))
-                priority_flag -= 1
+                if _top_level:
+                    proc_str = tabulate.tabulate(data_issues, ('Name', 'Reasoning'),
+                                        'plain')
+                    print(proc_str)
+                else:
+                    proc_str = tabulate.tabulate(data_issues, tablefmt='plain')
+                proc_strs.append(proc_str)
+        return "\n".join(proc_strs)
 
-            print('%-40s:%s:%s%6s/%1s' % ((indent * '    ' + res.name)[0:39], res.weight, indent * '  ', res.value[0], res.value[1]))
-            if res.children:
-                self.print_routine(res.children, indent + 1, priority_flag)
-
-    def reasoning_routine(self, list_of_results, indent, line=True):
-        """
-        print routine performed
-        """
-        def weight_func(r):
-            """
-            Function that returns the weight, used for sorting by priority
-            """
-            return r.weight
-
-        # Sorting method used to properly sort the output by priority.
-        grouped_sorted = []
-        grouped_sorted = sorted(list_of_results, key=weight_func, reverse=True)
-
-        wrapper = textwrap.TextWrapper(initial_indent='', width=80, subsequent_indent=' ' * 54)
-        for res in grouped_sorted:
-            if (res.value[0] != res.value[1]) and not res.msgs:
-                print('%-39s:%1s:%6s/%2s : %s' % ((indent * '    ' + res.name)[0:39], res.weight, res.value[0], res.value[1], ' '))
-
-            if (res.value[0] != res.value[1]) and res.msgs:
-                print(wrapper.fill('%-39s:%1s:%6s/%2s : %s' %
-                      ((indent * '    ' + res.name)[0:39],
-                       res.weight,
-                       res.value[0],
-                       res.value[1],
-                       ", ".join(res.msgs))))
-
-            if res.children:
-                self.reasoning_routine(res.children, indent + 1, False)
 
     def process_doc(self, doc):
         """
