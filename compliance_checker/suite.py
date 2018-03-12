@@ -42,37 +42,6 @@ class CheckSuite(object):
     def __init__(self):
         self.col_width = 80
 
-    def priorityheader(self, check):
-        """
-        Method to determine which scoring terminology to use for the headers.
-        @param check  name of the check being run
-
-        @return headerout  dict of header priorities
-        """
-        headermap = {1:  {3: 'Highly Recommended',
-                          2: 'Recommended',
-                          1: 'Suggested'},
-                     2:  {3: 'Errors',
-                          2: 'Warnings',
-                          1: 'Info'},
-                     3:  {3: 'Required',
-                          2: 'Recommended',
-                          1: 'Suggested'},
-                     4:  {3: 'High Priority',
-                          2: 'Medium Priority',
-                          1: 'Low Priority'}}
-        if check.startswith('acdd') or check.startswith('ioos'):
-            headerout = headermap.get(1)
-        elif check.startswith('cf'):
-            headerout = headermap.get(2)
-        elif check.startswith('ncei'):
-            headerout = headermap.get(3)
-        elif check.startswith('UGRID'):
-            headerout = headermap.get(4)
-        else:
-            headerout = headermap.get(4)
-        return headerout
-
     @classmethod
     def load_all_available_checkers(cls):
         """
@@ -127,6 +96,19 @@ class CheckSuite(object):
 
         return [fix_return_value(val, check_method.__func__.__name__, check_method, check_method.__self__)]
 
+    def _get_check_versioned_name(self, check_name):
+        """
+        The compliance checker allows the user to specify a
+        check without a version number but we want the report
+        to specify the version number.
+
+        Returns the check name with the version number it checked
+        """
+        if ':' not in check_name or ':latest' in check_name:
+            check_name = ':'.join((check_name.split(':')[0],
+                                   self.checkers[check_name]._cc_spec_version))
+        return check_name
+
     def _get_valid_checkers(self, ds, checker_names):
         """
         Returns a filtered list of 2-tuples: (name, valid checker) based on the ds object's type and
@@ -142,7 +124,6 @@ class CheckSuite(object):
 
         all_checked = set([a[1] for a in args])  # only class types
         checker_queue = set(args)
-
         while len(checker_queue):
             name, a = checker_queue.pop()
             # is the current dataset type in the supported filetypes
@@ -205,6 +186,51 @@ class CheckSuite(object):
                 return False
 
         return True
+
+    def get_priority_headers(self, check):
+        """
+        Method to determine which scoring terminology to use for the headers.
+        @param check name of the check being run
+
+        @return header_out  dict of header priorities
+        """
+        header_map = {
+            1: {  # Default
+                3: 'High Priority',
+                2: 'Medium Priority',
+                1: 'Low Priority'
+            },
+            2: {  # ACDD, IOOS
+                3: 'Highly Recommended',
+                2: 'Recommended',
+                1: 'Suggested'
+            },
+            3: {  # CF
+                3: 'Errors',
+                2: 'Warnings',
+                1: 'Info'
+            },
+            4: {  # NCEI
+                3: 'Required',
+                2: 'Recommended',
+                1: 'Suggested'
+            },
+        }
+        # Make a default selection
+        header_out = header_map.get(1)
+        # If check isn't defined, just use the default
+        if check is None:
+            return header_out
+
+        check = check.lower()
+        if check.startswith('acdd') or check.startswith('ioos'):
+            header_out = header_map.get(2)
+        elif check.startswith('cf'):
+            header_out = header_map.get(3)
+        elif check.startswith('ncei'):
+            header_out = header_map.get(4)
+
+        return header_out
 
     def build_structure(self, check_name, groups, source_name, limit=1):
         '''
@@ -279,9 +305,10 @@ class CheckSuite(object):
         aggregates['medium_priorities'] = medium_priorities
         aggregates['low_priorities'] = low_priorities
         aggregates['all_priorities'] = all_priorities
-        aggregates['testname'] = check_name
+        aggregates['testname'] = self._get_check_versioned_name(check_name)
         aggregates['source_name'] = source_name
-        aggregates['scoreheader'] = self.priorityheader(check_name)
+        aggregates['scoreheader'] = self.get_priority_headers(check_name)
+        aggregates['cc_spec_version'] = self.checkers[check_name]._cc_spec_version
         return aggregates
 
     def dict_output(self, check_name, groups, source_name, limit):
@@ -368,6 +395,9 @@ class CheckSuite(object):
         """
         score_list, points, out_of = self.get_points(groups, limit)
         issue_count = out_of - points
+
+        # Let's add the version number to the check name if it's missing
+        check_name = self._get_check_versioned_name(check_name)
         print('\n')
         print("-" * 80)
         print('{:^80}'.format("IOOS Compliance Checker Report"))
@@ -395,7 +425,6 @@ class CheckSuite(object):
         print routine performed
         """
 
-
         sort_fn = lambda x: x.weight
         groups_sorted = sorted(groups, key=sort_fn, reverse=True)
         result = {key: [v for v in valuesiter if v.value[0] != v.value[1]]
@@ -408,7 +437,7 @@ class CheckSuite(object):
             print('{:^80}'.format("Scoring Breakdown:"))
             print('\n')
         check = check
-        priorities = self.priorityheader(check)
+        priorities = self.get_priority_headers(check)
         def process_table(res, check):
             issue = wrapper.fill("{}:".format(res.name))
             if not res.children:
