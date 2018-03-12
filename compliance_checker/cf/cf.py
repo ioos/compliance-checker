@@ -61,6 +61,11 @@ class CFBaseCheck(BaseCheck):
     _cc_spec_version = '1.6'
     _cc_description = 'Climate and Forecast Conventions (CF)'
     _cc_url = 'http://cfconventions.org'
+    _cc_display_headers = {
+        3: 'Errors',
+        2: 'Warnings',
+        1: 'Info'
+    }
 
     """
     CF Convention Checker (1.6)
