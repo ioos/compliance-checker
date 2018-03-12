@@ -14,6 +14,11 @@ class IOOSBaseCheck(BaseCheck):
     _cc_spec_version = '0.1'
     _cc_description = 'IOOS Inventory Metadata'
     _cc_url = 'https://ioos.github.io/ioos-netcdf/ioos-netcdf-metadata-description-v1-1.html#ioos-netcdf-metadata-profile-attributes'
+    _cc_display_headers = {
+        3: 'Highly Recommended',
+        2: 'Recommended',
+        1: 'Suggested'
+    }
 
     @classmethod
     def _has_attr(cls, ds, attr, concept_name, priority=BaseCheck.HIGH):

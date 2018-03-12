@@ -25,6 +25,11 @@ class ACDDBaseCheck(BaseCheck):
     _cc_spec = 'acdd'
     _cc_description = 'Attribute Conventions for Dataset Discovery (ACDD)'
     _cc_url = 'http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery'
+    _cc_display_headers = {
+        3: 'Highly Recommended',
+        2: 'Recommended',
+        1: 'Suggested'
+    }
 
     def __init__(self):
 
