@@ -50,9 +50,12 @@ class ComplianceChecker(object):
         @returns                If the tests failed (based on the criteria)
         """
         cs = CheckSuite()
+        # using OrderedDict is important here to preserve the order
+        # of multiple datasets which may be passed in
         score_dict = OrderedDict()
         if not isinstance(ds_loc, six.string_types):
             locs = ds_loc
+        # if single dataset, put in list
         else:
             locs = [ds_loc]
 
@@ -65,7 +68,7 @@ class ComplianceChecker(object):
             if not score_groups:
                 raise ValueError("No checks found, please check the name of the checker(s) and that they are installed")
             else:
-                score_dict[ds_loc] = score_groups
+                score_dict[loc] = score_groups
 
         if criteria == 'normal':
             limit = 2
@@ -130,7 +133,7 @@ class ComplianceChecker(object):
         @param cs              Compliance Checker Suite
         @param score_groups    List of results
         @param output_filename The file path to output to
-        @param ds_loc          Location of the source dataset
+        @param ds_loc          List of source datasets
         @param limit           The degree of strictness, 1 being the strictest, and going up from there.
         '''
         checkers_html = []
@@ -156,7 +159,7 @@ class ComplianceChecker(object):
         @param cs              Compliance Checker Suite
         @param score_groups    List of results
         @param output_filename The file path to output to
-        @param ds_loc          Location of the source dataset
+        @param ds_loc          List of source datasets
         @param limit           The degree of strictness, 1 being the strictest,
                                and going up from there.
         '''
@@ -170,7 +173,7 @@ class ComplianceChecker(object):
                 for checker, rpair in six.iteritems(score_groups):
                     groups, errors = rpair
                     results[checker] = cs.dict_output(
-                        checker, groups, ds_loc, limit,
+                        checker, groups, ds, limit,
                     )
         elif output_type == 'json_new':
             for ds, score_groups in six.iteritems(score_dict):
@@ -178,7 +181,7 @@ class ComplianceChecker(object):
                     groups, errors = rpair
                     results[ds] = {}
                     results[ds][checker] = cs.dict_output(
-                        checker, groups, ds_loc, limit
+                        checker, groups, ds, limit
                     )
         json_results = json.dumps(results, indent=2, ensure_ascii=False)
 
