@@ -363,10 +363,10 @@ class CheckSuite(object):
         print('\n')
         print("-" * 80)
         print('{:^80}'.format("IOOS Compliance Checker Report"))
-        print('{:^80}'.format("%s check" % check_name))
+        print('{:^80}'.format("{} check on dataset {}".format(check_name, ds)))
         if issue_count > 0:
             plural = '' if issue_count == 1 else 's'
-            print("The dataset had {} potential issue{} discovered".format(issue_count, plural))
+            print("The dataset {} had {} potential issue{} discovered".format(ds, issue_count, plural))
             print('{:^80}'.format("during the %s check" % check_name))
         print("-" * 80)
 
