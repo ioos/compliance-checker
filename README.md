@@ -56,7 +56,7 @@ Source Code is available on GitHub:
 Select the test you want to run from the dropdown menu. Then, either upload your dataset or provide a url to a
 remote dataset (OPeNDAP) and click 'Submit'.
 
-The output of the Compliance Checker will give you an overall score and a scoring breakdown.
+The output of the Compliance Checker will give you a comprehensive list of issues and the actions needed to correct them.
 You may download the Compliance Checker report as a text file by clicking the 'Download Report' button
 
 ![Compliance-Checker-Web](https://user-images.githubusercontent.com/5702672/30527267-b4bb136c-9bf4-11e7-8345-dd9b8e2e859f.png)
@@ -118,40 +118,6 @@ parse it's contents.
 > **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPeNDAP URL, please be sure the size is reasonable!
 
 ```
-usage: compliance-checker [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
-                          [--verbose] [--skip-checks SKIP_CHECKS]
-                          [-f {text,html,json,json_new}] [-o OUTPUT] [-V] [-l]
-                          [-d DOWNLOAD_STANDARD_NAMES]
-                          [dataset_location [dataset_location ...]]
-
-positional arguments:
-  dataset_location      Defines the location of the dataset to be checked.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --test TEST, -t TEST, --test= TEST, -t= TEST
-                        Select the Checks you want to perform. Defaults to
-                        'acdd' if unspecified. Versions of standards can be
-                        specified via `-t <test_standard>:<version>`. If
-                        `<version>` is omitted, or is "latest", the latest
-                        version of the test standard is used.
-  --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
-                        Define the criteria for the checks. Either Strict,
-                        Normal, or Lenient. Defaults to Normal.
-  --verbose, -v         Increase output. May be specified up to three times.
-  --skip-checks SKIP_CHECKS, -s SKIP_CHECKS
-                        Specifies tests to skip
-  -f {text,html,json,json_new}, --format {text,html,json,json_new}
-                        Output format
-  -o OUTPUT, --output OUTPUT
-                        Output filename(s)
-  -V, --version         Display the IOOS Compliance Checker version
-                        information.
-  -l, --list-tests      List the available tests
-  -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
-                        Specify a version of the cf standard name table to
-                        download as packaged version
-(cchecker) [badams@localhost]~/devel/compliance-checker% python cchecker.py --help
 usage: cchecker.py [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
                    [--verbose] [--skip-checks SKIP_CHECKS]
                    [-f {text,html,json,json_new}] [-o OUTPUT] [-V] [-l]
@@ -208,97 +174,38 @@ $ compliance-checker --test=cf:1.6 compliance_checker/tests/data/examples/hycom_
 
 
 --------------------------------------------------------------------------------
-                    The dataset scored 113 out of 122 points
-                              during the cf check
+                         IOOS Compliance Checker Report
+                                  cf:1.6 check
 --------------------------------------------------------------------------------
-                               Scoring Breakdown:
+                               Corrective Actions
+hycom_global.nc has 9 potential issues
 
 
-                                 High Priority
+                                     Errors
 --------------------------------------------------------------------------------
-    Name                            :Priority: Score
-§2.2 Valid netCDF data types            :3:     6/6
-§2.4 Unique dimensions                  :3:     6/6
-§3.1 Variable depth contains valid CF u :3:     3/3
-§3.1 Variable lat contains valid CF uni :3:     3/3
-§3.1 Variable lon contains valid CF uni :3:     3/3
-§3.1 Variable time contains valid CF un :3:     3/3
-§3.1 Variable water_u contains valid CF :3:     3/3
-§3.1 Variable water_v contains valid CF :3:     3/3
-§3.3 Variable time has valid standard_n :3:     0/1
-§4 depth contains a valid axis          :3:     2/2
-§4 lat contains a valid axis            :3:     2/2
-§4 lon contains a valid axis            :3:     2/2
-§4.1 Latitude variable lat has required :3:     1/1
-§4.1 Longitude variable lon has require :3:     1/1
-§4.3.1 depth is a valid vertical coordi :3:     1/2
-§4.4 Time coordinate variable and attri :3:     2/2
-§5.0 Variable water_u does not contain  :3:     4/4
-§5.0 Variable water_v does not contain  :3:     4/4
-§5.6 Grid Feature water_u is associated :3:     2/2
-§5.6 Grid Feature water_v is associated :3:     2/2
-§9.1 Dataset contains a valid featureTy :3:     1/1
-§9.1 Feature Types are all the same     :3:     1/1
+Name                                      Reasoning
+§3.2 Either long_name or standard_name    Attribute long_name or/and standard_name
+is highly recommended for variable time:  is highly recommended for variable time
+§4.3.1 depth is a valid vertical          vertical coordinates not defining
+coordinate:                               pressure must include a positive
+                                          attribute that is either 'up' or 'down'
 
 
-                                Medium Priority
+                                    Warnings
 --------------------------------------------------------------------------------
-    Name                            :Priority: Score
-cell_methods                            :2:     0/0
-§2.3 Naming Conventions for attributes  :2:    27/27
-§2.3 Naming Conventions for dimensions  :2:     4/4
-§2.3 Naming Conventions for variables   :2:     6/6
-§2.3 Unique variable names              :2:     6/6
-§2.4 Dimension Order                    :2:     6/6
-§2.5.1 Fill Values should be outside th :2:     0/0
-§2.6.1 Global Attribute Conventions inc :2:     0/1
-§2.6.2 Recommended Attributes           :2:     0/3
-§2.6.2 Recommended Global Attributes    :2:     1/2
-§4.1 Latitude variable lat defines eith :2:     1/1
-§4.1 Latitude variable lat uses recomme :2:     1/1
-§4.1 Longitude variable lon defines eit :2:     1/1
-§4.1 Longitude variable lon uses recomm :2:     1/1
-§5.0 multidimensional coordinate lat sh :2:     1/1
-§5.0 multidimensional coordinate lon sh :2:     1/1
-§8.1 Packed Data defined by water_u con :2:     1/1
-§8.1 Packed Data defined by water_u con :2:     0/1
-§8.1 Packed Data defined by water_v con :2:     1/1
-§8.1 Packed Data defined by water_v con :2:     0/1
-
-
---------------------------------------------------------------------------------
-                  Reasoning for the failed tests given below:
-
-
-Name                             Priority:     Score:Reasoning
---------------------------------------------------------------------------------
-§3.3 Variable time has valid standard_n:3:     0/ 1 : variable time's attribute
-                                                      standard_name must be a
-                                                      non-empty string or it
-                                                      should define a long_name
-                                                      attribute.
-§4.3.1 depth is a valid vertical coordi:3:     1/ 2 : vertical coordinates not
-                                                      defining pressure must
-                                                      include a positive
-                                                      attribute that is either
-                                                      'up' or 'down'
-§2.6.1 Global Attribute Conventions inc:2:     0/ 1 : Conventions global
-                                                      attribute does not contain
-                                                      "CF-1.6"
-§2.6.2 Recommended Attributes          :2:     0/ 3 : institution should be
-                                                      defined, source should be
-                                                      defined, references should
-                                                      be defined
-§2.6.2 Recommended Global Attributes   :2:     1/ 2 : global attribute history
-                                                      should exist and be a non-
-                                                      empty string
-§8.1 Packed Data defined by water_u con:2:     0/ 1 : Attributes add_offset and
-                                                      scale_factor are not of
-                                                      type float or double.
-§8.1 Packed Data defined by water_v con:2:     0/ 1 : Attributes add_offset and
-                                                      scale_factor are not of
-                                                      type float or double.
-
+Name                                   Reasoning
+§2.6.1 Global Attribute Conventions    Conventions global attribute does not
+includes CF-1.6:                       contain "CF-1.6". The CF Checker only
+                                       supports CF-1.6 at this time.
+§2.6.2 Recommended Attributes:         institution should be defined source
+                                       should be defined references should be
+                                       defined
+§2.6.2 Recommended Global Attributes:  global attribute history should exist
+                                       and be a non-empty string
+§8.1 Packed Data defined by water_u    Attributes add_offset and scale_factor
+contains valid packing:                are not of type float or double.
+§8.1 Packed Data defined by water_v    Attributes add_offset and scale_factor
+contains valid packing:                are not of type float or double.
 ```
 
 ### Check a remote file against ACDD 1.3
@@ -325,6 +232,12 @@ $ compliance-checker --test=acdd:1.3 --format=json --output=/tmp/report.json com
 
 ```shell
 $ compliance-checker --test=acdd:1.3 --format=html --output=/tmp/report.html compliance_checker/tests/data/examples/hycom_global.nc
+```
+
+### Output text from multiple input files to one output file
+
+```
+$ compliance-checker --test=cf:1.6 --format text --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
 ```
 
 ### Download a particular CF standard names table for use in the test
@@ -451,11 +364,6 @@ compliance-checker -t ncei-trajectory-profile-orthogonal -v ~/data/sample-trajec
 compliance-checker -t ncei-grid -f json -o ~/Documents/sample_grid_report.json ~/Documents/sample_grid_report.nc
 ```
 
-4. Outputting text from a multiple input files to one output file
-
-```
-compliance-checker -t cf:1.6 -f text -o ~/Documents/combined_output.txt ~/Documents/sample_waves.nc ~/Documents/sample_currents.nc
-```
 
 ## Contributors
 

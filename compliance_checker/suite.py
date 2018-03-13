@@ -25,7 +25,6 @@ from datetime import datetime
 import requests
 import textwrap
 import codecs
-
 import tabulate
 
 tabulate.PRESERVE_WHITESPACE = True
@@ -41,7 +40,7 @@ class CheckSuite(object):
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
 
     def __init__(self):
-        self.col_width = 80
+        self.col_width = 40
 
     @classmethod
     def load_all_available_checkers(cls):
@@ -363,13 +362,12 @@ class CheckSuite(object):
         print('\n')
         print("-" * 80)
         print('{:^80}'.format("IOOS Compliance Checker Report"))
-        print('{:^80}'.format("{} check on dataset {}".format(check_name, ds)))
+        print('{:^80}'.format("%s check" % check_name))
+        print("-" * 80)
         if issue_count > 0:
             print('{:^80}'.format("Corrective Actions"))
             plural = '' if issue_count == 1 else 's'
-            print("The dataset {} had {} potential issue{} discovered".format(ds, issue_count, plural))
-            print('{:^80}'.format("during the %s check" % check_name))
-        print("-" * 80)
+            print("{} has {} potential issue{}".format(os.path.basename(ds), issue_count, plural))
 
         return [groups, points, out_of]
 
@@ -394,13 +392,13 @@ class CheckSuite(object):
                     for key, valuesiter in itertools.groupby(groups_sorted,
                                                              key=sort_fn)}
         wrapper = textwrap.TextWrapper(initial_indent='',
-                                       width=max(int(80 / 2**indent), 40))
+                                       width=max(int(self.col_width / 2**indent), self.col_width / 2))
 
         priorities = self.checkers[check]._cc_display_headers
         def process_table(res, check):
             issue = wrapper.fill("{}:".format(res.name))
             if not res.children:
-                reason = wrapper.fill(', '.join(res.msgs))
+                reason = wrapper.fill('\n'.join(res.msgs))
             else:
                 child_reasons = self.reasoning_routine(res.children,
                                                        indent + 1,
