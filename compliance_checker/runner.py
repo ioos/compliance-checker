@@ -1,15 +1,12 @@
 from __future__ import print_function
-
+import os
 import traceback
 import sys
 import io
 import json
-
 from collections import OrderedDict
 from contextlib import contextmanager
 from compliance_checker.suite import CheckSuite
-
-#from six import iteritems
 import six
 
 
@@ -36,7 +33,7 @@ class ComplianceChecker(object):
     @classmethod
     def run_checker(cls, ds_loc, checker_names, verbose, criteria,
                     skip_checks=None, output_filename='-',
-                    output_format='text'):
+                    output_format=['text']):
         """
         Static check runner.
 
@@ -46,7 +43,7 @@ class ComplianceChecker(object):
         @param  criteria        Determines failure (lenient, normal, strict)
         @param  output_filename Path to the file for output
         @param  skip_checks     Names of checks to skip
-        @param  output_format   Format of the output
+        @param  output_format   Format of the output(s)
 
         @returns                If the tests failed (based on the criteria)
         """
@@ -59,6 +56,10 @@ class ComplianceChecker(object):
         # if single dataset, put in list
         else:
             locs = [ds_loc]
+
+        # Make sure output format is a list
+        if isinstance(output_format, six.string_types):
+            output_format = [output_format]
 
         for loc in locs:
             ds = cs.load_dataset(loc)
@@ -78,27 +79,37 @@ class ComplianceChecker(object):
         elif criteria == 'lenient':
             limit = 3
 
-        if output_format == 'text':
-            if output_filename == '-':
-                groups = cls.stdout_output(cs, score_dict, verbose, limit)
-            # need to redirect output from stdout since print functions are
-            # presently used to generate the standard report output
+        for out_fmt in output_format:
+            if out_fmt == 'text':
+                if output_filename == '-':
+                    groups = cls.stdout_output(cs, score_dict, verbose, limit)
+                # need to redirect output from stdout since print functions are
+                # presently used to generate the standard report output
+                else:
+                    if len(output_format) > 1:
+                        # Update file name if needed
+                        output_filename = '{}.txt'.format(os.path.splitext(output_filename)[0])
+                    with io.open(output_filename, 'w', encoding='utf-8') as f:
+                        with stdout_redirector(f):
+                            groups = cls.stdout_output(cs, score_dict, verbose,
+                                                       limit)
+
+            elif out_fmt == 'html':
+                # Update file name if needed
+                if len(output_format) > 1 and output_filename != '-':
+                    output_filename = '{}.html'.format(os.path.splitext(output_filename)[0])
+                groups = cls.html_output(cs, score_dict, output_filename, ds_loc,
+                                         limit)
+
+            elif out_fmt == 'json' or 'json_new':
+                # Update file name if needed
+                if len(output_format) > 1 and output_filename != '-':
+                    output_filename = '{}.json'.format(os.path.splitext(output_filename)[0])
+                groups = cls.json_output(cs, score_dict, output_filename, ds_loc,
+                                         limit, out_fmt)
+
             else:
-                with io.open(output_filename, 'w', encoding='utf-8') as f:
-                    with stdout_redirector(f):
-                        groups = cls.stdout_output(cs, score_dict, verbose,
-                                                   limit)
-
-        elif output_format == 'html':
-            groups = cls.html_output(cs, score_dict, output_filename, ds_loc,
-                                     limit)
-
-        elif output_format == 'json' or 'json_new':
-            groups = cls.json_output(cs, score_dict, output_filename, ds_loc,
-                                     limit, output_format)
-
-        else:
-            raise TypeError('Invalid format %s' % output_format)
+                raise TypeError('Invalid format %s' % out_fmt)
 
         errors_occurred = cls.check_errors(score_groups, verbose)
 

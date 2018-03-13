@@ -36,9 +36,9 @@ def main():
                         help="Specifies tests to skip",
                         action='append')
 
-    parser.add_argument('-f', '--format', default='text',
-                        choices=['text', 'html', 'json', 'json_new'],
-                        help=("Output format. The difference between the 'json' and the 'json_new'"
+    parser.add_argument('-f', '--format', default=[], action='append',
+                        help=("Output format(s). Options are 'text', 'html', 'json', 'json_new'."
+                              " The difference between the 'json' and the 'json_new'"
                               " formats is that the 'json' format has the check as the top level"
                               " key, whereas the 'json_new' format has the dataset name(s) as the"
                               " main key in the output follow by any checks as subkeys.  Also, "
@@ -87,6 +87,7 @@ def main():
     if args.download_standard_names:
         download_cf_standard_name_table(args.download_standard_names)
 
+    # Check the number of output files
     if not args.output:
         args.output = '-'
     output_len = len(args.output)
@@ -94,6 +95,16 @@ def main():
         print('The number of output files must either be one or the same as the number of datasets', file=sys.stderr)
         sys.exit(2)
 
+    # Check the output formats
+    format_choices = ['text', 'html', 'json', 'json_new']
+    for out_format in args.format:
+        if out_format not in format_choices:
+            print(("Error: argument -f/--format: invalid choice: '{}'"
+                   " (choose from 'text', 'html', 'json', 'json_new')".format(out_format)))
+            sys.exit(2)
+
+    # Run the compliance checker
+    # 2 modes, concatenated output file or multiple output files
     return_values = []
     had_errors = []
     if output_len == 1:
@@ -105,7 +116,7 @@ def main():
                                                              args.criteria,
                                                              args.skip_checks,
                                                              args.output[0],
-                                                             args.format)
+                                                             args.format or ['text'])
         return_values.append(return_value)
         had_errors.append(errors)
     else:
@@ -118,7 +129,7 @@ def main():
                                                                 args.criteria,
                                                                 args.skip_checks,
                                                                 output,
-                                                                args.format)
+                                                                args.format or ['text'])
             return_values.append(return_value)
             had_errors.append(errors)
 
