@@ -392,7 +392,7 @@ class CheckSuite(object):
                     for key, valuesiter in itertools.groupby(groups_sorted,
                                                              key=sort_fn)}
         wrapper = textwrap.TextWrapper(initial_indent='',
-                                       width=max(int(40 / 2**indent), 20))
+                                       width=max(int(self.col_width / 2**indent), self.col_width / 2))
 
         priorities = self.checkers[check]._cc_display_headers
         def process_table(res, check):
