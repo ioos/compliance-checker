@@ -349,7 +349,7 @@ class CheckSuite(object):
 
         return score_list, points, out_of
 
-    def standard_output(self, limit, check_name, groups):
+    def standard_output(self, ds, limit, check_name, groups):
         """
         Generates the Terminal Output for Standard cases
 
@@ -363,12 +363,13 @@ class CheckSuite(object):
         print('\n')
         print("-" * 80)
         print('{:^80}'.format("IOOS Compliance Checker Report"))
-        print('{:^80}'.format("%s check" % check_name))
-        print("-" * 80)
+        print('{:^80}'.format("{} check on dataset {}".format(check_name, ds)))
         if issue_count > 0:
             print('{:^80}'.format("Corrective Actions"))
             plural = '' if issue_count == 1 else 's'
-            print("The dataset has {} potential issue{}".format(issue_count, plural))
+            print("The dataset {} had {} potential issue{} discovered".format(ds, issue_count, plural))
+            print('{:^80}'.format("during the %s check" % check_name))
+        print("-" * 80)
 
         return [groups, points, out_of]
 
