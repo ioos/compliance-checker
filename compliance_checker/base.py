@@ -4,10 +4,9 @@
 Compliance Checker
 """
 from __future__ import unicode_literals
-
 from functools import wraps
 import pprint
-
+import warnings
 from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
@@ -346,6 +345,7 @@ def score_group(group_name=None):
     Please do not using scoring groups and update your plugins
     if necessary
     '''
+    warnings.warn('Score_group is deprecated as of Compliance Checker v3.2.')
     def _inner(func):
         def _dec(s, ds):
             ret_val = func(s, ds)
