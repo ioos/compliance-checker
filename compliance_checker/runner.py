@@ -42,6 +42,7 @@ class ComplianceChecker(object):
 
         @param  ds_loc          Dataset location (url or file)
         @param  checker_names   List of string names to run, should match keys of checkers dict (empty list means run all)
+        @param  verbose         Verbosity of the output (0, 1, 2)
         @param  criteria        Determines failure (lenient, normal, strict)
         @param  output_filename Path to the file for output
         @param  skip_checks     Names of checks to skip
@@ -162,6 +163,8 @@ class ComplianceChecker(object):
         @param ds_loc          List of source datasets
         @param limit           The degree of strictness, 1 being the strictest,
                                and going up from there.
+        @param output_type     Either 'json' or 'json_new'. json_new is the new
+                               json output format that supports multiple datasets
         '''
         results = {}
         # json output keys out at the top level by

@@ -118,40 +118,6 @@ parse it's contents.
 > **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPeNDAP URL, please be sure the size is reasonable!
 
 ```
-usage: compliance-checker [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
-                          [--verbose] [--skip-checks SKIP_CHECKS]
-                          [-f {text,html,json,json_new}] [-o OUTPUT] [-V] [-l]
-                          [-d DOWNLOAD_STANDARD_NAMES]
-                          [dataset_location [dataset_location ...]]
-
-positional arguments:
-  dataset_location      Defines the location of the dataset to be checked.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --test TEST, -t TEST, --test= TEST, -t= TEST
-                        Select the Checks you want to perform. Defaults to
-                        'acdd' if unspecified. Versions of standards can be
-                        specified via `-t <test_standard>:<version>`. If
-                        `<version>` is omitted, or is "latest", the latest
-                        version of the test standard is used.
-  --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
-                        Define the criteria for the checks. Either Strict,
-                        Normal, or Lenient. Defaults to Normal.
-  --verbose, -v         Increase output. May be specified up to three times.
-  --skip-checks SKIP_CHECKS, -s SKIP_CHECKS
-                        Specifies tests to skip
-  -f {text,html,json,json_new}, --format {text,html,json,json_new}
-                        Output format
-  -o OUTPUT, --output OUTPUT
-                        Output filename(s)
-  -V, --version         Display the IOOS Compliance Checker version
-                        information.
-  -l, --list-tests      List the available tests
-  -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
-                        Specify a version of the cf standard name table to
-                        download as packaged version
-(cchecker) [badams@localhost]~/devel/compliance-checker% python cchecker.py --help
 usage: cchecker.py [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
                    [--verbose] [--skip-checks SKIP_CHECKS]
                    [-f {text,html,json,json_new}] [-o OUTPUT] [-V] [-l]
@@ -327,6 +293,12 @@ $ compliance-checker --test=acdd:1.3 --format=json --output=/tmp/report.json com
 $ compliance-checker --test=acdd:1.3 --format=html --output=/tmp/report.html compliance_checker/tests/data/examples/hycom_global.nc
 ```
 
+### Output text from multiple input files to one output file
+
+```
+$ compliance-checker --test=cf:1.6 --format text --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
+```
+
 ### Download a particular CF standard names table for use in the test
 
 **Note**
@@ -451,11 +423,6 @@ compliance-checker -t ncei-trajectory-profile-orthogonal -v ~/data/sample-trajec
 compliance-checker -t ncei-grid -f json -o ~/Documents/sample_grid_report.json ~/Documents/sample_grid_report.nc
 ```
 
-4. Outputting text from a multiple input files to one output file
-
-```
-compliance-checker -t cf:1.6 -f text -o ~/Documents/combined_output.txt ~/Documents/sample_waves.nc ~/Documents/sample_currents.nc
-```
 
 ## Contributors
 
