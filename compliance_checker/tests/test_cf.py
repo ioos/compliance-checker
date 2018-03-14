@@ -247,7 +247,7 @@ class TestCF(BaseTestCase):
         # 1x institution
         # 1x source
         # 1x EMPTY references
-        assert result.value == (15, 16)
+        assert result.value == (12, 13)
         assert result.msgs[0] == "references global attribute should be a non-empty string"
 
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
@@ -256,10 +256,8 @@ class TestCF(BaseTestCase):
         # institution is a 10L
         # no source
         # comments doment matter unless they're empty
-        assert result.value == (1, 4)
+        assert result.value == (0, 1)
         assert result.msgs[0] == 'salinity:institution should be a non-empty string'
-        assert result.msgs[1] == 'source should be defined'
-        assert result.msgs[2] == 'references should be defined'
 
     def test_check_standard_name(self):
         """
