@@ -800,6 +800,8 @@ class CFBaseCheck(BaseCheck):
         :rtype: list
         :return: List of Results
         """
+        # The attrs are optional and only needs to be a string and non-empty if it
+        # exists.
         attrs = ['institution', 'source', 'references', 'comment']
 
         valid_attributes = TestCtx(BaseCheck.MEDIUM, '§2.6.2 Recommended Attributes')
@@ -826,17 +828,6 @@ class CFBaseCheck(BaseCheck):
                                              "{} global attribute should be a non-empty string"
                                              "".format(attribute))
                 attr_bin.add(attribute)
-        # Make sure we've seen each attribute at least once.
-
-        valid_attributes.assert_true('institution' in attr_bin,
-                                     "institution should be defined")
-        valid_attributes.assert_true('source' in attr_bin,
-                                     "source should be defined")
-        valid_attributes.assert_true('references' in attr_bin,
-                                     "references should be defined")
-
-        # comment is optional and only needs to be a string and non-empty if it
-        # exists.
 
         return valid_attributes.to_result()
 
