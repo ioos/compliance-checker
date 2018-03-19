@@ -677,20 +677,6 @@ def get_axis_map(ds, variable):
             if coord_name not in axis_map[axis]:
                 axis_map[axis].append(coord_name)
 
-    # Sometimes dimensionless coordinates are considered coordinate variables.
-    # I know, it's confusing.
-    if 'X' not in axis_map and longitudes:
-        axis_map['X'] = longitudes
-
-    if 'Y' not in axis_map and latitudes:
-        axis_map['Y'] = latitudes
-
-    if 'T' not in axis_map and times:
-        axis_map['T'] = times
-
-    if 'Z' not in axis_map and heights:
-        axis_map['Z'] = heights
-
     return axis_map
 
 
