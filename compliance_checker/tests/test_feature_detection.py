@@ -283,8 +283,9 @@ class TestFeatureDetection(TestCase):
 
             axis_map = util.get_axis_map(nc, 'temperature')
             assert axis_map['T'] == ['time']
-            assert axis_map['Y'] == ['lat']
-            assert axis_map['X'] == ['lon']
+            assert axis_map['Z'] == []
+            assert axis_map['Y'] == []
+            assert axis_map['X'] == []
 
         with Dataset(resources.STATIC_FILES['index_ragged']) as nc:
             assert util.guess_feature_type(nc, 'temperature') == "single-trajectory"
@@ -300,7 +301,7 @@ class TestFeatureDetection(TestCase):
 
             axis_map = util.get_axis_map(nc, 'sea_surface_height')
             assert axis_map['T'] == ['time']
-            assert axis_map['Z'] == ['z']
+            assert axis_map['Z'] == []
             assert axis_map['Y'] == ['lat']
             assert axis_map['X'] == ['lon']
 
