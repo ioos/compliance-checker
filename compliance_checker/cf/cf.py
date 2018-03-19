@@ -3172,15 +3172,16 @@ class CFBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: compliance_checker.base.Result
         """
-        feature_list = ['point', 'timeSeries', 'trajectory', 'profile', 'timeSeriesProfile', 'trajectoryProfile']
+        # Due to case insensitive requirement, we list the possible featuretypes
+        # in lower case and check using the .lower() method
+        feature_list = ['point', 'timeseries', 'trajectory', 'profile', 'timeseriesprofile', 'trajectoryprofile']
 
         feature_type = getattr(ds, 'featureType', None)
 
         valid_feature_type = TestCtx(BaseCheck.HIGH, '§9.1 Dataset contains a valid featureType')
-        valid_feature_type.assert_true(feature_type is None or feature_type in feature_list,
+        valid_feature_type.assert_true(feature_type is None or feature_type.lower() in feature_list,
                                        "{} is not a valid CF featureType. It must be one of {}"
                                        "".format(feature_type, ', '.join(feature_list)))
-
         return valid_feature_type.to_result()
 
     def check_cf_role(self, ds):
