@@ -929,6 +929,28 @@ class TestCF(BaseTestCase):
         result = self.cf.check_all_features_are_same_type(dataset)
         assert result
 
+    def test_featureType_is_case_insensitive(self):
+        '''
+        Tests that the featureType attribute is case insensitive
+        '''
+        nc = self.new_nc_file()
+        nc.featureType = 'timeseriesprofile'
+        result = self.cf.check_feature_type(nc)
+        self.assertTrue(result.value == (1, 1))
+
+        nc.featureType = 'timeSeriesProfile'
+        result = self.cf.check_feature_type(nc)
+        self.assertTrue(result.value == (1, 1))
+
+        nc.featureType = 'traJectorYpRofile'
+        result = self.cf.check_feature_type(nc)
+        self.assertTrue(result.value == (1, 1))
+
+        # This one should fail
+        nc.featureType = 'timeseriesprofilebad'
+        result = self.cf.check_feature_type(nc)
+        self.assertTrue(result.value == (0, 1))
+
     def test_check_units(self):
         '''
         Ensure that container variables are not checked for units but geophysical variables are
