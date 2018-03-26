@@ -43,7 +43,12 @@ def main():
     parser.add_argument('-l', '--list-tests', action='store_true', help='List the available tests')
     parser.add_argument('-d', '--download-standard-names', help='Specify a version of the cf standard name table to download as packaged version')
 
+    # Add command line args from generator plugins
+    check_suite.add_plugin_args(parser)
+
     args = parser.parse_args()
+
+    check_suite.load_generated_checkers(args)
 
     if args.version:
         print("IOOS compliance checker version %s" % __version__)

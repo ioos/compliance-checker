@@ -25,6 +25,7 @@ from datetime import datetime
 import requests
 import textwrap
 import codecs
+from pkg_resources import working_set
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
@@ -38,12 +39,41 @@ class CheckSuite(object):
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
 
     @classmethod
+    def _get_generator_plugins(cls):
+        """
+        Return a list of classes from external plugins that are used to
+        generate checker classes
+        """
+        if not hasattr(cls, 'suite_generators'):
+            gens = working_set.iter_entry_points('compliance_checker.generators')
+            cls.suite_generators = [x.load() for x in gens]
+
+        return cls.suite_generators
+
+    @classmethod
+    def add_plugin_args(cls, parser):
+        """
+        Add command line arguments for external plugins that generate checker
+        classes
+        """
+        for gen in cls._get_generator_plugins():
+            gen.add_arguments(parser)
+
+    @classmethod
+    def load_generated_checkers(cls, args):
+        """
+        Load checker classes from generator plugins
+        """
+        for gen in cls._get_generator_plugins():
+            suites = gen.get_suites(args)
+            cls.checkers.update(suites)
+
+    @classmethod
     def load_all_available_checkers(cls):
         """
         Helper method to retrieve all sub checker classes derived from various
         base classes.
         """
-        from pkg_resources import working_set
         for x in working_set.iter_entry_points('compliance_checker.suites'):
             try:
                 xl = x.load()
