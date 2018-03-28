@@ -173,6 +173,11 @@ class TestCF(BaseTestCase):
         assert result.msgs[0] == ("really_bad's dimensions are not in the recommended order "
                                   "T, Z, Y, X. They are latitude, power")
 
+        dataset = self.load_dataset(STATIC_FILES['dimension_order'])
+        result = self.cf.check_dimension_order(dataset)
+        self.assertEqual((3, 3), result.value)
+        self.assertEqual([], result.msgs)
+
     def test_check_fill_value_outside_valid_range(self):
         """
         2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.

@@ -113,4 +113,5 @@ STATIC_FILES = {
     'bad_cell_measure2'                    : get_filename('tests/data/bad_cell_measure2.cdl'),
     'bad_cf_role'                          : get_filename('tests/data/bad_cf_role.cdl'),
     'ioos_gold_1_1'                        : get_filename('tests/data/ioos_1_1.cdl'),
+    'dimension_order'                      : get_filename('tests/data/dimension_order.cdl')
 }
