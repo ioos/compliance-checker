@@ -674,7 +674,7 @@ class CFBaseCheck(BaseCheck):
         :return: Returns True if the dimensions are in order U*, T, Z, Y, X,
                  False otherwise
         '''
-        regx = regex.compile(r'^L?I?U*T?Z?(?:(?:Y?X?)|(?:C?)|(?:A+))$')
+        regx = regex.compile(r'^[^TZYX]*T?Z?Y?X?$')
         dimension_string = ''.join(dimension_order)
         return regx.match(dimension_string) is not None
 
