@@ -4,10 +4,9 @@
 Compliance Checker
 """
 from __future__ import unicode_literals
-
 from functools import wraps
 import pprint
-
+import warnings
 from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
@@ -42,6 +41,11 @@ class BaseCheck(object):
     LOW    = 1
 
     _cc_checker_version = __version__
+    _cc_display_headers = {
+        3: 'High Priority',
+        2: 'Medium Priority',
+        1: 'Low Priority'
+    }
 
     supported_ds = []
 
@@ -316,8 +320,9 @@ def fix_return_value(v, method_name, method=None, checker=None):
     """
     Transforms scalar return values into Result.
     """
-    method_name = (method_name or method.__func__.__name__).replace("check_", "")     # remove common check prefix
-
+    # remove common check prefix
+    method_name = (method_name or method.__func__.__name__).replace("check_",
+                                                                    "")
     if v is None or not isinstance(v, Result):
         v = Result(value=v, name=method_name)
 
@@ -334,6 +339,13 @@ def ratable_result(value, name, msgs):
 
 
 def score_group(group_name=None):
+    '''
+    Warning this is deprecated as of Compliance Checker v3.2!
+
+    Please do not using scoring groups and update your plugins
+    if necessary
+    '''
+    warnings.warn('Score_group is deprecated as of Compliance Checker v3.2.')
     def _inner(func):
         def _dec(s, ds):
             ret_val = func(s, ds)
