@@ -1348,7 +1348,7 @@ class CFBaseCheck(BaseCheck):
                                 "flag_masks ({}) mustbe the same data type as {} ({})"
                                 "".format(flag_masks.dtype, name, variable.dtype))
 
-        type_ok = (np.issubdtype(variable.dtype, int) or
+        type_ok = (np.issubdtype(variable.dtype, np.integer) or
                    np.issubdtype(variable.dtype, 'S') or
                    np.issubdtype(variable.dtype, 'b'))
 
@@ -2483,9 +2483,12 @@ class CFBaseCheck(BaseCheck):
             valid_region = TestCtx(BaseCheck.MEDIUM,
                                    "§6.1.1 Geographic region specified by {} is valid"
                                    "".format(var.name))
-            valid_region.assert_true(''.join(var[:].astype(str)).lower() in region_list,
+            region = var[:]
+            if np.ma.isMA(region):
+                region = region.data
+            valid_region.assert_true(''.join(region.astype(str)).lower() in region_list,
                                      "{} is not a valid region"
-                                     "".format(''.join(var[:].astype(str))))
+                                     "".format(''.join(region.astype(str))))
             ret_val.append(valid_region.to_result())
         return ret_val
 
