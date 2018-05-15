@@ -1348,7 +1348,7 @@ class CFBaseCheck(BaseCheck):
                                 "flag_masks ({}) mustbe the same data type as {} ({})"
                                 "".format(flag_masks.dtype, name, variable.dtype))
 
-        type_ok = (np.issubdtype(variable.dtype, int) or
+        type_ok = (np.issubdtype(variable.dtype, np.integer) or
                    np.issubdtype(variable.dtype, 'S') or
                    np.issubdtype(variable.dtype, 'b'))
 
