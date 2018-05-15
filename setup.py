@@ -1,7 +1,6 @@
 from __future__ import with_statement
 from setuptools import setup, find_packages
-from compliance_checker import __version__
-
+import versioneer
 
 def readme():
     with open('README.md') as f:
@@ -12,7 +11,7 @@ reqs = [line.strip() for line in open('requirements.txt')]
 
 setup(
     name                 = "compliance-checker",
-    version              = __version__,
+    version              = versioneer.get_version(),
     description          = "Checks Datasets and SOS endpoints for standards compliance",
     long_description     = readme(),
     license              = 'Apache License 2.0',
@@ -57,5 +56,6 @@ setup(
     },
     package_data         = {
         'compliance_checker': ['data/*.xml', 'tests/data/*.nc', 'tests/data/*.cdl', 'tests/data/non-comp/*.cdl', 'data/templates/*.j2'],
-    }
+    },
+    cmdclass=versioneer.get_cmdclass(),
 )
