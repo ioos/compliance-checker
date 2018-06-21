@@ -920,14 +920,11 @@ class CFBaseCheck(BaseCheck):
         :rtype: tuple
         :return: 2-tuple of standard_name and modifier as strings
         '''
-        standard_name_modifier = None
-        if not isinstance(standard_name, basestring):
-            return (None, None)
 
-        if ' ' in standard_name:
-            standard_name, standard_name_modifier = standard_name.split(' ', 1)
-
-        return (standard_name, standard_name_modifier)
+        if isinstance(standard_name, basestring) and ' ' in standard_name:
+            return standard_name.split(' ', 1)
+        else:
+            return standard_name, None
 
     def _check_valid_cf_units(self, ds, variable_name):
         '''

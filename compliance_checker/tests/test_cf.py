@@ -295,6 +295,12 @@ class TestCF(BaseTestCase):
         assert result.value == (0, 1)
 
         assert len(result_dict) == 9
+        # try setting standard name to invalid type (non-string)
+        dataset.variables['salinity'] = MockVariable(dataset.variables['salinity'])
+        dataset.variables['salinity'].standard_name = 1
+        result_dict = {r.name: r for r in self.cf.check_standard_name(dataset)}
+        result = result_dict[u"§3.3 Variable salinity has valid standard_name attribute"]
+        assert result.value[0] == 0
 
         dataset = self.load_dataset(STATIC_FILES['reduced_horizontal_grid'])
         results = self.cf.check_standard_name(dataset)
