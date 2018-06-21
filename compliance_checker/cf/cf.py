@@ -895,9 +895,14 @@ class CFBaseCheck(BaseCheck):
             valid_units = self._check_valid_cf_units(ds, name)
             ret_val.append(valid_units)
 
-            if isinstance(units, basestring):
+            units_attr_is_string = TestCtx(BaseCheck.MEDIUM,
+                                "§3.1 Variable {}'s units attribute is a string".format(variable.name))
+            # side effects, but better than teasing out the individual result
+            if units_attr_is_string.assert_true(isinstance(units, basestring),
+                                                "'units' attribute must be a string"):
                 valid_udunits = self._check_valid_udunits(ds, name)
                 ret_val.append(valid_udunits)
+            ret_val.append(units_attr_is_string.to_result())
 
             if isinstance(standard_name, basestring):
                 valid_standard_units = self._check_valid_standard_units(ds,

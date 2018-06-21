@@ -496,6 +496,16 @@ class TestCF(BaseTestCase):
                              u"the standard_name atmospheric_temperature number_of_observations"]
         assert result.value == (1, 1)
 
+        dataset.variables['temp_count'] = MockVariable(
+                                            dataset.variables['temp_count'])
+        # use illegal non-string units
+        # people can mistakenly use 1 instead of '1', especially for practical
+        # salinity units
+        dataset.variables['temp_count'].units = 1
+        result_dict = {r.name: r for r in self.cf.check_units(dataset)}
+        result = result_dict[u"§3.1 Variable temp_count's units attribute is a string"]
+        assert result.value[0] == 0
+
     def test_latitude(self):
         '''
         Section 4.1 Latitude Coordinate
@@ -966,9 +976,14 @@ class TestCF(BaseTestCase):
         # We don't keep track of the variables names for checks that passed, so
         # we can make a strict assertion about how many checks were performed
         # and if there were errors, which there shouldn't be.
+        # FIXME (badams): find a better way of grouping together results by
+        #                 variable checked instead of checking the number of
+        #                 points scored, which should be deprecated, and
+        #                 furthermore is fragile and breaks tests when check
+        #                 definitions change
         scored, out_of, messages = self.get_results(results)
-        assert scored == 20
-        assert out_of == 20
+        assert scored == 24
+        assert out_of == 24
         assert messages == []
 
     def test_check_duplicates(self):
