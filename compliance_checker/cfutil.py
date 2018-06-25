@@ -19,26 +19,26 @@ except NameError:
 _UNITLESS_DB = None
 _SEA_NAMES = None
 
-VALID_LAT_UNITS = [
+VALID_LAT_UNITS = {
     'degrees_north',
     'degree_north',
     'degree_n',
     'degrees_n',
     'degreen',
     'degreesn'
-]
-VALID_LON_UNITS = [
+}
+VALID_LON_UNITS = {
     'degrees_east',
     'degree_east',
     'degree_e',
     'degrees_e',
     'degreee',
     'degreese'
-]
+}
 
 
 # We can't import appendix d without getting circular imports
-DIMENSIONLESS_VERTICAL_COORDINATES = [
+DIMENSIONLESS_VERTICAL_COORDINATES = {
     'ocean_s_coordinate',
     'ocean_s_coordinate_g1',
     'ocean_s_coordinate_g2',
@@ -50,7 +50,7 @@ DIMENSIONLESS_VERTICAL_COORDINATES = [
     'atmosphere_sigma_coordinate',
     'atmosphere_ln_pressure_coordinate',
     'atmosphere_sleve_coordinate'
-]
+}
 
 
 def get_unitless_standard_names(xml_tree, units):
@@ -120,7 +120,8 @@ def is_geophysical(ds, variable):
     unitless = is_unitless(ds, variable)
 
     # Is the standard name associated with coordinates
-    if standard_name in ('time', 'latitude', 'longitude', 'height', 'depth', 'altitude'):
+    if standard_name in {'time', 'latitude', 'longitude',
+                         'height', 'depth', 'altitude'}:
         return False
 
     if variable in get_coordinate_variables(ds):
