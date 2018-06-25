@@ -54,7 +54,7 @@ DIMENSIONLESS_VERTICAL_COORDINATES = [
     'atmosphere_sleve_coordinate'
 ]
 
-def check_attr_membership(attr_val, value_set, attr_type=basestring,
+def attr_membership(attr_val, value_set, attr_type=basestring,
                           modifier_fn=lambda x: x):
     """
     Helper function passed to netCDF4.Dataset.get_attributes_by_value
@@ -426,7 +426,7 @@ def get_latitude_variables(nc):
         if variable.name not in latitude_variables:
             latitude_variables.append(variable.name)
 
-    check_fn = partial(check_attr_membership, value_set=VALID_LAT_UNITS,
+    check_fn = partial(attr_membership, value_set=VALID_LAT_UNITS,
                            modifier_fn=lambda s: s.lower())
     for variable in nc.get_variables_by_attributes(units=check_fn):
         if variable.name not in latitude_variables:
@@ -489,7 +489,7 @@ def get_longitude_variables(nc):
         if variable.name not in longitude_variables:
             longitude_variables.append(variable.name)
 
-    check_fn = partial(check_attr_membership, value_set=VALID_LON_UNITS,
+    check_fn = partial(attr_membership, value_set=VALID_LON_UNITS,
                        modifier_fn=lambda s: s.lower())
     for variable in nc.get_variables_by_attributes(units=check_fn):
         if variable.name not in longitude_variables:
