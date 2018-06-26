@@ -100,6 +100,9 @@ def get_unitless_standard_names(xml_tree, units):
     Returns True if the units are unitless. Unitless includes units that have
     no units and units that are defined as '1'.
     '''
+    # standard_name must be string, so if it is not, it is *wrong* by default
+    if not isinstance(units, basestring):
+        return False
     found_standard_name = xml_tree.find(".//entry[@id='{}']".format(units))
     if found_standard_name is not None:
         canonical_units = found_standard_name.find('canonical_units')
@@ -137,9 +140,7 @@ def is_unitless(ds, variable):
     :param str variable: Name of the variable
     '''
     units = getattr(ds.variables[variable], 'units', None)
-    if units is None or units == '':
-        return True
-    return False
+    return units is None or units == ''
 
 
 def is_geophysical(ds, variable):

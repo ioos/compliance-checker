@@ -899,7 +899,7 @@ class CFBaseCheck(BaseCheck):
                                 "§3.1 Variable {}'s units attribute is a string".format(variable.name))
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(isinstance(units, basestring),
-                                                "'units' attribute must be a string"):
+                                                "'units' attribute must be a string compatible with UDUNITS"):
                 valid_udunits = self._check_valid_udunits(ds, name)
                 ret_val.append(valid_udunits)
             ret_val.append(units_attr_is_string.to_result())
@@ -923,6 +923,8 @@ class CFBaseCheck(BaseCheck):
 
         if isinstance(standard_name, basestring) and ' ' in standard_name:
             return standard_name.split(' ', 1)
+        # if this isn't a string, then it doesn't make sense to split
+        # -- treat value as standard name with no modifier
         else:
             return standard_name, None
 
@@ -979,8 +981,8 @@ class CFBaseCheck(BaseCheck):
         variable = ds.variables[variable_name]
 
         units = getattr(variable, 'units', None)
-        standard_name = getattr(variable, 'standard_name', None)
-        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+        standard_name_base = getattr(variable, 'standard_name', None)
+        standard_name, standard_name_modifier = self._split_standard_name(standard_name_base)
         std_name_unitless = cfutil.get_unitless_standard_names(self._std_names._root,
                                                                standard_name)
 
