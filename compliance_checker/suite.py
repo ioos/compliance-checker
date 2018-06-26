@@ -17,6 +17,7 @@ from compliance_checker.base import fix_return_value, Result, GenericFile
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from compliance_checker.protocols import opendap, netcdf, cdl
+from compliance_checker import MemoizedDataset
 try:
     from urlparse import urlparse
 except ImportError:
@@ -27,13 +28,13 @@ import textwrap
 import codecs
 import tabulate
 
+
 tabulate.PRESERVE_WHITESPACE = True
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 if sys.stderr.encoding is None:
     sys.stderr = codecs.getwriter('utf8')(sys.stderr)
-
 
 class CheckSuite(object):
 
@@ -514,7 +515,7 @@ class CheckSuite(object):
             ds_str = self.generate_dataset(ds_str)
 
         if netcdf.is_netcdf(ds_str):
-            return Dataset(ds_str)
+            return MemoizedDataset(ds_str)
 
         # Assume this is just a Generic File if it exists
         if os.path.isfile(ds_str):
