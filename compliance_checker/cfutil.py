@@ -53,15 +53,25 @@ DIMENSIONLESS_VERTICAL_COORDINATES = {
 }
 
 
-def get_unitless_standard_names(xml_tree, units):
+def get_dimensionless_standard_names(xml_tree, standard_name):
     '''
-    Returns True if the units are unitless. Unitless includes units that have
-    no units and units that are defined as '1'.
+    Returns True if the units for the associated standard name are unitless.
+    Unitless includes units that have no units and units that are defined as
+    constant units in the CF standard name table i.e. '1', or '1e-3'.
     '''
-    found_standard_name = xml_tree.find(".//entry[@id='{}']".format(units))
+    # standard_name must be string, so if it is not, it is *wrong* by default
+    if not isinstance(standard_name, basestring):
+        return False
+    found_standard_name = xml_tree.find(".//entry[@id='{}']".format(standard_name))
     if found_standard_name is not None:
         canonical_units = found_standard_name.find('canonical_units')
-        return canonical_units is None or canonical_units.text == '1'
+        # so far, standard name XML table includes
+        # 1 and 1e-3 for unitless dims, but expanding to valid udunits
+        # prefixes to be on the safe side
+        # taken from CF Table 3.1 of valid UDUnits prefixes
+        dimless_units = r'1(?:e-?(?:1|2|3|6|9|12|15|18|21|24))$'
+        return canonical_units is None or re.match(dimless_units,
+                                                   canonical_units.text)
     # if the standard name is not found, assume we need units for the time being
     else:
         return False
