@@ -14,7 +14,7 @@ from pkg_resources import resource_filename
 
 # copied from paegan
 # paegan may depend on these later
-_possiblet = ["time", "TIME", "Time",
+_possiblet = {"time", "TIME", "Time",
               "t", "T",
               "ocean_time", "OCEAN_TIME",
               "jd", "JD",
@@ -22,8 +22,8 @@ _possiblet = ["time", "TIME", "Time",
               "times", "TIMES", "Times",
               "mt", "MT",
               "dt", "DT",
-              ]
-_possiblez = ["depth", "DEPTH",
+              }
+_possiblez = {"depth", "DEPTH",
               "depths", "DEPTHS",
               "height", "HEIGHT",
               "altitude", "ALTITUDE",
@@ -37,8 +37,8 @@ _possiblez = ["depth", "DEPTH",
               "siglev", "SIGLEV",
               "sigma", "SIGMA",
               "vertical", "VERTICAL", "lev", "LEV", "level", "LEVEL"
-              ]
-_possiblex = ["x", "X",
+              }
+_possiblex = {"x", "X",
               "lon", "LON",
               "xlon", "XLON",
               "lonx", "lonx",
@@ -49,9 +49,8 @@ _possiblex = ["x", "X",
               "longitude", "LONGITUDE",
               "lon_rho", "LON_RHO",
               "lon_psi", "LON_PSI",
-
-              ]
-_possibley = ["y", "Y",
+              }
+_possibley = {"y", "Y",
               "lat", "LAT",
               "ylat", "YLAT",
               "laty", "laty",
@@ -63,28 +62,28 @@ _possibley = ["y", "Y",
               "lat_rho", "LAT_RHO",
               "lat_psi", "LAT_PSI",
 
-              ]
+              }
 
-_possibleaxis = _possiblet + _possiblez + _possiblex + _possibley
+_possibleaxis = _possiblet | _possiblez | _possiblex | _possibley
 
 
-_possiblexunits = ['degrees_east',
+_possiblexunits = {'degrees_east',
                    'degree_east',
                    'degrees_E',
                    'degree_E',
                    'degreesE',
                    'degreeE'
-                   ]
+                   }
 
-_possibleyunits = ['degrees_north',
+_possibleyunits = {'degrees_north',
                    'degree_north',
                    'degrees_N',
                    'degree_N',
                    'degreesN',
                    'degreeN'
-                   ]
+                   }
 
-_possibletunits = ['day',
+_possibletunits = {'day',
                    'days',
                    'd',
                    'hour',
@@ -104,9 +103,9 @@ _possibletunits = ['day',
                    's',
                    'sec',
                    'secs'
-                   ]
+                   }
 
-_possibleaxisunits = _possiblexunits + _possibleyunits + _possibletunits
+_possibleaxisunits = _possiblexunits | _possibleyunits | _possibletunits
 
 
 class DotDict(dict):
