@@ -942,7 +942,7 @@ class CFBaseCheck(BaseCheck):
         units = getattr(variable, 'units', None)
         standard_name_full = getattr(variable, 'standard_name', None)
         standard_name, standard_name_modifier = self._split_standard_name(standard_name_full)
-        std_name_units_dimensionless = cfutil.get_dimensionless_standard_names(self._std_names._root,
+        std_name_units_dimensionless = cfutil.is_dimensionless_standard_name(self._std_names._root,
                                                                standard_name)
         # Is this even in the database? also, if there is no standard_name,
         # there's no way to know if it is dimensionless.
@@ -979,7 +979,7 @@ class CFBaseCheck(BaseCheck):
         units = getattr(variable, 'units', None)
         standard_name = getattr(variable, 'standard_name', None)
         standard_name, standard_name_modifier = self._split_standard_name(standard_name)
-        std_name_units_dimensionless = cfutil.get_dimensionless_standard_names(self._std_names._root,
+        std_name_units_dimensionless = cfutil.is_dimensionless_standard_name(self._std_names._root,
                                                                standard_name)
 
         # If the variable is supposed to be dimensionless, it automatically passes
@@ -1015,7 +1015,7 @@ class CFBaseCheck(BaseCheck):
                                                                      standard_name or "unspecified"))
 
         # If the variable is supposed to be dimensionless, it automatically passes
-        std_name_units_dimensionless = cfutil.get_dimensionless_standard_names(self._std_names._root,
+        std_name_units_dimensionless = cfutil.is_dimensionless_standard_name(self._std_names._root,
                                                                standard_name)
 
         standard_name, standard_name_modifier = self._split_standard_name(standard_name)

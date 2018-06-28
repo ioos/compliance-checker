@@ -53,7 +53,7 @@ DIMENSIONLESS_VERTICAL_COORDINATES = {
 }
 
 
-def get_dimensionless_standard_names(xml_tree, standard_name):
+def is_dimensionless_standard_name(xml_tree, standard_name):
     '''
     Returns True if the units for the associated standard name are
     dimensionless.  Dimensionless standard names include those that have no
