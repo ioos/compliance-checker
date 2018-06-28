@@ -952,7 +952,7 @@ class CFBaseCheck(BaseCheck):
         # 1) Units must exist
         valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(variable_name))
         valid_units.assert_true(should_be_dimensionless or units is not None,
-                                'units attribute is required for {} when'.format(variable_name))
+                                'units attribute is required for {} when variable is not a dimensionless quantity'.format(variable_name))
 
         # Don't bother checking the rest
         if units is None and not should_be_dimensionless:
