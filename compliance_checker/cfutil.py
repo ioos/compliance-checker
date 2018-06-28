@@ -67,7 +67,7 @@ def is_dimensionless_standard_name(xml_tree, standard_name):
     if found_standard_name is not None:
         canonical_units = found_standard_name.find('canonical_units')
         # so far, standard name XML table includes
-        # 1 and 1e-3 for unitless dims, but expanding to valid udunits
+        # 1 and 1e-3 for constant units, but expanding to valid udunits
         # prefixes to be on the safe side
         # taken from CF Table 3.1 of valid UDUnits prefixes
         dimless_units = r'1(?:e-?(?:1|2|3|6|9|12|15|18|21|24))?$'
