@@ -41,7 +41,7 @@ class CheckSuite(object):
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
 
     def __init__(self):
-        self.col_width = 40
+        self.col_width = 60
 
     @classmethod
     def load_all_available_checkers(cls):
@@ -115,6 +115,14 @@ class CheckSuite(object):
             check_name = ':'.join((check_name.split(':')[0],
                                    self.checkers[check_name]._cc_spec_version))
         return check_name
+
+    def _get_check_url(self, check_name):
+        """
+        Return the check's reference URL if it exists. If not, return emtpy str.
+        @param check_name str: name of the check being run returned by
+                               _get_check_versioned_name()
+        """
+        return getattr(self.checkers[check_name], '_cc_url', '')
 
     def _get_valid_checkers(self, ds, checker_names):
         """
@@ -271,6 +279,7 @@ class CheckSuite(object):
         aggregates['source_name'] = source_name
         aggregates['scoreheader'] = self.checkers[check_name]._cc_display_headers
         aggregates['cc_spec_version'] = self.checkers[check_name]._cc_spec_version
+        aggregates['cc_url'] = self._get_check_url(aggregates['testname'])
         return aggregates
 
     def dict_output(self, check_name, groups, source_name, limit):
@@ -359,13 +368,16 @@ class CheckSuite(object):
 
         # Let's add the version number to the check name if it's missing
         check_name = self._get_check_versioned_name(check_name)
+        check_url = self._get_check_url(check_name)
+        _len_ = 120
         print('\n')
-        print("-" * 80)
-        print('{:^80}'.format("IOOS Compliance Checker Report"))
-        print('{:^80}'.format("%s check" % check_name))
-        print("-" * 80)
+        print("-" * _len_)
+        print('{:^120}'.format("IOOS Compliance Checker Report"))
+        print('{:^120}'.format("%s check" % check_name))
+        print('{:^120}'.format('%s' % check_url))
+        print("-" * _len_)
         if issue_count > 0:
-            print('{:^80}'.format("Corrective Actions"))
+            print('{:^120}'.format("Corrective Actions"))
             plural = '' if issue_count == 1 else 's'
             print("{} has {} potential issue{}".format(os.path.basename(ds), issue_count, plural))
 
@@ -426,8 +438,8 @@ class CheckSuite(object):
                 # datasets
                 if _top_level:
                     print("\n")
-                    print('{:^80}'.format(level_name))
-                    print("-" * 80)
+                    print('{:^120}'.format(level_name))
+                    print("-" * 120)
 
                 data_issues = [process_table(res, check) for res in result[level]]
 
@@ -493,6 +505,7 @@ class CheckSuite(object):
 
         :param str ds_str: URL to the remote resource
         '''
+
         if opendap.is_opendap(ds_str):
             return Dataset(ds_str)
         else:
