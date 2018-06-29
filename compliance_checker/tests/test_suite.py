@@ -19,6 +19,10 @@ class TestSuite(unittest.TestCase):
     # @see
     # http://www.saltycrane.com/blog/2012/07/how-prevent-nose-unittest-using-docstring-when-verbosity-2/
 
+    def setUp(self):
+        self.cs = CheckSuite()
+        self.cs.load_all_available_checkers()
+
     def shortDescription(self):
         return None
 
@@ -148,3 +152,18 @@ class TestSuite(unittest.TestCase):
         cs = CheckSuite()
         resp = cs.load_local_dataset(static_files['empty'])
         assert isinstance(resp, GenericFile) ==  True
+
+    def test_standard_output_score_header(self):
+        """
+            Check that the output score header only checks the number of
+            of potential issues, rather than the weighted score
+            """
+        ds = self.cs.load_dataset(static_files['bad_region'])
+        score_groups = self.cs.run(ds, [], 'cf')
+        limit = 2
+        groups, errors = score_groups['cf']
+        score_list, all_passed, out_of = self.cs.standard_output(
+                                                        ds.filepath(),
+                                                        limit, 'cf',
+                                                        groups)
+        self.assertEqual((all_passed, out_of), (30, 47))
