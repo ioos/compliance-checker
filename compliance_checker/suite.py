@@ -338,15 +338,14 @@ class CheckSuite(object):
             if g.weight >= limit:
                 score_only_list.append(g.value)
 
-        points = [x[0] for x in score_only_list]
-        out_of = [x[1] for x in score_only_list]
+        # checks where all pertinent sections passed
+        all_passed = sum(x[0] == x[1] for x in score_only_list)
+        out_of = len(score_only_list)
 
-        points = sum(points)
-        out_of = sum(out_of)
         # sorts lists into high/medium/low order
         score_list.sort(key=lambda x: x.weight, reverse=True)
 
-        return score_list, points, out_of
+        return score_list, all_passed, out_of
 
     def standard_output(self, ds, limit, check_name, groups):
         """

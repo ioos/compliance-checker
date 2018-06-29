@@ -1050,7 +1050,7 @@ class CFBaseCheck(BaseCheck):
         # UDunits can't tell the difference between east and north facing coordinates
         elif standard_name == 'latitude':
             # degrees is allowed if using a transformed grid
-            allowed_units = cfutil.VALID_LAT_UNITS + ['degrees']
+            allowed_units = cfutil.VALID_LAT_UNITS | {'degrees'}
             valid_standard_units.assert_true(units.lower() in allowed_units,
                                              'variables defining latitude must use degrees_north '
                                              'or degrees if defining a transformed grid. Currently '
@@ -1058,7 +1058,7 @@ class CFBaseCheck(BaseCheck):
         # UDunits can't tell the difference between east and north facing coordinates
         elif standard_name == 'longitude':
             # degrees is allowed if using a transformed grid
-            allowed_units = cfutil.VALID_LON_UNITS + ['degrees']
+            allowed_units = cfutil.VALID_LON_UNITS | {'degrees'}
             valid_standard_units.assert_true(units.lower() in allowed_units,
                                              'variables defining longitude must use degrees_east '
                                              'or degrees if defining a transformed grid. Currently '
@@ -1541,7 +1541,7 @@ class CFBaseCheck(BaseCheck):
             # Check that latitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Latitude variable {} uses recommended units'.format(latitude))
             if standard_name == 'grid_latitude':
-                e_n_units = cfutil.VALID_LAT_UNITS + cfutil.VALID_LON_UNITS
+                e_n_units = cfutil.VALID_LAT_UNITS | cfutil.VALID_LON_UNITS
                 # check that the units aren't in east and north degrees units,
                 # but are convertible to angular units
                 allowed_units.assert_true(units not in e_n_units and
@@ -1635,7 +1635,7 @@ class CFBaseCheck(BaseCheck):
             # Check that longitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Longitude variable {} uses recommended units'.format(longitude))
             if standard_name == 'grid_longitude':
-                e_n_units = cfutil.VALID_LAT_UNITS + cfutil.VALID_LON_UNITS
+                e_n_units = cfutil.VALID_LAT_UNITS | cfutil.VALID_LON_UNITS
                 # check that the units aren't in east and north degrees units,
                 # but are convertible to angular units
                 allowed_units.assert_true(units not in e_n_units and
