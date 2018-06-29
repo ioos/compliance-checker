@@ -8,6 +8,7 @@ from pkg_resources import resource_filename
 from collections import defaultdict
 import warnings
 from functools import partial
+import six
 import csv
 import re
 
@@ -77,9 +78,14 @@ def attr_membership(attr_val, value_set, attr_type=basestring,
                       "Attempting to cast to expected type.".format(type(attr_val),
                                                                     attr_type))
         try:
-            new_attr_val = attr_type(attr_val)
+            # if the expected type is basestring, try casting to unicode type
+            # since basestring can't be instantiated
+            if attr_type is basestring:
+                new_attr_val = six.text_type(attr_val)
+            else:
+                new_attr_val = attr_type(attr_val)
         # catch casting errors
-        except ValueError as e:
+        except (ValueError, UnicodeEncodeError) as e:
             warnings.warn("Could not cast to type {}".format(attr_type))
             return False
     else:
