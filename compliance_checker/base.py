@@ -191,6 +191,8 @@ class TestCtx(object):
     def assert_true(self, test, message):
         '''
         Increments score if test is true otherwise appends a message
+        :rtype: bool
+        :return: Boolean indicating whether test condition passed or not
         '''
         self.out_of += 1
 
@@ -198,6 +200,8 @@ class TestCtx(object):
             self.score += 1
         else:
             self.messages.append(message)
+
+        return test
 
 
 def std_check_in(dataset, name, allowed_vals):

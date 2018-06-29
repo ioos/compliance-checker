@@ -153,4 +153,6 @@ class TestSuite(unittest.TestCase):
                                                         ds.filepath(),
                                                         limit, 'cf',
                                                         groups)
-        self.assertEqual((all_passed, out_of), (26, 41))
+
+        self.assertEqual((all_passed, out_of), (30, 47))
+

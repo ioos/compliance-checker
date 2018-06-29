@@ -6,6 +6,9 @@ compliance_checker/cfutil.py
 from cf_units import Unit
 from pkg_resources import resource_filename
 from collections import defaultdict
+import warnings
+from functools import partial
+import six
 import csv
 import re
 
@@ -52,12 +55,60 @@ DIMENSIONLESS_VERTICAL_COORDINATES = {
     'atmosphere_sleve_coordinate'
 }
 
+def attr_membership(attr_val, value_set, attr_type=basestring,
+                          modifier_fn=lambda x: x):
+    """
+    Helper function passed to netCDF4.Dataset.get_attributes_by_value
+    Checks that `attr_val` exists, has the same type as `attr_type`,
+    and is contained in `value_set`
+    attr_val: The value of the attribute being checked
+    attr_type: A type object that the `attr_val` is expected to have the same
+               type as.  If the type is not the same, a warning is issued and
+               the code attempts to cast `attr_val` to the expected type.
+    value_set: The set against which membership for `attr_val` is tested
+    modifier_fn: A function to apply to attr_val prior to applying the set
+                 membership test
+
+    """
+    if attr_val is None:
+        return False
+
+    if not isinstance(attr_val, attr_type):
+        warnings.warn("Attribute is of type {}, {} expected. "
+                      "Attempting to cast to expected type.".format(type(attr_val),
+                                                                    attr_type))
+        try:
+            # if the expected type is basestring, try casting to unicode type
+            # since basestring can't be instantiated
+            if attr_type is basestring:
+                new_attr_val = six.text_type(attr_val)
+            else:
+                new_attr_val = attr_type(attr_val)
+        # catch casting errors
+        except (ValueError, UnicodeEncodeError) as e:
+            warnings.warn("Could not cast to type {}".format(attr_type))
+            return False
+    else:
+        new_attr_val = attr_val
+
+    try:
+        is_in_set = modifier_fn(new_attr_val) in value_set
+    except Exception as e:
+        warnings.warn('Could not apply modifier function {} to value: '
+                      ' {}'.format(modifier_fn, e.msg))
+        return False
+
+    return is_in_set
+
 
 def get_unitless_standard_names(xml_tree, units):
     '''
     Returns True if the units are unitless. Unitless includes units that have
     no units and units that are defined as '1'.
     '''
+    # standard_name must be string, so if it is not, it is *wrong* by default
+    if not isinstance(units, basestring):
+        return False
     found_standard_name = xml_tree.find(".//entry[@id='{}']".format(units))
     if found_standard_name is not None:
         canonical_units = found_standard_name.find('canonical_units')
@@ -95,9 +146,7 @@ def is_unitless(ds, variable):
     :param str variable: Name of the variable
     '''
     units = getattr(ds.variables[variable], 'units', None)
-    if units is None or units == '':
-        return True
-    return False
+    return units is None or units == ''
 
 
 def is_geophysical(ds, variable):
@@ -116,8 +165,19 @@ def is_geophysical(ds, variable):
     if getattr(ncvar, 'axis', None):
         return False
 
-    standard_name = getattr(ncvar, 'standard_name', '')
+    standard_name_test = getattr(ncvar, 'standard_name', '')
     unitless = is_unitless(ds, variable)
+
+    if not isinstance(standard_name_test, basestring):
+        warnings.warn("Variable {} has non string standard name, "
+                      "Attempting cast to string".format(variable))
+        try:
+            standard_name = str(standard_name_test)
+        except ValueError:
+            warnings.warn("Unable to cast standard name to string, excluding "
+                          "from geophysical variables")
+    else:
+        standard_name = standard_name_test
 
     # Is the standard name associated with coordinates
     if standard_name in {'time', 'latitude', 'longitude',
@@ -374,7 +434,9 @@ def get_latitude_variables(nc):
         if variable.name not in latitude_variables:
             latitude_variables.append(variable.name)
 
-    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in VALID_LAT_UNITS):
+    check_fn = partial(attr_membership, value_set=VALID_LAT_UNITS,
+                           modifier_fn=lambda s: s.lower())
+    for variable in nc.get_variables_by_attributes(units=check_fn):
         if variable.name not in latitude_variables:
             latitude_variables.append(variable.name)
 
@@ -435,7 +497,9 @@ def get_longitude_variables(nc):
         if variable.name not in longitude_variables:
             longitude_variables.append(variable.name)
 
-    for variable in nc.get_variables_by_attributes(units=lambda x: x is not None and x.lower() in VALID_LON_UNITS):
+    check_fn = partial(attr_membership, value_set=VALID_LON_UNITS,
+                       modifier_fn=lambda s: s.lower())
+    for variable in nc.get_variables_by_attributes(units=check_fn):
         if variable.name not in longitude_variables:
             longitude_variables.append(variable.name)
 
