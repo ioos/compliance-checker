@@ -369,15 +369,15 @@ class CheckSuite(object):
         # Let's add the version number to the check name if it's missing
         check_name = self._get_check_versioned_name(check_name)
         check_url = self._get_check_url(check_name)
-        _len_ = 120
+        _len_ = 2*self.col_width
         print('\n')
         print("-" * _len_)
-        print('{:^120}'.format("IOOS Compliance Checker Report"))
-        print('{:^120}'.format("%s check" % check_name))
-        print('{:^120}'.format('%s' % check_url))
+        print('{:^{width}}'.format("IOOS Compliance Checker Report", width=_len_))
+        print('{:^{width}}'.format("%s check" % check_name, width=_len_))
+        print('{:^{width}}'.format('%s' % check_url, width=_len_))
         print("-" * _len_)
         if issue_count > 0:
-            print('{:^120}'.format("Corrective Actions"))
+            print('{:^{width}}'.format("Corrective Actions", width=_len_))
             plural = '' if issue_count == 1 else 's'
             print("{} has {} potential issue{}".format(os.path.basename(ds), issue_count, plural))
 
@@ -438,8 +438,8 @@ class CheckSuite(object):
                 # datasets
                 if _top_level:
                     print("\n")
-                    print('{:^120}'.format(level_name))
-                    print("-" * 120)
+                    print('{:^{width}}'.format(level_name, width=_len_))
+                    print("-" * _len_)
 
                 data_issues = [process_table(res, check) for res in result[level]]
 
