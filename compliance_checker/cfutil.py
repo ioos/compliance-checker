@@ -294,7 +294,7 @@ def get_auxiliary_coordinate_variables(ds):
 
 def get_cell_boundary_map(ds):
     '''
-    Returns a dictionary mapping a variable to it's boundary variable. The
+    Returns a dictionary mapping a variable to its boundary variable. The
     returned dictionary maps a string variable name to the name of the boundary
     variable.
 
