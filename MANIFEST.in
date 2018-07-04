@@ -8,3 +8,5 @@ include compliance_checker/tests/data/*.cdl
 include compliance_checker/tests/data/*.nc
 include compliance_checker/tests/data/non-comp/*.cdl
 
+include versioneer.py
+include compliance_checker/_version.py

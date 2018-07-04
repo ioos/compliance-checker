@@ -173,6 +173,11 @@ class TestCF(BaseTestCase):
         assert result.msgs[0] == ("really_bad's dimensions are not in the recommended order "
                                   "T, Z, Y, X. They are latitude, power")
 
+        dataset = self.load_dataset(STATIC_FILES['dimension_order'])
+        result = self.cf.check_dimension_order(dataset)
+        self.assertEqual((3, 3), result.value)
+        self.assertEqual([], result.msgs)
+
     def test_check_fill_value_outside_valid_range(self):
         """
         2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
@@ -290,6 +295,12 @@ class TestCF(BaseTestCase):
         assert result.value == (0, 1)
 
         assert len(result_dict) == 9
+        # try setting standard name to invalid type (non-string)
+        dataset.variables['salinity'] = MockVariable(dataset.variables['salinity'])
+        dataset.variables['salinity'].standard_name = 1
+        result_dict = {r.name: r for r in self.cf.check_standard_name(dataset)}
+        result = result_dict[u"§3.3 Variable salinity has valid standard_name attribute"]
+        assert result.value[0] == 0
 
         dataset = self.load_dataset(STATIC_FILES['reduced_horizontal_grid'])
         results = self.cf.check_standard_name(dataset)
@@ -490,6 +501,16 @@ class TestCF(BaseTestCase):
         result = result_dict[u"§3.1 Variable temp_count's units are appropriate for "
                              u"the standard_name atmospheric_temperature number_of_observations"]
         assert result.value == (1, 1)
+
+        dataset.variables['temp_count'] = MockVariable(
+                                            dataset.variables['temp_count'])
+        # use illegal non-string units
+        # people can mistakenly use 1 instead of '1', especially for practical
+        # salinity units
+        dataset.variables['temp_count'].units = 1
+        result_dict = {r.name: r for r in self.cf.check_units(dataset)}
+        result = result_dict[u"§3.1 Variable temp_count's units attribute is a string"]
+        assert result.value[0] == 0
 
     def test_latitude(self):
         '''
@@ -961,9 +982,14 @@ class TestCF(BaseTestCase):
         # We don't keep track of the variables names for checks that passed, so
         # we can make a strict assertion about how many checks were performed
         # and if there were errors, which there shouldn't be.
+        # FIXME (badams): find a better way of grouping together results by
+        #                 variable checked instead of checking the number of
+        #                 points scored, which should be deprecated, and
+        #                 furthermore is fragile and breaks tests when check
+        #                 definitions change
         scored, out_of, messages = self.get_results(results)
-        assert scored == 20
-        assert out_of == 20
+        assert scored == 24
+        assert out_of == 24
         assert messages == []
 
     def test_check_duplicates(self):

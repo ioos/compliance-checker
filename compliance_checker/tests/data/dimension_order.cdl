@@ -1,0 +1,41 @@
+netcdf dimension_order {
+dimensions:
+    TIME = 4 ;
+    INSTRUMENT = 2 ;
+variables:
+    double TIME(TIME) ;
+        TIME:axis = "T" ;
+        TIME:standard_name = "time" ;
+        TIME:units = "days since 1970-01-01T00:00:00 UTC" ;
+    float NOMINAL_DEPTH(INSTRUMENT);
+        NOMINAL_DEPTH:axis = "Z" ;
+        NOMINAL_DEPTH:positive = "down" ;
+        NOMINAL_DEPTH:standard_name = "depth" ;
+        NOMINAL_DEPTH:units = "m" ;
+    float LATITUDE ;
+        LATITUDE:axis = "Y" ;
+        LATITUDE:standard_name = "latitude" ;
+        LATITUDE:units = "degrees_north" ;
+    float LONGITUDE ;
+        LONGITUDE:axis = "X" ;
+        LONGITUDE:standard_name = "longitude" ;
+        LONGITUDE:units = "degrees_east" ;
+    float TEMP(INSTRUMENT, TIME) ;
+        TEMP:standard_name = "sea_water_temperature" ;
+        TEMP:units = "degrees_Celsius" ;
+        TEMP:coordinates = "TIME NOMINAL_DEPTH LATITUDE LONGITUDE" ;
+
+data:
+
+ TIME = 24608.65, 24608.66, 24608.67, 24608.68 ;
+
+ NOMINAL_DEPTH = 22, 107 ;
+
+ LATITUDE = -27.3415 ;
+
+ LONGITUDE = 153.5619 ;
+
+ TEMP = 21.20, 21.21, 21.21, 21.21,
+        12.01, 12.05, 12.08, 12.03 ;
+
+}
