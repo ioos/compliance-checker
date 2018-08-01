@@ -11,7 +11,11 @@ from functools import partial
 import six
 import csv
 import re
-from functools import lru_cache
+try:
+    from functools import lru_cache
+# Fallback for Python < 3.2
+except ImportError:
+    from functools32 import lru_cache
 
 # For python2/python3 support
 try:

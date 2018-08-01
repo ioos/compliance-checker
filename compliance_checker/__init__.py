@@ -7,7 +7,7 @@ try:
     from functools import lru_cache
 # Fallback for Python < 3.2
 except ImportError:
-    from repoze import lru_cache
+    from functools32 import lru_cache
 
 class MemoizedDataset(Dataset):
     @lru_cache(128)
