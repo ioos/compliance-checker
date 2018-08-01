@@ -725,9 +725,8 @@ def get_axis_map(ds, variable):
 
     # For example
     # {'x': ['longitude'], 'y': ['latitude'], 't': ['time']}
-    axis_map = defaultdict(set)
+    axis_map = defaultdict(list)
     for coord_name in all_coords:
-
         if is_compression_coordinate(ds, coord_name):
             axis = 'C'
         elif coord_name in times:
@@ -743,12 +742,11 @@ def get_axis_map(ds, variable):
 
         if coord_name in ds.variables[variable].dimensions:
             if coord_name not in axis_map[axis]:
-                axis_map[axis].add(coord_name)
+                axis_map[axis].append(coord_name)
 
         elif coord_name in coordinates:
             if coord_name not in axis_map[axis]:
-                axis_map[axis].add(coord_name)
-
+                axis_map[axis].append(coord_name)
     return axis_map
 
 
