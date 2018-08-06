@@ -528,7 +528,6 @@ class CFBaseCheck(BaseCheck):
                                                   "{}'s dimensions are not in the recommended order "
                                                   "T, Z, Y, X. They are {}"
                                                   "".format(name, self._get_pretty_dimension_order(ds, name)))
-
         return valid_dimension_order.to_result()
 
     def _get_coord_axis_map(self, ds):
@@ -789,7 +788,6 @@ class CFBaseCheck(BaseCheck):
             valid_globals.assert_true(is_string and len(dataset_attr),
                                       "global attribute {} should exist and be a non-empty string"
                                       "".format(attr))
-
         return valid_globals.to_result()
 
     def check_convention_possibly_var_attrs(self, ds):
@@ -833,7 +831,6 @@ class CFBaseCheck(BaseCheck):
                                              "{} global attribute should be a non-empty string"
                                              "".format(attribute))
                 attr_bin.add(attribute)
-
         return valid_attributes.to_result()
 
     ###############################################################################
@@ -1136,7 +1133,6 @@ class CFBaseCheck(BaseCheck):
                 valid_std_name = TestCtx(BaseCheck.HIGH, '§3.3 Variable {} has valid standard_name attribute'.format(name))
                 valid_std_name.assert_true(isinstance(standard_name, basestring),
                                         "Attribute standard_name for variable {} must be a string".format(name))
-
                 if isinstance(standard_name, basestring):
                     valid_std_name.assert_true(standard_name in self._std_names,
                                             "standard_name {} is not defined in Standard Name Table v{}".format(
@@ -2546,7 +2542,6 @@ class CFBaseCheck(BaseCheck):
         # Note that test does not check monotonicity
         ret_val = []
         reasoning = []
-
         for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(ds).items():
             variable = ds.variables[variable_name]
             valid = True
@@ -2593,7 +2588,6 @@ class CFBaseCheck(BaseCheck):
                             "§7.1 Cell boundaries are valid for variable {}".format(variable_name),
                             reasoning)
             ret_val.append(result)
-
         return ret_val
 
     def check_cell_measures(self, ds):
@@ -3190,7 +3184,6 @@ class CFBaseCheck(BaseCheck):
         feature_list = ['point', 'timeseries', 'trajectory', 'profile', 'timeseriesprofile', 'trajectoryprofile']
 
         feature_type = getattr(ds, 'featureType', None)
-
         valid_feature_type = TestCtx(BaseCheck.HIGH, '§9.1 Dataset contains a valid featureType')
         valid_feature_type.assert_true(feature_type is None or feature_type.lower() in feature_list,
                                        "{} is not a valid CF featureType. It must be one of {}"

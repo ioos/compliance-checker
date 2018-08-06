@@ -11,7 +11,7 @@ from netCDF4 import Dataset
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
-from compliance_checker import __version__
+from compliance_checker import __version__, MemoizedDataset
 from lxml import etree
 import sys
 
@@ -62,7 +62,7 @@ class BaseNCCheck(object):
     """
     Base Class for NetCDF Dataset supporting Check Suites.
     """
-    supported_ds = [Dataset]
+    supported_ds = {Dataset, MemoizedDataset}
 
     @classmethod
     def std_check_in(cls, dataset, name, allowed_vals):
