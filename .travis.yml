@@ -52,7 +52,7 @@ before_install:
       install_file='conda-requirements_pre3_2.txt' ;
     else
       install_file='conda-requirements.txt' ;
-    fi
+    fi;
     conda create --name TEST python=$TRAVIS_PYTHON_VERSION --file "$install_file" --file test_requirements.txt
   - source activate TEST
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
