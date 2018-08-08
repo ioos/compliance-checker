@@ -278,5 +278,5 @@ class TestCFIntegration(BaseTestCase):
         scored, out_of, messages = self.get_results(check_results)
         # assert (scored, out_of) == (92, 100)
         assert scored < out_of
-        assert (u'\u00A79.5 states that datasets should not contain more than two '
+        assert (u'§9.5 states that datasets should not contain more than two '
                 'variables defining a cf_role attribute.') in messages

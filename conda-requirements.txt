@@ -11,6 +11,3 @@ regex==2017.07.28
 pendulum>=1.2.4
 tabulate==0.8.2
 cython
-# functools.lru_cache first appears in Python 3.2, use this for other
-# versions
-functools32==3.2.3-2; python_version < '3.2'
