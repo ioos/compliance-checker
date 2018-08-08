@@ -11,6 +11,11 @@ from functools import partial
 import six
 import csv
 import re
+try:
+    from functools import lru_cache
+# Fallback for Python < 3.2
+except ImportError:
+    from functools32 import lru_cache
 
 # For python2/python3 support
 try:
@@ -101,6 +106,7 @@ def attr_membership(attr_val, value_set, attr_type=basestring,
     return is_in_set
 
 
+@lru_cache(128)
 def is_dimensionless_standard_name(xml_tree, standard_name):
     '''
     Returns True if the units for the associated standard name are
@@ -302,7 +308,7 @@ def get_auxiliary_coordinate_variables(ds):
 
 def get_cell_boundary_map(ds):
     '''
-    Returns a dictionary mapping a variable to it's boundary variable. The
+    Returns a dictionary mapping a variable to its boundary variable. The
     returned dictionary maps a string variable name to the name of the boundary
     variable.
 
@@ -329,7 +335,7 @@ def get_cell_boundary_variables(ds):
             boundary_variables.append(var.bounds)
     return boundary_variables
 
-
+@lru_cache(128)
 def get_geophysical_variables(ds):
     '''
     Returns a list of variable names for the variables detected as geophysical
@@ -345,6 +351,7 @@ def get_geophysical_variables(ds):
     return parameters
 
 
+@lru_cache(128)
 def get_z_variable(nc):
     '''
     Returns the name of the variable that defines the Z axis or height/depth
@@ -414,6 +421,7 @@ def get_z_variables(nc):
     return z_variables
 
 
+@lru_cache(128)
 def get_lat_variable(nc):
     '''
     Returns the first variable matching latitude
@@ -477,6 +485,7 @@ def get_true_latitude_variables(nc):
     return true_lats
 
 
+@lru_cache(128)
 def get_lon_variable(nc):
     '''
     Returns the variable for longitude
@@ -610,24 +619,25 @@ def get_time_variable(ds):
     return None
 
 
+@lru_cache(128)
 def get_time_variables(ds):
     '''
     Returns a list of variables describing the time coordinate
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
     '''
-    time_variables = []
+    time_variables = set()
     for variable in ds.get_variables_by_attributes(standard_name='time'):
-        time_variables.append(variable.name)
+        time_variables.add(variable.name)
 
     for variable in ds.get_variables_by_attributes(axis='T'):
         if variable.name not in time_variables:
-            time_variables.append(variable.name)
+            time_variables.add(variable.name)
 
     regx = r'^(?:day|d|hour|hr|h|minute|min|second|s)s? since .*$'
     for variable in ds.get_variables_by_attributes(units=lambda x: isinstance(x, basestring)):
         if re.match(regx, variable.units) and variable.name not in time_variables:
-            time_variables.append(variable.name)
+            time_variables.add(variable.name)
 
     return time_variables
 
@@ -697,6 +707,7 @@ def get_grid_mapping_variables(ds):
     return grid_mapping_variables
 
 
+@lru_cache(128)
 def get_axis_map(ds, variable):
     '''
     Returns an axis_map dictionary that contains an axis key and the coordinate
@@ -728,7 +739,6 @@ def get_axis_map(ds, variable):
     # {'x': ['longitude'], 'y': ['latitude'], 't': ['time']}
     axis_map = defaultdict(list)
     for coord_name in all_coords:
-
         if is_compression_coordinate(ds, coord_name):
             axis = 'C'
         elif coord_name in times:
@@ -749,7 +759,6 @@ def get_axis_map(ds, variable):
         elif coord_name in coordinates:
             if coord_name not in axis_map[axis]:
                 axis_map[axis].append(coord_name)
-
     return axis_map
 
 
