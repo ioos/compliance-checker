@@ -49,9 +49,9 @@ before_install:
   - conda update conda
   - conda config --add channels conda-forge --force
   - if [[ "$TRAVIS_PYTHON_VERSION" < "3.2" ]]; then
-      install_file='conda-requirements_pre3_2.txt'
+      install_file='conda-requirements_pre3_2.txt' ;
     else
-      install_file='conda-requirements.txt'
+      install_file='conda-requirements.txt' ;
     fi
     conda create --name TEST python=$TRAVIS_PYTHON_VERSION --file "$install_file" --file test_requirements.txt
   - source activate TEST
