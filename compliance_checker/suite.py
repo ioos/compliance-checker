@@ -70,8 +70,8 @@ class CheckSuite(object):
         Load checker classes from generator plugins
         """
         for gen in cls._get_generator_plugins():
-            suites = gen.get_suites(args)
-            cls.checkers.update(suites)
+            checkers = gen.get_checkers(args)
+            cls.checkers.update(checkers)
 
     @classmethod
     def load_all_available_checkers(cls):
