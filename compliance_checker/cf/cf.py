@@ -947,8 +947,9 @@ class CFBaseCheck(BaseCheck):
                                                                standard_name)
         # Is this even in the database? also, if there is no standard_name,
         # there's no way to know if it is dimensionless.
-        should_be_dimensionless = (variable.ndim == 0 or variable.dtype.char == 'S' or
-                                   std_name_units_dimensionless or standard_name is None)
+        should_be_dimensionless = (variable.dtype.char == 'S' or
+                                   std_name_units_dimensionless or
+                                   standard_name is None)
 
         # 1) Units must exist
         valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(variable_name))
