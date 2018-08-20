@@ -985,11 +985,8 @@ class CFBaseCheck(BaseCheck):
                                                                standard_name)
 
         # If the variable is supposed to be dimensionless, it automatically passes
-        should_be_dimensionless = (
-            variable.ndim == 0 or
-            variable.dtype.char == 'S' or
-            std_name_units_dimensionless
-        )
+        should_be_dimensionless = (variable.dtype.char == 'S' or
+                                   std_name_units_dimensionless)
 
         valid_udunits = TestCtx(BaseCheck.LOW,
                                 "§3.1 Variable {}'s units are contained in UDUnits".format(variable_name))
