@@ -4,6 +4,7 @@
 from compliance_checker.suite import CheckSuite
 from compliance_checker.cf import CFBaseCheck, dimless_vertical_coordinates
 from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal, StandardNameTable, create_cached_data_dir, download_cf_standard_name_table
+from compliance_checker import cfutil
 from netCDF4 import Dataset
 from tempfile import gettempdir
 from compliance_checker.tests.resources import STATIC_FILES
@@ -790,8 +791,6 @@ class TestCF(BaseTestCase):
         self.assertTrue('Attribute formula_terms is not well-formed'
                         in result.msgs)
 
-
-
     def test_is_time_variable(self):
         var1 = MockVariable()
         var1.standard_name = 'time'
@@ -809,6 +808,19 @@ class TestCF(BaseTestCase):
         var4 = MockVariable()
         var4.units = 'seconds since 1900-01-01'
         self.assertTrue(is_time_variable('maybe_time', var4))
+
+    def test_dimensionless_standard_names(self):
+        """Check that dimensionless standard names are properly detected"""
+        std_names_xml_root = self.cf._std_names._root
+        # canonical_units are K, should be False
+        self.assertFalse(cfutil.is_dimensionless_standard_name(std_names_xml_root,
+                                                             'sea_water_temperature'))
+        # canonical_units are 1, should be True
+        self.assertTrue(cfutil.is_dimensionless_standard_name(std_names_xml_root,
+                                                             'sea_water_practical_salinity'))
+        # canonical_units are 1e-3, should be True
+        self.assertTrue(cfutil.is_dimensionless_standard_name(std_names_xml_root,
+                                                             'sea_water_salinity'))
 
     def test_check_time_coordinate(self):
         dataset = self.load_dataset(STATIC_FILES['example-grid'])

@@ -943,23 +943,24 @@ class CFBaseCheck(BaseCheck):
         units = getattr(variable, 'units', None)
         standard_name_full = getattr(variable, 'standard_name', None)
         standard_name, standard_name_modifier = self._split_standard_name(standard_name_full)
-        std_name_unitless = cfutil.get_unitless_standard_names(self._std_names._root,
+        std_name_units_dimensionless = cfutil.is_dimensionless_standard_name(self._std_names._root,
                                                                standard_name)
         # Is this even in the database? also, if there is no standard_name,
-        # there's no way to know if it is unitless.
-        should_be_unitless = (variable.ndim == 0 or variable.dtype.char == 'S' or
-                              std_name_unitless or standard_name is None)
+        # there's no way to know if it is dimensionless.
+        should_be_dimensionless = (variable.dtype.char == 'S' or
+                                   std_name_units_dimensionless or
+                                   standard_name is None)
 
         # 1) Units must exist
         valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(variable_name))
-        valid_units.assert_true(should_be_unitless or units is not None,
-                                'units attribute is required for {}'.format(variable_name))
+        valid_units.assert_true(should_be_dimensionless or units is not None,
+                                'units attribute is required for {} when variable is not a dimensionless quantity'.format(variable_name))
 
         # Don't bother checking the rest
-        if units is None and not should_be_unitless:
+        if units is None and not should_be_dimensionless:
             return valid_units.to_result()
         # 2) units attribute must be a string
-        valid_units.assert_true(should_be_unitless or isinstance(units, basestring),
+        valid_units.assert_true(should_be_dimensionless or isinstance(units, basestring),
                                 'units attribute for {} needs to be a string'.format(variable_name))
 
         # 3) units are not deprecated
@@ -978,22 +979,19 @@ class CFBaseCheck(BaseCheck):
         variable = ds.variables[variable_name]
 
         units = getattr(variable, 'units', None)
-        standard_name_base = getattr(variable, 'standard_name', None)
-        standard_name, standard_name_modifier = self._split_standard_name(standard_name_base)
-        std_name_unitless = cfutil.get_unitless_standard_names(self._std_names._root,
+        standard_name = getattr(variable, 'standard_name', None)
+        standard_name, standard_name_modifier = self._split_standard_name(standard_name)
+        std_name_units_dimensionless = cfutil.is_dimensionless_standard_name(self._std_names._root,
                                                                standard_name)
 
-        # If the variable is supposed to be unitless, it automatically passes
-        should_be_unitless = (
-            variable.ndim == 0 or
-            variable.dtype.char == 'S' or
-            std_name_unitless
-        )
+        # If the variable is supposed to be dimensionless, it automatically passes
+        should_be_dimensionless = (variable.dtype.char == 'S' or
+                                   std_name_units_dimensionless)
 
         valid_udunits = TestCtx(BaseCheck.LOW,
                                 "§3.1 Variable {}'s units are contained in UDUnits".format(variable_name))
         are_udunits = (units is not None and util.units_known(units))
-        valid_udunits.assert_true(should_be_unitless or are_udunits,
+        valid_udunits.assert_true(should_be_dimensionless or are_udunits,
                                   'units for {}, "{}" are not recognized by udunits'.format(variable_name, units))
         return valid_udunits.to_result()
 
@@ -1015,8 +1013,8 @@ class CFBaseCheck(BaseCheck):
                                        "the standard_name {}".format(variable_name,
                                                                      standard_name or "unspecified"))
 
-        # If the variable is supposed to be unitless, it automatically passes
-        std_name_unitless = cfutil.get_unitless_standard_names(self._std_names._root,
+        # If the variable is supposed to be dimensionless, it automatically passes
+        std_name_units_dimensionless = cfutil.is_dimensionless_standard_name(self._std_names._root,
                                                                standard_name)
 
         standard_name, standard_name_modifier = self._split_standard_name(standard_name)
@@ -1060,8 +1058,8 @@ class CFBaseCheck(BaseCheck):
                                              'variables defining longitude must use degrees_east '
                                              'or degrees if defining a transformed grid. Currently '
                                              '{}'.format(units))
-        # Standard Name table agrees the unit should be unitless
-        elif std_name_unitless:
+        # Standard Name table agrees the unit should be dimensionless
+        elif std_name_units_dimensionless:
             valid_standard_units.assert_true(True, '')
 
         elif canonical_units is not None:
