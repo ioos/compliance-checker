@@ -165,7 +165,7 @@ class CheckSuite(object):
         checkers = self._get_valid_checkers(ds, checker_names)
 
         if len(checkers) == 0:
-            print("No valid checkers found for tests '%s'" % ",".join(checker_names))
+            print("No valid checkers found for tests '{}'".format(",".join(checker_names)))
 
         for checker_name, checker_class in checkers:
 
@@ -369,15 +369,15 @@ class CheckSuite(object):
         # Let's add the version number to the check name if it's missing
         check_name = self._get_check_versioned_name(check_name)
         check_url = self._get_check_url(check_name)
-        _len_ = 2*self.col_width
+        width = 2*self.col_width
         print('\n')
-        print("-" * _len_)
-        print('{:^{width}}'.format("IOOS Compliance Checker Report", width=_len_))
-        print('{:^{width}}'.format("%s check" % check_name, width=_len_))
-        print('{:^{width}}'.format('%s' % check_url, width=_len_))
-        print("-" * _len_)
+        print("-" * width)
+        print('{:^{width}}'.format("IOOS Compliance Checker Report", width=width))
+        print('{:^{width}}'.format(check_name, width=width))
+        print('{:^{width}}'.format(check_url, width=width))
+        print("-" * width)
         if issue_count > 0:
-            print('{:^{width}}'.format("Corrective Actions", width=_len_))
+            print('{:^{width}}'.format("Corrective Actions", width=width))
             plural = '' if issue_count == 1 else 's'
             print("{} has {} potential issue{}".format(os.path.basename(ds), issue_count, plural))
 
@@ -437,9 +437,10 @@ class CheckSuite(object):
                 # only print priority headers at top level, i.e. non-child
                 # datasets
                 if _top_level:
+                    width = 2 * self.col_width
                     print("\n")
-                    print('{:^{width}}'.format(level_name, width=_len_))
-                    print("-" * _len_)
+                    print('{:^{width}}'.format(level_name, width=width))
+                    print("-" * width)
 
                 data_issues = [process_table(res, check) for res in result[level]]
 
@@ -468,7 +469,7 @@ class CheckSuite(object):
         elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
             ds = SensorML(xml_doc)
         else:
-            raise ValueError("Unrecognized XML root element: %s" % xml_doc.tag)
+            raise ValueError("Unrecognized XML root element: {}".format(xml_doc.tag))
         return ds
 
     def generate_dataset(self, cdl_path):
