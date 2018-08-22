@@ -41,7 +41,7 @@ class CheckSuite(object):
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
 
     def __init__(self):
-        self.col_width = 40
+        self.col_width = 60
 
     @classmethod
     def load_all_available_checkers(cls):
@@ -116,6 +116,14 @@ class CheckSuite(object):
                                    self.checkers[check_name]._cc_spec_version))
         return check_name
 
+    def _get_check_url(self, check_name):
+        """
+        Return the check's reference URL if it exists. If not, return emtpy str.
+        @param check_name str: name of the check being run returned by
+                               _get_check_versioned_name()
+        """
+        return getattr(self.checkers[check_name], '_cc_url', '')
+
     def _get_valid_checkers(self, ds, checker_names):
         """
         Returns a filtered list of 2-tuples: (name, valid checker) based on the ds object's type and
@@ -157,7 +165,7 @@ class CheckSuite(object):
         checkers = self._get_valid_checkers(ds, checker_names)
 
         if len(checkers) == 0:
-            print("No valid checkers found for tests '%s'" % ",".join(checker_names))
+            print("No valid checkers found for tests '{}'".format(",".join(checker_names)))
 
         for checker_name, checker_class in checkers:
 
@@ -271,6 +279,7 @@ class CheckSuite(object):
         aggregates['source_name'] = source_name
         aggregates['scoreheader'] = self.checkers[check_name]._cc_display_headers
         aggregates['cc_spec_version'] = self.checkers[check_name]._cc_spec_version
+        aggregates['cc_url'] = self._get_check_url(aggregates['testname'])
         return aggregates
 
     def dict_output(self, check_name, groups, source_name, limit):
@@ -359,13 +368,16 @@ class CheckSuite(object):
 
         # Let's add the version number to the check name if it's missing
         check_name = self._get_check_versioned_name(check_name)
+        check_url = self._get_check_url(check_name)
+        width = 2*self.col_width
         print('\n')
-        print("-" * 80)
-        print('{:^80}'.format("IOOS Compliance Checker Report"))
-        print('{:^80}'.format("%s check" % check_name))
-        print("-" * 80)
+        print("-" * width)
+        print('{:^{width}}'.format("IOOS Compliance Checker Report", width=width))
+        print('{:^{width}}'.format(check_name, width=width))
+        print('{:^{width}}'.format(check_url, width=width))
+        print("-" * width)
         if issue_count > 0:
-            print('{:^80}'.format("Corrective Actions"))
+            print('{:^{width}}'.format("Corrective Actions", width=width))
             plural = '' if issue_count == 1 else 's'
             print("{} has {} potential issue{}".format(os.path.basename(ds), issue_count, plural))
 
@@ -425,9 +437,10 @@ class CheckSuite(object):
                 # only print priority headers at top level, i.e. non-child
                 # datasets
                 if _top_level:
+                    width = 2 * self.col_width
                     print("\n")
-                    print('{:^80}'.format(level_name))
-                    print("-" * 80)
+                    print('{:^{width}}'.format(level_name, width=width))
+                    print("-" * width)
 
                 data_issues = [process_table(res, check) for res in result[level]]
 
@@ -456,7 +469,7 @@ class CheckSuite(object):
         elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
             ds = SensorML(xml_doc)
         else:
-            raise ValueError("Unrecognized XML root element: %s" % xml_doc.tag)
+            raise ValueError("Unrecognized XML root element: {}".format(xml_doc.tag))
         return ds
 
     def generate_dataset(self, cdl_path):
@@ -493,6 +506,7 @@ class CheckSuite(object):
 
         :param str ds_str: URL to the remote resource
         '''
+
         if opendap.is_opendap(ds_str):
             return Dataset(ds_str)
         else:

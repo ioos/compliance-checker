@@ -7,7 +7,14 @@
     </div>
   </div>
   <div class="col-md-12">
-    <h3>{{testname}}</h3>
+    <h3>
+      {% if cc_url %}
+        <a href={{cc_url}} target="_blank">{{testname}}</a>
+      {% else %}
+        {{testname}}
+      {% endif %}
+    </h3>
+    <!--<a href={{cc_url}}>Reference Page</a>-->
   </div>
   <div class="col-md-12">
     <h4>Corrective Actions</h4>
