@@ -265,6 +265,9 @@ class StandardNameTable(object):
         if cached_location:
             with io.open(cached_location, 'r', encoding='utf-8') as fp:
                 resource_text = fp.read()
+        elif os.environ.get('CF_STANDARD_NAME_TABLE') and os.path.exists(os.environ['CF_STANDARD_NAME_TABLE']):
+            with io.open(os.environ['CF_STANDARD_NAME_TABLE'], 'r', encoding='utf-8') as fp:
+                resource_text = fp.read()
         else:
             resource_text = get_data("compliance_checker", "data/cf-standard-name-table.xml")
 
