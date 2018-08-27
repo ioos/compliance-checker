@@ -265,6 +265,7 @@ $ compliance-checker -d 35
 Downloading cf-standard-names table version 35 from: http://cfconventions.org/Data/cf-standard-names/35/src/cf-standard-name-table.xml
 ```
 
+Alternatively, you can specify an absolute path to a standard name table you may have locally in an environment variable named CF_STANDARD_NAME_TABLE and the compliance checker will use that version instead.
 
 
 ## Python Usage
