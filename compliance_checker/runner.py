@@ -66,6 +66,9 @@ class ComplianceChecker(object):
 
             score_groups = cs.run(ds, [] if skip_checks is None else skip_checks,
                                 *checker_names)
+            # TODO: consider wrapping in a proper context manager instead
+            if hasattr(ds, 'close'):
+                ds.close()
 
             if not score_groups:
                 raise ValueError("No checks found, please check the name of the checker(s) and that they are installed")
