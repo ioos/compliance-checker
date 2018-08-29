@@ -6,6 +6,14 @@ def readme():
     with open('README.md') as f:
         return f.read()
 
+def pip_requirements(fname='requirements.txt'):
+    with open(fname, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            reqs.append(line)
+    return reqs
 
 reqs = [line.strip() for line in open('requirements.txt')]
 
@@ -19,7 +27,7 @@ setup(
     author_email         = "dave@axiomdatascience.com",
     url                  = "https://github.com/ioos/compliance-checker",
     packages             = find_packages(),
-    install_requires     = reqs,
+    install_requires     = pip_requirements(),
     tests_require        = ['pytest'],
     classifiers          = [
         'Development Status :: 5 - Production/Stable',
