@@ -16,7 +16,6 @@ requirements:
     - pip
   run:
     - python
-    - cython
     - setuptools
     - cf_units >=2
     - isodate >=0.5.4
