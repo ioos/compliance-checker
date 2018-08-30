@@ -43,7 +43,8 @@ def main():
                               " key, whereas the 'json_new' format has the dataset name(s) as the"
                               " main key in the output follow by any checks as subkeys.  Also, "
                               "'json' format can be only be run against one input file, whereas "
-                              "'json_new' can be run against multiple files."))
+                              "'json_new' can be run against multiple files."),
+                        choices=['text', 'html', 'json', 'json_new'])
 
     parser.add_argument('-o', '--output', default=[], action='append',
                         help=("Output filename(s).  If '-' is supplied, output to stdout."
@@ -103,14 +104,6 @@ def main():
     if not (output_len == 1 or output_len == len(args.dataset_location)):
         print('The number of output files must either be one or the same as the number of datasets', file=sys.stderr)
         sys.exit(2)
-
-    # Check the output formats
-    format_choices = ['text', 'html', 'json', 'json_new']
-    for out_format in args.format:
-        if out_format not in format_choices:
-            print(("Error: argument -f/--format: invalid choice: '{}'"
-                   " (choose from 'text', 'html', 'json', 'json_new')".format(out_format)))
-            sys.exit(2)
 
     # Run the compliance checker
     # 2 modes, concatenated output file or multiple output files
