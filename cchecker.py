@@ -94,7 +94,7 @@ def main():
 
     if len(args.dataset_location) == 0:
         parser.print_help()
-        return 0
+        return 1
 
     # Check the number of output files
     if not args.output:
