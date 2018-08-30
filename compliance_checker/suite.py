@@ -52,7 +52,7 @@ class CheckSuite(object):
         """
         if not hasattr(cls, 'suite_generators'):
             gens = working_set.iter_entry_points('compliance_checker.generators')
-            cls.suite_generators = [x.load() for x in gens]
+            cls.suite_generators = [x.load(require=False) for x in gens]
 
         return cls.suite_generators
 
