@@ -99,3 +99,4 @@ ENV/
 
 # netCDF Files
 *.nc
+conda-requirements.txt

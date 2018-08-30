@@ -52,7 +52,7 @@ class CheckSuite(object):
         """
         if not hasattr(cls, 'suite_generators'):
             gens = working_set.iter_entry_points('compliance_checker.generators')
-            cls.suite_generators = [x.load() for x in gens]
+            cls.suite_generators = [x.resolve() for x in gens]
 
         return cls.suite_generators
 
@@ -82,7 +82,7 @@ class CheckSuite(object):
         """
         for x in working_set.iter_entry_points('compliance_checker.suites'):
             try:
-                xl = x.load()
+                xl = x.resolve()
                 cls.checkers[':'.join((xl._cc_spec, xl._cc_spec_version))] = xl
             # TODO: remove this once all checkers move over to the new
             #       _cc_spec, _cc_spec_version

@@ -47,21 +47,15 @@ before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set always_yes yes --set changeps1 no --set show_channel_urls true
   - conda update conda
+  - conda config --remove channels defaults --force
   - conda config --add channels conda-forge --force
-  - if [[ "$TRAVIS_PYTHON_VERSION" < "3.2" ]]; then
-      install_file='conda-requirements_pre3_2.txt' ;
-    else
-      install_file='conda-requirements.txt' ;
-    fi;
-    conda create --name TEST python=$TRAVIS_PYTHON_VERSION --file "$install_file" --file test_requirements.txt
+  - python gen_conda_requirements.py --groups requirements.txt --py${TRAVIS_PYTHON_VERSION:0:1} > conda-requirements.txt;
+  - conda create --name TEST python=$TRAVIS_PYTHON_VERSION --file conda-requirements.txt --file test_requirements.txt
   - source activate TEST
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      conda install --yes httpretty ;
-    fi
 
 # Test source distribution.
 install:
-    - python setup.py sdist && version=$(python setup.py --version) && pushd dist  && pip install compliance-checker-${version}.tar.gz && popd
+    - python setup.py sdist && version=$(python setup.py --version) && pushd dist  && pip install compliance-checker-${version}.tar.gz --no-deps && popd
 
 script:
   - if [[ $TEST_TARGET == "default" ]]; then
