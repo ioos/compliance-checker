@@ -82,7 +82,7 @@ class CheckSuite(object):
         """
         for x in working_set.iter_entry_points('compliance_checker.suites'):
             try:
-                xl = x.load()
+                xl = x.load(require=False)
                 cls.checkers[':'.join((xl._cc_spec, xl._cc_spec_version))] = xl
             # TODO: remove this once all checkers move over to the new
             #       _cc_spec, _cc_spec_version
