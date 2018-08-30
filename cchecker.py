@@ -92,6 +92,10 @@ def main():
     if args.download_standard_names:
         download_cf_standard_name_table(args.download_standard_names)
 
+    if len(args.dataset_location) == 0:
+        parser.print_help()
+        return 0
+
     # Check the number of output files
     if not args.output:
         args.output = '-'
