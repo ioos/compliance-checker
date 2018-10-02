@@ -5,39 +5,39 @@ sudo: false
 matrix:
   fast_finish: true
   include:
-  - python: 2.7
-    env: TEST_TARGET=default
-  - python: 3.5
-    env: TEST_TARGET=default
-  - python: 3.6
-    env: TEST_TARGET=default
-  - python: 3.6
-    env: TEST_TARGET=coding_standards
-  - python: 3.6
-    env: TEST_TARGET=cc-plugin-glider
-  - python: 3.6
-    env: TEST_TARGET=cc-plugin-ncei
-  - python: 3.6
-    env: TEST_TARGET=cc-plugin-sgrid
-  - python: 3.6
-    env: TEST_TARGET=cc-checker-ugrid
+    - name: "default-python2"
+      env: TEST_TARGET=default PY=2.7
+    - name: "default-python3"
+      env: TEST_TARGET=default PY=3.7
+    - name: "integration-python2"
+      env: TEST_TARGET=integration PY=2.7
+    - name: "integration-python3"
+      env: TEST_TARGET=integration PY=3.7
+    - name: "coding_standards"
+      env: TEST_TARGET=coding_standards PY=3.7
+    - name: "glider plugin"
+      env: TEST_TARGET=cc-plugin-glider PY=3.7
+    - name: "ncei plugin"
+      env: TEST_TARGET=cc-plugin-ncei PY=3.7
+    - name: "sgrid plugin"
+      env: TEST_TARGET=cc-plugin-sgrid PY=3.7
+    - name: "ugrid plugin"
+      env: TEST_TARGET=cc-checker-ugrid PY=3.7
   allow_failures:
-  - python: 3.6
-    env: TEST_TARGET=coding_standards
-  - python: 2.7
-    env: TEST_TARGET=integration
-  - python: 3.5
-    env: TEST_TARGET=integration
-  - python: 3.6
-    env: TEST_TARGET=integration
-  - python: 3.6
-    env: TEST_TARGET=cc-plugin-glider
-  - python: 3.6
-    env: TEST_TARGET=cc-plugin-ncei
-  - python: 3.6
-    env: TEST_TARGET=cc-plugin-sgrid
-  - python: 3.6
-    env: TEST_TARGET=cc-checker-ugrid
+    - name: "integration-python2"
+      env: TEST_TARGET=integration PY=2.7
+    - name: "integration-python3"
+      env: TEST_TARGET=integration PY=3.7
+    - name: "coding_standards"
+      env: TEST_TARGET=coding_standards PY=3.7
+    - name: "glider plugin"
+      env: TEST_TARGET=cc-plugin-glider PY=3.7
+    - name: "ncei plugin"
+      env: TEST_TARGET=cc-plugin-ncei PY=3.7
+    - name: "sgrid plugin"
+      env: TEST_TARGET=cc-plugin-sgrid PY=3.7
+    - name: "ugrid plugin"
+      env: TEST_TARGET=cc-checker-ugrid PY=3.7
 
 before_install:
   - wget http://bit.ly/miniconda -O miniconda.sh
@@ -47,8 +47,8 @@ before_install:
   - conda update conda
   - conda config --remove channels defaults --force
   - conda config --add channels conda-forge --force
-  - python gen_conda_requirements.py --groups requirements.txt --py${TRAVIS_PYTHON_VERSION:0:1} > conda-requirements.txt;
-  - conda create --name TEST python=$TRAVIS_PYTHON_VERSION --file conda-requirements.txt --file test_requirements.txt
+  - python gen_conda_requirements.py --groups requirements.txt --py${PY:0:1} > conda-requirements.txt;
+  - conda create --name TEST python=$PY --file conda-requirements.txt --file test_requirements.txt
   - source activate TEST
 
 # Test source distribution.
