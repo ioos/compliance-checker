@@ -6,12 +6,13 @@ import unittest
 import os
 
 static_files = {
-    '2dim'                       : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
-    'bad_region'                 : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
-    'bad_data_type'              : resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
-    'test_cdl'                   : resource_filename('compliance_checker', 'tests/data/test_cdl.cdl'),
-    'test_cdl_nc'                : resource_filename('compliance_checker', 'tests/data/test_cdl_nc_file.nc'),
-    'empty'                    : resource_filename('compliance_checker', 'tests/data/non-comp/empty.file'),
+    '2dim'         : resource_filename('compliance_checker', 'tests/data/2dim-grid.nc'),
+    'bad_region'   : resource_filename('compliance_checker', 'tests/data/bad_region.nc'),
+    'bad_data_type': resource_filename('compliance_checker', 'tests/data/bad_data_type.nc'),
+    'test_cdl'     : resource_filename('compliance_checker', 'tests/data/test_cdl.cdl'),
+    'test_cdl_nc'  : resource_filename('compliance_checker', 'tests/data/test_cdl_nc_file.nc'),
+    'empty'        : resource_filename('compliance_checker', 'tests/data/non-comp/empty.file'),
+    'ru07'         : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc')
 }
 
 
@@ -64,6 +65,33 @@ class TestSuite(unittest.TestCase):
         score_groups = self.cs.run(ds, ['check_high'], 'acdd')
         assert all(sg.name not in {'Conventions', 'title', 'keywords',
                                    'summary'} for sg in score_groups['acdd'][0])
+
+    def test_skip_check_level(self):
+        """Checks level limited skip checks"""
+        ds = self.cs.load_dataset(static_files['ru07'])
+        score_groups = self.cs.run(ds, ['check_flags:A',
+                                        'check_convention_possibly_var_attrs:M',
+                                        'check_standard_name:L'], 'cf')
+
+        name_set = {sg.name for sg in score_groups['cf'][0]}
+        # flattened set of messages
+        msg_set = {msg for sg in score_groups['cf'][0] for msg in sg.msgs}
+
+        expected_excluded_names = {'§3.5 flag_meanings for lat',
+                                   '§3.5 flag_meanings for lon',
+                                   '§3.5 lat is a valid flags variable',
+                                   '§3.5 lat is a valid flags variable',
+                                   '§3.5 lon is a valid flags variable'}
+
+        self.assertTrue(len(expected_excluded_names & name_set) == 0)
+
+        # should skip references
+        ref_msg = 'references global attribute should be a non-empty string'
+        self.assertTrue(ref_msg not in msg_set)
+        # check_standard_name is high priority, but we requested only low,
+        # so the standard_name check should still exist
+        standard_name_hdr = '§3.3 Variable salinity has valid standard_name attribute'
+        self.assertTrue(standard_name_hdr in name_set)
 
     def test_group_func(self):
         # This is checking for issue #183, where group_func results in

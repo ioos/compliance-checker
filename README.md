@@ -140,7 +140,15 @@ optional arguments:
                         Normal, or Lenient. Defaults to Normal.
   --verbose, -v         Increase output. May be specified up to three times.
   --skip-checks SKIP_CHECKS, -s SKIP_CHECKS
-                        Specifies tests to skip
+                        Specifies tests to skip. Can take the form of either
+                        `<check_name>` or `<check_name>:<skip_level>`.  The
+                        first form skips any checks matching the name.  In the
+                        second form <skip_level> may be specified as "A", "M",
+                        or "L".  "A" skips all checks and is equivalent to
+                        calling the first form. "M" will only show high
+                        priority output from the given check and will skip
+                        medium and low.  "L" will show both high and medium
+                        priority issues, while skipping low priority issues.
   -f {text,html,json,json_new}, --format {text,html,json,json_new}
                         Output format. The difference between the 'json' and
                         the 'json_new' formats is that the 'json' format has

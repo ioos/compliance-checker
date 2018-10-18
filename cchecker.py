@@ -6,6 +6,7 @@ import sys
 from compliance_checker.runner import ComplianceChecker, CheckSuite
 from compliance_checker.cf.util import download_cf_standard_name_table
 from compliance_checker import __version__
+from textwrap import dedent
 
 
 def main():
@@ -33,7 +34,20 @@ def main():
                         default=0)
 
     parser.add_argument('--skip-checks', '-s',
-                        help="Specifies tests to skip",
+                        help=dedent("""
+                                    Specifies tests to skip. Can take the form
+                                    of either `<check_name>` or
+                                    `<check_name>:<skip_level>`.  The first
+                                    form skips any checks matching the name.
+                                    In the second form <skip_level> may be
+                                    specified as "A", "M", or "L".  "A" skips
+                                    all checks and is equivalent to calling
+                                    the first form. "M" will only show high
+                                    priority output from the given check and
+                                    will skip medium and low.  "L" will show
+                                    both high and medium priority issues, while
+                                    skipping low priority issues.
+                                    """),
                         action='append')
 
     parser.add_argument('-f', '--format', default=[], action='append',
