@@ -40,6 +40,7 @@ if sys.stderr.encoding is None:
 class CheckSuite(object):
 
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
+    templates_root = 'compliance_checker'  # modify to load alternative Jinja2 templates
 
     def __init__(self):
         self.col_width = 60
@@ -352,7 +353,7 @@ class CheckSuite(object):
         @param limit           Integer value for limiting output
         '''
         from jinja2 import Environment, PackageLoader
-        self.j2 = Environment(loader=PackageLoader('compliance_checker', 'data/templates'))
+        self.j2 = Environment(loader=PackageLoader(self.templates_root, 'data/templates'))
         template = self.j2.get_template('ccheck.html.j2')
 
         template_vars = self.build_structure(check_name, groups, source_name, limit)
