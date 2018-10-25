@@ -77,11 +77,11 @@ class TestSuite(unittest.TestCase):
         # flattened set of messages
         msg_set = {msg for sg in score_groups['cf'][0] for msg in sg.msgs}
 
-        expected_excluded_names = {'§3.5 flag_meanings for lat',
-                                   '§3.5 flag_meanings for lon',
-                                   '§3.5 lat is a valid flags variable',
-                                   '§3.5 lat is a valid flags variable',
-                                   '§3.5 lon is a valid flags variable'}
+        expected_excluded_names = {u'§3.5 flag_meanings for lat',
+                                   u'§3.5 flag_meanings for lon',
+                                   u'§3.5 lat is a valid flags variable',
+                                   u'§3.5 lat is a valid flags variable',
+                                   u'§3.5 lon is a valid flags variable'}
 
         self.assertTrue(len(expected_excluded_names & name_set) == 0)
 
