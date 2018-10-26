@@ -1,3 +1,4 @@
+# coding=utf-8
 from pkg_resources import resource_filename
 from compliance_checker.suite import CheckSuite
 from compliance_checker.base import Result, BaseCheck, GenericFile
@@ -86,11 +87,11 @@ class TestSuite(unittest.TestCase):
         self.assertTrue(len(expected_excluded_names & name_set) == 0)
 
         # should skip references
-        ref_msg = 'references global attribute should be a non-empty string'
+        ref_msg = u'references global attribute should be a non-empty string'
         self.assertTrue(ref_msg not in msg_set)
         # check_standard_name is high priority, but we requested only low,
         # so the standard_name check should still exist
-        standard_name_hdr = '§3.3 Variable salinity has valid standard_name attribute'
+        standard_name_hdr = u'§3.3 Variable salinity has valid standard_name attribute'
         self.assertTrue(standard_name_hdr in name_set)
 
     def test_group_func(self):
