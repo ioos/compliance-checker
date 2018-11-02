@@ -17,7 +17,10 @@ from compliance_checker.base import fix_return_value, Result, GenericFile
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from compliance_checker.protocols import opendap, netcdf, cdl
+from compliance_checker.base import BaseCheck
 from compliance_checker import MemoizedDataset
+from collections import defaultdict
+import warnings
 try:
     from urlparse import urlparse
 except ImportError:
@@ -123,16 +126,36 @@ class CheckSuite(object):
         """
         meths = inspect.getmembers(checkclass, inspect.ismethod)
         # return all check methods not among the skipped checks
-        return [x[1] for x in meths if x[0].startswith("check_") and
-                x[0] not in skip_checks]
+        returned_checks = []
+        for fn_name, fn_obj in meths:
+            if (fn_name.startswith("check_") and
+                skip_checks[fn_name] != BaseCheck.HIGH):
+                returned_checks.append((fn_obj, skip_checks[fn_name]))
 
-    def _run_check(self, check_method, ds):
+        return returned_checks
+
+    def _run_check(self, check_method, ds, max_level):
+        """
+        Runs a check and appends a result to the
+        """
         val = check_method(ds)
 
         if isinstance(val, list):
-            return [fix_return_value(v, check_method.__func__.__name__, check_method, check_method.__self__) for v in val]
+            check_val = []
+            for v in val:
+                res = fix_return_value(v, check_method.__func__.__name__,
+                                       check_method, check_method.__self__)
+                if max_level is None or res.weight > max_level:
+                    check_val.append(res)
 
-        return [fix_return_value(val, check_method.__func__.__name__, check_method, check_method.__self__)]
+            return check_val
+        else:
+            check_val = fix_return_value(val, check_method.__func__.__name__,
+                                         check_method, check_method.__self__)
+            if max_level is None or check_val.weight > max_level:
+                return [check_val]
+            else:
+                return []
 
     def _get_check_versioned_name(self, check_name):
         """
@@ -185,6 +208,39 @@ class CheckSuite(object):
 
         return valid
 
+
+    @classmethod
+    def _process_skip_checks(cls, skip_checks):
+        """
+        Processes an iterable of skip_checks with strings and returns a dict
+        with <check_name>: <max_skip_level> pairs
+        """
+
+        check_dict = defaultdict(lambda: None)
+        # A is for "all", "M" is for medium, "L" is for low
+        check_lookup = {'A': BaseCheck.HIGH,
+                        'M': BaseCheck.MEDIUM,
+                        'L': BaseCheck.LOW}
+
+        for skip_check_spec in skip_checks:
+            split_check_spec = skip_check_spec.split(':')
+            check_name = split_check_spec[0]
+            if len(split_check_spec) < 2:
+               check_max_level = BaseCheck.HIGH
+            else:
+                try:
+                    check_max_level = check_lookup[split_check_spec[1]]
+                except KeyError:
+                    warnings.warn("Skip specifier '{}' on check '{}' not found,"
+                                  " defaulting to skip entire check".format(split_check_spec[1], check_name))
+                    check_max_level = BaseCheck.HIGH
+
+            check_dict[check_name] = check_max_level
+
+        return check_dict
+
+
+
     def run(self, ds, skip_checks, *checker_names):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
@@ -195,6 +251,11 @@ class CheckSuite(object):
         ret_val = {}
         checkers = self._get_valid_checkers(ds, checker_names)
 
+        if skip_checks is not None:
+            skip_check_dict = CheckSuite._process_skip_checks(skip_checks)
+        else:
+            skip_check_dict = defaultdict(lambda: None)
+
         if len(checkers) == 0:
             print("No valid checkers found for tests '{}'".format(",".join(checker_names)))
 
@@ -203,13 +264,13 @@ class CheckSuite(object):
             checker = checker_class()
             checker.setup(ds)
 
-            checks = self._get_checks(checker, skip_checks)
+            checks = self._get_checks(checker, skip_check_dict)
             vals = []
             errs = {}   # check method name -> (exc, traceback)
 
-            for c in checks:
+            for c, max_level in checks:
                 try:
-                    vals.extend(self._run_check(c, ds))
+                    vals.extend(self._run_check(c, ds, max_level))
                 except Exception as e:
                     errs[c.__func__.__name__] = (e, sys.exc_info()[2])
 

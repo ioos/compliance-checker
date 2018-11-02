@@ -30,6 +30,7 @@ class ComplianceChecker(object):
     Ties together the entire compliance checker framework, is used from
     the command line or can be used via import.
     """
+    # Consider using __init__ instead of so many classmethods
     @classmethod
     def run_checker(cls, ds_loc, checker_names, verbose, criteria,
                     skip_checks=None, output_filename='-',
@@ -64,8 +65,7 @@ class ComplianceChecker(object):
         for loc in locs:
             ds = cs.load_dataset(loc)
 
-            score_groups = cs.run(ds, [] if skip_checks is None else skip_checks,
-                                *checker_names)
+            score_groups = cs.run(ds, skip_checks, *checker_names)
             # TODO: consider wrapping in a proper context manager instead
             if hasattr(ds, 'close'):
                 ds.close()
