@@ -26,10 +26,8 @@ from datetime import datetime
 import requests
 import codecs
 from pkg_resources import working_set
-import tabulate
 
 
-tabulate.PRESERVE_WHITESPACE = True
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
