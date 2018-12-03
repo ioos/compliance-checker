@@ -471,11 +471,17 @@ class CheckSuite(object):
 
                 data_issues = [process_table(res, check) for res in result[level]]
 
+                has_printed = False
                 for issue, reasons in data_issues:
+                    # if this isn't the first printed issue, add a newline
+                    # separating this and the previous level
+                    if has_printed:
+                        print("")
                     reason_str = "\n".join('* {}'.format(r) for r in reasons)
                     proc_str = "{}\n{}".format(issue, reason_str)
                     print(proc_str)
                     proc_strs.append(proc_str)
+                    has_printed = True
         return "\n".join(proc_strs)
 
 
