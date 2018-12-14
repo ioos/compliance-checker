@@ -39,7 +39,7 @@ class CheckSuite(object):
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
 
     def __init__(self):
-        self.col_width = 60
+        self.col_width = 40
 
     @classmethod
     def _get_generator_plugins(cls):
@@ -396,7 +396,7 @@ class CheckSuite(object):
         # Let's add the version number to the check name if it's missing
         check_name = self._get_check_versioned_name(check_name)
         check_url = self._get_check_url(check_name)
-        width = 2*self.col_width
+        width = 2 * self.col_width
         print('\n')
         print("-" * width)
         print('{:^{width}}'.format("IOOS Compliance Checker Report", width=width))
