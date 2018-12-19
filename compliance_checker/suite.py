@@ -27,13 +27,10 @@ except ImportError:
     from urllib.parse import urlparse
 from datetime import datetime
 import requests
-import textwrap
 import codecs
 from pkg_resources import working_set
-import tabulate
 
 
-tabulate.PRESERVE_WHITESPACE = True
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
@@ -46,7 +43,7 @@ class CheckSuite(object):
     templates_root = 'compliance_checker'  # modify to load alternative Jinja2 templates
 
     def __init__(self):
-        self.col_width = 60
+        self.col_width = 40
 
     @classmethod
     def _get_generator_plugins(cls):
@@ -461,7 +458,7 @@ class CheckSuite(object):
         # Let's add the version number to the check name if it's missing
         check_name = self._get_check_versioned_name(check_name)
         check_url = self._get_check_url(check_name)
-        width = 2*self.col_width
+        width = 2 * self.col_width
         print('\n')
         print("-" * width)
         print('{:^{width}}'.format("IOOS Compliance Checker Report", width=width))
@@ -495,14 +492,11 @@ class CheckSuite(object):
         result = {key: [v for v in valuesiter if v.value[0] != v.value[1]]
                     for key, valuesiter in itertools.groupby(groups_sorted,
                                                              key=sort_fn)}
-        wrapper = textwrap.TextWrapper(initial_indent='',
-                                       width=max(int(self.col_width / 2**indent), self.col_width / 2))
-
         priorities = self.checkers[check]._cc_display_headers
         def process_table(res, check):
-            issue = wrapper.fill("{}:".format(res.name))
+            issue = res.name
             if not res.children:
-                reason = wrapper.fill('\n'.join(res.msgs))
+                reasons = res.msgs
             else:
                 child_reasons = self.reasoning_routine(res.children,
                                                        indent + 1,
@@ -510,11 +504,12 @@ class CheckSuite(object):
                                                         _top_level=False)
                 # there shouldn't be messages if there are children
                 # is this a valid assumption?
-                reason = "\n{}".format(child_reasons)
+                reasons = child_reasons
 
-            return issue, reason
+            return issue, reasons
 
         # iterate up to the min priority requested
+        proc_strs = ""
         for level in range(3, priority_flag - 1, -1):
             level_name = priorities.get(level, level)
             # print headers
@@ -536,13 +531,17 @@ class CheckSuite(object):
 
                 data_issues = [process_table(res, check) for res in result[level]]
 
-                if _top_level:
-                    proc_str = tabulate.tabulate(data_issues, ('Name', 'Reasoning'),
-                                        'plain')
+                has_printed = False
+                for issue, reasons in data_issues:
+                    # if this isn't the first printed issue, add a newline
+                    # separating this and the previous level
+                    if has_printed:
+                        print("")
+                    reason_str = "\n".join('* {}'.format(r) for r in reasons)
+                    proc_str = "{}\n{}".format(issue, reason_str)
                     print(proc_str)
-                else:
-                    proc_str = tabulate.tabulate(data_issues, tablefmt='plain')
-                proc_strs.append(proc_str)
+                    proc_strs.append(proc_str)
+                    has_printed = True
         return "\n".join(proc_strs)
 
 
