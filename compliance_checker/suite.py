@@ -133,7 +133,11 @@ class CheckSuite(object):
 
     def _run_check(self, check_method, ds, max_level):
         """
-        Runs a check and appends a result to the
+        Runs a check and appends a result to the values list.
+        @param bound method check_method: a given check method
+        @param netCDF4 dataset ds
+        @param int max_level: check level
+        @return list: list of Result objects
         """
         val = check_method(ds)
 
@@ -489,10 +493,13 @@ class CheckSuite(object):
 
         sort_fn = lambda x: x.weight
         groups_sorted = sorted(groups, key=sort_fn, reverse=True)
+
+        # create dict of the groups -> {level: [reasons]}
         result = {key: [v for v in valuesiter if v.value[0] != v.value[1]]
                     for key, valuesiter in itertools.groupby(groups_sorted,
                                                              key=sort_fn)}
         priorities = self.checkers[check]._cc_display_headers
+
         def process_table(res, check):
             issue = res.name
             if not res.children:

@@ -62,7 +62,7 @@ class ComplianceChecker(object):
         if isinstance(output_format, six.string_types):
             output_format = [output_format]
 
-        for loc in locs:
+        for loc in locs: # loop through each dataset and run specified checks
             ds = cs.load_dataset(loc)
 
             score_groups = cs.run(ds, skip_checks, *checker_names)
@@ -137,6 +137,7 @@ class ComplianceChecker(object):
                 score_list, points, out_of = cs.standard_output(ds, limit,
                                                                 checker,
                                                                 groups)
+                # send list of grouped result objects to stdout & reasoning_routine
                 cs.standard_output_generation(groups, limit, points, out_of,
                                               check=checker)
         return groups

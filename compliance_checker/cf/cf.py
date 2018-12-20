@@ -893,7 +893,7 @@ class CFBaseCheck(BaseCheck):
             ret_val.append(valid_units)
 
             units_attr_is_string = TestCtx(BaseCheck.MEDIUM,
-                                "§3.1 Variable {}'s units attribute is a string".format(variable.name))
+                                "§3.1 String-type variable attribute")
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(isinstance(units, basestring),
                                                 "'units' attribute must be a string compatible with UDUNITS"):
@@ -952,7 +952,7 @@ class CFBaseCheck(BaseCheck):
                                    standard_name is None)
 
         # 1) Units must exist
-        valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Variable {} contains valid CF units'.format(variable_name))
+        valid_units = TestCtx(BaseCheck.HIGH, '§3.1 Valid CF Variable Units')
         valid_units.assert_true(should_be_dimensionless or units is not None,
                                 'units attribute is required for {} when variable is not a dimensionless quantity'.format(variable_name))
 
@@ -989,7 +989,7 @@ class CFBaseCheck(BaseCheck):
                                    std_name_units_dimensionless)
 
         valid_udunits = TestCtx(BaseCheck.LOW,
-                                "§3.1 Variable {}'s units are contained in UDUnits".format(variable_name))
+                                "§3.1 Variable units are contained in UDUnits")
         are_udunits = (units is not None and util.units_known(units))
         valid_udunits.assert_true(should_be_dimensionless or are_udunits,
                                   'units for {}, "{}" are not recognized by udunits'.format(variable_name, units))
@@ -1008,8 +1008,10 @@ class CFBaseCheck(BaseCheck):
         units = getattr(variable, 'units', None)
         standard_name = getattr(variable, 'standard_name', None)
 
+
+        # TODO NOTE this one might have to be revisited -- take std name out?
         valid_standard_units = TestCtx(BaseCheck.HIGH,
-                                       "§3.1 Variable {}'s units are appropriate for "
+                                       "§3.1 Variable units appropriate for "
                                        "the standard_name {}".format(variable_name,
                                                                      standard_name or "unspecified"))
 
@@ -1112,7 +1114,7 @@ class CFBaseCheck(BaseCheck):
             standard_name = getattr(ncvar, 'standard_name', None)
             standard_name, standard_name_modifier = self._split_standard_name(standard_name)
             long_name = getattr(ncvar, 'long_name', None)
-            long_or_std_name = TestCtx(BaseCheck.HIGH, '§3.2 Either long_name or standard_name is highly recommended for variable {}'.format(name))
+            long_or_std_name = TestCtx(BaseCheck.HIGH, '§3.2 Long name')
             if long_name is not None:
                 long_name_present = True
                 long_or_std_name.assert_true(isinstance(long_name, basestring),
@@ -1181,7 +1183,7 @@ class CFBaseCheck(BaseCheck):
 
         for ncvar in ds.get_variables_by_attributes(ancillary_variables=lambda x: x is not None):
             name = ncvar.name
-            valid_ancillary = TestCtx(BaseCheck.HIGH, "§3.4 Ancillary Variables defined by {}".format(name))
+            valid_ancillary = TestCtx(BaseCheck.HIGH, "§3.4 Ancillary Variables")
             ancillary_variables = ncvar.ancillary_variables
 
             valid_ancillary.assert_true(isinstance(ancillary_variables, basestring),
@@ -1241,7 +1243,7 @@ class CFBaseCheck(BaseCheck):
             flag_values = getattr(variable, "flag_values", None)
             flag_masks = getattr(variable, "flag_masks", None)
 
-            valid_flags_var = TestCtx(BaseCheck.HIGH, '§3.5 {} is a valid flags variable'.format(name))
+            valid_flags_var = TestCtx(BaseCheck.HIGH, '§3.5 Valid flag_* Variables')
             # Check that the variable defines mask or values
             valid_flags_var.assert_true(flag_values is not None or flag_masks is not None,
                                         "{} does not define either flag_masks or flag_values".format(name))
@@ -1263,9 +1265,9 @@ class CFBaseCheck(BaseCheck):
             if flag_values is not None and flag_masks is not None:
                 allv = list(map(lambda a, b: a & b == a, list(zip(flag_values, flag_masks))))
 
-                allvr = Result(BaseCheck.MEDIUM, all(allv), '§3.5 flags for {}'.format(name))
+                allvr = Result(BaseCheck.MEDIUM, all(allv), '§3.5 Flags Combined')
                 if not allvr.value:
-                    allvr.msgs = ["flag masks and flag values combined don't equal flag value"]
+                    allvr.msgs = ["flag masks and flag values for '{}' combined don't equal flag value".format(name)]
 
                 ret_val.append(allvr)
 
@@ -1288,11 +1290,11 @@ class CFBaseCheck(BaseCheck):
 
         flag_values = variable.flag_values
         flag_meanings = getattr(variable, 'flag_meanings', None)
-        valid_values = TestCtx(BaseCheck.HIGH, '§3.5 flag_values for {}'.format(name))
+        valid_values = TestCtx(BaseCheck.HIGH, '§3.5 flag_values attribute')
 
         # flag_values must be a list of values, not a string or anything else
         valid_values.assert_true(isinstance(flag_values, np.ndarray),
-                                 "flag_values must be an array of values not {}".format(type(flag_values)))
+                                 "{}'s flag_values must be an array of values not {}".format(name, type(flag_values)))
 
         # We can't perform any more checks
         if not isinstance(flag_values, np.ndarray):
@@ -1301,7 +1303,7 @@ class CFBaseCheck(BaseCheck):
         # the flag values must be independent, no repeating values
         flag_set = set(flag_values)
         valid_values.assert_true(len(flag_set) == len(flag_values),
-                                 "flag_values must be independent and can not be repeated")
+                                 "{}'s flag_values must be independent and can not be repeated".format(name))
 
         # the data type for flag_values should be the same as the variable
         valid_values.assert_true(variable.dtype == flag_values.dtype,
@@ -1311,7 +1313,7 @@ class CFBaseCheck(BaseCheck):
         if isinstance(flag_meanings, basestring):
             flag_meanings = flag_meanings.split()
             valid_values.assert_true(len(flag_meanings) == len(flag_values),
-                                     "flag_meanings and flag_values should have the same number "
+                                     "{}'s flag_meanings and flag_values should have the same number ".format(name)+\
                                      "of elements.")
 
         return valid_values.to_result()
@@ -1334,10 +1336,10 @@ class CFBaseCheck(BaseCheck):
         flag_masks = variable.flag_masks
         flag_meanings = getattr(ds, 'flag_meanings', None)
 
-        valid_masks = TestCtx(BaseCheck.HIGH, '§3.5 flag_masks for {}'.format(name))
+        valid_masks = TestCtx(BaseCheck.HIGH, '§3.5 flag_masks attribute')
 
         valid_masks.assert_true(isinstance(flag_masks, np.ndarray),
-                                "flag_masks must be an array of values not {}".format(type(flag_masks)))
+                                "{}'s flag_masks must be an array of values not {}".format(name, type(flag_masks)))
 
         if not isinstance(flag_masks, np.ndarray):
             return valid_masks.to_result()
@@ -1350,12 +1352,12 @@ class CFBaseCheck(BaseCheck):
                    np.issubdtype(variable.dtype, 'S') or
                    np.issubdtype(variable.dtype, 'b'))
 
-        valid_masks.assert_true(type_ok, "{}'s data type must be capable of bit-field expression")
+        valid_masks.assert_true(type_ok, "{}'s data type must be capable of bit-field expression".format(name))
 
         if isinstance(flag_meanings, basestring):
             flag_meanings = flag_meanings.split()
             valid_masks.assert_true(len(flag_meanings) == len(flag_masks),
-                                    "flag_meanings and flag_masks should have the same number "
+                                    "{} flag_meanings and flag_masks should have the same number ".format(name)+\
                                     "of elements.")
 
         return valid_masks.to_result()
@@ -1374,27 +1376,27 @@ class CFBaseCheck(BaseCheck):
         '''
         variable = ds.variables[name]
         flag_meanings = getattr(variable, 'flag_meanings', None)
-        valid_meanings = TestCtx(BaseCheck.HIGH, '§3.5 flag_meanings for {}'.format(name))
+        valid_meanings = TestCtx(BaseCheck.HIGH, '§3.5 flag_meanings')
 
         valid_meanings.assert_true(flag_meanings is not None,
-                                   "flag_meanings attribute is required for flag variables")
+                                   "{}'s flag_meanings attribute is required for flag variables".format(name))
 
         valid_meanings.assert_true(isinstance(flag_meanings, basestring),
-                                   "flag_meanings attribute must be a string")
+                                   "{}'s flag_meanings attribute must be a string".format(name))
 
         # We can't perform any additional checks if it's not a string
         if not isinstance(flag_meanings, basestring):
             return valid_meanings.to_result()
 
         valid_meanings.assert_true(len(flag_meanings) > 0,
-                                   "flag_meanings can't be empty")
+                                   "{}'s flag_meanings can't be empty".format(name))
 
         flag_regx = regex.compile("^[0-9A-Za-z_\-.+@]+$")
         meanings = flag_meanings.split()
         for meaning in meanings:
             if flag_regx.match(meaning) is None:
                 valid_meanings.assert_true(False,
-                                           "flag_meanings attribute defined an illegal flag meaning "
+                                           "{}'s flag_meanings attribute defined an illegal flag meaning ".format(name)+\
                                            "{}".format(meaning))
         return valid_meanings.to_result()
 
@@ -1460,17 +1462,17 @@ class CFBaseCheck(BaseCheck):
         variable = ds.variables[name]
         axis = variable.axis
 
-        valid_axis = TestCtx(BaseCheck.HIGH, '§4 {} contains a valid axis'.format(name))
+        valid_axis = TestCtx(BaseCheck.HIGH, '§4 Valid Axis')
         axis_is_string = isinstance(axis, basestring),
         valid_axis.assert_true(axis_is_string and len(axis) > 0,
-                               "axis attribute must be a non-empty string")
+                               "{}'s axis attribute must be a non-empty string".format(name))
 
         # If axis isn't a string we can't continue any checks
         if not axis_is_string or len(axis) == 0:
             return valid_axis.to_result()
 
         valid_axis.assert_true(axis in allowed_axis,
-                               "axis attribute must be T, X, Y, or Z, "
+                               "{}'s axis attribute must be T, X, Y, or Z, ".format(name)+\
                                "currently {}".format(axis))
 
         return valid_axis.to_result()
@@ -1527,13 +1529,13 @@ class CFBaseCheck(BaseCheck):
             axis = getattr(variable, 'axis', None)
 
             # Check that latitude defines units
-            valid_latitude = TestCtx(BaseCheck.HIGH, '§4.1 Latitude variable {} has required units attribute'.format(latitude))
+            valid_latitude = TestCtx(BaseCheck.HIGH, '§4.1 Latitude variable uses defined units')
             valid_latitude.assert_true(units is not None,
                                        "latitude variable '{}' must define units".format(latitude))
             ret_val.append(valid_latitude.to_result())
 
             # Check that latitude uses allowed units
-            allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Latitude variable {} uses recommended units'.format(latitude))
+            allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Latitude variable uses recommended units')
             if standard_name == 'grid_latitude':
                 e_n_units = cfutil.VALID_LAT_UNITS | cfutil.VALID_LON_UNITS
                 # check that the units aren't in east and north degrees units,
@@ -1556,13 +1558,13 @@ class CFBaseCheck(BaseCheck):
                        "".format(latitude))
                 recommended_units = Result(BaseCheck.LOW,
                                            True,
-                                           '§4.1 Latitude variable {} defines units using degrees_north'.format(latitude),
+                                           '§4.1 Latitude variable defines units using degrees_north',
                                            [msg])
                 ret_val.append(recommended_units)
 
             y_variables = ds.get_variables_by_attributes(axis='Y')
             # Check that latitude defines either standard_name or axis
-            definition = TestCtx(BaseCheck.MEDIUM, '§4.1 Latitude variable {} defines either standard_name or axis'.format(latitude))
+            definition = TestCtx(BaseCheck.MEDIUM, '§4.1 Latitude variable defines (standard_name | axis)')
             definition.assert_true(standard_name == 'latitude' or axis == 'Y' or y_variables != [],
                                    "latitude variable '{}' should define standard_name='latitude' or axis='Y'"
                                    "".format(latitude))
@@ -1621,13 +1623,13 @@ class CFBaseCheck(BaseCheck):
             axis = getattr(variable, 'axis', None)
 
             # Check that longitude defines units
-            valid_longitude = TestCtx(BaseCheck.HIGH, '§4.1 Longitude variable {} has required units attribute'.format(longitude))
+            valid_longitude = TestCtx(BaseCheck.HIGH, '§4.1 Longitude variable has required units attribute')
             valid_longitude.assert_true(units is not None,
                                         "longitude variable '{}' must define units".format(longitude))
             ret_val.append(valid_longitude.to_result())
 
             # Check that longitude uses allowed units
-            allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Longitude variable {} uses recommended units'.format(longitude))
+            allowed_units = TestCtx(BaseCheck.MEDIUM, '§4.1 Longitude variable uses recommended units')
             if standard_name == 'grid_longitude':
                 e_n_units = cfutil.VALID_LAT_UNITS | cfutil.VALID_LON_UNITS
                 # check that the units aren't in east and north degrees units,
@@ -1643,7 +1645,7 @@ class CFBaseCheck(BaseCheck):
             ret_val.append(allowed_units.to_result())
 
             # Check that longitude uses degrees_east
-            recommended_units = TestCtx(BaseCheck.LOW, '§4.1 Longitude variable {} defines units using degrees_east'.format(longitude))
+            recommended_units = TestCtx(BaseCheck.LOW, '§4.1 Longitude variable defines units using degrees_east')
             if standard_name == 'longitude' and units != 'degrees_east':
                 # This is only a recommendation and we won't penalize but we
                 # will include a recommended action.
@@ -1651,13 +1653,12 @@ class CFBaseCheck(BaseCheck):
                        "".format(longitude))
                 recommended_units = Result(BaseCheck.LOW,
                                            True,
-                                           '§4.1 Longitude variable {} defines units using degrees_east'.format(longitude),
-                                           [msg])
+                                           '§4.1 Longitude variable defines units using degrees_east', [msg])
                 ret_val.append(recommended_units)
 
             x_variables = ds.get_variables_by_attributes(axis='X')
             # Check that longitude defines either standard_name or axis
-            definition = TestCtx(BaseCheck.MEDIUM, '§4.1 Longitude variable {} defines either standard_name or axis'.format(longitude))
+            definition = TestCtx(BaseCheck.MEDIUM, '§4.1 Longitude variable defines either standard_name or axis')
             definition.assert_true(standard_name == 'longitude' or axis == 'Y' or x_variables != [],
                                    "longitude variable '{}' should define standard_name='longitude' or axis='X'"
                                    "".format(longitude))
@@ -1704,16 +1705,15 @@ class CFBaseCheck(BaseCheck):
                 standard_name in dimless_vertical_coordinates):
                 continue
 
-            valid_vertical_coord = TestCtx(BaseCheck.HIGH,
-                                           "§4.3.1 {} is a valid vertical coordinate"
-                                           "".format(name))
+            valid_vertical_coord = TestCtx(BaseCheck.HIGH, "§4.3.1 Valid vertical coordinate")
             valid_vertical_coord.assert_true(isinstance(units, basestring) and units,
-                                             "units must be defined for vertical coordinates, there is no default")
+                                             "{}'s units must be defined for vertical coordinates, "
+                                             "there is no default".format(name))
 
             if not util.units_convertible('bar', units):
                 valid_vertical_coord.assert_true(positive in ('up', 'down'),
-                                                 "vertical coordinates not defining pressure must include "
-                                                 "a positive attribute that is either 'up' or 'down'")
+                                                 "{}: vertical coordinates not defining pressure must include "
+                                                 "a positive attribute that is either 'up' or 'down'".format(name))
 
             # _check_valid_standard_units, part of the Chapter 3 checks,
             # already verifies that this coordinate has valid units
@@ -1789,11 +1789,11 @@ class CFBaseCheck(BaseCheck):
         standard_name = getattr(variable, 'standard_name', None)
         formula_terms = getattr(variable, 'formula_terms', None)
         valid_formula_terms = TestCtx(BaseCheck.HIGH,
-                                      '§4.3.2 {} has valid formula_terms'
-                                      ''.format(coord))
+                                      '§4.3.2 Valid formula_terms')
 
         valid_formula_terms.assert_true(isinstance(formula_terms, basestring) and formula_terms,
-                                        'formula_terms is a required attribute and must be a non-empty string')
+                                        '{}\'s formula_terms is a required attribute and must be a non-empty string'
+                                        ''.format(coord))
         # We can't check any more
         if not formula_terms:
             return valid_formula_terms.to_result()
@@ -1808,7 +1808,7 @@ class CFBaseCheck(BaseCheck):
         # get the variables named in the formula terms and check if any
         # are not present in the dataset
         missing_vars = sorted(set(m[1] for m in matches) - set(ds.variables))
-        missing_fmt = "The following variable(s) referenced in formula_terms are not present in the dataset variables: {}"
+        missing_fmt = "The following variable(s) referenced in formula_terms are not present in the dataset: {}".format(coord)
         valid_formula_terms.assert_true(len(missing_vars) == 0,
                                     missing_fmt.format(', '.join(missing_vars)))
         # try to reconstruct formula_terms by adding space in between the regex
@@ -1820,14 +1820,14 @@ class CFBaseCheck(BaseCheck):
 
         valid_formula_terms.assert_true(standard_name in
                                         dimless_vertical_coordinates,
-                                        "unknown standard_name for dimensionless vertical coordinate: {}"
-                                        "".format(standard_name))
+                                        "unknown standard_name '{}' for dimensionless vertical coordinate {}"
+                                        "".format(standard_name, coord))
         if standard_name not in dimless_vertical_coordinates:
             return valid_formula_terms.to_result()
 
         valid_formula_terms.assert_true(no_missing_terms(standard_name, terms),
-                                        "formula_terms are invalid for {}, please see appendix D of CF 1.6"
-                                        "".format(standard_name))
+                                        "{}'s formula_terms are invalid for {}, please see appendix D of CF 1.6"
+                                        "".format(coord, standard_name))
 
         return valid_formula_terms.to_result()
 
@@ -2026,14 +2026,13 @@ class CFBaseCheck(BaseCheck):
                 continue
 
             valid_aux_coords = TestCtx(BaseCheck.HIGH,
-                                       "§5.0 Auxiliary Coordinates of {} must have a subset of {}'s dimensions"
-                                       "".format(name, name))
+                                       "§5.0 Auxiliary Coordinates have correct dimensions subset")
 
             for aux_coord in coordinates.split():
                 valid_aux_coords.assert_true(aux_coord in ds.variables,
-                                             "auxiliary coordinate specified by the coordinates attribute, {}, "
+                                             "{}'s auxiliary coordinate specified by the coordinates attribute, {}, "
                                              "is not a variable in this dataset"
-                                             "".format(aux_coord))
+                                             "".format(name, aux_coord))
                 if aux_coord not in ds.variables:
                     continue
 
@@ -2076,7 +2075,7 @@ class CFBaseCheck(BaseCheck):
         ret_val = []
         geophysical_variables = self._find_geophysical_vars(ds)
         for name in geophysical_variables:
-            no_duplicates = TestCtx(BaseCheck.HIGH, '§5.0 Variable {} does not contain duplicate coordinates'.format(name))
+            no_duplicates = TestCtx(BaseCheck.HIGH, '§5.0 Variable does not contain duplicate coordinates')
             axis_map = cfutil.get_axis_map(ds, name)
             axes = []
             # For every coordinate associated with this variable, keep track of
@@ -2087,7 +2086,7 @@ class CFBaseCheck(BaseCheck):
                 for coordinate in coordinates:
                     axis_attr = getattr(ds.variables[coordinate], 'axis', None)
                     no_duplicates.assert_true(axis_attr is None or axis_attr not in axes,
-                                              "duplicate axis {} defined by {}".format(axis_attr, coordinate))
+                                              "'{}' has duplicate axis {} defined by {}".format(name, axis_attr, coordinate))
 
                     if axis_attr and axis_attr not in axes:
                         axes.append(axis_attr)
@@ -2118,8 +2117,8 @@ class CFBaseCheck(BaseCheck):
             if variable.ndim < 2:
                 continue
             not_matching = TestCtx(BaseCheck.MEDIUM,
-                                   '§5.0 multidimensional coordinate {} should not have the same '
-                                   'name as dimension'.format(coord))
+                                   '§5.0 multidimensional coordinates should not have the same '
+                                   'name as dimension')
 
             not_matching.assert_true(coord not in variable.dimensions,
                                      '{} shares the same name as one of its dimensions'
@@ -2166,8 +2165,7 @@ class CFBaseCheck(BaseCheck):
             if cfutil.guess_feature_type(ds, variable) not in check_featues:
                 continue
             has_coords = TestCtx(BaseCheck.HIGH,
-                                 '§5.6 Grid Feature {} is associated with true latitude and true longitude'
-                                 ''.format(variable))
+                                 '§5.6 Grid Feature is associated with true latitude and true longitude')
 
             # axis_map is a defaultdict(list) mapping the axis to a list of
             # coordinate names. For example:
@@ -2230,7 +2228,7 @@ class CFBaseCheck(BaseCheck):
             if 'C' not in axis_map:
                 continue
 
-            valid_rgrid = TestCtx(BaseCheck.HIGH, '§5.3 {} is a valid reduced horizontal grid'.format(name))
+            valid_rgrid = TestCtx(BaseCheck.HIGH, '§5.3 alid reduced horizontal grid')
             # Make sure reduced grid features define coordinates
             valid_rgrid.assert_true(isinstance(coords, basestring) and coords,
                                     "reduced grid feature {} must define coordinates attribute"
@@ -2317,31 +2315,29 @@ class CFBaseCheck(BaseCheck):
         for variable in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
             grid_mapping = getattr(variable, 'grid_mapping', None)
             defines_grid_mapping = TestCtx(BaseCheck.HIGH,
-                                           "§5.6 Variable {} defining a grid mapping has valid grid_mapping attribute"
-                                           "".format(variable.name))
-            defines_grid_mapping.assert_true(isinstance(grid_mapping, basestring) and grid_mapping,
-                                             "grid_mapping attribute must be a space-separated non-empty string")
+                                           "§5.6 Variable defining a grid mapping has valid grid_mapping attribute")
+            defines_grid_mapping.assert_true((isinstance(grid_mapping, basestring) and grid_mapping),
+                                             "{}'s grid_mapping attribute must be a "+\
+                                             "space-separated non-empty string".format(variable.name))
 
             if isinstance(grid_mapping, basestring):
                 for grid_var_name in grid_mapping.split():
                     defines_grid_mapping.assert_true(grid_var_name in ds.variables,
-                                                     "grid mapping variable {} must exist in this dataset"
-                                                     "".format(grid_var_name))
+                                                  "grid mapping variable {} must exist in this dataset".format(variable.name))
             ret_val.append(defines_grid_mapping.to_result())
 
         # Check the grid mapping variables themselves
         for grid_var_name in grid_mapping_variables:
             valid_grid_mapping = TestCtx(BaseCheck.HIGH,
-                                         "§5.6 Grid Mapping Variable {} must define a valid grid mapping"
-                                         "".format(grid_var_name))
+                                         "§5.6 Grid Mapping Variable must define a valid grid mapping")
             grid_var = ds.variables[grid_var_name]
 
             grid_mapping_name = getattr(grid_var, 'grid_mapping_name', None)
 
             # Grid mapping name must be in appendix F
             valid_grid_mapping.assert_true(grid_mapping_name in grid_mapping_dict,
-                                           "{} is not a valid grid_mapping_name. See Appendix F for valid grid mappings"
-                                           "".format(grid_mapping_name))
+                                           "{} is not a valid grid_mapping_name.".format(grid_mapping_name)+\
+                                           " See Appendix F for valid grid mappings")
 
             # The grid_mapping_dict has a values of:
             # - required attributes
@@ -2359,8 +2355,7 @@ class CFBaseCheck(BaseCheck):
             # Make sure all the required attributes are defined
             for req in required_attrs:
                 valid_grid_mapping.assert_true(hasattr(grid_var, req),
-                                               "{} is a required attribute for grid mapping {}"
-                                               "".format(req, grid_mapping_name))
+                                               "{} is a required attribute for grid mapping {}".format(req, grid_mapping_name))
 
             # Make sure that exactly one of the exclusive attributes exist
             if len(grid_mapping_dict) == 4:
@@ -2370,16 +2365,18 @@ class CFBaseCheck(BaseCheck):
                     if hasattr(grid_var, attr):
                         number_found += 1
                 valid_grid_mapping.assert_true(number_found == 1,
-                                               "grid mapping {} must define exactly one of these attributes: "
-                                               "{}".format(grid_mapping_name, ' or '.join(at_least_attr)))
+                                               "grid mapping {}".format(grid_mapping_name) +\
+                                               "must define exactly one of these attributes: "+\
+                                               "{}".format(' or '.join(at_least_attr)))
 
             # Make sure that exactly one variable is defined for each of the required standard_names
             expected_std_names = grid_mapping[2]
             for expected_std_name in expected_std_names:
                 found_vars = ds.get_variables_by_attributes(standard_name=expected_std_name)
                 valid_grid_mapping.assert_true(len(found_vars) == 1,
-                                               "grid mapping {} requires exactly one variable with standard_name "
-                                               "{} to be defined".format(grid_mapping_name, expected_std_name))
+                                               "grid mapping {} requires exactly".format(grid_mapping_name)+\
+                                               "one variable with standard_name "+\
+                                               "{} to be defined".format(expected_std_name))
 
             ret_val.append(valid_grid_mapping.to_result())
 
@@ -2479,14 +2476,15 @@ class CFBaseCheck(BaseCheck):
 
         for var in ds.get_variables_by_attributes(standard_name='region'):
             valid_region = TestCtx(BaseCheck.MEDIUM,
-                                   "§6.1.1 Geographic region specified by {} is valid"
-                                   "".format(var.name))
+                                   "§6.1.1 Geographic region is valid")
             region = var[:]
             if np.ma.isMA(region):
                 region = region.data
             valid_region.assert_true(''.join(region.astype(str)).lower() in region_list,
-                                     "{} is not a valid region"
-                                     "".format(''.join(region.astype(str))))
+                                     "'{}' specified by '{}' is not a valid region".format(
+                                         ''.join(region.astype(str)), var.name
+                                         )
+                                    )
             ret_val.append(valid_region.to_result())
         return ret_val
 
@@ -2546,17 +2544,19 @@ class CFBaseCheck(BaseCheck):
             reasoning = []
             if boundary_variable_name not in ds.variables:
                 valid = False
-                reasoning.append("Boundary variable {} referenced by {} not "
-                                 "found in dataset variables".format(boundary_variable_name,
-                                                                     variable.name))
+                reasoning.append("Boundary variable {} referenced by {} not ".format(
+                                    boundary_variable_name, variable.name
+                                    )+\
+                                 "found in dataset variables")
             else:
                 boundary_variable = ds.variables[boundary_variable_name]
             # The number of dimensions in the bounds variable should always be
             # the number of dimensions in the referring variable + 1
             if (boundary_variable.ndim < 2):
                 valid = False
-                reasoning.append('Boundary variable {} should have at least two'
-                                 'dimensions to enclose the base case of a one dimensionsal variable'.format(boundary_variable.name))
+                reasoning.append('Boundary variable {} specified by {}'.format(boundary_variable.name, variable.name)+\
+                                 ' should have at least two dimensions to enclose the base '+\
+                                 'case of a one dimensionsal variable')
             if (boundary_variable.ndim != variable.ndim + 1):
                 valid = False
                 reasoning.append('The number of dimensions of the variable %s is %s, but the '
@@ -2569,21 +2569,21 @@ class CFBaseCheck(BaseCheck):
             if (variable.dimensions[:] != boundary_variable.dimensions[:variable.ndim]):
                 valid = False
                 reasoning.append(
-                    u"Boundary variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
-                        boundary_variable.dimensions)
-                )
+                    u"Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
+                    "".format(variable.name, boundary_variable.dimensions))
 
             # ensure p vertices form a valid simplex given previous a...n
             # previous auxiliary coordinates
             if (ds.dimensions[boundary_variable.dimensions[-1]].size < len(boundary_variable.dimensions[:-1]) + 1):
                 valid = False
-                reasoning.append("Boundary variable dimension {} must have at least {} elements to form a simplex/closed cell with previous dimensions {}.".format(
+                reasoning.append("Dimension {} of boundary variable (for {}) must have at least {} elements to form a simplex/closed cell with previous dimensions {}.".format(
                     boundary_variable.name,
+                    variable.name,
                     len(variable.dimensions) + 1,
                     boundary_variable.dimensions[:-1])
                 )
             result = Result(BaseCheck.MEDIUM, valid,
-                            "§7.1 Cell boundaries are valid for variable {}".format(variable_name),
+                            "§7.1 Valid cell boundaries",
                             reasoning)
             ret_val.append(result)
         return ret_val
@@ -2710,14 +2710,14 @@ class CFBaseCheck(BaseCheck):
             method = getattr(var, 'cell_methods', '')
 
             valid_attribute = TestCtx(BaseCheck.HIGH,
-                                      '§7.1 {} has a valid cell_methods attribute format'.format(var.name))
+                                      '§7.1 Valid cell_methods attribute format')
             valid_attribute.assert_true(regex.match(psep, method) is not None,
-                                        '"{}" is not a valid format for cell_methods attribute'
-                                        ''.format(method))
+                                        '"{}" is not a valid format for cell_methods attribute of "{}"'
+                                        ''.format(method, var.name))
             ret_val.append(valid_attribute.to_result())
 
             valid_cell_names = TestCtx(BaseCheck.MEDIUM,
-                                       '§7.3 {} has valid names in cell_methods attribute'.format(var.name))
+                                       '§7.3 Valid names in cell_methods attribute')
 
             # check that the name is valid
             for match in regex.finditer(psep, method):
@@ -2735,14 +2735,14 @@ class CFBaseCheck(BaseCheck):
                         valid = False
 
                     valid_cell_names.assert_true(valid,
-                                                'cell_methods name component {} does not match a dimension, area or auxiliary coordinate'
-                                                ''.format(var_str))
+                                                '{}\'s cell_methods name component {} does not match a dimension, '
+                                                'area or auxiliary coordinate'.format(var.name, var_str))
 
             ret_val.append(valid_cell_names.to_result())
 
             # Checks if the method value of the 'name: method' pair is acceptable
             valid_cell_methods = TestCtx(BaseCheck.MEDIUM,
-                                         '§7.3 {} has valid methods in cell_methods attribute'.format(var.name))
+                                         '§7.3 Valid methods in cell_methods attribute')
 
             for match in regex.finditer(psep, method):
                 # CF section 7.3 - "Case is not significant in the method name."
@@ -2768,7 +2768,7 @@ class CFBaseCheck(BaseCheck):
         #valid_info = TestCtx(BaseCheck.MEDIUM,
         #                            '§7.3.2 {} has valid cell_methods spacing/other info'.format(var.name))
         valid_info = TestCtx(BaseCheck.MEDIUM,
-                             '§7.3.3 {} has valid cell_methods modifiers'.format(var.name))
+                             '§7.3.3 Valid cell_methods modifiers')
         # if there are no colons, this is a simple comment
         # TODO: are empty comments considered valid?
         if ':' not in paren_contents:
@@ -2830,7 +2830,7 @@ class CFBaseCheck(BaseCheck):
         # original string.  If they're not, there's likely a formatting error
         valid_info.assert_true(''.join(m.group(0)
                                        for m in pmatches) == paren_contents,
-                   "Parenthetical content inside cell_methods is not well formed: {}".format(paren_contents))
+                   "Parenthetical content inside {}:cell_methods is not well formed: {}".format(var.name, paren_contents))
 
         return valid_info
 
@@ -3020,7 +3020,7 @@ class CFBaseCheck(BaseCheck):
 
             result = Result(BaseCheck.MEDIUM,
                             valid,
-                            '§8.1 Packed Data defined by {} contains valid packing'
+                            '§8.1 Packed Data ains valid packing'
                             ''.format(name),
                             reasoning)
             ret_val.append(result)
@@ -3031,27 +3031,27 @@ class CFBaseCheck(BaseCheck):
             if hasattr(var, "_FillValue"):
                 if var._FillValue.dtype != var.dtype:
                     valid = False
-                    reasoning.append("Type of _FillValue attribute (%s) does not match variable type (%s)" %
-                                     (var._FillValue.dtype, var.dtype))
+                    reasoning.append("Type of %s:_FillValue attribute (%s) does not match variable type (%s)" %
+                                     (name, var._FillValue.dtype, var.dtype))
             if hasattr(var, "valid_min"):
                 if var.valid_min.dtype != var.dtype:
                     valid = False
-                    reasoning.append("Type of valid_min attribute (%s) does not match variable type (%s)" %
-                                     (var.valid_min.dtype, var.dtype))
+                    reasoning.append("Type of %svalid_min attribute (%s) does not match variable type (%s)" %
+                                     (name, var.valid_min.dtype, var.dtype))
             if hasattr(var, "valid_max"):
                 if var.valid_max.dtype != var.dtype:
                     valid = False
-                    reasoning.append("Type of valid_max attribute (%s) does not match variable type (%s)" %
-                                     (var.valid_max.dtype, var.dtype))
+                    reasoning.append("Type of %s:valid_max attribute (%s) does not match variable type (%s)" %
+                                     (name, var.valid_max.dtype, var.dtype))
             if hasattr(var, "valid_range"):
                 if var.valid_range.dtype != var.dtype:
                     valid = False
-                    reasoning.append("Type of valid_range attribute (%s) does not match variable type (%s)" %
-                                     (var.valid_range.dtype, var.dtype))
+                    reasoning.append("Type of %s:valid_range attribute (%s) does not match variable type (%s)" %
+                                     (name, var.valid_range.dtype, var.dtype))
 
             result = Result(BaseCheck.MEDIUM,
                             valid,
-                            '§8.1 Packed Data defined by {} contains valid data types'.format(name),
+                            '§8.1 Packed Data contains valid data types',
                             reasoning)
             ret_val.append(result)
 
@@ -3118,7 +3118,7 @@ class CFBaseCheck(BaseCheck):
 
             result = Result(BaseCheck.MEDIUM,
                             valid,
-                            '§8.2 Compression by gathering for variable {}'.format(compress_var.name),
+                            '§8.2 Compression by gathering',
                             reasoning)
             ret_val.append(result)
 
@@ -3203,7 +3203,7 @@ class CFBaseCheck(BaseCheck):
         for variable in ds.get_variables_by_attributes(cf_role=lambda x: x is not None):
             variable_count += 1
             name = variable.name
-            valid_cf_role = TestCtx(BaseCheck.HIGH, '§9.5 {} contains a valid cf_role attribute'.format(name))
+            valid_cf_role = TestCtx(BaseCheck.HIGH, '§9.5 Valid cf_role attribute')
             cf_role = variable.cf_role
             valid_cf_role.assert_true(cf_role in valid_roles,
                                       "{} is not a valid cf_role value. It must be one of {}"
@@ -3266,8 +3266,7 @@ class CFBaseCheck(BaseCheck):
             if variable_feature is None:
                 continue
             matching_feature = TestCtx(BaseCheck.MEDIUM,
-                                       '§9.1 Feature Type for {} is valid {}'
-                                       ''.format(name, feature_type))
+                                       '§9.1 Valid Feature Type')
             matching_feature.assert_true(variable_feature in feature_type_map[feature_type],
                                          '{} is not a {}, it is detected as a {}'
                                          ''.format(name, feature_type, variable_feature))
@@ -3306,7 +3305,7 @@ class CFBaseCheck(BaseCheck):
                        'as a boundary using the `bounds` attribute.'.format(name))
                 result = Result(BaseCheck.LOW,
                                 True,
-                                '§7.1 {} is a potential cell boundary variable'.format(name),
+                                '§7.1 Potential cell boundary variable',
                                 [msg])
                 ret_val.append(result)
 
