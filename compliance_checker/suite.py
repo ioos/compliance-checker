@@ -140,7 +140,6 @@ class CheckSuite(object):
         @return list: list of Result objects
         """
         val = check_method(ds)
-
         if isinstance(val, list):
             check_val = []
             for v in val:
