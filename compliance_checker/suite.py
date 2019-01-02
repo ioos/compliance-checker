@@ -51,6 +51,7 @@ class CheckSuite(object):
         Return a list of classes from external plugins that are used to
         generate checker classes
         """
+
         if not hasattr(cls, 'suite_generators'):
             gens = working_set.iter_entry_points('compliance_checker.generators')
             cls.suite_generators = [x.resolve() for x in gens]
@@ -71,6 +72,7 @@ class CheckSuite(object):
         """
         Load checker classes from generator plugins
         """
+
         for gen in cls._get_generator_plugins():
             checkers = gen.get_checkers(args)
             cls.checkers.update(checkers)
@@ -183,6 +185,7 @@ class CheckSuite(object):
         Returns a filtered list of 2-tuples: (name, valid checker) based on the ds object's type and
         the user selected names.
         """
+
         assert len(self.checkers) > 0, "No checkers could be found."
 
         if len(checker_names) == 0:
