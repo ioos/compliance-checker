@@ -35,7 +35,10 @@ class TestProtocols(TestCase):
         '''
         Tests that a connection can be made to a remote THREDDS endpoint
         '''
-        url = 'http://data.ioos.us/thredds/dodsC/deployments/rutgers/ru24-20150105T1441/ru24-20150105T1441.nc3.nc'
+        url = "http://thredds.ucar.edu/thredds/dodsC/grib/NCEP/GFS/Global_0p25deg_ana/TP"
+
+
+
         cs = CheckSuite()
         ds = cs.load_dataset(url)
         assert ds is not None
