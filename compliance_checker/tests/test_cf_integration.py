@@ -90,6 +90,7 @@ class TestCFIntegration(BaseTestCase):
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lat, is not a variable in this dataset", 
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset"
         ]
+        assert all(m in messages for m in msgs)
 
 
     @pytest.mark.slowtest
@@ -164,6 +165,7 @@ class TestCFIntegration(BaseTestCase):
             u'Unidentifiable feature for variable Cs_w', 
             u'Unidentifiable feature for variable user'
         ]
+        assert all(m in messages for m in msgs)
 
 
     def test_l01_met(self):
@@ -353,52 +355,10 @@ class TestCFIntegration(BaseTestCase):
             raise AssertionError(u"\"dimensions for auxiliary coordinate variable siglay (node, siglay) "
                                  "are not a subset of dimensions for variable u (siglay, nele, time)\""
                                  " not in messages")
-
-        msgs = [
-            u"zeta's dimensions are not in the recommended order T, Z, Y, X. They are time, node",
-            u"u's dimensions are not in the recommended order T, Z, Y, X. They are time, siglay, nele",
-            u"v's dimensions are not in the recommended order T, Z, Y, X. They are time, siglay, nele",
-            u"ww's dimensions are not in the recommended order T, Z, Y, X. They are time, siglay, nele",
-            u"ua's dimensions are not in the recommended order T, Z, Y, X. They are time, nele",
-            u"va's dimensions are not in the recommended order T, Z, Y, X. They are time, nele",
-            u"temp's dimensions are not in the recommended order T, Z, Y, X. They are time, siglay, node",
-            u"salinity's dimensions are not in the recommended order T, Z, Y, X. They are time, siglay, node",
-            u"icing_0kts's dimensions are not in the recommended order T, Z, Y, X. They are time, node",
-            u"icing_10kts's dimensions are not in the recommended order T, Z, Y, X. They are time, node",
-            u'§2.6.1 Conventions global attribute does not contain "CF-1.6". The CF Checker only supports CF-1.6 at this time.',
-            u"'units' attribute of 'awx' must be a string compatible with UDUNITS",
-            u"'units' attribute of 'awy' must be a string compatible with UDUNITS",
-            u"'units' attribute of 'nbe' must be a string compatible with UDUNITS",
-            u"'units' attribute of 'siglay' must be a string compatible with UDUNITS",
-            u"'units' attribute of 'aw0' must be a string compatible with UDUNITS",
-            u"dimensions for auxiliary coordinate variable siglay (node, siglay) are not a subset of dimensions for variable u (time, siglay, nele)",
-            u"dimensions for auxiliary coordinate variable siglay (node, siglay) are not a subset of dimensions for variable v (time, siglay, nele)",
-            u"dimensions for auxiliary coordinate variable siglay (node, siglay) are not a subset of dimensions for variable ww (time, siglay, nele)",
-            u"siglay shares the same name as one of its dimensions",
-            u"Unidentifiable feature for variable x",
-            u"Unidentifiable feature for variable y",
-            u"Unidentifiable feature for variable xc",
-            u"Unidentifiable feature for variable yc",
-            u"Unidentifiable feature for variable h",
-            u"Unidentifiable feature for variable zeta",
-            u"Unidentifiable feature for variable nbe",
-            u"Unidentifiable feature for variable aw0",
-            u"Unidentifiable feature for variable awx",
-            u"Unidentifiable feature for variable awy",
-            u"Unidentifiable feature for variable u",
-            u"Unidentifiable feature for variable v",
-            u"Unidentifiable feature for variable ww",
-            u"Unidentifiable feature for variable ua",
-            u"Unidentifiable feature for variable va",
-            u"Unidentifiable feature for variable temp",
-            u"Unidentifiable feature for variable salinity",
-            u"Unidentifiable feature for variable icing_0kts",
-            u"Unidentifiable feature for variable icing_10kts",
-            u"fvcom_mesh is not a valid cf_role value. It must be one of timeseries_id, profile_id, trajectory_id"
-        ]
-
-        pass
-        #assert all([m in messages for m in msgs]) # not sure how this isn't working since I copied/pasted
+        assert (u"Unidentifiable feature for variable x") in messages
+        assert (u'§2.6.1 Conventions global attribute does not contain '
+                 '"CF-1.6". The CF Checker only supports CF-1.6 '
+                 'at this time.') in messages 
 
 
     def test_ww3(self):
