@@ -1051,9 +1051,6 @@ class CFBaseCheck(BaseCheck):
         units = getattr(variable, 'units', None)
         standard_name = getattr(variable, 'standard_name', None)
 
-
-        # TODO CHECK ME
-        # TODO NOTE this one might have to be revisited -- take std name out?
         valid_standard_units = TestCtx(BaseCheck.HIGH, self.section_titles["3.1"])
 
         # If the variable is supposed to be dimensionless, it automatically passes
@@ -2686,7 +2683,7 @@ class CFBaseCheck(BaseCheck):
 
             result = Result(BaseCheck.MEDIUM,
                             valid,
-                            (self.section_titles['7.2']), # TODO check is this a different format? Inconsistent?
+                            (self.section_titles['7.2']),
                             reasoning)
             ret_val.append(result)
 
@@ -2915,7 +2912,7 @@ class CFBaseCheck(BaseCheck):
                 reasoning.append('Variable {} has a climatology attribute and cannot also have a bounds attribute.'.format(clim_var.name))
                 result = Result(BaseCheck.MEDIUM,
                                 False,
-                                (self.section_titles['7.3']), # TODO is this supposed to be 7.4?
+                                (self.section_titles['7.4']),
                                 reasoning)
                 ret_val.append(result)
                 return ret_val
@@ -2924,7 +2921,7 @@ class CFBaseCheck(BaseCheck):
                 reasoning.append("Variable {} referenced in time's climatology attribute does not exist".format(ds.variables['time'].climatology))
                 result = Result(BaseCheck.MEDIUM,
                                 False,
-                                (self.section_titles['7.3']), # TODO is this supposed to be 7.4?
+                                (self.section_titles['7.4']),
                                 reasoning)
                 ret_val.append(result)
                 return ret_val
