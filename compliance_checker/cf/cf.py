@@ -939,7 +939,7 @@ class CFBaseCheck(BaseCheck):
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(
                 isinstance(units, basestring),
-                "'units' attribute of '{}' must be a string compatible with UDUNITS".format(variable.name)
+                "units ({}) attribute of '{}' must be a string".format(units, variable.name)
             ):
                 valid_udunits = self._check_valid_udunits(ds, name)
                 ret_val.append(valid_udunits)
@@ -1035,7 +1035,7 @@ class CFBaseCheck(BaseCheck):
         valid_udunits = TestCtx(BaseCheck.LOW, self.section_titles["3.1"])
         are_udunits = (units is not None and util.units_known(units))
         valid_udunits.assert_true(should_be_dimensionless or are_udunits,
-                                  'units for {}, "{}" are not recognized by udunits'.format(variable_name, units))
+                                  'units for {}, "{}" are not recognized by UDUNITS'.format(variable_name, units))
         return valid_udunits.to_result()
 
     def _check_valid_standard_units(self, ds, variable_name):
