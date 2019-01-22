@@ -345,10 +345,43 @@ class TestCF(BaseTestCase):
         message = u'Cell measure variable PS referred to by box_area is not present in dataset variables'
         assert message in messages
 
-    def test_climatology(self):
+    def test_climatology_cell_methods(self):
+        """
+        Checks that climatology cell_methods strings are properly validated
+        """
         dataset = self.load_dataset(STATIC_FILES['climatology'])
         results = self.cf.check_climatological_statistics(dataset)
+        # cell methods in this file is
+        # "time: mean within days time: mean over days"
         score, out_of, messages = self.get_results(results)
+        self.assertEqual(score, out_of)
+        temp_var = dataset.variables['temperature'] = \
+                   MockVariable(dataset.variables['temperature'])
+        temp_var.cell_methods = 'INVALID'
+        results = self.cf.check_climatological_statistics(dataset)
+        score, out_of, messages = self.get_results(results)
+        self.assertNotEqual(score, out_of)
+        # incorrect time units
+        temp_var.cell_methods = "time: mean within years time: mean over days"
+        results = self.cf.check_climatological_statistics(dataset)
+        score, out_of, messages = self.get_results(results)
+        self.assertNotEqual(score, out_of)
+        # can only have third method over years if first two are within and
+        # over days, respectively
+        temp_var.cell_methods = "time: mean within years time: mean over years time: sum over years"
+        results = self.cf.check_climatological_statistics(dataset)
+        score, out_of, messages = self.get_results(results)
+        self.assertNotEqual(score, out_of)
+        # this, on the other hand, should work.
+        temp_var.cell_methods = "time: mean within days time: mean over days time: sum over years"
+        results = self.cf.check_climatological_statistics(dataset)
+        score, out_of, messages = self.get_results(results)
+        self.assertEqual(score, out_of)
+        # parenthesized comment to describe climatology
+        temp_var.cell_methods = "time: sum within days time: maximum over days (ENSO years)"
+        results = self.cf.check_climatological_statistics(dataset)
+        score, out_of, messages = self.get_results(results)
+        self.assertEqual(score, out_of)
 
     def test_check_ancillary_variables(self):
         '''

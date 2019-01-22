@@ -826,7 +826,7 @@ class CFBaseCheck(BaseCheck):
         for attr in attrs:
             dataset_attr = getattr(ds, attr, None)
             is_string = isinstance(dataset_attr, basestring)
-            valid_globals.assert_true(is_string and len(dataset_attr), 
+            valid_globals.assert_true(is_string and len(dataset_attr),
                                       "§2.6.2 global attribute {} should exist and be a non-empty string" # subsection message
                                       "".format(attr))
         return valid_globals.to_result()
@@ -2793,7 +2793,6 @@ class CFBaseCheck(BaseCheck):
         Checks that the spacing and/or comment info contained inside the
         parentheses in cell_methods is well-formed
         """
-
         valid_info = TestCtx(BaseCheck.MEDIUM,
                              self.section_titles['7.3'])
         # if there are no colons, this is a simple comment
@@ -2952,8 +2951,6 @@ class CFBaseCheck(BaseCheck):
                     u"Climatology dimension {} should only contain two elements".format(
                         boundary_variable.dimensions)
                 )
-        # catchall
-        return ret_val # TODO this return cuts right in middle of this method
 
         # otherwise match the following values with for variable with
         # `cell_methods` attributes
@@ -2965,9 +2962,10 @@ class CFBaseCheck(BaseCheck):
         # "time: method1 within years time: method2 over years (sidereal years)"
 
         meth_regex = "(?:{})".format("|".join(methods))
-        re_string = (r"^time: {0} within (?:years time: {0} over years|"
-                     r"days time: {0} over days"
-                     r"(?: time: {0} over years)?)(?: \([^)]+\))?$".format(meth_regex))
+        re_string = (r'^time: {0} within (years|days)'
+                     r' time: {0} over \1(?<=days)(?: time: {0} over years)?'
+                     r'(?: \([^)]+\))?$'.format(meth_regex))
+
         # find any variables with a valid climatological cell_methods
         for cell_method_var in ds.get_variables_by_attributes(cell_methods=lambda s: s is not
                                                               None):
