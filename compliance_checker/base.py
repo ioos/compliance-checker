@@ -123,7 +123,11 @@ class Result(object):
         if value is None:
             self.value = None
         elif isinstance(value, tuple):
-            assert len(value) == 2, 'Result value must be 2-tuple or boolean!'
+            try:
+                assert len(value) == 2, 'Result value must be 2-tuple or boolean!'
+            except AssertionError:
+                if value == (): # just make it (0, 0)
+                    value = (0, 0)
             self.value = value
         else:
             self.value = bool(value)
@@ -231,13 +235,19 @@ def xpath_check(tree, xpath):
     return len(xpath(tree)) > 0
 
 
-def attr_check(l, ds, priority, ret_val):
+def attr_check(l, ds, priority, ret_val, gname=None):
     """
     Handles attribute checks for simple presence of an attribute, presence of
     one of several attributes, and passing a validation function.  Returns a
     status along with an error message in the event of a failure.  Mutates
     ret_val parameter
+
+    :param tuple(str, func) or str l: the attribute being checked
+    :param netCDF4 dataset ds       : dataset being checked
+    :param int priority             : priority level of check
+    :param list ret_val             : result to be returned
     """
+
     msgs = []
     if isinstance(l, tuple):
         name, other = l
@@ -246,18 +256,32 @@ def attr_check(l, ds, priority, ret_val):
             # check instead
             res = std_check_in(ds, name, other)
             if res == 0:
-                msgs.append("Attr %s not present" % name)
+                msgs.append("%s not present" % name)
             elif res == 1:
-                msgs.append("Attr %s present, but not in expected value list (%s)" % (name, other))
+                msgs.append("%s present, but not in expected value list (%s)" % (name, other))
 
-            ret_val.append(Result(priority, (res, 2), name, msgs))
+            ret_val.append(
+                Result(
+                    priority,
+                    (res, 2),
+                    gname if gname else name, # groups Globals if supplied
+                    msgs
+                )
+            )
         # if we have an XPath expression, call it on the document
         elif type(other) is etree.XPath:
             # TODO: store tree instead of creating it each time?
             res = xpath_check(ds._root, other)
             if not res:
                 msgs = ["XPath for {} not found".format(name)]
-            ret_val.append(Result(priority, res, name, msgs))
+            ret_val.append(
+                Result(
+                    priority,
+                    res,
+                    gname if gname else name,
+                    msgs
+                )
+            )
         # if the attribute is a function, call it
         # right now only supports single attribute
         # important note: current magic approach uses all functions
@@ -270,10 +294,18 @@ def attr_check(l, ds, priority, ret_val):
             # to check whether the attribute is present every time
             # and instead focuses on the core functionality of the
             # test
-            res = std_check(ds, name)
+
+            res = other(ds) # call the method on the dataset
             if not res:
-                msgs = ["Attr %s not present" % name]
-                ret_val.append(Result(priority, res, name, msgs))
+                msgs = ["%s not present" % name]
+                ret_val.append(
+                    Result(
+                        priority,
+                        res,
+                        gname if gname else name,
+                        msgs
+                    )
+                )
             else:
                 ret_val.append(other(ds)(priority))
         # unsupported second type in second
@@ -283,7 +315,7 @@ def attr_check(l, ds, priority, ret_val):
     else:
         res = std_check(ds, l)
         if not res:
-            msgs = ["Attr %s not present" % l]
+            msgs = ["%s not present" % l]
         else:
             try:
                 # see if this attribute is a string, try stripping
@@ -291,17 +323,25 @@ def attr_check(l, ds, priority, ret_val):
                 att_strip = getattr(ds, l).strip()
                 if not att_strip:
                     res = False
-                    msgs = ["Attr %s is empty or completely whitespace" % l]
+                    msgs = ["%s is empty or completely whitespace" % l]
             # if not a string/has no strip method we should be OK
             except AttributeError:
                 pass
 
-        ret_val.append(Result(priority, res, l, msgs))
+        # gname arg allows the global attrs to be grouped together
+        ret_val.append(Result(
+            priority,
+            value=res,
+            name=gname if gname else l,
+            msgs=msgs
+        ))
 
     return ret_val
 
 
-def check_has(priority=BaseCheck.HIGH):
+def check_has(priority=BaseCheck.HIGH, gname=None):
+    """Decorator to wrap a function to check if a dataset has given attributes.
+    :param function func: function to wrap"""
 
     def _inner(func):
         def _dec(s, ds):
@@ -312,7 +352,7 @@ def check_has(priority=BaseCheck.HIGH):
             # effects on `ret_val`
             for l in list_vars:
                 # function mutates ret_val
-                attr_check(l, ds, priority, ret_val)
+                attr_check(l, ds, priority, ret_val, gname)
             return ret_val
 
         return wraps(func)(_dec)
@@ -325,12 +365,12 @@ def fix_return_value(v, method_name, method=None, checker=None):
     Transforms scalar return values into Result.
     """
     # remove common check prefix
-    method_name = (method_name or method.__func__.__name__).replace("check_",
-                                                                    "")
+    method_name = (method_name or method.__func__.__name__).replace("check_","")
     if v is None or not isinstance(v, Result):
         v = Result(value=v, name=method_name)
 
     v.name         = v.name or method_name
+
     v.checker      = checker
     v.check_method = method
 

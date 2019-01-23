@@ -27,22 +27,22 @@ class TestBase(TestCase):
         rv1, rv2, rv3, rv4 = [], [], [], []
         attr = 'test'
         base.attr_check(attr, self.ds, priority, rv1)
-        assert rv1[0] == base.Result(priority, False, 'test',
-                                     ['Attr test not present'])
+        assert rv1[0] == base.Result(priority, False, "test",
+                                     ['test not present'])
         # test with empty string
         self.ds.test = ''
         base.attr_check(attr, self.ds, priority, rv2)
-        assert rv2[0] == base.Result(priority, False, 'test',
-                                     ["Attr test is empty or completely whitespace"])
+        assert rv2[0] == base.Result(priority, False, "test",
+                                     ["test is empty or completely whitespace"])
         # test with whitespace in the form of a space and a tab
         self.ds.test = ' 	'
         base.attr_check(attr, self.ds, priority, rv3)
-        assert rv3[0] == base.Result(priority, False, 'test',
-                                     ["Attr test is empty or completely whitespace"])
+        assert rv3[0] == base.Result(priority, False, "test",
+                                     ["test is empty or completely whitespace"])
         # test with actual string contents
         self.ds.test = 'abc 123'
         base.attr_check(attr, self.ds, priority, rv4)
-        assert rv4[0] == base.Result(priority, True, 'test', [])
+        assert rv4[0] == base.Result(priority, True, "test", [])
 
     def test_attr_in_valid_choices(self):
         """Tests attribute membership in a set"""
@@ -51,33 +51,37 @@ class TestBase(TestCase):
         valid_choices = ['a', 'b', 'c']
         attr = ('test', valid_choices)
         base.attr_check(attr, self.ds, priority, rv1)
-        assert rv1[0] == base.Result(priority, (0, 2), 'test', ["Attr test not present"])
+        assert rv1[0] == base.Result(priority, (0, 2), "test", ["test not present"])
         self.ds.test = ''
         base.attr_check(attr, self.ds, priority, rv2)
-        assert rv2[0] == base.Result(priority, (1, 2), 'test', ["Attr test present, but not in expected value list (%s)" % valid_choices])
+        assert rv2[0] == base.Result(priority, (1, 2), "test", ["test present, but not in expected value list (%s)" % valid_choices])
         self.ds.test = 'a'
         base.attr_check(attr, self.ds, priority, rv3)
-        assert rv3[0] == base.Result(priority, (2, 2), 'test', [])
+        assert rv3[0] == base.Result(priority, (2, 2), "test", [])
 
     def test_attr_fn(self):
         """Test attribute against a checker function"""
+
         # simple test.  In an actual program, this use case would be covered
         rv1, rv2, rv3 = [], [], []
         priority = base.BaseCheck.MEDIUM
 
         def verify_dummy(ds):
-            if ds.dummy + 'y' == 'dummyy':
-                return base.ratable_result(True, 'dummy', [])
-            else:
-                return base.ratable_result(False, 'dummy', ['not "dummyy"'])
+            """Sample function that will be called when passed into attr_check"""
+            try:
+                if ds.dummy + 'y' == 'dummyy':
+                    return base.ratable_result(True, 'dummy', [])
+                else:
+                    return base.ratable_result(False, 'dummy', [ds.dummy+'y'])
+            except AttributeError:
+                return base.ratable_result(False, 'dummy', [])
 
         attr = ('dummy', verify_dummy)
         base.attr_check(attr, self.ds, priority, rv1)
-        assert rv1[0] == base.Result(priority, False, 'dummy',
-                                     ['Attr dummy not present'])
+        assert rv1[0] == base.Result(priority, False, 'dummy', [])
         self.ds.dummy = 'doomy'
         base.attr_check(attr, self.ds, priority, rv2)
-        assert rv2[0] == base.Result(priority, False, 'dummy', ['not "dummyy"'])
+        assert rv2[0] == base.Result(priority, False, 'dummy', ['doomyy'])
         self.ds.dummy = 'dummy'
         base.attr_check(attr, self.ds, priority, rv3)
         assert rv3[0] == base.Result(priority, True, 'dummy', [])
