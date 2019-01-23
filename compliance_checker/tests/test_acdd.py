@@ -43,6 +43,7 @@ class TestACDD1_1(BaseTestCase):
             "coverage_content_type"
         ],
         "Recommended": [
+            "acknowledgment/acknowledgement",
             "id",
             "naming_authority",
             "keywords_vocabulary",
@@ -130,19 +131,17 @@ class TestACDD1_1(BaseTestCase):
                                          self.acdd_recommended)
 
         ncei_exceptions = [
-            'geospatial_bounds',
-            'time_coverage_duration'
+            'geospatial_bounds not present',
+            'time_coverage_duration not present',
+            'time_coverage_resolution not present'
         ]
         results = self.acdd.check_recommended(self.ds)
         for result in results:
-            # NODC 1.1 doesn't have some ACDD attributes
-            if result.name in ncei_exceptions:
-                continue
-
-            # The NCEI Gold Standard Point is missing time_coverage_resolution...
-            if result.name == 'time_coverage_resolution':
+            if (result.msgs) and all([m in ncei_exceptions for m in result.msgs]): # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
+
+            self.assert_result_is_good(result)
 
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
@@ -162,14 +161,14 @@ class TestACDD1_1(BaseTestCase):
 
         # Attributes that are missing from NCEI but should be there
         missing = [
-            'geospatial_lat_resolution',
-            'geospatial_lon_resolution',
-            'geospatial_vertical_resolution'
+            'geospatial_lat_resolution not present',
+            'geospatial_lon_resolution not present',
+            'geospatial_vertical_resolution not present'
         ]
 
         results = self.acdd.check_suggested(self.ds)
         for result in results:
-            if result.name in missing:
+            if (result.msgs) and all([m in missing for m in result.msgs]): # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
 
@@ -183,32 +182,6 @@ class TestACDD1_1(BaseTestCase):
         results = self.acdd.check_recommended(empty_ds)
         for result in results:
             self.assert_result_is_bad(result)
-
-    def test_acknowldegement_check(self):
-        # Check British Spelling
-        try:
-            empty0 = Dataset(os.devnull, 'w', diskless=True)
-            result = self.acdd.check_acknowledgment(empty0)
-            self.assert_result_is_bad(result)
-
-            empty0.acknowledgement = "Attribution goes here"
-            result = self.acdd.check_acknowledgment(empty0)
-            self.assert_result_is_good(result)
-        finally:
-            empty0.close()
-
-        try:
-            # Check British spelling
-            empty1 = Dataset(os.devnull, 'w', diskless=True)
-            result = self.acdd.check_acknowledgment(empty1)
-            self.assert_result_is_bad(result)
-
-            empty1.acknowledgment = "Attribution goes here"
-            result = self.acdd.check_acknowledgment(empty1)
-            self.assert_result_is_good(result)
-        finally:
-            empty1.close()
-
 
 class TestACDD1_3(BaseTestCase):
     # Adapted using `pandas.read_html` from URL
@@ -247,6 +220,7 @@ class TestACDD1_3(BaseTestCase):
             "Conventions"
         ],
         "Recommended": [
+            "acknowledgment/acknowledgement",
             "id",
             "naming_authority",
             "history",
@@ -307,8 +281,12 @@ class TestACDD1_3(BaseTestCase):
         assert check_varset_nonintersect(self.expected['Highly Recommended'],
                                          self.acdd_highly_recommended)
 
+        missing = ['"Conventions" does not contain \'ACDD-1.3\'']
         results = self.acdd.check_high(self.ds)
         for result in results:
+            if result.msgs and all([m in missing for m in result.msgs]):
+                self.assert_result_is_bad(result)
+                continue
             # NODC 2.0 has a different value in the conventions field
             self.assert_result_is_good(result)
 
@@ -321,11 +299,11 @@ class TestACDD1_3(BaseTestCase):
 
         results = self.acdd.check_recommended(self.ds)
         ncei_exceptions = [
-            'time_coverage_duration',
-            'time_coverage_resolution'
+            'time_coverage_duration not present',
+            'time_coverage_resolution not present'
         ]
         for result in results:
-            if result.name in ncei_exceptions:
+            if (result.msgs) and all([m in ncei_exceptions for m in result.msgs]): # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
 
@@ -341,12 +319,12 @@ class TestACDD1_3(BaseTestCase):
         results = self.acdd.check_suggested(self.ds)
         # NCEI does not require or suggest resolution attributes
         ncei_exceptions = [
-            'geospatial_lat_resolution',
-            'geospatial_lon_resolution',
-            'geospatial_vertical_resolution'
+            'geospatial_lat_resolution not present',
+            'geospatial_lon_resolution not present',
+            'geospatial_vertical_resolution not present'
         ]
         for result in results:
-            if result.name in ncei_exceptions:
+            if (result.msgs) and all([m in ncei_exceptions for m in result.msgs]): # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
             self.assert_result_is_good(result)
@@ -394,20 +372,6 @@ class TestACDD1_3(BaseTestCase):
         assert len(results) == 1
         for result in results:
             self.assert_result_is_bad(result)
-
-    def test_acknowledgement(self):
-        '''
-        Test acknowledgement attribute is being checked
-        '''
-
-        empty_ds = Dataset(os.devnull, 'w', diskless=True)
-        self.addCleanup(empty_ds.close)
-
-        result = self.acdd.check_acknowledgment(self.ds)
-        self.assert_result_is_good(result)
-
-        result = self.acdd.check_acknowledgment(empty_ds)
-        self.assert_result_is_bad(result)
 
     def test_vertical_extents(self):
         '''
