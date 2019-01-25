@@ -526,15 +526,12 @@ class ACDDBaseCheck(BaseCheck):
                 if convention == 'ACDD-' + self._cc_spec_version:
                     return ratable_result((2, 2), None, []) # name=None so grouped with Globals
 
-                else:
-                    # Conventions attribute is present, but does not include
-                    # proper ACDD version
-                    messages = [
-                    "\"Conventions\" does not contain 'ACDD-{}'".format(self._cc_spec_version)
-                    ]
-                    return ratable_result((1, 2), None, messages)
+            # if no/wrong ACDD convention, return appropriate result
+            return ratable_result((0, 2), None, messages)
         except AttributeError: # NetCDF attribute not found
-            messages = ["Conventions not present"]
+            messages = [
+                "\"Conventions\" does not contain 'ACDD-{}'".format(self._cc_spec_version)
+            ]
             return ratable_result((0, 2), None, messages)
 
 
@@ -575,9 +572,7 @@ class ACDD1_3Check(ACDDNCCheck):
         ])
 
         self.rec_atts.extend([
-                              #'acknowledgement',
                               ('acknowledgment/acknowledgement', self.check_acknowledgment),
-                              #('acknowledgement', self.check_acknowledgment),
                               'geospatial_vertical_positive',
                               'geospatial_bounds_crs',
                               'geospatial_bounds_vertical_crs',
@@ -719,7 +714,7 @@ class ACDD1_3Check(ACDDNCCheck):
             if ctype not in valid_ctypes:
                 msgs.append("coverage_content_type in \"%s\""
                             % (variable, sorted(valid_ctypes)))
-                results.append(Result(BaseCheck.HIGH, check, # w/o appending this, msg won't get in
+                results.append(Result(BaseCheck.HIGH, check, # append to list
                                       self._var_header.format(variable), msgs))
 
         return results

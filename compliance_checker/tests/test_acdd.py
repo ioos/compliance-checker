@@ -109,8 +109,12 @@ class TestACDD1_1(BaseTestCase):
                                          self.acdd_highly_recommended)
 
         # Check the reference dataset, NCEI 1.1 Gold Standard Point
+        missing = ['"Conventions" does not contain \'ACDD-1.3\'']
         results = self.acdd.check_high(self.ds)
         for result in results:
+            if result.msgs and all([m in missing for m in result.msgs]):
+                # only the Conventions check should have failed
+                 self.assert_result_is_bad(result)
             self.assert_result_is_good(result)
 
         # Create an empty dataset that writes to /dev/null This acts as a
@@ -281,12 +285,8 @@ class TestACDD1_3(BaseTestCase):
         assert check_varset_nonintersect(self.expected['Highly Recommended'],
                                          self.acdd_highly_recommended)
 
-        missing = ['"Conventions" does not contain \'ACDD-1.3\'']
         results = self.acdd.check_high(self.ds)
         for result in results:
-            if result.msgs and all([m in missing for m in result.msgs]):
-                self.assert_result_is_bad(result)
-                continue
             # NODC 2.0 has a different value in the conventions field
             self.assert_result_is_good(result)
 

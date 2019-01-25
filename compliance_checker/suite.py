@@ -484,14 +484,19 @@ class CheckSuite(object):
         Generates the Terminal Output
         '''
         if points < out_of:
-            self.reasoning_routine(groups, 0, check, priority_flag=limit)
+            self.reasoning_routine(groups, check, priority_flag=limit)
         else:
             print("All tests passed!")
 
-    def reasoning_routine(self, groups, indent, check, line=True, priority_flag=3,
+    def reasoning_routine(self, groups, check, priority_flag=3,
                           _top_level=True):
         """
         print routine performed
+        @param list groups: the Result groups
+        @param str check: checker name
+        @param int priority_flag: indicates the weight of the groups
+        @param bool _top_level: indicates the level of the group so as to
+                                print out the appropriate header string
         """
 
         sort_fn = lambda x: x.weight
@@ -504,21 +509,25 @@ class CheckSuite(object):
         priorities = self.checkers[check]._cc_display_headers
 
         def process_table(res, check):
+            """Recursively calls reasoning_routine to parse out child reasons
+            from the parent reasons.
+            @param Result res: Result object
+            @param str check: checker name"""
+
             issue = res.name
             if not res.children:
                 reasons = res.msgs
             else:
                 child_reasons = self.reasoning_routine(res.children,
-                                                       indent + 1,
-                                                       check,
-                                                        _top_level=False)
+                                                       check, _top_level=False)
                 # there shouldn't be messages if there are children
                 # is this a valid assumption?
                 reasons = child_reasons
 
             return issue, reasons
 
-        # iterate up to the min priority requested
+        # iterate in reverse to the min priority requested;
+        # the higher the limit, the more lenient the output
         proc_strs = ""
         for level in range(3, priority_flag - 1, -1):
             level_name = priorities.get(level, level)
@@ -653,17 +662,6 @@ class CheckSuite(object):
         """
 
         # BEGIN INTERNAL FUNCS ########################################
-        def build_group(label=None, weight=None, value=None, sub=None):
-            label = label
-            weight = weight
-            value = self._translate_value(value)
-            sub = sub or []
-
-            return Result(weight=weight,
-                          value=value,
-                          name=label,
-                          children=sub)
-
         def trim_groups(r):
             if isinstance(r.name, tuple) or isinstance(r.name, list):
                 new_name = r.name[1:]
@@ -680,8 +678,12 @@ class CheckSuite(object):
 
         def group_func(r):
             """
-            Slices off first element (if list/tuple) of classification or just returns it if scalar.
+            Takes a Result object and slices off the first element of its name
+            if its's a tuple. Otherwise, does nothing to the name. Returns the
+            Result's name and weight in a tuple to be used for sorting in that
+            order in a groupby function.
             @param Result r
+            @return tuple (str, int)
             """
             if isinstance(r.name, tuple) or isinstance(r.name, list):
                 if len(r.name) == 0:
@@ -690,19 +692,28 @@ class CheckSuite(object):
                     retval = r.name[0:1][0]
             else:
                 retval = r.name
-            return retval
+            return retval, r.weight
         # END INTERNAL FUNCS ##########################################
 
         # NOTE until this point, *ALL* Results in raw_scores are
         # individual Result objects.
+
+        # sort then group by name, then by priority weighting
         grouped = itertools.groupby(sorted(raw_scores, key=group_func),
                                     key=group_func)
 
+        # NOTE: post-grouping, grouped looks something like
+        # [(('Global Attributes', 1), <itertools._grouper at 0x7f10982b5390>),
+        #  (('Global Attributes', 3), <itertools._grouper at 0x7f10982b5438>),
+        #  (('Not a Global Attr', 1), <itertools._grouper at 0x7f10982b5470>)]
+        #  (('Some Variable', 2),     <itertools._grouper at 0x7f10982b5400>),
+
         ret_val = []
 
-        for k, v in grouped:
+        for k, v in grouped: # iterate through the grouped tuples
 
-            v = list(v)
+            k = k[0]         # slice ("name", weight_val) --> "name"
+            v = list(v)      # from itertools._grouper to list
 
             cv = self._group_raw(list(map(trim_groups, v)), k, level + 1)
             if len(cv):
@@ -710,36 +721,7 @@ class CheckSuite(object):
                 max_weight = max([x.weight for x in cv])
                 sum_scores = tuple(map(sum, list(zip(*([x.value for x in cv])))))
                 msgs = []
-            elif k == "Global Attributes": # added specially for ACDD reformatting, probably will work for IOOS
-                # TODO group only the messages with LIKE WEIGHTS together
-                # ensure results have full score value, not shorthand
 
-                global_1 = [] # groups based on weight (priority)
-                global_2 = []
-                global_3 = []
-                for x in v:
-                    x.value = self._translate_value(x.value)
-                    if x.weight == 1:
-                        global_1.append(x)
-                    elif x.weight == 2:
-                        global_2.append(x)
-                    elif x.weight == 3:
-                        global_3.append(x)
-                    else:
-                        continue
-
-                for _weight, _group in zip([1,2,3], [global_1, global_2, global_3]):
-                    gresult = Result(   # create an aggregate Result for this priority level
-                        name=k,         # still using the same name, k
-                        weight=_weight, # weight is 1, 2, or 3
-                        value=tuple(map(sum, list(zip(*([r.value for r in _group]))))), # tuple sum
-                        children=cv,
-                        msgs=sum([r.msgs for r in _group], [])
-                    )
-                    # put the results in the list
-                    ret_val.append(gresult)
-
-                continue # next item in loop so we don't hit that append line below
             else:
                 max_weight = max([x.weight for x in v])
                 sum_scores = tuple(map(sum, list(zip(*([self._translate_value(x.value) for x in v])))))

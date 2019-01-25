@@ -74,7 +74,6 @@ class TestBase(TestCase):
                 else:
                     return base.ratable_result(False, 'dummy', [ds.dummy+'y'])
             except AttributeError:
-            #else:
                 return base.ratable_result(False, 'dummy', [])
 
         attr = ('dummy', verify_dummy)
