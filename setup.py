@@ -57,7 +57,7 @@ setup(
             'compliance-checker = cchecker:main'
         ],
         'compliance_checker.suites': [
-            'cf = compliance_checker.cf.cf:CFBaseCheck',
+            'cf-1.6 = compliance_checker.cf.cf:CF16Check',
             'acdd-1.1 = compliance_checker.acdd:ACDD1_1Check',
             'acdd-1.3 = compliance_checker.acdd:ACDD1_3Check',
             'ioos_sos = compliance_checker.ioos:IOOSBaseSOSCheck',
