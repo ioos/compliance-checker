@@ -4,7 +4,8 @@ from __future__ import unicode_literals, division, print_function
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates,
                                               no_missing_terms)
-from compliance_checker.cf.appendix_f import grid_mapping_dict
+from compliance_checker.cf.appendix_e import cell_methods16, cell_methods17
+from compliance_checker.cf.appendix_f import grid_mapping_dict16, grid_mapping_dict17
 from compliance_checker.cf import util
 from compliance_checker import cfutil
 from cf_units import Unit
@@ -38,7 +39,7 @@ def print_exceptions(f):
     return wrapper
 
 
-__stdname_table__ = "v29"
+__stdname_table__ = "v61"
 
 
 # helper to see if we should do DSG tests
@@ -55,24 +56,8 @@ def is_likely_dsg(func):
 
 
 class CFBaseCheck(BaseCheck):
-    register_checker = True
-    _cc_spec = 'cf'
-    # TODO: break out into subclasses once CF-1.7 is a working standard
-    _cc_spec_version = '1.6'
-    _cc_description = 'Climate and Forecast Conventions (CF)'
-    _cc_url = 'http://cfconventions.org'
-    _cc_display_headers = {
-        3: 'Errors',
-        2: 'Warnings',
-        1: 'Info'
-    }
-
     """
-    CF Convention Checker (1.6)
-
-    These checks are translated documents:
-        http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html
-        http://cf-pcmdi.llnl.gov/conformance/requirements-and-recommendations/1.6/
+    CF Convention Checker Base
     """
 
     def __init__(self):
@@ -133,10 +118,9 @@ class CFBaseCheck(BaseCheck):
             "9.6": "§9.6 Missing Data"
         }
 
+
     ################################################################################
-    #
     # Helper Methods - var classifications, etc
-    #
     ################################################################################
 
     def setup(self, ds):
@@ -154,6 +138,121 @@ class CFBaseCheck(BaseCheck):
         self._find_metadata_vars(ds)
         self._find_cf_standard_name_table(ds)
         self._find_geophysical_vars(ds)
+
+    def _dims_in_order(self, dimension_order):
+        '''
+        :param list dimension_order: A list of axes
+        :rtype: bool
+        :return: Returns True if the dimensions are in order U*, T, Z, Y, X,
+                 False otherwise
+        '''
+        regx = regex.compile(r'^[^TZYX]*T?Z?Y?X?$')
+        dimension_string = ''.join(dimension_order)
+        return regx.match(dimension_string) is not None
+
+    def _find_aux_coord_vars(self, ds, refresh=False):
+        '''
+        Returns a list of auxiliary coordinate variables
+
+        An auxiliary coordinate variable is any netCDF variable that contains
+        coordinate data, but is not a coordinate variable (in the sense of the term
+        defined by CF).
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        :rtype: list
+        :return: List of variable names (str) that are defined to be auxiliary
+                 coordinate variables.
+        '''
+        if self._aux_coords.get(ds, None) and refresh is False:
+            return self._aux_coords[ds]
+
+        self._aux_coords[ds] = cfutil.get_auxiliary_coordinate_variables(ds)
+        return self._aux_coords[ds]
+
+    def _find_boundary_vars(self, ds, refresh=False):
+        '''
+        Returns dictionary of boundary variables mapping the variable instance
+        to the name of the variable acting as a boundary variable.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        :rtype: list
+        :return: A list containing strings with boundary variable names.
+        '''
+        if self._boundary_vars.get(ds, None) and refresh is False:
+            return self._boundary_vars[ds]
+
+        self._boundary_vars[ds] = cfutil.get_cell_boundary_variables(ds)
+
+        return self._boundary_vars[ds]
+
+    def _find_ancillary_vars(self, ds, refresh=False):
+        '''
+        Returns a list of variable names that are defined as ancillary
+        variables in the dataset ds.
+
+        An ancillary variable generally is a metadata container and referenced
+        from other variables via a string reference in an attribute.
+
+        - via ancillary_variables (3.4)
+        - "grid mapping var" (5.6)
+        - TODO: more?
+
+        The result is cached by the passed in dataset object inside of this
+        checker. Pass refresh=True to redo the cached value.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        :rtype: list
+        :return: List of variable names (str) that are defined as ancillary
+                 variables in the dataset ds.
+        '''
+
+        # Used the cached version if it exists and is not empty
+        if self._ancillary_vars.get(ds, None) and refresh is False:
+            return self._ancillary_vars[ds]
+
+        # Invalidate the cache at all costs
+        self._ancillary_vars[ds] = []
+
+        for name, var in ds.variables.items():
+            if hasattr(var, 'ancillary_variables'):
+                for anc_name in var.ancillary_variables.split(" "):
+                    if anc_name in ds.variables:
+                        self._ancillary_vars[ds].append(anc_name)
+
+            if hasattr(var, 'grid_mapping'):
+                gm_name = var.grid_mapping
+                if gm_name in ds.variables:
+                    self._ancillary_vars[ds].append(gm_name)
+
+        return self._ancillary_vars[ds]
+
+    def _find_clim_vars(self, ds, refresh=False):
+        '''
+        Returns a list of variables that are likely to be climatology variables based on CF §7.4
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bool refresh: if refresh is set to True, the cache is
+                             invalidated.
+        :rtype: list
+        :return: A list containing strings with geophysical variable
+                 names.
+        '''
+
+        if self._clim_vars.get(ds, None) and refresh is False:
+            return self._clim_vars[ds]
+
+        climatology_variable = cfutil.get_climatology_variable(ds)
+        if climatology_variable:
+            self._clim_vars[ds].append(climatology_variable)
+
+        return self._clim_vars[ds]
+
 
     def _find_cf_standard_name_table(self, ds):
         '''
@@ -231,69 +330,24 @@ class CFBaseCheck(BaseCheck):
 
         return self._coord_vars[ds]
 
-    def _find_aux_coord_vars(self, ds, refresh=False):
+    def _find_geophysical_vars(self, ds, refresh=False):
         '''
-        Returns a list of auxiliary coordinate variables
-
-        An auxiliary coordinate variable is any netCDF variable that contains
-        coordinate data, but is not a coordinate variable (in the sense of the term
-        defined by CF).
+        Returns a list of geophysical variables.  Modifies
+        `self._geophysical_vars`
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param bool refresh: if refresh is set to True, the cache is
                              invalidated.
         :rtype: list
-        :return: List of variable names (str) that are defined to be auxiliary
-                 coordinate variables.
+        :return: A list containing strings with geophysical variable
+                 names.
         '''
-        if self._aux_coords.get(ds, None) and refresh is False:
-            return self._aux_coords[ds]
+        if self._geophysical_vars.get(ds, None) and refresh is False:
+            return self._geophysical_vars[ds]
 
-        self._aux_coords[ds] = cfutil.get_auxiliary_coordinate_variables(ds)
-        return self._aux_coords[ds]
+        self._geophysical_vars[ds] = cfutil.get_geophysical_variables(ds)
 
-    def _find_ancillary_vars(self, ds, refresh=False):
-        '''
-        Returns a list of variable names that are defined as ancillary
-        variables in the dataset ds.
-
-        An ancillary variable generally is a metadata container and referenced
-        from other variables via a string reference in an attribute.
-
-        - via ancillary_variables (3.4)
-        - "grid mapping var" (5.6)
-        - TODO: more?
-
-        The result is cached by the passed in dataset object inside of this
-        checker. Pass refresh=True to redo the cached value.
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :param bool refresh: if refresh is set to True, the cache is
-                             invalidated.
-        :rtype: list
-        :return: List of variable names (str) that are defined as ancillary
-                 variables in the dataset ds.
-        '''
-
-        # Used the cached version if it exists and is not empty
-        if self._ancillary_vars.get(ds, None) and refresh is False:
-            return self._ancillary_vars[ds]
-
-        # Invalidate the cache at all costs
-        self._ancillary_vars[ds] = []
-
-        for name, var in ds.variables.items():
-            if hasattr(var, 'ancillary_variables'):
-                for anc_name in var.ancillary_variables.split(" "):
-                    if anc_name in ds.variables:
-                        self._ancillary_vars[ds].append(anc_name)
-
-            if hasattr(var, 'grid_mapping'):
-                gm_name = var.grid_mapping
-                if gm_name in ds.variables:
-                    self._ancillary_vars[ds].append(gm_name)
-
-        return self._ancillary_vars[ds]
+        return self._geophysical_vars[ds]
 
     def _find_metadata_vars(self, ds, refresh=False):
         '''
@@ -327,69 +381,223 @@ class CFBaseCheck(BaseCheck):
 
         return self._metadata_vars[ds]
 
-    def _find_geophysical_vars(self, ds, refresh=False):
+    def _get_coord_axis_map(self, ds):
         '''
-        Returns a list of geophysical variables.  Modifies
-        `self._geophysical_vars`
+        Returns a dictionary mapping each coordinate to a letter identifier
+        describing the _kind_ of coordinate.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :param bool refresh: if refresh is set to True, the cache is
-                             invalidated.
-        :rtype: list
-        :return: A list containing strings with geophysical variable
-                 names.
+
+        :rtype: dict
+        :return: A dictionary with variable names mapped to axis abbreviations,
+                 i.e. {'longitude': 'X', ... 'pressure': 'Z'}
         '''
-        if self._geophysical_vars.get(ds, None) and refresh is False:
-            return self._geophysical_vars[ds]
+        expected = ['T', 'Z', 'Y', 'X']
+        coord_vars = self._find_coord_vars(ds)
+        coord_axis_map = {}
 
-        self._geophysical_vars[ds] = cfutil.get_geophysical_variables(ds)
+        # L - Unlimited Coordinates
+        # T - Time coordinates
+        # Z - Depth/Altitude Coordinate
+        # Y - Y-Coordinate (latitude)
+        # X - X-Coordinate (longitude)
+        # A - Auxiliary Coordinate
+        # I - Instance Coordinate
 
-        return self._geophysical_vars[ds]
+        time_variables = cfutil.get_time_variables(ds)
+        lat_variables = cfutil.get_latitude_variables(ds)
+        lon_variables = cfutil.get_longitude_variables(ds)
+        z_variables = cfutil.get_z_variables(ds)
 
-    def _find_clim_vars(self, ds, refresh=False):
+        for coord_name in coord_vars:
+            coord_var = ds.variables[coord_name]
+            axis = getattr(coord_var, 'axis', None)
+            standard_name = getattr(coord_var, 'standard_name', None)
+
+            # Unlimited dimensions must come first
+            if ds.dimensions[coord_name].isunlimited():
+                coord_axis_map[coord_name] = 'L'
+            # axis takes precedence over standard_name
+            elif axis in expected:
+                coord_axis_map[coord_name] = axis
+            elif standard_name == 'time':
+                coord_axis_map[coord_name] = 'T'
+            elif standard_name == 'longitude':
+                coord_axis_map[coord_name] = 'X'
+            elif standard_name == 'latitude':
+                coord_axis_map[coord_name] = 'Y'
+            elif standard_name in ['height', 'depth', 'altitude']:
+                coord_axis_map[coord_name] = 'Z'
+            elif cfutil.is_compression_coordinate(ds, coord_name):
+                coord_axis_map[coord_name] = 'C'
+            elif coord_name in time_variables:
+                coord_axis_map[coord_name] = 'T'
+            elif coord_name in z_variables:
+                coord_axis_map[coord_name] = 'Z'
+            elif coord_name in lat_variables:
+                coord_axis_map[coord_name] = 'Y'
+            elif coord_name in lon_variables:
+                coord_axis_map[coord_name] = 'X'
+            else:
+                # mark the coordinate variable as unknown
+                coord_axis_map[coord_name] = 'U'
+
+        for dimension in self._get_instance_dimensions(ds):
+            if dimension not in coord_axis_map:
+                coord_axis_map[dimension] = 'I'
+
+        # Dimensions of auxiliary coordinate variables will be marked with A.
+        # This is useful to help determine if the dimensions are used like a
+        # mapping from grid coordinates to physical lat/lon
+        for coord_name in self._find_aux_coord_vars(ds):
+            coord_var = ds.variables[coord_name]
+            # Skip label auxiliary coordinates
+            if coord_var.dtype.char == 'S':
+                continue
+            for dimension in coord_var.dimensions:
+                if dimension not in coord_axis_map:
+                    coord_axis_map[dimension] = 'A'
+
+        # If a dimension does not have a coordinate variable mark it as unknown
+        # 'U'
+        for dimension in ds.dimensions:
+            if dimension not in coord_axis_map:
+                coord_axis_map[dimension] = 'U'
+
+        return coord_axis_map
+
+    def _get_coord_vars(self, ds):
+        coord_vars = []
+        for name, var in ds.variables.items():
+            if (name,) == var.dimensions:
+                coord_vars.append(name)
+        return coord_vars
+
+    def _get_dimension_order(self, ds, name, coord_axis_map):
         '''
-        Returns a list of variables that are likely to be climatology variables based on CF §7.4
+        Returns a list of strings corresponding to the named axis of the dimensions for a variable.
+
+        Example::
+            self._get_dimension_order(ds, 'temperature', coord_axis_map)
+            --> ['T', 'Y', 'X']
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :param bool refresh: if refresh is set to True, the cache is
-                             invalidated.
+        :param str name: Name of the variable
+        :param dict coord_axis_map: A dictionary mapping each coordinate variable and dimension to a named axis
+
         :rtype: list
-        :return: A list containing strings with geophysical variable
-                 names.
+        :return: A list of strings corresponding to the named axis of the dimensions for a variable
         '''
 
-        if self._clim_vars.get(ds, None) and refresh is False:
-            return self._clim_vars[ds]
+        retval = []
+        variable = ds.variables[name]
+        for dim in variable.dimensions:
+            retval.append(coord_axis_map[dim])
+        return retval
 
-        climatology_variable = cfutil.get_climatology_variable(ds)
-        if climatology_variable:
-            self._clim_vars[ds].append(climatology_variable)
-
-        return self._clim_vars[ds]
-
-    def _find_boundary_vars(self, ds, refresh=False):
+    def _get_instance_dimensions(self, ds):
         '''
-        Returns dictionary of boundary variables mapping the variable instance
-        to the name of the variable acting as a boundary variable.
+        Returns a list of dimensions marked as instance dimensions
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        :param bool refresh: if refresh is set to True, the cache is
-                             invalidated.
+
         :rtype: list
-        :return: A list containing strings with boundary variable names.
+        :returns: A list of variable dimensions
         '''
-        if self._boundary_vars.get(ds, None) and refresh is False:
-            return self._boundary_vars[ds]
+        ret_val = []
+        for variable in ds.get_variables_by_attributes(cf_role=lambda x: isinstance(x, basestring)):
+            if variable.ndim > 0:
+                ret_val.append(variable.dimensions[0])
+        return ret_val
 
-        self._boundary_vars[ds] = cfutil.get_cell_boundary_variables(ds)
+    def _get_pretty_dimension_order(self, ds, name):
+        '''
+        Returns a comma seperated string of the dimensions for a specified
+        variable
 
-        return self._boundary_vars[ds]
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: A string with a valid NetCDF variable name for the
+                         dataset
+        :rtype: str
+        :return: A comma separated string of the variable's dimensions
+        '''
+        dim_names = []
+        for dim in ds.variables[name].dimensions:
+            dim_name = dim
+            if ds.dimensions[dim].isunlimited():
+                dim_name += ' (Unlimited)'
+            dim_names.append(dim_name)
+        return ', '.join(dim_names)
+
+    def _is_station_var(self, var):
+        """
+        Returns True if the NetCDF variable is associated with a station, False
+        otherwise.
+
+        :param netCDF4.Variable var: a variable in an existing NetCDF dataset
+        :rtype: bool
+        :return: Status of whether variable appears to be associated with a
+                 station
+        """
+
+        if getattr(var, 'standard_name', None) in ('platform_name', 'station_name', 'instrument_name'):
+            return True
+        return False
+
+    def _split_standard_name(self, standard_name):
+        '''
+        Returns a tuple of the standard_name and standard_name modifier
+
+        Nones are used to represent the absence of a modifier or standard_name
+
+        :rtype: tuple
+        :return: 2-tuple of standard_name and modifier as strings
+        '''
+
+        if isinstance(standard_name, basestring) and ' ' in standard_name:
+            return standard_name.split(' ', 1)
+        # if this isn't a string, then it doesn't make sense to split
+        # -- treat value as standard name with no modifier
+        else:
+            return standard_name, None
+
+
+class CFNCCheck(BaseNCCheck, CFBaseCheck):
+    """Inherits from both BaseNCCheck and CFBaseCheck to support
+    checking netCDF datasets. Must inherit in this order, or certain
+    attributes from BaseNCCheck (like supported_ds) will not be passed to
+    CFNCCheck."""
+    pass
+
+
+class CF16Check(CFNCCheck):
+    """CF-1.6-specific implementation of CFBaseCheck; supports checking
+    netCDF datasets.
+    These checks are translated documents:
+        http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html
+        http://cf-pcmdi.llnl.gov/conformance/requirements-and-recommendations/1.6/"""
+
+    register_checker    = True
+    _cc_spec            = 'cf'
+    _cc_spec_version    = '1.6'
+    _cc_description     = 'Climate and Forecast Conventions (CF)'
+    _cc_url             = 'http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html'
+    _cc_display_headers = {
+        3: 'Errors',
+        2: 'Warnings',
+        1: 'Info'
+    }
+
+    def __init__(self): # initialize with parent methods and data
+        super(CF16Check, self).__init__()
+
+        self.cell_methods = cell_methods16
+        self.grid_mapping_dict = grid_mapping_dict16
 
     ###############################################################################
-    #
     # Chapter 2: NetCDF Files and Components
-    #
     ###############################################################################
+
 
     def check_data_types(self, ds):
         '''
@@ -571,158 +779,6 @@ class CFBaseCheck(BaseCheck):
                                                   "".format(name, self._get_pretty_dimension_order(ds, name)))
         return valid_dimension_order.to_result()
 
-    def _get_coord_axis_map(self, ds):
-        '''
-        Returns a dictionary mapping each coordinate to a letter identifier
-        describing the _kind_ of coordinate.
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-
-        :rtype: dict
-        :return: A dictionary with variable names mapped to axis abbreviations,
-                 i.e. {'longitude': 'X', ... 'pressure': 'Z'}
-        '''
-        expected = ['T', 'Z', 'Y', 'X']
-        coord_vars = self._find_coord_vars(ds)
-        coord_axis_map = {}
-
-        # L - Unlimited Coordinates
-        # T - Time coordinates
-        # Z - Depth/Altitude Coordinate
-        # Y - Y-Coordinate (latitude)
-        # X - X-Coordinate (longitude)
-        # A - Auxiliary Coordinate
-        # I - Instance Coordinate
-
-        time_variables = cfutil.get_time_variables(ds)
-        lat_variables = cfutil.get_latitude_variables(ds)
-        lon_variables = cfutil.get_longitude_variables(ds)
-        z_variables = cfutil.get_z_variables(ds)
-
-        for coord_name in coord_vars:
-            coord_var = ds.variables[coord_name]
-            axis = getattr(coord_var, 'axis', None)
-            standard_name = getattr(coord_var, 'standard_name', None)
-
-            # Unlimited dimensions must come first
-            if ds.dimensions[coord_name].isunlimited():
-                coord_axis_map[coord_name] = 'L'
-            # axis takes precedence over standard_name
-            elif axis in expected:
-                coord_axis_map[coord_name] = axis
-            elif standard_name == 'time':
-                coord_axis_map[coord_name] = 'T'
-            elif standard_name == 'longitude':
-                coord_axis_map[coord_name] = 'X'
-            elif standard_name == 'latitude':
-                coord_axis_map[coord_name] = 'Y'
-            elif standard_name in ['height', 'depth', 'altitude']:
-                coord_axis_map[coord_name] = 'Z'
-            elif cfutil.is_compression_coordinate(ds, coord_name):
-                coord_axis_map[coord_name] = 'C'
-            elif coord_name in time_variables:
-                coord_axis_map[coord_name] = 'T'
-            elif coord_name in z_variables:
-                coord_axis_map[coord_name] = 'Z'
-            elif coord_name in lat_variables:
-                coord_axis_map[coord_name] = 'Y'
-            elif coord_name in lon_variables:
-                coord_axis_map[coord_name] = 'X'
-            else:
-                # mark the coordinate variable as unknown
-                coord_axis_map[coord_name] = 'U'
-
-        for dimension in self._get_instance_dimensions(ds):
-            if dimension not in coord_axis_map:
-                coord_axis_map[dimension] = 'I'
-
-        # Dimensions of auxiliary coordinate variables will be marked with A.
-        # This is useful to help determine if the dimensions are used like a
-        # mapping from grid coordinates to physical lat/lon
-        for coord_name in self._find_aux_coord_vars(ds):
-            coord_var = ds.variables[coord_name]
-            # Skip label auxiliary coordinates
-            if coord_var.dtype.char == 'S':
-                continue
-            for dimension in coord_var.dimensions:
-                if dimension not in coord_axis_map:
-                    coord_axis_map[dimension] = 'A'
-
-        # If a dimension does not have a coordinate variable mark it as unknown
-        # 'U'
-        for dimension in ds.dimensions:
-            if dimension not in coord_axis_map:
-                coord_axis_map[dimension] = 'U'
-
-        return coord_axis_map
-
-    def _get_instance_dimensions(self, ds):
-        '''
-        Returns a list of dimensions marked as instance dimensions
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-
-        :rtype: list
-        :returns: A list of variable dimensions
-        '''
-        ret_val = []
-        for variable in ds.get_variables_by_attributes(cf_role=lambda x: isinstance(x, basestring)):
-            if variable.ndim > 0:
-                ret_val.append(variable.dimensions[0])
-        return ret_val
-
-    def _get_pretty_dimension_order(self, ds, name):
-        '''
-        Returns a comma seperated string of the dimensions for a specified
-        variable
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :param str name: A string with a valid NetCDF variable name for the
-                         dataset
-        :rtype: str
-        :return: A comma separated string of the variable's dimensions
-        '''
-        dim_names = []
-        for dim in ds.variables[name].dimensions:
-            dim_name = dim
-            if ds.dimensions[dim].isunlimited():
-                dim_name += ' (Unlimited)'
-            dim_names.append(dim_name)
-        return ', '.join(dim_names)
-
-    def _get_dimension_order(self, ds, name, coord_axis_map):
-        '''
-        Returns a list of strings corresponding to the named axis of the dimensions for a variable.
-
-        Example::
-            self._get_dimension_order(ds, 'temperature', coord_axis_map)
-            --> ['T', 'Y', 'X']
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :param str name: Name of the variable
-        :param dict coord_axis_map: A dictionary mapping each coordinate variable and dimension to a named axis
-
-        :rtype: list
-        :return: A list of strings corresponding to the named axis of the dimensions for a variable
-        '''
-
-        retval = []
-        variable = ds.variables[name]
-        for dim in variable.dimensions:
-            retval.append(coord_axis_map[dim])
-        return retval
-
-    def _dims_in_order(self, dimension_order):
-        '''
-        :param list dimension_order: A list of axes
-        :rtype: bool
-        :return: Returns True if the dimensions are in order U*, T, Z, Y, X,
-                 False otherwise
-        '''
-        regx = regex.compile(r'^[^TZYX]*T?Z?Y?X?$')
-        dimension_string = ''.join(dimension_order)
-        return regx.match(dimension_string) is not None
-
     def check_fill_value_outside_valid_range(self, ds):
         '''
         Checks each variable's _FillValue to ensure that it's in valid_range or
@@ -801,8 +857,7 @@ class CFBaseCheck(BaseCheck):
                     break
             else:
                 reasoning = ['§2.6.1 Conventions global attribute does not contain '
-                             '"CF-1.6". The CF Checker only supports CF-1.6 '
-                             'at this time.']
+                             '"CF-1.6"']
         else:
             valid = False
             reasoning = ['§2.6.1 Conventions field is not present']
@@ -875,9 +930,7 @@ class CFBaseCheck(BaseCheck):
         return valid_attributes.to_result()
 
     ###############################################################################
-    #
     # Chapter 3: Description of the Data
-    #
     ###############################################################################
 
     def check_units(self, ds):
@@ -951,23 +1004,6 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(valid_standard_units)
 
         return ret_val
-
-    def _split_standard_name(self, standard_name):
-        '''
-        Returns a tuple of the standard_name and standard_name modifier
-
-        Nones are used to represent the absence of a modifier or standard_name
-
-        :rtype: tuple
-        :return: 2-tuple of standard_name and modifier as strings
-        '''
-
-        if isinstance(standard_name, basestring) and ' ' in standard_name:
-            return standard_name.split(' ', 1)
-        # if this isn't a string, then it doesn't make sense to split
-        # -- treat value as standard name with no modifier
-        else:
-            return standard_name, None
 
     def _check_valid_cf_units(self, ds, variable_name):
         '''
@@ -1439,9 +1475,7 @@ class CFBaseCheck(BaseCheck):
         return valid_meanings.to_result()
 
     ###############################################################################
-    #
     # Chapter 4: Coordinate Types
-    #
     ###############################################################################
 
     def check_coordinate_types(self, ds):
@@ -1836,7 +1870,7 @@ class CFBaseCheck(BaseCheck):
         # check that the formula_terms are well formed and are present
         # The pattern for formula terms is always component: variable_name
         # the regex grouping always has component names in even positions and
-        # the corresponding variable name in even positions.
+        # the corresponding variable name in odd positions.
         matches = regex.findall(r'([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)',
                                 variable.formula_terms)
         terms = set(m[0][:-2] for m in matches)
@@ -2005,32 +2039,8 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     ###############################################################################
-    #
     # Chapter 5: Coordinate Systems
-    #
     ###############################################################################
-
-    def _is_station_var(self, var):
-        """
-        Returns True if the NetCDF variable is associated with a station, False
-        otherwise.
-
-        :param netCDF4.Variable var: a variable in an existing NetCDF dataset
-        :rtype: bool
-        :return: Status of whether variable appears to be associated with a
-                 station
-        """
-
-        if getattr(var, 'standard_name', None) in ('platform_name', 'station_name', 'instrument_name'):
-            return True
-        return False
-
-    def _get_coord_vars(self, ds):
-        coord_vars = []
-        for name, var in ds.variables.items():
-            if (name,) == var.dimensions:
-                coord_vars.append(name)
-        return coord_vars
 
     def check_aux_coordinates(self, ds):
         '''
@@ -2366,22 +2376,22 @@ class CFBaseCheck(BaseCheck):
             grid_mapping_name = getattr(grid_var, 'grid_mapping_name', None)
 
             # Grid mapping name must be in appendix F
-            valid_grid_mapping.assert_true(grid_mapping_name in grid_mapping_dict,
+            valid_grid_mapping.assert_true(grid_mapping_name in self.grid_mapping_dict,
                                            "{} is not a valid grid_mapping_name.".format(grid_mapping_name)+\
                                            " See Appendix F for valid grid mappings")
 
-            # The grid_mapping_dict has a values of:
+            # The self.grid_mapping_dict has a values of:
             # - required attributes
             # - optional attributes (can't check)
             # - required standard_names defined
             # - at least one of these attributes must be defined
 
             # We can't do any of the other grid mapping checks if it's not a valid grid mapping name
-            if grid_mapping_name not in grid_mapping_dict:
+            if grid_mapping_name not in self.grid_mapping_dict:
                 ret_val.append(valid_grid_mapping.to_result())
                 continue
 
-            grid_mapping = grid_mapping_dict[grid_mapping_name]
+            grid_mapping = self.grid_mapping_dict[grid_mapping_name]
             required_attrs = grid_mapping[0]
             # Make sure all the required attributes are defined
             for req in required_attrs:
@@ -2389,8 +2399,8 @@ class CFBaseCheck(BaseCheck):
                                                "{} is a required attribute for grid mapping {}".format(req, grid_mapping_name))
 
             # Make sure that exactly one of the exclusive attributes exist
-            if len(grid_mapping_dict) == 4:
-                at_least_attr = grid_mapping_dict[3]
+            if len(self.grid_mapping_dict) == 4:
+                at_least_attr = self.grid_mapping_dict[3]
                 number_found = 0
                 for attr in at_least_attr:
                     if hasattr(grid_var, attr):
@@ -2414,9 +2424,7 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     ###############################################################################
-    #
     # Chapter 6: Labels and Alternative Coordinates
-    #
     ###############################################################################
 
     def check_geographic_region(self, ds):
@@ -2519,9 +2527,7 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     ###############################################################################
-    #
     # Chapter 7: Data Representative of Cells
-    #
     ###############################################################################
 
     def check_cell_boundaries(self, ds):
@@ -2661,7 +2667,7 @@ class CFBaseCheck(BaseCheck):
                     reasoning.append(
                         "Cell measure variable {} referred to by "
                         "{} is not present in dataset variables".format(
-                            var.name, cell_meas_var_name)
+                            cell_meas_var_name, var.name)
                     )
                 else:
                     cell_meas_var = ds.variables[cell_meas_var_name]
@@ -2714,19 +2720,6 @@ class CFBaseCheck(BaseCheck):
         :return: List of results
         """
 
-        methods = {
-            "point",
-            "sum",
-            "mean",
-            "maximum",
-            "minimum",
-            "mid_range",
-            "standard_deviation",
-            "variance",
-            "mode",
-            "median"
-        }
-
         ret_val = []
         psep = regex.compile(r'(?P<vars>\w+: )+(?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
                              '?(?P<over>over (?P<otypevar>\w+))?| ?)(?:\((?P<paren_contents>[^)]*)\))?')
@@ -2738,7 +2731,7 @@ class CFBaseCheck(BaseCheck):
             method = getattr(var, 'cell_methods', '')
 
             valid_attribute = TestCtx(BaseCheck.HIGH,
-                                      self.section_titles['7.1'])
+                                      self.section_titles['7.3']) # changed from 7.1 to 7.3 -- NOTE this in commit message
             valid_attribute.assert_true(regex.match(psep, method) is not None,
                                         '"{}" is not a valid format for cell_methods attribute of "{}"'
                                         ''.format(method, var.name))
@@ -2774,7 +2767,7 @@ class CFBaseCheck(BaseCheck):
 
             for match in regex.finditer(psep, method):
                 # CF section 7.3 - "Case is not significant in the method name."
-                valid_cell_methods.assert_true(match.group('method').lower() in methods,
+                valid_cell_methods.assert_true(match.group('method').lower() in self.cell_methods,
                                                '{}:cell_methods contains an invalid method: {}'
                                                ''.format(var.name, match.group('method')))
 
@@ -2985,9 +2978,7 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     ###############################################################################
-    #
     # Chapter 8: Reduction of Dataset Size
-    #
     ###############################################################################
 
     def check_packed_data(self, ds):
@@ -3147,9 +3138,7 @@ class CFBaseCheck(BaseCheck):
         return ret_val
 
     ###############################################################################
-    #
     # Chapter 9: Discrete Sampling Geometries
-    #
     ###############################################################################
 
     def check_all_features_are_same_type(self, ds):
@@ -3329,6 +3318,287 @@ class CFBaseCheck(BaseCheck):
                                 self.section_titles['7.1'],
                                 [msg])
                 ret_val.append(result)
+
+        return ret_val
+
+class CF17Check(CF16Check):
+    """Implementation for CF v1.7. Inherits from CF16Check as most of the
+    checks are the same."""
+
+    # things that are specific to 1.7
+    _cc_spec_version    = '1.7'
+    _cc_url             = 'http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html'
+
+    def __init__(self):
+        super(CF17Check, self).__init__()
+
+        self.cell_methods = cell_methods17
+        self.grid_mapping_dict = grid_mapping_dict17
+
+    
+    def check_actual_range(self, ds):
+        """Check the actual_range attribute of variables. As stated in
+        section 2.5.1 of version 1.7, this convention defines a two-element
+        vector attribute designed to describe the actual minimum and actual
+        maximium values of variables containing numeric data. Conditions:
+          - if all values of the variable are equal, actual_range should *not*
+            exist
+          - the fist value of the two-element vector must be equal to the
+            minimum of the data, and the second element equal to the maximium
+          - if the data is packed, the elements of actual_range should have
+            the same data type as the *unpacked* data
+          - if valid_range is specified, both elements of actual_range should
+            be within valid_range
+
+        If a variable does not have an actual_range attribute, let it pass; 
+        including this attribute is only suggested. However, if the user is
+        specifying the actual_range, the Result will be considered
+        high-priority."""
+
+        ret_val = []
+
+        for name, variable in ds.variables.items():
+            msgs   = []
+            score  = 0
+            out_of = 0
+
+            if not hasattr(variable, "actual_range"):
+                continue # having this attr is only suggested, no Result needed
+            else:
+
+                if variable.mask: # remove mask
+                    variable.set_auto_mask(False)
+
+                # NOTE this is a data check
+                out_of += 1
+                if len(set(variable[:])) == 1: # all values are the same
+                    msgs.append("\"{}\"'s values are all equal; actual_range shouldn't exist".format(name))
+                    ret_val.append(Result( # putting result into list
+                        BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
+                    continue # no need to keep checking if it shouldn't be there
+                else:
+                    score += 1
+
+                out_of += 1
+                try:
+                    if (len(variable.actual_range) != 2):
+                        msgs.append("actual_range of '{}' must be 2 elements".format(name))
+                        ret_val.append(Result( # putting result into list
+                            BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
+                        continue # no need to keep checking if already completely wrong
+                    else:
+                        score += 1
+                except TypeError: # in case it's just a single number
+                    msgs.append("actual_range of '{}' must be 2 elements".format(name))
+                    ret_val.append(Result( # putting result into list
+                        BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
+                    continue
+
+                # NOTE this is a data check -- but do we need it since we are checking
+                # consistency with valid_min/valid_max attrs?
+                out_of += 1
+                if ( # check equality to stated min/max values
+                    variable.actual_range[0] != min(variable[:])
+                ) or (
+                    variable.actual_range[1] != max(variable[:])
+                ):
+                    msgs.append("actual_range elements of '{}' inconsistent with its min/max values".format(name)
+                    )
+                else:
+                    score += 1
+
+                out_of += 1
+                if (hasattr(variable, "valid_range")): # check within valid_range
+                    if (variable.actual_range[0] != variable.valid_range[0]) or (variable.actual_range[1] != variable.valid_range[1]):
+                        msgs.append("\"{}\"'s actual_range must be within valid_range".format(name))
+                else:
+                    score += 1
+
+                for _att, loc in zip(["valid_min", "valid_max"], [0, 1]):
+                    out_of += 1
+                    if (hasattr(variable, _att)):
+                        _val = getattr(variable, _att)
+                        if (variable.actual_range[loc] != _val):
+                            msgs.append("\"{}\"'s actual_range[{}] must be == {} ({})".format(name, loc, _val, _att))
+                    else:
+                        score += 1
+
+            ret_val.append(Result( # putting result into list
+                BaseCheck.HIGH,
+                (score, out_of),
+                self.section_titles["2.5"],
+                msgs
+            ))
+        return ret_val
+
+    def check_cell_boundaries(self, ds):
+        """
+        Checks the dimensions of cell boundary variables to ensure they are CF compliant
+        per section 7.1.
+
+        This method extends the CF16Check method; please see the original method for the
+        complete doc string.
+
+        If any variable contains both a formula_terms attribute *and* a bounding variable,
+        that bounds variable must also have a formula_terms attribute.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :returns list: List of results
+        """
+
+        # Note that test does not check monotonicity
+        ret_val = []
+        reasoning = []
+        for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(ds).items():
+            variable = ds.variables[variable_name]
+            valid = True
+            reasoning = []
+            if boundary_variable_name not in ds.variables:
+                valid = False
+                reasoning.append("Boundary variable {} referenced by {} not ".format(
+                                    boundary_variable_name, variable.name
+                                    )+\
+                                 "found in dataset variables")
+            else:
+                boundary_variable = ds.variables[boundary_variable_name]
+            # The number of dimensions in the bounds variable should always be
+            # the number of dimensions in the referring variable + 1
+            if (boundary_variable.ndim < 2):
+                valid = False
+                reasoning.append('Boundary variable {} specified by {}'.format(boundary_variable.name, variable.name)+\
+                                 ' should have at least two dimensions to enclose the base '+\
+                                 'case of a one dimensionsal variable')
+            if (boundary_variable.ndim != variable.ndim + 1):
+                valid = False
+                reasoning.append('The number of dimensions of the variable %s is %s, but the '
+                                 'number of dimensions of the boundary variable %s is %s. The boundary variable '
+                                 'should have %s dimensions' %
+                                 (variable.name, variable.ndim,
+                                  boundary_variable.name,
+                                  boundary_variable.ndim,
+                                  variable.ndim + 1))
+            if (variable.dimensions[:] != boundary_variable.dimensions[:variable.ndim]):
+                valid = False
+                reasoning.append(
+                    u"Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
+                    "".format(variable.name, boundary_variable.dimensions))
+
+            # ensure p vertices form a valid simplex given previous a...n
+            # previous auxiliary coordinates
+            if (ds.dimensions[boundary_variable.dimensions[-1]].size < len(boundary_variable.dimensions[:-1]) + 1):
+                valid = False
+                reasoning.append("Dimension {} of boundary variable (for {}) must have at least {} elements to form a simplex/closed cell with previous dimensions {}.".format(
+                    boundary_variable.name,
+                    variable.name,
+                    len(variable.dimensions) + 1,
+                    boundary_variable.dimensions[:-1])
+                )
+
+            # check if formula_terms is present in the var; if so,
+            # the bounds variable must also have a formula_terms attr
+            if hasattr(variable, "formula_terms"):
+               if not hasattr(boundary_variable, "formula_terms"):
+                   valid = False
+                   reasoning.append(
+                       "'{}' has 'formula_terms' attr, bounds variable '{}' must also have 'formula_terms'".format(variable_name, boundary_variable_name))
+
+            result = Result(BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning)
+            ret_val.append(result)
+        return ret_val
+
+    def check_cell_measures(self, ds):
+        """
+        A method to over-ride the CF16Check method. In CF 1.7, it is specified
+        that variable referenced by cell_measures must be in the dataset OR
+        referenced by the global attribute "external_variables", which represent
+        all the variables used in the dataset but not found in the dataset.
+
+        7.2 To indicate extra information about the spatial properties of a
+        variable's grid cells, a cell_measures attribute may be defined for a
+        variable. This is a string attribute comprising a list of
+        blank-separated pairs of words of the form "measure: name". "area" and
+        "volume" are the only defined measures.
+
+        The "name" is the name of the variable containing the measure values,
+        which we refer to as a "measure variable". The dimensions of the
+        measure variable should be the same as or a subset of the dimensions of
+        the variable to which they are related, but their order is not
+        restricted.
+
+        The variable must have a units attribute and may have other attributes
+        such as a standard_name.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
+        """
+        ret_val = []
+        reasoning = []
+        variables = ds.get_variables_by_attributes(cell_measures=lambda c:
+                                                   c is not None)
+        for var in variables:
+            search_str = '^(?:area|volume): (\w+)$'
+            search_res = regex.search(search_str, var.cell_measures)
+            if not search_res:
+                valid = False
+                reasoning.append("The cell_measures attribute for variable {} "
+                                 "is formatted incorrectly.  It should take the"
+                                 " form of either 'area: cell_var' or "
+                                 "'volume: cell_var' where cell_var is the "
+                                 "variable describing the cell measures".format(
+                                     var.name))
+            else:
+                valid = True
+                cell_meas_var_name = search_res.groups()[0]
+                # TODO: cache previous results
+
+                # if the dataset has external_variables, get it
+                try:
+                    external_variables = ds.getncattr("external_variables")
+                except AttributeError:
+                    external_variables = []
+                if (cell_meas_var_name not in ds.variables):
+                    if (cell_meas_var_name not in external_variables):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} referred to by {} is not present in dataset variables".format(
+                                cell_meas_var_name, var.name)
+                        )
+                   
+                    else:
+                        valid = True
+
+                    # make Result
+                    result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            (self.section_titles['7.2']),
+                            reasoning)
+                    ret_val.append(result)                    
+                    continue # can't test anything on an external var
+
+                else:
+                    cell_meas_var = ds.variables[cell_meas_var_name]
+                    if not hasattr(cell_meas_var, 'units'):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} is required "
+                            "to have units attribute defined.".format(
+                                cell_meas_var_name)
+                        )
+                    if not set(cell_meas_var.dimensions).issubset(var.dimensions):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} must have "
+                            "dimensions which are a subset of "
+                            "those defined in variable {}.".format(
+                                cell_meas_var_name, var.name)
+                        )
+
+            result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            (self.section_titles['7.2']),
+                            reasoning)
+            ret_val.append(result)
 
         return ret_val
 
