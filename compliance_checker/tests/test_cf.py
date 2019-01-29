@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from compliance_checker.suite import CheckSuite
-from compliance_checker.cf import CFBaseCheck, dimless_vertical_coordinates
+from compliance_checker.cf import CF16Check, dimless_vertical_coordinates
 from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal, StandardNameTable, create_cached_data_dir, download_cf_standard_name_table
 from compliance_checker import cfutil
 from netCDF4 import Dataset
@@ -26,7 +26,7 @@ class TestCF(BaseTestCase):
         '''
         Initialize the dataset
         '''
-        self.cf = CFBaseCheck()
+        self.cf = CF16Check()
 
     # --------------------------------------------------------------------------------
     # Helper Methods
@@ -939,7 +939,7 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ints64'])
         suite = CheckSuite()
         suite.checkers = {
-            'cf'        : CFBaseCheck
+            'cf'        : CF16Check
         }
         suite.run(dataset, 'cf')
 
