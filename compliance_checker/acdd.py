@@ -86,7 +86,8 @@ class ACDDBaseCheck(BaseCheck):
         self._var_header = "variable \"{}\" missing the following attributes:"
 
     # set up attributes according to version
-    @check_has(BaseCheck.HIGH)
+    @check_has(BaseCheck.HIGH, gname="Global Attributes")
+    #@check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         '''
         Performs a check on each highly recommended attributes' existence in the dataset
@@ -95,7 +96,7 @@ class ACDDBaseCheck(BaseCheck):
         '''
         return self.high_rec_atts
 
-    @check_has(BaseCheck.MEDIUM)
+    @check_has(BaseCheck.MEDIUM, gname="Global Attributes")
     def check_recommended(self, ds):
         '''
         Performs a check on each recommended attributes' existence in the dataset
@@ -104,7 +105,7 @@ class ACDDBaseCheck(BaseCheck):
         '''
         return self.rec_atts
 
-    @check_has(BaseCheck.LOW)
+    @check_has(BaseCheck.LOW, gname="Global Attributes")
     def check_suggested(self, ds):
         '''
         Performs a check on each suggested attributes' existence in the dataset
@@ -210,8 +211,8 @@ class ACDDBaseCheck(BaseCheck):
         else:
             messages.append("acknowledgment/acknowledgement not present")
 
-        # name=None so gets grouped with Global Attributes
-        return ratable_result(check, None, messages)
+        # name="Global Attributes" so gets grouped with Global Attributes
+        return ratable_result(check, "Global Attributes", messages)
 
     def check_lat_extents(self, ds):
         '''
@@ -351,7 +352,7 @@ class ACDDBaseCheck(BaseCheck):
         check = var is not None
         if not check:
             return ratable_result(False,
-                                  None, # name=None so gets grouped with Globals
+                                  "Global Attributes", # grouped with Globals
                                   ["geospatial_bounds not present"])
 
         try:
@@ -360,11 +361,11 @@ class ACDDBaseCheck(BaseCheck):
             from_wkt(ds.geospatial_bounds)
         except AttributeError:
             return ratable_result(False,
-                                  None,
+                                  "Global Attributes", # grouped with Globals
                                   ['Could not parse WKT, possible bad value for WKT'])
         # parsed OK
         else:
-            return ratable_result(True, None, tuple())
+            return ratable_result(True, "Global Attributes", tuple())
 
     def _check_total_z_extents(self, ds, z_variable):
         '''
@@ -527,12 +528,14 @@ class ACDDBaseCheck(BaseCheck):
                     return ratable_result((2, 2), None, []) # name=None so grouped with Globals
 
             # if no/wrong ACDD convention, return appropriate result
-            return ratable_result((0, 2), None, messages)
+            # Result will have name "Global Attributes" to group with globals
+            return ratable_result((1, 2), "Global Attributes", messages)
         except AttributeError: # NetCDF attribute not found
             messages = [
                 "\"Conventions\" does not contain 'ACDD-{}'".format(self._cc_spec_version)
             ]
-            return ratable_result((0, 2), None, messages)
+            # Result will have name "Global Attributes" to group with globals
+            return ratable_result((0, 2), "Global Attributes", messages)
 
 
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):

@@ -27,22 +27,22 @@ class TestBase(TestCase):
         rv1, rv2, rv3, rv4 = [], [], [], []
         attr = 'test'
         base.attr_check(attr, self.ds, priority, rv1)
-        assert rv1[0] == base.Result(priority, False, None,
+        assert rv1[0] == base.Result(priority, False, "test",
                                      ['test not present'])
         # test with empty string
         self.ds.test = ''
         base.attr_check(attr, self.ds, priority, rv2)
-        assert rv2[0] == base.Result(priority, False, None,
+        assert rv2[0] == base.Result(priority, False, "test",
                                      ["test is empty or completely whitespace"])
         # test with whitespace in the form of a space and a tab
         self.ds.test = ' 	'
         base.attr_check(attr, self.ds, priority, rv3)
-        assert rv3[0] == base.Result(priority, False, None,
+        assert rv3[0] == base.Result(priority, False, "test",
                                      ["test is empty or completely whitespace"])
         # test with actual string contents
         self.ds.test = 'abc 123'
         base.attr_check(attr, self.ds, priority, rv4)
-        assert rv4[0] == base.Result(priority, True, None, [])
+        assert rv4[0] == base.Result(priority, True, "test", [])
 
     def test_attr_in_valid_choices(self):
         """Tests attribute membership in a set"""
@@ -51,13 +51,13 @@ class TestBase(TestCase):
         valid_choices = ['a', 'b', 'c']
         attr = ('test', valid_choices)
         base.attr_check(attr, self.ds, priority, rv1)
-        assert rv1[0] == base.Result(priority, (0, 2), None, ["test not present"])
+        assert rv1[0] == base.Result(priority, (0, 2), "test", ["test not present"])
         self.ds.test = ''
         base.attr_check(attr, self.ds, priority, rv2)
-        assert rv2[0] == base.Result(priority, (1, 2), None, ["test present, but not in expected value list (%s)" % valid_choices])
+        assert rv2[0] == base.Result(priority, (1, 2), "test", ["test present, but not in expected value list (%s)" % valid_choices])
         self.ds.test = 'a'
         base.attr_check(attr, self.ds, priority, rv3)
-        assert rv3[0] == base.Result(priority, (2, 2), None, [])
+        assert rv3[0] == base.Result(priority, (2, 2), "test", [])
 
     def test_attr_fn(self):
         """Test attribute against a checker function"""

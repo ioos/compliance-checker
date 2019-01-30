@@ -264,8 +264,8 @@ class CheckSuite(object):
 
         for checker_name, checker_class in checkers:
 
-            checker = checker_class()
-            checker.setup(ds)
+            checker = checker_class() # instantiate a Checker object
+            checker.setup(ds)         # setup method to prep
 
             checks = self._get_checks(checker, skip_check_dict)
             vals = []
@@ -658,7 +658,7 @@ class CheckSuite(object):
         """
         Internal recursive method to group raw scores into a cascading score summary.
         Only top level items are tallied for scores.
-        @param list raw_scores: list of raw scores
+        @param list raw_scores: list of raw scores (Result objects)
         """
 
         # BEGIN INTERNAL FUNCS ########################################

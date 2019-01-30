@@ -806,7 +806,7 @@ class TestCF(BaseTestCase):
         results = self.cf.check_packed_data(dataset)
         self.assertEqual(len(results), 4)
         self.assertFalse(results[0].value)
-        self.assertTrue(results[1].value)
+        self.assertFalse(results[1].value)
         self.assertTrue(results[2].value)
         self.assertFalse(results[3].value)
 

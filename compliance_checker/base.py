@@ -235,7 +235,7 @@ def xpath_check(tree, xpath):
     return len(xpath(tree)) > 0
 
 
-def attr_check(l, ds, priority, ret_val):
+def attr_check(l, ds, priority, ret_val, gname=None):
     """
     Handles attribute checks for simple presence of an attribute, presence of
     one of several attributes, and passing a validation function.  Returns a
@@ -260,14 +260,28 @@ def attr_check(l, ds, priority, ret_val):
             elif res == 1:
                 msgs.append("%s present, but not in expected value list (%s)" % (name, other))
 
-            ret_val.append(Result(priority, (res, 2), None, msgs)) # name=None so groups with Globals
+            ret_val.append(
+                Result(
+                    priority,
+                    (res, 2),
+                    gname if gname else name, # groups Globals if supplied
+                    msgs
+                )
+            )
         # if we have an XPath expression, call it on the document
         elif type(other) is etree.XPath:
             # TODO: store tree instead of creating it each time?
             res = xpath_check(ds._root, other)
             if not res:
                 msgs = ["XPath for {} not found".format(name)]
-            ret_val.append(Result(priority, res, name, msgs))
+            ret_val.append(
+                Result(
+                    priority,
+                    res,
+                    gname if gname else name,
+                    msgs
+                )
+            )
         # if the attribute is a function, call it
         # right now only supports single attribute
         # important note: current magic approach uses all functions
@@ -284,7 +298,14 @@ def attr_check(l, ds, priority, ret_val):
             res = other(ds) # call the method on the dataset
             if not res:
                 msgs = ["%s not present" % name]
-                ret_val.append(Result(priority, res, name, msgs))
+                ret_val.append(
+                    Result(
+                        priority,
+                        res,
+                        gname if gname else name,
+                        msgs
+                    )
+                )
             else:
                 ret_val.append(other(ds)(priority))
         # unsupported second type in second
@@ -307,13 +328,18 @@ def attr_check(l, ds, priority, ret_val):
             except AttributeError:
                 pass
 
-        # supplying no name arg allows the global attrs to be grouped together
-        ret_val.append(Result(priority, value=res, msgs=msgs))
+        # gname arg allows the global attrs to be grouped together
+        ret_val.append(Result(
+            priority,
+            value=res,
+            name=gname if gname else l,
+            msgs=msgs
+        ))
 
     return ret_val
 
 
-def check_has(priority=BaseCheck.HIGH):
+def check_has(priority=BaseCheck.HIGH, gname=None):
     """Decorator to wrap a function to check if a dataset has given attributes.
     :param function func: function to wrap"""
 
@@ -326,7 +352,7 @@ def check_has(priority=BaseCheck.HIGH):
             # effects on `ret_val`
             for l in list_vars:
                 # function mutates ret_val
-                attr_check(l, ds, priority, ret_val)
+                attr_check(l, ds, priority, ret_val, gname)
             return ret_val
 
         return wraps(func)(_dec)
@@ -344,8 +370,6 @@ def fix_return_value(v, method_name, method=None, checker=None):
         v = Result(value=v, name=method_name)
 
     v.name         = v.name or method_name
-    if v.name in ["high", "recommended", "suggested"]:
-        v.name = "Global Attributes" # specifically for ACDD for grouping
 
     v.checker      = checker
     v.check_method = method
