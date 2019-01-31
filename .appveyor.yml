@@ -20,18 +20,18 @@ install:
 
   # Add path, activate `conda` and update conda.
   - cmd: call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
-  - cmd: conda.exe config --set always_yes yes --set changeps1 no --set show_channel_urls true
-  - cmd: conda.exe update conda
-  - cmd: conda.exe config --remove channels defaults --force
-  - cmd: conda.exe config --add channels conda-forge --force
+  - cmd: conda config --set always_yes yes --set changeps1 no --set show_channel_urls true
+  - cmd: conda install conda=4.5
+  - cmd: conda config --remove channels defaults --force
+  - cmd: conda config --add channels conda-forge --force
   - cmd: set PYTHONUNBUFFERED=1
 
   - cmd: python gen_conda_requirements.py --groups requirements.txt --py%PY:~0,1% > conda-requirements.txt
-  - cmd: conda.exe create --name TEST python=%PY% --file conda-requirements.txt --file test_requirements.txt
+  - cmd: conda create --name TEST python=%PY% --file conda-requirements.txt --file test_requirements.txt
 
   - cmd: conda activate TEST
-  - cmd: conda.exe info --all
-  - cmd: conda.exe list
+  - cmd: conda info --all
+  - cmd: conda list
 
 
 # Skip .NET project specific build phase.
