@@ -123,11 +123,7 @@ class Result(object):
         if value is None:
             self.value = None
         elif isinstance(value, tuple):
-            try:
-                assert len(value) == 2, 'Result value must be 2-tuple or boolean!'
-            except AssertionError:
-                if value == (): # just make it (0, 0)
-                    value = (0, 0)
+            assert len(value) == 2, 'Result value must be 2-tuple or boolean!'
             self.value = value
         else:
             self.value = bool(value)

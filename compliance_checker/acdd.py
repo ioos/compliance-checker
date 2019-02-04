@@ -86,7 +86,6 @@ class ACDDBaseCheck(BaseCheck):
 
     # set up attributes according to version
     @check_has(BaseCheck.HIGH, gname="Global Attributes")
-    #@check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         '''
         Performs a check on each highly recommended attributes' existence in the dataset
@@ -124,17 +123,33 @@ class ACDDBaseCheck(BaseCheck):
         if self._applicable_variables is None:
             self.applicable_variables = cfutil.get_geophysical_variables(ds)
             varname = cfutil.get_time_variable(ds)
-            if varname:
+            # avoid duplicates by checking if already present
+            if varname and (varname not in self.applicable_variables):
                 self.applicable_variables.append(varname)
             varname = cfutil.get_lon_variable(ds)
-            if varname:
+            if varname and (varname not in self.applicable_variables):
                 self.applicable_variables.append(varname)
             varname = cfutil.get_lat_variable(ds)
-            if varname:
+            if varname and (varname not in self.applicable_variables):
                 self.applicable_variables.append(varname)
             varname = cfutil.get_z_variable(ds)
-            if varname:
+            if varname and (varname not in self.applicable_variables):
                 self.applicable_variables.append(varname)
+
+            # TODO?
+            # by assigning:
+
+            # self._applicable_variables = self.applicable_variables
+
+            # this entire if statement won't have to be called again;
+            # not assigning will result in some of th cached results being duplicated,
+            # and thus some check Results being duplicated. However, once assigned
+            # the cache is present for the entire life of the ACDD1_* checker object;
+            # this has unintended side effects on our unit tests which do not always
+            # (never, I believe) flush the cache between creating/loading new testing
+            # datasets. Because of this, cached objects from the previous dataset are
+            # kept in the object, causing downstream tests to fail.
+
         return self.applicable_variables
 
     def check_var_long_name(self, ds):
@@ -530,13 +545,12 @@ class ACDDBaseCheck(BaseCheck):
 
             # if no/wrong ACDD convention, return appropriate result
             # Result will have name "Global Attributes" to group with globals
-            return ratable_result((1, 2), "Global Attributes", messages)
+            m = ["\"Conventions\" does not contain 'ACDD-{}'".format(self._cc_spec_version)]
+            return ratable_result((1, 2), "Global Attributes", m)
         except AttributeError: # NetCDF attribute not found
-            messages = [
-                "\"Conventions\" does not contain 'ACDD-{}'".format(self._cc_spec_version)
-            ]
+            m = ["\"Conventions\" attribute not present"]
             # Result will have name "Global Attributes" to group with globals
-            return ratable_result((0, 2), "Global Attributes", messages)
+            return ratable_result((0, 2), "Global Attributes", m)
 
 
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):

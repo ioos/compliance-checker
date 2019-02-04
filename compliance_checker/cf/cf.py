@@ -939,7 +939,7 @@ class CFBaseCheck(BaseCheck):
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(
                 isinstance(units, basestring),
-                "units ({}) attribute of '{}' must be a string".format(units, variable.name)
+                "units ({}) attribute of '{}' must be a string compatible with UDUNITS".format(units, variable.name)
             ):
                 valid_udunits = self._check_valid_udunits(ds, name)
                 ret_val.append(valid_udunits)
