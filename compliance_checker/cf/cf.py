@@ -4,7 +4,8 @@ from __future__ import unicode_literals, division, print_function
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates,
                                               no_missing_terms)
-from compliance_checker.cf.appendix_f import grid_mapping_dict
+from compliance_checker.cf.appendix_e import cell_methods16, cell_methods17
+from compliance_checker.cf.appendix_f import grid_mapping_dict16, grid_mapping_dict17
 from compliance_checker.cf import util
 from compliance_checker import cfutil
 from cf_units import Unit
@@ -38,7 +39,7 @@ def print_exceptions(f):
     return wrapper
 
 
-__stdname_table__ = "v29" # has this changed?
+__stdname_table__ = "v61"
 
 
 # helper to see if we should do DSG tests
@@ -117,7 +118,6 @@ class CFBaseCheck(BaseCheck):
             "9.6": "§9.6 Missing Data"
         }
 
-    #self.supported_ds = 
 
     ################################################################################
     # Helper Methods - var classifications, etc
@@ -591,9 +591,13 @@ class CF16Check(CFNCCheck):
     def __init__(self): # initialize with parent methods and data
         super(CF16Check, self).__init__()
 
+        self.cell_methods = cell_methods16
+        self.grid_mapping_dict = grid_mapping_dict16
+
     ###############################################################################
     # Chapter 2: NetCDF Files and Components
     ###############################################################################
+
 
     def check_data_types(self, ds):
         '''
@@ -988,7 +992,7 @@ class CF16Check(CFNCCheck):
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(
                 isinstance(units, basestring),
-                "units ({}) attribute of '{}' must be a string".format(units, variable.name)
+                "units ({}) attribute of '{}' must be a string compatible with UDUNITS".format(units, variable.name)
             ):
                 valid_udunits = self._check_valid_udunits(ds, name)
                 ret_val.append(valid_udunits)
@@ -1866,7 +1870,7 @@ class CF16Check(CFNCCheck):
         # check that the formula_terms are well formed and are present
         # The pattern for formula terms is always component: variable_name
         # the regex grouping always has component names in even positions and
-        # the corresponding variable name in even positions.
+        # the corresponding variable name in odd positions.
         matches = regex.findall(r'([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)',
                                 variable.formula_terms)
         terms = set(m[0][:-2] for m in matches)
@@ -2372,22 +2376,22 @@ class CF16Check(CFNCCheck):
             grid_mapping_name = getattr(grid_var, 'grid_mapping_name', None)
 
             # Grid mapping name must be in appendix F
-            valid_grid_mapping.assert_true(grid_mapping_name in grid_mapping_dict,
+            valid_grid_mapping.assert_true(grid_mapping_name in self.grid_mapping_dict,
                                            "{} is not a valid grid_mapping_name.".format(grid_mapping_name)+\
                                            " See Appendix F for valid grid mappings")
 
-            # The grid_mapping_dict has a values of:
+            # The self.grid_mapping_dict has a values of:
             # - required attributes
             # - optional attributes (can't check)
             # - required standard_names defined
             # - at least one of these attributes must be defined
 
             # We can't do any of the other grid mapping checks if it's not a valid grid mapping name
-            if grid_mapping_name not in grid_mapping_dict:
+            if grid_mapping_name not in self.grid_mapping_dict:
                 ret_val.append(valid_grid_mapping.to_result())
                 continue
 
-            grid_mapping = grid_mapping_dict[grid_mapping_name]
+            grid_mapping = self.grid_mapping_dict[grid_mapping_name]
             required_attrs = grid_mapping[0]
             # Make sure all the required attributes are defined
             for req in required_attrs:
@@ -2395,8 +2399,8 @@ class CF16Check(CFNCCheck):
                                                "{} is a required attribute for grid mapping {}".format(req, grid_mapping_name))
 
             # Make sure that exactly one of the exclusive attributes exist
-            if len(grid_mapping_dict) == 4:
-                at_least_attr = grid_mapping_dict[3]
+            if len(self.grid_mapping_dict) == 4:
+                at_least_attr = self.grid_mapping_dict[3]
                 number_found = 0
                 for attr in at_least_attr:
                     if hasattr(grid_var, attr):
@@ -2663,7 +2667,7 @@ class CF16Check(CFNCCheck):
                     reasoning.append(
                         "Cell measure variable {} referred to by "
                         "{} is not present in dataset variables".format(
-                            var.name, cell_meas_var_name)
+                            cell_meas_var_name, var.name)
                     )
                 else:
                     cell_meas_var = ds.variables[cell_meas_var_name]
@@ -2716,25 +2720,6 @@ class CF16Check(CFNCCheck):
         :return: List of results
         """
 
-        methods = {
-            "point",
-            "sum",
-            "mean",
-            "maximum",
-            "minimum",
-            "mid_range",
-            "standard_deviation",
-            "variance",
-            "mode",
-            "median",
-            "maximum_absolute_value",
-            "minimum_absolute_value",
-            "mean_absolute_value",
-            "root_mean_square",
-            "sum_of_squares",
-            "range",
-        }
-
         ret_val = []
         psep = regex.compile(r'(?P<vars>\w+: )+(?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
                              '?(?P<over>over (?P<otypevar>\w+))?| ?)(?:\((?P<paren_contents>[^)]*)\))?')
@@ -2746,7 +2731,7 @@ class CF16Check(CFNCCheck):
             method = getattr(var, 'cell_methods', '')
 
             valid_attribute = TestCtx(BaseCheck.HIGH,
-                                      self.section_titles['7.1']) # TODO is this supposed to be 7.3?
+                                      self.section_titles['7.3']) # changed from 7.1 to 7.3 -- NOTE this in commit message
             valid_attribute.assert_true(regex.match(psep, method) is not None,
                                         '"{}" is not a valid format for cell_methods attribute of "{}"'
                                         ''.format(method, var.name))
@@ -2782,7 +2767,7 @@ class CF16Check(CFNCCheck):
 
             for match in regex.finditer(psep, method):
                 # CF section 7.3 - "Case is not significant in the method name."
-                valid_cell_methods.assert_true(match.group('method').lower() in methods,
+                valid_cell_methods.assert_true(match.group('method').lower() in self.cell_methods,
                                                '{}:cell_methods contains an invalid method: {}'
                                                ''.format(var.name, match.group('method')))
 
@@ -3334,6 +3319,287 @@ class CF16Check(CFNCCheck):
                                 self.section_titles['7.1'],
                                 [msg])
                 ret_val.append(result)
+
+        return ret_val
+
+class CF17Check(CF16Check):
+    """Implementation for CF v1.7. Inherits from CF16Check as most of the
+    checks are the same."""
+
+    # things that are specific to 1.7
+    _cc_spec_version    = '1.7'
+    _cc_url             = 'http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html'
+
+    def __init__(self):
+        super(CF17Check, self).__init__()
+
+        self.cell_methods = cell_methods17
+        self.grid_mapping_dict = grid_mapping_dict17
+
+    
+    def check_actual_range(self, ds):
+        """Check the actual_range attribute of variables. As stated in
+        section 2.5.1 of version 1.7, this convention defines a two-element
+        vector attribute designed to describe the actual minimum and actual
+        maximium values of variables containing numeric data. Conditions:
+          - if all values of the variable are equal, actual_range should *not*
+            exist
+          - the fist value of the two-element vector must be equal to the
+            minimum of the data, and the second element equal to the maximium
+          - if the data is packed, the elements of actual_range should have
+            the same data type as the *unpacked* data
+          - if valid_range is specified, both elements of actual_range should
+            be within valid_range
+
+        If a variable does not have an actual_range attribute, let it pass; 
+        including this attribute is only suggested. However, if the user is
+        specifying the actual_range, the Result will be considered
+        high-priority."""
+
+        ret_val = []
+
+        for name, variable in ds.variables.items():
+            msgs   = []
+            score  = 0
+            out_of = 0
+
+            if not hasattr(variable, "actual_range"):
+                continue # having this attr is only suggested, no Result needed
+            else:
+
+                if variable.mask: # remove mask
+                    variable.set_auto_mask(False)
+
+                # NOTE this is a data check
+                out_of += 1
+                if len(set(variable[:])) == 1: # all values are the same
+                    msgs.append("\"{}\"'s values are all equal; actual_range shouldn't exist".format(name))
+                    ret_val.append(Result( # putting result into list
+                        BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
+                    continue # no need to keep checking if it shouldn't be there
+                else:
+                    score += 1
+
+                out_of += 1
+                try:
+                    if (len(variable.actual_range) != 2):
+                        msgs.append("actual_range of '{}' must be 2 elements".format(name))
+                        ret_val.append(Result( # putting result into list
+                            BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
+                        continue # no need to keep checking if already completely wrong
+                    else:
+                        score += 1
+                except TypeError: # in case it's just a single number
+                    msgs.append("actual_range of '{}' must be 2 elements".format(name))
+                    ret_val.append(Result( # putting result into list
+                        BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
+                    continue
+
+                # NOTE this is a data check -- but do we need it since we are checking
+                # consistency with valid_min/valid_max attrs?
+                out_of += 1
+                if ( # check equality to stated min/max values
+                    variable.actual_range[0] != min(variable[:])
+                ) or (
+                    variable.actual_range[1] != max(variable[:])
+                ):
+                    msgs.append("actual_range elements of '{}' inconsistent with its min/max values".format(name)
+                    )
+                else:
+                    score += 1
+
+                out_of += 1
+                if (hasattr(variable, "valid_range")): # check equality to valid_range
+                    if (variable.actual_range[0] != variable.valid_range[0]) or (variable.actual_range[1] != variable.valid_range[1]):
+                        msgs.append("\"{}\"'s actual_range must be == valid_range".format(name))
+                else:
+                    score += 1
+
+                for _att, loc in zip(["valid_min", "valid_max"], [0, 1]):
+                    out_of += 1
+                    if (hasattr(variable, _att)):
+                        _val = getattr(variable, _att)
+                        if (variable.actual_range[loc] != _val):
+                            msgs.append("\"{}\"'s actual_range[{}] must be == {} ({})".format(name, loc, _val, _att))
+                    else:
+                        score += 1
+
+            ret_val.append(Result( # putting result into list
+                BaseCheck.HIGH,
+                (score, out_of),
+                self.section_titles["2.5"],
+                msgs
+            ))
+        return ret_val
+
+    def check_cell_boundaries(self, ds):
+        """
+        Checks the dimensions of cell boundary variables to ensure they are CF compliant
+        per section 7.1.
+
+        This method extends the CF16Check method; please see the original method for the
+        complete doc string.
+
+        If any variable contains both a formula_terms attribute *and* a bounding variable,
+        that bounds variable must also have a formula_terms attribute.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :returns list: List of results
+        """
+
+        # Note that test does not check monotonicity
+        ret_val = []
+        reasoning = []
+        for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(ds).items():
+            variable = ds.variables[variable_name]
+            valid = True
+            reasoning = []
+            if boundary_variable_name not in ds.variables:
+                valid = False
+                reasoning.append("Boundary variable {} referenced by {} not ".format(
+                                    boundary_variable_name, variable.name
+                                    )+\
+                                 "found in dataset variables")
+            else:
+                boundary_variable = ds.variables[boundary_variable_name]
+            # The number of dimensions in the bounds variable should always be
+            # the number of dimensions in the referring variable + 1
+            if (boundary_variable.ndim < 2):
+                valid = False
+                reasoning.append('Boundary variable {} specified by {}'.format(boundary_variable.name, variable.name)+\
+                                 ' should have at least two dimensions to enclose the base '+\
+                                 'case of a one dimensionsal variable')
+            if (boundary_variable.ndim != variable.ndim + 1):
+                valid = False
+                reasoning.append('The number of dimensions of the variable %s is %s, but the '
+                                 'number of dimensions of the boundary variable %s is %s. The boundary variable '
+                                 'should have %s dimensions' %
+                                 (variable.name, variable.ndim,
+                                  boundary_variable.name,
+                                  boundary_variable.ndim,
+                                  variable.ndim + 1))
+            if (variable.dimensions[:] != boundary_variable.dimensions[:variable.ndim]):
+                valid = False
+                reasoning.append(
+                    u"Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
+                    "".format(variable.name, boundary_variable.dimensions))
+
+            # ensure p vertices form a valid simplex given previous a...n
+            # previous auxiliary coordinates
+            if (ds.dimensions[boundary_variable.dimensions[-1]].size < len(boundary_variable.dimensions[:-1]) + 1):
+                valid = False
+                reasoning.append("Dimension {} of boundary variable (for {}) must have at least {} elements to form a simplex/closed cell with previous dimensions {}.".format(
+                    boundary_variable.name,
+                    variable.name,
+                    len(variable.dimensions) + 1,
+                    boundary_variable.dimensions[:-1])
+                )
+
+            # check if formula_terms is present in the var; if so,
+            # the bounds variable must also have a formula_terms attr
+            if hasattr(variable, "formula_terms"):
+               if not hasattr(boundary_variable, "formula_terms"):
+                   valid = False
+                   reasoning.append(
+                       "'{}' has 'formula_terms' attr, bounds variable '{}' must also have 'formula_terms'".format(variable_name, boundary_variable_name))
+
+            result = Result(BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning)
+            ret_val.append(result)
+        return ret_val
+
+    def check_cell_measures(self, ds):
+        """
+        A method to over-ride the CF16Check method. In CF 1.7, it is specified
+        that variable referenced by cell_measures must be in the dataset OR
+        referenced by the global attribute "external_variables", which represent
+        all the variables used in the dataset but not found in the dataset.
+
+        7.2 To indicate extra information about the spatial properties of a
+        variable's grid cells, a cell_measures attribute may be defined for a
+        variable. This is a string attribute comprising a list of
+        blank-separated pairs of words of the form "measure: name". "area" and
+        "volume" are the only defined measures.
+
+        The "name" is the name of the variable containing the measure values,
+        which we refer to as a "measure variable". The dimensions of the
+        measure variable should be the same as or a subset of the dimensions of
+        the variable to which they are related, but their order is not
+        restricted.
+
+        The variable must have a units attribute and may have other attributes
+        such as a standard_name.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
+        """
+        ret_val = []
+        reasoning = []
+        variables = ds.get_variables_by_attributes(cell_measures=lambda c:
+                                                   c is not None)
+        for var in variables:
+            search_str = '^(?:area|volume): (\w+)$'
+            search_res = regex.search(search_str, var.cell_measures)
+            if not search_res:
+                valid = False
+                reasoning.append("The cell_measures attribute for variable {} "
+                                 "is formatted incorrectly.  It should take the"
+                                 " form of either 'area: cell_var' or "
+                                 "'volume: cell_var' where cell_var is the "
+                                 "variable describing the cell measures".format(
+                                     var.name))
+            else:
+                valid = True
+                cell_meas_var_name = search_res.groups()[0]
+                # TODO: cache previous results
+
+                # if the dataset has external_variables, get it
+                try:
+                    external_variables = ds.getncattr("external_variables")
+                except AttributeError:
+                    external_variables = []
+                if (cell_meas_var_name not in ds.variables):
+                    if (cell_meas_var_name not in external_variables):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} referred to by {} is not present in dataset variables".format(
+                                cell_meas_var_name, var.name)
+                        )
+                   
+                    else:
+                        valid = True
+
+                    # make Result
+                    result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            (self.section_titles['7.2']),
+                            reasoning)
+                    ret_val.append(result)                    
+                    continue # can't test anything on an external var
+
+                else:
+                    cell_meas_var = ds.variables[cell_meas_var_name]
+                    if not hasattr(cell_meas_var, 'units'):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} is required "
+                            "to have units attribute defined.".format(
+                                cell_meas_var_name)
+                        )
+                    if not set(cell_meas_var.dimensions).issubset(var.dimensions):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} must have "
+                            "dimensions which are a subset of "
+                            "those defined in variable {}.".format(
+                                cell_meas_var_name, var.name)
+                        )
+
+            result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            (self.section_titles['7.2']),
+                            reasoning)
+            ret_val.append(result)
 
         return ret_val
 
