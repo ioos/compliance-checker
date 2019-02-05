@@ -186,7 +186,6 @@ class CheckSuite(object):
         the user selected names.
         """
 
-        import pdb; pdb.set_trace()
         assert len(self.checkers) > 0, "No checkers could be found."
 
         if len(checker_names) == 0:
