@@ -81,8 +81,11 @@ class ACDDBaseCheck(BaseCheck):
         # the method isn't executed repeatedly.
         self._applicable_variables = None
 
+        # to be used to format variable Result groups headers
+        self._var_header = "variable \"{}\" missing the following attributes:"
+
     # set up attributes according to version
-    @check_has(BaseCheck.HIGH)
+    @check_has(BaseCheck.HIGH, gname="Global Attributes")
     def check_high(self, ds):
         '''
         Performs a check on each highly recommended attributes' existence in the dataset
@@ -91,7 +94,7 @@ class ACDDBaseCheck(BaseCheck):
         '''
         return self.high_rec_atts
 
-    @check_has(BaseCheck.MEDIUM)
+    @check_has(BaseCheck.MEDIUM, gname="Global Attributes")
     def check_recommended(self, ds):
         '''
         Performs a check on each recommended attributes' existence in the dataset
@@ -100,7 +103,7 @@ class ACDDBaseCheck(BaseCheck):
         '''
         return self.rec_atts
 
-    @check_has(BaseCheck.LOW)
+    @check_has(BaseCheck.LOW, gname="Global Attributes")
     def check_suggested(self, ds):
         '''
         Performs a check on each suggested attributes' existence in the dataset
@@ -120,17 +123,19 @@ class ACDDBaseCheck(BaseCheck):
         if self._applicable_variables is None:
             self.applicable_variables = cfutil.get_geophysical_variables(ds)
             varname = cfutil.get_time_variable(ds)
-            if varname:
+            # avoid duplicates by checking if already present
+            if varname and (varname not in self.applicable_variables):
                 self.applicable_variables.append(varname)
             varname = cfutil.get_lon_variable(ds)
-            if varname:
+            if varname and (varname not in self.applicable_variables):
                 self.applicable_variables.append(varname)
             varname = cfutil.get_lat_variable(ds)
-            if varname:
+            if varname and (varname not in self.applicable_variables):
                 self.applicable_variables.append(varname)
             varname = cfutil.get_z_variable(ds)
-            if varname:
+            if varname and (varname not in self.applicable_variables):
                 self.applicable_variables.append(varname)
+
         return self.applicable_variables
 
     def check_var_long_name(self, ds):
@@ -149,8 +154,8 @@ class ACDDBaseCheck(BaseCheck):
             long_name = getattr(ds.variables[variable], 'long_name', None)
             check = long_name is not None
             if not check:
-                msgs.append("Var %s missing attribute long_name" % variable)
-            results.append(Result(BaseCheck.HIGH, check, "variable {}".format(variable), msgs))
+                msgs.append("long_name")
+            results.append(Result(BaseCheck.HIGH, check, self._var_header.format(variable), msgs))
 
         return results
 
@@ -166,8 +171,8 @@ class ACDDBaseCheck(BaseCheck):
             std_name = getattr(ds.variables[variable], 'standard_name', None)
             check = std_name is not None
             if not check:
-                msgs.append("Var %s missing attribute standard_name" % variable)
-            results.append(Result(BaseCheck.HIGH, check, "variable {}".format(variable), msgs))
+                msgs.append("standard_name")
+            results.append(Result(BaseCheck.HIGH, check, self._var_header.format(variable), msgs))
 
         return results
 
@@ -188,14 +193,16 @@ class ACDDBaseCheck(BaseCheck):
                 continue
             # Check if we have no units
             if not unit_check:
-                msgs.append("Var %s missing attribute units" % variable)
-            results.append(Result(BaseCheck.HIGH, unit_check, "variable {}".format(variable), msgs))
+                msgs.append("units")
+            results.append(Result(BaseCheck.HIGH, unit_check, self._var_header.format(variable), msgs))
 
         return results
 
     def check_acknowledgment(self, ds):
         '''
-        Check if acknowledgment/acknowledgment attribute is present.
+        Check if acknowledgment/acknowledgment attribute is present. Because
+        acknowledgement has its own check, we are keeping it out of the Global
+        Attributes (even though it is a Global Attr).
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         '''
@@ -204,9 +211,10 @@ class ACDDBaseCheck(BaseCheck):
         if hasattr(ds, 'acknowledgment') or hasattr(ds, 'acknowledgement'):
             check = True
         else:
-            messages.append("Attr acknowledgement not present")
+            messages.append("acknowledgment/acknowledgement not present")
 
-        return Result(BaseCheck.MEDIUM, check, 'acknowledgment/acknowledgement', msgs=messages)
+        # name="Global Attributes" so gets grouped with Global Attributes
+        return Result(BaseCheck.MEDIUM, check, "Global Attributes", msgs=messages)
 
     def check_lat_extents(self, ds):
         '''
@@ -346,8 +354,8 @@ class ACDDBaseCheck(BaseCheck):
         check = var is not None
         if not check:
             return ratable_result(False,
-                                  'geospatial_bounds',
-                                  ["Attr geospatial_bounds not present"])
+                                  "Global Attributes", # grouped with Globals
+                                  ["geospatial_bounds not present"])
 
         try:
             # TODO: verify that WKT is valid given CRS (defaults to EPSG:4326
@@ -355,11 +363,11 @@ class ACDDBaseCheck(BaseCheck):
             from_wkt(ds.geospatial_bounds)
         except AttributeError:
             return ratable_result(False,
-                                  'geospatial_bounds',
+                                  "Global Attributes", # grouped with Globals
                                   ['Could not parse WKT, possible bad value for WKT'])
         # parsed OK
         else:
-            return ratable_result(True, 'geospatial_bounds', tuple())
+            return ratable_result(True, "Global Attributes", tuple())
 
     def _check_total_z_extents(self, ds, z_variable):
         '''
@@ -516,19 +524,19 @@ class ACDDBaseCheck(BaseCheck):
         """
         Verify that the version in the Conventions field is correct
         """
-        for convention in ds.Conventions.replace(' ', '').split(','):
-            if convention == 'ACDD-' + self._cc_spec_version:
-                return ratable_result((2, 2),
-                                      'Conventions',
-                                      [])
-        # Conventions attribute is present, but does not include
-        # proper ACDD version
-        messages = [
-            "Global Attribute 'Conventions' does not contain 'ACDD-{}'".format(self._cc_spec_version)
-        ]
-        return ratable_result((1, 2),
-                              'Conventions',
-                              messages)
+        try:
+            for convention in getattr(ds, "Conventions", '').replace(' ', '').split(','):
+                if convention == 'ACDD-' + self._cc_spec_version:
+                    return ratable_result((2, 2), None, []) # name=None so grouped with Globals
+
+            # if no/wrong ACDD convention, return appropriate result
+            # Result will have name "Global Attributes" to group with globals
+            m = ["Conventions does not contain 'ACDD-{}'".format(self._cc_spec_version)]
+            return ratable_result((1, 2), "Global Attributes", m)
+        except AttributeError: # NetCDF attribute not found
+            m = ["No Conventions attribute present; must contain ACDD-{}".format(self._cc_spec_version)]
+            # Result will have name "Global Attributes" to group with globals
+            return ratable_result((0, 2), "Global Attributes", m)
 
 
 class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
@@ -567,7 +575,8 @@ class ACDD1_3Check(ACDDNCCheck):
             ('Conventions', self.verify_convention_version)
         ])
 
-        self.rec_atts.extend(['geospatial_vertical_positive',
+        self.rec_atts.extend([
+                              'geospatial_vertical_positive',
                               'geospatial_bounds_crs',
                               'geospatial_bounds_vertical_crs',
                               'publisher_name',       # publisher,dataCenter
@@ -689,11 +698,9 @@ class ACDD1_3Check(ACDDNCCheck):
                             'coverage_content_type', None)
             check = ctype is not None
             if not check:
-                msgs.append("Var %s missing attribute coverage_content_type" %
-                            variable)
+                msgs.append("coverage_content")
                 results.append(Result(BaseCheck.HIGH, check,
-                                      "variable {}".format(variable),
-                                      msgs))
+                                      self._var_header.format(variable), msgs))
                 continue
 
             # ISO 19115-1 codes
@@ -708,7 +715,9 @@ class ACDD1_3Check(ACDDNCCheck):
                 'coordinate'
             }
             if ctype not in valid_ctypes:
-                msgs.append("Var %s does not have a coverage_content_type in %s"
+                msgs.append("coverage_content_type in \"%s\""
                             % (variable, sorted(valid_ctypes)))
+                results.append(Result(BaseCheck.HIGH, check, # append to list
+                                      self._var_header.format(variable), msgs))
 
         return results

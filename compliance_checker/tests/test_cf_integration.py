@@ -119,11 +119,11 @@ class TestCFIntegration(BaseTestCase):
             u"lwrad's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho", 
             u"swrad's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho", 
             u'§2.6.1 Conventions global attribute does not contain "CF-1.6". The CF Checker only supports CF-1.6 at this time.', 
-            u"'units' attribute of 's_w' must be a string compatible with UDUNITS", 
-            u"'units' attribute of 's_rho' must be a string compatible with UDUNITS", 
-            u"'units' attribute of 'Cs_w' must be a string compatible with UDUNITS", 
-            u"'units' attribute of 'user' must be a string compatible with UDUNITS", 
-            u"'units' attribute of 'Cs_r' must be a string compatible with UDUNITS", 
+            u"units (None) attribute of 's_w' must be a string compatible with UDUNITS", 
+            u"units (None) attribute of 's_rho' must be a string compatible with UDUNITS", 
+            u"units (None) attribute of 'Cs_w' must be a string compatible with UDUNITS", 
+            u"units (None) attribute of 'user' must be a string compatible with UDUNITS", 
+            u"units (None) attribute of 'Cs_r' must be a string compatible with UDUNITS", 
             u"CF recommends latitude variable 'lat_rho' to use units degrees_north", 
             u"CF recommends latitude variable 'lat_u' to use units degrees_north", 
             u"CF recommends latitude variable 'lat_v' to use units degrees_north", 
@@ -165,7 +165,7 @@ class TestCFIntegration(BaseTestCase):
             u'Unidentifiable feature for variable Cs_w', 
             u'Unidentifiable feature for variable user'
         ]
-        assert all(m in messages for m in msgs)
+        assert all([m in messages for m in msgs])
 
 
     def test_l01_met(self):
@@ -266,7 +266,7 @@ class TestCFIntegration(BaseTestCase):
 
         msgs = [
            u'§2.6.2 comment global attribute should be a non-empty string', 
-           u"'units' attribute of 'deployment' must be a string compatible with UDUNITS", 
+           u"units (None) attribute of 'deployment' must be a string compatible with UDUNITS", 
            u'Attribute long_name or/and standard_name is highly recommended for variable deployment', 
            u"latitude variable 'latitude' should define standard_name='latitude' or axis='Y'", 
            u"longitude variable 'longitude' should define standard_name='longitude' or axis='X'"
@@ -323,9 +323,9 @@ class TestCFIntegration(BaseTestCase):
             u'§2.6.2 depth:comment should be a non-empty string', 
             u'§2.6.2 institution global attribute should be a non-empty string', 
             u'§2.6.2 comment global attribute should be a non-empty string', 
-            u"'units' attribute of 'LayerInterf' must be a string compatible with UDUNITS", 
-            u"'units' attribute of 'time_bounds' must be a string compatible with UDUNITS", 
-            u"'units' attribute of 'Layer' must be a string compatible with UDUNITS", 
+            u"units (None) attribute of 'LayerInterf' must be a string compatible with UDUNITS",
+            u"units (None) attribute of 'time_bounds' must be a string compatible with UDUNITS",
+            u"units (None) attribute of 'Layer' must be a string compatible with UDUNITS", 
             u'units for variable area must be convertible to m2 currently they are degrees2', 
             u"k: vertical coordinates not defining pressure must include a positive attribute that is either 'up' or 'down'", 
             u'grid_longitude is not associated with a coordinate defining true latitude and sharing a subset of dimensions', 
@@ -336,7 +336,6 @@ class TestCFIntegration(BaseTestCase):
             u'Unidentifiable feature for variable time_bounds', 
             u'Unidentifiable feature for variable grid_depth'
         ]
-
         assert all(m in messages for m in msgs)
 
 
@@ -392,15 +391,12 @@ class TestCFIntegration(BaseTestCase):
                 "they are hours since 2016-01-01T12:00:00Z") in messages
         assert (u"standard_name cloud_cover is not defined in Standard Name Table v{}".format(self._std_names._version)) in messages
         assert (u"standard_name dew_point is not defined in Standard Name Table v{}".format(self._std_names._version)) in messages
-        # NOTE this dataset does not contain any variables with attribute 'bounds'
-        # assert (u"variable eta referenced by formula_terms does not exist") in messages
-        # assert (u"Boundary variable eta referenced by formula_terms not found in dataset variables") in messages
         assert (u"GRID is not a valid CF featureType. It must be one of point, timeseries, "
                 "trajectory, profile, timeseriesprofile, trajectoryprofile") in messages
         assert (u"global attribute _CoordSysBuilder should begin with a letter and "
                 "be composed of letters, digits, and underscores") in messages
         assert (u"source should be defined")
-        assert (u'units for cl, "fraction" are not recognized by udunits') in messages
+        assert (u'units for cl, "fraction" are not recognized by UDUNITS') in messages
 
     def test_ncei_templates(self):
         """

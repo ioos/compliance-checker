@@ -75,6 +75,8 @@ class ComplianceChecker(object):
             else:
                 score_dict[loc] = score_groups
 
+        # define a score limit to truncate the ouput to the strictness level
+        # specified by the user
         if criteria == 'normal':
             limit = 2
         elif criteria == 'strict':
