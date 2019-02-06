@@ -242,6 +242,7 @@ def attr_check(l, ds, priority, ret_val, gname=None):
     :param netCDF4 dataset ds       : dataset being checked
     :param int priority             : priority level of check
     :param list ret_val             : result to be returned
+    :param str or None gname        : group name assigned to a group of attribute Results
     """
 
     msgs = []

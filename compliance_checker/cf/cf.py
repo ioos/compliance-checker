@@ -1032,7 +1032,7 @@ class CFBaseCheck(BaseCheck):
         should_be_dimensionless = (variable.dtype.char == 'S' or
                                    std_name_units_dimensionless)
 
-        valid_udunits = TestCtx(BaseCheck.LOW, self.section_titles["3.1"])
+        valid_udunits = TestCtx(BaseCheck.HIGH, self.section_titles["3.1"])
         are_udunits = (units is not None and util.units_known(units))
         valid_udunits.assert_true(should_be_dimensionless or are_udunits,
                                   'units for {}, "{}" are not recognized by UDUNITS'.format(variable_name, units))

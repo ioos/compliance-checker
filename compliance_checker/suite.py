@@ -556,7 +556,8 @@ class CheckSuite(object):
                     # separating this and the previous level
                     if has_printed:
                         print("")
-                    reason_str = "\n".join('* {}'.format(r) for r in reasons)
+                    # join alphabetized reasons together
+                    reason_str = "\n".join('* {}'.format(r) for r in sorted(reasons, key=lambda x: x[0]))
                     proc_str = "{}\n{}".format(issue, reason_str)
                     print(proc_str)
                     proc_strs.append(proc_str)
