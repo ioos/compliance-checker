@@ -2888,7 +2888,7 @@ class CFBaseCheck(BaseCheck):
         total_climate_count = 0
         valid_climate_count = 0
 
-        methods = [ 'point',
+        methods = [ 'point', # TODO change to appendix import once cf1.7 merged
                     'sum',
                     'mean',
                     'maximum',
@@ -2903,9 +2903,12 @@ class CFBaseCheck(BaseCheck):
         # variable, we need to make sure it has the attribute "climatology",
         # but not the attribute "bounds"
         meth_regex = "(?:{})".format("|".join(methods))
+
+        # find the variables with climatology attributes
         clim_containing_vars = ds.get_variables_by_attributes(
             climatology=lambda s: s is not None)
-        clim_var = clim_containing_vars[0] if clim_containing_vars else None
+        clim_var = clim_containing_vars[0] if clim_containing_vars else None  # NOTE why only get the first element? There could be multiple, no?
+
         if clim_var:
             if hasattr(clim_var, 'bounds'):
                 reasoning.append('Variable {} has a climatology attribute and cannot also have a bounds attribute.'.format(clim_var.name))
@@ -2952,34 +2955,33 @@ class CFBaseCheck(BaseCheck):
                         boundary_variable.dimensions)
                 )
 
-        # otherwise match the following values with for variable with
-        # `cell_methods` attributes
-        # time: method1 within years time: method2 over years
-        # time: method1 within days time: method2 over days
-        # time: method1 within days time: method2 over days time: method3 over years
-        # optionally followed by parentheses for explaining additional
-        # info, e.g.
-        # "time: method1 within years time: method2 over years (sidereal years)"
+            # match the following values with for variable with
+            # `cell_methods` attributes
+            # time: method1 within years time: method2 over years
+            # time: method1 within days time: method2 over days
+            # time: method1 within days time: method2 over days time: method3 over years
+            # optionally followed by parentheses for explaining additional
+            # info, e.g.
+            # "time: method1 within years time: method2 over years (sidereal years)"
 
-        meth_regex = "(?:{})".format("|".join(methods))
-        re_string = (r'^time: {0} within (years|days)'
-                     r' time: {0} over \1(?<=days)(?: time: {0} over years)?'
-                     r'(?: \([^)]+\))?$'.format(meth_regex))
+            meth_regex = "(?:{})".format("|".join(methods))
+            re_string = (r'^time: {0} within (years|days)'
+                         r' time: {0} over \1(?<=days)(?: time: {0} over years)?'
+                         r'(?: \([^)]+\))?$'.format(meth_regex))
 
-        # find any variables with a valid climatological cell_methods
-        for cell_method_var in ds.get_variables_by_attributes(cell_methods=lambda s: s is not
-                                                              None):
-            total_climate_count += 1
-            if not regex.search(re_string, cell_method_var.cell_methods):
-                reasoning.append('The "time: method within years/days over years/days" format is not correct in variable {}.'.format(cell_method_var.name))
-            else:
-                valid_climate_count += 1
+            # find any variables with a valid climatological cell_methods
+            for cell_method_var in ds.get_variables_by_attributes(cell_methods=lambda s: s is not None):
+                total_climate_count += 1
+                if not regex.search(re_string, cell_method_var.cell_methods):
+                    reasoning.append('The "time: method within years/days over years/days" format is not correct in variable {}.'.format(cell_method_var.name))
+                else:
+                    valid_climate_count += 1
 
-            result = Result(BaseCheck.MEDIUM,
-                            (valid_climate_count, total_climate_count),
-                            (self.section_titles['7.4']),
-                            reasoning)
-            ret_val.append(result)
+                result = Result(BaseCheck.MEDIUM,
+                                (valid_climate_count, total_climate_count),
+                                (self.section_titles['7.4']),
+                                reasoning)
+                ret_val.append(result)
 
         return ret_val
 
