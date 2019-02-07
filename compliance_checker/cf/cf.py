@@ -3407,9 +3407,9 @@ class CF17Check(CF16Check):
                     score += 1
 
                 out_of += 1
-                if (hasattr(variable, "valid_range")): # check equality to valid_range
+                if (hasattr(variable, "valid_range")): # check within valid_range
                     if (variable.actual_range[0] != variable.valid_range[0]) or (variable.actual_range[1] != variable.valid_range[1]):
-                        msgs.append("\"{}\"'s actual_range must be == valid_range".format(name))
+                        msgs.append("\"{}\"'s actual_range must be within valid_range".format(name))
                 else:
                     score += 1
 
