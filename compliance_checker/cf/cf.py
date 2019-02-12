@@ -2907,9 +2907,8 @@ class CFBaseCheck(BaseCheck):
         # find the variables with climatology attributes
         clim_containing_vars = ds.get_variables_by_attributes(
             climatology=lambda s: s is not None)
-        clim_var = clim_containing_vars[0] if clim_containing_vars else None  # NOTE why only get the first element? There could be multiple, no?
 
-        if clim_var:
+        for clim_var in clim_containing_vars:
             if hasattr(clim_var, 'bounds'):
                 reasoning.append('Variable {} has a climatology attribute and cannot also have a bounds attribute.'.format(clim_var.name))
                 result = Result(BaseCheck.MEDIUM,
