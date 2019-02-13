@@ -794,7 +794,7 @@ class CFBaseCheck(BaseCheck):
         valid = False
         reasoning = []
         if hasattr(ds, 'Conventions'):
-            conventions = regex.split(',|\s+', getattr(ds, 'Conventions', ''))
+            conventions = regex.split(r',|\s+', getattr(ds, 'Conventions', ''))
             for convention in conventions:
                 if convention == 'CF-1.6':
                     valid = True
@@ -1429,7 +1429,7 @@ class CFBaseCheck(BaseCheck):
         valid_meanings.assert_true(len(flag_meanings) > 0,
                                    "{}'s flag_meanings can't be empty".format(name))
 
-        flag_regx = regex.compile("^[0-9A-Za-z_\-.+@]+$")
+        flag_regx = regex.compile(r"^[0-9A-Za-z_\-.+@]+$")
         meanings = flag_meanings.split()
         for meaning in meanings:
             if flag_regx.match(meaning) is None:
@@ -2642,7 +2642,7 @@ class CFBaseCheck(BaseCheck):
         variables = ds.get_variables_by_attributes(cell_measures=lambda c:
                                                    c is not None)
         for var in variables:
-            search_str = '^(?:area|volume): (\w+)$'
+            search_str = r'^(?:area|volume): (\w+)$'
             search_res = regex.search(search_str, var.cell_measures)
             if not search_res:
                 valid = False
@@ -2729,7 +2729,7 @@ class CFBaseCheck(BaseCheck):
 
         ret_val = []
         psep = regex.compile(r'(?P<vars>\w+: )+(?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
-                             '?(?P<over>over (?P<otypevar>\w+))?| ?)(?:\((?P<paren_contents>[^)]*)\))?')
+                             r'?(?P<over>over (?P<otypevar>\w+))?| ?)(?:\((?P<paren_contents>[^)]*)\))?')
 
         for var in ds.get_variables_by_attributes(cell_methods=lambda x: x is not None):
             if not getattr(var, 'cell_methods', ''):
@@ -2870,23 +2870,24 @@ class CFBaseCheck(BaseCheck):
         representative of the climatological time intervals, such that an application which does not recognise climatological
         time will nonetheless be able to make a reasonable interpretation.
 
-        Valid values of the cell_methods attribute must be in one of the forms from the following list.
-
+        A climatological axis may use different statistical methods to measure variation among years, within years, and within
+        days. The methods which can be specified are those listed in Appendix E, Cell Methods and each entry in the cell_methods
+        attribute may also contain non-standardised information in parentheses after the method. The value of the cell_method
+        attribute must be in one of the following forms:
         - time: method1 within years   time: method2 over years
-        - time: method1 within days   time: method2 over days
-        - time: method1 within days   time: method2 over days   time: method3 over years
-
-        The methods which can be specified are those listed in Appendix E, Cell Methods and each entry in the cell_methods
-        attribute may also, contain non-standardised information in parentheses after the method.
+        - time: method1 within days    time: method2 over days
+        - time: method1 within days    time: method2 over days   time: method3 over years
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: list
         :return: List of results
         """
+
         reasoning = []
         ret_val = []
         total_climate_count = 0
         valid_climate_count = 0
+        all_clim_coord_var_names = []
 
         methods = [ 'point', # TODO change to appendix import once cf1.7 merged
                     'sum',
@@ -2899,26 +2900,26 @@ class CFBaseCheck(BaseCheck):
                     'mode',
                     'median']
 
-        # first, to determine whether or not we have a climatological time
-        # variable, we need to make sure it has the attribute "climatology",
-        # but not the attribute "bounds"
-        meth_regex = "(?:{})".format("|".join(methods))
-
-        # find the variables with climatology attributes
-        clim_containing_vars = ds.get_variables_by_attributes(
+        # find any climatology axies variables; any variables which contain climatological stats will use
+        # these variables as coordinates
+        clim_time_coord_vars = ds.get_variables_by_attributes(
             climatology=lambda s: s is not None)
 
-        for clim_var in clim_containing_vars:
-            if hasattr(clim_var, 'bounds'):
-                reasoning.append('Variable {} has a climatology attribute and cannot also have a bounds attribute.'.format(clim_var.name))
+        # first, to determine whether or not we have a valid climatological time
+        # coordindate variable, we need to make sure it has the attribute "climatology",
+        # but not the attribute "bounds"
+        for clim_coord_var in clim_time_coord_vars:
+            if hasattr(clim_coord_var, 'bounds'):
+                reasoning.append('Variable {} has a climatology attribute and cannot also have a bounds attribute.'.format(clim_coord_var.name))
                 result = Result(BaseCheck.MEDIUM,
                                 False,
                                 (self.section_titles['7.4']),
                                 reasoning)
                 ret_val.append(result)
                 return ret_val
+
             # make sure the climatology variable referenced actually exists
-            elif clim_var.climatology not in ds.variables:
+            elif clim_coord_var.climatology not in ds.variables:
                 reasoning.append("Variable {} referenced in time's climatology attribute does not exist".format(ds.variables['time'].climatology))
                 result = Result(BaseCheck.MEDIUM,
                                 False,
@@ -2926,50 +2927,57 @@ class CFBaseCheck(BaseCheck):
                                 reasoning)
                 ret_val.append(result)
                 return ret_val
+
             # handle 1-d and 2d coordinate bounds
-            if (clim_var.ndim + 1 != ds.variables[clim_var.climatology].ndim):
+            if (clim_coord_var.ndim + 1 != ds.variables[clim_coord_var.climatology].ndim):
                 # Probably realistically need two dimensions in majority of
                 # practical cases.
                 reasoning.append('The number of dimensions of the climatology variable %s is %s, but the '
                                  'number of dimensions of the referencing variable %s is %s. The climatology variable '
                                  'should have %s dimensions' %
-                                 (ds.variables[clim_var.climatology].name,
-                                  ds.variables[clim_var.climatology].ndim,
-                                  clim_var.name,
-                                  clim_var.ndim,
-                                  clim_var.ndim + 1))
+                                 (ds.variables[clim_coord_var.climatology].name,
+                                  ds.variables[clim_coord_var.climatology].ndim,
+                                  clim_coord_var.name,
+                                  clim_coord_var.ndim,
+                                  clim_coord_var.ndim + 1))
                 return ret_val
+
             # check that coordinate bounds are in the proper order.
             # make sure last elements are boundary variable specific dimensions
-            elif (clim_var.dimensions[:] !=
-                  ds.variables[clim_var.climatology].dimensions[:clim_var.ndim]):
+            elif (clim_coord_var.dimensions[:] !=
+                  ds.variables[clim_coord_var.climatology].dimensions[:clim_coord_var.ndim]):
                 reasoning.append(
                     u"Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
-                        ds.variables[clim_var.climatology].dimensions)
+                        ds.variables[clim_coord_var.climatology].dimensions)
                 )
                 return ret_val
-            elif ds.dimensions[ds.variables[clim_var.climatology].dimensions[-1]].size != 2:
+
+            elif ds.dimensions[ds.variables[clim_coord_var.climatology].dimensions[-1]].size != 2:
                 reasoning.append(
                     u"Climatology dimension {} should only contain two elements".format(
                         boundary_variable.dimensions)
                 )
 
-            # match the following values with for variable with
-            # `cell_methods` attributes
-            # time: method1 within years time: method2 over years
-            # time: method1 within days time: method2 over days
-            # time: method1 within days time: method2 over days time: method3 over years
-            # optionally followed by parentheses for explaining additional
-            # info, e.g.
-            # "time: method1 within years time: method2 over years (sidereal years)"
+            # passed all these checks, so we can add this clim_coord_var to our total list
+            all_clim_coord_var_names.append(clim_coord_var.name)
 
-            meth_regex = "(?:{})".format("|".join(methods))
-            re_string = (r'^time: {0} within (years|days)'
-                         r' time: {0} over \1(?<=days)(?: time: {0} over years)?'
-                         r'(?: \([^)]+\))?$'.format(meth_regex))
+        # for any variables which use a climatology time coordinate variable as a coordinate,
+        # if they have a cell_methods attribute, it must comply with the form:
+        #     time: method1 within years time: method2 over years
+        #     time: method1 within days time: method2 over days
+        #     time: method1 within days time: method2 over days time: method3 over years
+        # optionally followed by parentheses for explaining additional
+        # info, e.g.
+        # "time: method1 within years time: method2 over years (sidereal years)"
 
-            # find any variables with a valid climatological cell_methods
-            for cell_method_var in ds.get_variables_by_attributes(cell_methods=lambda s: s is not None):
+        meth_regex = "(?:{})".format("|".join(methods)) # "or" comparison for the methods
+        re_string = (r'^time: {0} within (years|days)'  # regex string to test
+                     r' time: {0} over \1(?<=days)(?: time: {0} over years)?'
+                     r'(?: \([^)]+\))?$'.format(meth_regex))
+
+        # find any variables with a valid climatological cell_methods
+        for cell_method_var in ds.get_variables_by_attributes(cell_methods=lambda s: s is not None):
+            if any([dim in all_clim_coord_var_names for dim in cell_method_var.dimensions]):
                 total_climate_count += 1
                 if not regex.search(re_string, cell_method_var.cell_methods):
                     reasoning.append('The "time: method within years/days over years/days" format is not correct in variable {}.'.format(cell_method_var.name))
