@@ -2928,23 +2928,10 @@ class CFBaseCheck(BaseCheck):
                 ret_val.append(result)
                 return ret_val
 
-            # handle 1-d and 2d coordinate bounds
-            if (clim_coord_var.ndim + 1 != ds.variables[clim_coord_var.climatology].ndim):
-                # Probably realistically need two dimensions in majority of
-                # practical cases.
-                reasoning.append('The number of dimensions of the climatology variable %s is %s, but the '
-                                 'number of dimensions of the referencing variable %s is %s. The climatology variable '
-                                 'should have %s dimensions' %
-                                 (ds.variables[clim_coord_var.climatology].name,
-                                  ds.variables[clim_coord_var.climatology].ndim,
-                                  clim_coord_var.name,
-                                  clim_coord_var.ndim,
-                                  clim_coord_var.ndim + 1))
-                return ret_val
 
             # check that coordinate bounds are in the proper order.
             # make sure last elements are boundary variable specific dimensions
-            elif (clim_coord_var.dimensions[:] !=
+            if (clim_coord_var.dimensions[:] !=
                   ds.variables[clim_coord_var.climatology].dimensions[:clim_coord_var.ndim]):
                 reasoning.append(
                     u"Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
