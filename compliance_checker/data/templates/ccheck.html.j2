@@ -1,13 +1,55 @@
 <!-- Template for the HTML markup for the results of a single test -->
+
+<style>
+
+/* ------------------------- */
+/* ----- Table Styling ----- */
+/* ------------------------- */
+
+table {
+  font-family: helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th{
+    text-align: left;
+    padding: 12 px;
+}
+
+td{
+  /*border-top: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
+  border-left: 1px solid #dddddd;
+  border-right: 1px solid #dddddd;*/
+  font-size: 14px;
+  text-align: left;
+  padding: 8px;
+}
+
+td:first-child{
+  font-style: italic;
+}
+
+/* ------------------------ */
+/* ----- List styling ----- */
+/* ------------------------ */
+
+li{
+  line-height: 14px;
+}
+
+</style>
+
 <div class="row">
   <div class="col-md-12">
     <div class="page-header">
-      <h2>IOOS Compliance Checker Report</h2>
-      <p>For dataset {{source_name}}</p>
+      <h2 align="center">IOOS Compliance Checker Report</h2>
+      <p align="center">For dataset {{source_name}}</p>
     </div>
   </div>
   <div class="col-md-12">
-    <h3>
+    <h3 align="center">
       {% if cc_url %}
         <a href={{cc_url}} target="_blank">{{testname}}</a>
       {% else %}
@@ -16,9 +58,18 @@
     </h3>
     <!--<a href={{cc_url}}>Reference Page</a>-->
   </div>
+
+  <!-- -------------- -->
+  <!-- RESULTS TABLES -->
+  <!-- -------------- -->
+
   <div class="col-md-12">
-    <h4>Corrective Actions</h4>
+    <!--<h4>Corrective Actions</h4>-->
+    <h4 align="center">Corrective Actions</h4>
     <div class="col-md-12">
+
+      <!-- High Priority -->
+
       <div class="table-collapse">
         <a data-target="high-priority-table" href="#"> {{scoreheader.get(3)}} <i class="glyphicon glyphicon-collapse-up"></i></a>
       </div>
@@ -26,6 +77,7 @@
       <div class="failures">
         | <span class="label label-danger label-as-badge">{{ high_count }}</span>
       </div>
+
       <div class="high-priority-table collapse in">
         <table class="table">
           <thead>
@@ -37,17 +89,31 @@
           <tbody>
             {% for result in all_priorities -%}
               {% if result['weight'] == 3 -%}
-                {% for msg in result['msgs']-%}
+
+
                   <tr>
-                    <td>{{result['name']}}</td>
-                    <td>{{msg}}</td>
+                    {% if result["msgs"] != [] -%}
+                      <td>{{result['name']}}</td>
+                      <td>
+                          {% for msg in result['msgs'] -%}
+
+                          <!-- bulleted list inside the table row -->
+                        <ul>
+                          <li>{{msg}}</li>
+                        </ul>
+
+                        {% endfor -%}
+                    {% endif -%}
+                    </td>
                   </tr>
-                {% endfor -%}
+
+
               {% endif -%}
             {% endfor -%}
           </tbody>
         </table>
       </div> <!-- .high-priority-table -->
+
       {% else -%}
       <div class="failures">
         | <span class="label label-success label-as-badge">{{ high_count }}</span>
@@ -64,6 +130,9 @@
       </div>
       {% endif -%}
     </div> <!-- .col-md-12 -->
+
+    <!-- Medium Priority -->
+
     <div class="col-md-12">
       {% if medium_count -%}
       <div class="table-collapse">
@@ -80,22 +149,39 @@
               <th class="ccorrection">Reasoning</th>
             </tr>
           </thead>
+
           <tbody>
             {% for result in all_priorities -%}
               {% if result['weight'] == 2 -%}
-                {% for msg in result['msgs']-%}
+
                   <tr>
-                    <td>{{result['name']}}</td>
-                    <td>{{msg}}</td>
+                    {% if result["msgs"] != [] -%}
+                      <td>{{result['name']}}</td>
+                      <td>
+                          {% for msg in result['msgs'] -%}
+
+                          <!-- bulleted list inside the table row -->
+                        <ul>
+                          <li>{{msg}}</li>
+                        </ul>
+
+                        {% endfor -%}
+                    {% endif -%}
+                    </td>
                   </tr>
-                {% endfor -%}
+
+
               {% endif -%}
             {% endfor -%}
           </tbody>
+
         </table>
       </div> <!-- .medium-priority-table -->
       {% endif -%}
     </div> <!-- .col-md-12 -->
+
+    <!-- Low Priority -->
+    
     <div class="col-md-12">
       {% if low_count -%}
       <div class="table-collapse">
@@ -112,21 +198,36 @@
               <th class="ccorrection">Reasoning</th>
             </tr>
           </thead>
+
           <tbody>
             {% for result in all_priorities -%}
               {% if result['weight'] == 1 -%}
-                {% for msg in result['msgs']-%}
+
                   <tr>
-                    <td>{{result['name']}}</td>
-                    <td>{{msg}}</td>
+                    {% if result["msgs"] != [] -%}
+                      <td>{{result['name']}}</td>
+                      <td>
+                          {% for msg in result['msgs'] -%}
+
+                          <!-- bulleted list inside the table row -->
+                        <ul>
+                          <li>{{msg}}</li>
+                        </ul>
+
+                        {% endfor -%}
+                    {% endif -%}
+                    </td>
                   </tr>
-                {% endfor -%}
+
+
               {% endif -%}
             {% endfor -%}
           </tbody>
+
         </table>
       </div> <!-- .low-priority-table -->
       {% endif -%}
     </div> <!-- .col-md-12 -->
+
   </div> <!-- .col-md-12 -->
 </div> <!-- .row -->
