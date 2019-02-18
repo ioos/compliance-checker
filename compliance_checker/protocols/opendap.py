@@ -14,7 +14,10 @@ def is_opendap(url):
     :param str url: URL for a remote OPeNDAP endpoint
     '''
     # If the server replies to a Data Attribute Structure request
-    das_url = url + '.das'
+    if url.endswith('#fillmismatch'):
+        das_url = url.replace('#fillmismatch', '.das')
+    else:
+        das_url = url + '.das'
     response = requests.get(das_url, allow_redirects=True)
     if 'xdods-server' in response.headers:
         return True
