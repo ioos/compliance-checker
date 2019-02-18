@@ -92,7 +92,7 @@ li{
 
 
                   <tr>
-                    {% if result["msgs"] != [] -%}
+                    {% if result["msgs"]|length > 0 -%}
                       <td>{{result['name']}}</td>
                       <td>
                           {% for msg in result['msgs'] -%}
@@ -155,7 +155,7 @@ li{
               {% if result['weight'] == 2 -%}
 
                   <tr>
-                    {% if result["msgs"] != [] -%}
+                    {% if result["msgs"]|length -%}
                       <td>{{result['name']}}</td>
                       <td>
                           {% for msg in result['msgs'] -%}
@@ -204,7 +204,7 @@ li{
               {% if result['weight'] == 1 -%}
 
                   <tr>
-                    {% if result["msgs"] != [] -%}
+                    {% if result["msgs"]|length -%}
                       <td>{{result['name']}}</td>
                       <td>
                           {% for msg in result['msgs'] -%}
