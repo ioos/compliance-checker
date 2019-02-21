@@ -13,7 +13,7 @@ class IOOSBaseCheck(BaseCheck):
     _cc_spec = 'ioos'
     _cc_spec_version = '0.1'
     _cc_description = 'IOOS Inventory Metadata'
-    _cc_url = 'https://ioos.github.io/ioos-netcdf/ioos-netcdf-metadata-description-v1-1.html#ioos-netcdf-metadata-profile-attributes'
+    _cc_url = 'https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes'
     _cc_display_headers = {
         3: 'Highly Recommended',
         2: 'Recommended',
@@ -194,16 +194,16 @@ class IOOS0_1Check(IOOSNCCheck):
 
 class IOOS1_1Check(IOOSNCCheck):
     '''
-    Compliance checker implementation of IOOS Metadata Profile for NetCDF, Version 1.1
+    Compliance checker implementation of IOOS Metadata Profile, Version 1.1
 
     Related links:
-    https://ioos.github.io/ioos-netcdf/ioos-netcdf-metadata-description-v1-1.html#ioos-netcdf-metadata-profile-attributes
+    https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes
     https://github.com/ioos/compliance-checker/issues/69
     https://github.com/ioos/compliance-checker/issues/358
     '''
     _cc_spec_version = '1.1'
-    _cc_description = 'IOOS Metadata Profile for NetCDF, Version 1.1'
-    _cc_url = 'https://ioos.github.io/ioos-netcdf/ioos-netcdf-metadata-description-v1-1.html#ioos-netcdf-metadata-profile-attributes'
+    _cc_description = 'IOOS Metadata Profile, Version 1.1'
+    _cc_url = 'https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes'
     register_checker = True
 
     def __init__(self):
