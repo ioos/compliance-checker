@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 import versioneer
 
 def readme():
-    with open('README.md') as f:
+    with open('README.md', , encoding="utf-8") as f:
         return f.read()
 
 def pip_requirements(fname='requirements.txt'):
