@@ -4,7 +4,7 @@ import io
 import versioneer
 
 def readme():
-    with io.open('README.md') as f:
+    with io.open('README.md', encoding="utf-8") as f:
         return f.read()
 
 def pip_requirements(fname='requirements.txt'):
