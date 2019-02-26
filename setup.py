@@ -1,9 +1,10 @@
 from __future__ import with_statement
 from setuptools import setup, find_packages
+import io
 import versioneer
 
 def readme():
-    with open('README.md') as f:
+    with io.open('README.md', encoding="utf-8") as f:
         return f.read()
 
 def pip_requirements(fname='requirements.txt'):
