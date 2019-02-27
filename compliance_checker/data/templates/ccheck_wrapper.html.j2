@@ -199,6 +199,7 @@ thead .ccorrection {
     <script type="text/javascript">
 $(document).ready(function() {
     $('.high-priority-table').collapse({toggle: false});
+
     $('.table-collapse').click(function(e) {
       e.preventDefault();
       // Find table to toggle within this check
@@ -206,6 +207,23 @@ $(document).ready(function() {
       $(checkWrapper).find('.' + $(e.target).data('target')).collapse('toggle');
 
       var glyph = $(e.target).find('.glyphicon');
+      if(glyph.hasClass('glyphicon-collapse-up')) {
+        glyph.removeClass('glyphicon-collapse-up');
+        glyph.addClass('glyphicon-collapse-down');
+      } else {
+        glyph.removeClass('glyphicon-collapse-down');
+        glyph.addClass('glyphicon-collapse-up');
+      }
+    });
+
+
+    $('.table-collapse i.glyphicon').click(function(e) {
+      e.preventDefault();
+      // Find table to toggle within this check
+      var checkWrapper = $(e.target).closest(".check_wrapper");
+      $(checkWrapper).find('.' + $(e.target.parentElement).data('target')).collapse('toggle');
+
+      var glyph = $(e.target.parentElement).find('.glyphicon');
       if(glyph.hasClass('glyphicon-collapse-up')) {
         glyph.removeClass('glyphicon-collapse-up');
         glyph.addClass('glyphicon-collapse-down');
