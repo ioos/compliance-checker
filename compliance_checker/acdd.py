@@ -226,8 +226,8 @@ class ACDDBaseCheck(BaseCheck):
         if not (hasattr(ds, 'geospatial_lat_min') and hasattr(ds, 'geospatial_lat_max')):
             return
 
-        lat_min = ds.geospatial_lat_min
-        lat_max = ds.geospatial_lat_max
+        lat_min = float(ds.geospatial_lat_min)
+        lat_max = float(ds.geospatial_lat_max)
 
         # identify lat var(s) as per CF 4.1
         lat_vars = {}       # var -> number of criteria passed
@@ -292,8 +292,8 @@ class ACDDBaseCheck(BaseCheck):
         if not (hasattr(ds, 'geospatial_lon_min') and hasattr(ds, 'geospatial_lon_max')):
             return
 
-        lon_min = ds.geospatial_lon_min
-        lon_max = ds.geospatial_lon_max
+        lon_min = float(ds.geospatial_lon_min)
+        lon_max = float(ds.geospatial_lon_max)
 
         # identify lon var(s) as per CF 4.2
         lon_vars = {}       # var -> number of criteria passed
@@ -377,8 +377,8 @@ class ACDDBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param str z_variable: Name of the variable representing the Z-Axis
         '''
-        vert_min = ds.geospatial_vertical_min
-        vert_max = ds.geospatial_vertical_max
+        vert_min = float(ds.geospatial_vertical_min)
+        vert_max = float(ds.geospatial_vertical_max)
         msgs = []
         total = 2
 
@@ -698,7 +698,7 @@ class ACDD1_3Check(ACDDNCCheck):
                             'coverage_content_type', None)
             check = ctype is not None
             if not check:
-                msgs.append("coverage_content")
+                msgs.append("coverage_content_type")
                 results.append(Result(BaseCheck.HIGH, check,
                                       self._var_header.format(variable), msgs))
                 continue

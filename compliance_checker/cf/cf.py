@@ -1843,9 +1843,9 @@ class CFBaseCheck(BaseCheck):
         # get the variables named in the formula terms and check if any
         # are not present in the dataset
         missing_vars = sorted(set(m[1] for m in matches) - set(ds.variables))
-        missing_fmt = "The following variable(s) referenced in formula_terms are not present in the dataset: {}".format(coord)
+        missing_fmt = "The following variable(s) referenced in {}:formula_terms are not present in the dataset: {}"
         valid_formula_terms.assert_true(len(missing_vars) == 0,
-                                    missing_fmt.format(', '.join(missing_vars)))
+                                    missing_fmt.format(coord, ', '.join(missing_vars)))
         # try to reconstruct formula_terms by adding space in between the regex
         # matches.  If it doesn't exactly match the original, the formatting
         # of the attribute is incorrect
@@ -2206,29 +2206,42 @@ class CFBaseCheck(BaseCheck):
             # contents of the `coordinates` attribute only.
             axis_map = cfutil.get_axis_map(ds, variable)
 
+            msg = '{}\'s coordinate variable "{}" is not one of the variables identifying true '+\
+                  'latitude/longitude and its dimensions are not a subset of {}\'s dimensions'
+
+            alt = '{} has no coordinate associated with a variable identified as true latitude/longitude; '+\
+                  'its coordinate variable should also share a subset of {}\'s dimensions'
+
             # Make sure we can find latitude and its dimensions are a subset
+            _lat = None 
             found_lat = False
             for lat in axis_map['Y']:
+                _lat = lat
                 is_subset_dims = set(ds.variables[lat].dimensions).issubset(dimensions)
 
                 if is_subset_dims and lat in latitudes:
                     found_lat = True
                     break
-            has_coords.assert_true(found_lat,
-                                   '{} is not associated with a coordinate defining true latitude '
-                                   'and sharing a subset of dimensions'.format(variable))
+            if _lat:
+                has_coords.assert_true(found_lat, msg.format(variable, _lat, variable))
+            else:
+                has_coords.assert_true(found_lat, alt.format(variable, variable))
+                
 
             # Make sure we can find longitude and its dimensions are a subset
+            _lon = None 
             found_lon = False
             for lon in axis_map['X']:
+                _lon = lon
                 is_subset_dims = set(ds.variables[lon].dimensions).issubset(dimensions)
 
                 if is_subset_dims and lon in longitudes:
                     found_lon = True
                     break
-            has_coords.assert_true(found_lon,
-                                   '{} is not associated with a coordinate defining true longitude '
-                                   'and sharing a subset of dimensions'.format(variable))
+            if _lon:
+                has_coords.assert_true(found_lon, msg.format(variable, _lon, variable))
+            else:
+                has_coords.assert_true(found_lon, alt.format(variable, variable))
 
             ret_val.append(has_coords.to_result())
         return ret_val
