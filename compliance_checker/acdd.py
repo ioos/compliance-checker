@@ -223,11 +223,23 @@ class ACDDBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         '''
-        if not (hasattr(ds, 'geospatial_lat_min') and hasattr(ds, 'geospatial_lat_max')):
-            return
 
-        lat_min = float(ds.geospatial_lat_min)
-        lat_max = float(ds.geospatial_lat_max)
+        if not (hasattr(ds, 'geospatial_lat_min') or hasattr(ds, 'geospatial_lat_max')):
+            return Result(BaseCheck.MEDIUM,
+                          False,
+                          'geospatial_lat_extents_match',
+                          ['geospatial_lat_min/max attribute not found, CF-1.6 spec chapter 4.1'])
+
+        try: # type cast
+            lat_min = float(ds.geospatial_lat_min)
+            lat_max = float(ds.geospatial_lat_max)
+        except ValueError:
+            return Result(BaseCheck.MEDIUM,
+                          False,
+                          'geospatial_lat_extents_match',
+                          ['Could not convert one of geospatial_lat_min ({}) or max ({}) to float see CF-1.6 spec chapter 4.1'
+                          ''.format(ds.geospatial_lat_min, ds.geospatial_lat_max)])
+            
 
         # identify lat var(s) as per CF 4.1
         lat_vars = {}       # var -> number of criteria passed
@@ -289,11 +301,22 @@ class ACDDBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         '''
-        if not (hasattr(ds, 'geospatial_lon_min') and hasattr(ds, 'geospatial_lon_max')):
-            return
 
-        lon_min = float(ds.geospatial_lon_min)
-        lon_max = float(ds.geospatial_lon_max)
+        if not (hasattr(ds, 'geospatial_lon_min') and hasattr(ds, 'geospatial_lon_max')):
+            return Result(BaseCheck.MEDIUM,
+                          False,
+                          'geospatial_lon_extents_match',
+                          ['geospatial_lon_min/max attribute not found, CF-1.6 spec chapter 4.1'])
+
+        try: # type cast
+            lon_min = float(ds.geospatial_lon_min)
+            lon_max = float(ds.geospatial_lon_max)
+        except ValueError:
+            return Result(BaseCheck.MEDIUM,
+                          False,
+                          'geospatial_lon_extents_match',
+                          ['Could not convert one of geospatial_lon_min ({}) or max ({}) to float see CF-1.6 spec chapter 4.1'
+                          ''.format(ds.geospatial_lon_min, ds.geospatial_lon_max)])
 
         # identify lon var(s) as per CF 4.2
         lon_vars = {}       # var -> number of criteria passed
