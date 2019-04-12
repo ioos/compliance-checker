@@ -48,6 +48,7 @@ class ComplianceChecker(object):
 
         @returns                If the tests failed (based on the criteria)
         """
+        all_groups = []
         cs = CheckSuite()
         # using OrderedDict is important here to preserve the order
         # of multiple datasets which may be passed in
@@ -87,7 +88,8 @@ class ComplianceChecker(object):
         for out_fmt in output_format:
             if out_fmt == 'text':
                 if output_filename == '-':
-                    groups = cls.stdout_output(cs, score_dict, verbose, limit)
+                    all_groups.append(cls.stdout_output(cs, score_dict,
+                                                        verbose, limit))
                 # need to redirect output from stdout since print functions are
                 # presently used to generate the standard report output
                 else:
@@ -96,29 +98,30 @@ class ComplianceChecker(object):
                         output_filename = '{}.txt'.format(os.path.splitext(output_filename)[0])
                     with io.open(output_filename, 'w', encoding='utf-8') as f:
                         with stdout_redirector(f):
-                            groups = cls.stdout_output(cs, score_dict, verbose,
-                                                       limit)
+                            all_groups.append(cls.stdout_output(cs, score_dict,
+                                                                verbose, limit))
 
             elif out_fmt == 'html':
                 # Update file name if needed
                 if len(output_format) > 1 and output_filename != '-':
                     output_filename = '{}.html'.format(os.path.splitext(output_filename)[0])
-                groups = cls.html_output(cs, score_dict, output_filename, ds_loc,
-                                         limit)
+                all_groups.append(cls.html_output(cs, score_dict, output_filename, ds_loc,
+                                  limit))
 
             elif out_fmt == 'json' or 'json_new':
                 # Update file name if needed
                 if len(output_format) > 1 and output_filename != '-':
                     output_filename = '{}.json'.format(os.path.splitext(output_filename)[0])
-                groups = cls.json_output(cs, score_dict, output_filename, ds_loc,
-                                         limit, out_fmt)
+                all_groups.append(cls.json_output(cs, score_dict, output_filename, ds_loc,
+                                         limit, out_fmt))
 
             else:
                 raise TypeError('Invalid format %s' % out_fmt)
 
-        errors_occurred = cls.check_errors(score_groups, verbose)
+            errors_occurred = cls.check_errors(score_groups, verbose)
 
-        return cs.passtree(groups, limit), errors_occurred
+        return (all(cs.passtree(groups, limit) for groups in all_groups),
+                errors_occurred)
 
     @classmethod
     def stdout_output(cls, cs, score_dict, verbose, limit):
