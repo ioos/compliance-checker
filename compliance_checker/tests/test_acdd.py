@@ -1,8 +1,10 @@
 from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check
+from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests import BaseTestCase
 from netCDF4 import Dataset
 import os
+import numpy as np
 
 
 def to_singleton_var(l):
@@ -12,7 +14,6 @@ def to_singleton_var(l):
     '''
     return [x[0] if hasattr(x, '__iter__') and not isinstance(x, str) else x
             for x in l]
-
 
 def check_varset_nonintersect(group0, group1):
     '''
@@ -433,3 +434,82 @@ class TestACDD1_3(BaseTestCase):
         empty_ds.time_coverage_end = '20160102T000000-1000'
         result = self.acdd.check_time_extents(empty_ds)
         self.assert_result_is_good(result)
+
+    def test_check_lat_extents(self):
+        """Test the check_lat_extents() method behaves expectedly"""
+
+        # create dataset using MockDataset, give it lat/lon dimensions
+        ds = MockTimeSeries()
+        ds.variables["lat"][:] = np.linspace(-135., -130., num=500) # arbitrary, but matches time dim size
+
+        # test no values, expect failure
+        result = self.acdd.check_lat_extents(ds)
+        self.assert_result_is_bad(result)
+
+        # give integer geospatial_lat_max/min, test
+        ds.setncattr("geospatial_lat_min", -135)
+        ds.setncattr("geospatial_lat_max", -130)
+
+        result = self.acdd.check_lat_extents(ds)
+        self.assert_result_is_good(result)
+
+        # give float geospatial_lat_min/max, test
+        ds.setncattr("geospatial_lat_min", -135.)
+        ds.setncattr("geospatial_lat_max", -130.)
+        
+        result = self.acdd.check_lat_extents(ds)
+        self.assert_result_is_good(result)
+
+        # give string (in number-form), test
+        ds.setncattr("geospatial_lat_min", "-135.")
+        ds.setncattr("geospatial_lat_max", "-130.")
+        
+        result = self.acdd.check_lat_extents(ds)
+        self.assert_result_is_good(result)
+
+        # give garbage string -- expect failure
+        ds.setncattr("geospatial_lat_min", "bad")
+        ds.setncattr("geospatial_lat_max", "val")
+        
+        result = self.acdd.check_lat_extents(ds)
+        self.assert_result_is_bad(result)
+
+    def test_check_lon_extents(self):
+        """Test the check_lon_extents() method behaves expectedly"""
+
+        # create dataset using MockDataset, give it lat/lon dimensions
+        ds = MockTimeSeries()
+        ds.variables["lon"][:] = np.linspace(65., 67., num=500) 
+
+        # test no values, expect failure
+        #result = self.acdd.check_lon_extents(ds)
+        #self.assert_result_is_bad(result)
+
+        # give integer geospatial_lon_max/min, test
+        ds.setncattr("geospatial_lon_min", 65)
+        ds.setncattr("geospatial_lon_max", 67)
+
+        result = self.acdd.check_lon_extents(ds)
+        self.assert_result_is_good(result)
+
+        # give float geospatial_lon_min/max, test
+        ds.setncattr("geospatial_lon_min", 65.)
+        ds.setncattr("geospatial_lon_max", 67.)
+        
+        result = self.acdd.check_lon_extents(ds)
+        self.assert_result_is_good(result)
+
+        # give string (in number-form), test
+        ds.setncattr("geospatial_lon_min", "65.")
+        ds.setncattr("geospatial_lon_max", "67.")
+        
+        result = self.acdd.check_lon_extents(ds)
+        self.assert_result_is_good(result)
+
+        # give garbage string -- expect failure
+        ds.setncattr("geospatial_lon_min", "bad")
+        ds.setncattr("geospatial_lon_max", "val")
+        
+        result = self.acdd.check_lon_extents(ds)
+        self.assert_result_is_bad(result)
+
