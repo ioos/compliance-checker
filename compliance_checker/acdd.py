@@ -239,7 +239,7 @@ class ACDDBaseCheck(BaseCheck):
                           'geospatial_lat_extents_match',
                           ['Could not convert one of geospatial_lat_min ({}) or max ({}) to float see CF-1.6 spec chapter 4.1'
                           ''.format(ds.geospatial_lat_min, ds.geospatial_lat_max)])
-            
+
 
         # identify lat var(s) as per CF 4.1
         lat_vars = {}       # var -> number of criteria passed
@@ -658,7 +658,7 @@ class ACDD1_3Check(ACDDNCCheck):
         if not hasattr(ds, u'date_modified'):
             return
         date_modified_check, msgs = datetime_is_iso(getattr(ds, u'date_modified'))
-        return Result(BaseCheck.MEDIUM, date_modified_check, 'date_modified_is_iso', msgs)
+        return Result(BaseCheck.LOW, date_modified_check, 'date_modified_is_iso', msgs)
 
     def check_date_issued_is_iso(self, ds):
         '''
@@ -669,7 +669,7 @@ class ACDD1_3Check(ACDDNCCheck):
         if not hasattr(ds, u'date_issued'):
             return
         date_issued_check, msgs = datetime_is_iso(getattr(ds, u'date_issued'))
-        return Result(BaseCheck.MEDIUM, date_issued_check, 'date_issued_is_iso', msgs)
+        return Result(BaseCheck.LOW, date_issued_check, 'date_issued_is_iso', msgs)
 
     def check_date_metadata_modified_is_iso(self, ds):
         '''
