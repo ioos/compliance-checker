@@ -25,7 +25,7 @@ class TestBase(TestCase):
         # attribute not present, should fail
         priority = base.BaseCheck.MEDIUM
         rv1, rv2, rv3, rv4 = [], [], [], []
-        attr = 'test'
+        attr = ('test', None)
         base.attr_check(attr, self.ds, priority, rv1)
         assert rv1[0] == base.Result(priority, False, "test",
                                      ['test not present'])
@@ -99,4 +99,4 @@ class TestGenericFile(TestCase):
 
     def test_create_GenericFile_failure(self):
         gf = base.GenericFile("will not match")
-        self.assertNotEqual(gf.filepath(), "do NOT MATCH") 
+        self.assertNotEqual(gf.filepath(), "do NOT MATCH")

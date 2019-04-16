@@ -3,6 +3,7 @@ General purpose utility functions to aid in compliance checking tasks
 """
 import isodate
 import pendulum
+from collections import OrderedDict
 
 
 def isstring(obj):
@@ -33,3 +34,9 @@ def dateparse(date_str):
 
     return pendulum.parse(date_str)
 
+def kvp_convert(input_coll):
+    if isinstance(input_coll, OrderedDict):
+        return input_coll
+    else:
+        return OrderedDict((l, None) if not isinstance(l, tuple) else
+                           (l[0], l[1]) for l in input_coll)
