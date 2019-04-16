@@ -14,6 +14,8 @@ from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
 from compliance_checker.cf.util import _possiblexunits, _possibleyunits
 from compliance_checker.util import datetime_is_iso, dateparse
 from compliance_checker import cfutil
+from compliance_checker.util import kvp_convert
+from functools import partial
 import pendulum
 from pygeoif import from_wkt
 
@@ -239,7 +241,7 @@ class ACDDBaseCheck(BaseCheck):
                           'geospatial_lat_extents_match',
                           ['Could not convert one of geospatial_lat_min ({}) or max ({}) to float see CF-1.6 spec chapter 4.1'
                           ''.format(ds.geospatial_lat_min, ds.geospatial_lat_max)])
-            
+
 
         # identify lat var(s) as per CF 4.1
         lat_vars = {}       # var -> number of criteria passed
@@ -634,6 +636,26 @@ class ACDD1_3Check(ACDDNCCheck):
             'publisher_institution',
         ])
 
+        # overrride the ISO date checks in
+        def _check_attr_is_iso_date(attr, ds):
+            result_name = "{}_is_iso".format(attr)
+            if not hasattr(ds, attr):
+                return ratable_result((0,2), result_name,
+                                      ["Attr {} is not present".format(attr)])
+            else:
+                iso_check, msgs = datetime_is_iso(getattr(ds, attr))
+                return ratable_result((1 + iso_check, 2),
+                                      result_name, msgs)
+
+        self.rec_atts = kvp_convert(self.rec_atts)
+        self.rec_atts['date_created'] = partial(_check_attr_is_iso_date,
+                                                'date_created')
+        self.sug_atts = kvp_convert(self.sug_atts)
+        for k in ("date_{}".format(suffix) for suffix in
+                  ('issued', 'modified', 'metadata_modified')):
+
+            self.sug_atts[k] = partial(_check_attr_is_iso_date, k)
+
     def check_metadata_link(self, ds):
         '''
         Checks if metadata link is formed in a rational manner
@@ -649,39 +671,6 @@ class ACDD1_3Check(ACDDNCCheck):
         valid_link = (len(msgs) == 0)
         return Result(BaseCheck.LOW, valid_link, 'metadata_link_valid', msgs)
 
-    def check_date_modified_is_iso(self, ds):
-        '''
-        Checks if date modified field is ISO compliant
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
-        if not hasattr(ds, u'date_modified'):
-            return
-        date_modified_check, msgs = datetime_is_iso(getattr(ds, u'date_modified'))
-        return Result(BaseCheck.MEDIUM, date_modified_check, 'date_modified_is_iso', msgs)
-
-    def check_date_issued_is_iso(self, ds):
-        '''
-        Checks if date issued field is ISO compliant
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
-        if not hasattr(ds, u'date_issued'):
-            return
-        date_issued_check, msgs = datetime_is_iso(getattr(ds, u'date_issued'))
-        return Result(BaseCheck.MEDIUM, date_issued_check, 'date_issued_is_iso', msgs)
-
-    def check_date_metadata_modified_is_iso(self, ds):
-        '''
-        Checks if date metadata modified field is ISO compliant
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
-        if not hasattr(ds, u'date_metadata_modified'):
-            return
-        date_metadata_modified_check, msgs = datetime_is_iso(getattr(ds, u'date_metadata_modified'))
-        return Result(BaseCheck.MEDIUM, date_metadata_modified_check, 'date_metadata_modified_is_iso', msgs)
-
     def check_id_has_no_blanks(self, ds):
         '''
         Check if there are blanks in the id field
@@ -695,18 +684,6 @@ class ACDD1_3Check(ACDDNCCheck):
                           msgs=[u'There should be no blanks in the id field'])
         else:
             return Result(BaseCheck.MEDIUM, True, 'no_blanks_in_id', msgs=[])
-
-    def check_date_created(self, ds):
-        '''
-        Check if date created is ISO-8601
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
-        if not hasattr(ds, u'date_created'):
-            return
-        date_created_check, msgs = datetime_is_iso(getattr(ds, u'date_created'))
-        return Result(BaseCheck.MEDIUM, date_created_check,
-                      'date_created_is_iso', msgs)
 
     def check_var_coverage_content_type(self, ds):
         '''
