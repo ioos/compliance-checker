@@ -34,7 +34,17 @@ def dateparse(date_str):
 
     return pendulum.parse(date_str)
 
+
 def kvp_convert(input_coll):
+    '''
+    Converts a list of string attributes and/or tuples into an OrderedDict.
+    If passed in an OrderedDict, function is idempotent.
+    Key/value pairs map to `first_tuple_element` -> `second_tuple_element` if
+    a tuple, or `scalar_value` -> None if not a tuple.
+
+    :param input_coll: An iterable with string and/or 2-tuple elements
+    :returns: collections.OrderedDict
+    '''
     if isinstance(input_coll, OrderedDict):
         return input_coll
     else:

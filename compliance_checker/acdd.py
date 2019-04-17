@@ -647,6 +647,8 @@ class ACDD1_3Check(ACDDNCCheck):
                 return ratable_result((1 + iso_check, 2),
                                       result_name, msgs)
 
+        # run ISO 8601 date checks against the date_created, date_issued,
+        # date_modified, and date_metadata_modified global attributes
         self.rec_atts = kvp_convert(self.rec_atts)
         self.rec_atts['date_created'] = partial(_check_attr_is_iso_date,
                                                 'date_created')
