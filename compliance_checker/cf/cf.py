@@ -37,10 +37,6 @@ def print_exceptions(f):
             print_exc()
     return wrapper
 
-
-__stdname_table__ = "v29"
-
-
 # helper to see if we should do DSG tests
 def is_likely_dsg(func):
     @wraps(func)
@@ -419,6 +415,41 @@ class CFBaseCheck(BaseCheck):
 
                 fails.append('The variable {} failed because the datatype is {}'.format(k, v.datatype))
         return Result(BaseCheck.HIGH, (total - len(fails), total), self.section_titles["2.2"], msgs=fails)
+
+    def check_child_attr_data_types(self, ds):
+        """
+        For any variables which contain any of the following attributes:
+            - valid_min/valid_max
+            - valid_range
+            - scale_factor
+            - add_offset
+            - _FillValue
+        the data type of the attribute must match the type of its parent variable as specified in the
+        NetCDF User Guide (NUG) https://www.unidata.ucar.edu/software/netcdf/docs/attribute_conventions.html,
+        referenced in the CF Conventions in Section 2.5.2 
+        (http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#missing-data)
+
+        :param netCDF4.Dataset ds: open netCDF dataset object
+        :rtype: compliance_checker.base.Result
+        """
+
+        ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles['2.5'])
+        special_attrs = [
+            "actual_range", "actual_min", "actual_max", "valid_min", "valid_max",
+            "valid_range", "scale_factor", "add_offset", "_FillValue"
+        ]
+        for _v, v in ds.variables.items():
+            for att in special_attrs:
+                try:
+                    _val = v.getncattr(att)
+                    ctx.assert_true(
+                        (_val.dtype == v.dtype),
+                        "Attribute '{}' (type: {}) and parent variable '{}' (type: {}) "
+                        "must have equivalent datatypes".format(att, type(_val), _v, v.dtype)
+                    )
+                except AttributeError:
+                    continue
+        return ctx.to_result()
 
     def check_naming_conventions(self, ds):
         '''
