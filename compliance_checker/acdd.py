@@ -400,30 +400,48 @@ class ACDDBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param str z_variable: Name of the variable representing the Z-Axis
         '''
-        vert_min = float(ds.geospatial_vertical_min)
-        vert_max = float(ds.geospatial_vertical_max)
         msgs = []
         total = 2
+        try:
+            vert_min = float(ds.geospatial_vertical_min)
+        except ValueError:
+            msgs.append('geospatial_vertical_min cannot be cast to float')
+
+        try:
+            vert_max = float(ds.geospatial_vertical_max)
+        except ValueError:
+            msgs.append('geospatial_vertical_max cannot be cast to float')
+        if len(msgs) > 0:
+            return Result(BaseCheck.MEDIUM, (0, total),
+                          'geospatial_vertical_extents_match', msgs)
 
         zvalue = ds.variables[z_variable][:]
         # If the array has fill values, which is allowed in the case of point
         # features
         if hasattr(zvalue, 'mask'):
             zvalue = zvalue[~zvalue.mask]
-        zmin = zvalue.min()
-        zmax = zvalue.max()
-        if not np.isclose(vert_min, zmin):
-            msgs.append("geospatial_vertical_min != min(%s) values, %s != %s" % (
-                z_variable,
-                vert_min,
-                zmin
-            ))
-        if not np.isclose(vert_max, zmax):
-            msgs.append("geospatial_vertical_max != max(%s) values, %s != %s" % (
-                z_variable,
-                vert_min,
-                zmax
-            ))
+
+        if zvalue.size == 0:
+            msgs.append("Cannot compare geospatial vertical extents "
+                        "against min/max of data, as non-masked data "
+                        "length is zero")
+            return Result(BaseCheck.MEDIUM, (0, total),
+                          'geospatial_vertical_extents_match', msgs)
+        else:
+            zmin = zvalue.min()
+            zmax = zvalue.max()
+            if not np.isclose(vert_min, zmin):
+                msgs.append("geospatial_vertical_min != min(%s) values, %s != %s" % (
+                    z_variable,
+                    vert_min,
+                    zmin
+                ))
+            if not np.isclose(vert_max, zmax):
+                msgs.append("geospatial_vertical_max != max(%s) values, %s != %s" % (
+                    z_variable,
+                    vert_min,
+                    zmax
+                ))
 
         return Result(BaseCheck.MEDIUM,
                       (total - len(msgs), total),

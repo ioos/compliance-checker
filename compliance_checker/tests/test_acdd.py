@@ -456,21 +456,21 @@ class TestACDD1_3(BaseTestCase):
         # give float geospatial_lat_min/max, test
         ds.setncattr("geospatial_lat_min", -135.)
         ds.setncattr("geospatial_lat_max", -130.)
-        
+
         result = self.acdd.check_lat_extents(ds)
         self.assert_result_is_good(result)
 
         # give string (in number-form), test
         ds.setncattr("geospatial_lat_min", "-135.")
         ds.setncattr("geospatial_lat_max", "-130.")
-        
+
         result = self.acdd.check_lat_extents(ds)
         self.assert_result_is_good(result)
 
         # give garbage string -- expect failure
         ds.setncattr("geospatial_lat_min", "bad")
         ds.setncattr("geospatial_lat_max", "val")
-        
+
         result = self.acdd.check_lat_extents(ds)
         self.assert_result_is_bad(result)
 
@@ -479,7 +479,7 @@ class TestACDD1_3(BaseTestCase):
 
         # create dataset using MockDataset, give it lat/lon dimensions
         ds = MockTimeSeries()
-        ds.variables["lon"][:] = np.linspace(65., 67., num=500) 
+        ds.variables["lon"][:] = np.linspace(65., 67., num=500)
 
         # test no values, expect failure
         #result = self.acdd.check_lon_extents(ds)
@@ -495,21 +495,61 @@ class TestACDD1_3(BaseTestCase):
         # give float geospatial_lon_min/max, test
         ds.setncattr("geospatial_lon_min", 65.)
         ds.setncattr("geospatial_lon_max", 67.)
-        
+
         result = self.acdd.check_lon_extents(ds)
         self.assert_result_is_good(result)
 
         # give string (in number-form), test
         ds.setncattr("geospatial_lon_min", "65.")
         ds.setncattr("geospatial_lon_max", "67.")
-        
+
         result = self.acdd.check_lon_extents(ds)
         self.assert_result_is_good(result)
 
         # give garbage string -- expect failure
         ds.setncattr("geospatial_lon_min", "bad")
         ds.setncattr("geospatial_lon_max", "val")
-        
+
         result = self.acdd.check_lon_extents(ds)
         self.assert_result_is_bad(result)
 
+    def test_check_geospatial_vertical_max(self):
+        ds = MockTimeSeries()
+        ds.variables["depth"][:] = np.linspace(0., 30., num=500)
+
+        # give integer geospatial_vertical_max/min, test
+        ds.setncattr("geospatial_vertical_min", 0)
+        ds.setncattr("geospatial_vertical_max", 30)
+
+        result = self.acdd.check_vertical_extents(ds)
+        self.assert_result_is_good(result)
+
+        # give float geospatial_vertical_min/max, test
+        ds.setncattr("geospatial_vertical_min", 0.)
+        ds.setncattr("geospatial_vertical_max", 30.)
+
+        result = self.acdd.check_vertical_extents(ds)
+        self.assert_result_is_good(result)
+
+        # give string (in number-form), test
+        ds.setncattr("geospatial_vertical_min", "0.")
+        ds.setncattr("geospatial_vertical_max", "30.")
+
+        result = self.acdd.check_vertical_extents(ds)
+        self.assert_result_is_good(result)
+
+        # give garbage string -- expect failure
+        ds.setncattr("geospatial_vertical_min", "bad")
+        ds.setncattr("geospatial_vertical_max", "val")
+
+        result = self.acdd.check_vertical_extents(ds)
+        self.assert_result_is_bad(result)
+
+        # all masked values mean that there are no valid array elements to get
+        # the min/max of
+        ds.setncattr("geospatial_vertical_min", 0.)
+        ds.setncattr("geospatial_vertical_max", 30.)
+        ds.variables["depth"][:] = np.ma.masked_all(ds.variables["depth"]
+                                                    .shape)
+        result = self.acdd.check_vertical_extents(ds)
+        self.assert_result_is_bad(result)
