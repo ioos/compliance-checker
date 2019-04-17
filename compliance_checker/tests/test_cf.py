@@ -13,6 +13,7 @@ from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
 from compliance_checker.cf.appendix_d import no_missing_terms
 from itertools import chain
 
+import numpy as np
 import os
 import re
 import sys
@@ -96,6 +97,41 @@ class TestCF(BaseTestCase):
         result = self.cf.check_data_types(dataset)
         assert result.msgs[0] == u'The variable temp failed because the datatype is int64'
         assert result.value == (6, 7)
+
+    def test_check_child_attr_data_types(self):
+        """
+        Tests check_child_attr_data_types() to ensure the attributes specified in Section 2.5.1
+        have a matching data type to their parent variables."""
+
+        # create dataset using MockDataset (default constructor gives it time dimension)
+        ds = MockTimeSeries()
+        ds.createVariable("temp", np.float64, dimensions=("time")) # add variable "temp" with dimension "time"
+
+        # check where no special data attrs are present, should result good
+        result = self.cf.check_child_attr_data_types(ds) # checks all special attrs for all variables
+        self.assert_result_is_good(result)
+
+        # give temp _FillValue as a float, expect good result
+        ds.variables['temp'].setncattr("_FillValue", np.float(99999999999999999999.))
+        result = self.cf.check_child_attr_data_types(ds)
+        self.assert_result_is_good(result)
+
+        # give temp valid_range as an array of floats, all should check out
+        ds.variables['temp'].setncattr("valid_range", np.array([35., 38.]))
+        result = self.cf.check_child_attr_data_types(ds)
+        self.assert_result_is_good(result)
+
+        # now give invalid integer for valid_min; above two should still check out, this one should fail
+        ds.variables['temp'].setncattr("valid_min", 45)
+        result = self.cf.check_child_attr_data_types(ds)
+        self.assert_result_is_bad(result)
+        
+        # now give invalid string for valid_max
+        ds.variables['temp'].setncattr("valid_max", "eighty")
+        result = self.cf.check_child_attr_data_types(ds)
+        self.assert_result_is_bad(result)
+
+        # TODO for CF-1.7: actual_range, actual_min/max
 
     def test_naming_conventions(self):
         '''
