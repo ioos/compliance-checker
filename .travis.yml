@@ -40,16 +40,19 @@ matrix:
       env: TEST_TARGET=cc-checker-ugrid PY=3.7
 
 before_install:
-  - wget http://bit.ly/miniconda -O miniconda.sh
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - conda config --set always_yes yes --set changeps1 no --set show_channel_urls true
-  - conda update conda
-  - conda config --remove channels defaults --force
-  - conda config --add channels conda-forge --force
-  - python gen_conda_requirements.py --groups requirements.txt --py${PY:0:1} > conda-requirements.txt;
-  - conda create --name TEST python=$PY --file conda-requirements.txt --file test_requirements.txt
-  - source activate TEST
+  # Install miniconda and create TEST env.
+  - |
+    wget http://bit.ly/miniconda -O miniconda.sh
+    bash miniconda.sh -b -p $HOME/miniconda
+    export PATH="$HOME/miniconda/bin:$PATH"
+    conda config --set always_yes yes --set changeps1 no --set show_channel_urls true
+    conda update conda --quiet
+    conda config --add channels conda-forge --force
+    conda config --set channel_priority strict
+    conda config --set safety_checks disabled
+    python gen_conda_requirements.py --groups requirements.txt --py${PY:0:1} > conda-requirements.txt
+    conda create --name TEST python=$PY --file conda-requirements.txt --file test_requirements.txt
+    source activate TEST
 
 # Test source distribution.
 install:
