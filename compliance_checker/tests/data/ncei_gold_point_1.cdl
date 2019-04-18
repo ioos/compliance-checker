@@ -56,7 +56,7 @@ variables:
 		sal:grid_mapping = "crs" ;
 		sal:source = "This data is completely false data, the number was randomly selected" ;
 		sal:references = "http://www.numpy.org/" ;
-		sal:cell_methods = "time: point longitude: point latitude: point" ;
+		sal:cell_methods = "time: point lon: point lat: point" ;
 		sal:platform = "platform1" ;
 		sal:instrument = "instrument1" ;
 		sal:comment = "This data is BOGUS!!!!!" ;
@@ -76,7 +76,7 @@ variables:
 		temp:grid_mapping = "crs" ;
 		temp:source = "This data is completely false data, the number was randomly selected" ;
 		temp:references = "http://www.numpy.org/" ;
-		temp:cell_methods = "time: point longitude: point latitude: point" ;
+		temp:cell_methods = "time: point lon: point lat: point" ;
 		temp:platform = "platform1" ;
 		temp:instrument = "instrument1" ;
 		temp:comment = "This data is BOGUS!!!!!" ;
