@@ -29,9 +29,14 @@ class MockTimeSeries(MockNetCDF):
 
         # give some applicable units
         self.variables["time"].units  = "seconds since 2019-04-11T00:00:00"
+        self.variables["time"].axis  = "T"
         self.variables["lat"].units   = "degree_north"
+        self.variables["lat"].axis  = "Y"
         self.variables["lon"].units   = "degree_east"
+        self.variables["lon"].axis  = "X"
         self.variables["depth"].units = "meters"
+        self.variables["depth"].axis  = "Z"
+        self.variables["depth"].positive = "down"
 
 
 class MockVariable(object):
