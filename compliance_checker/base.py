@@ -12,6 +12,7 @@ from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
 from compliance_checker import __version__, MemoizedDataset
+from compliance_checker.util import kvp_convert
 from lxml import etree
 import sys
 
@@ -231,7 +232,7 @@ def xpath_check(tree, xpath):
     return len(xpath(tree)) > 0
 
 
-def attr_check(l, ds, priority, ret_val, gname=None):
+def attr_check(kvp, ds, priority, ret_val, gname=None):
     """
     Handles attribute checks for simple presence of an attribute, presence of
     one of several attributes, and passing a validation function.  Returns a
@@ -246,81 +247,19 @@ def attr_check(l, ds, priority, ret_val, gname=None):
     """
 
     msgs = []
-    if isinstance(l, tuple):
-        name, other = l
-        if hasattr(other, '__iter__'):
-            # redundant, we could easily do this with a hasattr
-            # check instead
-            res = std_check_in(ds, name, other)
-            if res == 0:
-                msgs.append("%s not present" % name)
-            elif res == 1:
-                msgs.append("%s present, but not in expected value list (%s)" % (name, other))
-
-            ret_val.append(
-                Result(
-                    priority,
-                    (res, 2),
-                    gname if gname else name, # groups Globals if supplied
-                    msgs
-                )
-            )
-        # if we have an XPath expression, call it on the document
-        elif type(other) is etree.XPath:
-            # TODO: store tree instead of creating it each time?
-            res = xpath_check(ds._root, other)
-            if not res:
-                msgs = ["XPath for {} not found".format(name)]
-            ret_val.append(
-                Result(
-                    priority,
-                    res,
-                    gname if gname else name,
-                    msgs
-                )
-            )
-        # if the attribute is a function, call it
-        # right now only supports single attribute
-        # important note: current magic approach uses all functions
-        # starting with "check".  Avoid naming check functions
-        # starting with check if you want to pass them in with
-        # a tuple to avoid them being checked more than once
-        elif hasattr(other, '__call__'):
-            # check that the attribute is actually present.
-            # This reduces boilerplate in functions by not needing
-            # to check whether the attribute is present every time
-            # and instead focuses on the core functionality of the
-            # test
-
-            res = other(ds) # call the method on the dataset
-            if not res:
-                msgs = ["%s not present" % name]
-                ret_val.append(
-                    Result(
-                        priority,
-                        res,
-                        gname if gname else name,
-                        msgs
-                    )
-                )
-            else:
-                ret_val.append(other(ds)(priority))
-        # unsupported second type in second
-        else:
-            raise TypeError("Second arg in tuple has unsupported type: {}".format(type(other)))
-
-    else:
-        res = std_check(ds, l)
+    name, other = kvp
+    if other is None:
+        res = std_check(ds, name)
         if not res:
-            msgs = ["%s not present" % l]
+            msgs = ["%s not present" % name]
         else:
             try:
                 # see if this attribute is a string, try stripping
                 # whitespace, and return an error if empty
-                att_strip = getattr(ds, l).strip()
+                att_strip = getattr(ds, name).strip()
                 if not att_strip:
                     res = False
-                    msgs = ["%s is empty or completely whitespace" % l]
+                    msgs = ["%s is empty or completely whitespace" % name]
             # if not a string/has no strip method we should be OK
             except AttributeError:
                 pass
@@ -329,9 +268,70 @@ def attr_check(l, ds, priority, ret_val, gname=None):
         ret_val.append(Result(
             priority,
             value=res,
-            name=gname if gname else l,
+            name=gname if gname else name,
             msgs=msgs
         ))
+    elif hasattr(other, '__iter__'):
+        # redundant, we could easily do this with a hasattr
+        # check instead
+        res = std_check_in(ds, name, other)
+        if res == 0:
+            msgs.append("%s not present" % name)
+        elif res == 1:
+            msgs.append("%s present, but not in expected value list (%s)" % (name, other))
+
+        ret_val.append(
+            Result(
+                priority,
+                (res, 2),
+                gname if gname else name, # groups Globals if supplied
+                msgs
+            )
+        )
+    # if we have an XPath expression, call it on the document
+    elif type(other) is etree.XPath:
+        # TODO: store tree instead of creating it each time?
+        res = xpath_check(ds._root, other)
+        if not res:
+            msgs = ["XPath for {} not found".format(name)]
+        ret_val.append(
+            Result(
+                priority,
+                res,
+                gname if gname else name,
+                msgs
+            )
+        )
+    # if the attribute is a function, call it
+    # right now only supports single attribute
+    # important note: current magic approach uses all functions
+    # starting with "check".  Avoid naming check functions
+    # starting with check if you want to pass them in with
+    # a tuple to avoid them being checked more than once
+    elif hasattr(other, '__call__'):
+        # check that the attribute is actually present.
+        # This reduces boilerplate in functions by not needing
+        # to check whether the attribute is present every time
+        # and instead focuses on the core functionality of the
+        # test
+
+        res = other(ds) # call the method on the dataset
+        if not res:
+            msgs = ["%s not present" % name]
+            ret_val.append(
+                Result(
+                    priority,
+                    res,
+                    gname if gname else name,
+                    msgs
+                )
+            )
+        else:
+            ret_val.append(res(priority))
+    # unsupported second type in second
+    else:
+        raise TypeError("Second arg in tuple has unsupported type: {}".format(type(other)))
+
 
     return ret_val
 
@@ -342,14 +342,14 @@ def check_has(priority=BaseCheck.HIGH, gname=None):
 
     def _inner(func):
         def _dec(s, ds):
-            list_vars = func(s, ds)
+            attr_process = kvp_convert(func(s, ds))
 
             ret_val = []
             # could potentially run tests in parallel if we eliminated side
             # effects on `ret_val`
-            for l in list_vars:
+            for kvp in attr_process.items():
                 # function mutates ret_val
-                attr_check(l, ds, priority, ret_val, gname)
+                attr_check(kvp, ds, priority, ret_val, gname)
             return ret_val
 
         return wraps(func)(_dec)
