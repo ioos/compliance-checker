@@ -402,17 +402,11 @@ class CFBaseCheck(BaseCheck):
         total = len(ds.variables)
 
         for k, v in ds.variables.items():
-            if v.dtype not in [np.character,
-                               np.dtype('c'),
-                               np.dtype('b'),
-                               np.dtype('i4'),
-                               np.int32,
-                               np.float32,
-                               np.double,
-                               'int16',
-                               'float32'
-                               ]:
-
+            if (v.dtype.kind != 'S' and
+                all(v.dtype.type != t for t in
+                                    (np.character, np.dtype('|S1'),
+                                     np.dtype('b'), np.dtype('i2'),
+                                     np.dtype('i4'), np.float32, np.double))):
                 fails.append('The variable {} failed because the datatype is {}'.format(k, v.datatype))
         return Result(BaseCheck.HIGH, (total - len(fails), total), self.section_titles["2.2"], msgs=fails)
 
@@ -426,7 +420,7 @@ class CFBaseCheck(BaseCheck):
             - _FillValue
         the data type of the attribute must match the type of its parent variable as specified in the
         NetCDF User Guide (NUG) https://www.unidata.ucar.edu/software/netcdf/docs/attribute_conventions.html,
-        referenced in the CF Conventions in Section 2.5.2 
+        referenced in the CF Conventions in Section 2.5.2
         (http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#missing-data)
 
         :param netCDF4.Dataset ds: open netCDF dataset object
@@ -434,21 +428,27 @@ class CFBaseCheck(BaseCheck):
         """
 
         ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles['2.5'])
-        special_attrs = [
-            "actual_range", "actual_min", "actual_max", "valid_min", "valid_max",
-            "valid_range", "scale_factor", "add_offset", "_FillValue"
-        ]
-        for _v, v in ds.variables.items():
-            for att in special_attrs:
-                try:
-                    _val = v.getncattr(att)
-                    ctx.assert_true(
-                        (_val.dtype == v.dtype),
-                        "Attribute '{}' (type: {}) and parent variable '{}' (type: {}) "
-                        "must have equivalent datatypes".format(att, type(_val), _v, v.dtype)
+        special_attrs = {"actual_range", "actual_min", "actual_max",
+                         "valid_min", "valid_max", "valid_range",
+                         "scale_factor", "add_offset", "_FillValue"}
+
+        for var_name, var in ds.variables.items():
+            for att in special_attrs.intersection(var.ncattrs()):
+                val = var.getncattr(att)
+                if isinstance(val, basestring):
+                    type_match = var.dtype.kind == 'S'
+                    val_type = type(val)
+                else:
+                    val_type = val.dtype.type
+                    type_match = val_type == var.dtype.type
+
+                ctx.assert_true(type_match,
+                    "Attribute '{}' (type: {}) and parent variable '{}' (type: {}) "
+                    "must have equivalent datatypes".format(att,
+                                                            val_type,
+                                                            var_name,
+                                                            var.dtype.type)
                     )
-                except AttributeError:
-                    continue
         return ctx.to_result()
 
     def check_naming_conventions(self, ds):
@@ -1375,9 +1375,9 @@ class CFBaseCheck(BaseCheck):
                                  "{}'s flag_values must be independent and can not be repeated".format(name))
 
         # the data type for flag_values should be the same as the variable
-        valid_values.assert_true(variable.dtype == flag_values.dtype,
+        valid_values.assert_true(variable.dtype.type == flag_values.dtype.type,
                                  "flag_values ({}) must be the same data type as {} ({})"
-                                 "".format(flag_values.dtype, name, variable.dtype))
+                                 "".format(flag_values.dtype.type, name, variable.dtype.type))
 
         if isinstance(flag_meanings, basestring):
             flag_meanings = flag_meanings.split()
@@ -1413,9 +1413,9 @@ class CFBaseCheck(BaseCheck):
         if not isinstance(flag_masks, np.ndarray):
             return valid_masks.to_result()
 
-        valid_masks.assert_true(variable.dtype == flag_masks.dtype,
+        valid_masks.assert_true(variable.dtype.type == flag_masks.dtype.type,
                                 "flag_masks ({}) mustbe the same data type as {} ({})"
-                                "".format(flag_masks.dtype, name, variable.dtype))
+                                "".format(flag_masks.dtype.type, name, variable.dtype.type))
 
         type_ok = (np.issubdtype(variable.dtype, np.integer) or
                    np.issubdtype(variable.dtype, 'S') or
@@ -2244,7 +2244,7 @@ class CFBaseCheck(BaseCheck):
                   'its coordinate variable should also share a subset of {}\'s dimensions'
 
             # Make sure we can find latitude and its dimensions are a subset
-            _lat = None 
+            _lat = None
             found_lat = False
             for lat in axis_map['Y']:
                 _lat = lat
@@ -2257,10 +2257,10 @@ class CFBaseCheck(BaseCheck):
                 has_coords.assert_true(found_lat, msg.format(variable, _lat, variable))
             else:
                 has_coords.assert_true(found_lat, alt.format(variable, variable))
-                
+
 
             # Make sure we can find longitude and its dimensions are a subset
-            _lon = None 
+            _lon = None
             found_lon = False
             for lon in axis_map['X']:
                 _lon = lon
@@ -3072,14 +3072,14 @@ class CFBaseCheck(BaseCheck):
             if type(add_offset) != type(scale_factor):
                 valid = False
                 reasoning.append("Attributes add_offset and scale_factor have different data type.")
-            elif type(scale_factor) != var.dtype:
+            elif type(scale_factor) != var.dtype.type:
                 # Check both attributes are type float or double
                 if not isinstance(scale_factor, (float, np.floating)):
                     valid = False
                     reasoning.append("Attributes add_offset and scale_factor are not of type float or double.")
                 else:
                     # Check variable type is byte, short or int
-                    if var.dtype not in [np.int, np.int8, np.int16, np.int32, np.int64]:
+                    if var.dtype.type not in [np.int, np.int8, np.int16, np.int32, np.int64]:
                         valid = False
                         reasoning.append("Variable is not of type byte, short, or int.")
 
@@ -3090,25 +3090,25 @@ class CFBaseCheck(BaseCheck):
             valid = True
             # test further with  _FillValue , valid_min , valid_max , valid_range
             if hasattr(var, "_FillValue"):
-                if var._FillValue.dtype != var.dtype:
+                if var._FillValue.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append("Type of %s:_FillValue attribute (%s) does not match variable type (%s)" %
-                                     (name, var._FillValue.dtype, var.dtype))
+                                     (name, var._FillValue.dtype.type, var.dtype.type))
             if hasattr(var, "valid_min"):
-                if var.valid_min.dtype != var.dtype:
+                if var.valid_min.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append("Type of %svalid_min attribute (%s) does not match variable type (%s)" %
-                                     (name, var.valid_min.dtype, var.dtype))
+                                     (name, var.valid_min.dtype.type, var.dtype.type))
             if hasattr(var, "valid_max"):
-                if var.valid_max.dtype != var.dtype:
+                if var.valid_max.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append("Type of %s:valid_max attribute (%s) does not match variable type (%s)" %
-                                     (name, var.valid_max.dtype, var.dtype))
+                                     (name, var.valid_max.dtype.type, var.dtype.type))
             if hasattr(var, "valid_range"):
-                if var.valid_range.dtype != var.dtype:
+                if var.valid_range.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append("Type of %s:valid_range attribute (%s) does not match variable type (%s)" %
-                                     (name, var.valid_range.dtype, var.dtype))
+                                     (name, var.valid_range.dtype.type, var.dtype.type))
 
             result = Result(BaseCheck.MEDIUM,
                             valid,
