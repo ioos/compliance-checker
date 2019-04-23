@@ -182,6 +182,9 @@ class CFBaseCheck(BaseCheck):
         # usually raised from .lower() with an incompatible (non-string)
         # data type
         except AttributeError:
+            warn("Cannot convert standard name table to lowercase.  This can "
+                 "occur if a non-string standard_name_vocabulary global "
+                 "attribute is supplied")
             return False
 
         if version.startswith('v'):  # i.e 'v34' -> '34' drop the v
