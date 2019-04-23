@@ -125,7 +125,7 @@ class TestCF(BaseTestCase):
         ds.variables['temp'].setncattr("valid_min", 45)
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_bad(result)
-        
+
         # now give invalid string for valid_max
         ds.variables['temp'].setncattr("valid_max", "eighty")
         result = self.cf.check_child_attr_data_types(ds)
@@ -457,8 +457,16 @@ class TestCF(BaseTestCase):
         """
         Test that failure in case a bad standard name table is passed.
         """
+        # would this ever actually be reached by the code?
         with pytest.raises(IOError):
             StandardNameTable('dummy_non_existent_file.ext')
+
+        nc_obj = MockTimeSeries()
+        nc_obj.standard_name_table = 'dummy_non_existent_file.ext'
+        self.assertFalse(self.cf._find_cf_standard_name_table(nc_obj))
+
+        nc_obj.standard_name_table = np.array([], np.float64)
+        self.assertFalse(self.cf._find_cf_standard_name_table(nc_obj))
 
     def test_check_flags(self):
         """Test that the check for flags works as expected."""
@@ -482,7 +490,7 @@ class TestCF(BaseTestCase):
     def test_check_bad_units(self):
         """Load a dataset with units that are expected to fail (bad_units.nc).
         There are 6 variables in this dataset, three of which should give
-        an error: 
+        an error:
             - time, with units "s" (should be <units> since <epoch>)
             - lat, with units "degrees_E" (should be degrees)
             - lev, with units "level" (deprecated)"""
@@ -496,7 +504,7 @@ class TestCF(BaseTestCase):
         # dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
 
         dataset = self.load_dataset(STATIC_FILES['bad_units'])
-        all_results = self.cf.check_units(dataset) 
+        all_results = self.cf.check_units(dataset)
 
         # use itertools.chain() to unpack the lists of messages
         results_list = list(chain(*(r.msgs for r in all_results if r.msgs)))
@@ -526,7 +534,7 @@ class TestCF(BaseTestCase):
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
         assert (r.name == u'§4.1 Latitude Coordinates' for r in results)
-        
+
         # check with another ds -- all 6 vars checked pass
         dataset = self.load_dataset(STATIC_FILES['rotated_pole_grid'])
         results = self.cf.check_latitude(dataset)
@@ -716,7 +724,7 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['bad'])
         results = self.cf.check_dimensionless_vertical_coordinate(dataset)
         scored, out_of, messages = self.get_results(results)
-        assert len(results) == 4 
+        assert len(results) == 4
         assert scored <= out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
         assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
@@ -731,7 +739,7 @@ class TestCF(BaseTestCase):
         results = self.cf.check_dimensionless_vertical_coordinate(dataset)
         scored, out_of, messages = self.get_results(results)
 
-        assert len(results) == 4 
+        assert len(results) == 4
         assert scored <= out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
         assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
