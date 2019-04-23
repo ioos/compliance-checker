@@ -169,3 +169,31 @@ class TestCLI(TestCase):
         )
 
         assert os.stat(self.path).st_size > 0
+
+    def test_multi_checker_return_value(self):
+        '''
+        Tests that any failure for multiple checkers results in a failure return
+        status
+        '''
+        # CF should pass here
+        return_value, errors = ComplianceChecker.run_checker(
+            ds_loc=STATIC_FILES['ncei_gold_point_1'],
+            verbose=0,
+            criteria='strict',
+            checker_names=['cf'],
+            output_filename=self.path,
+            output_format='text'
+        )
+        self.assertTrue(return_value)
+
+        # CF should pass, but ACDD will have some errors.  Overall return
+        # status should be a failure
+        return_value, errors = ComplianceChecker.run_checker(
+            ds_loc=STATIC_FILES['ncei_gold_point_1'],
+            verbose=0,
+            criteria='strict',
+            checker_names=['acdd', 'cf'],
+            output_filename=self.path,
+            output_format='text'
+        )
+        self.assertFalse(return_value)
