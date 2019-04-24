@@ -167,16 +167,24 @@ class CFBaseCheck(BaseCheck):
 
         # Try to parse this attribute to get version
         version = None
-        if 'cf standard name table' in standard_name_vocabulary.lower():
-            version = [s.strip('(').strip(')').strip('v').strip(',') for s in standard_name_vocabulary.split()]
-            # This assumes that table version number won't start with 0.
-            version = [s for s in version if s.isdigit() and len(s) <= 2 and not s.startswith('0')]
-            if len(version) > 1:
-                return False
+        try:
+            if 'cf standard name table' in standard_name_vocabulary.lower():
+                version = [s.strip('(').strip(')').strip('v').strip(',') for s in standard_name_vocabulary.split()]
+                # This assumes that table version number won't start with 0.
+                version = [s for s in version if s.isdigit() and len(s) <= 2 and not s.startswith('0')]
+                if len(version) > 1:
+                    return False
+                else:
+                    version = version[0]
             else:
-                version = version[0]
-        else:
-            # Can't parse the attribute, use the packaged version
+                # Can't parse the attribute, use the packaged version
+                return False
+        # usually raised from .lower() with an incompatible (non-string)
+        # data type
+        except AttributeError:
+            warn("Cannot convert standard name table to lowercase.  This can "
+                 "occur if a non-string standard_name_vocabulary global "
+                 "attribute is supplied")
             return False
 
         if version.startswith('v'):  # i.e 'v34' -> '34' drop the v
