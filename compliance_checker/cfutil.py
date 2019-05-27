@@ -733,7 +733,9 @@ def get_axis_map(ds, variable):
 
     coordinates = getattr(ds.variables[variable], "coordinates", None)
     if not isinstance(coordinates, basestring):
-        coordinates = ''
+        coordinates = []
+    else:
+        coordinates = coordinates.split(' ')
 
     # For example
     # {'x': ['longitude'], 'y': ['latitude'], 't': ['time']}
