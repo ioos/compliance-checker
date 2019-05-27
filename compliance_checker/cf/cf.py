@@ -2155,15 +2155,13 @@ class CFBaseCheck(BaseCheck):
             # For every coordinate associated with this variable, keep track of
             # which coordinates define an axis and assert that there are no
             # duplicate axis attributes defined in the set of associated
-            # coordinates.
-            for axis, coordinates in axis_map.items():
-                for coordinate in coordinates:
-                    axis_attr = getattr(ds.variables[coordinate], 'axis', None)
-                    no_duplicates.assert_true(axis_attr is None or axis_attr not in axes,
-                                              "'{}' has duplicate axis {} defined by {}".format(name, axis_attr, coordinate))
-
-                    if axis_attr and axis_attr not in axes:
-                        axes.append(axis_attr)
+            # coordinates. axis_map includes coordinates that don't actually have
+            # an axis attribute, so we need to ignore those here.
+            for axis, coords in axis_map.items():
+                coords = [c for c in coords if hasattr(ds.variables[c], 'axis')]
+                no_duplicates.assert_true(len(coords) <= 1,
+                                          "'{}' has duplicate axis {} defined by {}".format(name, axis, sorted(coords))
+                                          )
 
             ret_val.append(no_duplicates.to_result())
 
