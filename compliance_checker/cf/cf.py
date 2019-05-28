@@ -2160,7 +2160,7 @@ class CFBaseCheck(BaseCheck):
             for axis, coords in axis_map.items():
                 coords = [c for c in coords if hasattr(ds.variables[c], 'axis')]
                 no_duplicates.assert_true(len(coords) <= 1,
-                                          "'{}' has duplicate axis {} defined by {}".format(name, axis, sorted(coords))
+                                          "'{}' has duplicate axis {} defined by [{}]".format(name, axis, ', '.join(sorted(coords)))
                                           )
 
             ret_val.append(no_duplicates.to_result())

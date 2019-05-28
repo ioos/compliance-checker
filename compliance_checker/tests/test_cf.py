@@ -962,7 +962,7 @@ class TestCF(BaseTestCase):
 
         # only one check run here, so we can directly compare all the values
         assert scored != out_of
-        assert messages[0] == u"'temp' has duplicate axis X defined by [u'lon_rho', u'lon_u']"
+        assert messages[0] == u"'temp' has duplicate axis X defined by [lon_rho, lon_u]"
 
     def test_check_multi_dimensional_coords(self):
         '''
