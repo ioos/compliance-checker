@@ -733,24 +733,28 @@ def get_axis_map(ds, variable):
 
     coordinates = getattr(ds.variables[variable], "coordinates", None)
     if not isinstance(coordinates, basestring):
-        coordinates = ''
+        coordinates = []
+    else:
+        coordinates = coordinates.split(' ')
 
     # For example
     # {'x': ['longitude'], 'y': ['latitude'], 't': ['time']}
     axis_map = defaultdict(list)
     for coord_name in all_coords:
-        if is_compression_coordinate(ds, coord_name):
-            axis = 'C'
-        elif coord_name in times:
-            axis = 'T'
-        elif coord_name in longitudes:
-            axis = 'X'
-        elif coord_name in latitudes:
-            axis = 'Y'
-        elif coord_name in heights:
-            axis = 'Z'
-        else:
-            axis = 'U'
+        axis = getattr(ds.variables[coord_name], 'axis', None)
+        if not axis or axis not in ('X', 'Y', 'Z', 'T'):
+            if is_compression_coordinate(ds, coord_name):
+                axis = 'C'
+            elif coord_name in times:
+                axis = 'T'
+            elif coord_name in longitudes:
+                axis = 'X'
+            elif coord_name in latitudes:
+                axis = 'Y'
+            elif coord_name in heights:
+                axis = 'Z'
+            else:
+                axis = 'U'
 
         if coord_name in ds.variables[variable].dimensions:
             if coord_name not in axis_map[axis]:
