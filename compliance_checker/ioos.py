@@ -5,9 +5,15 @@ from __future__ import unicode_literals
 from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, Result
 from owslib.namespaces import Namespaces
 from lxml.etree import XPath
-from compliance_checker.cfutil import get_geophysical_variables
 from compliance_checker.cf.cf import CF1_6Check
+from compliance_checker.cfutil import get_geophysical_variables, get_instrument_variables
+from compliance_checker.cf.cf import CFBaseCheck
+import re
 
+try:
+    basestring
+except NameError:
+    basestring = str
 
 class IOOSBaseCheck(BaseCheck):
     _cc_spec = 'ioos'
@@ -264,6 +270,26 @@ class IOOS1_1Check(IOOSNCCheck):
         '''
         return self.rec_atts
 
+    def check_instrument_variables(self, ds):
+        '''
+        Instrument variables are 'required, if applicable' by the IOOS Profile v1.1.
+        If an instrument variable exists, it must have the 'discriminant' attribute.
+        Since the Compliance-Checker has no way to discern if it is applicable or not,
+        the check is skipped if the variable does not exist.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        results = []
+        instrument_vars = get_instrument_variables(ds)
+        if not instrument_vars:
+            pass
+
+        for ivar in instrument_vars:
+            results.append(
+                self._has_var_attr(ds, ivar, 'discriminant', 'instrument_variable:discriminant', BaseCheck.HIGH),
+            )
+        return results
+
     def check_platform_variables(self, ds):
         '''
         The value of platform attribute should be set to another variable which
@@ -345,6 +371,159 @@ class IOOS1_1Check(IOOSNCCheck):
         '''
         cf16 = CF1_6Check()
         return cf16.check_units(ds)
+
+
+class IOOS1_2Check(IOOS1_1Check):
+    """
+    Compliance checker implementation of IOOS Metadata Profile, Version 1.2
+
+    Related links:
+    https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#ioos-metadata-profile-attributes
+    """
+    _cc_spec_version = '1.2'
+    _cc_description = 'IOOS Metadata Profile, Version 1.2'
+    _cc_url = 'https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#ioos-metadata-profile-attributes'
+    register_checker = True
+
+    def __init__(self):
+        # Define the global attributes
+        self.required_atts = [
+            'creator_country',
+            'creator_email',
+            'creator_institution',
+            'creator_sector',
+            'creator_url',
+            'featureType',
+            'id',
+            'info_url',
+            'naming_authority',
+            'platform_name',
+            'platform_vocabulary',
+            'publisher_country',
+            'publisher_email',
+            'publisher_name',
+            'publisher_url',
+            'standard_name_vocabulary',
+            'title'
+        ]
+
+        self.rec_atts = [
+            'contributor_email',
+            'contributor_name',
+            'contributor_role',
+            'contributor_role_vocabulary',
+            'contributor_url',
+            'creator_address',
+            'creator_city',
+            'creator_name',
+            'creator_phone',
+            'creator_state',
+            'creator_type',
+            'creator_postalcode',
+            'institution',
+            'keywords',
+            'license',
+            'platform_id',
+            'publisher_address',
+            'publisher_city',
+            'publisher_phone',
+            'publisher_state',
+            'publisher_type',
+            'publisher_postalcode',
+            'references',
+            'summary'
+        ]
+
+    def check_instrument_variables(self, ds):
+        '''
+        Instrument variables are 'recommended, if applicable' by the IOOS Profile v1.2.
+        If an instrument variable exists, it is recommended to have the following attributes:
+            component
+            discriminant
+
+        Since the Compliance-Checker has no way to discern if it is applicable or not,
+        the check is skipped if the variable does not exist.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        results = []
+        instrument_vars = get_instrument_variables(ds)
+        if not instrument_vars:
+            pass
+
+        for ivar in instrument_vars:
+            results.append(
+                self._has_var_attr(ds, ivar, 'component', 'instrument_variable:component', BaseCheck.HIGH))
+            results.append(
+                self._has_var_attr(ds, ivar, 'discriminant', 'instrument_variable:discriminant', BaseCheck.HIGH))
+        return results
+
+    def check_platform_variables(self, ds):
+        """Since only 1 platform variable is allowed per v1.2, this method
+        is overloaded to skip."""
+        pass
+
+    def check_platform_variable_attributes(self, ds):
+        """Many of the attributes were removed from v1.1 to v1.2, so this
+        method is overloaded to skip."""
+        pass
+
+    def check_platform_variable(self, ds):
+        '''
+        Consolidated method to check a singular platform variable exists
+        and contains the 'cf_role' attribute.
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        platform_name = getattr(ds, 'platform', '')
+        _multi_platforms = platform_name.split(" ")
+        if len(_multi_platforms) > 1:
+            return Result(
+                BaseCheck.HIGH,
+                False,
+                "platform variable",
+                ["Only one platform variable is allowed per Version 1.2"]
+            )
+        val = platform_name in ds.variables
+        if not val:
+            msg = 'The value of "platform" global attribute should be set to another variable '+\
+                  'which contains the details of the platform.'
+            return Result(BaseCheck.HIGH, val, 'platform variables', [msg])
+        return self._has_var_attr(ds, platform_name, 'cf_role', 'platform variable', BaseCheck.HIGH)
+
+    def check_geophysical_vars_standard_name(self, ds):
+        """Overloaded implementation to add a check for standard_name_uri"""
+        results = []
+        for geo_var in get_geophysical_variables(ds):
+            results.append(
+                self._has_var_attr(ds, geo_var, 'standard_name', 'geophysical variables standard_name'),
+            )
+            results.append(
+                self._has_var_attr(ds, geo_var, 'standard_name_uri', 'geophysical variables standard_name_uri'),
+            )
+        return results
+
+    def check_wmo_platform_code(self, ds):
+        """Check if a dataset is defined as WMO, then it must have the wmo_platform_code
+        global attribute. If the attribute does not exist, the check passes without performing
+        any further computation; otherwise, it checks if the attribute is a 5 or 7 character alpha-
+        numeric string."""
+
+        try:
+            wmo_id = ds.getncattr("wmo_platform_code")
+            m = "wmo_platform_code must be 5-7 character alphanumeric string"
+            if not isinstance(wmo_id, basestring):
+                score = False
+            else:
+                r = re.compile(r"^\w{5}(?:\w{2})?$") # alphanumeric, length 5 or 7 characters
+                if r.match(wmo_id):
+                    score = True
+                else:
+                    score = False
+        except AttributeError:
+            score = True
+            m = "wmo_platform_code not found; passing"
+
+        return Result(BaseCheck.HIGH, score, 'Platform', [m])
 
 
 class IOOSBaseSOSCheck(BaseCheck):
