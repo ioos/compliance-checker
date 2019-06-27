@@ -175,7 +175,12 @@ class CFBaseCheck(BaseCheck):
                 if len(version) > 1:
                     return False
                 else:
-                    version = version[0]
+                    try:
+                        version = version[0]
+                    except IndexError:
+                        warn("Cannot extract CF standard name version number "
+                             "from standard_name_vocabulary string")
+                        return False
             else:
                 # Can't parse the attribute, use the packaged version
                 return False
