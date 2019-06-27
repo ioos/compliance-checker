@@ -468,6 +468,12 @@ class TestCF(BaseTestCase):
         nc_obj.standard_name_table = np.array([], np.float64)
         self.assertFalse(self.cf._find_cf_standard_name_table(nc_obj))
 
+        nc_obj.standard_name_vocabulary = "CF Standard Name Table vNN???"
+        with pytest.warns(UserWarning,
+                          match="Cannot extract CF standard name version "
+                                "number from standard_name_vocabulary string"):
+            self.assertFalse(self.cf._find_cf_standard_name_table(nc_obj))
+
     def test_check_flags(self):
         """Test that the check for flags works as expected."""
 
