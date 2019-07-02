@@ -59,7 +59,7 @@ class CheckSuite(object):
 
         return cls.suite_generators
 
-    def _print_suites(self, verbose=False):
+    def _print_suites(self, verbose=0):
         """
         Prints out available check suites.  If the verbose argument is True,
         includes the internal module version number of the check and also displays
