@@ -408,6 +408,24 @@ class TestACDD1_3(BaseTestCase):
         result = self.acdd.check_vertical_extents(self.ds)
         self.assert_result_is_good(result)
 
+    def test_geospatial_bounds(self):
+        '''
+        Test geospatial bounds are checked and provide a good error message
+        '''
+        # Create an empty dataset that writes to /dev/null This acts as a
+        # temporary netCDF file in-memory that never gets written to disk.
+        empty_ds = Dataset(os.devnull, 'w', diskless=True)
+        self.addCleanup(empty_ds.close)
+
+        # Mispelled WKT. Error message should include the attribute checked
+        # and the value that was provided for easy troubleshooting
+        empty_ds.geospatial_bounds = "POIT (-123.458000 38.048000)"
+        results = self.acdd.check_recommended(empty_ds)
+        for result in results:
+            if result.variable_name == 'geospatial_bounds':
+                assert ('Could not parse WKT from geospatial_bounds,'
+                        ' possible bad value: "{}"'.format(empty_ds.geospatial_bounds) in result.msgs)
+
     def test_time_extents(self):
         '''
         Test that the time extents are being checked

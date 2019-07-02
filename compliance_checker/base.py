@@ -374,9 +374,9 @@ def fix_return_value(v, method_name, method=None, checker=None):
     return v
 
 
-def ratable_result(value, name, msgs):
+def ratable_result(value, name, msgs, variable_name=None):
     """Returns a partial function with a Result that has not been weighted."""
-    return lambda w: Result(w, value, name, msgs)
+    return lambda w: Result(w, value, name, msgs, variable_name=variable_name)
 
 
 def score_group(group_name=None):
