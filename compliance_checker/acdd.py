@@ -388,8 +388,11 @@ class ACDDBaseCheck(BaseCheck):
             from_wkt(ds.geospatial_bounds)
         except AttributeError:
             return ratable_result(False,
-                                  "Global Attributes", # grouped with Globals
-                                  ['Could not parse WKT, possible bad value for WKT'])
+                                  "Global Attributes",  # grouped with Globals
+                                  [('Could not parse WKT from geospatial_bounds,'
+                                    ' possible bad value: \"{}\"'.format(ds.geospatial_bounds))],
+                                  variable_name='geospatial_bounds'
+                                  )
         # parsed OK
         else:
             return ratable_result(True, "Global Attributes", tuple())
