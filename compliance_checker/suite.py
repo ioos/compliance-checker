@@ -28,7 +28,10 @@ except ImportError:
 from datetime import datetime
 import requests
 import codecs
+import re
+import textwrap
 from pkg_resources import working_set
+import six
 
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
@@ -37,6 +40,19 @@ if sys.stdout.encoding is None:
 if sys.stderr.encoding is None:
     sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 
+def extract_docstring_summary(docstring):
+    """
+    Returns a dedented docstring without parameter information
+    :param docstring: A docstring
+    :type docstring: str
+    :returns: str
+    """
+    # return a dedented, then indented two spaces docstring with leading and
+    # trailing whitespace removed.
+    return re.sub(r'^(?=.)', '  ',
+                  textwrap.dedent(re.split(r'\n\s*:\w', docstring,
+                                           flags=re.MULTILINE)[0]).strip(),
+                  flags=re.MULTILINE)
 
 class CheckSuite(object):
 
@@ -75,6 +91,28 @@ class CheckSuite(object):
                 print(" - {} (v{})".format(checker, version))
             elif ':' in checker and not checker.endswith(':latest'):  # Skip the "latest" output
                 print(" - {}".format(checker))
+
+    def _print_checker(self, checker_obj):
+        """
+        Prints each available check and a description with an abridged
+        docstring for a given checker object
+        :param checker_obj: Checker object on which to operate
+        :type checker_obj: subclass of compliance_checker.base.BaseChecker
+        """
+
+        check_functions = self._get_checks(checker_obj,
+                                           defaultdict(lambda: None))
+        for c, _ in check_functions:
+            print("- {}".format(c.__name__))
+            if c.__doc__ is not None:
+                # necessary for unicode characters in docstrings under Python
+                # 2, aside from converting everything over to u'' strings
+                try:
+                    u_doc = six.u(c.__doc__)
+                except TypeError:
+                    u_doc = c.__doc__
+
+                print("\n{}\n".format(extract_docstring_summary(u_doc)))
 
     @classmethod
     def add_plugin_args(cls, parser):
@@ -158,8 +196,8 @@ class CheckSuite(object):
         Helper method to retreive check methods from a Checker class.  Excludes
         any checks in `skip_checks`.
 
-        The name of the methods in the Checker class should start with "check_" for this
-        method to find them.
+        The name of the methods in the Checker class should start with "check_"
+        for this method to find them.
         """
         meths = inspect.getmembers(checkclass, inspect.ismethod)
         # return all check methods not among the skipped checks
