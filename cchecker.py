@@ -6,8 +6,8 @@ import sys
 from compliance_checker.runner import ComplianceChecker, CheckSuite
 from compliance_checker.cf.util import download_cf_standard_name_table
 from compliance_checker import __version__
+import sys
 from textwrap import dedent
-
 
 def main():
     # Load all available checker classes
@@ -32,6 +32,12 @@ def main():
                         help="Increase output. May be specified up to three times.",
                         action="count",
                         default=0)
+
+    parser.add_argument('--describe-checks', '-D',
+                        help=("Describes checks in a particular checker if "
+                              "checker is specified.  Use a checker from `-l` "
+                              "output or specify '*' to list all checks from "
+                              "all available checkers"))
 
     parser.add_argument('--skip-checks', '-s',
                         help=dedent("""
@@ -78,7 +84,7 @@ def main():
     parser.add_argument('-l', '--list-tests', action='store_true',
                         help='List the available tests')
 
-    parser.add_argument('-d', '--download-standard-names',
+    parser.add_argument('-d', '--download-standard-names', nargs='?',
                         help=("Specify a version of the cf standard name table"
                               " to download as packaged version"))
 
@@ -91,7 +97,27 @@ def main():
 
     if args.version:
         print("IOOS compliance checker version %s" % __version__)
-        return 0
+        sys.exit(0)
+
+    if args.describe_checks is not None:
+        if args.describe_checks == '*':
+            for key in sorted(check_suite.checkers):
+                # skip "latest" meta-versions
+                if ':' not in key or key.endswith(':latest'):
+                    continue
+                # print checker name and contents
+                print("{}\n============".format(key))
+                check_suite._print_checker(check_suite.checkers[key])
+        else:
+            if args.describe_checks not in check_suite.checkers:
+                print("Cannot find checker '{}' to describe tests for"
+                      .format(args.describe_checks), sys.stderr)
+                sys.exit(1)
+            else:
+                check = args.describe_checks
+                print("{}\n============".format(check))
+                check_suite._print_checker(check_suite.checkers[check])
+        sys.exit(0)
 
     if args.list_tests:
         print("IOOS compliance checker available checker suites:")
@@ -109,7 +135,7 @@ def main():
 
     if len(args.dataset_location) == 0:
         parser.print_help()
-        return 1
+        sys.exit(1)
 
     # Check the number of output files
     if not args.output:
@@ -150,10 +176,10 @@ def main():
             had_errors.append(errors)
 
     if any(had_errors):
-        return 2
+        sys.exit(2)
     if all(return_values):
-        return 0
-    return 1
+        sys.exit(0)
+    sys.exit(1)
 
 
 if __name__ == "__main__":

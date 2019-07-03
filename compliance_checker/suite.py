@@ -28,6 +28,8 @@ except ImportError:
 from datetime import datetime
 import requests
 import codecs
+import re
+import textwrap
 from pkg_resources import working_set
 
 
@@ -36,6 +38,17 @@ if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 if sys.stderr.encoding is None:
     sys.stderr = codecs.getwriter('utf8')(sys.stderr)
+
+def extract_docstring_summary(docstring):
+    """
+    Returns a dedented docstring without parameter information
+    :param docstring: A docstring
+    :type docstring: str
+    :returns: str
+    """
+
+    return textwrap.dedent(re.split(r'\n\s*:\w', docstring,
+                                    flags=re.MULTILINE)[0])
 
 class CheckSuite(object):
 
@@ -57,6 +70,15 @@ class CheckSuite(object):
             cls.suite_generators = [x.resolve() for x in gens]
 
         return cls.suite_generators
+
+    def _print_checker(self, checker_obj):
+        check_functions = [t[1] for t in inspect.getmembers(checker_obj,
+                                                            inspect.isfunction)
+                           if t[0].startswith('check_')]
+        for c in check_functions:
+            print(c.__name__)
+            if c.__doc__ is not None:
+                print(extract_docstring_summary(c.__doc__))
 
     @classmethod
     def add_plugin_args(cls, parser):
