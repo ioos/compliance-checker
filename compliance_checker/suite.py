@@ -46,9 +46,12 @@ def extract_docstring_summary(docstring):
     :type docstring: str
     :returns: str
     """
-
-    return textwrap.dedent(re.split(r'\n\s*:\w', docstring,
-                                    flags=re.MULTILINE)[0])
+    # return a dedented, then indented two spaces docstring with leading and
+    # trailing whitespace removed.
+    return re.sub(r'^(?=.)', '  ',
+                  textwrap.dedent(re.split(r'\n\s*:\w', docstring,
+                                           flags=re.MULTILINE)[0]).strip(),
+                  flags=re.MULTILINE)
 
 class CheckSuite(object):
 
@@ -83,9 +86,9 @@ class CheckSuite(object):
                                                             inspect.isfunction)
                            if t[0].startswith('check_')]
         for c in check_functions:
-            print(c.__name__)
+            print("- {}".format(c.__name__))
             if c.__doc__ is not None:
-                print(extract_docstring_summary(c.__doc__))
+                print("\n{}\n".format(extract_docstring_summary(c.__doc__)))
 
     @classmethod
     def add_plugin_args(cls, parser):
@@ -149,8 +152,8 @@ class CheckSuite(object):
         Helper method to retreive check methods from a Checker class.  Excludes
         any checks in `skip_checks`.
 
-        The name of the methods in the Checker class should start with "check_" for this
-        method to find them.
+        The name of the methods in the Checker class should start with "check_"
+        for this method to find them.
         """
         meths = inspect.getmembers(checkclass, inspect.ismethod)
         # return all check methods not among the skipped checks

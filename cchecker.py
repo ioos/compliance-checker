@@ -9,6 +9,15 @@ from compliance_checker import __version__
 import sys
 from textwrap import dedent
 
+def _print_checker_name_header(checker_str):
+    """
+    Helper function to prints a checker name surrounded by a border of "="
+    :param checker_suite: A check suite string name
+    :type checker: str
+    """
+    print("{0}\n {1} \n{0}".format("=" * (len(checker_str) + 2), checker_str))
+
+
 def main():
     # Load all available checker classes
     check_suite = CheckSuite()
@@ -105,8 +114,7 @@ def main():
                 # skip "latest" meta-versions
                 if ':' not in key or key.endswith(':latest'):
                     continue
-                # print checker name and contents
-                print("{}\n============".format(key))
+                _print_checker_name_header(key)
                 check_suite._print_checker(check_suite.checkers[key])
         else:
             if args.describe_checks not in check_suite.checkers:
@@ -115,7 +123,7 @@ def main():
                 sys.exit(1)
             else:
                 check = args.describe_checks
-                print("{}\n============".format(check))
+                _print_checker_name_header(check)
                 check_suite._print_checker(check_suite.checkers[check])
         sys.exit(0)
 
