@@ -72,6 +72,13 @@ class CheckSuite(object):
         return cls.suite_generators
 
     def _print_checker(self, checker_obj):
+        """
+        Prints each available check and a description with an abridged
+        docstring for a given checker object
+        :param checker_obj: Checker object on which to operate
+        :type checker_obj: subclass of compliance_checker.base.BaseChecker
+        """
+
         check_functions = [t[1] for t in inspect.getmembers(checker_obj,
                                                             inspect.isfunction)
                            if t[0].startswith('check_')]
