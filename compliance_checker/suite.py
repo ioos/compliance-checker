@@ -82,10 +82,9 @@ class CheckSuite(object):
         :type checker_obj: subclass of compliance_checker.base.BaseChecker
         """
 
-        check_functions = [t[1] for t in inspect.getmembers(checker_obj,
-                                                            inspect.isfunction)
-                           if t[0].startswith('check_')]
-        for c in check_functions:
+        check_functions = self._get_checks(checker_obj,
+                                           defaultdict(lambda: None))
+        for c, _ in check_functions:
             print("- {}".format(c.__name__))
             if c.__doc__ is not None:
                 print("\n{}\n".format(extract_docstring_summary(c.__doc__)))
