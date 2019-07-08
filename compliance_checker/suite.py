@@ -199,7 +199,7 @@ class CheckSuite(object):
         The name of the methods in the Checker class should start with "check_"
         for this method to find them.
         """
-        meths = inspect.getmembers(checkclass, inspect.ismethod)
+        meths = inspect.getmembers(checkclass, inspect.isroutine)
         # return all check methods not among the skipped checks
         returned_checks = []
         for fn_name, fn_obj in meths:
