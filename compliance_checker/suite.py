@@ -37,6 +37,7 @@ if sys.stdout.encoding is None:
 if sys.stderr.encoding is None:
     sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 
+
 class CheckSuite(object):
 
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
@@ -57,6 +58,23 @@ class CheckSuite(object):
             cls.suite_generators = [x.resolve() for x in gens]
 
         return cls.suite_generators
+
+    def _print_suites(self, verbose=0):
+        """
+        Prints out available check suites.  If the verbose argument is True,
+        includes the internal module version number of the check and also displays
+        "latest" meta-versions.
+        :param check_suite: Check suite object
+        :param verbose: Integer indicating whether to print verbose output
+        :type verbose: int
+        """
+        for checker in sorted(self.checkers.keys()):
+            version = getattr(self.checkers[checker],
+                            '_cc_checker_version', "???")
+            if verbose > 0:
+                print(" - {} (v{})".format(checker, version))
+            elif ':' in checker and not checker.endswith(':latest'):  # Skip the "latest" output
+                print(" - {}".format(checker))
 
     @classmethod
     def add_plugin_args(cls, parser):
@@ -83,22 +101,42 @@ class CheckSuite(object):
         Helper method to retrieve all sub checker classes derived from various
         base classes.
         """
-        for x in working_set.iter_entry_points('compliance_checker.suites'):
+        cls._load_checkers(working_set
+                           .iter_entry_points('compliance_checker.suites'))
+
+    @classmethod
+    def _load_checkers(cls, checkers):
+        """
+        Loads up checkers in an iterable into the class checkers dict
+        :param checkers: An iterable containing the checker objects
+        """
+
+        for c in checkers:
             try:
-                xl = x.resolve()
-                cls.checkers[':'.join((xl._cc_spec, xl._cc_spec_version))] = xl
-            # TODO: remove this once all checkers move over to the new
-            #       _cc_spec, _cc_spec_version
-            except AttributeError:
-                # if there are versioned classes, it will get overwritten by the
-                # latest version later.  If there are not, it will be assigned
-                # the checker as the main class
-                # TODO: nix name attribute in plugins.  Keeping in for now
-                #       to provide backwards compatibility
-                cls.checkers[getattr(xl, 'name', None) or xl._cc_spec] = xl
+                check_obj = c.resolve()
+                if (hasattr(check_obj, '_cc_spec') and
+                    hasattr(check_obj, '_cc_spec_version')):
+                    check_version_str = ':'.join((check_obj._cc_spec,
+                                                  check_obj._cc_spec_version))
+                    cls.checkers[check_version_str] = check_obj
+                # TODO: remove this once all checkers move over to the new
+                #       _cc_spec, _cc_spec_version
+                else:
+                    # if _cc_spec and _cc_spec_version attributes aren't
+                    # present, fall back to using name attribute
+                    checker_name = (getattr(check_obj, 'name', None) or
+                                    getattr(check_obj, '_cc_spec', None))
+                    warnings.warn('Checker for {} should implement both '
+                                '"_cc_spec" and "_cc_spec_version" '
+                                'attributes. "name" attribute is deprecated. '
+                                'Assuming checker is latest version.',
+                                DeprecationWarning)
+                    # append "unknown" to version string since no versioning
+                    # info was provided
+                    cls.checkers["{}:unknown".format(checker_name)] = check_obj
 
             except Exception as e:
-                print("Could not load", x, ":", e, file=sys.stderr)
+                print("Could not load", c, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
         ver_checkers = sorted([c.split(':', 1) for c

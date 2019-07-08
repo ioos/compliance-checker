@@ -13,8 +13,8 @@ from compliance_checker.runner import ComplianceChecker, CheckSuite
 from compliance_checker.tests.resources import STATIC_FILES
 import tempfile
 import os
-
-CheckSuite.load_all_available_checkers()
+from argparse import Namespace
+import pytest
 
 
 class TestCLI(TestCase):
@@ -24,6 +24,9 @@ class TestCLI(TestCase):
 
     def setUp(self):
         self.fid, self.path = tempfile.mkstemp()
+        # why is the class being written to
+        CheckSuite.checkers.clear()
+        CheckSuite.load_all_available_checkers()
 
     def tearDown(self):
         if os.path.isfile(self.path):
@@ -92,6 +95,41 @@ class TestCLI(TestCase):
             r = json.load(f)
             assert 'cf' in r
 
+
+    def test_list_checks(self):
+        """
+        Tests listing of both old-style, deprecated checkers using .name
+        attributes, and newer ones which use ._cc_spec and _cc_spec_version
+        attributes
+        """
+
+        # hack: use argparse.Namespace to mock checker object with attributes
+        # since SimpleNamespace is Python 3.3+ only
+        CheckSuite.checkers.clear()
+        # need to mock setuptools entrypoints here in order to load in checkers
+        def checker_1():
+            return Namespace(name='checker_1')
+        def checker_2():
+            return Namespace(_cc_spec='checker_2',
+                             _cc_spec_version='2.2')
+        mock_checkers = [Namespace(resolve=checker_1),
+                         Namespace(resolve=checker_2)]
+        with pytest.warns(DeprecationWarning):
+            CheckSuite._load_checkers(mock_checkers)
+
+        cs = CheckSuite()
+        saved = sys.stdout
+        try:
+            # ugly!  consider refactoring to use py.test capsys
+            fake_stdout = io.StringIO()
+            sys.stdout = fake_stdout
+            cs._print_suites()
+            assert (fake_stdout.getvalue() ==
+                    ' - checker_1:unknown\n - checker_2:2.2\n')
+        finally:
+            sys.stdout = saved
+            fake_stdout.close()
+
     def test_multiple_json_output(self):
         '''
         Tests that a suite can produce JSON output to a file
@@ -132,6 +170,7 @@ class TestCLI(TestCase):
             assert 'cf' in r
         finally:
             sys.stdout = saved
+            fake_stdout.close()
 
     def test_single_json_output_stdout(self):
         '''
@@ -153,6 +192,7 @@ class TestCLI(TestCase):
             assert 'cf' in r
         finally:
             sys.stdout = saved
+            fake_stdout.close()
 
     def test_text_output(self):
         '''
