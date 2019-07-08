@@ -110,8 +110,8 @@ def main():
                 check_suite._print_checker(check_suite.checkers[key])
         else:
             if args.describe_checks not in check_suite.checkers:
-                print("Cannot find checker '{}' to describe tests for"
-                      .format(args.describe_checks), sys.stderr)
+                print("Cannot find checker '{}' with which to describe checks"
+                      .format(args.describe_checks), file=sys.stderr)
                 sys.exit(1)
             else:
                 check = args.describe_checks
