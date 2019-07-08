@@ -121,7 +121,7 @@ parse it's contents.
 usage: cchecker.py [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
                    [--verbose] [--describe-checks] [--skip-checks SKIP_CHECKS]
                    [-f {text,html,json,json_new}] [-o OUTPUT] [-V] [-l]
-                   [-d [DOWNLOAD_STANDARD_NAMES]]
+                   [-d DOWNLOAD_STANDARD_NAMES]
                    [dataset_location [dataset_location ...]]
 
 positional arguments:
@@ -174,7 +174,7 @@ optional arguments:
   -V, --version         Display the IOOS Compliance Checker version
                         information.
   -l, --list-tests      List the available tests
-  -d [DOWNLOAD_STANDARD_NAMES], --download-standard-names [DOWNLOAD_STANDARD_NAMES]
+  -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
                         Specify a version of the cf standard name table to
                         download as packaged version
 ```
