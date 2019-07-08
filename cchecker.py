@@ -6,7 +6,6 @@ import sys
 from compliance_checker.runner import ComplianceChecker, CheckSuite
 from compliance_checker.cf.util import download_cf_standard_name_table
 from compliance_checker import __version__
-import sys
 from textwrap import dedent
 
 def _print_checker_name_header(checker_str):
@@ -43,10 +42,10 @@ def main():
                         default=0)
 
     parser.add_argument('--describe-checks', '-D',
-                        help=("Describes checks in a particular checker if "
-                              "checker is specified.  Use a checker from `-l` "
-                              "output or specify '*' to list all checks from "
-                              "all available checkers"))
+                        help=("Describes checks for checkers specified using "
+                              "`-t`. If `-t` is not specified, lists checks "
+                              "from all available checkers."),
+                        action='store_true')
 
     parser.add_argument('--skip-checks', '-s',
                         help=dedent("""
@@ -108,24 +107,25 @@ def main():
         print("IOOS compliance checker version %s" % __version__)
         sys.exit(0)
 
-    if args.describe_checks is not None:
-        if args.describe_checks == '*':
-            for key in sorted(check_suite.checkers):
-                # skip "latest" meta-versions
-                if ':' not in key or key.endswith(':latest'):
-                    continue
-                _print_checker_name_header(key)
-                check_suite._print_checker(check_suite.checkers[key])
+    if args.describe_checks:
+        error_stat = 0
+        if args.test:
+            checker_names = set(args.test)
         else:
-            if args.describe_checks not in check_suite.checkers:
-                print("Cannot find checker '{}' with which to describe checks"
-                      .format(args.describe_checks), file=sys.stderr)
-                sys.exit(1)
+            # skip "latest" meta-versions (":latest" or no explicit version
+            # specifier)
+            checker_names = [c for c in check_suite.checkers
+                             if ':' in c and not c.endswith(':latest')]
+
+        for checker_name in sorted(checker_names):
+            if checker_name not in check_suite.checkers:
+                print("Cannot find checker '{}' with which to "
+                      "describe checks".format(checker_name), file=sys.stderr)
+                error_stat = 1
             else:
-                check = args.describe_checks
-                _print_checker_name_header(check)
-                check_suite._print_checker(check_suite.checkers[check])
-        sys.exit(0)
+                _print_checker_name_header(checker_name)
+                check_suite._print_checker(check_suite.checkers[checker_name])
+        sys.exit(error_stat)
 
     if args.list_tests:
         print("IOOS compliance checker available checker suites:")
