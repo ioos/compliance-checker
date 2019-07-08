@@ -92,7 +92,7 @@ def main():
     parser.add_argument('-l', '--list-tests', action='store_true',
                         help='List the available tests')
 
-    parser.add_argument('-d', '--download-standard-names', nargs='?',
+    parser.add_argument('-d', '--download-standard-names',
                         help=("Specify a version of the cf standard name table"
                               " to download as packaged version"))
 
