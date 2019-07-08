@@ -114,29 +114,29 @@ class CheckSuite(object):
         for c in checkers:
             try:
                 check_obj = c.resolve()
-                cls.checkers[':'.join((check_obj._cc_spec,
-                                       check_obj._cc_spec_version))] = check_obj
-            # TODO: remove this once all checkers move over to the new
-            #       _cc_spec, _cc_spec_version
-            except AttributeError:
-                # if there are versioned classes, it will get overwritten by the
-                # latest version later.  If there are not, it will be assigned
-                # the checker as the main class
-                # TODO: nix name attribute in plugins.  Keeping in for now
-                #       to provide backwards compatibility
-                checker_name = (getattr(check_obj, 'name', None) or
-                                getattr(check_obj, '_cc_spec', None))
-                warnings.warn('Checker for {} should implement both '
-                              '"_cc_spec" and "_cc_spec_version" '
-                              'attributes. "name" attribute is deprecated. '
-                              'Assuming checker is latest version.',
-                              DeprecationWarning)
-                # append "unknown" to version string since no versioning
-                # info was provided
-                cls.checkers["{}:unknown".format(checker_name)] = check_obj
+                if (hasattr(check_obj, '_cc_spec') and
+                    hasattr(check_obj, '_cc_spec_version')):
+                    check_version_str = ':'.join((check_obj._cc_spec,
+                                                  check_obj._cc_spec_version))
+                    cls.checkers[check_version_str] = check_obj
+                # TODO: remove this once all checkers move over to the new
+                #       _cc_spec, _cc_spec_version
+                else:
+                    # if _cc_spec and _cc_spec_version attributes aren't
+                    # present, fall back to using name attribute
+                    checker_name = (getattr(check_obj, 'name', None) or
+                                    getattr(check_obj, '_cc_spec', None))
+                    warnings.warn('Checker for {} should implement both '
+                                '"_cc_spec" and "_cc_spec_version" '
+                                'attributes. "name" attribute is deprecated. '
+                                'Assuming checker is latest version.',
+                                DeprecationWarning)
+                    # append "unknown" to version string since no versioning
+                    # info was provided
+                    cls.checkers["{}:unknown".format(checker_name)] = check_obj
 
             except Exception as e:
-                print("Could not load", x, ":", e, file=sys.stderr)
+                print("Could not load", c, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
         ver_checkers = sorted([c.split(':', 1) for c
