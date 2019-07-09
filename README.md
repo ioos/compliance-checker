@@ -119,7 +119,7 @@ parse it's contents.
 
 ```
 usage: cchecker.py [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
-                   [--verbose] [--skip-checks SKIP_CHECKS]
+                   [--verbose] [--describe-checks] [--skip-checks SKIP_CHECKS]
                    [-f {text,html,json,json_new}] [-o OUTPUT] [-V] [-l]
                    [-d DOWNLOAD_STANDARD_NAMES]
                    [dataset_location [dataset_location ...]]
@@ -139,20 +139,25 @@ optional arguments:
                         Define the criteria for the checks. Either Strict,
                         Normal, or Lenient. Defaults to Normal.
   --verbose, -v         Increase output. May be specified up to three times.
+  --describe-checks, -D
+                        Describes checks for checkers specified using `-t`. If
+                        `-t` is not specified, lists checks from all available
+                        checkers.
   --skip-checks SKIP_CHECKS, -s SKIP_CHECKS
                         Specifies tests to skip. Can take the form of either
-                        `<check_name>` or `<check_name>:<skip_level>`.  The
-                        first form skips any checks matching the name.  In the
+                        `<check_name>` or `<check_name>:<skip_level>`. The
+                        first form skips any checks matching the name. In the
                         second form <skip_level> may be specified as "A", "M",
-                        or "L".  "A" skips all checks and is equivalent to
+                        or "L". "A" skips all checks and is equivalent to
                         calling the first form. "M" will only show high
                         priority output from the given check and will skip
-                        medium and low.  "L" will show both high and medium
+                        medium and low. "L" will show both high and medium
                         priority issues, while skipping low priority issues.
   -f {text,html,json,json_new}, --format {text,html,json,json_new}
-                        Output format. The difference between the 'json' and
-                        the 'json_new' formats is that the 'json' format has
-                        the check as the top level key, whereas the 'json_new'
+                        Output format(s). Options are 'text', 'html', 'json',
+                        'json_new'. The difference between the 'json' and the
+                        'json_new' formats is that the 'json' format has the
+                        check as the top level key, whereas the 'json_new'
                         format has the dataset name(s) as the main key in the
                         output follow by any checks as subkeys. Also, 'json'
                         format can be only be run against one input file,
