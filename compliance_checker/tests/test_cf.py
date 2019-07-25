@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from compliance_checker.suite import CheckSuite
-from compliance_checker.cf import CF16Check, CF17Check, dimless_vertical_coordinates
+from compliance_checker.cf import CF1_6Check, CF1_7Check, dimless_vertical_coordinates
 from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal, StandardNameTable, create_cached_data_dir, download_cf_standard_name_table
 from compliance_checker import cfutil
 from netCDF4 import Dataset
@@ -21,12 +21,12 @@ import pytest
 
 from operator import sub
 
-class TestCF16(BaseTestCase):
+class TestCF1_6(BaseTestCase):
 
     def setUp(self):
-        '''Initialize a CF16Check object.'''
+        '''Initialize a CF1_6Check object.'''
 
-        self.cf = CF16Check()
+        self.cf = CF1_6Check()
 
     # --------------------------------------------------------------------------------
     # Helper Methods
@@ -1001,7 +1001,7 @@ class TestCF16(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['ints64'])
         suite = CheckSuite()
         suite.checkers = {
-            'cf'        : CF16Check
+            'cf'        : CF1_6Check
         }
         suite.run(dataset, 'cf')
 
@@ -1107,13 +1107,13 @@ class TestCF16(BaseTestCase):
         self.assertFalse(units_temporal('days since the big bang'))
 
 
-class TestCF17(TestCF16):
+class TestCF1_7(TestCF1_6):
     """Extends the CF 1.6 tests. Most of the tests remain the same."""
 
     def setUp(self):
-        '''Initialize a CF17Check object.'''
+        '''Initialize a CF1_7Check object.'''
 
-        self.cf = CF17Check()
+        self.cf = CF1_7Check()
 
     def test_check_actual_range(self):
         """Test the check_actual_range method works as expected"""
@@ -1251,7 +1251,7 @@ class TestCF17(TestCF16):
             assert "'a' has 'formula_terms' attr, bounds variable 'b' must also have 'formula_terms'" in messages
 
     def test_cell_measures(self):
-        """Over-ride the test_cell_measures from CF16"""
+        """Over-ride the test_cell_measures from CF1_6"""
 
         # create a temporary variable and test this only
         with MockTimeSeries() as dataset:

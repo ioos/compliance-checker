@@ -6,7 +6,7 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, Base
 from owslib.namespaces import Namespaces
 from lxml.etree import XPath
 from compliance_checker.cfutil import get_geophysical_variables
-from compliance_checker.cf.cf import CF16Check
+from compliance_checker.cf.cf import CF1_6Check
 
 
 class IOOSBaseCheck(BaseCheck):
@@ -343,7 +343,7 @@ class IOOS1_1Check(IOOSNCCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         '''
-        cf16 = CF16Check()
+        cf16 = CF1_6Check()
         return cf16.check_units(ds)
 
 

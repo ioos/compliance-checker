@@ -578,7 +578,7 @@ class CFNCCheck(BaseNCCheck, CFBaseCheck):
     pass
 
 
-class CF16Check(CFNCCheck):
+class CF1_6Check(CFNCCheck):
     """CF-1.6-specific implementation of CFBaseCheck; supports checking
     netCDF datasets.
     These checks are translated documents:
@@ -597,7 +597,7 @@ class CF16Check(CFNCCheck):
     }
 
     def __init__(self): # initialize with parent methods and data
-        super(CF16Check, self).__init__()
+        super(CF1_6Check, self).__init__()
 
         self.cell_methods = cell_methods16
         self.grid_mapping_dict = grid_mapping_dict16
@@ -3383,8 +3383,8 @@ class CF16Check(CFNCCheck):
 
         return ret_val
 
-class CF17Check(CF16Check):
-    """Implementation for CF v1.7. Inherits from CF16Check as most of the
+class CF1_7Check(CF1_6Check):
+    """Implementation for CF v1.7. Inherits from CF1_6Check as most of the
     checks are the same."""
 
     # things that are specific to 1.7
@@ -3392,7 +3392,7 @@ class CF17Check(CF16Check):
     _cc_url             = 'http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html'
 
     def __init__(self):
-        super(CF17Check, self).__init__()
+        super(CF1_7Check, self).__init__()
 
         self.cell_methods = cell_methods17
         self.grid_mapping_dict = grid_mapping_dict17
@@ -3497,7 +3497,7 @@ class CF17Check(CF16Check):
         Checks the dimensions of cell boundary variables to ensure they are CF compliant
         per section 7.1.
 
-        This method extends the CF16Check method; please see the original method for the
+        This method extends the CF1_6Check method; please see the original method for the
         complete doc string.
 
         If any variable contains both a formula_terms attribute *and* a bounding variable,
@@ -3569,7 +3569,7 @@ class CF17Check(CF16Check):
 
     def check_cell_measures(self, ds):
         """
-        A method to over-ride the CF16Check method. In CF 1.7, it is specified
+        A method to over-ride the CF1_6Check method. In CF 1.7, it is specified
         that variable referenced by cell_measures must be in the dataset OR
         referenced by the global attribute "external_variables", which represent
         all the variables used in the dataset but not found in the dataset.
