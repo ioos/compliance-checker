@@ -3396,6 +3396,102 @@ class CF17Check(CF16Check):
 
         self.cell_methods = cell_methods17
         self.grid_mapping_dict = grid_mapping_dict17
+    
+    def check_actual_range(self, ds):
+        """Check the actual_range attribute of variables. As stated in
+        section 2.5.1 of version 1.7, this convention defines a two-element
+        vector attribute designed to describe the actual minimum and actual
+        maximium values of variables containing numeric data. Conditions:
+          - if all values of the variable are equal, actual_range should *not*
+            exist
+          - the fist value of the two-element vector must be equal to the
+            minimum of the data, and the second element equal to the maximium
+          - if the data is packed, the elements of actual_range should have
+            the same data type as the *unpacked* data
+          - if valid_range is specified, both elements of actual_range should
+            be within valid_range
+
+        If a variable does not have an actual_range attribute, let it pass; 
+        including this attribute is only suggested. However, if the user is
+        specifying the actual_range, the Result will be considered
+        high-priority."""
+
+        ret_val = []
+
+        for name, variable in ds.variables.items():
+            msgs   = []
+            score  = 0
+            out_of = 0
+
+            if not hasattr(variable, "actual_range"):
+                continue # having this attr is only suggested, no Result needed
+            else:
+
+                if variable.mask: # remove mask
+                    variable.set_auto_mask(False)
+
+                # NOTE this is a data check
+                out_of += 1
+                if len(set(variable[:])) == 1: # all values are the same
+                    msgs.append("\"{}\"'s values are all equal; actual_range shouldn't exist".format(name))
+                    ret_val.append(Result( # putting result into list
+                        BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
+                    continue # no need to keep checking if it shouldn't be there
+                else:
+                    score += 1
+
+                out_of += 1
+                try:
+                    if (len(variable.actual_range) != 2):
+                        msgs.append("actual_range of '{}' must be 2 elements".format(name))
+                        ret_val.append(Result( # putting result into list
+                            BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
+                        continue # no need to keep checking if already completely wrong
+                    else:
+                        score += 1
+                except TypeError: # in case it's just a single number
+                    msgs.append("actual_range of '{}' must be 2 elements".format(name))
+                    ret_val.append(Result( # putting result into list
+                        BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
+                    continue
+
+                # NOTE this is a data check -- but do we need it since we are checking
+                # consistency with valid_min/valid_max attrs?
+                out_of += 1
+                if ( # check equality to stated min/max values
+                    variable.actual_range[0] != min(variable[:])
+                ) or (
+                    variable.actual_range[1] != max(variable[:])
+                ):
+                    msgs.append("actual_range elements of '{}' inconsistent with its min/max values".format(name)
+                    )
+                else:
+                    score += 1
+
+                out_of += 1
+                if (hasattr(variable, "valid_range")): # check equality to valid_range
+                    if (variable.actual_range[0] != variable.valid_range[0]) or (variable.actual_range[1] != variable.valid_range[1]):
+                        msgs.append("\"{}\"'s actual_range must be == valid_range".format(name))
+                else:
+                    score += 1
+
+                for _att, loc in zip(["valid_min", "valid_max"], [0, 1]):
+                    out_of += 1
+                    if (hasattr(variable, _att)):
+                        _val = getattr(variable, _att)
+                        if (variable.actual_range[loc] != _val):
+                            msgs.append("\"{}\"'s actual_range[{}] must be == {} ({})".format(name, loc, _val, _att))
+                    else:
+                        score += 1
+
+            ret_val.append(Result( # putting result into list
+                BaseCheck.HIGH,
+                (score, out_of),
+                self.section_titles["2.5"],
+                msgs
+            ))
+        return ret_val
+
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
 

@@ -1107,3 +1107,96 @@ class TestCF17(TestCF16):
 
         self.cf = CF17Check()
 
+    def test_check_actual_range(self):
+        """Test the check_actual_range method works as expected"""
+
+        # using a with block closes the ds; for checks operating on the data, we need
+        # to intialize and then manually close
+
+        dataset = MockTimeSeries()
+        dataset.createVariable('a', 'd', ('time',)) # dtype=double, dims=time
+        # test that if the variable doesn't have an actual_range attr, no score 
+        result = self.cf.check_actual_range(dataset)
+        assert result == []
+        dataset.close()
+
+        # NOTE this is a data check
+        # if variable values are equal, actual_range should not exist
+        dataset = MockTimeSeries()
+        dataset.createVariable('a', 'd', ('time',)) # dtype=double, dims=time
+        dataset.variables["a"][0:500] = 0 # set all 500 vals to 0
+        dataset.variables["a"].setncattr("actual_range", [1, 1]) # shouldn't exist
+        result = self.cf.check_actual_range(dataset)
+        score, out_of, messages = self.get_results(result)
+        assert score < out_of
+        assert len(messages) == 1
+        assert messages[0] == u"\"a\"'s values are all equal; actual_range shouldn't exist"
+        dataset.close()
+        
+        # test if len(actual_range) != 2; should fail
+        dataset = MockTimeSeries()
+        dataset.createVariable('a', 'd', ('time',)) # dtype=double, dims=time
+        dataset.variables['a'][0] = 0 # set some arbitrary val so not all equal
+        dataset.variables["a"].setncattr("actual_range", [1, 2, 3])
+        result = self.cf.check_actual_range(dataset)
+        score, out_of, messages = self.get_results(result)
+        assert score < out_of
+        assert len(messages) == 1
+        assert messages[0] == "actual_range of 'a' must be 2 elements"
+        dataset.close()
+
+        dataset = MockTimeSeries()
+        dataset.createVariable('a', 'd', ('time',)) # dtype=double, dims=time
+        dataset.variables['a'][0] = 0 # set some arbitrary val so not all equal
+        dataset.variables["a"].setncattr("actual_range", [1])
+        result = self.cf.check_actual_range(dataset)
+        score, out_of, messages = self.get_results(result)
+        assert score < out_of
+        assert len(messages) == 1
+        assert messages[0] == "actual_range of 'a' must be 2 elements"
+        dataset.close()
+
+        # NOTE this is a data check
+        # check equality to min and max values
+        dataset = MockTimeSeries()
+        dataset.createVariable('a', 'd', ('time', ))
+        dataset.variables['a'][0] = -299 # set some arbitrary minimum
+        dataset.variables['a'][1] = 10E36 # set some arbitrary max > _FillValue default
+        dataset.variables['a'].setncattr("actual_range", [0, 0]) # should fail
+        result = self.cf.check_actual_range(dataset)
+        score, out_of, messages = self.get_results(result)
+        assert score < out_of
+        assert len(messages) == 1
+        assert messages[0] == "actual_range elements of 'a' inconsistent with its min/max values"
+        dataset.close()
+        
+        # check equality to valid_range attr
+        dataset = MockTimeSeries()
+        dataset.createVariable('a', 'd', ('time', ))
+        dataset.variables['a'][0] = -299 # set some arbitrary val to not all equal
+        dataset.variables['a'][1] = 10E36 # set some arbitrary max > _FillValue default
+        dataset.variables['a'].setncattr("valid_range", [1, 3])  # should conflict
+        dataset.variables['a'].setncattr("actual_range", [-299, 10E36])
+        result = self.cf.check_actual_range(dataset)
+        score, out_of, messages = self.get_results(result)
+        assert score < out_of
+        assert len(messages) == 1
+        assert messages[0] == "\"a\"'s actual_range must be == valid_range"
+        dataset.close()
+
+        # check equality to valid_min and valid_max values
+        dataset = MockTimeSeries()
+        dataset.createVariable('a', 'd', ('time', ))
+        dataset.variables['a'][0] = -299 # set some arbitrary minimum
+        dataset.variables['a'][1] = 10E36 # set some arbitrary max > _FillValue default
+        dataset.variables['a'].setncattr("valid_min", 42) # conflicting valid_min/max
+        dataset.variables['a'].setncattr("valid_max", 45)
+        dataset.variables['a'].setncattr("actual_range", [-299, 10E36])
+        result = self.cf.check_actual_range(dataset)
+        score, out_of, messages = self.get_results(result)
+        assert score < out_of
+        assert len(messages) == 2
+        assert messages[0] == "\"a\"'s actual_range[0] must be == 42 (valid_min)"
+        assert messages[1] == "\"a\"'s actual_range[1] must be == 45 (valid_max)"
+        dataset.close()
+
