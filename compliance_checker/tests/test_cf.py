@@ -1242,3 +1242,50 @@ class TestCF17(TestCF16):
             assert score < out_of
             assert "'a' has 'formula_terms' attr, bounds variable 'b' must also have 'formula_terms'" in messages
 
+    def test_cell_measures(self):
+        """Over-ride the test_cell_measures from CF16"""
+
+        # create a temporary variable and test this only
+        with MockTimeSeries() as dataset:
+            dataset.createVariable('PS', 'd', ('time',)) # dtype=double, dims=time
+            dataset.variables["PS"].setncattr("cell_measures", 'area: cell_area')
+            # ensure the cell_measures var is in the dataset
+            dataset.createVariable('cell_area', 'd', ('time',))
+            dataset.variables["cell_area"].setncattr("units", 'm2')
+
+            # run the check
+            results = self.cf.check_cell_measures(dataset)
+            score, out_of, messages = self.get_results(results)
+            assert score == out_of
+            assert score > 0
+
+        # same thing, but test that the cell_area variable is in
+        # the global attr "external_variables"
+
+        with MockTimeSeries() as dataset:
+            dataset.createVariable('PS', 'd', ('time',)) # dtype=double, dims=time
+            dataset.variables["PS"].setncattr("cell_measures", 'area: cell_area')
+            dataset.setncattr("external_variables", ["cell_area"])
+            
+            # run the check
+            results = self.cf.check_cell_measures(dataset)
+            score, out_of, messages = self.get_results(results)
+            assert score > 0
+            assert score == out_of
+
+        # now test a dataset with a poorly formatted cell_measure attr
+        dataset = self.load_dataset(STATIC_FILES['bad_cell_measure1'])
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = self.get_results(results)
+        message = ("The cell_measures attribute for variable PS is formatted incorrectly.  "
+                   "It should take the form of either 'area: cell_var' or 'volume: cell_var' "
+                   "where cell_var is the variable describing the cell measures")
+        assert message in messages
+
+        # test a dataset where the cell_measure attr is not in the dataset or external_variables
+        # check for the variable should fail
+        dataset = self.load_dataset(STATIC_FILES['bad_cell_measure2'])
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = self.get_results(results)
+        message = u'Cell measure variable box_area referred to by PS is not present in dataset variables'
+        assert message in messages

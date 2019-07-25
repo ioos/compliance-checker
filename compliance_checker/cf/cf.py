@@ -3567,6 +3567,101 @@ class CF17Check(CF16Check):
             ret_val.append(result)
         return ret_val
 
+    def check_cell_measures(self, ds):
+        """
+        A method to over-ride the CF16Check method. In CF 1.7, it is specified
+        that variable referenced by cell_measures must be in the dataset OR
+        referenced by the global attribute "external_variables", which represent
+        all the variables used in the dataset but not found in the dataset.
+
+        7.2 To indicate extra information about the spatial properties of a
+        variable's grid cells, a cell_measures attribute may be defined for a
+        variable. This is a string attribute comprising a list of
+        blank-separated pairs of words of the form "measure: name". "area" and
+        "volume" are the only defined measures.
+
+        The "name" is the name of the variable containing the measure values,
+        which we refer to as a "measure variable". The dimensions of the
+        measure variable should be the same as or a subset of the dimensions of
+        the variable to which they are related, but their order is not
+        restricted.
+
+        The variable must have a units attribute and may have other attributes
+        such as a standard_name.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
+        """
+        ret_val = []
+        reasoning = []
+        variables = ds.get_variables_by_attributes(cell_measures=lambda c:
+                                                   c is not None)
+        for var in variables:
+            search_str = r'^(?:area|volume): (\w+)$'
+            search_res = regex.search(search_str, var.cell_measures)
+            if not search_res:
+                valid = False
+                reasoning.append("The cell_measures attribute for variable {} "
+                                 "is formatted incorrectly.  It should take the"
+                                 " form of either 'area: cell_var' or "
+                                 "'volume: cell_var' where cell_var is the "
+                                 "variable describing the cell measures".format(
+                                     var.name))
+            else:
+                valid = True
+                cell_meas_var_name = search_res.groups()[0]
+                # TODO: cache previous results
+
+                # if the dataset has external_variables, get it
+                try:
+                    external_variables = ds.getncattr("external_variables")
+                except AttributeError:
+                    external_variables = []
+                if (cell_meas_var_name not in ds.variables):
+                    if (cell_meas_var_name not in external_variables):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} referred to by {} is not present in dataset variables".format(
+                                cell_meas_var_name, var.name)
+                        )
+                   
+                    else:
+                        valid = True
+
+                    # make Result
+                    result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            (self.section_titles['7.2']),
+                            reasoning)
+                    ret_val.append(result)                    
+                    continue # can't test anything on an external var
+
+                else:
+                    cell_meas_var = ds.variables[cell_meas_var_name]
+                    if not hasattr(cell_meas_var, 'units'):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} is required "
+                            "to have units attribute defined.".format(
+                                cell_meas_var_name)
+                        )
+                    if not set(cell_meas_var.dimensions).issubset(var.dimensions):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} must have "
+                            "dimensions which are a subset of "
+                            "those defined in variable {}.".format(
+                                cell_meas_var_name, var.name)
+                        )
+
+            result = Result(BaseCheck.MEDIUM,
+                            valid,
+                            (self.section_titles['7.2']),
+                            reasoning)
+            ret_val.append(result)
+
+        return ret_val
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
 
