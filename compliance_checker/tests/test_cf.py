@@ -96,7 +96,7 @@ class TestCF16(BaseTestCase):
         result = self.cf.check_data_types(dataset)
 
         # TODO
-        # the acdd_reformat_rebase branch has a new .nc file that I made
+        # the acdd_reformat_rebase branch has a new .nc file
         # which constructs the temp variable with an int64 dtype --
         # upon rebasing, this should work as expected
         #assert result.msgs[0] == u'The variable temp failed because the datatype is int64'
@@ -891,11 +891,19 @@ class TestCF16(BaseTestCase):
     def test_check_packed_data(self):
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         results = self.cf.check_packed_data(dataset)
+        score, out_of, messages = self.get_results(results)
+
+        msgs = [
+            'Attributes add_offset and scale_factor have different data type.',
+            "Type of tempvalid_min attribute (<class 'numpy.int32'>) does not match variable type (<class 'numpy.int64'>)",
+            "Type of temp:valid_max attribute (<class 'numpy.int32'>) does not match variable type (<class 'numpy.int64'>)",
+            "Type of salinityvalid_min attribute (<class 'numpy.int32'>) does not match variable type (<class 'numpy.float64'>)",
+            "Type of salinity:valid_max attribute (<class 'numpy.int32'>) does not match variable type (<class 'numpy.float64'>)"
+        ]
+
         self.assertEqual(len(results), 4)
-        self.assertFalse(results[0].value)
-        self.assertFalse(results[1].value)
-        self.assertTrue(results[2].value)
-        self.assertFalse(results[3].value)
+        self.assertTrue(score < out_of)
+        self.assertTrue(all(m in messages for m in msgs))
 
     def test_compress_packed(self):
         """Tests compressed indexed coordinates"""
@@ -1130,7 +1138,7 @@ class TestCF17(TestCF16):
         score, out_of, messages = self.get_results(result)
         assert score < out_of
         assert len(messages) == 1
-        assert messages[0] == u"\"a\"'s values are all equal; actual_range shouldn't exist"
+        assert messages[0] == "\"a\"'s values are all equal; actual_range shouldn't exist"
         dataset.close()
         
         # test if len(actual_range) != 2; should fail
@@ -1181,7 +1189,7 @@ class TestCF17(TestCF16):
         score, out_of, messages = self.get_results(result)
         assert score < out_of
         assert len(messages) == 1
-        assert messages[0] == "\"a\"'s actual_range must be == valid_range"
+        assert messages[0] == "\"a\"'s actual_range must be within valid_range"
         dataset.close()
 
         # check equality to valid_min and valid_max values
@@ -1256,8 +1264,7 @@ class TestCF17(TestCF16):
             # run the check
             results = self.cf.check_cell_measures(dataset)
             score, out_of, messages = self.get_results(results)
-            assert score == out_of
-            assert score > 0
+            assert (score == out_of) and (score > 0)
 
         # same thing, but test that the cell_area variable is in
         # the global attr "external_variables"

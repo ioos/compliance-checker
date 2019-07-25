@@ -238,7 +238,7 @@ grid_mapping_dict16 = {
 
 grid_mapping_dict17 = grid_mapping_dict16.copy() # need shallow copy; update() returns None
 grid_mapping_dict17.update({
-    'geos': [
+    'geostationary': [
         (
             'latitude_of_projection_origin',
             'longitude_of_projection_origin',

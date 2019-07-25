@@ -662,7 +662,9 @@ class CheckSuite(object):
     def generate_dataset(self, cdl_path):
         '''
         Use ncgen to generate a netCDF file from a .cdl file
-        Returns the path to the generated netcdf file
+        Returns the path to the generated netcdf file. If ncgen fails, uses
+        sys.exit(1) to terminate program so a long stack trace is not reported
+        to the user.
 
         :param str cdl_path: Absolute path to cdl file that is used to generate netCDF file
         '''
@@ -670,7 +672,10 @@ class CheckSuite(object):
             ds_str = cdl_path.replace('.cdl', '.nc')
         else:
             ds_str = cdl_path + '.nc'
-        subprocess.call(['ncgen', '-o', ds_str, cdl_path])
+        returncode = subprocess.call(['ncgen', '-o', ds_str, cdl_path])
+        if returncode != 0:
+            print("Error generating dataset from .cdl")
+            sys.exit(1)
         return ds_str
 
     def load_dataset(self, ds_str):
