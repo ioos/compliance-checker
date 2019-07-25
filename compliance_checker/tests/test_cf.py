@@ -1138,7 +1138,7 @@ class TestCF17(TestCF16):
         score, out_of, messages = self.get_results(result)
         assert score < out_of
         assert len(messages) == 1
-        assert messages[0] == "\"a\"'s values are all equal; actual_range shouldn't exist"
+        assert messages[0] == u"\"a\"'s values are all equal; actual_range shouldn't exist"
         dataset.close()
         
         # test if len(actual_range) != 2; should fail
