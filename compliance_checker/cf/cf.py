@@ -3492,6 +3492,81 @@ class CF17Check(CF16Check):
             ))
         return ret_val
 
+    def check_cell_boundaries(self, ds):
+        """
+        Checks the dimensions of cell boundary variables to ensure they are CF compliant
+        per section 7.1.
+
+        This method extends the CF16Check method; please see the original method for the
+        complete doc string.
+
+        If any variable contains both a formula_terms attribute *and* a bounding variable,
+        that bounds variable must also have a formula_terms attribute.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :returns list: List of results
+        """
+
+        # Note that test does not check monotonicity
+        ret_val = []
+        reasoning = []
+        for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(ds).items():
+            variable = ds.variables[variable_name]
+            valid = True
+            reasoning = []
+            if boundary_variable_name not in ds.variables:
+                valid = False
+                reasoning.append("Boundary variable {} referenced by {} not ".format(
+                                    boundary_variable_name, variable.name
+                                    )+\
+                                 "found in dataset variables")
+            else:
+                boundary_variable = ds.variables[boundary_variable_name]
+            # The number of dimensions in the bounds variable should always be
+            # the number of dimensions in the referring variable + 1
+            if (boundary_variable.ndim < 2):
+                valid = False
+                reasoning.append('Boundary variable {} specified by {}'.format(boundary_variable.name, variable.name)+\
+                                 ' should have at least two dimensions to enclose the base '+\
+                                 'case of a one dimensionsal variable')
+            if (boundary_variable.ndim != variable.ndim + 1):
+                valid = False
+                reasoning.append('The number of dimensions of the variable %s is %s, but the '
+                                 'number of dimensions of the boundary variable %s is %s. The boundary variable '
+                                 'should have %s dimensions' %
+                                 (variable.name, variable.ndim,
+                                  boundary_variable.name,
+                                  boundary_variable.ndim,
+                                  variable.ndim + 1))
+            if (variable.dimensions[:] != boundary_variable.dimensions[:variable.ndim]):
+                valid = False
+                reasoning.append(
+                    u"Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
+                    "".format(variable.name, boundary_variable.dimensions))
+
+            # ensure p vertices form a valid simplex given previous a...n
+            # previous auxiliary coordinates
+            if (ds.dimensions[boundary_variable.dimensions[-1]].size < len(boundary_variable.dimensions[:-1]) + 1):
+                valid = False
+                reasoning.append("Dimension {} of boundary variable (for {}) must have at least {} elements to form a simplex/closed cell with previous dimensions {}.".format(
+                    boundary_variable.name,
+                    variable.name,
+                    len(variable.dimensions) + 1,
+                    boundary_variable.dimensions[:-1])
+                )
+
+            # check if formula_terms is present in the var; if so,
+            # the bounds variable must also have a formula_terms attr
+            if hasattr(variable, "formula_terms"):
+               if not hasattr(boundary_variable, "formula_terms"):
+                   valid = False
+                   reasoning.append(
+                       "'{}' has 'formula_terms' attr, bounds variable '{}' must also have 'formula_terms'".format(variable_name, boundary_variable_name))
+
+            result = Result(BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning)
+            ret_val.append(result)
+        return ret_val
+
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
 

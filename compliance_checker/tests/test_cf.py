@@ -1200,3 +1200,45 @@ class TestCF17(TestCF16):
         assert messages[1] == "\"a\"'s actual_range[1] must be == 45 (valid_max)"
         dataset.close()
 
+    def test_check_cell_boundaries(self):
+        """Check our over-ridden check_cell_boundaries emthod behaves as expected"""
+
+
+        dataset = self.load_dataset(STATIC_FILES['grid-boundaries'])
+        results = self.cf.check_cell_boundaries(dataset)
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (2, 2)
+
+        dataset = self.load_dataset(STATIC_FILES['cf_example_cell_measures'])
+        results = self.cf.check_cell_boundaries(dataset)
+
+        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
+        results = self.cf.check_cell_boundaries(dataset)
+
+        dataset = self.load_dataset(STATIC_FILES['bounds_bad_order'])
+        results = self.cf.check_cell_boundaries(dataset)
+        score, out_of, messages = self.get_results(results)
+        # Make sure that the rgrid coordinate variable isn't checked for standard_name
+        assert (score, out_of) == (0, 2)
+
+        dataset = self.load_dataset(STATIC_FILES['bounds_bad_num_coords'])
+        results = self.cf.check_cell_boundaries(dataset)
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (0, 2)
+
+        dataset = self.load_dataset(STATIC_FILES['1d_bound_bad'])
+        results = self.cf.check_cell_boundaries(dataset)
+        score, out_of, messages = self.get_results(results)
+        assert (score, out_of) == (0, 2)
+
+        # if the variable has formula_terms, the bounds var must also
+        with MockTimeSeries() as dataset:
+            dataset.createVariable('a', 'd', ('time',))
+            dataset.createVariable('b', 'd', ('time',))
+            dataset.variables['a'].setncattr('bounds', 'b') # set bounds variable
+            dataset.variables['a'].setncattr('formula_terms', 'test')
+            results = self.cf.check_cell_boundaries(dataset)
+            score, out_of, messages = self.get_results(results)
+            assert score < out_of
+            assert "'a' has 'formula_terms' attr, bounds variable 'b' must also have 'formula_terms'" in messages
+
