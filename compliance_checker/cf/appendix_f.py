@@ -55,7 +55,7 @@ grid_mapping_attrs = [
     'straight_vertical_longitude_from_pole'
 ]
 
-grid_mapping_dict = {
+grid_mapping_dict16 = {
     'albers_conical_equal_area': [
         (
             'longitude_of_central_meridian',
@@ -235,3 +235,33 @@ grid_mapping_dict = {
         )
     ]
 }
+
+grid_mapping_dict17 = grid_mapping_dict16.copy() # need shallow copy; update() returns None
+grid_mapping_dict17.update({
+    'geos': [
+        (
+            'latitude_of_projection_origin',
+            'longitude_of_projection_origin',
+            'perspective_point_height',
+            'false_easting',
+            'false_northing'
+        )
+    ],
+    'oblique_mercator': [
+        (
+            'azimuth',
+            'latitude_of_projection_origin',
+            'longitude_of_projection_origin',
+            'scale_factor_at_projection_origin',
+            'false_easting',
+            'false_northing'
+        )
+    ],
+    'sinusoidal': [
+        (
+            'longitude_of_projection_origin',
+            'false_easting',
+            'false_northing'
+        )
+    ]
+})

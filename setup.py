@@ -58,6 +58,7 @@ setup(
         ],
         'compliance_checker.suites': [
             'cf-1.6 = compliance_checker.cf.cf:CF16Check',
+            'cf-1.7 = compliance_checker.cf.cf:CF17Check',
             'acdd-1.1 = compliance_checker.acdd:ACDD1_1Check',
             'acdd-1.3 = compliance_checker.acdd:ACDD1_3Check',
             'ioos_sos = compliance_checker.ioos:IOOSBaseSOSCheck',

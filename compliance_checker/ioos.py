@@ -343,8 +343,8 @@ class IOOS1_1Check(IOOSNCCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         '''
-        cf_base = CF16Check()
-        return cf_base.check_units(ds)
+        cf16 = CF16Check()
+        return cf16.check_units(ds)
 
 
 class IOOSBaseSOSCheck(BaseCheck):

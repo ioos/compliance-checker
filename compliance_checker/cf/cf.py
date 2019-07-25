@@ -4,7 +4,8 @@ from __future__ import unicode_literals, division, print_function
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates,
                                               no_missing_terms)
-from compliance_checker.cf.appendix_f import grid_mapping_dict
+from compliance_checker.cf.appendix_e import cell_methods16, cell_methods17
+from compliance_checker.cf.appendix_f import grid_mapping_dict16, grid_mapping_dict17
 from compliance_checker.cf import util
 from compliance_checker import cfutil
 from cf_units import Unit
@@ -598,9 +599,13 @@ class CF16Check(CFNCCheck):
     def __init__(self): # initialize with parent methods and data
         super(CF16Check, self).__init__()
 
+        self.cell_methods = cell_methods16
+        self.grid_mapping_dict = grid_mapping_dict16
+
     ###############################################################################
     # Chapter 2: NetCDF Files and Components
     ###############################################################################
+
 
     def check_data_types(self, ds):
         '''
@@ -1908,7 +1913,7 @@ class CF16Check(CFNCCheck):
         # check that the formula_terms are well formed and are present
         # The pattern for formula terms is always component: variable_name
         # the regex grouping always has component names in even positions and
-        # the corresponding variable name in even positions.
+        # the corresponding variable name in odd positions.
         matches = regex.findall(r'([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)',
                                 variable.formula_terms)
         terms = set(m[0][:-2] for m in matches)
@@ -2425,22 +2430,22 @@ class CF16Check(CFNCCheck):
             grid_mapping_name = getattr(grid_var, 'grid_mapping_name', None)
 
             # Grid mapping name must be in appendix F
-            valid_grid_mapping.assert_true(grid_mapping_name in grid_mapping_dict,
+            valid_grid_mapping.assert_true(grid_mapping_name in self.grid_mapping_dict,
                                            "{} is not a valid grid_mapping_name.".format(grid_mapping_name)+\
                                            " See Appendix F for valid grid mappings")
 
-            # The grid_mapping_dict has a values of:
+            # The self.grid_mapping_dict has a values of:
             # - required attributes
             # - optional attributes (can't check)
             # - required standard_names defined
             # - at least one of these attributes must be defined
 
             # We can't do any of the other grid mapping checks if it's not a valid grid mapping name
-            if grid_mapping_name not in grid_mapping_dict:
+            if grid_mapping_name not in self.grid_mapping_dict:
                 ret_val.append(valid_grid_mapping.to_result())
                 continue
 
-            grid_mapping = grid_mapping_dict[grid_mapping_name]
+            grid_mapping = self.grid_mapping_dict[grid_mapping_name]
             required_attrs = grid_mapping[0]
             # Make sure all the required attributes are defined
             for req in required_attrs:
@@ -2448,8 +2453,8 @@ class CF16Check(CFNCCheck):
                                                "{} is a required attribute for grid mapping {}".format(req, grid_mapping_name))
 
             # Make sure that exactly one of the exclusive attributes exist
-            if len(grid_mapping_dict) == 4:
-                at_least_attr = grid_mapping_dict[3]
+            if len(self.grid_mapping_dict) == 4:
+                at_least_attr = self.grid_mapping_dict[3]
                 number_found = 0
                 for attr in at_least_attr:
                     if hasattr(grid_var, attr):
@@ -2716,7 +2721,7 @@ class CF16Check(CFNCCheck):
                     reasoning.append(
                         "Cell measure variable {} referred to by "
                         "{} is not present in dataset variables".format(
-                            var.name, cell_meas_var_name)
+                            cell_meas_var_name, var.name)
                     )
                 else:
                     cell_meas_var = ds.variables[cell_meas_var_name]
@@ -2793,7 +2798,7 @@ class CF16Check(CFNCCheck):
             method = getattr(var, 'cell_methods', '')
 
             valid_attribute = TestCtx(BaseCheck.HIGH,
-                                      self.section_titles['7.1']) # TODO is this supposed to be 7.3?
+                                      self.section_titles['7.3']) # changed from 7.1 to 7.3
             valid_attribute.assert_true(regex.match(psep, method) is not None,
                                         '"{}" is not a valid format for cell_methods attribute of "{}"'
                                         ''.format(method, var.name))
@@ -2829,7 +2834,7 @@ class CF16Check(CFNCCheck):
 
             for match in regex.finditer(psep, method):
                 # CF section 7.3 - "Case is not significant in the method name."
-                valid_cell_methods.assert_true(match.group('method').lower() in methods,
+                valid_cell_methods.assert_true(match.group('method').lower() in self.cell_methods,
                                                '{}:cell_methods contains an invalid method: {}'
                                                ''.format(var.name, match.group('method')))
 
@@ -3378,6 +3383,19 @@ class CF16Check(CFNCCheck):
 
         return ret_val
 
+class CF17Check(CF16Check):
+    """Implementation for CF v1.7. Inherits from CF16Check as most of the
+    checks are the same."""
+
+    # things that are specific to 1.7
+    _cc_spec_version    = '1.7'
+    _cc_url             = 'http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html'
+
+    def __init__(self):
+        super(CF17Check, self).__init__()
+
+        self.cell_methods = cell_methods17
+        self.grid_mapping_dict = grid_mapping_dict17
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
 
