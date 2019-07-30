@@ -894,11 +894,11 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = self.get_results(results)
 
         msgs = [
-            'Attributes add_offset and scale_factor have different data type.',
-            "Type of tempvalid_min attribute (<class 'numpy.int32'>) does not match variable type (<class 'numpy.int64'>)",
-            "Type of temp:valid_max attribute (<class 'numpy.int32'>) does not match variable type (<class 'numpy.int64'>)",
-            "Type of salinityvalid_min attribute (<class 'numpy.int32'>) does not match variable type (<class 'numpy.float64'>)",
-            "Type of salinity:valid_max attribute (<class 'numpy.int32'>) does not match variable type (<class 'numpy.float64'>)"
+            u'Attributes add_offset and scale_factor have different data type.',
+            u"Type of tempvalid_min attribute (int32) does not match variable type (int64)",
+            u"Type of temp:valid_max attribute (int32) does not match variable type (int64)",
+            u"Type of salinityvalid_min attribute (int32) does not match variable type (float64)",
+            u"Type of salinity:valid_max attribute (int32) does not match variable type (float64)"
         ]
 
         self.assertEqual(len(results), 4)

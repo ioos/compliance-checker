@@ -3107,22 +3107,22 @@ class CF1_6Check(CFNCCheck):
                 if var._FillValue.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append("Type of %s:_FillValue attribute (%s) does not match variable type (%s)" %
-                                     (name, var._FillValue.dtype.type, var.dtype.type))
+                                     (name, var._FillValue.dtype.name, var.dtype.name))
             if hasattr(var, "valid_min"):
                 if var.valid_min.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append("Type of %svalid_min attribute (%s) does not match variable type (%s)" %
-                                     (name, var.valid_min.dtype.type, var.dtype.type))
+                                     (name, var.valid_min.dtype.name, var.dtype.name))
             if hasattr(var, "valid_max"):
                 if var.valid_max.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append("Type of %s:valid_max attribute (%s) does not match variable type (%s)" %
-                                     (name, var.valid_max.dtype.type, var.dtype.type))
+                                     (name, var.valid_max.dtype.name, var.dtype.name))
             if hasattr(var, "valid_range"):
                 if var.valid_range.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append("Type of %s:valid_range attribute (%s) does not match variable type (%s)" %
-                                     (name, var.valid_range.dtype.type, var.dtype.type))
+                                     (name, var.valid_range.dtype.name, var.dtype.name))
 
             result = Result(BaseCheck.MEDIUM,
                             valid,
