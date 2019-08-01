@@ -38,6 +38,7 @@ def print_exceptions(f):
             print_exc()
     return wrapper
 
+
 # helper to see if we should do DSG tests
 def is_likely_dsg(func):
     @wraps(func)
@@ -114,6 +115,7 @@ class CFBaseCheck(BaseCheck):
             "9.5": "§9.5 Coordinates and metadata",
             "9.6": "§9.6 Missing Data"
         }
+
 
     ################################################################################
     # Helper Methods - var classifications, etc
@@ -606,7 +608,6 @@ class CF1_6Check(CFNCCheck):
     ###############################################################################
     # Chapter 2: NetCDF Files and Components
     ###############################################################################
-
 
     def check_data_types(self, ds):
         '''
@@ -2778,19 +2779,6 @@ class CF1_6Check(CFNCCheck):
         :return: List of results
         """
 
-        methods = {
-            "point",
-            "sum",
-            "mean",
-            "maximum",
-            "minimum",
-            "mid_range",
-            "standard_deviation",
-            "variance",
-            "mode",
-            "median"
-        }
-
         ret_val = []
         psep = regex.compile(r'(?P<vars>\w+: )+(?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
                              r'?(?P<over>over (?P<otypevar>\w+))?| ?)(?:\((?P<paren_contents>[^)]*)\))?')
@@ -3629,7 +3617,6 @@ class CF1_7Check(CF1_6Check):
                             "Cell measure variable {} referred to by {} is not present in dataset variables".format(
                                 cell_meas_var_name, var.name)
                         )
-
                     else:
                         valid = True
 
