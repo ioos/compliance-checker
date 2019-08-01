@@ -18,12 +18,14 @@ from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
 from compliance_checker.cf.appendix_d import no_missing_terms
 from itertools import chain
+import copy
 
 import numpy as np
 import os
 import re
 import sys
 import pytest
+import sqlite3
 
 from operator import sub
 
@@ -1308,3 +1310,76 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(results)
         message = u'Cell measure variable box_area referred to by PS is not present in dataset variables'
         assert message in messages
+
+    def test_process_vdatum(self):
+        # first, we set up a mock SQLite database
+        conn_str = ':memory:'
+        conn = sqlite3.connect(conn_str)
+        cur = conn.cursor()
+        # create alias and vertical datum tables without
+        # triggers
+        cur.execute("""
+        CREATE TABLE alias_name(
+            table_name TEXT NOT NULL CHECK (table_name IN (
+                    'unit_of_measure', 'celestial_body', 'ellipsoid',
+                    'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+                    'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
+                    'helmert_transformation', 'other_transformation', 'concatenated_operation')),
+            auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+            code TEXT NOT NULL CHECK (length(code) >= 1),
+            alt_name TEXT NOT NULL CHECK (length(alt_name) >= 2),
+            source TEXT
+        );
+        """)
+        cur.execute("""
+        CREATE TABLE vertical_datum (
+            auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+            code TEXT NOT NULL CHECK (length(code) >= 1),
+            name TEXT NOT NULL CHECK (length(name) >= 2),
+            description TEXT,
+            scope TEXT,
+            area_of_use_auth_name TEXT NOT NULL,
+            area_of_use_code TEXT NOT NULL,
+            deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
+            CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code)
+        );
+        """)
+        cur.execute("""INSERT INTO alias_name VALUES
+                       ('vertical_datum', 'EPSG', '5103', 'NAVD88', 'EPSG');
+                    """)
+
+        cur.execute("""INSERT INTO vertical_datum VALUES
+                    ('EPSG', '5101', 'Ordnance Datum Newlyn', NULL, NULL,
+                     'EPSG', '2792', '0')""")
+
+        cur.close()
+
+        self.assertTrue(self.cf._process_v_datum_str('NAVD88', conn))
+        self.assertTrue(self.cf._process_v_datum_str(
+                                    'Ordnance Datum Newlyn', conn))
+        # NAD83 isn't a vertical datum to begin with, expect failure
+        self.assertFalse(self.cf._process_v_datum_str('NAD83', conn))
+
+    def test_check_grid_mapping_vert_datum_geoid_name(self):
+        """Checks that geoid_name works proerly"""
+        dataset = self.load_dataset(STATIC_FILES['mapping'])
+        dataset.variables['wgs84'] = MockVariable(dataset.variables['wgs84'])
+        dataset.variables['wgs84'].geoid_name = 'NAVD88'
+        dataset.variables['wgs84'].geopotential_datum_name = 'WGS84'
+        both_attrs = self.cf
+        geoid_name_good = copy.deepcopy(self.cf)
+        geopotential_datum_name_bad = copy.deepcopy(self.cf)
+        results = self.cf.check_grid_mapping(dataset)
+        score, out_of, messages = get_results(results)
+        self.assertIn("Cannot have both 'geoid_name' and 'geopotential_datum_name' attributes in grid mapping variable 'wgs84'",
+                      messages)
+        del dataset.variables['wgs84'].geopotential_datum_name
+        results = geoid_name_good.check_grid_mapping(dataset)
+        self.assertEqual(*results['wgs84'].value)
+        # WGS84 isn't a valid vertical datum name, of course
+        dataset.variables['wgs84'].geopotential_datum_name = 'WGS84'
+        del dataset.variables['wgs84'].geoid_name
+        results = self.cf.check_grid_mapping(dataset)
+        self.assertLess(*results['wgs84'].value)
+        self.assertIn("Vertical datum value 'WGS84' for attribute 'geopotential_datum_name' in grid mapping variable 'wgs84' is not valid",
+                      results['wgs84'].msgs)

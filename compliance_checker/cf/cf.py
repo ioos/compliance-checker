@@ -16,6 +16,8 @@ import numpy as np
 import os
 import regex
 import sys
+import pyproj
+import sqlite3
 
 import logging
 
@@ -3653,6 +3655,69 @@ class CF1_7Check(CF1_6Check):
             ret_val.append(result)
 
         return ret_val
+
+    def check_grid_mapping(self, ds):
+        __doc__ = super(CF1_7Check, self).check_grid_mapping.__doc__
+        prev_return = super(CF1_7Check, self).check_grid_mapping(ds)
+        ret_val = []
+        grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
+        for var_name in sorted(grid_mapping_variables):
+            var = ds.variables[var_name]
+            test_ctx = self.get_test_ctx(BaseCheck.HIGH,
+                                         self.section_titles["5.6"], var.name)
+            vert_datum_attrs = {}
+            # handle vertical datum related grid_mapping attributes
+            possible_vert_datum_attrs = {'geoid_name',
+                                         'geopotential_datum_name'}
+            vert_datum_attrs = (possible_vert_datum_attrs
+                                       .intersection(var.ncattrs()))
+            len_vdatum_name_attrs = len(vert_datum_attrs)
+            # check that geoid_name and geopotential_datum_name are not both
+            # present in the grid_mapping variable
+            if len_vdatum_name_attrs == 2:
+                test_ctx.out_of += 1
+                test_ctx.messages.append("Cannot have both 'geoid_name' and "
+                                     "'geopotential_datum_name' attributes in "
+                                     "grid mapping variable '{}'".format(
+                                          var_name))
+            elif len_vdatum_name_attrs == 1:
+                    # should be one or zero attrs
+                    proj_db_path = os.path.join(os.path.dirname(pyproj.__file__),
+                                                'proj_dir/share/proj/proj.db')
+                    proj_db_loc = "file://{}".format(proj_db_path)
+                    try:
+                        with sqlite3.connect(proj_db_loc, uri=True) as conn:
+                            v_datum_attr = next(iter(vert_datum_attrs))
+                            v_datum_value = getattr(var, v_datum_attr)
+                            v_datum_str_valid = self._process_v_datum_str(
+                                                 v_datum_value, conn)
+
+                            invalid_msg = ("Vertical datum value '{}' for "
+                                           "attribute '{}' in grid mapping "
+                                           "variable '{}' is not valid".format(
+                                                v_datum_value, v_datum_attr,
+                                                var_name))
+                            test_ctx.assert_true(v_datum_str_valid, invalid_msg)
+                    except sqlite3.Error as e:
+                        # if we hit an error, skip the check
+                        warn("Error occurred while trying to query "
+                                        "Proj4 SQLite database at {}: {}"
+                                        .format(proj_db_loc, str(e)))
+            prev_return[var_name] = test_ctx.to_result()
+
+        return prev_return
+
+    def _process_v_datum_str(self, v_datum_str, conn):
+        vdatum_query = """SELECT 1 FROM alias_name WHERE
+                            table_name = 'vertical_datum' AND
+                            alt_name = ?
+                                UNION ALL
+                            SELECT 1 FROM vertical_datum WHERE
+                            name = ?
+                            LIMIT 1"""
+        res_set = conn.execute(vdatum_query, (v_datum_str,
+                                                v_datum_str))
+        return len(res_set.fetchall()) > 0
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
 
