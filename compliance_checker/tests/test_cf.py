@@ -2,8 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from compliance_checker.suite import CheckSuite
-from compliance_checker.cf import CF1_6Check, CF1_7Check, dimless_vertical_coordinates
-from compliance_checker.cf.util import is_vertical_coordinate, is_time_variable, units_convertible, units_temporal, StandardNameTable, create_cached_data_dir, download_cf_standard_name_table
+from compliance_checker.cf import (CF1_6Check, CF1_7Check,
+                                   dimless_vertical_coordinates)
+from compliance_checker.cf.util import (is_vertical_coordinate,
+                                        is_time_variable,
+                                        units_convertible, units_temporal,
+                                        StandardNameTable,
+                                        create_cached_data_dir,
+                                        download_cf_standard_name_table)
 from compliance_checker import cfutil
 from netCDF4 import Dataset
 from tempfile import gettempdir
