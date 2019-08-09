@@ -103,6 +103,16 @@ class TestBase(TestCase):
         self.assertEqual(ctx2.out_of, 2)
         self.assertEqual(ctx2.messages, ['One plus one equals three'])
 
+        ctx2 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, 'Test Name',
+                                      'test_var_name')
+        ctx3 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, 'Test Name',
+                                      'test_var_name')
+        # check that variable cache is working
+        self.assertIs(ctx3, (self.acdd._defined_results['test_var_name']
+                                                       [(base.BaseCheck.HIGH,
+                                                         'Test Name')]
+                                                     ))
+
 
 class TestGenericFile(TestCase):
     '''

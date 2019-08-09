@@ -60,9 +60,9 @@ class BaseCheck(object):
         pass
 
     def __init__(self):
-        self._defined_results = defaultdict(TestCtx)
+        self._defined_results = defaultdict(lambda: defaultdict(TestCtx))
 
-    def get_test_ctx(self, severity, name):
+    def get_test_ctx(self, severity, name, variable=None):
         """
         Creates an existing TestCtx object in _defined_results dict if it does
         not exist for the current checker instance, or an returns the existing
@@ -75,7 +75,7 @@ class BaseCheck(object):
         :returns: A new or or existing `TestCtx` instance taken from this
                   instance's _defined_results dict
         """
-        return self._defined_results[(severity, name)]
+        return self._defined_results[variable][(severity, name)]
 
 
 class BaseNCCheck(object):
