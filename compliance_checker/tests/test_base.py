@@ -86,6 +86,33 @@ class TestBase(TestCase):
         base.attr_check(attr, self.ds, priority, rv3)
         assert rv3[0] == base.Result(priority, True, 'dummy', [])
 
+    def test_get_test_ctx(self):
+        # acdd refers to a BaseCheck instance here -- perhaps the variable name
+        # should reflect that?
+        ctx = self.acdd.get_test_ctx(base.BaseCheck.HIGH, 'Dummy Name')
+        ctx.assert_true(1 + 1 == 2, 'One plus one equals two')
+        self.assertEqual(ctx.out_of, 1)
+        self.assertEqual(ctx.messages, [])
+
+        # ctx2 should be receive the same test context
+        ctx2 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, 'Dummy Name')
+        self.assertIs(ctx, ctx2)
+        # will fail, obviously
+        ctx2.assert_true(1 + 1 == 3, 'One plus one equals three')
+        self.assertEqual(ctx.out_of, 2)
+        self.assertEqual(ctx2.out_of, 2)
+        self.assertEqual(ctx2.messages, ['One plus one equals three'])
+
+        ctx2 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, 'Test Name',
+                                      'test_var_name')
+        ctx3 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, 'Test Name',
+                                      'test_var_name')
+        # check that variable cache is working
+        self.assertIs(ctx3, (self.acdd._defined_results['test_var_name']
+                                                       [(base.BaseCheck.HIGH,
+                                                         'Test Name')]
+                                                     ))
+
 
 class TestGenericFile(TestCase):
     '''

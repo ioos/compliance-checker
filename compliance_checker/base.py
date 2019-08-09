@@ -13,6 +13,7 @@ from owslib.swe.sensor.sml import SensorML
 from owslib.namespaces import Namespaces
 from compliance_checker import __version__, MemoizedDataset
 from compliance_checker.util import kvp_convert
+from collections import defaultdict
 from lxml import etree
 import sys
 
@@ -57,6 +58,24 @@ class BaseCheck(object):
         Automatically run when running a CheckSuite. Define this method in your Checker class.
         """
         pass
+
+    def __init__(self):
+        self._defined_results = defaultdict(lambda: defaultdict(TestCtx))
+
+    def get_test_ctx(self, severity, name, variable=None):
+        """
+        Creates an existing TestCtx object in _defined_results dict if it does
+        not exist for the current checker instance, or an returns the existing
+        TestCtx for modification. Takes a severity level and name and uses the
+        two element tuple formed by the arguments as a key into the dict.
+
+        :param int severity: A BaseCheck severity level
+        :param str name: The name of the check
+        :rtype compliance_checker.base.TestCtx:
+        :returns: A new or or existing `TestCtx` instance taken from this
+                  instance's _defined_results dict
+        """
+        return self._defined_results[variable][(severity, name)]
 
 
 class BaseNCCheck(object):
@@ -187,7 +206,9 @@ class TestCtx(object):
         self.variable = variable
 
     def to_result(self):
-        return Result(self.category, (self.score, self.out_of), self.description, self.messages, variable_name=self.variable)
+        return Result(self.category, (self.score, self.out_of),
+                      self.description, self.messages,
+                      variable_name=self.variable)
 
     def assert_true(self, test, message):
         '''

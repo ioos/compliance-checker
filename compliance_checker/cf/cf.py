@@ -63,6 +63,7 @@ class CFBaseCheck(BaseCheck):
 
         # Each default dict is a key, value mapping from the dataset object to
         # a list of variables
+        super(CFBaseCheck, self).__init__()
         self._coord_vars       = defaultdict(list)
         self._ancillary_vars   = defaultdict(list)
         self._clim_vars        = defaultdict(list)
@@ -3396,7 +3397,7 @@ class CF1_7Check(CF1_6Check):
 
         self.cell_methods = cell_methods17
         self.grid_mapping_dict = grid_mapping_dict17
-    
+
     def check_actual_range(self, ds):
         """Check the actual_range attribute of variables. As stated in
         section 2.5.1 of version 1.7, this convention defines a two-element
@@ -3411,7 +3412,7 @@ class CF1_7Check(CF1_6Check):
           - if valid_range is specified, both elements of actual_range should
             be within valid_range
 
-        If a variable does not have an actual_range attribute, let it pass; 
+        If a variable does not have an actual_range attribute, let it pass;
         including this attribute is only suggested. However, if the user is
         specifying the actual_range, the Result will be considered
         high-priority."""
@@ -3625,7 +3626,7 @@ class CF1_7Check(CF1_6Check):
                             "Cell measure variable {} referred to by {} is not present in dataset variables".format(
                                 cell_meas_var_name, var.name)
                         )
-                   
+
                     else:
                         valid = True
 
@@ -3634,7 +3635,7 @@ class CF1_7Check(CF1_6Check):
                             valid,
                             (self.section_titles['7.2']),
                             reasoning)
-                    ret_val.append(result)                    
+                    ret_val.append(result)
                     continue # can't test anything on an external var
 
                 else:
