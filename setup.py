@@ -61,7 +61,8 @@ setup(
             'cf-1.7 = compliance_checker.cf.cf:CF1_7Check',
             'acdd-1.1 = compliance_checker.acdd:ACDD1_1Check',
             'acdd-1.3 = compliance_checker.acdd:ACDD1_3Check',
-            'ioos_sos = compliance_checker.ioos:IOOSBaseSOSCheck',
+            'ioos_sosGC = compliance_checker.ioos:IOOSSOSGCCheck',
+            'ioos_sosDS = compliance_checker.ioos:IOOSSOSDSCheck',
             'ioos-0.1 = compliance_checker.ioos:IOOS0_1Check',
             'ioos-1.1 = compliance_checker.ioos:IOOS1_1Check',
         ]

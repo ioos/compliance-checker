@@ -358,6 +358,11 @@ class IOOSBaseSOSCheck(BaseCheck):
 
 
 class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseSOSCheck):
+    _cc_spec = 'ioos_sosGC'
+    _cc_spec_version = '0.1'
+    _cc_description = ('IOOS Inventory Metadata checks for the Sensor Observation System (SOS). '
+                       'Checks SOS GetCapabilities functions.')
+    register_checker = True
 
     # set up namespaces for XPath
     ns = Namespaces().get_namespaces(['sos', 'gml', 'xlink'])
@@ -396,6 +401,11 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseSOSCheck):
 
 
 class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseSOSCheck):
+    _cc_spec = 'ioos_sosDS'
+    _cc_spec_version = '0.1'
+    _cc_description = ('IOOS Inventory Metadata checks for the Sensor Observation System (SOS). '
+                       'Checks SOS DescribeSensor functions.')
+    register_checker = True
 
     # set up namespaces for XPath
     ns = Namespaces().get_namespaces(['sml', 'swe', 'gml', 'xlink'])

@@ -279,12 +279,6 @@ class CheckSuite(object):
             if type(ds) in a().supported_ds:
                 valid.append((name, a))
 
-            # add any subclasses of the checker class
-            for subc in a.__subclasses__():
-                if subc not in all_checked:
-                    all_checked.add(subc)
-                    checker_queue.add((name, subc))
-
         return valid
 
 
