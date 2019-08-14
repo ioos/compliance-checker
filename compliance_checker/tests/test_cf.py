@@ -871,10 +871,10 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['mapping'])
         results = self.cf.check_grid_mapping(dataset)
 
-        # there are 8 results, 2 of which did not have perfect scores
-        assert len(results) == 8
-        assert len([r.value for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u'§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections' for r in results)
+        assert len(results) == 6
+        assert len([r.value for r in results if r.value[0] < r.value[1]]) == 1
+        expected_name = u'§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections'
+        assert all(r.name == expected_name for r in results)
 
 
     def test_check_geographic_region(self):
@@ -1123,7 +1123,7 @@ class TestCF1_7(TestCF1_6):
 
         dataset = MockTimeSeries()
         dataset.createVariable('a', 'd', ('time',)) # dtype=double, dims=time
-        # test that if the variable doesn't have an actual_range attr, no score 
+        # test that if the variable doesn't have an actual_range attr, no score
         result = self.cf.check_actual_range(dataset)
         assert result == []
         dataset.close()
@@ -1140,7 +1140,7 @@ class TestCF1_7(TestCF1_6):
         assert len(messages) == 1
         assert messages[0] == u"\"a\"'s values are all equal; actual_range shouldn't exist"
         dataset.close()
-        
+
         # test if len(actual_range) != 2; should fail
         dataset = MockTimeSeries()
         dataset.createVariable('a', 'd', ('time',)) # dtype=double, dims=time
@@ -1177,7 +1177,7 @@ class TestCF1_7(TestCF1_6):
         assert len(messages) == 1
         assert messages[0] == "actual_range elements of 'a' inconsistent with its min/max values"
         dataset.close()
-        
+
         # check equality to valid_range attr
         dataset = MockTimeSeries()
         dataset.createVariable('a', 'd', ('time', ))
@@ -1273,7 +1273,7 @@ class TestCF1_7(TestCF1_6):
             dataset.createVariable('PS', 'd', ('time',)) # dtype=double, dims=time
             dataset.variables["PS"].setncattr("cell_measures", 'area: cell_area')
             dataset.setncattr("external_variables", ["cell_area"])
-            
+
             # run the check
             results = self.cf.check_cell_measures(dataset)
             score, out_of, messages = self.get_results(results)

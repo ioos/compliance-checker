@@ -700,10 +700,10 @@ def get_grid_mapping_variables(ds):
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
     '''
-    grid_mapping_variables = []
+    grid_mapping_variables = set()
     for ncvar in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
         if ncvar.grid_mapping in ds.variables:
-            grid_mapping_variables.append(ncvar.grid_mapping)
+            grid_mapping_variables.add(ncvar.grid_mapping)
     return grid_mapping_variables
 
 
