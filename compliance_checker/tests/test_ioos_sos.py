@@ -29,7 +29,7 @@ if httpretty:
             # need to mock out the HEAD response so that compliance checker
             # recognizes this as some sort of XML doc instead of an OPeNDAP
             # source
-            ComplianceChecker.run_checker(url, ['ioos_sosGC'], 1, 'normal')
+            ComplianceChecker.run_checker(url, ['ioos_sos'], 1, 'normal')
 
     class TestIOOSSOSDescribeSensor(unittest.TestCase):
 
@@ -54,4 +54,4 @@ if httpretty:
             # need to mock out the HEAD response so that compliance checker
             # recognizes this as some sort of XML doc instead of an OPeNDAP
             # source
-            ComplianceChecker.run_checker(url, ['ioos_sosDS'], 1, 'normal')
+            ComplianceChecker.run_checker(url, ['ioos_sos'], 1, 'normal')

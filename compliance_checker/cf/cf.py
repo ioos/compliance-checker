@@ -3678,7 +3678,7 @@ class CF1_7Check(CF1_6Check):
 
         return ret_val
 
-    def check_conventions_are_cf_17(self, ds):
+    def check_conventions_are_cf_1_7(self, ds):
         '''
         Check the global attribute conventions to contain CF-1.7.
 

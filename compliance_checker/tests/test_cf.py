@@ -1303,23 +1303,23 @@ class TestCF1_7(TestCF1_6):
         as it does not exist in the CF1_7Check class."""
         pass
 
-    def test_check_conventions_are_cf_17(self):
-        """Ensure the check_conventions_are_cf_17() check works as expected"""
+    def test_check_conventions_are_cf_1_7(self):
+        """Ensure the check_conventions_are_cf_1_7() check works as expected"""
 
         # create a temporary variable and test this only
         with MockTimeSeries() as dataset:
             # no Conventions attribute
-            result = self.cf.check_conventions_are_cf_17(dataset)
+            result = self.cf.check_conventions_are_cf_1_7(dataset)
             self.assertFalse(result.value)
 
         with MockTimeSeries() as dataset:
             # incorrect Conventions attribute
             dataset.setncattr("Conventions", "CF-1.9999")
-            result = self.cf.check_conventions_are_cf_17(dataset)
+            result = self.cf.check_conventions_are_cf_1_7(dataset)
             self.assertFalse(result.value)
 
         with MockTimeSeries() as dataset:
             # correct Conventions attribute
             dataset.setncattr("Conventions", "CF-1.7, ACDD-1.3")
-            result = self.cf.check_conventions_are_cf_17(dataset)
+            result = self.cf.check_conventions_are_cf_1_7(dataset)
             self.assertTrue(result.value)
