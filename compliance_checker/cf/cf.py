@@ -3702,7 +3702,7 @@ class CF1_7Check(CF1_6Check):
                         # if we hit an error, skip the check
                         warn("Error occurred while trying to query "
                                         "Proj4 SQLite database at {}: {}"
-                                        .format(proj_db_loc, str(e)))
+                                        .format(proj_db_path, str(e)))
             prev_return[var_name] = test_ctx.to_result()
 
         return prev_return
