@@ -3682,9 +3682,8 @@ class CF1_7Check(CF1_6Check):
                                           var_name))
             elif len_vdatum_name_attrs == 1:
                     # should be one or zero attrs
-                    proj_db_path = os.path.join(os.path.dirname(
-                                                     pyproj.__file__),
-                                                'proj_dir/share/proj/proj.db')
+                    proj_db_path = os.path.join(pyproj.datadir.get_data_dir(),
+                                                'proj.db')
                     try:
                         with sqlite3.connect(proj_db_path) as conn:
                             v_datum_attr = next(iter(vert_datum_attrs))
