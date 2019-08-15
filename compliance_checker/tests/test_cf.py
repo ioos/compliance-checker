@@ -1379,7 +1379,7 @@ class TestCF1_7(BaseTestCase):
         # WGS84 isn't a valid vertical datum name, of course
         dataset.variables['wgs84'].geopotential_datum_name = 'WGS84'
         del dataset.variables['wgs84'].geoid_name
-        results = self.cf.check_grid_mapping(dataset)
+        results = geopotential_datum_name_bad.check_grid_mapping(dataset)
         self.assertLess(*results['wgs84'].value)
         self.assertIn("Vertical datum value 'WGS84' for attribute 'geopotential_datum_name' in grid mapping variable 'wgs84' is not valid",
                       results['wgs84'].msgs)
