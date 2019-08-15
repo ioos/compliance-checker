@@ -10,7 +10,7 @@ from compliance_checker.cf import util
 from compliance_checker import cfutil
 from cf_units import Unit
 from functools import wraps
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from warnings import warn
 import numpy as np
 import os
@@ -2405,14 +2405,15 @@ class CF1_6Check(CFNCCheck):
         :return: List of results
         """
 
-        ret_val = []
+        ret_val = OrderedDict()
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
 
         # Check the grid_mapping attribute to be a non-empty string and that its reference exists
         for variable in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
             grid_mapping = getattr(variable, 'grid_mapping', None)
-            defines_grid_mapping = TestCtx(BaseCheck.HIGH,
-                                           self.section_titles["5.6"])
+            defines_grid_mapping = self.get_test_ctx(BaseCheck.HIGH,
+                                                     self.section_titles["5.6"],
+                                                     variable.name)
             defines_grid_mapping.assert_true((isinstance(grid_mapping, basestring) and grid_mapping),
                                              "{}'s grid_mapping attribute must be a "+\
                                              "space-separated non-empty string".format(variable.name))
@@ -2421,11 +2422,13 @@ class CF1_6Check(CFNCCheck):
                 for grid_var_name in grid_mapping.split():
                     defines_grid_mapping.assert_true(grid_var_name in ds.variables,
                                                   "grid mapping variable {} must exist in this dataset".format(variable.name))
-            ret_val.append(defines_grid_mapping.to_result())
+            ret_val[variable.name] = defines_grid_mapping.to_result()
 
         # Check the grid mapping variables themselves
         for grid_var_name in grid_mapping_variables:
-            valid_grid_mapping = TestCtx(BaseCheck.HIGH, self.section_titles["5.6"])
+            valid_grid_mapping = self.get_test_ctx(BaseCheck.HIGH,
+                                                   self.section_titles["5.6"],
+                                                   grid_var_name)
             grid_var = ds.variables[grid_var_name]
 
             grid_mapping_name = getattr(grid_var, 'grid_mapping_name', None)
@@ -2443,7 +2446,7 @@ class CF1_6Check(CFNCCheck):
 
             # We can't do any of the other grid mapping checks if it's not a valid grid mapping name
             if grid_mapping_name not in self.grid_mapping_dict:
-                ret_val.append(valid_grid_mapping.to_result())
+                ret_val[grid_mapping_name] = valid_grid_mapping.to_result()
                 continue
 
             grid_mapping = self.grid_mapping_dict[grid_mapping_name]
@@ -2474,7 +2477,7 @@ class CF1_6Check(CFNCCheck):
                                                "one variable with standard_name "+\
                                                "{} to be defined".format(expected_std_name))
 
-            ret_val.append(valid_grid_mapping.to_result())
+            ret_val[grid_var_name] = valid_grid_mapping.to_result()
 
         return ret_val
 
