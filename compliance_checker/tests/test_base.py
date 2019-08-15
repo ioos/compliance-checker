@@ -108,9 +108,9 @@ class TestBase(TestCase):
         ctx3 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, 'Test Name',
                                       'test_var_name')
         # check that variable cache is working
-        self.assertIs(ctx3, (self.acdd._defined_results['test_var_name']
-                                                       [(base.BaseCheck.HIGH,
-                                                         'Test Name')]
+        self.assertIs(ctx3, (self.acdd._defined_results['Test Name']
+                                                       ['test_var_name']
+                                                       [base.BaseCheck.HIGH]
                                                      ))
 
 
