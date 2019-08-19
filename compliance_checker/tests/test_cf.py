@@ -1296,3 +1296,30 @@ class TestCF1_7(TestCF1_6):
         score, out_of, messages = self.get_results(results)
         message = u'Cell measure variable box_area referred to by PS is not present in dataset variables'
         assert message in messages
+
+    def test_check_conventions_are_cf_16(self):
+        """Since this class inherits directly from TestCF1_6, it tries to
+        implement every inherited method. This should method should not be tested,
+        as it does not exist in the CF1_7Check class."""
+        pass
+
+    def test_check_conventions_are_cf_1_7(self):
+        """Ensure the check_conventions_are_cf_1_7() check works as expected"""
+
+        # create a temporary variable and test this only
+        with MockTimeSeries() as dataset:
+            # no Conventions attribute
+            result = self.cf.check_conventions_are_cf_1_7(dataset)
+            self.assertFalse(result.value)
+
+        with MockTimeSeries() as dataset:
+            # incorrect Conventions attribute
+            dataset.setncattr("Conventions", "CF-1.9999")
+            result = self.cf.check_conventions_are_cf_1_7(dataset)
+            self.assertFalse(result.value)
+
+        with MockTimeSeries() as dataset:
+            # correct Conventions attribute
+            dataset.setncattr("Conventions", "CF-1.7, ACDD-1.3")
+            result = self.cf.check_conventions_are_cf_1_7(dataset)
+            self.assertTrue(result.value)

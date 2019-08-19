@@ -220,7 +220,7 @@ class TestCLI(TestCase):
             ds_loc=STATIC_FILES['ncei_gold_point_1'],
             verbose=0,
             criteria='strict',
-            checker_names=['cf'],
+            checker_names=['cf:1.6'],
             output_filename=self.path,
             output_format='text'
         )
