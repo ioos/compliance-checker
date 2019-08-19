@@ -1360,6 +1360,49 @@ class TestCF1_7(BaseTestCase):
         # NAD83 isn't a vertical datum to begin with, expect failure
         self.assertFalse(self.cf._process_v_datum_str('NAD83', conn))
 
+    def test_check_grid_mapping_crs_wkt(self):
+        dataset = self.load_dataset(STATIC_FILES['mapping'])
+        valid_crs_check = copy.deepcopy(self.cf)
+        dataset.variables['wgs84'] = MockVariable(dataset.variables['wgs84'])
+        dataset.variables['wgs84'].crs_wkt = 1
+        results = self.cf.check_grid_mapping(dataset)
+        score, out_of, messages = get_results(results)
+        self.assertIn('crs_wkt attribute must be a string', messages)
+        # test with an invalid OGC CRS WKT string
+        dataset.variables['wgs84'].crs_wkt = 'EPSG:3785'
+        results = self.cf.check_grid_mapping(dataset)
+        # reuses and appends to old messages, but this is OK since we only need
+        # to check that the invalid CRS string message was added
+        score, out_of, messages = get_results(results)
+        begin_crs_err_msg = 'Cannot parse crs_wkt attribute to CRS using Proj4'
+        invalid_crs_str = any(s.startswith(begin_crs_err_msg) for s in
+                              messages)
+        self.assertTrue(invalid_crs_str)
+
+        self.assertIn('crs_wkt attribute must be a string', messages)
+        score, out_of, messages = get_results(results)
+
+        valid_crs_wkt = '''PROJCS ["OSGB 1936 / British National Grid",
+      GEOGCS ["OSGB 1936",
+        DATUM ["OSGB 1936", SPHEROID ["Airy 1830", 6377563.396, 299.3249646]],
+        PRIMEM ["Greenwich", 0],
+        UNIT ["degree", 0.0174532925199433]],
+      PROJECTION ["Transverse Mercator"],
+      PARAMETER ["False easting", 400000],
+      PARAMETER ["False northing", -100000],
+      PARAMETER ["Longitude of natural origin", -2.0],
+      PARAMETER ["Latitude of natural origin", 49.0],
+      PARAMETER ["Scale factor at natural origin", 0.9996012717],
+      UNIT ["metre", 1.0]]'''
+
+        dataset.variables['wgs84'].crs_wkt = valid_crs_wkt
+        results = valid_crs_check.check_grid_mapping(dataset)
+        score, out_of, messages = get_results(results)
+        # without false_easting warning in current file
+        msg_len = len([m for m in messages if m !=
+         'false_easting is a required attribute for grid mapping stereographic'])
+        self.assertEqual(msg_len, 0)
+
     def test_check_grid_mapping_vert_datum_geoid_name(self):
         """Checks that geoid_name works proerly"""
         dataset = self.load_dataset(STATIC_FILES['mapping'])
