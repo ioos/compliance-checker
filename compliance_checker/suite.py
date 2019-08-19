@@ -218,9 +218,15 @@ class CheckSuite(object):
         @return list: list of Result objects
         """
         val = check_method(ds)
-        if isinstance(val, list):
+        if hasattr(val, '__iter__'):
+            # Handle OrderedDict when we need to modify results in a superclass
+            # i.e. some checks in CF 1.7 which extend CF 1.6 behaviors
+            if isinstance(val, dict):
+                val_iter = val.values()
+            else:
+                val_iter = val
             check_val = []
-            for v in val:
+            for v in val_iter:
                 res = fix_return_value(v, check_method.__func__.__name__,
                                        check_method, check_method.__self__)
                 if max_level is None or res.weight > max_level:

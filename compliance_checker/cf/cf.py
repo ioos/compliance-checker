@@ -10,12 +10,14 @@ from compliance_checker.cf import util
 from compliance_checker import cfutil
 from cf_units import Unit
 from functools import wraps
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from warnings import warn
 import numpy as np
 import os
 import regex
 import sys
+import pyproj
+import sqlite3
 
 import logging
 
@@ -37,6 +39,7 @@ def print_exceptions(f):
             from traceback import print_exc
             print_exc()
     return wrapper
+
 
 # helper to see if we should do DSG tests
 def is_likely_dsg(func):
@@ -114,6 +117,7 @@ class CFBaseCheck(BaseCheck):
             "9.5": "§9.5 Coordinates and metadata",
             "9.6": "§9.6 Missing Data"
         }
+
 
     ################################################################################
     # Helper Methods - var classifications, etc
@@ -633,7 +637,6 @@ class CF1_6Check(CFNCCheck):
     ###############################################################################
     # Chapter 2: NetCDF Files and Components
     ###############################################################################
-
 
     def check_data_types(self, ds):
         '''
@@ -2419,14 +2422,15 @@ class CF1_6Check(CFNCCheck):
         :return: List of results
         """
 
-        ret_val = []
+        ret_val = OrderedDict()
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
 
         # Check the grid_mapping attribute to be a non-empty string and that its reference exists
         for variable in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
             grid_mapping = getattr(variable, 'grid_mapping', None)
-            defines_grid_mapping = TestCtx(BaseCheck.HIGH,
-                                           self.section_titles["5.6"])
+            defines_grid_mapping = self.get_test_ctx(BaseCheck.HIGH,
+                                                     self.section_titles["5.6"],
+                                                     variable.name)
             defines_grid_mapping.assert_true((isinstance(grid_mapping, basestring) and grid_mapping),
                                              "{}'s grid_mapping attribute must be a "+\
                                              "space-separated non-empty string".format(variable.name))
@@ -2435,11 +2439,13 @@ class CF1_6Check(CFNCCheck):
                 for grid_var_name in grid_mapping.split():
                     defines_grid_mapping.assert_true(grid_var_name in ds.variables,
                                                   "grid mapping variable {} must exist in this dataset".format(variable.name))
-            ret_val.append(defines_grid_mapping.to_result())
+            ret_val[variable.name] = defines_grid_mapping.to_result()
 
         # Check the grid mapping variables themselves
         for grid_var_name in grid_mapping_variables:
-            valid_grid_mapping = TestCtx(BaseCheck.HIGH, self.section_titles["5.6"])
+            valid_grid_mapping = self.get_test_ctx(BaseCheck.HIGH,
+                                                   self.section_titles["5.6"],
+                                                   grid_var_name)
             grid_var = ds.variables[grid_var_name]
 
             grid_mapping_name = getattr(grid_var, 'grid_mapping_name', None)
@@ -2457,7 +2463,7 @@ class CF1_6Check(CFNCCheck):
 
             # We can't do any of the other grid mapping checks if it's not a valid grid mapping name
             if grid_mapping_name not in self.grid_mapping_dict:
-                ret_val.append(valid_grid_mapping.to_result())
+                ret_val[grid_mapping_name] = valid_grid_mapping.to_result()
                 continue
 
             grid_mapping = self.grid_mapping_dict[grid_mapping_name]
@@ -2488,7 +2494,7 @@ class CF1_6Check(CFNCCheck):
                                                "one variable with standard_name "+\
                                                "{} to be defined".format(expected_std_name))
 
-            ret_val.append(valid_grid_mapping.to_result())
+            ret_val[grid_var_name] = valid_grid_mapping.to_result()
 
         return ret_val
 
@@ -2788,19 +2794,6 @@ class CF1_6Check(CFNCCheck):
         :rtype: list
         :return: List of results
         """
-
-        methods = {
-            "point",
-            "sum",
-            "mean",
-            "maximum",
-            "minimum",
-            "mid_range",
-            "standard_deviation",
-            "variance",
-            "mode",
-            "median"
-        }
 
         ret_val = []
         psep = regex.compile(r'(?P<vars>\w+: )+(?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) '
@@ -3640,7 +3633,6 @@ class CF1_7Check(CF1_6Check):
                             "Cell measure variable {} referred to by {} is not present in dataset variables".format(
                                 cell_meas_var_name, var.name)
                         )
-
                     else:
                         valid = True
 
@@ -3678,6 +3670,68 @@ class CF1_7Check(CF1_6Check):
 
         return ret_val
 
+    def check_grid_mapping(self, ds):
+        __doc__ = super(CF1_7Check, self).check_grid_mapping.__doc__
+        prev_return = super(CF1_7Check, self).check_grid_mapping(ds)
+        ret_val = []
+        grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
+        for var_name in sorted(grid_mapping_variables):
+            var = ds.variables[var_name]
+            test_ctx = self.get_test_ctx(BaseCheck.HIGH,
+                                         self.section_titles["5.6"], var.name)
+            vert_datum_attrs = {}
+            # handle vertical datum related grid_mapping attributes
+            possible_vert_datum_attrs = {'geoid_name',
+                                         'geopotential_datum_name'}
+            vert_datum_attrs = (possible_vert_datum_attrs
+                                       .intersection(var.ncattrs()))
+            len_vdatum_name_attrs = len(vert_datum_attrs)
+            # check that geoid_name and geopotential_datum_name are not both
+            # present in the grid_mapping variable
+            if len_vdatum_name_attrs == 2:
+                test_ctx.out_of += 1
+                test_ctx.messages.append("Cannot have both 'geoid_name' and "
+                                     "'geopotential_datum_name' attributes in "
+                                     "grid mapping variable '{}'".format(
+                                          var_name))
+            elif len_vdatum_name_attrs == 1:
+                    # should be one or zero attrs
+                    proj_db_path = os.path.join(pyproj.datadir.get_data_dir(),
+                                                'proj.db')
+                    try:
+                        with sqlite3.connect(proj_db_path) as conn:
+                            v_datum_attr = next(iter(vert_datum_attrs))
+                            v_datum_value = getattr(var, v_datum_attr)
+                            v_datum_str_valid = self._process_v_datum_str(
+                                                 v_datum_value, conn)
+
+                            invalid_msg = ("Vertical datum value '{}' for "
+                                           "attribute '{}' in grid mapping "
+                                           "variable '{}' is not valid".format(
+                                                v_datum_value, v_datum_attr,
+                                                var_name))
+                            test_ctx.assert_true(v_datum_str_valid, invalid_msg)
+                    except sqlite3.Error as e:
+                        # if we hit an error, skip the check
+                        warn("Error occurred while trying to query "
+                                        "Proj4 SQLite database at {}: {}"
+                                        .format(proj_db_path, str(e)))
+            prev_return[var_name] = test_ctx.to_result()
+
+        return prev_return
+
+    def _process_v_datum_str(self, v_datum_str, conn):
+        vdatum_query = """SELECT 1 FROM alias_name WHERE
+                            table_name = 'vertical_datum' AND
+                            alt_name = ?
+                                UNION ALL
+                            SELECT 1 FROM vertical_datum WHERE
+                            name = ?
+                            LIMIT 1"""
+        res_set = conn.execute(vdatum_query, (v_datum_str,
+                                                v_datum_str))
+        return len(res_set.fetchall()) > 0
+
     def check_conventions_are_cf_1_7(self, ds):
         '''
         Check the global attribute conventions to contain CF-1.7.
@@ -3690,7 +3744,7 @@ class CF1_7Check(CF1_6Check):
         '''
 
         return self._check_conventions_version(ds) # invoke inherited method
-
+     
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
 

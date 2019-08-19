@@ -60,7 +60,7 @@ class BaseCheck(object):
         pass
 
     def __init__(self):
-        self._defined_results = defaultdict(lambda: defaultdict(TestCtx))
+        self._defined_results = defaultdict(lambda: defaultdict(dict))
 
     def get_test_ctx(self, severity, name, variable=None):
         """
@@ -75,7 +75,12 @@ class BaseCheck(object):
         :returns: A new or or existing `TestCtx` instance taken from this
                   instance's _defined_results dict
         """
-        return self._defined_results[variable][(severity, name)]
+        # Is it necessary to key out by severity?  Is severity level unique
+        # per check?  If so, it could be eliminated from key hierarchy
+        if severity not in self._defined_results[name][variable]:
+            self._defined_results[name][variable][severity] = \
+             TestCtx(severity, name, variable=variable)
+        return self._defined_results[name][variable][severity]
 
 
 class BaseNCCheck(object):
