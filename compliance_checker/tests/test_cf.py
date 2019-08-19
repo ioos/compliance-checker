@@ -1383,3 +1383,24 @@ class TestCF1_7(BaseTestCase):
         self.assertLess(*results['wgs84'].value)
         self.assertIn("Vertical datum value 'WGS84' for attribute 'geopotential_datum_name' in grid mapping variable 'wgs84' is not valid",
                       results['wgs84'].msgs)
+
+    def test_check_conventions_are_cf_1_7(self):
+        """Ensure the check_conventions_are_cf_1_7() check works as expected"""
+
+        # create a temporary variable and test this only
+        with MockTimeSeries() as dataset:
+            # no Conventions attribute
+            result = self.cf.check_conventions_are_cf_1_7(dataset)
+            self.assertFalse(result.value)
+
+        with MockTimeSeries() as dataset:
+            # incorrect Conventions attribute
+            dataset.setncattr("Conventions", "CF-1.9999")
+            result = self.cf.check_conventions_are_cf_1_7(dataset)
+            self.assertFalse(result.value)
+
+        with MockTimeSeries() as dataset:
+            # correct Conventions attribute
+            dataset.setncattr("Conventions", "CF-1.7, ACDD-1.3")
+            result = self.cf.check_conventions_are_cf_1_7(dataset)
+            self.assertTrue(result.value)
