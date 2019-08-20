@@ -3679,8 +3679,28 @@ class CF1_7Check(CF1_6Check):
             var = ds.variables[var_name]
             test_ctx = self.get_test_ctx(BaseCheck.HIGH,
                                          self.section_titles["5.6"], var.name)
-            vert_datum_attrs = {}
+
+            # TODO: check cases where crs_wkt provides part of a necessary
+            #       grid_mapping attribute, or where a grid_mapping attribute
+            #       overrides what has been provided in crs_wkt.
+            # attempt to parse crs_wkt if it is present
+            if 'crs_wkt' in var.ncattrs():
+                crs_wkt = var.crs_wkt
+                if not isinstance(crs_wkt, str):
+                    test_ctx.messages.append("crs_wkt attribute must be a string")
+                    test_ctx.out_of += 1
+                else:
+                    try:
+                        pyproj.CRS.from_wkt(crs_wkt)
+                    except pyproj.exceptions.CRSError as crs_error:
+                        test_ctx.messages.append("Cannot parse crs_wkt attribute to CRS using Proj4. Proj4 error: {}".format(str(crs_error)))
+                    else:
+                        test_ctx.score += 1
+                    test_ctx.out_of += 1
+
+
             # handle vertical datum related grid_mapping attributes
+            vert_datum_attrs = {}
             possible_vert_datum_attrs = {'geoid_name',
                                          'geopotential_datum_name'}
             vert_datum_attrs = (possible_vert_datum_attrs
