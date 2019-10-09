@@ -539,7 +539,7 @@ class TestCF(BaseTestCase):
         assert len(results) == 12
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
-        assert (r.name == u'§4.1 Latitude Coordinates' for r in results)
+        assert (r.name == u'§4.1 Latitude Coordinate' for r in results)
 
         # check with another ds -- all 6 vars checked pass
         dataset = self.load_dataset(STATIC_FILES['rotated_pole_grid'])
@@ -547,7 +547,7 @@ class TestCF(BaseTestCase):
         scored, out_of, messages = self.get_results(results)
         assert len(results) == 6
         assert scored == out_of
-        assert (r.name == u'§4.1 Latitude Coordinates' for r in results)
+        assert (r.name == u'§4.1 Latitude Coordinate' for r in results)
 
         # hack to avoid writing to read-only file
         dataset.variables['rlat'] = MockVariable(dataset.variables['rlat'])
@@ -582,7 +582,7 @@ class TestCF(BaseTestCase):
         assert len(results) == 12
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
-        assert all(r.name == u'§4.1 Latitude Coordinates' for r in results)
+        assert all(r.name == u'§4.2 Longitude Coordinate' for r in results)
 
         # check different dataset # TODO can be improved for check_latitude too
         dataset = self.load_dataset(STATIC_FILES['rotated_pole_grid'])

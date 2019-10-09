@@ -100,8 +100,8 @@ class CFBaseCheck(BaseCheck):
             "3.4": "§3.4 Ancillary Data",
             "3.5": "§3.5 Flags",
             "4"  : "§4 Coordinate Types",
-            "4.1": "§4.1 Latitude Coordinates",
-            "4.2": "§4.2 Longitude Coordinates",
+            "4.1": "§4.1 Latitude Coordinate",
+            "4.2": "§4.2 Longitude Coordinate",
             "4.3": "§4.3 Vertical Coordinate",
             "4.4": "§4.4 Time Coordinate",
             "4.5": "§4.5 Discrete Axis",
@@ -1706,13 +1706,13 @@ class CFBaseCheck(BaseCheck):
 
             # NOTE see docstring--should below be 4.1 or 4.2?
             # Check that longitude defines units
-            valid_longitude = TestCtx(BaseCheck.HIGH, self.section_titles['4.1'])
+            valid_longitude = TestCtx(BaseCheck.HIGH, self.section_titles['4.2'])
             valid_longitude.assert_true(units is not None,
                                         "longitude variable '{}' must define units".format(longitude))
             ret_val.append(valid_longitude.to_result())
 
             # Check that longitude uses allowed units
-            allowed_units = TestCtx(BaseCheck.MEDIUM, self.section_titles['4.1'])
+            allowed_units = TestCtx(BaseCheck.MEDIUM, self.section_titles['4.2'])
             if standard_name == 'grid_longitude':
                 e_n_units = cfutil.VALID_LAT_UNITS | cfutil.VALID_LON_UNITS
                 # check that the units aren't in east and north degrees units,
@@ -1735,13 +1735,13 @@ class CFBaseCheck(BaseCheck):
                        "".format(longitude))
                 recommended_units = Result(BaseCheck.LOW,
                                            (1, 1),
-                                           self.section_titles['4.1'], [msg])
+                                           self.section_titles['4.2'], [msg])
                 ret_val.append(recommended_units)
 
             x_variables = ds.get_variables_by_attributes(axis='X')
             # Check that longitude defines either standard_name or axis
-            definition = TestCtx(BaseCheck.MEDIUM, self.section_titles['4.1'])
-            definition.assert_true(standard_name == 'longitude' or axis == 'Y' or x_variables != [],
+            definition = TestCtx(BaseCheck.MEDIUM, self.section_titles['4.2'])
+            definition.assert_true(standard_name == 'longitude' or axis == 'X' or x_variables != [],
                                    "longitude variable '{}' should define standard_name='longitude' or axis='X'"
                                    "".format(longitude))
             ret_val.append(definition.to_result())
