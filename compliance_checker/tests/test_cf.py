@@ -259,7 +259,7 @@ class TestCF1_6(BaseTestCase):
         # :Conventions = "CF-1.6 ,ACDD" ;
         dataset = self.load_dataset(STATIC_FILES['conv_multi'])
         result = self.cf.check_conventions_are_cf_16(dataset)
-        self.assertTrue(result.value)
+        self.assertFalse(result.value)
 
         # :Conventions = "NoConvention"
         dataset = self.load_dataset(STATIC_FILES['conv_bad'])
