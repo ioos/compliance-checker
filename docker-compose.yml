@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  dev:
+    image: compliance-checker-build
+    build:
+      context: .
+      args:
+        BUILDER_UID: 1000
+    stdin_open: true
+    tty: true
+    working_dir: /app
+    volumes:
+      - './:/app'
