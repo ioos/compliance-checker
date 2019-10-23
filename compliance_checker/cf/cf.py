@@ -2447,8 +2447,8 @@ class CFBaseCheck(BaseCheck):
                                                "{} is a required attribute for grid mapping {}".format(req, grid_mapping_name))
 
             # Make sure that exactly one of the exclusive attributes exist
-            if len(grid_mapping_dict) == 4:
-                at_least_attr = grid_mapping_dict[3]
+            if len(grid_mapping) == 4:
+                at_least_attr = grid_mapping[3]
                 number_found = 0
                 for attr in at_least_attr:
                     if hasattr(grid_var, attr):
