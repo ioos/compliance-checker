@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, division, print_function
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
-from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates,
+from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates_1_6, dimless_vertical_coordinates_1_7,
                                               no_missing_terms)
 from compliance_checker.cf.appendix_e import cell_methods16, cell_methods17
 from compliance_checker.cf.appendix_f import grid_mapping_dict16, grid_mapping_dict17
@@ -139,7 +139,7 @@ class CFBaseCheck(BaseCheck):
         self._find_cf_standard_name_table(ds)
         self._find_geophysical_vars(ds)
 
-    def check_conventions_version(self, ds):
+    def _check_conventions_version(self, ds):
         '''
         CF §2.6.1 the NUG defined global attribute Conventions to the string
         value "CF-<version_number>"; check the Conventions attribute contains
@@ -165,6 +165,82 @@ class CFBaseCheck(BaseCheck):
             valid = False
             reasoning = ['§2.6.1 Conventions field is not present']
         return Result(BaseCheck.MEDIUM, valid, self.section_titles['2.6'], msgs=reasoning)
+
+    def _check_dimensionless_vertical_coordinates(self, ds, deprecated_units, version_specific_check, version_specific_dimless_vertical_coord_dict):
+        '''
+        Check the validity of dimensionless coordinates under CF
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param list deprecated_units: list of string names of deprecated units
+        :param function version_specific_check: version-specific implementation to check dimensionless vertical coord
+        :param dict version_specific_dimless_coord_dict: version-specific dict of dimensionless vertical coords and computed standard names
+        :return: List of results
+        '''
+        ret_val = []
+
+        z_variables = cfutil.get_z_variables(ds)
+
+        # call version-specific implementation
+        for name in z_variables:
+            version_specific_check(ds, name, deprecated_units, ret_val, version_specific_dimless_vertical_coord_dict)
+
+        return ret_val
+
+    def _check_formula_terms(self, ds, coord, dimless_coords_dict):
+        '''
+        Checks a dimensionless vertical coordinate contains valid formula_terms
+
+        - formula_terms is a non-empty string
+        - formula_terms matches regdimless_coords_dictx
+        - every variable defined in formula_terms exists
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: compliance_checker.base.Result
+        '''
+        variable = ds.variables[coord]
+        standard_name = getattr(variable, 'standard_name', None)
+        formula_terms = getattr(variable, 'formula_terms', None)
+        valid_formula_terms = TestCtx(BaseCheck.HIGH, self.section_titles['4.3'])
+
+        valid_formula_terms.assert_true(isinstance(formula_terms, basestring) and formula_terms,
+                                        '§4.3.2: {}\'s formula_terms is a required attribute and must be a non-empty string'
+                                        ''.format(coord))
+        # We can't check any more
+        if not formula_terms:
+            return valid_formula_terms.to_result()
+
+        # check that the formula_terms are well formed and are present
+        # The pattern for formula terms is always component: variable_name
+        # the regex grouping always has component names in even positions and
+        # the corresponding variable name in odd positions.
+        matches = regex.findall(r'([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)',
+                                variable.formula_terms)
+        terms = set(m[0][:-2] for m in matches)
+        # get the variables named in the formula terms and check if any
+        # are not present in the dataset
+        missing_vars = sorted(set(m[1] for m in matches) - set(ds.variables))
+        missing_fmt = "The following variable(s) referenced in {}:formula_terms are not present in the dataset: {}"
+        valid_formula_terms.assert_true(len(missing_vars) == 0,
+                                    missing_fmt.format(coord, ', '.join(missing_vars)))
+        # try to reconstruct formula_terms by adding space in between the regex
+        # matches.  If it doesn't exactly match the original, the formatting
+        # of the attribute is incorrect
+        reconstructed_formula = ' '.join(m[0] + m[1] for m in matches)
+        valid_formula_terms.assert_true(reconstructed_formula == formula_terms,
+                                        "Attribute formula_terms is not well-formed")
+
+        valid_formula_terms.assert_true(standard_name in
+                                        dimless_coords_dict,
+                                        "unknown standard_name '{}' for dimensionless vertical coordinate {}"
+                                        "".format(standard_name, coord))
+        if standard_name not in dimless_coords_dict:
+            return valid_formula_terms.to_result()
+
+        valid_formula_terms.assert_true(no_missing_terms(standard_name, terms, dimless_coords_dict),
+                                        "{}'s formula_terms are invalid for {}, please see appendix D of CF 1.6"
+                                        "".format(coord, standard_name))
+
+        return valid_formula_terms.to_result()
 
     def _dims_in_order(self, dimension_order):
         '''
@@ -1808,7 +1884,7 @@ class CF1_6Check(CFNCCheck):
 
         return ret_val
 
-    def check_dimensional_vertical_coordinate(self, ds):
+    def check_dimensional_vertical_coordinate(self, ds, dimless_vertical_coordinates=dimless_vertical_coordinates_1_6):
         '''
         Check units for variables defining vertical position are valid under
         CF.
@@ -1864,7 +1940,36 @@ class CF1_6Check(CFNCCheck):
 
         return ret_val
 
-    def check_dimensionless_vertical_coordinate(self, ds):
+    def _check_dimensionless_vertical_coordinate_1_6(self, ds, vname, deprecated_units, ret_val, dim_vert_coords_dict):
+        """
+        Check that a dimensionless vertical coordinate variable is valid under
+        CF-1.6.
+
+        :param netCDF4.Dataset ds: open netCDF4 dataset
+        :param str name: variable name
+        :param list ret_val: array to append Results to
+        :rtype None
+        """
+        variable = ds.variables[vname]
+        standard_name = getattr(variable, 'standard_name', None)
+        units = getattr(variable, 'units', None)
+        formula_terms = getattr(variable, 'formula_terms', None)
+        # Skip the variable if it's dimensional
+        if (formula_terms is None and
+            standard_name not in dim_vert_coords_dict):
+            return
+
+        is_not_deprecated = TestCtx(BaseCheck.LOW, self.section_titles["4.3"])
+
+        is_not_deprecated.assert_true(units not in deprecated_units,
+                                      "§4.3.2: units are deprecated by CF in variable {}: {}"
+                                      "".format(vname, units))
+
+        # check the vertical coordinates
+        ret_val.append(is_not_deprecated.to_result())
+        ret_val.append(self._check_formula_terms(ds, vname, dim_vert_coords_dict))
+
+    def check_dimensionless_vertical_coordinates(self, ds):
         '''
         Check the validity of dimensionless coordinates under CF
 
@@ -1894,81 +1999,15 @@ class CF1_6Check(CFNCCheck):
             'layer',
             'sigma_level'
         ]
-        for name in z_variables:
-            variable = ds.variables[name]
-            standard_name = getattr(variable, 'standard_name', None)
-            units = getattr(variable, 'units', None)
-            formula_terms = getattr(variable, 'formula_terms', None)
-            # Skip the variable if it's dimensional
-            if (formula_terms is None and
-                standard_name not in dimless_vertical_coordinates):
-                continue
 
-            is_not_deprecated = TestCtx(BaseCheck.LOW, self.section_titles["4.3"])
-
-            is_not_deprecated.assert_true(units not in deprecated_units,
-                                          "§4.3.2: units are deprecated by CF in variable {}: {}"
-                                          "".format(name, units))
-            ret_val.append(is_not_deprecated.to_result())
-            ret_val.append(self._check_formula_terms(ds, name))
+        ret_val.extend(self._check_dimensionless_vertical_coordinates(
+            ds,
+            deprecated_units,
+            self._check_dimensionless_vertical_coordinate_1_6,
+            dimless_vertical_coordinates_1_6)
+        )
 
         return ret_val
-
-    def _check_formula_terms(self, ds, coord):
-        '''
-        Checks a dimensionless vertical coordinate contains valid formula_terms
-
-        - formula_terms is a non-empty string
-        - formula_terms matches regx
-        - every variable defined in formula_terms exists
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: compliance_checker.base.Result
-        '''
-        variable = ds.variables[coord]
-        standard_name = getattr(variable, 'standard_name', None)
-        formula_terms = getattr(variable, 'formula_terms', None)
-        valid_formula_terms = TestCtx(BaseCheck.HIGH, self.section_titles['4.3'])
-
-        valid_formula_terms.assert_true(isinstance(formula_terms, basestring) and formula_terms,
-                                        '§4.3.2: {}\'s formula_terms is a required attribute and must be a non-empty string'
-                                        ''.format(coord))
-        # We can't check any more
-        if not formula_terms:
-            return valid_formula_terms.to_result()
-
-        # check that the formula_terms are well formed and are present
-        # The pattern for formula terms is always component: variable_name
-        # the regex grouping always has component names in even positions and
-        # the corresponding variable name in odd positions.
-        matches = regex.findall(r'([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)',
-                                variable.formula_terms)
-        terms = set(m[0][:-2] for m in matches)
-        # get the variables named in the formula terms and check if any
-        # are not present in the dataset
-        missing_vars = sorted(set(m[1] for m in matches) - set(ds.variables))
-        missing_fmt = "The following variable(s) referenced in {}:formula_terms are not present in the dataset: {}"
-        valid_formula_terms.assert_true(len(missing_vars) == 0,
-                                    missing_fmt.format(coord, ', '.join(missing_vars)))
-        # try to reconstruct formula_terms by adding space in between the regex
-        # matches.  If it doesn't exactly match the original, the formatting
-        # of the attribute is incorrect
-        reconstructed_formula = ' '.join(m[0] + m[1] for m in matches)
-        valid_formula_terms.assert_true(reconstructed_formula == formula_terms,
-                                        "Attribute formula_terms is not well-formed")
-
-        valid_formula_terms.assert_true(standard_name in
-                                        dimless_vertical_coordinates,
-                                        "unknown standard_name '{}' for dimensionless vertical coordinate {}"
-                                        "".format(standard_name, coord))
-        if standard_name not in dimless_vertical_coordinates:
-            return valid_formula_terms.to_result()
-
-        valid_formula_terms.assert_true(no_missing_terms(standard_name, terms),
-                                        "{}'s formula_terms are invalid for {}, please see appendix D of CF 1.6"
-                                        "".format(coord, standard_name))
-
-        return valid_formula_terms.to_result()
 
     def check_time_coordinate(self, ds):
         '''
@@ -3755,18 +3794,84 @@ class CF1_7Check(CF1_6Check):
                                                 v_datum_str))
         return len(res_set.fetchall()) > 0
 
-    #def check_conventions_are_cf_1_7(self, ds):
-    #    '''
-    #    Check the global attribute conventions to contain CF-1.7.
+    def _check_dimensionless_vertical_coordinate_1_7(self, ds, vname, deprecated_units, ret_val, dim_vert_coords_dict):
+        """
+        Check that a dimensionless vertical coordinate variable is valid under
+        CF-1.7.
 
-    #    CF §2.6.1 the NUG defined global attribute Conventions to the string
-    #    value "CF-1.7"
+        :param netCDF4.Dataset ds: open netCDF4 dataset
+        :param str name: variable name
+        :param list ret_val: array to append Results to
+        :rtype None
+        """
+        variable = ds.variables[vname]
+        standard_name = getattr(variable, 'standard_name', None)
+        units = getattr(variable, 'units', None)
+        formula_terms = getattr(variable, 'formula_terms', None)
+        # Skip the variable if it's dimensional
+        if (formula_terms is None and
+            standard_name not in dim_vert_coords_dict):
+            return
 
-    #    :param netCDF4.Dataset ds: An open netCDF dataset
-    #    :rtype: compliance_checker.base.Result
-    #    '''
+        is_not_deprecated = TestCtx(BaseCheck.LOW, self.section_titles["4.3"])
 
-    #    return self.check_conventions_version(ds) # invoke inherited method
+        is_not_deprecated.assert_true(units not in deprecated_units,
+                                      "§4.3.2: units are deprecated by CF in variable {}: {}"
+                                      "".format(vname, units))
+
+        # check the vertical coordinates
+        ret_val.append(is_not_deprecated.to_result())
+
+        # assert that the computed_standard_name is maps to the standard_name correctly
+        correct_computed_std_name_ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles['4.3'])
+        _comp_std_name = dim_vert_coords_dict[standard_name][1]
+        correct_computed_std_name_ctx.assert_true(
+            getattr(variable, 'computed_standard_name', None) in _comp_std_name,
+            '§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`'.format(vname, _comp_std_name)
+        )
+        ret_val.append(correct_computed_std_name_ctx.to_result())
+
+        ret_val.append(self._check_formula_terms(ds, vname, dim_vert_coords_dict))
+
+    def check_dimensionless_vertical_coordinates(self, ds):
+        '''
+        Check the validity of dimensionless coordinates under CF
+
+        CF §4.3.2 The units attribute is not required for dimensionless
+        coordinates.
+
+        The standard_name attribute associates a coordinate with its definition
+        from Appendix D, Dimensionless Vertical Coordinates. The definition
+        provides a mapping between the dimensionless coordinate values and
+        dimensional values that can positively and uniquely indicate the
+        location of the data.
+
+        A new attribute, formula_terms, is used to associate terms in the
+        definitions with variables in a netCDF file.  To maintain backwards
+        compatibility with COARDS the use of these attributes is not required,
+        but is strongly recommended.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
+        '''
+        ret_val = []
+
+        z_variables = cfutil.get_z_variables(ds)
+        deprecated_units = [
+            'level',
+            'layer',
+            'sigma_level'
+        ]
+
+        ret_val.extend(self._check_dimensionless_vertical_coordinates(
+            ds,
+            deprecated_units,
+            self._check_dimensionless_vertical_coordinate_1_7,
+            dimless_vertical_coordinates_1_7)
+        ) 
+
+        return ret_val
      
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
