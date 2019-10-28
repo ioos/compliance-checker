@@ -128,8 +128,12 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_child_attr_data_types(ds) # checks all special attrs for all variables
         self.assert_result_is_good(result)
 
+        # delete the dataset and start over to create the variable with _FillValue at time of creation
+        del ds
+        ds = MockTimeSeries()
+        ds.createVariable("temp", np.float64, dimensions=("time"), fill_value=np.float(99999999999999999999.))
+
         # give temp _FillValue as a float, expect good result
-        ds.variables['temp'].setncattr("_FillValue", np.float(99999999999999999999.))
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_good(result)
 
@@ -556,7 +560,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 12
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
-        assert (r.name == u'§4.1 Latitude Coordinates' for r in results)
+        assert (r.name == u'§4.1 Latitude Coordinate' for r in results)
 
         # check with another ds -- all 6 vars checked pass
         dataset = self.load_dataset(STATIC_FILES['rotated_pole_grid'])
@@ -564,7 +568,7 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
         assert len(results) == 6
         assert scored == out_of
-        assert (r.name == u'§4.1 Latitude Coordinates' for r in results)
+        assert (r.name == u'§4.1 Latitude Coordinate' for r in results)
 
         # hack to avoid writing to read-only file
         dataset.variables['rlat'] = MockVariable(dataset.variables['rlat'])
@@ -599,7 +603,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 12
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
-        assert all(r.name == u'§4.1 Latitude Coordinates' for r in results)
+        assert all(r.name == u'§4.2 Longitude Coordinate' for r in results)
 
         # check different dataset # TODO can be improved for check_latitude too
         dataset = self.load_dataset(STATIC_FILES['rotated_pole_grid'])

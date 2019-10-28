@@ -89,8 +89,8 @@ class CFBaseCheck(BaseCheck):
             "3.4": "§3.4 Ancillary Data",
             "3.5": "§3.5 Flags",
             "4"  : "§4 Coordinate Types",
-            "4.1": "§4.1 Latitude Coordinates",
-            "4.2": "§4.2 Longitude Coordinates",
+            "4.1": "§4.1 Latitude Coordinate",
+            "4.2": "§4.2 Longitude Coordinate",
             "4.3": "§4.3 Vertical Coordinate",
             "4.4": "§4.4 Time Coordinate",
             "4.5": "§4.5 Discrete Axis",
@@ -728,7 +728,10 @@ class CF1_6Check(CFNCCheck):
         ret_val.append(dimension_naming.to_result())
 
         for global_attr in ds.ncattrs():
+            # Special attributes made by THREDDS
             if global_attr.startswith('DODS'):
+                continue
+            if global_attr.startswith('EXTRA_DIMENSION'):
                 continue
             attribute_naming.assert_true(rname.match(global_attr) is not None,
                                          "global attribute {} should begin with a letter and be composed of "
@@ -1751,13 +1754,13 @@ class CF1_6Check(CFNCCheck):
 
             # NOTE see docstring--should below be 4.1 or 4.2?
             # Check that longitude defines units
-            valid_longitude = TestCtx(BaseCheck.HIGH, self.section_titles['4.1'])
+            valid_longitude = TestCtx(BaseCheck.HIGH, self.section_titles['4.2'])
             valid_longitude.assert_true(units is not None,
                                         "longitude variable '{}' must define units".format(longitude))
             ret_val.append(valid_longitude.to_result())
 
             # Check that longitude uses allowed units
-            allowed_units = TestCtx(BaseCheck.MEDIUM, self.section_titles['4.1'])
+            allowed_units = TestCtx(BaseCheck.MEDIUM, self.section_titles['4.2'])
             if standard_name == 'grid_longitude':
                 e_n_units = cfutil.VALID_LAT_UNITS | cfutil.VALID_LON_UNITS
                 # check that the units aren't in east and north degrees units,
@@ -1780,13 +1783,13 @@ class CF1_6Check(CFNCCheck):
                        "".format(longitude))
                 recommended_units = Result(BaseCheck.LOW,
                                            (1, 1),
-                                           self.section_titles['4.1'], [msg])
+                                           self.section_titles['4.2'], [msg])
                 ret_val.append(recommended_units)
 
             x_variables = ds.get_variables_by_attributes(axis='X')
             # Check that longitude defines either standard_name or axis
-            definition = TestCtx(BaseCheck.MEDIUM, self.section_titles['4.1'])
-            definition.assert_true(standard_name == 'longitude' or axis == 'Y' or x_variables != [],
+            definition = TestCtx(BaseCheck.MEDIUM, self.section_titles['4.2'])
+            definition.assert_true(standard_name == 'longitude' or axis == 'X' or x_variables != [],
                                    "longitude variable '{}' should define standard_name='longitude' or axis='X'"
                                    "".format(longitude))
             ret_val.append(definition.to_result())
@@ -2468,8 +2471,8 @@ class CF1_6Check(CFNCCheck):
                                                "{} is a required attribute for grid mapping {}".format(req, grid_mapping_name))
 
             # Make sure that exactly one of the exclusive attributes exist
-            if len(self.grid_mapping_dict) == 4:
-                at_least_attr = self.grid_mapping_dict[3]
+            if len(grid_mapping) == 4:
+                at_least_attr = grid_mapping[3]
                 number_found = 0
                 for attr in at_least_attr:
                     if hasattr(grid_var, attr):
@@ -3774,7 +3777,7 @@ class CF1_7Check(CF1_6Check):
             valid = False
             reasoning = ['§2.6.1 Conventions field is not present']
         return Result(BaseCheck.MEDIUM, valid, self.section_titles['2.6'], msgs=reasoning)
-     
+
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
 
