@@ -111,8 +111,12 @@ class TestCF(BaseTestCase):
         result = self.cf.check_child_attr_data_types(ds) # checks all special attrs for all variables
         self.assert_result_is_good(result)
 
+        # delete the dataset and start over to create the variable with _FillValue at time of creation
+        del ds
+        ds = MockTimeSeries()
+        ds.createVariable("temp", np.float64, dimensions=("time"), fill_value=np.float(99999999999999999999.))
+
         # give temp _FillValue as a float, expect good result
-        ds.variables['temp'].setncattr("_FillValue", np.float(99999999999999999999.))
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_good(result)
 
