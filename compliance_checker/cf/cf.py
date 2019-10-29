@@ -139,6 +139,33 @@ class CFBaseCheck(BaseCheck):
         self._find_cf_standard_name_table(ds)
         self._find_geophysical_vars(ds)
 
+    def check_conventions_version(self, ds):
+        '''
+        CF §2.6.1 the NUG defined global attribute Conventions to the string
+        value "CF-<version_number>"; check the Conventions attribute contains
+        the appropriate string.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: compliance_checker.base.Result
+        '''
+
+        valid = False
+        reasoning = []
+        correct_version_string = "{}-{}".format(self._cc_spec, self._cc_spec_version).upper()
+        if hasattr(ds, 'Conventions'):
+            conventions = regex.split(r',|\s+', getattr(ds, 'Conventions', ''))
+            for convention in conventions:
+                if convention == correct_version_string:
+                    valid = True
+                    break
+            else:
+                reasoning = ['§2.6.1 Conventions global attribute does not contain '
+                             '"{}"'.format(correct_version_string)]
+        else:
+            valid = False
+            reasoning = ['§2.6.1 Conventions field is not present']
+        return Result(BaseCheck.MEDIUM, valid, self.section_titles['2.6'], msgs=reasoning)
+
     def _dims_in_order(self, dimension_order):
         '''
         :param list dimension_order: A list of axes
@@ -886,40 +913,19 @@ class CF1_6Check(CFNCCheck):
 
         return valid_fill_range.to_result()
 
-    def check_conventions_are_cf_16(self, ds):
-        '''
-        CF §2.6.1 the NUG defined global attribute Conventions to the string
-        value "CF-1.6"; check the Conventions attribute contains
-        the appropriate string. Only the one string is allowed in the
-        attribute field.
+    #def check_conventions_are_cf_16(self, ds):
+    #    '''
+    #    Check the global attribute conventions to contain CF-1.6.
 
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: compliance_checker.base.Result
-        '''
+    #    CF §2.6.1 the NUG defined global attribute Conventions to the string
+    #    value "CF-1.6"
 
-        valid = False
-        reasoning = []
-        correct_version_string = "{}-{}".format(self._cc_spec, self._cc_spec_version).upper()
-        if hasattr(ds, 'Conventions'):
-            conventions = regex.split(r',|\s+', getattr(ds, 'Conventions', ''))
-            if len(conventions) > 1:
-                return Result(
-                    BaseCheck.MEDIUM,
-                    valid,
-                    self.section_titles['2.6'],
-                    msgs=['§2.6.1 only "CF-1.6" is permitted as the Conventions string']
-                )
-            elif len(conventions) < 1:
-                reasoning = ['§2.6.1 Conventions field is not present']
-            else:
-                if conventions[0] == correct_version_string:
-                    valid = True
-                reasoning = ['§2.6.1 Conventions global attribute does not contain '
-                    '"{}"'.format(correct_version_string)]
-        else:
-            valid = False
-            reasoning = ['§2.6.1 Conventions field is not present']
-        return Result(BaseCheck.MEDIUM, valid, self.section_titles['2.6'], msgs=reasoning)
+    #    :param netCDF4.Dataset ds: An open netCDF dataset
+    #    :rtype: compliance_checker.base.Result
+    #    '''
+
+    #    return self.check_conventions_version(ds) # invoke inherited method
+
 
     def check_convention_globals(self, ds):
         '''
@@ -3749,35 +3755,19 @@ class CF1_7Check(CF1_6Check):
                                                 v_datum_str))
         return len(res_set.fetchall()) > 0
 
-    def check_conventions_are_cf_1_7(self, ds):
-        '''
-        CF §2.6.1 the NUG defined global attribute Conventions to the string
-        value "CF-1.7"; check the Conventions attribute contains
-        the appropriate string. Additionally, the Conventions attribute is
-        permitted to contain more than one metadata convention, unlike
-        CF-1.6.
+    #def check_conventions_are_cf_1_7(self, ds):
+    #    '''
+    #    Check the global attribute conventions to contain CF-1.7.
 
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: compliance_checker.base.Result
-        '''
+    #    CF §2.6.1 the NUG defined global attribute Conventions to the string
+    #    value "CF-1.7"
 
-        valid = False
-        reasoning = []
-        correct_version_string = "{}-{}".format(self._cc_spec, self._cc_spec_version).upper()
-        if hasattr(ds, 'Conventions'):
-            conventions = regex.split(r',|\s+', getattr(ds, 'Conventions', ''))
-            for convention in conventions:
-                if convention == correct_version_string:
-                    valid = True
-                    break
-            else:
-                reasoning = ['§2.6.1 Conventions global attribute does not contain '
-                             '"{}"'.format(correct_version_string)]
-        else:
-            valid = False
-            reasoning = ['§2.6.1 Conventions field is not present']
-        return Result(BaseCheck.MEDIUM, valid, self.section_titles['2.6'], msgs=reasoning)
+    #    :param netCDF4.Dataset ds: An open netCDF dataset
+    #    :rtype: compliance_checker.base.Result
+    #    '''
 
+    #    return self.check_conventions_version(ds) # invoke inherited method
+     
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
 
