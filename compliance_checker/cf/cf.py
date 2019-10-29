@@ -139,7 +139,7 @@ class CFBaseCheck(BaseCheck):
         self._find_cf_standard_name_table(ds)
         self._find_geophysical_vars(ds)
 
-    def _check_conventions_version(self, ds):
+    def check_conventions_version(self, ds):
         '''
         CF §2.6.1 the NUG defined global attribute Conventions to the string
         value "CF-<version_number>"; check the Conventions attribute contains
@@ -913,18 +913,18 @@ class CF1_6Check(CFNCCheck):
 
         return valid_fill_range.to_result()
 
-    def check_conventions_are_cf_16(self, ds):
-        '''
-        Check the global attribute conventions to contain CF-1.6.
+    #def check_conventions_are_cf_16(self, ds):
+    #    '''
+    #    Check the global attribute conventions to contain CF-1.6.
 
-        CF §2.6.1 the NUG defined global attribute Conventions to the string
-        value "CF-1.6"
+    #    CF §2.6.1 the NUG defined global attribute Conventions to the string
+    #    value "CF-1.6"
 
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: compliance_checker.base.Result
-        '''
+    #    :param netCDF4.Dataset ds: An open netCDF dataset
+    #    :rtype: compliance_checker.base.Result
+    #    '''
 
-        return self._check_conventions_version(ds) # invoke inherited method
+    #    return self.check_conventions_version(ds) # invoke inherited method
 
 
     def check_convention_globals(self, ds):
@@ -3755,18 +3755,18 @@ class CF1_7Check(CF1_6Check):
                                                 v_datum_str))
         return len(res_set.fetchall()) > 0
 
-    def check_conventions_are_cf_1_7(self, ds):
-        '''
-        Check the global attribute conventions to contain CF-1.7.
+    #def check_conventions_are_cf_1_7(self, ds):
+    #    '''
+    #    Check the global attribute conventions to contain CF-1.7.
 
-        CF §2.6.1 the NUG defined global attribute Conventions to the string
-        value "CF-1.7"
+    #    CF §2.6.1 the NUG defined global attribute Conventions to the string
+    #    value "CF-1.7"
 
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: compliance_checker.base.Result
-        '''
+    #    :param netCDF4.Dataset ds: An open netCDF dataset
+    #    :rtype: compliance_checker.base.Result
+    #    '''
 
-        return self._check_conventions_version(ds) # invoke inherited method
+    #    return self.check_conventions_version(ds) # invoke inherited method
      
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):

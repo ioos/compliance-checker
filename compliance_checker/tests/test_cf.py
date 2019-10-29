@@ -257,17 +257,17 @@ class TestCF1_6(BaseTestCase):
         """
         # :Conventions = "CF-1.6"
         dataset = self.load_dataset(STATIC_FILES['rutgers'])
-        result = self.cf.check_conventions_are_cf_16(dataset)
+        result = self.cf.check_conventions_version(dataset)
         self.assertTrue(result.value)
 
         # :Conventions = "CF-1.6 ,ACDD" ;
         dataset = self.load_dataset(STATIC_FILES['conv_multi'])
-        result = self.cf.check_conventions_are_cf_16(dataset)
+        result = self.cf.check_conventions_version(dataset)
         self.assertTrue(result.value)
 
         # :Conventions = "NoConvention"
         dataset = self.load_dataset(STATIC_FILES['conv_bad'])
-        result = self.cf.check_conventions_are_cf_16(dataset)
+        result = self.cf.check_conventions_version(dataset)
         self.assertFalse(result.value)
         assert result.msgs[0] == (u'§2.6.1 Conventions global attribute does not contain '
                                   '"CF-1.6"')
@@ -1437,17 +1437,17 @@ class TestCF1_7(BaseTestCase):
         # create a temporary variable and test this only
         with MockTimeSeries() as dataset:
             # no Conventions attribute
-            result = self.cf.check_conventions_are_cf_1_7(dataset)
+            result = self.cf.check_conventions_version(dataset)
             self.assertFalse(result.value)
 
         with MockTimeSeries() as dataset:
             # incorrect Conventions attribute
             dataset.setncattr("Conventions", "CF-1.9999")
-            result = self.cf.check_conventions_are_cf_1_7(dataset)
+            result = self.cf.check_conventions_version(dataset)
             self.assertFalse(result.value)
 
         with MockTimeSeries() as dataset:
             # correct Conventions attribute
             dataset.setncattr("Conventions", "CF-1.7, ACDD-1.3")
-            result = self.cf.check_conventions_are_cf_1_7(dataset)
+            result = self.cf.check_conventions_version(dataset)
             self.assertTrue(result.value)
