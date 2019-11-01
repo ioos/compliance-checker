@@ -679,9 +679,15 @@ class CF1_6Check(CFNCCheck):
         """
 
         ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles['2.5'])
-        special_attrs = {"actual_range", "actual_min", "actual_max",
-                         "valid_min", "valid_max", "valid_range",
-                         "scale_factor", "add_offset", "_FillValue"}
+        special_attrs = {
+            "actual_range",
+            "valid_min",
+            "valid_max",
+            "valid_range",
+            "scale_factor",
+            "add_offset",
+            "_FillValue"
+        }
 
         for var_name, var in ds.variables.items():
             for att in special_attrs.intersection(var.ncattrs()):
@@ -3413,8 +3419,6 @@ class CF1_7Check(CF1_6Check):
         section 2.5.1 of version 1.7, this convention defines a two-element
         vector attribute designed to describe the actual minimum and actual
         maximium values of variables containing numeric data. Conditions:
-          - if all values of the variable are equal, actual_range should *not*
-            exist
           - the fist value of the two-element vector must be equal to the
             minimum of the data, and the second element equal to the maximium
           - if the data is packed, the elements of actual_range should have
@@ -3441,19 +3445,9 @@ class CF1_7Check(CF1_6Check):
                 if variable.mask: # remove mask
                     variable.set_auto_mask(False)
 
-                # NOTE this is a data check
-                out_of += 1
-                if len(set(variable[:])) == 1: # all values are the same
-                    msgs.append("\"{}\"'s values are all equal; actual_range shouldn't exist".format(name))
-                    ret_val.append(Result( # putting result into list
-                        BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
-                    continue # no need to keep checking if it shouldn't be there
-                else:
-                    score += 1
-
                 out_of += 1
                 try:
-                    if (len(variable.actual_range) != 2):
+                    if (len(variable.actual_range) != 2): # TODO is the attr also a numpy array? if so, .size
                         msgs.append("actual_range of '{}' must be 2 elements".format(name))
                         ret_val.append(Result( # putting result into list
                             BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
@@ -3466,32 +3460,38 @@ class CF1_7Check(CF1_6Check):
                         BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs))
                     continue
 
-                # NOTE this is a data check -- but do we need it since we are checking
-                # consistency with valid_min/valid_max attrs?
+                # check equality to existing min/max values
+                # NOTE this is a data check
                 out_of += 1
-                if ( # check equality to stated min/max values
-                    variable.actual_range[0] != min(variable[:])
+                if (
+                    variable.actual_range[0] != variable[:].min()
                 ) or (
-                    variable.actual_range[1] != max(variable[:])
+                    variable.actual_range[1] != variable[:].max()
                 ):
                     msgs.append("actual_range elements of '{}' inconsistent with its min/max values".format(name)
                     )
                 else:
                     score += 1
 
+                # check that the actual range is within the valid range
                 out_of += 1
                 if (hasattr(variable, "valid_range")): # check within valid_range
-                    if (variable.actual_range[0] != variable.valid_range[0]) or (variable.actual_range[1] != variable.valid_range[1]):
+                    if (variable.actual_range[0] < variable.valid_range[0]) or (variable.actual_range[1] > variable.valid_range[1]):
                         msgs.append("\"{}\"'s actual_range must be within valid_range".format(name))
                 else:
                     score += 1
 
-                for _att, loc in zip(["valid_min", "valid_max"], [0, 1]):
-                    out_of += 1
-                    if (hasattr(variable, _att)):
-                        _val = getattr(variable, _att)
-                        if (variable.actual_range[loc] != _val):
-                            msgs.append("\"{}\"'s actual_range[{}] must be == {} ({})".format(name, loc, _val, _att))
+                # check the elements of the actual range have the appropriate
+                # relationship to the valid_min and valid_max
+                out_of += 2
+                if (hasattr(variable, 'valid_min')):
+                    if (variable.actual_range[0] < variable.valid_min):
+                        msgs.append("\"{}\"'s actual_range first element must be >= valid_min ({})".format(name, variable.valid_min))
+                    else:
+                        score += 1
+                if (hasattr(variable, 'valid_max')):
+                    if (variable.actual_range[1] > variable.valid_max):
+                        msgs.append("\"{}\"'s actual_range second element must be <= valid_max ({})".format(name, variable.valid_max))
                     else:
                         score += 1
 

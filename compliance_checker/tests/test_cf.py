@@ -1151,24 +1151,12 @@ class TestCF1_7(BaseTestCase):
         dataset = MockTimeSeries()
         dataset.createVariable('a', 'd', ('time',)) # dtype=double, dims=time
         dataset.variables["a"][0:500] = 0 # set all 500 vals to 0
-        dataset.variables["a"].setncattr("actual_range", [1, 1]) # shouldn't exist
+        dataset.variables["a"].setncattr("actual_range", [1])
         result = self.cf.check_actual_range(dataset)
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 1
-        assert messages[0] == u"\"a\"'s values are all equal; actual_range shouldn't exist"
-        dataset.close()
-
-        # test if len(actual_range) != 2; should fail
-        dataset = MockTimeSeries()
-        dataset.createVariable('a', 'd', ('time',)) # dtype=double, dims=time
-        dataset.variables['a'][0] = 0 # set some arbitrary val so not all equal
-        dataset.variables["a"].setncattr("actual_range", [1, 2, 3])
-        result = self.cf.check_actual_range(dataset)
-        score, out_of, messages = get_results(result)
-        assert score < out_of
-        assert len(messages) == 1
-        assert messages[0] == "actual_range of 'a' must be 2 elements"
+        assert messages[0] == u"actual_range of 'a' must be 2 elements"
         dataset.close()
 
         dataset = MockTimeSeries()
@@ -1222,8 +1210,8 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 2
-        assert messages[0] == "\"a\"'s actual_range[0] must be == 42 (valid_min)"
-        assert messages[1] == "\"a\"'s actual_range[1] must be == 45 (valid_max)"
+        assert messages[0] == "\"a\"'s actual_range first element must be >= valid_min (42)"
+        assert messages[1] == "\"a\"'s actual_range second element must be <= valid_max (45)"
         dataset.close()
 
     def test_check_cell_boundaries(self):
