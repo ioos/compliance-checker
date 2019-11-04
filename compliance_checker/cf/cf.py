@@ -138,6 +138,14 @@ class CFBaseCheck(BaseCheck):
         self._find_metadata_vars(ds)
         self._find_cf_standard_name_table(ds)
         self._find_geophysical_vars(ds)
+        coord_containing_vars = ds.get_variables_by_attributes(coordinates=
+                                       lambda val: isinstance(val, basestring))
+        self.coord_data_vars = {coord_var_name for var in
+                                coord_containing_vars for
+                                coord_var_name in
+                                var.coordinates.strip().split(' ') if
+                                coord_var_name in ds.variables}
+        self.appendix_a_results = self.appendix_a_validate(ds)
 
     def check_conventions_version(self, ds):
         '''
@@ -677,6 +685,141 @@ class CFBaseCheck(BaseCheck):
         else:
             return standard_name, None
 
+    def appendix_a_validate(self, ds):
+        """
+        Validates a CF dataset against the contents of its Appendix A table for
+        attribute types and locations. Returns a list of results with the
+        outcomes of the
+
+        :param netCDF4.Variable var: a variable in an existing NetCDF dataset
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: A list of results corresponding to the results returned
+        """
+        possible_global_atts = (set(ds.ncattrs()).
+                                intersection(self.appendix_a.keys()))
+        results = []
+        for global_att_name in possible_global_atts:
+            global_att = ds.getncattr(global_att_name)
+            att_dict = self.appendix_a[global_att_name]
+            att_loc = att_dict['attr_loc']
+            if att_dict['cf_section'] is not None:
+                subsection_test = '.'.join(att_dict['cf_section'].split('.')
+                                        [:2])
+
+                section_loc = self.section_titles.get(subsection_test,
+                                        att_dict['cf_section'])
+            else:
+                section_loc = None
+            test_ctx = TestCtx(BaseCheck.HIGH, section_loc)
+
+            test_ctx.out_of += 1
+            if 'G' not in att_loc:
+                test_ctx.messages.append("Attribute {} should not be in global "
+                                         " attributes. Valid location(s) are "
+                                         "[{}]".format(global_att,
+                                                        ', '.join(att_loc)))
+            else:
+                result = self._handle_dtype_check(global_att, global_att_name,
+                                                  att_dict)
+                if not result[0]:
+                    test_ctx.messages.append(result[1])
+                else:
+                    test_ctx.score += 1
+            results.append(test_ctx.to_result())
+
+        noncoord_vars = set(ds.variables) - set(self.coord_data_vars)
+        for var_set, coord_letter, var_type, in (
+                                        (self.coord_data_vars, 'C',
+                                         'coordinate'),
+                                        (noncoord_vars, 'D', 'non-coordinate')):
+            for var_name in var_set:
+                var = ds.variables[var_name]
+                possible_attrs = (set(var.ncattrs()).
+                                  intersection(self.appendix_a.keys()))
+                for att_name in possible_attrs:
+                    att_dict = self.appendix_a[att_name]
+                    if att_dict['cf_section'] is not None:
+                        subsection_test = '.'.join(att_dict['cf_section'].split('.')
+                                                [:2])
+
+                        section_loc = self.section_titles.get(subsection_test,
+                                                att_dict['cf_section'])
+                    else:
+                        section_loc = None
+                    test_ctx = TestCtx(BaseCheck.HIGH, section_loc,
+                                       variable=var_name)
+                    att_loc = att_dict['attr_loc']
+                    att = var.getncattr(att_name)
+                    test_ctx.out_of += 1
+                    if coord_letter not in att_loc:
+                        test_ctx.messages.append("Attribute {} should not be in variable {} "
+                                                "attributes for variable {}. Valid location(s) are "
+                                                "[{}]".format(att_name,
+                                                              var_type,
+                                                              var_name,
+                                                              ', '.join(att_loc)
+                                                              ))
+                    else:
+                        result = self._handle_dtype_check(att, att_name,
+                                                          att_dict, var)
+                        if not result[0]:
+                            test_ctx.messages.append(result[1])
+                        else:
+                            test_ctx.score += 1
+                    results.append(test_ctx.to_result())
+
+        return results
+
+    def _handle_dtype_check(self, attribute, attr_name, attr_dict,
+                            variable=None):
+        """
+        Helper function for Appendix A checks.
+
+        :param attribute: The value of the attribute being checked
+        :param str attr_name: The name of the attribute being processed
+        :param dict attr_dict: The dict entry with type and attribute location
+                               information corresponding to this attribute
+        :rtype: tuple
+        :return: A two-tuple that contains pass/fail status as a boolean and
+                 a message string (or None if unset) as the second element.
+        """
+        attr_type = attr_dict['Type']
+        if variable is None and 'G' not in attr_dict['attr_loc']:
+            raise ValueError('Non-global attributes must be associated with a '
+                             ' variable')
+        attr_str = ('Global attribute {}'.format(attr_name)
+                    if 'G' in attr_dict['attr_loc'] and variable is None
+                    else "Attribute {} in variable {}".format(attr_name,
+                                                              variable.name))
+        if attr_type == 'S':
+            if not isinstance(attribute, basestring):
+                return (False,
+                        "{} must be a string".format(attr_str))
+        else:
+            # if it's not a string, it should have a numpy dtype
+            underlying_dtype = getattr(attribute, 'dtype', None)
+            if underlying_dtype is None:
+                return (False,
+                        "{} must be a numeric type".format(attr_str))
+            # both D and N should be some kind of numeric value
+            is_numeric = np.issubdtype(underlying_dtype, np.number)
+            if attr_type == 'N':
+                if not is_numeric:
+                    return (False,
+                            "{} must be numeric".format(attr_str))
+            elif attr_type == 'D':
+                # TODO: handle edge case where variable is unset here
+                var_dtype = getattr(variable, 'dtype', None)
+                if not is_numeric or (underlying_dtype != var_dtype):
+                    return (False,
+                            "{} must be numeric and must match".format(attr_str))
+            else:
+                # If we reached here, we fell off with an unrecognized type
+                return("{} has unrecognized type '{}'".format(attr_str,
+                                                              attr_type))
+        # pass if all other possible failure conditions have been evaluated
+        return (True, None)
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
     """Inherits from both BaseNCCheck and CFBaseCheck to support
@@ -703,6 +846,52 @@ class CF1_6Check(CFNCCheck):
         2: 'Warnings',
         1: 'Info'
     }
+    appendix_a = {'Conventions': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
+                  '_FillValue': {'Type': 'D', 'attr_loc': {'D', 'C'}, 'cf_section': None},
+                  'add_offset': {'Type': 'N', 'attr_loc': {'D'}, 'cf_section': '8.1'},
+                  'ancillary_variables': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '3.4'},
+                  'axis': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '4'},
+                  'bounds': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '7.1'},
+                  'calendar': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
+                  'cell_measures': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '7.2'},
+                  'cell_methods': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '7.3'},
+                  # cf_role type is "C" in document, which does not correspond
+                  # to types used, replaced with "S"
+                  'cf_role': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '9.5'},
+                  'climatology': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '7.4'},
+                  # comment was removed in this implementation
+                  'compress': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '8.2'},
+                  'coordinates': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '5'},
+                  # featureType type is "C" in document, which does not
+                  # correspond to types used, replaced with "S"
+                  'featureType': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': '9.4'},
+                  'flag_masks': {'Type': 'D', 'attr_loc': {'D'}, 'cf_section': '3.5'},
+                  'flag_meanings': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '3.5'},
+                  'flag_values': {'Type': 'D', 'attr_loc': {'D'}, 'cf_section': '3.5'},
+                  'formula_terms': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '4.3.2'},
+                  'grid_mapping': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '5.6'},
+                  'history': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
+                  #'instance_dimension': {'Type': 'N', 'attr_loc': {'D'}, 'cf_section': '9.3'},
+                  'institution': {'Type': 'S', 'attr_loc': {'G', 'D'}, 'cf_section': '2.6.2'},
+                  'leap_month': {'Type': 'N', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
+                  'leap_year': {'Type': 'N', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
+                  'long_name': {'Type': 'S', 'attr_loc': {'D', 'C'}, 'cf_section': '3.2'},
+                  'missing_value': {'Type': 'D', 'attr_loc': {'D', 'C'}, 'cf_section': '2.5.1'},
+                  'month_lengths': {'Type': 'N', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
+                  'positive': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': None},
+                  'references': {'Type': 'S', 'attr_loc': {'G', 'D'}, 'cf_section': '2.6.2'},
+                  #'sample_dimension': {'Type': 'N', 'attr_loc': {'D'}, 'cf_section': '9.3'},
+                  'scale_factor': {'Type': 'N', 'attr_loc': {'D'}, 'cf_section': '8.1'},
+                  'source': {'Type': 'S', 'attr_loc': {'G', 'D'}, 'cf_section': '2.6.2'},
+                  'standard_error_multiplier': {'Type': 'N',
+                                                'attr_loc': {'D'},
+                                                'cf_section': None},
+                  'standard_name': {'Type': 'S', 'attr_loc': {'D', 'C'}, 'cf_section': '3.3'},
+                  'title': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
+                  'units': {'Type': 'S', 'attr_loc': {'D', 'C'}, 'cf_section': '3.1'},
+                  'valid_max': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None},
+                  'valid_min': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None},
+                  'valid_range': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None}}
 
     def __init__(self): # initialize with parent methods and data
         super(CF1_6Check, self).__init__()
@@ -3294,7 +3483,8 @@ class CF1_6Check(CFNCCheck):
         """
         # Due to case insensitive requirement, we list the possible featuretypes
         # in lower case and check using the .lower() method
-        feature_list = ['point', 'timeseries', 'trajectory', 'profile', 'timeseriesprofile', 'trajectoryprofile']
+        feature_list = ['point', 'timeseries', 'trajectory', 'profile',
+                        'timeseriesprofile', 'trajectoryprofile']
 
         feature_type = getattr(ds, 'featureType', None)
         valid_feature_type = TestCtx(BaseCheck.HIGH, '§9.1 Dataset contains a valid featureType')
@@ -3432,6 +3622,53 @@ class CF1_7Check(CF1_6Check):
     # things that are specific to 1.7
     _cc_spec_version    = '1.7'
     _cc_url             = 'http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html'
+    appendix_a = {'Conventions': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
+                  '_FillValue': {'Type': 'D', 'attr_loc': {'D', 'C'}, 'cf_section': '2.5.1'},
+                  'actual_range': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': '2.5.1'},
+                  'add_offset': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': '8.1'},
+                  'ancillary_variables': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '3.4'},
+                  'axis': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '4'},
+                  'bounds': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '7.1'},
+                  'calendar': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
+                  'cell_measures': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '7.2'},
+                  'cell_methods': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '7.3'},
+                  'cf_role': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '9.5'},
+                  'climatology': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '7.4'},
+                  'comment': {'Type': 'S', 'attr_loc': {'G', 'D', 'C'}, 'cf_section': '2.6.2'},
+                  'compress': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '8.2'},
+                  'computed_standard_name': {'Type': 'S',
+                                             'attr_loc': {'C'},
+                                             'cf_section': '4.3.3'},
+                  'coordinates': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '5'},
+                  'external_variables': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': '2.6.3'},
+                  'featureType': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': '9.4'},
+                  'flag_masks': {'Type': 'D', 'attr_loc': {'D'}, 'cf_section': '3.5'},
+                  'flag_meanings': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '3.5'},
+                  'flag_values': {'Type': 'D', 'attr_loc': {'D'}, 'cf_section': '3.5'},
+                  'formula_terms': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '4.3.3'},
+                  'grid_mapping': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '5.6'},
+                  'history': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
+                  #'instance_dimension': {'Type': 'S', 'attr_loc': {'-'}, 'cf_section': '9.3'},
+                  'institution': {'Type': 'S', 'attr_loc': {'G', 'D'}, 'cf_section': '2.6.2'},
+                  'leap_month': {'Type': 'N', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
+                  'leap_year': {'Type': 'N', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
+                  'long_name': {'Type': 'S', 'attr_loc': {'D', 'C'}, 'cf_section': '3.2'},
+                  'missing_value': {'Type': 'D', 'attr_loc': {'D', 'C'}, 'cf_section': '2.5.1'},
+                  'month_lengths': {'Type': 'N', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
+                  'positive': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': None},
+                  'references': {'Type': 'S', 'attr_loc': {'G', 'D'}, 'cf_section': '2.6.2'},
+                  #'sample_dimension': {'Type': 'S', 'attr_loc': {'-'}, 'cf_section': '9.3'},
+                  'scale_factor': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': '8.1'},
+                  'source': {'Type': 'S', 'attr_loc': {'G', 'D'}, 'cf_section': '2.6.2'},
+                  'standard_error_multiplier': {'Type': 'N',
+                                                'attr_loc': {'D'},
+                                                'cf_section': None},
+                  'standard_name': {'Type': 'S', 'attr_loc': {'D', 'C'}, 'cf_section': '3.3'},
+                  'title': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
+                  'units': {'Type': 'S', 'attr_loc': {'D', 'C'}, 'cf_section': '3.1'},
+                  'valid_max': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None},
+                  'valid_min': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None},
+                  'valid_range': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None}}
 
     def __init__(self):
         super(CF1_7Check, self).__init__()
@@ -3846,17 +4083,17 @@ class CF1_7Check(CF1_6Check):
             deprecated_units,
             self._check_dimensionless_vertical_coordinate_1_6,
             dimless_vertical_coordinates_1_7)
-        ) 
+        )
 
         ret_val.extend(self._check_dimensionless_vertical_coordinates(
             ds,
             deprecated_units,
             self._check_dimensionless_vertical_coordinate_1_7,
             dimless_vertical_coordinates_1_7)
-        ) 
+        )
 
         return ret_val
-     
+
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
 
