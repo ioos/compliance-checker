@@ -131,7 +131,8 @@ class TestCF1_6(BaseTestCase):
         # delete the dataset and start over to create the variable with _FillValue at time of creation
         del ds
         ds = MockTimeSeries()
-        ds.createVariable("temp", np.float64, dimensions=("time"), fill_value=np.float(99999999999999999999.))
+        ds.createVariable("temp", np.float64, dimensions=("time"),
+                          fill_value=np.float(99999999999999999999.))
 
         # give temp _FillValue as a float, expect good result
         result = self.cf.check_child_attr_data_types(ds)
@@ -153,6 +154,17 @@ class TestCF1_6(BaseTestCase):
         self.assert_result_is_bad(result)
 
         # TODO for CF-1.7: actual_range, actual_min/max
+
+    def test_appendix_a(self):
+        dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
+        self.cf.setup(dataset)
+        aa_results = self.cf.appendix_a_results
+        # institution is in salinity, this shouldn't be present
+        flat_messages = {msg for res in aa_results for msg in res.msgs}
+        self.assertIn('Attribute compress should not be in variable non-coordinate attributes for variable temp. Valid location(s) are [C]',
+                      flat_messages)
+        self.assertIn('Attribute add_offset in variable temp must be a numeric type',
+                      flat_messages)
 
     def test_naming_conventions(self):
         '''
@@ -184,7 +196,6 @@ class TestCF1_6(BaseTestCase):
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
         assert all(r.name == u'§2.3 Naming Conventions' for r in results)
-
 
     def test_check_names_unique(self):
         """
