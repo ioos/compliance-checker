@@ -3,7 +3,7 @@
 
 from compliance_checker.suite import CheckSuite
 from compliance_checker.cf import (CF1_6Check, CF1_7Check,
-                                   dimless_vertical_coordinates)
+                                   dimless_vertical_coordinates_1_6, dimless_vertical_coordinates_1_7)
 from compliance_checker.cf.util import (is_vertical_coordinate,
                                         is_time_variable,
                                         units_convertible, units_temporal,
@@ -697,40 +697,40 @@ class TestCF1_6(BaseTestCase):
         # For each of the listed dimensionless vertical coordinates,
         # verify that the formula_terms match the provided set of terms
         self.assertTrue(no_missing_terms('atmosphere_ln_pressure_coordinate',
-                                         {"p0", "lev"}))
+                                         {"p0", "lev"}, dimless_vertical_coordinates_1_6))
         self.assertTrue(no_missing_terms('atmosphere_sigma_coordinate',
-                                         {"sigma", "ps", "ptop"}))
+                                         {"sigma", "ps", "ptop"}, dimless_vertical_coordinates_1_6))
         self.assertTrue(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
-                                         {'a', 'b', 'ps'}))
+                                         {'a', 'b', 'ps'}, dimless_vertical_coordinates_1_6))
         # test alternative terms for
         # 'atmosphere_hybrid_sigma_pressure_coordinate'
         self.assertTrue(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
-                                         {'ap', 'b', 'ps'}))
+                                         {'ap', 'b', 'ps'}, dimless_vertical_coordinates_1_6))
         # check that an invalid set of terms fails
         self.assertFalse(no_missing_terms('atmosphere_hybrid_sigma_pressure_coordinate',
-                                          {'a', 'b', 'p'}))
+                                          {'a', 'b', 'p'}, dimless_vertical_coordinates_1_6))
         self.assertTrue(no_missing_terms('atmosphere_hybrid_height_coordinate',
-                                          {"a", "b", "orog"}))
+                                          {"a", "b", "orog"}, dimless_vertical_coordinates_1_6))
         # missing terms should cause failure
         self.assertFalse(no_missing_terms('atmosphere_hybrid_height_coordinate',
-                                          {"a", "b"}))
+                                          {"a", "b"}, dimless_vertical_coordinates_1_6))
         # excess terms should cause failure
         self.assertFalse(no_missing_terms('atmosphere_hybrid_height_coordinate',
-                                         {"a", "b", "c", "orog"}))
+                                         {"a", "b", "c", "orog"}, dimless_vertical_coordinates_1_6))
         self.assertTrue(no_missing_terms('atmosphere_sleve_coordinate',
                                          {"a", "b1", "b2", "ztop", "zsurf1",
-                                          "zsurf2"}))
+                                          "zsurf2"}, dimless_vertical_coordinates_1_6))
         self.assertTrue(no_missing_terms('ocean_sigma_coordinate',
-                                         {"sigma", "eta", "depth"}))
+                                         {"sigma", "eta", "depth"}, dimless_vertical_coordinates_1_6))
         self.assertTrue(no_missing_terms('ocean_s_coordinate',
                                          {"s", "eta", "depth", "a", "b",
-                                          "depth_c"}))
+                                          "depth_c"}, dimless_vertical_coordinates_1_6))
         self.assertTrue(no_missing_terms('ocean_sigma_z_coordinate',
                                          {"sigma", "eta", "depth", "depth_c",
-                                          "nsigma", "zlev"}))
+                                          "nsigma", "zlev"}, dimless_vertical_coordinates_1_6))
         self.assertTrue(no_missing_terms('ocean_double_sigma_coordinate',
                                          {"sigma", "depth", "z1", "z2", "a",
-                                          "href", "k_c"}))
+                                          "href", "k_c"}, dimless_vertical_coordinates_1_6))
 
     def test_dimensionless_vertical(self):
         '''
@@ -738,7 +738,7 @@ class TestCF1_6(BaseTestCase):
         '''
         # Check affirmative compliance
         dataset = self.load_dataset(STATIC_FILES['dimensionless'])
-        results = self.cf.check_dimensionless_vertical_coordinate(dataset)
+        results = self.cf.check_dimensionless_vertical_coordinates(dataset)
         scored, out_of, messages = get_results(results)
 
         # all variables checked (2) pass
@@ -749,7 +749,7 @@ class TestCF1_6(BaseTestCase):
         # Check negative compliance -- 3 out of 4 pass
 
         dataset = self.load_dataset(STATIC_FILES['bad'])
-        results = self.cf.check_dimensionless_vertical_coordinate(dataset)
+        results = self.cf.check_dimensionless_vertical_coordinates(dataset)
         scored, out_of, messages = get_results(results)
         assert len(results) == 4
         assert scored <= out_of
@@ -763,7 +763,7 @@ class TestCF1_6(BaseTestCase):
 
         # create a malformed formula_terms attribute and check that it fails
         # 2/4 still pass
-        results = self.cf.check_dimensionless_vertical_coordinate(dataset)
+        results = self.cf.check_dimensionless_vertical_coordinates(dataset)
         scored, out_of, messages = get_results(results)
 
         assert len(results) == 4
@@ -1439,3 +1439,90 @@ class TestCF1_7(BaseTestCase):
             dataset.setncattr("Conventions", "CF-1.7, ACDD-1.3")
             result = self.cf.check_conventions_version(dataset)
             self.assertTrue(result.value)
+
+    def test_appendix_d(self):
+        '''
+        CF 1.7
+        Appendix D
+
+        As the CF-1.7 dimensionless vertical coordinates dict extends the 1.6 version,
+        this test only examines the extensions made there.
+        '''
+
+        # For each of the listed dimensionless vertical coordinates,
+        # verify that the formula_terms match the provided set of terms
+        self.assertTrue(no_missing_terms('ocean_s_coordinate_g1',
+                                         {'s', 'C', 'eta', 'depth', 'depth_c'}, dimless_vertical_coordinates_1_7))
+        self.assertTrue(no_missing_terms('ocean_s_coordinate_g2',
+                                         {'s', 'C', 'eta', 'depth', 'depth_c'}, dimless_vertical_coordinates_1_7))
+
+    def test_check_dimensionless_vertical_coordinate_1_7(self):
+        '''
+        Unit test for _check_dimensionless_vertical_coordinate_1_7 method.
+        '''
+        deprecated_units = [
+            'level',
+            'layer',
+            'sigma_level'
+        ]
+
+        ret_val = []
+
+        # create mock dataset for test; create three variables, one as dimensionless
+        with MockTimeSeries() as dataset:
+            dataset.createVariable('lev', 'd') # dtype=double, dims=1
+            dataset.variables['lev'].setncattr('standard_name', 'atmosphere_sigma_coordinate')
+            dataset.variables['lev'].setncattr('formula_terms', 'sigma: lev ps: PS ptop: PTOP')
+            
+            dataset.createVariable('PS', 'd', ('time',)) # dtype=double, dims=time
+            dataset.createVariable('PTOP', 'd', ('time',)) # dtype=double, dims=time
+
+
+            # run the check
+            self.cf._check_dimensionless_vertical_coordinate_1_7(
+                dataset, 'lev', deprecated_units, ret_val, dimless_vertical_coordinates_1_7
+            )
+
+            # one should have failed, as no computed_standard_name is assigned
+            score, out_of, messages = get_results(ret_val)
+            assert score == 0
+            assert out_of == 1
+
+            # this time, assign compufted_standard_name
+            ret_val = []
+            dataset.variables['lev'].setncattr('computed_standard_name', 'air_pressure')
+
+            # run the check
+            self.cf._check_dimensionless_vertical_coordinate_1_7(
+                dataset, 'lev', deprecated_units, ret_val, dimless_vertical_coordinates_1_7
+            )
+
+            # computed_standard_name is assigned, should pass
+            score, out_of, messages = get_results(ret_val)
+            assert score == out_of
+        
+    def test_dimensionless_vertical(self):
+        '''
+        Section 4.3.2 check, but for CF-1.7 implementation. With the refactor in
+        place, these are more of integration tests, but kept here for simplicity.
+        '''
+        # Check affirmative compliance
+        dataset = self.load_dataset(STATIC_FILES['dimensionless'])
+        dataset.variables['lev'] = MockVariable(dataset.variables['lev'])
+        dataset.variables['lev'].computed_standard_name = 'air_pressure'
+        results = self.cf.check_dimensionless_vertical_coordinates(dataset)
+        scored, out_of, messages = get_results(results)
+
+        # all variables checked (2) pass
+        assert len(results) == 3
+        assert scored == out_of
+        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+
+        # make one variable's computed_standard_name incorrect, one should fail
+        dataset.variables['lev'].computed_standard_name = 'definitely_not_right'
+        results = self.cf.check_dimensionless_vertical_coordinates(dataset)
+        scored, out_of, messages = get_results(results)
+
+        assert len(results) == 3
+        assert scored < out_of
+        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
