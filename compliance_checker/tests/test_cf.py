@@ -1485,9 +1485,8 @@ class TestCF1_7(BaseTestCase):
 
             # one should have failed, as no computed_standard_name is assigned
             score, out_of, messages = get_results(ret_val)
-            assert score == 6
-            assert out_of == 7
-
+            assert score == 0
+            assert out_of == 1
 
             # this time, assign compufted_standard_name
             ret_val = []
@@ -1498,7 +1497,7 @@ class TestCF1_7(BaseTestCase):
                 dataset, 'lev', deprecated_units, ret_val, dimless_vertical_coordinates_1_7
             )
 
-            # one should have failed, as no computed_standard_name is assigned
+            # computed_standard_name is assigned, should pass
             score, out_of, messages = get_results(ret_val)
             assert score == out_of
         

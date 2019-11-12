@@ -139,7 +139,7 @@ class CFBaseCheck(BaseCheck):
         self._find_cf_standard_name_table(ds)
         self._find_geophysical_vars(ds)
 
-    def _check_conventions_version(self, ds):
+    def check_conventions_version(self, ds):
         '''
         CF §2.6.1 the NUG defined global attribute Conventions to the string
         value "CF-<version_number>"; check the Conventions attribute contains
@@ -994,20 +994,6 @@ class CF1_6Check(CFNCCheck):
                                          "".format(name, fill_value, spec_by, rmin, rmax))
 
         return valid_fill_range.to_result()
-
-    #def check_conventions_are_cf_16(self, ds):
-    #    '''
-    #    Check the global attribute conventions to contain CF-1.6.
-
-    #    CF §2.6.1 the NUG defined global attribute Conventions to the string
-    #    value "CF-1.6"
-
-    #    :param netCDF4.Dataset ds: An open netCDF dataset
-    #    :rtype: compliance_checker.base.Result
-    #    '''
-
-    #    return self.check_conventions_version(ds) # invoke inherited method
-
 
     def check_convention_globals(self, ds):
         '''
@@ -3813,15 +3799,6 @@ class CF1_7Check(CF1_6Check):
             standard_name not in dim_vert_coords_dict):
             return
 
-        is_not_deprecated = TestCtx(BaseCheck.LOW, self.section_titles["4.3"])
-
-        is_not_deprecated.assert_true(units not in deprecated_units,
-                                      "§4.3.2: units are deprecated by CF in variable {}: {}"
-                                      "".format(vname, units))
-
-        # check the vertical coordinates
-        ret_val.append(is_not_deprecated.to_result())
-
         # assert that the computed_standard_name is maps to the standard_name correctly
         correct_computed_std_name_ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles['4.3'])
         _comp_std_name = dim_vert_coords_dict[standard_name][1]
@@ -3830,8 +3807,6 @@ class CF1_7Check(CF1_6Check):
             '§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`'.format(vname, _comp_std_name)
         )
         ret_val.append(correct_computed_std_name_ctx.to_result())
-
-        ret_val.append(self._check_formula_terms(ds, vname, dim_vert_coords_dict))
 
     def check_dimensionless_vertical_coordinates(self, ds):
         '''
@@ -3863,6 +3838,15 @@ class CF1_7Check(CF1_6Check):
             'layer',
             'sigma_level'
         ]
+
+        # compose this function to use the results from the CF-1.6 check
+        # and then extend it using a CF-1.7 addition
+        ret_val.extend(self._check_dimensionless_vertical_coordinates(
+            ds,
+            deprecated_units,
+            self._check_dimensionless_vertical_coordinate_1_6,
+            dimless_vertical_coordinates_1_7)
+        ) 
 
         ret_val.extend(self._check_dimensionless_vertical_coordinates(
             ds,
