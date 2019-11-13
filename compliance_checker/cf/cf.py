@@ -688,7 +688,8 @@ class CFBaseCheck(BaseCheck):
         """
         Validates a CF dataset against the contents of its Appendix A table for
         attribute types and locations. Returns a list of results with the
-        outcomes of the
+        outcomes of the Appendix A validation results against the existing
+        attributes in the docstring.
 
         :param netCDF4.Variable var: a variable in an existing NetCDF dataset
         :param netCDF4.Dataset ds: An open netCDF dataset
