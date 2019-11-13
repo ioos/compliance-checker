@@ -145,7 +145,6 @@ class CFBaseCheck(BaseCheck):
                                 coord_var_name in
                                 var.coordinates.strip().split(' ') if
                                 coord_var_name in ds.variables}
-        self.appendix_a_results = self.appendix_a_validate(ds)
 
     def check_conventions_version(self, ds):
         '''
@@ -685,7 +684,7 @@ class CFBaseCheck(BaseCheck):
         else:
             return standard_name, None
 
-    def appendix_a_validate(self, ds):
+    def check_appendix_a(self, ds):
         """
         Validates a CF dataset against the contents of its Appendix A table for
         attribute types and locations. Returns a list of results with the

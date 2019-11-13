@@ -158,7 +158,7 @@ class TestCF1_6(BaseTestCase):
     def test_appendix_a(self):
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
         self.cf.setup(dataset)
-        aa_results = self.cf.appendix_a_results
+        aa_results = self.cf.check_appendix_a(dataset)
         # institution is in salinity, this shouldn't be present
         flat_messages = {msg for res in aa_results for msg in res.msgs}
         self.assertIn('Attribute compress should not be in variable non-coordinate attributes for variable temp. Valid location(s) are [C]',
@@ -1484,7 +1484,7 @@ class TestCF1_7(BaseTestCase):
             dataset.createVariable('lev', 'd') # dtype=double, dims=1
             dataset.variables['lev'].setncattr('standard_name', 'atmosphere_sigma_coordinate')
             dataset.variables['lev'].setncattr('formula_terms', 'sigma: lev ps: PS ptop: PTOP')
-            
+
             dataset.createVariable('PS', 'd', ('time',)) # dtype=double, dims=time
             dataset.createVariable('PTOP', 'd', ('time',)) # dtype=double, dims=time
 
@@ -1511,7 +1511,7 @@ class TestCF1_7(BaseTestCase):
             # computed_standard_name is assigned, should pass
             score, out_of, messages = get_results(ret_val)
             assert score == out_of
-        
+
     def test_dimensionless_vertical(self):
         '''
         Section 4.3.2 check, but for CF-1.7 implementation. With the refactor in

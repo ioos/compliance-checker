@@ -360,9 +360,6 @@ class CheckSuite(object):
                     vals.extend(self._run_check(c, ds, max_level))
                 except Exception as e:
                     errs[c.__func__.__name__] = (e, sys.exc_info()[2])
-            if isinstance(checker, CFBaseCheck):
-                for res in checker.appendix_a_results:
-                    vals.append(res)
 
             # score the results we got back
             groups = self.scores(vals)
