@@ -828,25 +828,7 @@ class CFNCCheck(BaseNCCheck, CFBaseCheck):
     CFNCCheck."""
     pass
 
-
-class CF1_6Check(CFNCCheck):
-    """CF-1.6-specific implementation of CFBaseCheck; supports checking
-    netCDF datasets.
-    These checks are translated documents:
-        http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html
-        http://cf-pcmdi.llnl.gov/conformance/requirements-and-recommendations/1.6/"""
-
-    register_checker    = True
-    _cc_spec            = 'cf'
-    _cc_spec_version    = '1.6'
-    _cc_description     = 'Climate and Forecast Conventions (CF)'
-    _cc_url             = 'http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html'
-    _cc_display_headers = {
-        3: 'Errors',
-        2: 'Warnings',
-        1: 'Info'
-    }
-    appendix_a = {'Conventions': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
+appendix_a_base = {'Conventions': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
                   '_FillValue': {'Type': 'D', 'attr_loc': {'D', 'C'}, 'cf_section': None},
                   'add_offset': {'Type': 'N', 'attr_loc': {'D'}, 'cf_section': '8.1'},
                   'ancillary_variables': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '3.4'},
@@ -892,6 +874,25 @@ class CF1_6Check(CFNCCheck):
                   'valid_max': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None},
                   'valid_min': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None},
                   'valid_range': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None}}
+
+class CF1_6Check(CFNCCheck):
+    """CF-1.6-specific implementation of CFBaseCheck; supports checking
+    netCDF datasets.
+    These checks are translated documents:
+        http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html
+        http://cf-pcmdi.llnl.gov/conformance/requirements-and-recommendations/1.6/"""
+
+    register_checker    = True
+    _cc_spec            = 'cf'
+    _cc_spec_version    = '1.6'
+    _cc_description     = 'Climate and Forecast Conventions (CF)'
+    _cc_url             = 'http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html'
+    _cc_display_headers = {
+        3: 'Errors',
+        2: 'Warnings',
+        1: 'Info'
+    }
+    appendix_a = appendix_a_base
 
     def __init__(self): # initialize with parent methods and data
         super(CF1_6Check, self).__init__()
@@ -3621,53 +3622,15 @@ class CF1_7Check(CF1_6Check):
     # things that are specific to 1.7
     _cc_spec_version    = '1.7'
     _cc_url             = 'http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html'
-    appendix_a = {'Conventions': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
-                  '_FillValue': {'Type': 'D', 'attr_loc': {'D', 'C'}, 'cf_section': '2.5.1'},
-                  'actual_range': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': '2.5.1'},
-                  'add_offset': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': '8.1'},
-                  'ancillary_variables': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '3.4'},
-                  'axis': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '4'},
-                  'bounds': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '7.1'},
-                  'calendar': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
-                  'cell_measures': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '7.2'},
-                  'cell_methods': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '7.3'},
-                  'cf_role': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '9.5'},
-                  'climatology': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '7.4'},
-                  'comment': {'Type': 'S', 'attr_loc': {'G', 'D', 'C'}, 'cf_section': '2.6.2'},
-                  'compress': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '8.2'},
-                  'computed_standard_name': {'Type': 'S',
-                                             'attr_loc': {'C'},
-                                             'cf_section': '4.3.3'},
-                  'coordinates': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '5'},
-                  'external_variables': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': '2.6.3'},
-                  'featureType': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': '9.4'},
-                  'flag_masks': {'Type': 'D', 'attr_loc': {'D'}, 'cf_section': '3.5'},
-                  'flag_meanings': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '3.5'},
-                  'flag_values': {'Type': 'D', 'attr_loc': {'D'}, 'cf_section': '3.5'},
-                  'formula_terms': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': '4.3.3'},
-                  'grid_mapping': {'Type': 'S', 'attr_loc': {'D'}, 'cf_section': '5.6'},
-                  'history': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
-                  #'instance_dimension': {'Type': 'S', 'attr_loc': {'-'}, 'cf_section': '9.3'},
-                  'institution': {'Type': 'S', 'attr_loc': {'G', 'D'}, 'cf_section': '2.6.2'},
-                  'leap_month': {'Type': 'N', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
-                  'leap_year': {'Type': 'N', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
-                  'long_name': {'Type': 'S', 'attr_loc': {'D', 'C'}, 'cf_section': '3.2'},
-                  'missing_value': {'Type': 'D', 'attr_loc': {'D', 'C'}, 'cf_section': '2.5.1'},
-                  'month_lengths': {'Type': 'N', 'attr_loc': {'C'}, 'cf_section': '4.4.1'},
-                  'positive': {'Type': 'S', 'attr_loc': {'C'}, 'cf_section': None},
-                  'references': {'Type': 'S', 'attr_loc': {'G', 'D'}, 'cf_section': '2.6.2'},
-                  #'sample_dimension': {'Type': 'S', 'attr_loc': {'-'}, 'cf_section': '9.3'},
-                  'scale_factor': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': '8.1'},
-                  'source': {'Type': 'S', 'attr_loc': {'G', 'D'}, 'cf_section': '2.6.2'},
-                  'standard_error_multiplier': {'Type': 'N',
-                                                'attr_loc': {'D'},
-                                                'cf_section': None},
-                  'standard_name': {'Type': 'S', 'attr_loc': {'D', 'C'}, 'cf_section': '3.3'},
-                  'title': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': None},
-                  'units': {'Type': 'S', 'attr_loc': {'D', 'C'}, 'cf_section': '3.1'},
-                  'valid_max': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None},
-                  'valid_min': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None},
-                  'valid_range': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': None}}
+
+    appendix_a = appendix_a_base.copy()
+    appendix_a.update({
+        'actual_range': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': '2.5.1'},
+        'comment': {'Type': 'S', 'attr_loc': {'G', 'D', 'C'}, 'cf_section': '2.6.2'},
+        'external_variables': {'Type': 'S', 'attr_loc': {'G'}, 'cf_section': '2.6.3'},
+        'actual_range': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': '2.5.1'},
+        'scale_factor': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': '8.1'}
+    })
 
     def __init__(self):
         super(CF1_7Check, self).__init__()
