@@ -677,6 +677,87 @@ class CFBaseCheck(BaseCheck):
         else:
             return standard_name, None
 
+    def _check_attr_type(self, attribute, attr_type, variable=None):
+        """
+        Check if an attribute `attr` is of the type `attr_type`. Upon getting
+        a data type of 'D', the attr must have the same data type as the
+        variable it is assigned to.
+
+        Attributes designated type 'S' must be of type `str`. 'N' require
+        numeric types, and 'D' requires the attribute type match the type
+        of the variable it is assigned to.
+
+        :param attribute: attribute to check
+        :param str attr_type: the correct type of the attribute
+        :param variable: if given, type should match attr
+        :rtype list
+        :return A two-element list that contains pass/fail status as a boolean and
+                a message string (or None if unset) as the second element.
+                The string will contain a format field to be filled with a
+                string describing the attribute.
+        """
+
+        if attr_type == 'S':
+            if not isinstance(attribute, basestring):
+                return [False,
+                        "{} must be a string".format('{}')]
+        else:
+            # if it's not a string, it should have a numpy dtype
+            underlying_dtype = getattr(attribute, 'dtype', None)
+            if underlying_dtype is None:
+                return [False,
+                        "{} must be a numeric type".format('{}')]
+            # both D and N should be some kind of numeric value
+            is_numeric = np.issubdtype(underlying_dtype, np.number)
+            if attr_type == 'N':
+                if not is_numeric:
+                    return [False,
+                            "{} must be numeric".format('{}')]
+            elif attr_type == 'D':
+                # TODO: handle edge case where variable is unset here
+                var_dtype = getattr(variable, 'dtype', None)
+                if (underlying_dtype != var_dtype):
+                    return [False,
+                            "{} must be numeric and must match".format('{}')]
+            else:
+                # If we reached here, we fell off with an unrecognized type
+                return [False, "{} has unrecognized type '{}'".format('{}',
+                                                              attr_type)]
+        # pass if all other possible failure conditions have been evaluated
+        return [True, None]
+
+    def _handle_dtype_check(self, attribute, attr_name, attr_dict,
+                            variable=None):
+        """
+        Helper function for Appendix A checks.
+
+        :param attribute: The value of the attribute being checked
+        :param str attr_name: The name of the attribute being processed
+        :param dict attr_dict: The dict entry with type and attribute location
+                               information corresponding to this attribute
+        :param variable: if given, the variable whose type to check against
+        :rtype: tuple
+        :return: A two-tuple that contains pass/fail status as a boolean and
+                 a message string (or None if unset) as the second element.
+        """
+        attr_type = attr_dict['Type']
+        if variable is None and 'G' not in attr_dict['attr_loc']:
+            raise ValueError('Non-global attributes must be associated with a '
+                             ' variable')
+        attr_str = ('Global attribute {}'.format(attr_name)
+                    if 'G' in attr_dict['attr_loc'] and variable is None
+                    else "Attribute {} in variable {}".format(attr_name,
+                                                              variable.name))
+
+        # check the type
+        return_value = self._check_attr_type(attribute, attr_type, variable)
+
+        # if the second element is a string, format it
+        if isinstance(return_val[1], basestring):
+            return_value[1] = return_value[1].format(attr_str)
+
+        # convert to tuple for immutability and return
+        return tuple(return_value)
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
     """Inherits from both BaseNCCheck and CFBaseCheck to support
