@@ -1562,3 +1562,39 @@ class TestCF1_7(BaseTestCase):
         assert len(results) == 3
         assert scored < out_of
         assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+
+    def test_check_attr_type(self):
+        '''
+         Ensure the _check_attr_type method works as expected.
+        '''
+
+        # first, test all valid checks show that it's valid
+        attr = 'my_attr_value' # string
+        attr_type =  'S'
+        result = self.cf._check_attr_type(attr, attr_type)
+        self.assertTrue(result[0])
+
+        attr = np.int64(1)
+        attr_type =  'N'
+        self.assertTrue(self.cf._check_attr_type(attr, attr_type)[0])
+
+        attr = np.int64(45) # numpy int
+        attr_type = 'D'
+        variable = np.int64(45)
+        self.assertTrue(self.cf._check_attr_type(
+            attr, attr_type, variable)[0])
+
+        # check failures
+        attr = 'my_attr_value'
+        attr_type = 'N' # should be numeric
+        self.assertFalse(self.cf._check_attr_type(attr, attr_type)[0])
+
+        attr = np.int(64)
+        attr_type = 'S' # should be string
+        self.assertFalse(self.cf._check_attr_type(attr, attr_type)[0])
+
+        attr = np.int32(45)
+        attr_type = 'D' # should match
+        variable = np.int64(45) # mismatching numpy types
+        self.assertFalse(self.cf._check_attr_type(
+            attr, attr_type, variable)[0])
