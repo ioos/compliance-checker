@@ -2462,8 +2462,8 @@ class CFBaseCheck(BaseCheck):
             expected_std_names = grid_mapping[2]
             for expected_std_name in expected_std_names:
                 found_vars = ds.get_variables_by_attributes(standard_name=expected_std_name)
-                valid_grid_mapping.assert_true(len(found_vars) == 1,
-                                               "grid mapping {} requires exactly ".format(grid_mapping_name)+\
+                valid_grid_mapping.assert_true(len(found_vars) >= 1,
+                                               "grid mapping {} requires at least ".format(grid_mapping_name)+\
                                                "one variable with standard_name "+\
                                                "{} to be defined".format(expected_std_name))
 
