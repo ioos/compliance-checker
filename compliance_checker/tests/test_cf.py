@@ -894,6 +894,64 @@ class TestCF1_6(BaseTestCase):
         expected_name = u'§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections'
         assert all(r.name == expected_name for r in results.values())
 
+    def test_check_grid_mapping_attr_type(self):
+        """
+        Check that the check_grid_mapping_attr_type method checks
+        grid_mapping attribute types correctly.
+        """
+
+        # test good
+        att_name = 'test_att'
+        att = np.int64(45)
+        att_type = 'N' # numeric
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        self.assertTrue(res[0])
+        self.assertEqual(res[1], None)
+
+        att_name = 'test_att'
+        att = np.int64(45)
+        x = np.int64(45) # the variable
+        att_type = 'D' # numeric, types should match
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type, x)
+        self.assertTrue(res[0])
+        self.assertEqual(res[1], None)
+
+        att_name = 'test_att'
+        att = 'yo'
+        att_type = 'S' # string
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        self.assertTrue(res[0])
+        self.assertEqual(res[1], None)
+
+        att_name = 'test_att'
+        att = np.float64(45)
+        att_type = 'D' # string, types should match
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type, np.float64(95))
+        self.assertTrue(res[0])
+        self.assertEqual(res[1], None)
+        
+        # test bad
+        att_name = 'test_att'
+        att = np.int64(45)
+        att_type = 'S' # string, but att type is numeric
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        self.assertFalse(res[0])
+        self.assertEqual(res[1], "test_att must be a string")
+
+        # test bad
+        att_name = 'test_att'
+        att = 'bad'
+        att_type = 'N' # numeric, but att type is string
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        self.assertFalse(res[0])
+        self.assertEqual(res[1], "test_att must be a numeric numpy datatype")
+
+        att_name = 'test_att'
+        att = np.int32(2)
+        att_type = 'D' # should be same datatypes
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type, np.float32(2))
+        self.assertFalse(res[0])
+        self.assertEqual(res[1], "test_att must be numeric and must match float32 dtype")
 
     def test_check_geographic_region(self):
         dataset = self.load_dataset(STATIC_FILES['bad_region'])

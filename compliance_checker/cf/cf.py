@@ -5,7 +5,8 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates_1_6, dimless_vertical_coordinates_1_7,
                                               no_missing_terms)
 from compliance_checker.cf.appendix_e import cell_methods16, cell_methods17
-from compliance_checker.cf.appendix_f import grid_mapping_dict16, grid_mapping_dict17
+from compliance_checker.cf.appendix_f import (grid_mapping_dict16, grid_mapping_dict17,
+                                              grid_mapping_attr_types16, grid_mapping_attr_types17)
 from compliance_checker.cf import util
 from compliance_checker import cfutil
 from cf_units import Unit
@@ -241,6 +242,34 @@ class CFBaseCheck(BaseCheck):
                                         "".format(coord, standard_name))
 
         return valid_formula_terms.to_result()
+
+    # TODO, move this into alphabetical order?
+    def check_grid_mapping_attr_type(self, attr_name, attr, attr_type, variable=None):
+        """
+        Check the type of an attribute. Wrapper function, designed to
+        be overloaded in concrete implementations.
+
+        :param str attr_name: name of attribute
+        :param attr: attribute to check
+        :param str attr_type: designated type of attr; 'S', 'N', or 'D'
+        :param netCDF4.Variable variable
+        :rtype tuple
+        :return two-tuple of (bool, str|None)
+        """
+        raise NotImplementedError 
+
+    def check_attr_condition(self, attr, attr_name, ret_val):
+        """
+        Evaluate a condition (or series of conditions) for a particular
+        attribute. Designed to be overloaded in subclass implementations.
+
+        :param attr: attribute to teset condition for
+        :param str attr_name: name of the attribute
+        :param list ret_val: list of results to append to
+        :rtype None
+        :return None
+        """
+        raise NotImplementedError
 
     def _dims_in_order(self, dimension_order):
         '''
@@ -704,9 +733,12 @@ class CFBaseCheck(BaseCheck):
         else:
             # if it's not a string, it should have a numpy dtype
             underlying_dtype = getattr(attribute, 'dtype', None)
+
+            # TODO check for np.nan separately
             if underlying_dtype is None:
                 return [False,
-                        "{} must be a numeric type".format('{}')]
+                        "{} must be a numeric numpy datatype".format('{}')]
+
             # both D and N should be some kind of numeric value
             is_numeric = np.issubdtype(underlying_dtype, np.number)
             if attr_type == 'N':
@@ -718,7 +750,7 @@ class CFBaseCheck(BaseCheck):
                 var_dtype = getattr(variable, 'dtype', None)
                 if (underlying_dtype != var_dtype):
                     return [False,
-                            "{} must be numeric and must match".format('{}')]
+                            "{} must be numeric and must match {} dtype".format('{}', var_dtype)]
             else:
                 # If we reached here, we fell off with an unrecognized type
                 return [False, "{} has unrecognized type '{}'".format('{}',
@@ -790,6 +822,7 @@ class CF1_6Check(CFNCCheck):
 
         self.cell_methods = cell_methods16
         self.grid_mapping_dict = grid_mapping_dict16
+        self.grid_mapping_attr_types = grid_mapping_attr_types16
 
     ###############################################################################
     # Chapter 2: NetCDF Files and Components
@@ -2493,6 +2526,121 @@ class CF1_6Check(CFNCCheck):
 
         return ret_val
 
+    def check_grid_mapping_attr_type(self, attr_name, attr, attr_type, variable=None):
+        """
+        Check the type of an attribute. Wrapper function, 
+        implemented for CF-1.6.
+
+        :param str attr_name: name of attribute
+        :param attr: attribute to check
+        :param str attr_type: designated type of attr; 'S', 'N', or 'D'
+        :param netCDF4.Variable variable
+        :rtype tuple
+        :return two-tuple of (bool, str|None)
+        """
+
+        # get check result, list [bool, str|None] 
+        _res = self._check_attr_type(attr, attr_type, variable)
+
+        # fully format the message if it needs it
+        if isinstance(_res[1], basestring):
+            _res[1] = _res[1].format(attr_name)
+
+        # tuple for immutability
+        return tuple(_res)
+
+    def check_attr_condition(self, attr, attr_name, ret_val):
+        """
+        Evaluate a condition (or series of conditions) for a particular
+        attribute. Implementation for CF-1.6.
+
+        :param attr: attribute to teset condition for
+        :param str attr_name: name of the attribute
+        :param list ret_val: list of results to append to
+        :rtype None
+        :return None
+        """
+        raise NotImplementedError
+        # TODO
+
+    def _evaluate_latitude_of_projected_origin(self, val):
+        """
+        Evaluate the condition for `latitude_of_projected_origin` attribute.
+        Return result.
+
+        :param val: value to be tested
+        :rtype Result
+        :return Result
+        """
+
+        # TODO
+        raise NotImplementedError
+
+    def _evaluate_longitude_of_projected_origin(self, val):
+        """
+        Evaluate the condition for `longitude_of_projected_origin` attribute.
+        Return result.
+
+        :param val: value to be tested
+        :rtype Result
+        :return Result
+        """
+
+        # TODO
+        raise NotImplementedError
+
+    def _evaluate_scale_factor_at_central_meridian(self, val):
+        """
+        Evaluate the condition for `scale_factor_at_central_meridian` attribute.
+        Return result.
+
+        :param val: value to be tested
+        :rtype Result
+        :return Result
+        """
+
+        # TODO
+        raise NotImplementedError
+
+    def _evaluate_scale_factor_at_projected_origin(self, val):
+        """
+        Evaluate the condition for `scale_factor_at_projected_origin` attribute.
+        Return result.
+
+        :param val: value to be tested
+        :rtype Result
+        :return Result
+        """
+
+        # TODO
+        raise NotImplementedError
+
+    def _evaluate_standard_parallel(self, val):
+        """
+        Evaluate the condition for `standard_parallel` attribute. Return result.
+
+        :param val: value to be tested
+        :rtype Result
+        :return Result
+        """
+
+        # TODO
+        raise NotImplementedError
+
+
+    def _evaluate_straight_vertical_longitude_from_pole(self, val):
+        """
+        Evaluate the condition for `straight_vertical_longitude_from_pole`
+        attribute. Return result.
+
+        :param val: value to be tested
+        :rtype Result
+        :return Result
+        """
+
+        # TODO
+        raise NotImplementedError
+
     # grid mapping dictionary, appendix F
 
     def check_grid_mapping(self, ds):
@@ -2608,6 +2756,24 @@ class CF1_6Check(CFNCCheck):
                                                "grid mapping {} requires exactly".format(grid_mapping_name)+\
                                                "one variable with standard_name "+\
                                                "{} to be defined".format(expected_std_name))
+
+            # check the types of each of the grid mapping attributes
+            for _attr_name in ds.variables[grid_var_name].ncattrs():
+                if self.grid_mapping_attr_types.get(_attr_name, None):
+
+                    # get the type check result as a tuple (bool, str|None)
+                    _type_check = self.check_grid_mapping_attr_type(
+                        _attr_name,
+                        getattr(ds.variables[grid_var_name], _attr_name),  # get value
+                        self.grid_mapping_attr_types.get(_attr_name, None), # get type str
+                        ds.variables[grid_var_name],                        # variable
+                    )
+
+                    # add to existing TestCtx
+                    valid_grid_mapping.assert_true(
+                        _type_check[0], # bool
+                        _type_check[1]  # message
+                    )
 
             ret_val[grid_var_name] = valid_grid_mapping.to_result()
 
@@ -3519,6 +3685,7 @@ class CF1_7Check(CF1_6Check):
 
         self.cell_methods = cell_methods17
         self.grid_mapping_dict = grid_mapping_dict17
+        self.grid_mapping_attr_types = grid_mapping_attr_types17
 
     def check_actual_range(self, ds):
         """Check the actual_range attribute of variables. As stated in

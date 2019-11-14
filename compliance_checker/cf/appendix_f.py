@@ -33,27 +33,42 @@ grid_mapping_names = [
     'transverse_mercator',
     'vertical_perspective' ]
 
-grid_mapping_attrs = [
-    'earth_radius',
-    'false_easting',
-    'false_northing',
-    'grid_mapping_name',
-    'grid_north_pole_latitude',
-    'grid_north_pole_longitude',
-    'inverse_flattening',
-    'latitude_of_projection_origin',
-    'longitude_of_central_meridian',
-    'longitude_of_prime_meridian',
-    'longitude_of_projection_origin',
-    'north_pole_grid_longitude',
-    'perspective_point_height',
-    'scale_factor_at_central_meridian',
-    'scale_factor_at_projection_origin',
-    'semi_major_axis',
-    'semi_minor_axis',
-    'standard_parallel',
-    'straight_vertical_longitude_from_pole'
-]
+grid_mapping_attr_types16 = {
+    'earth_radius': 'N',
+    'false_easting': 'N',
+    'false_northing': 'N',
+    'grid_mapping_name': 'S',
+    'grid_north_pole_latitude': 'N',
+    'grid_north_pole_longitude': 'N',
+    'inverse_flattening': 'N',
+    'latitude_of_projection_origin': 'N',
+    'longitude_of_central_meridian': 'N',
+    'longitude_of_prime_meridian': 'N',
+    'longitude_of_projection_origin': 'N',
+    'north_pole_grid_longitude': 'N',
+    'perspective_point_height': 'N',
+    'scale_factor_at_central_meridian': 'N',
+    'scale_factor_at_projection_origin': 'N',
+    'semi_major_axis': 'N',
+    'semi_minor_axis': 'N',
+    'standard_parallel': 'N',
+    'straight_vertical_longitude_from_pole': 'N'
+}
+
+grid_mapping_attr_types17 = grid_mapping_attr_types16.copy() # need shallow copy; update() returns None
+
+grid_mapping_attr_types17.update({
+    'azimuth_of_central_line': 'N',
+    'crs_wkt': 'S',
+    'geographic_crs_name': 'S',
+    'geoid_name': 'S',
+    'geopotential_datum_name': 'S',
+    'prime_meridian_name': 'S',
+    'projected_crs_name': 'S',
+    'reference_ellipsoid_name': 'S',
+    'towgs84': 'N'
+    })
+
 
 grid_mapping_dict16 = {
     'albers_conical_equal_area': [
