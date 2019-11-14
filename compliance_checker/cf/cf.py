@@ -5,7 +5,9 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates_1_6, dimless_vertical_coordinates_1_7,
                                               no_missing_terms)
 from compliance_checker.cf.appendix_e import cell_methods16, cell_methods17
-from compliance_checker.cf.appendix_f import grid_mapping_dict16, grid_mapping_dict17
+from compliance_checker.cf.appendix_f import (grid_mapping_dict16, grid_mapping_dict17,
+                                              grid_mapping_attr_types16, grid_mapping_attr_types17,
+                                              horizontal_datum_names17, ellipsoid_names17, prime_meridian_names17)
 from compliance_checker.cf import util
 from compliance_checker import cfutil
 from cf_units import Unit
@@ -384,6 +386,34 @@ class CFBaseCheck(BaseCheck):
                                         "".format(coord, standard_name))
 
         return valid_formula_terms.to_result()
+
+    # TODO, move this into alphabetical order?
+    def check_grid_mapping_attr_type(self, attr_name, attr, attr_type, variable=None):
+        """
+        Check the type of an attribute. Wrapper function, designed to
+        be overloaded in concrete implementations.
+
+        :param str attr_name: name of attribute
+        :param attr: attribute to check
+        :param str attr_type: designated type of attr; 'S', 'N', or 'D'
+        :param netCDF4.Variable variable
+        :rtype tuple
+        :return two-tuple of (bool, str|None)
+        """
+        raise NotImplementedError 
+
+    def check_grid_mapping_attr_condition(self, attr, attr_name, ret_val):
+        """
+        Evaluate a condition (or series of conditions) for a particular
+        attribute. Designed to be overloaded in subclass implementations.
+
+        :param attr: attribute to teset condition for
+        :param str attr_name: name of the attribute
+        :param list ret_val: list of results to append to
+        :rtype None
+        :return None
+        """
+        raise NotImplementedError
 
     def _dims_in_order(self, dimension_order):
         '''
@@ -930,29 +960,31 @@ class CFBaseCheck(BaseCheck):
         if attr_type == 'S':
             if not isinstance(attribute, basestring):
                 return [False,
-                        "{} must be a string".format('{}')]
+                        "{} must be a string"]
         else:
             # if it's not a string, it should have a numpy dtype
             underlying_dtype = getattr(attribute, 'dtype', None)
+
+            # TODO check for np.nan separately
             if underlying_dtype is None:
                 return [False,
-                        "{} must be a numeric type".format('{}')]
+                        "{} must be a numeric numpy datatype"]
+
             # both D and N should be some kind of numeric value
             is_numeric = np.issubdtype(underlying_dtype, np.number)
             if attr_type == 'N':
                 if not is_numeric:
                     return [False,
-                            "{} must be numeric".format('{}')]
+                            "{} must be numeric"]
             elif attr_type == 'D':
                 # TODO: handle edge case where variable is unset here
                 var_dtype = getattr(variable, 'dtype', None)
                 if (underlying_dtype != var_dtype):
                     return [False,
-                            "{} must be numeric and must match".format('{}')]
+                            "{{}} must be numeric and must match {} dtype".format(var_dtype)]
             else:
                 # If we reached here, we fell off with an unrecognized type
-                return [False, "{} has unrecognized type '{}'".format('{}',
-                                                              attr_type)]
+                return [False, "{{}} has unrecognized type '{}'".format(attr_type)]
         # pass if all other possible failure conditions have been evaluated
         return [True, None]
 
@@ -1067,6 +1099,7 @@ class CF1_6Check(CFNCCheck):
 
         self.cell_methods = cell_methods16
         self.grid_mapping_dict = grid_mapping_dict16
+        self.grid_mapping_attr_types = grid_mapping_attr_types16
 
     ###############################################################################
     # Chapter 2: NetCDF Files and Components
@@ -2770,8 +2803,346 @@ class CF1_6Check(CFNCCheck):
 
         return ret_val
 
+    def check_grid_mapping_attr_type(self, attr_name, attr, attr_type, variable=None):
+        """
+        Check the type of an attribute. Wrapper function, 
+        implemented for CF-1.6.
+
+        :param str attr_name: name of attribute
+        :param attr: attribute to check
+        :param str attr_type: designated type of attr; 'S', 'N', or 'D'
+        :param netCDF4.Variable variable
+        :rtype tuple
+        :return two-tuple of (bool, str|None)
+        """
+
+        # get check result, list [bool, str|None] 
+        _res = self._check_attr_type(attr, attr_type, variable)
+
+        # fully format the message if it needs it
+        if isinstance(_res[1], basestring):
+            _res[1] = _res[1].format(attr_name)
+
+        # tuple for immutability
+        return tuple(_res)
+
+    def check_grid_mapping_attr_condition(self, attr, attr_name):
+        """
+        Evaluate a condition (or series of conditions) for a particular
+        attribute. Implementation for CF-1.6.
+
+        :param attr: attribute to teset condition for
+        :param str attr_name: name of the attribute
+        :rtype tuple
+        :return two-tuple of (bool, str)
+        """
+
+        if attr_name == 'latitude_of_projection_origin':
+            return self._evaluate_latitude_of_projection_origin(attr)
+
+        elif attr_name == 'longitude_of_projection_origin':
+            return self._evaluate_longitude_of_projection_origin(attr)
+
+        elif attr_name == 'longitude_of_central_meridian':
+            return self._evaluate_longitude_of_central_meridian(attr)
+
+        elif attr_name == 'longitude_of_prime_meridian':
+            return self._evaluate_longitude_of_prime_meridian(attr)
+
+        elif attr_name == 'scale_factor_at_central_meridian':
+            return self._evaluate_scale_factor_at_central_meridian(attr)
+
+        elif attr_name == 'scale_factor_at_projection_origin':
+            return self._evaluate_scale_factor_at_projection_origin(attr)
+
+        elif attr_name == 'standard_parallel':
+            return self._evaluate_standard_parallel(attr)
+
+        elif attr_name == 'straight_vertical_longitude_from_pole':
+            return self._evaluate_straight_vertical_longitude_from_pole(attr)
+
+        else:
+            raise NotImplementedError(
+                'Evaluation for {} not yet implemented'.format(attr_name)
+            )
+
+    def _evaluate_latitude_of_projection_origin(self, val):
+        """
+        Evaluate the condition for `latitude_of_projection_origin` attribute.
+        Return result. Value must be -90 <= x <= 90.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple (bool, msg)
+        """
+
+        return (
+            (val >= -90.) and (val <= 90.),
+            'latitude_of_projection_origin must satisfy (-90 <= x <= 90)'
+        )
+
+    def _evaluate_longitude_of_projection_origin(self, val):
+        """
+        Evaluate the condition for `longitude_of_projection_origin` attribute.
+        Return result.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple (bool, msg)
+        """
+
+        return (
+            (val >= -180.) and (val <= 180.),
+            'longitude_of_projection_origin must satisfy (-180 <= x <= 180)'
+        )
+
+    def _evaluate_longitude_of_central_meridian(self, val):
+        """
+        Evaluate the condition for `longitude_of_central_meridian` attribute.
+        Return result.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple (bool, msg)
+        """
+
+        return (
+            (val >= -180.) and (val <= 180.),
+            'longitude_of_central_meridian must satisfy (-180 <= x <= 180)'
+        )
+
+    def _evaluate_longitude_of_prime_meridian(self, val):
+        """
+        Evaluate the condition for `longitude_of_prime_meridian` attribute.
+        Return result.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple (bool, msg)
+        """
+
+        return (
+            (val >= -180.) and (val <= 180.),
+            'longitude_of_prime_meridian must satisfy (-180 <= x <= 180)'
+        )
+
+    def _evaluate_scale_factor_at_central_meridian(self, val):
+        """
+        Evaluate the condition for `scale_factor_at_central_meridian` attribute.
+        Return result.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple (bool, msg)
+        """
+
+        return (
+            val > 0.0,
+            'scale_factor_at_central_meridian must be > 0.0'
+        )
+
+    def _evaluate_scale_factor_at_projection_origin(self, val):
+        """
+        Evaluate the condition for `scale_factor_at_projection_origin` attribute.
+        Return result.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple (bool, msg)
+        """
+
+        return (
+            val > 0.0,
+            'scale_factor_at_projection_origin must be > 0.0'
+        )
+
+    def _evaluate_standard_parallel(self, val):
+        """
+        Evaluate the condition for `standard_parallel` attribute. Return result.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple (bool, msg)
+        """
+
+        return (
+            (val >= -90.) and (val <= 90),
+            'standard_parallel must satisfy (-90 <= x <= 90)'
+        )
+
+
+    def _evaluate_straight_vertical_longitude_from_pole(self, val):
+        """
+        Evaluate the condition for `straight_vertical_longitude_from_pole`
+        attribute. Return result.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple (bool, msg)
+        """
+
+        return (
+            (val >= -180.) and (val <= 180),
+            'straight_vertical_longitude_from_pole must satisfy (-180 <= x <= 180)'
+        )
+
     # grid mapping dictionary, appendix F
 
+    def check_grid_mapping(self, ds):
+        """
+        5.6 When the coordinate variables for a horizontal grid are not
+        longitude and latitude, it is required that the true latitude and
+        longitude coordinates be supplied via the coordinates attribute. If in
+        addition it is desired to describe the mapping between the given
+        coordinate variables and the true latitude and longitude coordinates,
+        the attribute grid_mapping may be used to supply this description.
+
+        This attribute is attached to data variables so that variables with
+        different mappings may be present in a single file. The attribute takes
+        a string value which is the name of another variable in the file that
+        provides the description of the mapping via a collection of attached
+        attributes. This variable is called a grid mapping variable and is of
+        arbitrary type since it contains no data. Its purpose is to act as a
+        container for the attributes that define the mapping.
+
+        The one attribute that all grid mapping variables must have is
+        grid_mapping_name which takes a string value that contains the mapping's
+        name. The other attributes that define a specific mapping depend on the
+        value of grid_mapping_name. The valid values of grid_mapping_name along
+        with the attributes that provide specific map parameter values are
+        described in Appendix F, Grid Mappings.
+
+        When the coordinate variables for a horizontal grid are longitude and
+        latitude, a grid mapping variable with grid_mapping_name of
+        latitude_longitude may be used to specify the ellipsoid and prime
+        meridian.
+
+
+        In order to make use of a grid mapping to directly calculate latitude
+        and longitude values it is necessary to associate the coordinate
+        variables with the independent variables of the mapping. This is done by
+        assigning a standard_name to the coordinate variable. The appropriate
+        values of the standard_name depend on the grid mapping and are given in
+        Appendix F, Grid Mappings.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
+        """
+
+        ret_val = OrderedDict()
+        grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
+
+        # Check the grid_mapping attribute to be a non-empty string and that its reference exists
+        for variable in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
+            grid_mapping = getattr(variable, 'grid_mapping', None)
+            defines_grid_mapping = self.get_test_ctx(BaseCheck.HIGH,
+                                                     self.section_titles["5.6"],
+                                                     variable.name)
+            defines_grid_mapping.assert_true((isinstance(grid_mapping, basestring) and grid_mapping),
+                                             "{}'s grid_mapping attribute must be a "+\
+                                             "space-separated non-empty string".format(variable.name))
+
+            if isinstance(grid_mapping, basestring):
+                for grid_var_name in grid_mapping.split():
+                    defines_grid_mapping.assert_true(grid_var_name in ds.variables,
+                                                  "grid mapping variable {} must exist in this dataset".format(variable.name))
+            ret_val[variable.name] = defines_grid_mapping.to_result()
+
+        # Check the grid mapping variables themselves
+        for grid_var_name in grid_mapping_variables:
+            valid_grid_mapping = self.get_test_ctx(BaseCheck.HIGH,
+                                                   self.section_titles["5.6"],
+                                                   grid_var_name)
+            grid_var = ds.variables[grid_var_name]
+
+            grid_mapping_name = getattr(grid_var, 'grid_mapping_name', None)
+
+            # Grid mapping name must be in appendix F
+            valid_grid_mapping.assert_true(grid_mapping_name in self.grid_mapping_dict,
+                                           "{} is not a valid grid_mapping_name.".format(grid_mapping_name)+\
+                                           " See Appendix F for valid grid mappings")
+
+            # The self.grid_mapping_dict has a values of:
+            # - required attributes
+            # - optional attributes (can't check)
+            # - required standard_names defined
+            # - at least one of these attributes must be defined
+
+            # We can't do any of the other grid mapping checks if it's not a valid grid mapping name
+            if grid_mapping_name not in self.grid_mapping_dict:
+                ret_val[grid_mapping_name] = valid_grid_mapping.to_result()
+                continue
+
+            grid_mapping = self.grid_mapping_dict[grid_mapping_name]
+            required_attrs = grid_mapping[0]
+            # Make sure all the required attributes are defined
+            for req in required_attrs:
+                valid_grid_mapping.assert_true(hasattr(grid_var, req),
+                                               "{} is a required attribute for grid mapping {}".format(req, grid_mapping_name))
+
+            # Make sure that exactly one of the exclusive attributes exist
+            if len(grid_mapping) == 4:
+                at_least_attr = grid_mapping[3]
+                number_found = 0
+                for attr in at_least_attr:
+                    if hasattr(grid_var, attr):
+                        number_found += 1
+                valid_grid_mapping.assert_true(number_found == 1,
+                                               "grid mapping {}".format(grid_mapping_name) +\
+                                               "must define exactly one of these attributes: "+\
+                                               "{}".format(' or '.join(at_least_attr)))
+
+            # Make sure that exactly one variable is defined for each of the required standard_names
+            expected_std_names = grid_mapping[2]
+            for expected_std_name in expected_std_names:
+                found_vars = ds.get_variables_by_attributes(standard_name=expected_std_name)
+                valid_grid_mapping.assert_true(len(found_vars) == 1,
+                                               "grid mapping {} requires exactly".format(grid_mapping_name)+\
+                                               "one variable with standard_name "+\
+                                               "{} to be defined".format(expected_std_name))
+
+            # check the types and any other conditions of each of the grid
+            # mapping attributes
+            for _attr_name in ds.variables[grid_var_name].ncattrs():
+
+                # only check type and condition if attr exists in standard
+                if self.grid_mapping_attr_types.get(_attr_name, None):
+
+                    # get the type check result as a tuple (bool, str|None)
+                    _type_check = self.check_grid_mapping_attr_type(
+                        _attr_name,
+                        getattr(ds.variables[grid_var_name], _attr_name),   # get value
+                        self.grid_mapping_attr_types[_attr_name].get(
+                            'type', None
+                        ),                                                  # get type str
+                        ds.variables[grid_var_name],                        # variable
+                    )
+
+                    # add to existing TestCtx
+                    valid_grid_mapping.assert_true(
+                        _type_check[0], # bool
+                        _type_check[1]  # message
+                    )
+
+                    # condition checking -----------------------------------------------
+                    if self.grid_mapping_attr_types[_attr_name].get(
+                        'extra_condition', False):
+                        _condition_check = self.check_grid_mapping_attr_condition(
+                            getattr(ds.variables[grid_var_name], _attr_name), # get value
+                            _attr_name
+                        )
+
+                        # add to existing TextCtx
+                        valid_grid_mapping.assert_true(
+                            _condition_check[0], # bool
+                            _condition_check[1], # message
+                        )
+                    # ------------------------------------------------------------------
+
+            ret_val[grid_var_name] = valid_grid_mapping.to_result()
+
+        return ret_val
 
     ###############################################################################
     # Chapter 6: Labels and Alternative Coordinates
@@ -3693,6 +4064,7 @@ class CF1_7Check(CF1_6Check):
 
         self.cell_methods = cell_methods17
         self.grid_mapping_dict = grid_mapping_dict17
+        self.grid_mapping_attr_types = grid_mapping_attr_types17
 
     def check_actual_range(self, ds):
         """Check the actual_range attribute of variables. As stated in
@@ -3953,6 +4325,288 @@ class CF1_7Check(CF1_6Check):
 
         return ret_val
 
+    def check_grid_mapping_attr_condition(self, attr, attr_name):
+        """
+        Evaluate a condition (or series of conditions) for a particular
+        attribute. Implementation for CF-1.7.
+
+        :param attr: attribute to teset condition for
+        :param str attr_name: name of the attribute
+        :rtype tuple
+        :return two-tuple of (bool, str)
+        """
+
+        if attr_name == 'geographic_crs_name':
+            return self._evaluate_geographic_crs_name(attr)
+
+        elif attr_name == 'geoid_name':
+            return self._evaluate_geoid_name(attr)
+
+        elif attr_name == 'geopotential_datum_name':
+            return self._evaluate_geopotential_datum_name(attr)
+
+        elif attr_name == 'horizontal_datum_name':
+            return self._evaluate_horizontal_datum_name(attr)
+
+        elif attr_name == 'prime_meridian_name':
+            return self._evaluate_prime_meridian_name(attr)
+
+        elif attr_name == 'projected_crs_name':
+            return self._evaluate_projected_crs_name(attr)
+
+        elif attr_name == 'reference_ellipsoid_name':
+            return self._evaluate_reference_ellipsoid_name(attr)
+
+        elif attr_name == 'towgs84':
+            return self._evaluate_towgs84(attr)
+
+        else: # invoke method from 1.6, as these names are all still valid
+            return super(CF1_7Check, self).check_grid_mapping_attr_condition(attr, attr_name)
+
+    def _check_gmattr_existence_condition_geoid_name_geoptl_datum_name(self, var):
+        """
+        Check to see if both geoid_name and geopotential_datum_name exist as attributes
+        for `var`. They should not.
+
+        :param netCDF4.Variable var
+        :rtype tuple
+        :return two-tuple (bool, str)
+        """
+
+        msg = 'Both geoid_name and geopotential_datum_name cannot exist'
+
+        if ('geoid_name' in var.ncattrs()) and ('geopotential_datum_name' in var.ncattrs()):
+            return (False, msg)
+
+        else:
+            return (True, msg)
+
+    def _check_gmattr_existence_condition_ell_pmerid_hdatum(self, var):
+        """
+        If one of reference_ellipsoid_name, prime_meridian_name, or
+        horizontal_datum_name are defined as grid_mapping attributes,
+        they must all be defined.
+
+        :param netCDF4.Variable var
+        :rtype tuple
+        :return two-tuple (bool, str)
+        """
+
+        msg = ("If any of reference_ellipsoid_name, prime_meridian_name, "
+               "or horizontal_datum_name are defined, all must be defined.")
+
+        _ncattrs = set(var.ncattrs())
+
+        if any(
+            [
+                x in _ncattrs for x in [
+                    'reference_ellipsoid_name',
+                    'prime_meridian_name', 
+                    'horizontal_datum_name'
+                ]
+            ]) and (not set(
+                [
+                    'reference_ellipsoid_name',
+                    'prime_meridian_name',
+                    'horizontal_datum_name'
+                ]
+            ).issubset(_ncattrs)):
+            return (False, msg)
+
+        else:
+            return (True, msg)
+        
+
+    def _get_projdb_conn(self):
+        """
+        Return a SQLite Connection to the PROJ database.
+
+        Returns:
+            sqlite3.Connection
+        """
+
+        proj_db_path = os.path.join(pyproj.datadir.get_data_dir(), 'proj.db')
+        return sqlite3.connect(proj_db_path)
+
+    def _exec_query_str_with_params(self, qstr, argtuple):
+        """
+        Execute a query string in a database connection with the given argument
+        tuple. Return a result set.
+
+        :param str qstr: desired query to be exectued
+        :param tuple argtuple: tuple of arguments to be supplied to query
+        :rtype set
+        """
+
+        conn = self._get_projdb_conn()
+        return conn.execute(qstr, argtuple)
+
+    def _evaluate_geographic_crs_name(self, val):
+        """
+        Evalute the condition for the geographic_crs_name attribute.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple of (bool, str)
+        """
+
+        query_str = ('SELECT 1 FROM geodetic_crs WHERE name = ? '
+                     'UNION ALL ' # need union in case contained in other tables
+                     'SELECT 1 FROM alias_name WHERE alt_name = ? '
+                     'AND table_name = \'geodetic_crs\' LIMIT 1')
+       
+        # try to find the value in the database
+        res_set = self._exec_query_str_with_params(query_str, (val, val))
+
+        # does it exist? if so, amt returned  be > 1
+        return (
+            len(res_set.fetchall()) > 0,
+            'geographic_crs_name must correspond to a valid OGC WKT GEOGCS name'
+        )
+
+    def _evaluate_geoid_name(self, val):
+        """
+        Evalute the condition for the geod_name attribute.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple of (bool, str)
+        """
+
+        query_str = ('SELECT 1 FROM vertical_datum WHERE name = ? ' 
+                     'UNION ALL '
+                     'SELECT 1 FROM alias_name WHERE alt_name = ? '
+                     'AND table_name = \'vertical_datum\' LIMIT 1')
+
+        # try to find the value in the database
+        res_set = self._exec_query_str_with_params(query_str, (val, val))
+
+        return (
+            len(res_set.fetchall()) > 0,
+            'geoid_name must correspond to a valid OGC WKT VERT_DATUM name'
+        )
+
+    def _evaluate_geopotential_datum_name(self, val):
+        """
+        Evalute the condition for the geogpotential_datum_name attribute.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple of (bool, str)
+        """
+
+        query_str = ('SELECT 1 FROM vertical_datum WHERE name = ? ' 
+                     'UNION ALL '
+                     'SELECT 1 FROM alias_name WHERE alt_name = ? '
+                     'AND table_name = \'vertical_datum\' LIMIT 1')
+
+        # try to find the value in the database
+        res_set = self._exec_query_str_with_params(query_str, (val, val))
+
+        return (
+            len(res_set.fetchall()) > 0,
+            'geopotential_datum_name must correspond to a valid OGC WKT VERT_DATUM name'
+        )
+
+    def _evaluate_horizontal_datum_name(self, val):
+        """
+        Evalute the condition for the horizontal_datum_name attribute.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple of (bool, str)
+        """
+
+        return (
+            val in horizontal_datum_names17,
+            ('{} must be a valid Horizontal Datum Name; '
+
+             'see https://github.com/cf-convention/cf-conventions/wiki/Mapping-from-CF-Grid-Mapping-Attributes-to-CRS-WKT-Elements.')
+        )
+
+    def _evaluate_prime_meridian_name(self, val):
+        """
+        Evaluate the condition for the prime_meridian_name.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple of (bool, str)
+        """
+
+        return (
+            val in prime_meridian_names17,
+            ('{} must be a valid Prime Meridian name; '
+             'see https://github.com/cf-convention/cf-conventions/wiki/csv/prime_meridian.csv.')
+        )
+
+    def _evaluate_projected_crs_name(self, val):
+        """
+        Evaluate the condition for the projected_crs attribute.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple of (bool, str)
+        """
+
+        query_str = ('SELECT 1 FROM projected_crs WHERE name = ? ' 
+                     'UNION ALL '
+                     'SELECT 1 FROM alias_name WHERE alt_name = ? '
+                     'AND table_name = \'projected_crs\' LIMIT 1')
+
+        # try to find the value in the database
+        res_set = self._exec_query_str_with_params(query_str, (val, val))
+
+        return (
+            len(res_set.fetchall()) > 0,
+            'projected_crs_name must correspond to a valid OGC WKT PROJCS name'
+        )
+
+    def _evaluate_reference_ellipsoid_name(self, val):
+        """
+        Evaluate the condition for the reference_ellipsoid_name attribute.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple of (bool, str)
+        """
+
+        return (
+            val in ellipsoid_names17,
+            ('{} must be a valid Ellipsoid Name; '
+             'see https://github.com/cf-convention/cf-conventions/wiki/csv/ellipsoid.csv.')
+        )
+
+    def _evaluate_towgs84(self, val):
+        """
+        Evaluate the condition for the towgs84 attribute.
+
+        :param val: value to be tested
+        :rtype tuple
+        :return two-tuple of (bool, str)
+        """
+
+        msg = ('towgs84 must be an array of length 3, 6, or 7 of double-precision'
+               ' and correspond to anm OGC WKT TOWGS84 node')
+
+        # if not numpy type, return false
+        if not getattr(val, 'dtype', None):
+            return (False, msg)
+
+        # must be double-precision array
+        elif val.dtype != np.float64:
+            return (False, msg)
+
+        # must be of length 3, 6, or 7
+        elif not val.shape: # single value
+            return (False, msg)
+
+        elif (not (val.size in (3, 6, 7))):
+            return (False, msg)
+
+        else:
+            return (True, msg)
+
+
     def check_grid_mapping(self, ds):
         __doc__ = super(CF1_7Check, self).check_grid_mapping.__doc__
         prev_return = super(CF1_7Check, self).check_grid_mapping(ds)
@@ -3981,7 +4635,14 @@ class CF1_7Check(CF1_6Check):
                         test_ctx.score += 1
                     test_ctx.out_of += 1
 
-
+            # existence_conditions
+            exist_cond_1 = self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(var)
+            test_ctx.assert_true(
+                exist_cond_1[0], exist_cond_1[1])
+            exist_cond_2 = self._check_gmattr_existence_condition_ell_pmerid_hdatum(var)
+            test_ctx.assert_true(
+                exist_cond_2[0], exist_cond_2[1])
+            
             # handle vertical datum related grid_mapping attributes
             vert_datum_attrs = {}
             possible_vert_datum_attrs = {'geoid_name',

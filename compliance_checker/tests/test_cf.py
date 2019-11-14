@@ -905,6 +905,105 @@ class TestCF1_6(BaseTestCase):
         expected_name = u'§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections'
         assert all(r.name == expected_name for r in results.values())
 
+    def test_check_grid_mapping_attr_type(self):
+        """
+        Check that the check_grid_mapping_attr_type method checks
+        grid_mapping attribute types correctly.
+        """
+
+        # test good
+        att_name = 'test_att'
+        att = np.int64(45)
+        att_type = 'N' # numeric
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        self.assertTrue(res[0])
+        self.assertEqual(res[1], None)
+
+        att_name = 'test_att'
+        att = np.int64(45)
+        x = np.int64(45) # the variable
+        att_type = 'D' # numeric, types should match
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type, x)
+        self.assertTrue(res[0])
+        self.assertEqual(res[1], None)
+
+        att_name = 'test_att'
+        att = 'yo'
+        att_type = 'S' # string
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        self.assertTrue(res[0])
+        self.assertEqual(res[1], None)
+
+        att_name = 'test_att'
+        att = np.float64(45)
+        att_type = 'D' # string, types should match
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type, np.float64(95))
+        self.assertTrue(res[0])
+        self.assertEqual(res[1], None)
+        
+        # test bad
+        att_name = 'test_att'
+        att = np.int64(45)
+        att_type = 'S' # string, but att type is numeric
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        self.assertFalse(res[0])
+        self.assertEqual(res[1], "test_att must be a string")
+
+        # test bad
+        att_name = 'test_att'
+        att = 'bad'
+        att_type = 'N' # numeric, but att type is string
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        self.assertFalse(res[0])
+        self.assertEqual(res[1], "test_att must be a numeric numpy datatype")
+
+        att_name = 'test_att'
+        att = np.int32(2)
+        att_type = 'D' # should be same datatypes
+        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type, np.float32(2))
+        self.assertFalse(res[0])
+        self.assertEqual(res[1], "test_att must be numeric and must match float32 dtype")
+
+    def test_check_grid_mapping_attr_condition(self):
+        """
+        Ensure the check_grid_mapping_attr_condition() method works as expected.
+        """
+
+        # test passes
+        attr_name = 'latitude_of_projection_origin'
+        val = 0
+        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        self.assertTrue(res[0])
+
+        attr_name = 'longitude_of_projection_origin'
+        val = 0
+        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        self.assertTrue(res[0])
+
+        attr_name = 'longitude_of_prime_meridian'
+        val = 0
+        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        self.assertTrue(res[0])
+
+        attr_name = 'scale_factor_at_central_meridian'
+        val = 1
+        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        self.assertTrue(res[0])
+
+        attr_name = 'scale_factor_at_projection_origin'
+        val = 1
+        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        self.assertTrue(res[0])
+
+        attr_name = 'standard_parallel'
+        val = 0
+        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        self.assertTrue(res[0])
+
+        attr_name = 'straight_vertical_longitude_from_pole'
+        val = 0
+        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        self.assertTrue(res[0])
 
     def test_check_geographic_region(self):
         dataset = self.load_dataset(STATIC_FILES['bad_region'])
@@ -1598,3 +1697,170 @@ class TestCF1_7(BaseTestCase):
         variable = np.int64(45) # mismatching numpy types
         self.assertFalse(self.cf._check_attr_type(
             attr, attr_type, variable)[0])
+
+    def test_check_grid_mapping_attr_condition(self):
+        """
+        Ensure the CF-1.7 implementation of check_grid_mapping_attr_condition()
+        works as expected.
+        """
+
+        # test good
+
+        att_name = 'horizontal_datum_name'
+        att = 'Monte Mario (Rome)'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertTrue(res[0])
+
+        att_name = 'prime_meridian_name'
+        att = 'Athens'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertTrue(res[0])
+
+        att_name = 'reference_ellipsoid_name'
+        att = 'Airy 1830'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertTrue(res[0])
+
+        att_name = 'towgs84'
+        att = np.array([0, 0, 0], dtype=np.float64) # len 3
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertTrue(res[0])
+        
+        att_name = 'towgs84'
+        att = np.array([0, 0, 0, 0, 0, 0], dtype=np.float64) # len 6
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertTrue(res[0])
+
+        att_name = 'towgs84'
+        att = np.array([0, 0, 0, 0, 0, 0, 0], dtype=np.float64) # len 7
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertTrue(res[0])
+
+        att_name = 'geographic_crs_name'
+        att = 'NAD83(CSRS98)'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertTrue(res[0])
+
+        att_name = 'geoid_name'
+        att = 'Mayotte 1950'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertTrue(res[0])
+
+        att_name = 'geopotential_datum_name'
+        att = 'NAVD88'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertTrue(res[0])
+
+        att_name = 'projected_crs_name'
+        att = 'Anguilla 1957 / British West Indies Grid'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertTrue(res[0])
+
+        # test bad
+
+        att_name = 'horizontal_datum_name'
+        att = 'bad'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertFalse(res[0])
+
+        att_name = 'prime_meridian_name'
+        att = 'bad'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertFalse(res[0])
+
+        att_name = 'reference_ellipsoid_name'
+        att = 'goofy goober'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertFalse(res[0])
+
+        att_name = 'towgs84'
+        att = np.array([0, 0, 0], dtype=np.int64) # len 3, wrong dtype
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertFalse(res[0])
+
+        att_name = 'towgs84'
+        att = np.array([0, 0, 0, 0], dtype=np.int64) # len 4
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertFalse(res[0])
+
+        att_name = 'towgs84'
+        att = np.float64(0) # single value, right dtype
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertFalse(res[0])
+
+        att_name = 'geographic_crs_name'
+        att = 'badbadbadbadbadnotinhere'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertFalse(res[0])
+
+        att_name = 'geoid_name'
+        att = 'yooooooo'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertFalse(res[0])
+
+        att_name = 'geopotential_datum_name'
+        att = 'NAVBAD BAD'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertFalse(res[0])
+
+        att_name = 'projected_crs_name'
+        att = 'Teddy Bruschi'
+        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        self.assertFalse(res[0])
+
+
+    def test_check_gmattr_existence_condition_geoid_name_geoptl_datum_name(self):
+        # create mock dataset for test; create three variables, one as dimensionless
+
+        # test good (either-or)
+        dataset = MockTimeSeries()
+        dataset.createVariable('lev', 'd') # dtype=double, dims=1
+        dataset.variables['lev'].setncattr('geoid_name', 'blah')
+        res = self.cf._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(dataset.variables['lev'])
+        self.assertTrue(res[0])
+        dataset.close()
+
+        dataset = MockTimeSeries()
+        dataset.createVariable('lev', 'd') # dtype=double, dims=1
+        dataset.variables['lev'].setncattr('geopotential_datum_name', 'blah')
+        res = self.cf._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(dataset.variables['lev'])
+        self.assertTrue(res[0])
+        dataset.close()
+
+        # bad
+        dataset = MockTimeSeries()
+        dataset.createVariable('lev', 'd') # dtype=double, dims=1
+        dataset.variables['lev'].setncattr('geopotential_datum_name', 'blah')
+        dataset.variables['lev'].setncattr('geoid_name', 'blah')
+        res = self.cf._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(dataset.variables['lev'])
+        self.assertFalse(res[0])
+        dataset.close()
+
+    def test_check_gmattr_existence_condition_ell_pmerid_hdatum(self):
+
+        # test good (all)
+        dataset = MockTimeSeries()
+        dataset.createVariable('lev', 'd') # dtype=double, dims=1
+        dataset.variables['lev'].setncattr('reference_ellipsoid_name', 'blah')
+        dataset.variables['lev'].setncattr('prime_meridian_name', 'blah')
+        dataset.variables['lev'].setncattr('horizontal_datum_name', 'blah')
+        res = self.cf._check_gmattr_existence_condition_ell_pmerid_hdatum(dataset.variables['lev'])
+        self.assertTrue(res[0])
+        dataset.close()
+
+        # test bad (not all)
+        dataset = MockTimeSeries()
+        dataset.createVariable('lev', 'd') # dtype=double, dims=1
+        dataset.variables['lev'].setncattr('reference_ellipsoid_name', 'blah')
+        res = self.cf._check_gmattr_existence_condition_ell_pmerid_hdatum(dataset.variables['lev'])
+        self.assertFalse(res[0])
+        dataset.close()
+
+        # test bad (not all)
+        dataset = MockTimeSeries()
+        dataset.createVariable('lev', 'd') # dtype=double, dims=1
+        dataset.variables['lev'].setncattr('reference_ellipsoid_name', 'blah')
+        dataset.variables['lev'].setncattr('prime_meridian_name', 'blah')
+        res = self.cf._check_gmattr_existence_condition_ell_pmerid_hdatum(dataset.variables['lev'])
+        self.assertFalse(res[0])
+        dataset.close()
