@@ -1395,6 +1395,31 @@ class TestCF1_7(BaseTestCase):
          'false_easting is a required attribute for grid mapping stereographic'])
         self.assertEqual(msg_len, 0)
 
+    def test_check_grid_mapping_coordinates(self):
+        """
+        Checks that coordinates variables referred to by a grid mapping
+        are well-formed and exist.
+        """
+        dataset = self.load_dataset(STATIC_FILES['grid_mapping_coordinates'])
+        valid_grid_mapping = copy.deepcopy(self.cf)
+        valid_grid_mapping_2 = copy.deepcopy(self.cf)
+        dataset.variables['temp'] = MockVariable(dataset.variables['temp'])
+        results = self.cf.check_grid_mapping(dataset)
+        self.assertEqual(results['temp'].value[0], results['temp'].value[1])
+        malformed_sep = "crsOSGB: x y : lat lon"
+        dataset.variables['temp'].grid_mapping = malformed_sep
+        results = valid_grid_mapping.check_grid_mapping(dataset)
+        self.assertIn("Could not consume entire grid_mapping expression, please check for well-formedness",
+                      results['temp'].msgs)
+        self.assertLess(*results['temp'].value)
+        malformed_var = "crsOSGB: x y_null z_null"
+        dataset.variables['temp'].grid_mapping = malformed_var
+        results = valid_grid_mapping_2.check_grid_mapping(dataset)
+        self.assertEqual(['Coordinate-related variable y_null referenced by grid_mapping variable crsOSGB must exist in this dataset',
+                          'Coordinate-related variable z_null referenced by grid_mapping variable crsOSGB must exist in this dataset'],
+                         results['temp'].msgs)
+        self.assertLess(*results['temp'].value)
+
     def test_check_grid_mapping_vert_datum_geoid_name(self):
         """Checks that geoid_name works proerly"""
         dataset = self.load_dataset(STATIC_FILES['mapping'])
@@ -1473,7 +1498,7 @@ class TestCF1_7(BaseTestCase):
             dataset.createVariable('lev', 'd') # dtype=double, dims=1
             dataset.variables['lev'].setncattr('standard_name', 'atmosphere_sigma_coordinate')
             dataset.variables['lev'].setncattr('formula_terms', 'sigma: lev ps: PS ptop: PTOP')
-            
+
             dataset.createVariable('PS', 'd', ('time',)) # dtype=double, dims=time
             dataset.createVariable('PTOP', 'd', ('time',)) # dtype=double, dims=time
 
@@ -1500,7 +1525,7 @@ class TestCF1_7(BaseTestCase):
             # computed_standard_name is assigned, should pass
             score, out_of, messages = get_results(ret_val)
             assert score == out_of
-        
+
     def test_dimensionless_vertical(self):
         '''
         Section 4.3.2 check, but for CF-1.7 implementation. With the refactor in

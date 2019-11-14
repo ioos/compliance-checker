@@ -52,6 +52,7 @@ STATIC_FILES = {
     'ghrsst'                               : get_filename('tests/data/20160919092000-ABOM-L3S_GHRSST-SSTfnd-AVHRR_D-1d_dn_truncate.cdl'),
     'glcfs'                                : get_filename('tests/data/examples/glcfs.cdl'),
     'grid-boundaries'                      : get_filename('tests/data/grid-boundaries.cdl'),
+    'grid_mapping_coordinates'             : get_filename('tests/data/grid_mapping_coordinates.cdl'),
     'hycom_global'                         : get_filename('tests/data/examples/hycom_global.cdl'),
     'h_point'                              : get_filename('tests/data/appendix_h/point.cdl'),
     'h_timeseries-incomplete'              : get_filename('tests/data/appendix_h/timeseries-incomplete.cdl'),
