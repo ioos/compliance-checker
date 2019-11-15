@@ -3230,12 +3230,13 @@ class CFBaseCheck(BaseCheck):
             # message did not appear in the output of compliance checker if
             # no other error/warning/information was printed out for section
             # 9.1.
+            found = False
             if feature is not None:
                 feature_types_found[feature].append(name)
-            else:
-                all_the_same.assert_true(False,
-                                         "Unidentifiable feature for variable {}"
-                                         "".format(name))
+                found = True
+            all_the_same.assert_true(found,
+                                     "Unidentifiable feature for variable {}"
+                                     "".format(name))
         feature_description = ', '.join(['{} ({})'.format(ftr, ', '.join(vrs)) for ftr, vrs in feature_types_found.items()])
 
         all_the_same.assert_true(len(feature_types_found) < 2,
