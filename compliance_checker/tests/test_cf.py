@@ -1406,6 +1406,31 @@ class TestCF1_7(BaseTestCase):
          'false_easting is a required attribute for grid mapping stereographic'])
         self.assertEqual(msg_len, 0)
 
+    def test_check_grid_mapping_coordinates(self):
+        """
+        Checks that coordinates variables referred to by a grid mapping
+        are well-formed and exist.
+        """
+        dataset = self.load_dataset(STATIC_FILES['grid_mapping_coordinates'])
+        valid_grid_mapping = copy.deepcopy(self.cf)
+        valid_grid_mapping_2 = copy.deepcopy(self.cf)
+        dataset.variables['temp'] = MockVariable(dataset.variables['temp'])
+        results = self.cf.check_grid_mapping(dataset)
+        self.assertEqual(results['temp'].value[0], results['temp'].value[1])
+        malformed_sep = "crsOSGB: x y : lat lon"
+        dataset.variables['temp'].grid_mapping = malformed_sep
+        results = valid_grid_mapping.check_grid_mapping(dataset)
+        self.assertIn("Could not consume entire grid_mapping expression, please check for well-formedness",
+                      results['temp'].msgs)
+        self.assertLess(*results['temp'].value)
+        malformed_var = "crsOSGB: x y_null z_null"
+        dataset.variables['temp'].grid_mapping = malformed_var
+        results = valid_grid_mapping_2.check_grid_mapping(dataset)
+        self.assertEqual(['Coordinate-related variable y_null referenced by grid_mapping variable crsOSGB must exist in this dataset',
+                          'Coordinate-related variable z_null referenced by grid_mapping variable crsOSGB must exist in this dataset'],
+                         results['temp'].msgs)
+        self.assertLess(*results['temp'].value)
+
     def test_check_grid_mapping_vert_datum_geoid_name(self):
         """Checks that geoid_name works proerly"""
         dataset = self.load_dataset(STATIC_FILES['mapping'])
