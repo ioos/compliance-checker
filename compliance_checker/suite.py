@@ -14,6 +14,7 @@ from netCDF4 import Dataset
 from lxml import etree as ET
 from distutils.version import StrictVersion
 from compliance_checker.base import fix_return_value, Result, GenericFile
+from compliance_checker.cf.cf import CFBaseCheck
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from compliance_checker.protocols import opendap, netcdf, cdl
@@ -276,7 +277,7 @@ class CheckSuite(object):
         args = [(name, self.checkers[name]) for name in checker_names if name in self.checkers]
         valid = []
 
-        all_checked = set([a[1] for a in args])  # only class types
+        all_checked = set(a[1] for a in args)  # only class types
         checker_queue = set(args)
         while len(checker_queue):
             name, a = checker_queue.pop()
@@ -750,7 +751,6 @@ class CheckSuite(object):
         @param list raw_scores: list of raw scores (Result objects)
         """
 
-        # BEGIN INTERNAL FUNCS ########################################
         def trim_groups(r):
             if isinstance(r.name, tuple) or isinstance(r.name, list):
                 new_name = r.name[1:]
