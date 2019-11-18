@@ -37,6 +37,12 @@ def read_conda_reqs(fname, options):
                         lines.append(line)
                     else:
                         continue
+                elif 'only python=3' in line:
+                    if 'python=2' not in options:
+                        line = line.replace('(only python=3)', '')
+                        lines.append(line)
+                    else:
+                        continue
                 else:
                     lines.append(line)
             else:
