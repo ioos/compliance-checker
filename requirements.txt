@@ -1,5 +1,5 @@
-OWSLib>=0.8.3,<0.19.0; python_version <= '2'
-OWSLib>=0.8.3; python_version > '2'
+OWSLib>=0.8.3,<0.19.0; python_version <= '2' #conda: OWSLib>=0.8.3,<0.19.0 (only python=2)
+OWSLib>=0.8.3; python_version > '2' #conda: OWSLib>=0.19.0 (only python=3)
 lxml>=3.2.1
 cf_units>=2
 requests>=2.2.1
@@ -12,4 +12,4 @@ regex>=2017.07.28
 pendulum>=1.2.4
 # functools.lru_cache first appears in Python 3.2, use this for other
 # versions
-functools32==3.2.3-2; python_version < '3.2' #conda: functools32  (only python=2)
+functools32==3.2.3-2; python_version < '3.2' #conda: functools32 (only python=2)
