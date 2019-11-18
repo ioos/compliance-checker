@@ -730,7 +730,7 @@ class CFBaseCheck(BaseCheck):
         if attr_type == 'S':
             if not isinstance(attribute, basestring):
                 return [False,
-                        "{} must be a string".format('{}')]
+                        "{} must be a string"]
         else:
             # if it's not a string, it should have a numpy dtype
             underlying_dtype = getattr(attribute, 'dtype', None)
@@ -738,24 +738,23 @@ class CFBaseCheck(BaseCheck):
             # TODO check for np.nan separately
             if underlying_dtype is None:
                 return [False,
-                        "{} must be a numeric numpy datatype".format('{}')]
+                        "{} must be a numeric numpy datatype"]
 
             # both D and N should be some kind of numeric value
             is_numeric = np.issubdtype(underlying_dtype, np.number)
             if attr_type == 'N':
                 if not is_numeric:
                     return [False,
-                            "{} must be numeric".format('{}')]
+                            "{} must be numeric"]
             elif attr_type == 'D':
                 # TODO: handle edge case where variable is unset here
                 var_dtype = getattr(variable, 'dtype', None)
                 if (underlying_dtype != var_dtype):
                     return [False,
-                            "{} must be numeric and must match {} dtype".format('{}', var_dtype)]
+                            "{{}} must be numeric and must match {} dtype".format(var_dtype)]
             else:
                 # If we reached here, we fell off with an unrecognized type
-                return [False, "{} has unrecognized type '{}'".format('{}',
-                                                              attr_type)]
+                return [False, "{{}} has unrecognized type '{}'".format(attr_type)]
         # pass if all other possible failure conditions have been evaluated
         return [True, None]
 
@@ -4049,10 +4048,10 @@ class CF1_7Check(CF1_6Check):
         if attr_name == 'geographic_crs_name':
             return self._evaluate_geographic_crs_name(attr)
 
-        elif attr_name == 'geoid_name': # TODO
+        elif attr_name == 'geoid_name':
             return self._evaluate_geoid_name(attr)
 
-        elif attr_name == 'geopotential_datum_name': # TODO
+        elif attr_name == 'geopotential_datum_name':
             return self._evaluate_geopotential_datum_name(attr)
 
         elif attr_name == 'horizontal_datum_name':
@@ -4067,7 +4066,7 @@ class CF1_7Check(CF1_6Check):
         elif attr_name == 'reference_ellipsoid_name':
             return self._evaluate_reference_ellipsoid_name(attr)
 
-        elif attr_name == 'towgs84': # TODO
+        elif attr_name == 'towgs84':
             return self._evaluate_towgs84(attr)
 
         else: # invoke method from 1.6, as these names are all still valid
@@ -4105,18 +4104,22 @@ class CF1_7Check(CF1_6Check):
         msg = ("If any of reference_ellipsoid_name, prime_meridian_name, "
                "or horizontal_datum_name are defined, all must be defined.")
 
-        if (not all([
-            x in var.ncattrs() for x in [
-                'reference_ellipsoid_name', 'prime_meridian_name',
-                'horizontal_datum_name'
-                ]
-            ])) and (any([
-                x in var.ncattrs() for x in [
-                    'reference_ellipsoid_name', 'prime_meridian_name',
-                    'horizontal_datum_name'
-                    ]
-                ])):
+        _ncattrs = set(var.ncattrs())
 
+        if any(
+            [
+                x in _ncattrs for x in [
+                    'reference_ellipsoid_name',
+                    'prime_meridian_name', 
+                    'horizontal_datum_name'
+                ]
+            ]) and (not set(
+                [
+                    'reference_ellipsoid_name',
+                    'prime_meridian_name',
+                    'horizontal_datum_name'
+                ]
+            ).issubset(_ncattrs)):
             return (False, msg)
 
         else:
@@ -4134,6 +4137,19 @@ class CF1_7Check(CF1_6Check):
         proj_db_path = os.path.join(pyproj.datadir.get_data_dir(), 'proj.db')
         return sqlite3.connect(proj_db_path)
 
+    def _exec_query_str_with_params(self, qstr, argtuple):
+        """
+        Execute a query string in a database connection with the given argument
+        tuple. Return a result set.
+
+        :param str qstr: desired query to be exectued
+        :param tuple argtuple: tuple of arguments to be supplied to query
+        :rtype set
+        """
+
+        conn = self._get_projdb_conn()
+        return conn.execute(qstr, argtuple)
+
     def _evaluate_geographic_crs_name(self, val):
         """
         Evalute the condition for the geographic_crs_name attribute.
@@ -4143,20 +4159,17 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        conn = self._get_projdb_conn()
         query_str = ('SELECT 1 FROM geodetic_crs WHERE name = ? '
                      'UNION ALL ' # need union in case contained in other tables
                      'SELECT 1 FROM alias_name WHERE alt_name = ? '
                      'AND table_name = \'geodetic_crs\' LIMIT 1')
        
         # try to find the value in the database
-        res_set = conn.execute(query_str, (val, val))
+        res_set = self._exec_query_str_with_params(query_str, (val, val))
 
         # does it exist? if so, amt returned  be > 1
-        res = len(res_set.fetchall()) > 0
-
         return (
-            res,
+            len(res_set.fetchall()) > 0,
             'geographic_crs_name must correspond to a valid OGC WKT GEOGCS name'
         )
 
@@ -4169,20 +4182,16 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        conn = self._get_projdb_conn()
         query_str = ('SELECT 1 FROM vertical_datum WHERE name = ? ' 
                      'UNION ALL '
                      'SELECT 1 FROM alias_name WHERE alt_name = ? '
                      'AND table_name = \'vertical_datum\' LIMIT 1')
 
         # try to find the value in the database
-        res_set = conn.execute(query_str, (val, val))
-
-        # does it exist? if so, amt returned  be > 1
-        res = len(res_set.fetchall()) > 0
+        res_set = self._exec_query_str_with_params(query_str, (val, val))
 
         return (
-            res,
+            len(res_set.fetchall()) > 0,
             'geoid_name must correspond to a valid OGC WKT VERT_DATUM name'
         )
 
@@ -4195,20 +4204,16 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        conn = self._get_projdb_conn()
         query_str = ('SELECT 1 FROM vertical_datum WHERE name = ? ' 
                      'UNION ALL '
                      'SELECT 1 FROM alias_name WHERE alt_name = ? '
                      'AND table_name = \'vertical_datum\' LIMIT 1')
 
         # try to find the value in the database
-        res_set = conn.execute(query_str, (val, val))
-
-        # does it exist? if so, amt returned  be > 1
-        res = len(res_set.fetchall()) > 0
+        res_set = self._exec_query_str_with_params(query_str, (val, val))
 
         return (
-            res,
+            len(res_set.fetchall()) > 0,
             'geopotential_datum_name must correspond to a valid OGC WKT VERT_DATUM name'
         )
 
@@ -4252,20 +4257,16 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        conn = self._get_projdb_conn()
         query_str = ('SELECT 1 FROM projected_crs WHERE name = ? ' 
                      'UNION ALL '
                      'SELECT 1 FROM alias_name WHERE alt_name = ? '
                      'AND table_name = \'projected_crs\' LIMIT 1')
 
         # try to find the value in the database
-        res_set = conn.execute(query_str, (val, val))
-
-        # does it exist? if so, amt returned  be > 1
-        res = len(res_set.fetchall()) > 0
+        res_set = self._exec_query_str_with_params(query_str, (val, val))
 
         return (
-            res,
+            len(res_set.fetchall()) > 0,
             'projected_crs_name must correspond to a valid OGC WKT PROJCS name'
         )
 
@@ -4308,7 +4309,7 @@ class CF1_7Check(CF1_6Check):
         elif not val.shape: # single value
             return (False, msg)
 
-        elif not any([(val.shape[0] == 3) or (val.shape[0] == 6) or (val.shape[0] == 7)]):
+        elif (not (val.size in (3, 6, 7))):
             return (False, msg)
 
         else:
