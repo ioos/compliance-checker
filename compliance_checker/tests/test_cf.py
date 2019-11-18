@@ -955,7 +955,7 @@ class TestCF1_6(BaseTestCase):
         att_type = 'N' # numeric, but att type is string
         res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
         self.assertFalse(res[0])
-        self.assertEqual(res[1], "test_att must be a numeric numpy datatype")
+        self.assertEqual(res[1], "test_att must be a numeric type")
 
         att_name = 'test_att'
         att = np.int32(2)

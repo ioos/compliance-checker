@@ -400,7 +400,7 @@ class CFBaseCheck(BaseCheck):
         :rtype tuple
         :return two-tuple of (bool, str|None)
         """
-        raise NotImplementedError 
+        raise NotImplementedError
 
     def check_grid_mapping_attr_condition(self, attr, attr_name, ret_val):
         """
@@ -968,14 +968,14 @@ class CFBaseCheck(BaseCheck):
             # TODO check for np.nan separately
             if underlying_dtype is None:
                 return [False,
-                        "{} must be a numeric numpy datatype"]
+                        "{} must be a numeric type"]
 
             # both D and N should be some kind of numeric value
             is_numeric = np.issubdtype(underlying_dtype, np.number)
             if attr_type == 'N':
                 if not is_numeric:
                     return [False,
-                            "{} must be numeric"]
+                            "{} must be a numeric type"]
             elif attr_type == 'D':
                 # TODO: handle edge case where variable is unset here
                 var_dtype = getattr(variable, 'dtype', None)
@@ -2805,7 +2805,7 @@ class CF1_6Check(CFNCCheck):
 
     def check_grid_mapping_attr_type(self, attr_name, attr, attr_type, variable=None):
         """
-        Check the type of an attribute. Wrapper function, 
+        Check the type of an attribute. Wrapper function,
         implemented for CF-1.6.
 
         :param str attr_name: name of attribute
@@ -2816,7 +2816,7 @@ class CF1_6Check(CFNCCheck):
         :return two-tuple of (bool, str|None)
         """
 
-        # get check result, list [bool, str|None] 
+        # get check result, list [bool, str|None]
         _res = self._check_attr_type(attr, attr_type, variable)
 
         # fully format the message if it needs it
@@ -2988,161 +2988,6 @@ class CF1_6Check(CFNCCheck):
 
     # grid mapping dictionary, appendix F
 
-    def check_grid_mapping(self, ds):
-        """
-        5.6 When the coordinate variables for a horizontal grid are not
-        longitude and latitude, it is required that the true latitude and
-        longitude coordinates be supplied via the coordinates attribute. If in
-        addition it is desired to describe the mapping between the given
-        coordinate variables and the true latitude and longitude coordinates,
-        the attribute grid_mapping may be used to supply this description.
-
-        This attribute is attached to data variables so that variables with
-        different mappings may be present in a single file. The attribute takes
-        a string value which is the name of another variable in the file that
-        provides the description of the mapping via a collection of attached
-        attributes. This variable is called a grid mapping variable and is of
-        arbitrary type since it contains no data. Its purpose is to act as a
-        container for the attributes that define the mapping.
-
-        The one attribute that all grid mapping variables must have is
-        grid_mapping_name which takes a string value that contains the mapping's
-        name. The other attributes that define a specific mapping depend on the
-        value of grid_mapping_name. The valid values of grid_mapping_name along
-        with the attributes that provide specific map parameter values are
-        described in Appendix F, Grid Mappings.
-
-        When the coordinate variables for a horizontal grid are longitude and
-        latitude, a grid mapping variable with grid_mapping_name of
-        latitude_longitude may be used to specify the ellipsoid and prime
-        meridian.
-
-
-        In order to make use of a grid mapping to directly calculate latitude
-        and longitude values it is necessary to associate the coordinate
-        variables with the independent variables of the mapping. This is done by
-        assigning a standard_name to the coordinate variable. The appropriate
-        values of the standard_name depend on the grid mapping and are given in
-        Appendix F, Grid Mappings.
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: list
-        :return: List of results
-        """
-
-        ret_val = OrderedDict()
-        grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
-
-        # Check the grid_mapping attribute to be a non-empty string and that its reference exists
-        for variable in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
-            grid_mapping = getattr(variable, 'grid_mapping', None)
-            defines_grid_mapping = self.get_test_ctx(BaseCheck.HIGH,
-                                                     self.section_titles["5.6"],
-                                                     variable.name)
-            defines_grid_mapping.assert_true((isinstance(grid_mapping, basestring) and grid_mapping),
-                                             "{}'s grid_mapping attribute must be a "+\
-                                             "space-separated non-empty string".format(variable.name))
-
-            if isinstance(grid_mapping, basestring):
-                for grid_var_name in grid_mapping.split():
-                    defines_grid_mapping.assert_true(grid_var_name in ds.variables,
-                                                  "grid mapping variable {} must exist in this dataset".format(variable.name))
-            ret_val[variable.name] = defines_grid_mapping.to_result()
-
-        # Check the grid mapping variables themselves
-        for grid_var_name in grid_mapping_variables:
-            valid_grid_mapping = self.get_test_ctx(BaseCheck.HIGH,
-                                                   self.section_titles["5.6"],
-                                                   grid_var_name)
-            grid_var = ds.variables[grid_var_name]
-
-            grid_mapping_name = getattr(grid_var, 'grid_mapping_name', None)
-
-            # Grid mapping name must be in appendix F
-            valid_grid_mapping.assert_true(grid_mapping_name in self.grid_mapping_dict,
-                                           "{} is not a valid grid_mapping_name.".format(grid_mapping_name)+\
-                                           " See Appendix F for valid grid mappings")
-
-            # The self.grid_mapping_dict has a values of:
-            # - required attributes
-            # - optional attributes (can't check)
-            # - required standard_names defined
-            # - at least one of these attributes must be defined
-
-            # We can't do any of the other grid mapping checks if it's not a valid grid mapping name
-            if grid_mapping_name not in self.grid_mapping_dict:
-                ret_val[grid_mapping_name] = valid_grid_mapping.to_result()
-                continue
-
-            grid_mapping = self.grid_mapping_dict[grid_mapping_name]
-            required_attrs = grid_mapping[0]
-            # Make sure all the required attributes are defined
-            for req in required_attrs:
-                valid_grid_mapping.assert_true(hasattr(grid_var, req),
-                                               "{} is a required attribute for grid mapping {}".format(req, grid_mapping_name))
-
-            # Make sure that exactly one of the exclusive attributes exist
-            if len(grid_mapping) == 4:
-                at_least_attr = grid_mapping[3]
-                number_found = 0
-                for attr in at_least_attr:
-                    if hasattr(grid_var, attr):
-                        number_found += 1
-                valid_grid_mapping.assert_true(number_found == 1,
-                                               "grid mapping {}".format(grid_mapping_name) +\
-                                               "must define exactly one of these attributes: "+\
-                                               "{}".format(' or '.join(at_least_attr)))
-
-            # Make sure that exactly one variable is defined for each of the required standard_names
-            expected_std_names = grid_mapping[2]
-            for expected_std_name in expected_std_names:
-                found_vars = ds.get_variables_by_attributes(standard_name=expected_std_name)
-                valid_grid_mapping.assert_true(len(found_vars) == 1,
-                                               "grid mapping {} requires exactly".format(grid_mapping_name)+\
-                                               "one variable with standard_name "+\
-                                               "{} to be defined".format(expected_std_name))
-
-            # check the types and any other conditions of each of the grid
-            # mapping attributes
-            for _attr_name in ds.variables[grid_var_name].ncattrs():
-
-                # only check type and condition if attr exists in standard
-                if self.grid_mapping_attr_types.get(_attr_name, None):
-
-                    # get the type check result as a tuple (bool, str|None)
-                    _type_check = self.check_grid_mapping_attr_type(
-                        _attr_name,
-                        getattr(ds.variables[grid_var_name], _attr_name),   # get value
-                        self.grid_mapping_attr_types[_attr_name].get(
-                            'type', None
-                        ),                                                  # get type str
-                        ds.variables[grid_var_name],                        # variable
-                    )
-
-                    # add to existing TestCtx
-                    valid_grid_mapping.assert_true(
-                        _type_check[0], # bool
-                        _type_check[1]  # message
-                    )
-
-                    # condition checking -----------------------------------------------
-                    if self.grid_mapping_attr_types[_attr_name].get(
-                        'extra_condition', False):
-                        _condition_check = self.check_grid_mapping_attr_condition(
-                            getattr(ds.variables[grid_var_name], _attr_name), # get value
-                            _attr_name
-                        )
-
-                        # add to existing TextCtx
-                        valid_grid_mapping.assert_true(
-                            _condition_check[0], # bool
-                            _condition_check[1], # message
-                        )
-                    # ------------------------------------------------------------------
-
-            ret_val[grid_var_name] = valid_grid_mapping.to_result()
-
-        return ret_val
 
     ###############################################################################
     # Chapter 6: Labels and Alternative Coordinates
@@ -4401,7 +4246,7 @@ class CF1_7Check(CF1_6Check):
             [
                 x in _ncattrs for x in [
                     'reference_ellipsoid_name',
-                    'prime_meridian_name', 
+                    'prime_meridian_name',
                     'horizontal_datum_name'
                 ]
             ]) and (not set(
@@ -4415,7 +4260,7 @@ class CF1_7Check(CF1_6Check):
 
         else:
             return (True, msg)
-        
+
 
     def _get_projdb_conn(self):
         """
@@ -4454,7 +4299,7 @@ class CF1_7Check(CF1_6Check):
                      'UNION ALL ' # need union in case contained in other tables
                      'SELECT 1 FROM alias_name WHERE alt_name = ? '
                      'AND table_name = \'geodetic_crs\' LIMIT 1')
-       
+
         # try to find the value in the database
         res_set = self._exec_query_str_with_params(query_str, (val, val))
 
@@ -4473,7 +4318,7 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        query_str = ('SELECT 1 FROM vertical_datum WHERE name = ? ' 
+        query_str = ('SELECT 1 FROM vertical_datum WHERE name = ? '
                      'UNION ALL '
                      'SELECT 1 FROM alias_name WHERE alt_name = ? '
                      'AND table_name = \'vertical_datum\' LIMIT 1')
@@ -4495,7 +4340,7 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        query_str = ('SELECT 1 FROM vertical_datum WHERE name = ? ' 
+        query_str = ('SELECT 1 FROM vertical_datum WHERE name = ? '
                      'UNION ALL '
                      'SELECT 1 FROM alias_name WHERE alt_name = ? '
                      'AND table_name = \'vertical_datum\' LIMIT 1')
@@ -4548,7 +4393,7 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        query_str = ('SELECT 1 FROM projected_crs WHERE name = ? ' 
+        query_str = ('SELECT 1 FROM projected_crs WHERE name = ? '
                      'UNION ALL '
                      'SELECT 1 FROM alias_name WHERE alt_name = ? '
                      'AND table_name = \'projected_crs\' LIMIT 1')
@@ -4642,7 +4487,7 @@ class CF1_7Check(CF1_6Check):
             exist_cond_2 = self._check_gmattr_existence_condition_ell_pmerid_hdatum(var)
             test_ctx.assert_true(
                 exist_cond_2[0], exist_cond_2[1])
-            
+
             # handle vertical datum related grid_mapping attributes
             vert_datum_attrs = {}
             possible_vert_datum_attrs = {'geoid_name',
@@ -4657,7 +4502,7 @@ class CF1_7Check(CF1_6Check):
                 test_ctx.messages.append("Cannot have both 'geoid_name' and "
                                      "'geopotential_datum_name' attributes in "
                                      "grid mapping variable '{}'".format(
-                                          var_name))
+                                          var.name))
             elif len_vdatum_name_attrs == 1:
                     # should be one or zero attrs
                     proj_db_path = os.path.join(pyproj.datadir.get_data_dir(),
@@ -4673,14 +4518,14 @@ class CF1_7Check(CF1_6Check):
                                            "attribute '{}' in grid mapping "
                                            "variable '{}' is not valid".format(
                                                 v_datum_value, v_datum_attr,
-                                                var_name))
+                                                var.name))
                             test_ctx.assert_true(v_datum_str_valid, invalid_msg)
                     except sqlite3.Error as e:
                         # if we hit an error, skip the check
                         warn("Error occurred while trying to query "
                                         "Proj4 SQLite database at {}: {}"
                                         .format(proj_db_path, str(e)))
-            prev_return[var_name] = test_ctx.to_result()
+            prev_return[var.name] = test_ctx.to_result()
 
         return prev_return
 
