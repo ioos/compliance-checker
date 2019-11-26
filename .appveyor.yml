@@ -42,5 +42,5 @@ install:
 
 
 test_script:
-  - python -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  - "python -m pip install . --no-deps -vv"
   - pytest -s -rxs -v -k "not integration" compliance_checker
