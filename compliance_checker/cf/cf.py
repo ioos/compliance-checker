@@ -426,6 +426,32 @@ class CFBaseCheck(BaseCheck):
         dimension_string = ''.join(dimension_order)
         return regx.match(dimension_string) is not None
 
+    def _parent_var_attr_type_check(self, attr_name, var, ctx):
+        """
+        Checks that an attribute has an equivalent value to a parent variable.
+        Takes an attribute name, variable, and test context on which to operate.
+        :param str attr_name: The name of the attribute to be checked
+        :param netCDF4.Variable var: The variable against which to be checked
+        :param compliance_checker.base.TestCtx ctx: The associated test context to modify
+        :rtype None
+        :return None
+        """
+        attr_val = var.getncattr(attr_name)
+
+        if isinstance(attr_val, basestring):
+            type_match = var.dtype.kind == 'S'
+            val_type = type(attr_val)
+        else:
+            val_type = attr_val.dtype.type
+            type_match = val_type == var.dtype.type
+
+        ctx.assert_true(type_match,
+            "Attribute '{}' (type: {}) and parent variable '{}' (type: {}) "
+            "must have equivalent datatypes".format(attr_name,
+                                                    val_type,
+                                                    var.name,
+                                                    var.dtype.type))
+
     def _find_aux_coord_vars(self, ds, refresh=False):
         '''
         Returns a list of auxiliary coordinate variables
@@ -1157,22 +1183,8 @@ class CF1_6Check(CFNCCheck):
         }
 
         for var_name, var in ds.variables.items():
-            for att in special_attrs.intersection(var.ncattrs()):
-                val = var.getncattr(att)
-                if isinstance(val, basestring):
-                    type_match = var.dtype.kind == 'S'
-                    val_type = type(val)
-                else:
-                    val_type = val.dtype.type
-                    type_match = val_type == var.dtype.type
-
-                ctx.assert_true(type_match,
-                    "Attribute '{}' (type: {}) and parent variable '{}' (type: {}) "
-                    "must have equivalent datatypes".format(att,
-                                                            val_type,
-                                                            var_name,
-                                                            var.dtype.type)
-                    )
+            for att_name in special_attrs.intersection(var.ncattrs()):
+                self._parent_var_attr_type_check(att_name, var, ctx)
         return ctx.to_result()
 
     def check_naming_conventions(self, ds):
