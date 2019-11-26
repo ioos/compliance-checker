@@ -54,7 +54,7 @@ def compute_requirements(requirement_names, options=None):
     conda_reqs_lines = []
 
     if 'python=2' in options:
-        conda_reqs_lines.append('python=2.*')
+        conda_reqs_lines.append('# Python 2 conda configuration')
     else:
         conda_reqs_lines.append('# Python 3 conda configuration')
 
