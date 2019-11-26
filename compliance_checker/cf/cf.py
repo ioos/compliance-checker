@@ -132,6 +132,7 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
+        self.ds = ds
         self._find_coord_vars(ds)
         self._find_aux_coord_vars(ds)
         self._find_ancillary_vars(ds)
@@ -963,7 +964,7 @@ class CFBaseCheck(BaseCheck):
 
         return results
 
-    def _check_attr_type(self, attribute, attr_type, variable=None):
+    def _check_attr_type(self, attr_name, attr_type, variable=None):
         """
         Check if an attribute `attr` is of the type `attr_type`. Upon getting
         a data type of 'D', the attr must have the same data type as the
@@ -982,6 +983,11 @@ class CFBaseCheck(BaseCheck):
                 The string will contain a format field to be filled with a
                 string describing the attribute.
         """
+        # if the variable is unset, assume
+        if variable is None:
+            attribute = self.ds.getncattr(attr_name)
+        else:
+            attribute = variable.getncattr(attr_name)
 
         if attr_type == 'S':
             if not isinstance(attribute, basestring):
@@ -1004,15 +1010,18 @@ class CFBaseCheck(BaseCheck):
                             "{} must be a numeric type"]
             elif attr_type == 'D':
                 # TODO: handle edge case where variable is unset here
+                temp_ctx = TestCtx()
+                self._parent_var_attr_type_check(attr_name, variable, temp_ctx)
                 var_dtype = getattr(variable, 'dtype', None)
-                if (underlying_dtype != var_dtype):
-                    return [False,
-                            "{{}} must be numeric and must match {} dtype".format(var_dtype)]
+                if temp_ctx.messages:
+                    return (False,
+                            "{} must be numeric and must be equivalent to {} dtype".format(attr_name, var_dtype))
             else:
                 # If we reached here, we fell off with an unrecognized type
-                return [False, "{{}} has unrecognized type '{}'".format(attr_type)]
+                return (False, "{} has unrecognized type '{}'".format(attr_name,
+                                                                      attr_type))
         # pass if all other possible failure conditions have been evaluated
-        return [True, None]
+        return (True, None)
 
     def _handle_dtype_check(self, attribute, attr_name, attr_dict,
                             variable=None):
@@ -1038,7 +1047,8 @@ class CFBaseCheck(BaseCheck):
                                                               variable.name))
 
         # check the type
-        return_value = self._check_attr_type(attribute, attr_type, variable)
+        return_value = self._check_attr_type(attr_name, attr_type,
+                                             variable)
 
         # if the second element is a string, format it
         if isinstance(return_value[1], basestring):
@@ -2815,7 +2825,11 @@ class CF1_6Check(CFNCCheck):
 
         return ret_val
 
-    def check_grid_mapping_attr_type(self, attr_name, attr, attr_type, variable=None):
+
+    # TODO (badams): replace this function entirely and probably just call
+    #                _check_attr_type
+    def check_grid_mapping_attr_type(self, attr_name, attr, attr_type,
+                                     variable=None):
         """
         Check the type of an attribute. Wrapper function,
         implemented for CF-1.6.

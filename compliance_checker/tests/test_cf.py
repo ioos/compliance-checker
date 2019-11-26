@@ -905,6 +905,8 @@ class TestCF1_6(BaseTestCase):
         expected_name = u'§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections'
         assert all(r.name == expected_name for r in results.values())
 
+    # TODO: overhaul to use netCDF global attributes or mocks and variable
+    #       attributes
     def test_check_grid_mapping_attr_type(self):
         """
         Check that the check_grid_mapping_attr_type method checks
@@ -940,7 +942,7 @@ class TestCF1_6(BaseTestCase):
         res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type, np.float64(95))
         self.assertTrue(res[0])
         self.assertEqual(res[1], None)
-        
+
         # test bad
         att_name = 'test_att'
         att = np.int64(45)
@@ -1725,7 +1727,7 @@ class TestCF1_7(BaseTestCase):
         att = np.array([0, 0, 0], dtype=np.float64) # len 3
         res = self.cf.check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
-        
+
         att_name = 'towgs84'
         att = np.array([0, 0, 0, 0, 0, 0], dtype=np.float64) # len 6
         res = self.cf.check_grid_mapping_attr_condition(att, att_name)
