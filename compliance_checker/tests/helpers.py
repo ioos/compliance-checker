@@ -54,3 +54,7 @@ class MockVariable(object):
             self.ndim = copy_var.ndim
             for att in copy_var.ncattrs():
                 setattr(self, att, getattr(copy_var, att))
+
+    def ncattrs(self):
+        return [att for att in vars(self) if
+                att not in {'ndim', 'name', 'dtype', 'dimensions'}]

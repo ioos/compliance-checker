@@ -14,6 +14,7 @@ from netCDF4 import Dataset
 from lxml import etree as ET
 from distutils.version import StrictVersion
 from compliance_checker.base import fix_return_value, Result, GenericFile
+from compliance_checker.cf.cf import CFBaseCheck
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from compliance_checker.protocols import opendap, netcdf, cdl
@@ -218,9 +219,15 @@ class CheckSuite(object):
         @return list: list of Result objects
         """
         val = check_method(ds)
-        if isinstance(val, list):
+        if hasattr(val, '__iter__'):
+            # Handle OrderedDict when we need to modify results in a superclass
+            # i.e. some checks in CF 1.7 which extend CF 1.6 behaviors
+            if isinstance(val, dict):
+                val_iter = val.values()
+            else:
+                val_iter = val
             check_val = []
-            for v in val:
+            for v in val_iter:
                 res = fix_return_value(v, check_method.__func__.__name__,
                                        check_method, check_method.__self__)
                 if max_level is None or res.weight > max_level:
@@ -270,7 +277,7 @@ class CheckSuite(object):
         args = [(name, self.checkers[name]) for name in checker_names if name in self.checkers]
         valid = []
 
-        all_checked = set([a[1] for a in args])  # only class types
+        all_checked = set(a[1] for a in args)  # only class types
         checker_queue = set(args)
         while len(checker_queue):
             name, a = checker_queue.pop()
@@ -279,11 +286,12 @@ class CheckSuite(object):
             if type(ds) in a().supported_ds:
                 valid.append((name, a))
 
-            # add any subclasses of the checker class
-            for subc in a.__subclasses__():
-                if subc not in all_checked:
-                    all_checked.add(subc)
-                    checker_queue.add((name, subc))
+            # add subclasses of SOS checks
+            if "ioos_sos" in name:
+                for subc in a.__subclasses__():
+                    if subc not in all_checked:
+                        all_checked.add(subc)
+                        checker_queue.add((name, subc))
 
         return valid
 
@@ -662,7 +670,9 @@ class CheckSuite(object):
     def generate_dataset(self, cdl_path):
         '''
         Use ncgen to generate a netCDF file from a .cdl file
-        Returns the path to the generated netcdf file
+        Returns the path to the generated netcdf file. If ncgen fails, uses
+        sys.exit(1) to terminate program so a long stack trace is not reported
+        to the user.
 
         :param str cdl_path: Absolute path to cdl file that is used to generate netCDF file
         '''
@@ -670,7 +680,10 @@ class CheckSuite(object):
             ds_str = cdl_path.replace('.cdl', '.nc')
         else:
             ds_str = cdl_path + '.nc'
-        subprocess.call(['ncgen', '-o', ds_str, cdl_path])
+        returncode = subprocess.call(['ncgen', '-o', ds_str, cdl_path])
+        if returncode != 0:
+            print("Error generating dataset from .cdl")
+            sys.exit(1)
         return ds_str
 
     def load_dataset(self, ds_str):
@@ -738,7 +751,6 @@ class CheckSuite(object):
         @param list raw_scores: list of raw scores (Result objects)
         """
 
-        # BEGIN INTERNAL FUNCS ########################################
         def trim_groups(r):
             if isinstance(r.name, tuple) or isinstance(r.name, list):
                 new_name = r.name[1:]
