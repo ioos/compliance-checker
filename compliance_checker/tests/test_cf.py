@@ -163,7 +163,7 @@ class TestCF1_6(BaseTestCase):
         flat_messages = {msg for res in aa_results for msg in res.msgs}
         self.assertIn('Attribute compress should not be in variable non-coordinate attributes for variable temp. Valid location(s) are [C]',
                       flat_messages)
-        self.assertIn('Attribute add_offset in variable temp must be a numeric type',
+        self.assertIn('add_offset must be a numeric type',
                       flat_messages)
 
     def test_naming_conventions(self):
@@ -907,9 +907,9 @@ class TestCF1_6(BaseTestCase):
 
     # TODO: overhaul to use netCDF global attributes or mocks and variable
     #       attributes
-    def test_check_grid_mapping_attr_type(self):
+    def test_check_attr_type(self):
         """
-        Check that the check_grid_mapping_attr_type method checks
+        Check that the check_attr_type method checks
         grid_mapping attribute types correctly.
         """
 
@@ -917,29 +917,26 @@ class TestCF1_6(BaseTestCase):
         att_name = 'test_att'
         att = np.int64(45)
         att_type = 'N' # numeric
-        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        res = self.cf._check_attr_type(att_name, att_type, att)
         self.assertTrue(res[0])
         self.assertEqual(res[1], None)
 
+        # create a temporary variable and test this only
+        nc_obj = MockTimeSeries()
+        nc_obj.createVariable('temperature', 'd', ('time',))
+        nc_obj.variables['temperature'].setncattr('test_att', np.float64(45))
         att_name = 'test_att'
-        att = np.int64(45)
-        x = np.int64(45) # the variable
+        _var = nc_obj.variables['temperature']
+        att = np.float64(45)
         att_type = 'D' # numeric, types should match
-        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type, x)
+        res = self.cf._check_attr_type(att_name, att_type, att, _var)
         self.assertTrue(res[0])
         self.assertEqual(res[1], None)
 
         att_name = 'test_att'
         att = 'yo'
         att_type = 'S' # string
-        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
-        self.assertTrue(res[0])
-        self.assertEqual(res[1], None)
-
-        att_name = 'test_att'
-        att = np.float64(45)
-        att_type = 'D' # string, types should match
-        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type, np.float64(95))
+        res = self.cf._check_attr_type(att_name, att_type, att)
         self.assertTrue(res[0])
         self.assertEqual(res[1], None)
 
@@ -947,7 +944,7 @@ class TestCF1_6(BaseTestCase):
         att_name = 'test_att'
         att = np.int64(45)
         att_type = 'S' # string, but att type is numeric
-        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        res = self.cf._check_attr_type(att_name, att_type, att)
         self.assertFalse(res[0])
         self.assertEqual(res[1], "test_att must be a string")
 
@@ -955,16 +952,21 @@ class TestCF1_6(BaseTestCase):
         att_name = 'test_att'
         att = 'bad'
         att_type = 'N' # numeric, but att type is string
-        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type)
+        res = self.cf._check_attr_type(att_name, att_type, att)
         self.assertFalse(res[0])
         self.assertEqual(res[1], "test_att must be a numeric type")
 
+        # create a temporary variable and test this only
+        nc_obj = MockTimeSeries()
+        nc_obj.createVariable('temperature', 'd', ('time',))
+        nc_obj.variables['temperature'].setncattr('test_att', np.int32(45))
+        _var = nc_obj.variables['temperature']
         att_name = 'test_att'
         att = np.int32(2)
         att_type = 'D' # should be same datatypes
-        res = self.cf.check_grid_mapping_attr_type(att_name, att, att_type, np.float32(2))
+        res = self.cf._check_attr_type(att_name, att_type, att, _var)
         self.assertFalse(res[0])
-        self.assertEqual(res[1], "test_att must be numeric and must match float32 dtype")
+        self.assertEqual(res[1], "test_att must be numeric and must be equivalent to float64 dtype")
 
     def test_check_grid_mapping_attr_condition(self):
         """
@@ -974,37 +976,37 @@ class TestCF1_6(BaseTestCase):
         # test passes
         attr_name = 'latitude_of_projection_origin'
         val = 0
-        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        res = self.cf._check_grid_mapping_attr_condition(val, attr_name)
         self.assertTrue(res[0])
 
         attr_name = 'longitude_of_projection_origin'
         val = 0
-        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        res = self.cf._check_grid_mapping_attr_condition(val, attr_name)
         self.assertTrue(res[0])
 
         attr_name = 'longitude_of_prime_meridian'
         val = 0
-        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        res = self.cf._check_grid_mapping_attr_condition(val, attr_name)
         self.assertTrue(res[0])
 
         attr_name = 'scale_factor_at_central_meridian'
         val = 1
-        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        res = self.cf._check_grid_mapping_attr_condition(val, attr_name)
         self.assertTrue(res[0])
 
         attr_name = 'scale_factor_at_projection_origin'
         val = 1
-        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        res = self.cf._check_grid_mapping_attr_condition(val, attr_name)
         self.assertTrue(res[0])
 
         attr_name = 'standard_parallel'
         val = 0
-        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        res = self.cf._check_grid_mapping_attr_condition(val, attr_name)
         self.assertTrue(res[0])
 
         attr_name = 'straight_vertical_longitude_from_pole'
         val = 0
-        res = self.cf.check_grid_mapping_attr_condition(val, attr_name)
+        res = self.cf._check_grid_mapping_attr_condition(val, attr_name)
         self.assertTrue(res[0])
 
     def test_check_geographic_region(self):
@@ -1669,40 +1671,48 @@ class TestCF1_7(BaseTestCase):
          Ensure the _check_attr_type method works as expected.
         '''
 
+        # create a temporary variable and test this only
+        nc_obj = MockTimeSeries()
+        nc_obj.createVariable('temperature', 'd', ('time',))
+        nc_obj.variables['temperature'].setncattr('test_att', np.float64(45))
+        att_name = 'test_att'
+        _var = nc_obj.variables['temperature']
+
         # first, test all valid checks show that it's valid
         attr = 'my_attr_value' # string
         attr_type =  'S'
-        result = self.cf._check_attr_type(attr, attr_type)
+        result = self.cf._check_attr_type(att_name, attr_type, attr)
         self.assertTrue(result[0])
 
         attr = np.int64(1)
         attr_type =  'N'
-        self.assertTrue(self.cf._check_attr_type(attr, attr_type)[0])
+        self.assertTrue(self.cf._check_attr_type(att_name, attr_type, attr)[0])
 
-        attr = np.int64(45) # numpy int
+        attr = np.float64(45)
         attr_type = 'D'
-        variable = np.int64(45)
         self.assertTrue(self.cf._check_attr_type(
-            attr, attr_type, variable)[0])
+            att_name, attr_type, attr, _var)[0])
 
         # check failures
         attr = 'my_attr_value'
         attr_type = 'N' # should be numeric
-        self.assertFalse(self.cf._check_attr_type(attr, attr_type)[0])
+        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr)[0])
 
         attr = np.int(64)
         attr_type = 'S' # should be string
-        self.assertFalse(self.cf._check_attr_type(attr, attr_type)[0])
+        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr)[0])
 
+        nc_obj = MockTimeSeries()
+        nc_obj.createVariable('temperature', 'd', ('time',))
+        nc_obj.variables['temperature'].setncattr('test_att', np.int32(45))
+        _var = nc_obj.variables['temperature']
         attr = np.int32(45)
         attr_type = 'D' # should match
-        variable = np.int64(45) # mismatching numpy types
-        self.assertFalse(self.cf._check_attr_type(
-            attr, attr_type, variable)[0])
+        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr, _var)[0])
 
     def test_check_grid_mapping_attr_condition(self):
         """
-        Ensure the CF-1.7 implementation of check_grid_mapping_attr_condition()
+        Ensure the CF-1.7 implementation of _check_grid_mapping_attr_condition()
         works as expected.
         """
 
@@ -1710,104 +1720,104 @@ class TestCF1_7(BaseTestCase):
 
         att_name = 'horizontal_datum_name'
         att = 'Monte Mario (Rome)'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
 
         att_name = 'prime_meridian_name'
         att = 'Athens'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
 
         att_name = 'reference_ellipsoid_name'
         att = 'Airy 1830'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
 
         att_name = 'towgs84'
         att = np.array([0, 0, 0], dtype=np.float64) # len 3
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
 
         att_name = 'towgs84'
         att = np.array([0, 0, 0, 0, 0, 0], dtype=np.float64) # len 6
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
 
         att_name = 'towgs84'
         att = np.array([0, 0, 0, 0, 0, 0, 0], dtype=np.float64) # len 7
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
 
         att_name = 'geographic_crs_name'
         att = 'NAD83(CSRS98)'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
 
         att_name = 'geoid_name'
         att = 'Mayotte 1950'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
 
         att_name = 'geopotential_datum_name'
         att = 'NAVD88'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
 
         att_name = 'projected_crs_name'
         att = 'Anguilla 1957 / British West Indies Grid'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertTrue(res[0])
 
         # test bad
 
         att_name = 'horizontal_datum_name'
         att = 'bad'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertFalse(res[0])
 
         att_name = 'prime_meridian_name'
         att = 'bad'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertFalse(res[0])
 
         att_name = 'reference_ellipsoid_name'
         att = 'goofy goober'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertFalse(res[0])
 
         att_name = 'towgs84'
         att = np.array([0, 0, 0], dtype=np.int64) # len 3, wrong dtype
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertFalse(res[0])
 
         att_name = 'towgs84'
         att = np.array([0, 0, 0, 0], dtype=np.int64) # len 4
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertFalse(res[0])
 
         att_name = 'towgs84'
         att = np.float64(0) # single value, right dtype
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertFalse(res[0])
 
         att_name = 'geographic_crs_name'
         att = 'badbadbadbadbadnotinhere'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertFalse(res[0])
 
         att_name = 'geoid_name'
         att = 'yooooooo'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertFalse(res[0])
 
         att_name = 'geopotential_datum_name'
         att = 'NAVBAD BAD'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertFalse(res[0])
 
         att_name = 'projected_crs_name'
         att = 'Teddy Bruschi'
-        res = self.cf.check_grid_mapping_attr_condition(att, att_name)
+        res = self.cf._check_grid_mapping_attr_condition(att, att_name)
         self.assertFalse(res[0])
 
 

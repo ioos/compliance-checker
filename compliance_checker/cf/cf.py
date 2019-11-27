@@ -132,7 +132,6 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
-        self.ds = ds
         self._find_coord_vars(ds)
         self._find_aux_coord_vars(ds)
         self._find_ancillary_vars(ds)
@@ -388,22 +387,8 @@ class CFBaseCheck(BaseCheck):
 
         return valid_formula_terms.to_result()
 
-    # TODO, move this into alphabetical order?
-    def check_grid_mapping_attr_type(self, attr_name, attr, attr_type, variable=None):
-        """
-        Check the type of an attribute. Wrapper function, designed to
-        be overloaded in concrete implementations.
 
-        :param str attr_name: name of attribute
-        :param attr: attribute to check
-        :param str attr_type: designated type of attr; 'S', 'N', or 'D'
-        :param netCDF4.Variable variable
-        :rtype tuple
-        :return two-tuple of (bool, str|None)
-        """
-        raise NotImplementedError
-
-    def check_grid_mapping_attr_condition(self, attr, attr_name, ret_val):
+    def _check_grid_mapping_attr_condition(self, attr, attr_name, ret_val):
         """
         Evaluate a condition (or series of conditions) for a particular
         attribute. Designed to be overloaded in subclass implementations.
@@ -964,7 +949,7 @@ class CFBaseCheck(BaseCheck):
 
         return results
 
-    def _check_attr_type(self, attr_name, attr_type, variable=None):
+    def _check_attr_type(self, attr_name, attr_type, attribute, variable=None):
         """
         Check if an attribute `attr` is of the type `attr_type`. Upon getting
         a data type of 'D', the attr must have the same data type as the
@@ -974,25 +959,19 @@ class CFBaseCheck(BaseCheck):
         numeric types, and 'D' requires the attribute type match the type
         of the variable it is assigned to.
 
-        :param attribute: attribute to check
+        :param str attr_name: name of attr being checked (to format message)
         :param str attr_type: the correct type of the attribute
+        :param attribute: attribute to check
         :param variable: if given, type should match attr
-        :rtype list
-        :return A two-element list that contains pass/fail status as a boolean and
+        :rtype tuple
+        :return A two-tuple that contains pass/fail status as a boolean and
                 a message string (or None if unset) as the second element.
-                The string will contain a format field to be filled with a
-                string describing the attribute.
         """
-        # if the variable is unset, assume
-        if variable is None:
-            attribute = self.ds.getncattr(attr_name)
-        else:
-            attribute = variable.getncattr(attr_name)
 
         if attr_type == 'S':
             if not isinstance(attribute, basestring):
                 return [False,
-                        "{} must be a string"]
+                        "{} must be a string".format(attr_name)]
         else:
             # if it's not a string, it should have a numpy dtype
             underlying_dtype = getattr(attribute, 'dtype', None)
@@ -1000,14 +979,14 @@ class CFBaseCheck(BaseCheck):
             # TODO check for np.nan separately
             if underlying_dtype is None:
                 return [False,
-                        "{} must be a numeric type"]
+                        "{} must be a numeric type".format(attr_name)]
 
             # both D and N should be some kind of numeric value
             is_numeric = np.issubdtype(underlying_dtype, np.number)
             if attr_type == 'N':
                 if not is_numeric:
                     return [False,
-                            "{} must be a numeric type"]
+                            "{} must be a numeric type".format(attr_name)]
             elif attr_type == 'D':
                 # TODO: handle edge case where variable is unset here
                 temp_ctx = TestCtx()
@@ -1047,7 +1026,9 @@ class CFBaseCheck(BaseCheck):
                                                               variable.name))
 
         # check the type
-        return_value = self._check_attr_type(attr_name, attr_type,
+        return_value = self._check_attr_type(attr_name,
+                                             attr_type,
+                                             attribute,
                                              variable)
 
         # if the second element is a string, format it
@@ -2826,33 +2807,7 @@ class CF1_6Check(CFNCCheck):
         return ret_val
 
 
-    # TODO (badams): replace this function entirely and probably just call
-    #                _check_attr_type
-    def check_grid_mapping_attr_type(self, attr_name, attr, attr_type,
-                                     variable=None):
-        """
-        Check the type of an attribute. Wrapper function,
-        implemented for CF-1.6.
-
-        :param str attr_name: name of attribute
-        :param attr: attribute to check
-        :param str attr_type: designated type of attr; 'S', 'N', or 'D'
-        :param netCDF4.Variable variable
-        :rtype tuple
-        :return two-tuple of (bool, str|None)
-        """
-
-        # get check result, list [bool, str|None]
-        _res = self._check_attr_type(attr, attr_type, variable)
-
-        # fully format the message if it needs it
-        if isinstance(_res[1], basestring):
-            _res[1] = _res[1].format(attr_name)
-
-        # tuple for immutability
-        return tuple(_res)
-
-    def check_grid_mapping_attr_condition(self, attr, attr_name):
+    def _check_grid_mapping_attr_condition(self, attr, attr_name):
         """
         Evaluate a condition (or series of conditions) for a particular
         attribute. Implementation for CF-1.6.
@@ -3011,8 +2966,6 @@ class CF1_6Check(CFNCCheck):
             (val >= -180.) and (val <= 180),
             'straight_vertical_longitude_from_pole must satisfy (-180 <= x <= 180)'
         )
-
-    # grid mapping dictionary, appendix F
 
 
     ###############################################################################
@@ -4196,7 +4149,7 @@ class CF1_7Check(CF1_6Check):
 
         return ret_val
 
-    def check_grid_mapping_attr_condition(self, attr, attr_name):
+    def _check_grid_mapping_attr_condition(self, attr, attr_name):
         """
         Evaluate a condition (or series of conditions) for a particular
         attribute. Implementation for CF-1.7.
@@ -4232,7 +4185,7 @@ class CF1_7Check(CF1_6Check):
             return self._evaluate_towgs84(attr)
 
         else: # invoke method from 1.6, as these names are all still valid
-            return super(CF1_7Check, self).check_grid_mapping_attr_condition(attr, attr_name)
+            return super(CF1_7Check, self)._check_grid_mapping_attr_condition(attr, attr_name)
 
     def _check_gmattr_existence_condition_geoid_name_geoptl_datum_name(self, var):
         """
