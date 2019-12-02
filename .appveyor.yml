@@ -3,7 +3,6 @@ build: false
 environment:
   PYTHON: "C:\\myminiconda3"
   matrix:
-    - PY: 2.7
     - PY: 3.8
 
 init:
