@@ -6,10 +6,13 @@
 The IOOS Compliance Checker is a python based tool for data providers to check
 for completeness and community standard compliance of local or remote
 [netCDF](https://en.wikipedia.org/wiki/NetCDF) files against
-[CF](https://en.wikipedia.org/wiki/NetCDF) and
+[CF](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html) and
 [ACDD](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3)
 file standards. The python module can be used as a command-line tool or as a
 library that can be integrated into other software.
+
+## Python 2.7 Deprecation Notice
+As of release 4.3.0, the __Compliance Checker no longer officially supports Python 2.7__.
 
 A [web-based version](https://data.ioos.us/compliance/index.html) of the Compliance
 Checker was developed to enable a broader audience and improve accessibility for the
@@ -22,6 +25,7 @@ It currently supports the following sources and standards:
 | Standard                                                                                                                            | Source                                                            | .nc/OPeNDAP/.cdl | SOS                             |
 | ----------------------------------------------------------------------------------------------------                                | -----------                                                       | ------           | ------------------------------- |
 | [ACDD (1.1, 1.3)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3)                                    | Built-in                                                          | X                | -                               |
+| [CF (1.7)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html)                                     | Built-in                                                          | X                | -                               |
 | [CF (1.6)](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html)                                                      | Built-in                                                          | X                | -                               |
 | IOOS SOS                                                                                                                            | Built-in                                                          | -                | GetCapabilities, DescribeSensor |
 | [IOOS (1.1)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes) | Built-in                                                          | X                | -                               |
@@ -399,6 +403,7 @@ compliance-checker -t ncei-grid -f json -o ~/Documents/sample_grid_report.json ~
 - [Kyle Wilcox](https://github.com/kwilcox) &lt;kyle@axiomdatascience.com&gt;
 - [Ben Adams](https://github.com/benjwadams) &lt;ben.adams@rpsgroup.com&gt;
 - [Bob Fratantonio](https://github.com/bobfrat) &lt;robert.fratantonio@rpsgroup.com&gt;
+- [Dalton Kell](https://github.com/daltonkell) &lt;dalton.kell@rpsgroup.com&gt;
 
 And many more testers!
 
