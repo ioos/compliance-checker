@@ -12,7 +12,7 @@ file standards. The python module can be used as a command-line tool or as a
 library that can be integrated into other software.
 
 ## Python 2.7 Deprecation Notice
-As of release 4.3.0, the __Compliance Checker no longer supports Python 2.7__.
+As of release 4.3.0, the __Compliance Checker no longer officially supports Python 2.7__.
 
 A [web-based version](https://data.ioos.us/compliance/index.html) of the Compliance
 Checker was developed to enable a broader audience and improve accessibility for the
