@@ -157,14 +157,23 @@ class TestCF1_6(BaseTestCase):
 
     def test_appendix_a(self):
         dataset = self.load_dataset(STATIC_FILES['bad_data_type'])
+        new_check = copy.deepcopy(self.cf)
+        self.cf.enable_check_appendix_a = True
         self.cf.setup(dataset)
         aa_results = self.cf.check_appendix_a(dataset)
-        # institution is in salinity, this shouldn't be present
         flat_messages = {msg for res in aa_results for msg in res.msgs}
-        self.assertIn('Attribute compress should not be in variable non-coordinate attributes for variable temp. Valid location(s) are [C]',
+        self.assertIn('[Appendix A] Attribute "compress" should not be present in non-coordinate data (D) variable "temp". This attribute may only appear in coordinate data (C).',
                       flat_messages)
         self.assertIn('add_offset must be a numeric type',
                       flat_messages)
+        nc_obj = MockTimeSeries()
+        nc_obj._FillValue = '-9999.00'
+        new_check.setup(nc_obj)
+        res2 = new_check.check_appendix_a(nc_obj)
+        flat_messages = {msg for res in res2 for msg in res.msgs}
+        self.assertIn('[Appendix A] Attribute "_FillValue" should not be present in global (G) attributes. This attribute may only appear in coordinate data (C) and non-coordinate data (D).',
+                      flat_messages)
+
 
     def test_naming_conventions(self):
         '''
