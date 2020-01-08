@@ -78,6 +78,23 @@ class TestCF1_6(BaseTestCase):
         self.addCleanup(nc.close)
         return nc
 
+    def test_coord_data_vars(self):
+        """Check that coordinate data variables are properly handled"""
+        ds = MockTimeSeries()
+        ds.createDimension('siglev', 20)
+
+        temp = ds.createVariable("temp", np.float64, dimensions=("time",),
+                                 fill_value=np.float(99999999999999999999.))
+        temp.coordinates = "sigma noexist"
+        ds.createVariable("sigma", np.float64, dimensions=('siglev',))
+        self.cf.setup(ds)
+        # time is a NUG coordinate variable, sigma is not, but is referred to in
+        # variables, so both should show up in cf_coord_data_vars.
+        # noexist does not exist in the dataset's variables, so it is not
+        # present in coord_data_vars
+        self.assertEqual(self.cf.coord_data_vars, {'time', 'sigma'})
+
+
     def load_dataset(self, nc_dataset):
         '''
         Return a loaded NC Dataset for the given path

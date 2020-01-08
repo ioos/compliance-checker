@@ -132,7 +132,7 @@ class CFBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
-        self._find_coord_vars(ds)
+        self.coord_vars = self._find_coord_vars(ds)
         self._find_aux_coord_vars(ds)
         self._find_ancillary_vars(ds)
         self._find_clim_vars(ds)
@@ -142,11 +142,28 @@ class CFBaseCheck(BaseCheck):
         self._find_geophysical_vars(ds)
         coord_containing_vars = ds.get_variables_by_attributes(coordinates=
                                        lambda val: isinstance(val, basestring))
-        self.coord_data_vars = {coord_var_name for var in
-                                coord_containing_vars for
-                                coord_var_name in
-                                var.coordinates.strip().split(' ') if
-                                coord_var_name in ds.variables}
+
+        # coordinate data variables
+
+        # Excerpt from "§1.3 Overview" on coordinate data
+        # There are two methods used to identify variables that contain
+        # coordinate data. The first is to use the NUG-defined "coordinate
+        # variables." The use of coordinate variables is required for all
+        # dimensions that correspond to one dimensional space or time
+        # coordinates . In cases where coordinate variables are not applicable,
+        # the variables containing coordinate data are identified by the
+        # coordinates attribute.
+
+        # first read in variables referred to in coordinates which exist
+        # in the dataset
+        self.coord_data_vars = set()
+        for var in coord_containing_vars:
+            for coord_var_name in var.coordinates.strip().split(' '):
+                if coord_var_name in ds.variables:
+                    self.coord_data_vars.add(coord_var_name)
+        # then add in the NUG coordinate variables -- single dimension with
+        # dimension name the same as coordinates
+        self.coord_data_vars.update(self.coord_vars)
 
     def check_grid_mapping(self, ds):
         """
