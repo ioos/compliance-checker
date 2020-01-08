@@ -877,10 +877,64 @@ class CFBaseCheck(BaseCheck):
         possible_global_atts = (set(ds.ncattrs()).
                                 intersection(self.appendix_a.keys()))
         results = []
+        attr_location_ident = {'G': 'global attributes',
+                               'C': 'coordinate data',
+                               'D': 'non-coordinate data'}
+        def att_loc_print_helper(att_letter):
+            """
+            Returns a string corresponding to attr_location ident in
+            human-readable form.  E.g. an input of 'G' will return
+            "global attributes (G)"
+
+            :param str att_letter: An attribute letter corresponding to the
+                                   "Use" column in CF Appendix A
+            :rtype: str
+            :return: A string with a human-readable name followed by the input
+                     letter specified
+            """
+
+            return ("{} ({})".
+                    format(attr_location_ident.get(att_letter, "other"),
+                           att_letter))
+
+        def _att_loc_msg(att_loc):
+            """
+            Helper method for formatting an error message when an attribute
+            appears in the improper location corresponding to the "Use" column
+            in CF Appendix A.
+
+            :param set att_loc: A set with the possible valid locations of the
+                                attribute corresponding to the "Use" column
+                                in CF Appendix A
+            :rtype: str
+            :return: A human-readable string with the possible valid locations
+                     of the attribute
+            """
+            att_loc_len = len(att_loc)
+            # this is a fallback in case an empty att_loc is passed
+            # it generally should not occur
+            valid_loc = 'no locations in the dataset'
+            loc_sort = sorted(att_loc)
+            if att_loc_len == 1:
+                valid_loc = att_loc_print_helper(loc_sort[0])
+            elif att_loc_len == 2:
+                valid_loc = "{} and {}".format(att_loc_print_helper(loc_sort[0]),
+                                               att_loc_print_helper(loc_sort[1])
+                                              )
+            # shouldn't be reached under normal circumstances, as any attribute
+            # should be either G, C, or D but if another
+            # category is added, this will be useful.
+            else:
+                valid_loc = (', '.join(loc_sort[:-1]) +
+                            ", and {}".format(att_loc_print_helper(loc_sort[-1]))
+                            )
+            return 'This attribute may only appear in {}.'.format(valid_loc)
+
         for global_att_name in possible_global_atts:
             global_att = ds.getncattr(global_att_name)
             att_dict = self.appendix_a[global_att_name]
             att_loc = att_dict['attr_loc']
+            valid_loc_warn = _att_loc_msg(att_loc)
             if att_dict['cf_section'] is not None:
                 subsection_test = '.'.join(att_dict['cf_section'].split('.')
                                         [:2])
@@ -893,10 +947,10 @@ class CFBaseCheck(BaseCheck):
 
             test_ctx.out_of += 1
             if 'G' not in att_loc:
-                test_ctx.messages.append("Attribute {} should not be in global "
-                                         " attributes. Valid location(s) are "
-                                         "[{}]".format(global_att,
-                                                        ', '.join(att_loc)))
+                test_ctx.messages.append('[Appendix A] Attribute "{}" should not be present in global (G) '
+                                         'attributes. {}'.
+                                           format(global_att_name,
+                                                  valid_loc_warn))
             else:
                 result = self._handle_dtype_check(global_att, global_att_name,
                                                   att_dict)
@@ -907,10 +961,8 @@ class CFBaseCheck(BaseCheck):
             results.append(test_ctx.to_result())
 
         noncoord_vars = set(ds.variables) - set(self.coord_data_vars)
-        for var_set, coord_letter, var_type, in (
-                                        (self.coord_data_vars, 'C',
-                                         'coordinate'),
-                                        (noncoord_vars, 'D', 'non-coordinate')):
+        for var_set, coord_letter in ((self.coord_data_vars, 'C'),
+                                      (noncoord_vars, 'D')):
             for var_name in var_set:
                 var = ds.variables[var_name]
                 possible_attrs = (set(var.ncattrs()).
@@ -928,15 +980,15 @@ class CFBaseCheck(BaseCheck):
                     test_ctx = TestCtx(BaseCheck.HIGH, section_loc,
                                        variable=var_name)
                     att_loc = att_dict['attr_loc']
+                    valid_loc_warn = _att_loc_msg(att_loc)
                     att = var.getncattr(att_name)
                     test_ctx.out_of += 1
                     if coord_letter not in att_loc:
-                        test_ctx.messages.append("Attribute {} should not be in variable {} "
-                                                "attributes for variable {}. Valid location(s) are "
-                                                "[{}]".format(att_name,
-                                                              var_type,
+                        test_ctx.messages.append('[Appendix A] Attribute "{}" should not be present in {} '
+                                                 'variable "{}". {}'.format(att_name,
+                                                              att_loc_print_helper(coord_letter),
                                                               var_name,
-                                                              ', '.join(att_loc)
+                                                              valid_loc_warn
                                                               ))
                     else:
                         result = self._handle_dtype_check(att, att_name,
