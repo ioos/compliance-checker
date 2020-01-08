@@ -881,11 +881,35 @@ class CFBaseCheck(BaseCheck):
                                'C': 'coordinate data',
                                'D': 'non-coordinate data'}
         def att_loc_print_helper(att_letter):
+            """
+            Returns a string corresponding to attr_location ident in
+            human-readable form.  E.g. an input of 'G' will return
+            "global attributes (G)"
+
+            :param str att_letter: An attribute letter corresponding to the
+                                   "Use" column in CF Appendix A
+            :rtype: str
+            :return: A string with a human-readable name followed by the input
+                     letter specified
+            """
+
             return ("{} ({})".
                     format(attr_location_ident.get(att_letter, "other"),
                            att_letter))
 
         def _att_loc_msg(att_loc):
+            """
+            Helper method for formatting an error message when an attribute
+            appears in the improper location corresponding to the "Use" column
+            in CF Appendix A.
+
+            :param set att_loc: A set with the possible valid locations of the
+                                attribute corresponding to the "Use" column
+                                in CF Appendix A
+            :rtype: str
+            :return: A human-readable string with the possible valid locations
+                     of the attribute
+            """
             att_loc_len = len(att_loc)
             # this is a fallback in case an empty att_loc is passed
             # it generally should not occur
