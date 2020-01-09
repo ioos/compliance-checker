@@ -124,8 +124,8 @@ parse it's contents.
 ```
 usage: cchecker.py [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
                    [--verbose] [--describe-checks] [--skip-checks SKIP_CHECKS]
-                   [-f {text,html,json,json_new}] [-o OUTPUT] [-V] [-l]
-                   [-d DOWNLOAD_STANDARD_NAMES]
+                   [-f {text,html,json,json_new}] [-o OUTPUT] [-O OPTION] [-V]
+                   [-l] [-d DOWNLOAD_STANDARD_NAMES]
                    [dataset_location [dataset_location ...]]
 
 positional arguments:
@@ -175,6 +175,16 @@ optional arguments:
                         more than one output file is supplied, the number of
                         input datasets supplied must match the number of
                         output files.
+  -O OPTION, --option OPTION
+                        Additional options to be passed to the checkers.
+                        Multiple options can be specified via multiple
+                        invocations of this switch. Options should be prefixed
+                        with a the checker name followed by the option, e.g.
+                        '<checker>:<option_name>' Available options:
+                        'cf:enable_appendix_a_checks' - Allow check results
+                        against CF Appendix A for attribute location and data
+                        types.
+
   -V, --version         Display the IOOS Compliance Checker version
                         information.
   -l, --list-tests      List the available tests

@@ -59,8 +59,12 @@ class BaseCheck(object):
         """
         pass
 
-    def __init__(self):
+    def __init__(self, options=None):
         self._defined_results = defaultdict(lambda: defaultdict(dict))
+        if options is None:
+            self.options = set()
+        else:
+            self.options = options
 
     def get_test_ctx(self, severity, name, variable=None):
         """

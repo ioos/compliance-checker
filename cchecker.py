@@ -6,7 +6,9 @@ import sys
 from compliance_checker.runner import ComplianceChecker, CheckSuite
 from compliance_checker.cf.util import download_cf_standard_name_table
 from compliance_checker import __version__
+from collections import defaultdict
 from textwrap import dedent
+import warnings
 
 def _print_checker_name_header(checker_str):
     """
@@ -16,6 +18,24 @@ def _print_checker_name_header(checker_str):
     """
     print("{0}\n {1} \n{0}".format("=" * (len(checker_str) + 2), checker_str))
 
+def parse_options(opts):
+    """
+    Helper function to parse possible options.  Splits option after the first
+    colon to split into key/value pairs.
+
+    :param opts: Iterable of strings with options
+    :rtype: dict
+    :return: Dictionary with keys as checker type (i.e. "cf", "acdd")
+    """
+    options_dict = defaultdict(set)
+    for opt_str in opts:
+        try:
+            checker_type, checker_opt = opt_str.split(':', 1)
+        except ValueError:
+            warnings.warn("Could not split option {}, ignoring".format(opt_str))
+        else:
+            options_dict[checker_type].add(checker_opt)
+    return options_dict
 
 def main():
     # Load all available checker classes
@@ -83,6 +103,21 @@ def main():
                               "supplied, the number of input datasets supplied must match "
                               "the number of output files."))
 
+    parser.add_argument('-O', '--option', default=[], action='append',
+                        help=dedent("""
+                                    Additional options to be passed to the
+                                    checkers.  Multiple options can be specified
+                                    via multiple invocations of this switch.
+                                    Options should be prefixed with a the
+                                    checker name followed by the option, e.g.
+                                    '<checker>:<option_name>'
+
+                                    Available options:
+                                    'cf:enable_appendix_a_checks' - Allow check
+                                    results against CF Appendix A for attribute
+                                    location and data types.
+                                    """))
+
     parser.add_argument('-V', '--version', action='store_true',
                         help='Display the IOOS Compliance Checker version information.')
 
@@ -106,6 +141,10 @@ def main():
     if args.version:
         print("IOOS compliance checker version %s" % __version__)
         sys.exit(0)
+
+
+    options_dict = (parse_options(args.option) if args.option else
+                    defaultdict(set))
 
     if args.describe_checks:
         error_stat = 0
@@ -160,7 +199,8 @@ def main():
                                                              args.criteria,
                                                              args.skip_checks,
                                                              args.output[0],
-                                                             args.format or ['text'])
+                                                             args.format or ['text'],
+                                                             options=options_dict)
         return_values.append(return_value)
         had_errors.append(errors)
     else:
@@ -173,7 +213,8 @@ def main():
                                                                 args.criteria,
                                                                 args.skip_checks,
                                                                 output,
-                                                                args.format or ['text'])
+                                                                args.format or ['text'],
+                                                                options=options_dict)
             return_values.append(return_value)
             had_errors.append(errors)
 

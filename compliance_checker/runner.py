@@ -34,7 +34,7 @@ class ComplianceChecker(object):
     @classmethod
     def run_checker(cls, ds_loc, checker_names, verbose, criteria,
                     skip_checks=None, output_filename='-',
-                    output_format=['text']):
+                    output_format=['text'], options=None):
         """
         Static check runner.
 
@@ -49,7 +49,7 @@ class ComplianceChecker(object):
         @returns                If the tests failed (based on the criteria)
         """
         all_groups = []
-        cs = CheckSuite()
+        cs = CheckSuite(options=options or {})
         # using OrderedDict is important here to preserve the order
         # of multiple datasets which may be passed in
         score_dict = OrderedDict()

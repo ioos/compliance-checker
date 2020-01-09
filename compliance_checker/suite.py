@@ -60,8 +60,9 @@ class CheckSuite(object):
     checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
     templates_root = 'compliance_checker'  # modify to load alternative Jinja2 templates
 
-    def __init__(self):
+    def __init__(self, options=None):
         self.col_width = 40
+        self.options = options or {}
 
     @classmethod
     def _get_generator_plugins(cls):
@@ -347,9 +348,23 @@ class CheckSuite(object):
             print("No valid checkers found for tests '{}'".format(",".join(checker_names)))
 
         for checker_name, checker_class in checkers:
+            # TODO: maybe this a little more reliable than depending on
+            #       a string to determine the type of the checker -- perhaps
+            #       use some kind of checker object with checker type and
+            #       version baked in
+            checker_type_name = checker_name.split(':')[0]
+            checker_opts = self.options.get(checker_type_name, set())
 
-            checker = checker_class() # instantiate a Checker object
-            checker.setup(ds)         # setup method to prep
+            # instantiate a Checker object
+            try:
+                checker = checker_class(options=checker_opts)
+            # hacky fix for no options in constructor
+            except TypeError:
+                checker = checker_class()
+            # TODO? : Why is setup(ds) called at all instead of just moving the
+            #         checker setup into the constructor?
+            # setup method to prep
+            checker.setup(ds)
 
             checks = self._get_checks(checker, skip_check_dict)
             vals = []

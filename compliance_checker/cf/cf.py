@@ -61,14 +61,14 @@ class CFBaseCheck(BaseCheck):
     CF Convention Checker Base
     """
 
-    def __init__(self):
+    def __init__(self, options=None):
         # The compliance checker can be run on multiple datasets in a single
         # instantiation, so caching values has be done by the unique identifier
         # for each dataset loaded.
 
         # Each default dict is a key, value mapping from the dataset object to
         # a list of variables
-        super(CFBaseCheck, self).__init__()
+        super(CFBaseCheck, self).__init__(options)
         self._coord_vars       = defaultdict(list)
         self._ancillary_vars   = defaultdict(list)
         self._clim_vars        = defaultdict(list)
@@ -891,9 +891,13 @@ class CFBaseCheck(BaseCheck):
         :rtype: list
         :return: A list of results corresponding to the results returned
         """
+        # if 'enable_appendix_a_checks' isn't specified in the checks,
+        # don't do anything on this check
+        results = []
+        if 'enable_appendix_a_checks' not in self.options:
+            return results
         possible_global_atts = (set(ds.ncattrs()).
                                 intersection(self.appendix_a.keys()))
-        results = []
         attr_location_ident = {'G': 'global attributes',
                                'C': 'coordinate data',
                                'D': 'non-coordinate data'}
@@ -1180,8 +1184,8 @@ class CF1_6Check(CFNCCheck):
     }
     appendix_a = appendix_a_base
 
-    def __init__(self): # initialize with parent methods and data
-        super(CF1_6Check, self).__init__()
+    def __init__(self, options=None): # initialize with parent methods and data
+        super(CF1_6Check, self).__init__(options)
 
         self.cell_methods = cell_methods16
         self.grid_mapping_dict = grid_mapping_dict16
@@ -3952,8 +3956,8 @@ class CF1_7Check(CF1_6Check):
         'scale_factor': {'Type': 'N', 'attr_loc': {'D', 'C'}, 'cf_section': '8.1'}
     })
 
-    def __init__(self):
-        super(CF1_7Check, self).__init__()
+    def __init__(self, options=None):
+        super(CF1_7Check, self).__init__(options)
 
         self.cell_methods = cell_methods17
         self.grid_mapping_dict = grid_mapping_dict17
