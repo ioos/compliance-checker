@@ -110,7 +110,13 @@ def main():
                                     via multiple invocations of this switch.
                                     Options should be prefixed with a the
                                     checker name followed by the option, e.g.
-                                    '<checker>:<option_name>'"""))
+                                    '<checker>:<option_name>'
+
+                                    Available options:
+                                    'cf:enable_appendix_a_checks' - Allow check
+                                    results against CF Appendix A for attribute
+                                    location and data types.
+                                    """))
 
     parser.add_argument('-V', '--version', action='store_true',
                         help='Display the IOOS Compliance Checker version information.')
