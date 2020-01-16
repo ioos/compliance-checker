@@ -1,7 +1,10 @@
-from compliance_checker.ioos import IOOS0_1Check, IOOS1_1Check
+from compliance_checker.ioos import IOOS0_1Check, IOOS1_1Check, IOOS1_2Check
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests import BaseTestCase
+from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
+from compliance_checker.tests.test_cf import get_results
 from netCDF4 import Dataset
+import numpy as np
 import os
 
 
@@ -291,3 +294,31 @@ class TestIOOS1_1(BaseTestCase):
         results = self.ioos.check_units(self.ds)
         for result in results:
             self.assert_result_is_good(result)
+
+class TestIOOS1_2(BaseTestCase):
+    '''
+    Tests for the compliance checker implementation of IOOS Metadata Profile
+    for NetCDF, Version 1.1
+    '''
+
+    # for reference
+        #ds.createDimension('siglev', 20)
+
+        #temp = ds.createVariable("temp", np.float64, dimensions=("time",),
+        #                         fill_value=np.float(99999999999999999999.))
+        #temp.coordinates = "sigma noexist"
+        #ds.createVariable("sigma", np.float64, dimensions=('siglev',))
+
+    def setUp(self):
+        self.ioos = IOOS1_2Check() 
+        self.ds = MockTimeSeries() # time, lat, lon, depth 
+
+    def test_check_vars_have_attrs(self):
+
+        # create geophysical variable
+        temp = self.ds.createVariable("temp", np.float64, dimensions=("time",))
+
+        # should fail here
+        results = self.ioos.check_vars_have_attrs(self.ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)

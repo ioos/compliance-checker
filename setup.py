@@ -65,6 +65,7 @@ setup(
             'ioos_sos = compliance_checker.ioos:IOOSBaseSOSCheck',
             'ioos-0.1 = compliance_checker.ioos:IOOS0_1Check',
             'ioos-1.1 = compliance_checker.ioos:IOOS1_1Check',
+            'ioos-1.2 = compliance_checker.ioos:IOOS1_2Check',
         ]
     },
     package_data         = {

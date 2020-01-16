@@ -5,8 +5,9 @@ from __future__ import unicode_literals
 from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, Result
 from owslib.namespaces import Namespaces
 from lxml.etree import XPath
+from compliance_checker.acdd import ACDD1_3Check
 from compliance_checker.cfutil import get_geophysical_variables
-from compliance_checker.cf.cf import CF1_6Check
+from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
 
 
 class IOOSBaseCheck(BaseCheck):
@@ -346,6 +347,134 @@ class IOOS1_1Check(IOOSNCCheck):
         cf16 = CF1_6Check()
         return cf16.check_units(ds)
 
+class IOOS1_2Check(IOOSNCCheck):
+    """
+    Class to implement the IOOS Metadata 1.2 Specification
+    """
+
+    _cc_spec_version = '1.2'
+    _cc_description = 'IOOS Metadata Profile, Version 1.2'
+    _cc_url = 'https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html'
+    register_checker = True
+
+    def __init__(self):
+
+        # instantiate objects used for delegation
+        self.acdd1_6 = ACDD1_3Check()
+        self.cf1_7   = CF1_7Check()
+
+        # check geophysical variables have the following attrs:
+        self.check_var_attrs = (
+            ("_FillValue", BaseCheck.MEDIUM),
+            ("missing_value", BaseCheck.MEDIUM),
+            #( "standard_name", BaseCheck.HIGH # already checked in CF1_7Check.check_standard_name()
+            ("standard_name_uri", BaseCheck.MEDIUM),
+            #( "units", BaseCheck.HIGH # already checked in CF1_7Check.check_units()
+            ("platform", BaseCheck.HIGH),
+            ("platform_id", BaseCheck.MEDIUM),
+            ("platform_name", BaseCheck.HIGH),
+            ("platform_vocabulary", BaseCheck.HIGH),
+            #( "wmo_platform_code", BaseCheck.HIGH # only "if applicable", see check_wmo_platform_code()
+        )
+
+        # Define the global attributes
+        self.required_atts = [
+            'Conventions',
+            'creator_country',
+            'creator_email',
+            'creator_institution',
+            'creator_sector',
+            'creator_url',
+            'featureType',
+            'id',
+            'license',
+            'naming_authority',
+            'platform',
+            'platform_vocabulary',
+            'publisher_country',
+            'publisher_email',
+            'publisher_institution',
+            'publisher_url',
+            'standard_name_vocabulary',
+            'summary',
+            'title'
+        ]
+
+        self.rec_atts = [
+            'contributor_email',
+            'contributor_name',
+            'contributor_role',
+            'contributor_role_vocabulary',
+            'contributor_url',
+            'creator_address',
+            'creator_city',
+            'creator_name',
+            'creator_phone',
+            'creator_postalcode',
+            'creator_state',
+            'creator_type',
+            'institution',
+            'instrument',
+            'ioos_ingest',
+            'keywords',
+            'publisher_address',
+            'publisher_city',
+            'publisher_name',
+            'publisher_phone',
+            'publisher_postalcode',
+            'publisher_state',
+            'publisher_type',
+            'references',
+        ]
+
+    @check_has(BaseCheck.HIGH)
+    def check_high(self, ds):
+        '''
+        Performs a check on each highly recommended attributes' existence in the dataset
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        return self.required_atts
+
+    @check_has(BaseCheck.MEDIUM)
+    def check_recommended(self, ds):
+        '''
+        Performs a check on each recommended attributes' existence in the dataset
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        '''
+        return self.rec_atts
+
+    def check_vars_have_attrs(self, ds):
+        """
+        Using the tuples defined in __init__, check that each variable has
+        the attributes using the corresponding priority.
+
+        :param netCDF4.Dataset: open netCDF4 dataset
+        """
+
+        results = []
+        # NOTE should it also find 'geospatial` variables?
+        for geo_var in get_geophysical_variables(ds):
+            for attr_tuple in self.check_var_attrs:
+                results.append(
+                    self._has_var_attr(
+                        ds,
+                        geo_var,
+                        attr_tuple[0], # attribute name
+                        attr_tuple[0], # attribute name used as 'concept_name'
+                        attr_tuple[1]  # priority level
+                    )
+                )
+
+        return results
+
+    # TODO -- checks that are not as simple as "does this exist?"
+    # platform variable checks
+    # instrument variable checks
+    # wmo_platform_code check
+    # qartod checks
+    # gts_ingest
 
 class IOOSBaseSOSCheck(BaseCheck):
     _cc_spec = 'ioos_sos'
