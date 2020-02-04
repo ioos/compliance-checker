@@ -670,7 +670,7 @@ class CheckSuite(object):
             ds_str = cdl_path.replace('.cdl', '.nc')
         else:
             ds_str = cdl_path + '.nc'
-        subprocess.call(['ncgen', '-o', ds_str, cdl_path])
+        subprocess.call(['ncgen', '-k', 'nc4', '-o', ds_str, cdl_path])
         return ds_str
 
     def load_dataset(self, ds_str):
