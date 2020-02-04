@@ -871,9 +871,11 @@ class TestCF(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES['mapping'])
         results = self.cf.check_grid_mapping(dataset)
 
-        # there are 8 results, 2 of which did not have perfect scores
+        # there are 8 results, all have perfect scores
+        #  (false_easting does not exist as attribute of grid mapping 
+        #   variable but is optional)
         assert len(results) == 8
-        assert len([r.value for r in results if r.value[0] < r.value[1]]) == 2
+        assert len([r.value for r in results if r.value[0] < r.value[1]]) == 0
         assert all(r.name == u'§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections' for r in results)
 
 
