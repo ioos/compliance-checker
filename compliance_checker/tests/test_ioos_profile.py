@@ -311,14 +311,113 @@ class TestIOOS1_2(BaseTestCase):
 
     def setUp(self):
         self.ioos = IOOS1_2Check() 
-        self.ds = MockTimeSeries() # time, lat, lon, depth 
 
     def test_check_vars_have_attrs(self):
 
         # create geophysical variable
-        temp = self.ds.createVariable("temp", np.float64, dimensions=("time",))
+        ds = MockTimeSeries() # time, lat, lon, depth 
+        temp = ds.createVariable("temp", np.float64, dimensions=("time",))
 
         # should fail here
-        results = self.ioos.check_vars_have_attrs(self.ds)
+        results = self.ioos.check_vars_have_attrs(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
+
+        # should pass
+        ds = MockTimeSeries() # time, lat, lon, depth 
+        temp = ds.createVariable("temp", np.float64, fill_value=9999999999.) # _FillValue
+        temp.setncattr("missing_value", 9999999999.)
+        temp.setncattr("standard_name", "sea_surface_temperature")
+        temp.setncattr("standard_name_uri", "http://cfconventions.org/Data/cf-standard-names/64/build/cf-standard-name-table.html")
+        temp.setncattr("units", "degree_C")
+        temp.setncattr("platform", "myPlatform")
+
+        results = self.ioos.check_vars_have_attrs(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+    def test_check_single_platform(self):
+
+        ds = MockTimeSeries()
+
+        # should fail as no platform attrs exist
+        result = self.ioos.check_single_platform(ds)
+        self.assertFalse(result.value)
+
+        # should pass with single platform
+        ds.setncattr("platform", "myPlatform")
+        result = self.ioos.check_single_platform(ds)
+        self.assertTrue(result.value)
+
+        # add a different platform
+        ds.variables["time"].setncattr("platform", "myPlatform2")
+        result = self.ioos.check_single_platform(ds)
+        self.assertFalse(result.value)
+
+        # make all the same
+        ds.variables["time"].setncattr("platform", "myPlatform")
+        result = self.ioos.check_single_platform(ds)
+        self.assertTrue(result.value)
+
+    def test_check_gts_ingest(self):
+        ds = MockTimeSeries() # time, lat, lon, depth 
+
+        # no gts_ingest, should pass
+        results = self.ioos.check_gts_ingest(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # global
+        ds.setncattr("gts_ingest", "true")
+        results = self.ioos.check_gts_ingest(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # give one variable the gts_ingest attribute
+        ds.variables["time"].setncattr("gts_ingest", "true")
+        results = self.ioos.check_gts_ingest(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # give a poor value
+        ds.variables["time"].setncattr("gts_ingest", "blah")
+        results = self.ioos.check_gts_ingest(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+    def test_check_instrument_variables(self):
+
+        ds = MockTimeSeries() # time, lat, lon, depth 
+
+        # no instrument variable, should pass
+        results = self.ioos.check_instrument_variables(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        temp = ds.createVariable("temp", np.float64, dimensions=("time",))
+        temp.setncattr("cf_role", "timeseries")
+        temp.setncattr("standard_name", "sea_surface_temperature")
+        temp.setncattr("units", "degree_C")
+        temp.setncattr("axis", "Y")
+        temp.setncattr("instrument", "myInstrument")
+        temp[:] = 45.
+        instr = ds.createVariable("myInstrument", np.float64, dimensions=("time",))
+
+        # give instrument variable with component
+        instr.setncattr("component", "someComponent")
+        results = self.ioos.check_instrument_variables(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # give discriminant
+        instr.setncattr("discriminant", "someDiscriminant")
+        results = self.ioos.check_instrument_variables(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # bad component
+        instr.setncattr("component", 45)
+        results = self.ioos.check_instrument_variables(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+        

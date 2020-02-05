@@ -6,7 +6,7 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, Base
 from owslib.namespaces import Namespaces
 from lxml.etree import XPath
 from compliance_checker.acdd import ACDD1_3Check
-from compliance_checker.cfutil import get_geophysical_variables
+from compliance_checker.cfutil import get_geophysical_variables, get_instrument_variables
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
 
 
@@ -371,9 +371,6 @@ class IOOS1_2Check(IOOSNCCheck):
             ("standard_name_uri", BaseCheck.MEDIUM),
             #( "units", BaseCheck.HIGH # already checked in CF1_7Check.check_units()
             ("platform", BaseCheck.HIGH),
-            ("platform_id", BaseCheck.MEDIUM),
-            ("platform_name", BaseCheck.HIGH),
-            ("platform_vocabulary", BaseCheck.HIGH),
             #( "wmo_platform_code", BaseCheck.HIGH # only "if applicable", see check_wmo_platform_code()
         )
 
@@ -390,6 +387,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'license',
             'naming_authority',
             'platform',
+            'platform_name',
             'platform_vocabulary',
             'publisher_country',
             'publisher_email',
@@ -417,6 +415,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'instrument',
             'ioos_ingest',
             'keywords',
+            'platform_id',
             'publisher_address',
             'publisher_city',
             'publisher_name',
@@ -469,12 +468,148 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return results
 
+
+    def check_single_platform(self, ds):
+        """
+        Verify that a dataset only has a single platform attribute.
+
+        Args:
+            ds (netCDF-4 Dataset): open Dataset object
+
+        Returns:
+            None
+        """
+
+        platform_set = set()
+
+        global_platform = getattr(ds, "platform", None)
+        if global_platform:
+            platform_set.add(global_platform)
+
+        for v in ds.get_variables_by_attributes(platform=lambda x: x is not None):
+            platform_set.add(v.getncattr("platform"))
+
+        msg = f"A dataset may only have one platform; {len(platform_set)} found"
+        if len(platform_set) > 1:
+            return Result(BaseCheck.HIGH, False, "platform", [msg])
+        elif len(platform_set) == 0:
+            return Result(BaseCheck.HIGH, False, "platform", ["A dataset must have a global attribute \"platform\""])
+        else:
+            return Result(BaseCheck.HIGH, True, "platform", [msg])
+        
+    def _check_gts_ingest(self, attr, msg):
+        """
+        Helper function for check_gts_ingest().
+
+        Args:
+            attr (?): attribute value
+
+        Returns:
+            Result
+        """
+
+        if (
+            isinstance(attr, str)
+            and
+            ((attr == "true") or (attr == "false"))
+        ):
+            val = True
+        else:
+            val = False   
+        return Result(BaseCheck.HIGH, val, "gts_ingest", [msg])
+
+    def check_gts_ingest(self, ds):
+        """
+        Check if a dataset has a global gts_ingest attribute and if any
+        variables also have the gts_ingest attribute.
+
+        According to https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#requirements-for-ioos-dataset-gts-ingest,
+        the gts_ingest is "required, if applicable". Because the Compliance Checker
+        cannot accurately guess applicability of a certain dataset or variable,
+        this check simply verifies that if it exists, the value is a string
+        denoting "true" or "false".
+
+        Args:
+            ds (netCDF4.Dataset): open Dataset
+
+        Returns:
+            list of Result objects
+        """
+
+        default_pass_result = Result(BaseCheck.HIGH, True, "gts_ingest", ["gts_ingest"])
+
+        results = []
+
+        # check global
+        glb_msg = ("If provided, the global attribute \"gts_ingest\" must be a "
+                   "string and its value must be one of \"true\" or \"false\"")
+        glb_gts_attr = getattr(ds, "gts_ingest", None)
+        if glb_gts_attr:
+            results.append(self._check_gts_ingest(glb_gts_attr, glb_msg))
+        else:
+            results.append(default_pass_result)
+
+        # check variables
+        var_msg = ("If provided, the attribute \"gts_ingest\" of variable \"{v}\" "
+                   "must be a string and its value must be one of "
+                   "\"true\" or \"false\"")
+        for v in ds.variables:
+            _attr = getattr(ds.variables[v], "gts_ingest", None)
+            if _attr:
+                print(_attr)
+                results.append((self._check_gts_ingest(_attr, var_msg.format(v=v))))
+            else:
+                results.append(default_pass_result)
+
+        return results
+
     # TODO -- checks that are not as simple as "does this exist?"
-    # platform variable checks
-    # instrument variable checks
-    # wmo_platform_code check
+
     # qartod checks
-    # gts_ingest
+    # TODO -- how to implement this? How can we distinguish variables that are
+    # intended to be an ancillary_variable?
+
+    # instrument variable checks
+    def check_instrument_variables(self, ds):
+        """
+        If present, the instrument_variable is one that contains additional
+        metadata about the instrument the data was collected with.
+
+        Args:
+            ds (netCDF4.Dataset): open Dataset
+
+        Returns:
+            list of Results
+        """
+
+        results = []
+        instr_vars = get_instrument_variables(ds)
+
+        # check for component, disciminant
+        for instr in instr_vars:
+            if instr in ds.variables:
+                compnt = getattr(ds.variables[instr], "component", None)
+                m = [f"component attribute of {instr} ({compnt}) must be a string"]
+                if compnt:
+                    results.append(
+                        Result(BaseCheck.MEDIUM, isinstance(compnt, str), "instrument_variable", m)
+                    )
+                else:
+                    results.append(Result(BaseCheck.MEDIUM, True, "instrument_variable", m))
+
+                disct = getattr(ds.variables[instr], "discriminant", None)
+                m = [f"discriminant attribute of {instr} ({disct}) must be a string"]
+                if disct:
+                    results.append(
+                        Result(BaseCheck.MEDIUM, isinstance(disct, str), "instrument_variable", m)
+                    )
+                else:
+                    results.append(Result(BaseCheck.MEDIUM, True, "instrument_variable", m))
+
+        return results
+            
+
+    # wmo_platform_code check
 
 class IOOSBaseSOSCheck(BaseCheck):
     _cc_spec = 'ioos_sos'
