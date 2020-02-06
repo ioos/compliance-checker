@@ -420,4 +420,91 @@ class TestIOOS1_2(BaseTestCase):
         results = self.ioos.check_instrument_variables(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
+
+    def test_check_wmo_platform_code(self):
+        ds = MockTimeSeries() # time, lat, lon, depth 
+
+        # no wmo_platform_code, pass
+        result = self.ioos.check_wmo_platform_code(ds)
+        self.assertTrue(result.value)
+
+        # valid code
+        ds.setncattr("wmo_platform_code", "12345")
+        result = self.ioos.check_wmo_platform_code(ds)
+        self.assertTrue(result.value)
+
+        # valid code
+        ds.setncattr("wmo_platform_code", "7654321")
+        result = self.ioos.check_wmo_platform_code(ds)
+        self.assertTrue(result.value)
+
+        # non-numeric, fail
+        ds.setncattr("wmo_platform_code", "abcd1")
+        result = self.ioos.check_wmo_platform_code(ds)
+        self.assertFalse(result.value)
+    
+        # invalid length, fail
+        ds.setncattr("wmo_platform_code", "123")
+        result = self.ioos.check_wmo_platform_code(ds)
+        self.assertFalse(result.value)
+
+    def test_check_standard_name(self):
+        ds = MockTimeSeries() # time, lat, lon, depth 
+
+        # no standard names
+        results = self.ioos.check_standard_name(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # give standard names to all variables
+        ds.variables["time"].setncattr("standard_name", "time")
+        ds.variables["lon"].setncattr("standard_name", "longitude")
+        ds.variables["lat"].setncattr("standard_name", "latitude")
+        ds.variables["depth"].setncattr("standard_name", "depth")
+        results = self.ioos.check_standard_name(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # add a QARTOD variable, no standard name - should fail
+        qr = ds.createVariable("depth_qc", np.byte)
+        qr.setncattr("flag_meanings", "blah")
+        results = self.ioos.check_standard_name(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # bad standard name
+        qr.setncattr("standard_name", "blah")
+        results = self.ioos.check_standard_name(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # good standard name
+        qr.setncattr("standard_name", "spike_test_quality_flag")
+        results = self.ioos.check_standard_name(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+    def test_check_qartod_variables_references(self):
+        ds = MockTimeSeries() # time, lat, lon, depth 
         
+        # no QARTOD variables
+        results = self.ioos.check_qartod_variables_references(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # QARTOD variable without references (fail)
+        qr = ds.createVariable("depth_qc", np.byte)
+        qr.setncattr("flag_meanings", "blah")
+        qr.setncattr("standard_name", "spike_test_quality_flag")
+        results = self.ioos.check_qartod_variables_references(ds)
+        self.assertFalse(all(r.value for r in results))
+
+        # QARTOD variable with references (pass)
+        qr.setncattr("references", "http://services.cormp.org/quality.php")
+        results = self.ioos.check_qartod_variables_references(ds)
+        self.assertTrue(all(r.value for r in results))
+
+        # QARTOD variable with bad references (fail)
+        qr.setncattr("references", "p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht")
+        results = self.ioos.check_qartod_variables_references(ds)
+        self.assertFalse(all(r.value for r in results))

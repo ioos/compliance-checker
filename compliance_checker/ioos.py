@@ -8,6 +8,7 @@ from lxml.etree import XPath
 from compliance_checker.acdd import ACDD1_3Check
 from compliance_checker.cfutil import get_geophysical_variables, get_instrument_variables
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
+from rfc3986 import is_valid_uri
 
 
 class IOOSBaseCheck(BaseCheck):
@@ -363,6 +364,23 @@ class IOOS1_2Check(IOOSNCCheck):
         self.acdd1_6 = ACDD1_3Check()
         self.cf1_7   = CF1_7Check()
 
+        # extend standard_names set to include QARTOD standard_names
+        self._qartod_std_names = [
+            "aggregate_quality_flag",
+            "attenuated_signal_test_quality_flag",
+            "climatology_test_quality_flag",
+            "flat_line_test_quality_flag",
+            "gap_test_quality_flag",
+            "gross_range_test_quality_flag",
+            "location_test_quality_flag",
+            "multi_variate_test_quality_flag",
+            "neighbor_test_quality_flag",
+            "rate_of_change_test_quality_flag",
+            "spike_test_quality_flag",
+            "syntax_test_quality_flag"
+        ]
+        self.cf1_7._std_names._names.extend(self._qartod_std_names)
+
         # check geophysical variables have the following attrs:
         self.check_var_attrs = (
             ("_FillValue", BaseCheck.MEDIUM),
@@ -443,6 +461,22 @@ class IOOS1_2Check(IOOSNCCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         '''
         return self.rec_atts
+
+    def check_standard_name(self, ds):
+        """
+        Wrapper for checking standard names using the CF module.
+        Extends the StandardNameTable to include QARTOD variable
+        standard names.
+        """
+
+        return self.cf1_7.check_standard_name(ds)
+
+    def check_units(self, ds):
+        """
+        Wrapper to check units with the CF module.
+        """
+
+        return self.cf1_7.check_units(ds)
 
     def check_vars_have_attrs(self, ds):
         """
@@ -563,13 +597,6 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return results
 
-    # TODO -- checks that are not as simple as "does this exist?"
-
-    # qartod checks
-    # TODO -- how to implement this? How can we distinguish variables that are
-    # intended to be an ancillary_variable?
-
-    # instrument variable checks
     def check_instrument_variables(self, ds):
         """
         If present, the instrument_variable is one that contains additional
@@ -607,9 +634,62 @@ class IOOS1_2Check(IOOSNCCheck):
                     results.append(Result(BaseCheck.MEDIUM, True, "instrument_variable", m))
 
         return results
-            
 
-    # wmo_platform_code check
+    def check_qartod_variables_references(self, ds):
+        """
+        For any variables that are deemed QARTOD variables,
+        check that they contain the "references" attribute.
+
+        Args:
+            ds (netCDF4.Dataset): open Dataset
+
+        Returns:
+            list of Results
+        """
+
+        # TODO
+        # is_valid_uri will be deprecated soon, use validators.Validator
+        # what schemes should be allowed?
+
+        results = []
+        ctxt = "qartod_variable:references"
+        for v in ds.get_variables_by_attributes(standard_name=lambda x: x in self._qartod_std_names):
+            msg = f"\"references\" attribute for variable \"{v.name}\" must be a valid URI"
+            val = True
+            ref = getattr(v, "references", None)
+            if not (isinstance(ref, str) and is_valid_uri(ref)):
+                val = False
+            results.append(Result(BaseCheck.MEDIUM, val, ctxt, [msg]))
+
+        return results
+
+    def check_wmo_platform_code(self, ds):
+        """
+        If a WMO Platform Code is given as a global variable, check that it is
+        well-formed. According to the WMO, valid codes are a numeric string
+        comprised of 5 or 7 characters.
+
+        Args:
+            ds (netCDF4.Dataset): open Dataset
+
+        Returns:
+            Result
+        """
+
+        valid = True
+        ctxt = "wmo_platform_code"
+        msg = "The wmo_platform_code must be a numeric string of 5 or 7 characters"
+
+        code = getattr(ds, "wmo_platform_code", None)
+        if code:
+           if not (
+               isinstance(code, str) and
+               code.isnumeric() and
+               (len(code) == 5 or len(code) == 7)
+           ):
+               valid = False
+
+        return Result(BaseCheck.HIGH, valid, ctxt, [msg])
 
 class IOOSBaseSOSCheck(BaseCheck):
     _cc_spec = 'ioos_sos'
