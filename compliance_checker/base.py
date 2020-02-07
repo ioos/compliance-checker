@@ -15,7 +15,15 @@ from compliance_checker.util import kvp_convert
 from collections import defaultdict
 from lxml import etree
 import sys
+import re
+from email.utils import parseaddr
 
+# Python 3.5+ should work, also have a fallback
+try:
+    from typing import Pattern
+    re_pattern_type = Pattern
+except ImportError:
+    re_pattern_type = type(re.compile(''))
 
 def get_namespaces():
     n = Namespaces()
@@ -23,6 +31,54 @@ def get_namespaces():
     ns["ows"] = n.get_namespace("ows110")
     return ns
 
+class ValidationObject(object):
+    validator_fail_msg = ''
+    expected_type = None
+
+    def validator_func(self, input_value):
+        raise NotImplementedError
+
+    def validate(self, input_name, input_value):
+        if self.expected_type is not None:
+            type_result = self.validate_type(input_name, input_value)
+            if not type_result[0]:
+                return type_result
+        validator_result = self.validator_func(input_value)
+        if validator_result:
+            return True, None
+        else:
+            return False, self.validator_fail_msg.format(input_name)
+
+    def validate_type(self, input_name, input_value):
+        if not isinstance(input_value, self.expected_type):
+            expected_type_fmt = "Attribute {} should be instance of type {}"
+            return (False,
+                    expected_type_fmt.format(input_name,
+                                             self.expected_type.__name__))
+        else:
+            return True, None
+
+class EmailValidator(ValidationObject):
+    validator_fail_msg = "{} must be a valid email address"
+    expected_type = str
+
+    def validator_func(self, input_value):
+        return parseaddr(input_value) != ("", "")
+
+class RegexValidator(ValidationObject):
+    expected_type = str
+    validator_regex = r'^.+$'
+    validator_fail_msg = "{} must not be an empty string"
+
+    def validator_func(self, input_value):
+        return bool(re.search(self.validator_regex, input_value))
+
+class UrlValidator(ValidationObject):
+    validator_fail_msg = "{} must be a valid URL"
+    expected_type = str
+
+    def validator_func(self, input_value):
+        return bool(validators.url(input_value))
 
 # Simple class for Generic File type (default to this if file not recognised)
 class GenericFile(object):
@@ -255,6 +311,13 @@ def xpath_check(tree, xpath):
     """Checks whether tree contains one or more elements matching xpath"""
     return len(xpath(tree)) > 0
 
+def maybe_get_global_attr(attr_name, ds):
+    if attr_name in ds.ncattrs():
+        return True, ds.getncattr(attr_name)
+    else:
+        err_msg = "{} not present"
+        return False, [err_msg.format(attr_name)]
+
 
 def attr_check(kvp, ds, priority, ret_val, gname=None):
     """
@@ -326,6 +389,50 @@ def attr_check(kvp, ds, priority, ret_val, gname=None):
                 msgs
             )
         )
+    # check if this is a class and subclass of ValidationObject
+    elif isinstance(other, type) and issubclass(other, ValidationObject):
+        attr_result = maybe_get_global_attr(name, ds)
+        if not attr_result[0]:
+            res_tup = attr_result
+        else:
+            check_val = attr_result[1]
+            check_result = other().validate(name, check_val)
+            if check_result[0]:
+                res_tup = True, []
+            else:
+                res_tup = False, [check_result[1]]
+        ret_val.append(
+            Result(
+                priority,
+                res_tup[0],
+                name,
+                res_tup[1]
+            )
+        )
+    elif isinstance(other, re_pattern_type):
+        attr_result = maybe_get_global_attr(name, ds)
+        if not attr_result[0]:
+            return attr_result
+        else:
+            check_val = attr_result[1]
+        if not isinstance(check_val, str):
+            res = False
+            msgs = ["{} must be a string".format(name)]
+        elif not other.search(check_val):
+            res = False
+            msgs = ["{} must match regular expression {}".format(name, other)]
+        else:
+            res = True
+            msgs = []
+
+        ret_val.append(Result(
+            priority,
+            value=res,
+            name=gname if gname else name,
+            msgs=msgs
+        ))
+
+
     # if the attribute is a function, call it
     # right now only supports single attribute
     # important note: current magic approach uses all functions

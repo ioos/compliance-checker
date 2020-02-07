@@ -112,6 +112,31 @@ class TestBase(TestCase):
                                                        [base.BaseCheck.HIGH]
                                                      ))
 
+        def test_email_validation(self):
+            test_attr_name = 'test'
+            validator = base.EmailValidator()
+            self.assertTrue(validator.validate(test_attr_name,
+                                               'foo@bar.com')[0])
+            bad_result = validator.validate(test_attr_name, 'foo@bar.com')
+            self.assertFalse(bad_result[0])
+            self.assertEqual(bad_result[1],
+                             "test must be a valid email address")
+
+        def test_url_validation(self):
+            """
+            Test that URL validation works properly
+            """
+            test_attr_name = "test"
+            # invalid URL
+            test_url = "ssh://invalid_url"
+            validator = base.UrlValidator()
+            bad_result = validator.validate(test_attr_name, test_url)
+            self.assertFalse(bad_result[0])
+            self.assertEqual(bad_result[1], "test must be a valid URL")
+            # valid URL
+            test_url = "https://ioos.us"
+            self.assertTrue(validator.validate(test_attr_name, test_url)[0])
+
 
 class TestGenericFile(TestCase):
     '''
