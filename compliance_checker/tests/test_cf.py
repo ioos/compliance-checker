@@ -929,7 +929,7 @@ class TestCF1_6(BaseTestCase):
 
         assert len(results) == 6
         assert len([r.value for r in results.values()
-                    if r.value[0] < r.value[1]]) == 1
+                    if r.value[0] < r.value[1]]) == 0
         expected_name = u'§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections'
         assert all(r.name == expected_name for r in results.values())
 
