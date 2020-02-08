@@ -695,9 +695,22 @@ class CheckSuite(object):
             ds_str = cdl_path.replace('.cdl', '.nc')
         else:
             ds_str = cdl_path + '.nc'
-        returncode = subprocess.call(['ncgen', '-o', ds_str, cdl_path])
-        if returncode != 0:
-            print("Error generating dataset from .cdl")
+
+        # generate netCDF-4 file
+        iostat = subprocess.run(['ncgen', '-k', 'nc4', '-o', ds_str, cdl_path], capture_output=True)
+        if iostat.returncode != 0:
+          # if not successfull, create netCDF classic file
+          print('netCDF-4 file could not be generated from cdl file with ' +
+                'message:')
+          print(iostat.stderr)
+          print('Trying to create netCDF Classic file instead.')
+          iostat = subprocess.run(['ncgen', '-k', 'nc3', '-o', ds_str, cdl_path], capture_output=True)
+          if iostat.returncode != 0:
+            # Exit program if neither a netCDF Classic nor a netCDF-4 file
+            # could be created.
+            print('netCDF Classic file could not be generated from cdl file' +
+                  'with message:')
+            print(iostat.stderr)
             sys.exit(1)
         return ds_str
 
