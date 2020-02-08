@@ -36,5 +36,5 @@ variables:
 		:history = "2020-02-04T18:00 manually create by Daniel Neumann, DKRZ" ;
 		:global_att_of_type_int = 2 ;
 		:global_att_of_type_int64 = 2LL ;
-		:Conventions = "CF-1.6" ;
+		:Conventions = "CF-1.7" ;
 }
