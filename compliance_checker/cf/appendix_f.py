@@ -280,6 +280,10 @@ grid_mapping_dict17.update({
         (
             'false_easting',
             'false_northing'
+        ),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
         )
     ],
     'oblique_mercator': [
@@ -292,6 +296,10 @@ grid_mapping_dict17.update({
         (
             'false_easting',
             'false_northing'
+        ),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
         )
     ],
     'sinusoidal': [
@@ -301,6 +309,10 @@ grid_mapping_dict17.update({
         (
             'false_easting',
             'false_northing'
+        ),
+        (
+            'projection_x_coordinate',
+            'projection_y_coordinate'
         )
     ]
 })
