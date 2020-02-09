@@ -13,7 +13,8 @@ static_files = {
     'test_cdl'     : resource_filename('compliance_checker', 'tests/data/test_cdl.cdl'),
     'test_cdl_nc'  : resource_filename('compliance_checker', 'tests/data/test_cdl_nc_file.nc'),
     'empty'        : resource_filename('compliance_checker', 'tests/data/non-comp/empty.file'),
-    'ru07'         : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc')
+    'ru07'         : resource_filename('compliance_checker', 'tests/data/ru07-20130824T170228_rt0.nc'),
+    'netCDF4'      : resource_filename('compliance_checker', 'tests/data/test_cdl_nc4_file.cdl')
 }
 
 
@@ -58,6 +59,18 @@ class TestSuite(unittest.TestCase):
                                                             groups)
             # This asserts that print is able to generate all of the unicode output
             self.cs.standard_output_generation(groups, limit, points, out_of, checker)
+
+    def test_generate_dataset_netCDF4(self):
+        """
+        Tests that suite.generate_dataset works with cdl file with netCDF4
+        features.
+        """
+        # create netCDF4 file
+        ds_name = self.cs.generate_dataset(static_files['netCDF4'])
+        # check if correct name is return
+        assert ds_name == static_files['netCDF4'].replace('.cdl', '.nc')
+        # check if netCDF4 file was created
+        assert os.path.isfile(static_files['netCDF4'].replace('.cdl', '.nc'))
 
     def test_skip_checks(self):
         """Tests that checks are properly skipped when specified"""
@@ -183,4 +196,19 @@ class TestSuite(unittest.TestCase):
                                                         limit, 'cf',
                                                         groups)
         assert all_passed < out_of
+
+    def test_netCDF4_features(self):
+        """
+        Check if a proper netCDF4 file with netCDF4-datatypes is created.
+        """
+        # create and open dataset
+        ds = self.cs.load_dataset(static_files['netCDF4'])
+        # check if netCDF type of global attributes is correct
+        assert isinstance(ds.global_att_of_type_int, np.int32)
+        # check if netCDF4 type of global attributes is correct
+        assert isinstance(ds.global_att_of_type_int64, np.int64)
+        # check if netCDF type of variable is correct
+        assert ds['tas'].dtype is np.dtype('float32')
+        # check if netCDF4 type of variable is correct
+        assert ds['mask'].dtype is np.dtype('int64')
 
