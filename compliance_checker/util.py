@@ -7,10 +7,7 @@ from collections import OrderedDict
 
 
 def isstring(obj):
-    try:
-        return isinstance(obj, basestring)
-    except NameError:
-        return isinstance(obj, str)
+    return isinstance(obj, str)
 
 
 def datetime_is_iso(date_str):

@@ -20,10 +20,7 @@ from compliance_checker.base import BaseCheck
 from compliance_checker import MemoizedDataset
 from collections import defaultdict
 import warnings
-try:
-    from urlparse import urlparse
-except ImportError:
-    from urllib.parse import urlparse
+from urllib.parse import urlparse
 from datetime import datetime
 import requests
 import codecs

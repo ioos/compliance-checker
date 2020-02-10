@@ -10,17 +10,8 @@ import warnings
 from functools import partial
 import csv
 import re
-try:
-    from functools import lru_cache
-# Fallback for Python < 3.2
-except ImportError:
-    from functools32 import lru_cache
+from functools import lru_cache
 
-# For python2/python3 support
-try:
-    basestring
-except NameError:
-    basestring = str
 
 
 _UNITLESS_DB = None
@@ -59,7 +50,7 @@ DIMENSIONLESS_VERTICAL_COORDINATES = {
     'atmosphere_sleve_coordinate'
 }
 
-def attr_membership(attr_val, value_set, attr_type=basestring,
+def attr_membership(attr_val, value_set, attr_type=str,
                           modifier_fn=lambda x: x):
     """
     Helper function passed to netCDF4.Dataset.get_attributes_by_value
@@ -82,9 +73,9 @@ def attr_membership(attr_val, value_set, attr_type=basestring,
                       "Attempting to cast to expected type.".format(type(attr_val),
                                                                     attr_type))
         try:
-            # if the expected type is basestring, try casting to unicode type
-            # since basestring can't be instantiated
-            if attr_type is basestring:
+            # if the expected type is str, try casting to unicode type
+            # since str can't be instantiated
+            if attr_type is str:
                 new_attr_val = str(attr_val)
             else:
                 new_attr_val = attr_type(attr_val)
@@ -114,7 +105,7 @@ def is_dimensionless_standard_name(xml_tree, standard_name):
     table i.e. '1', or '1e-3'.
     '''
     # standard_name must be string, so if it is not, it is *wrong* by default
-    if not isinstance(standard_name, basestring):
+    if not isinstance(standard_name, str):
         return False
     found_standard_name = xml_tree.find(".//entry[@id='{}']".format(standard_name))
     if found_standard_name is not None:
@@ -181,7 +172,7 @@ def is_geophysical(ds, variable):
     standard_name_test = getattr(ncvar, 'standard_name', '')
     unitless = is_unitless(ds, variable)
 
-    if not isinstance(standard_name_test, basestring):
+    if not isinstance(standard_name_test, str):
         warnings.warn("Variable {} has non string standard name, "
                       "Attempting cast to string".format(variable))
         try:
@@ -273,7 +264,7 @@ def get_auxiliary_coordinate_variables(ds):
     '''
     aux_vars = []
     # get any variables referecned by the coordinates attribute
-    for ncvar in ds.get_variables_by_attributes(coordinates=lambda x: isinstance(x, basestring)):
+    for ncvar in ds.get_variables_by_attributes(coordinates=lambda x: isinstance(x, str)):
         # split the coordinates into individual variable names
         referenced_variables = ncvar.coordinates.split(' ')
         # if the variable names exist, add them
@@ -370,7 +361,7 @@ def get_z_variable(nc):
     for var in z_variables:
         ncvar = nc.variables[var]
         units = getattr(ncvar, 'units', None)
-        if isinstance(units, basestring):
+        if isinstance(units, str):
             if units_convertible(units, 'bar'):
                 return var
             if units_convertible(units, 'm'):
@@ -406,7 +397,7 @@ def get_z_variables(nc):
         if units is not None:
             if units_convertible(units, 'bar'):
                 z_variables.append(coord_name)
-            elif isinstance(positive, basestring):
+            elif isinstance(positive, str):
                 if positive.lower() in ['up', 'down']:
                     z_variables.append(coord_name)
         # if axis='Z' we're good
@@ -479,7 +470,7 @@ def get_true_latitude_variables(nc):
         units = getattr(nc.variables[lat], "units", None)
         if standard_name == 'latitude':
             true_lats.append(lat)
-        elif isinstance(units, basestring) and units.lower() in VALID_LAT_UNITS:
+        elif isinstance(units, str) and units.lower() in VALID_LAT_UNITS:
             true_lats.append(lat)
     return true_lats
 
@@ -543,7 +534,7 @@ def get_true_longitude_variables(nc):
         units = getattr(nc.variables[lon], "units", None)
         if standard_name == 'longitude':
             true_lons.append(lon)
-        elif isinstance(units, basestring) and units.lower() in VALID_LON_UNITS:
+        elif isinstance(units, str) and units.lower() in VALID_LON_UNITS:
             true_lons.append(lon)
     return true_lons
 
@@ -634,7 +625,7 @@ def get_time_variables(ds):
             time_variables.add(variable.name)
 
     regx = r'^(?:day|d|hour|hr|h|minute|min|second|s)s? since .*$'
-    for variable in ds.get_variables_by_attributes(units=lambda x: isinstance(x, basestring)):
+    for variable in ds.get_variables_by_attributes(units=lambda x: isinstance(x, str)):
         if re.match(regx, variable.units) and variable.name not in time_variables:
             time_variables.add(variable.name)
 
@@ -686,7 +677,7 @@ def get_flag_variables(ds):
     flag_variables = []
     for name, ncvar in ds.variables.items():
         standard_name = getattr(ncvar, 'standard_name', None)
-        if isinstance(standard_name, basestring) and 'status_flag' in standard_name:
+        if isinstance(standard_name, str) and 'status_flag' in standard_name:
             flag_variables.append(name)
         elif hasattr(ncvar, 'flag_meanings'):
             flag_variables.append(name)
@@ -731,7 +722,7 @@ def get_axis_map(ds, variable):
     heights = get_z_variables(ds)
 
     coordinates = getattr(ds.variables[variable], "coordinates", None)
-    if not isinstance(coordinates, basestring):
+    if not isinstance(coordinates, str):
         coordinates = []
     else:
         coordinates = coordinates.split(' ')
@@ -790,7 +781,7 @@ def is_compression_coordinate(ds, variable):
         return False
     # must have a string attribute compress
     compress = getattr(ds.variables[variable], 'compress', None)
-    if not isinstance(compress, basestring):
+    if not isinstance(compress, str):
         return False
     if not compress:
         return False
