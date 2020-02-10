@@ -5,12 +5,8 @@ sudo: false
 matrix:
   fast_finish: true
   include:
-    - name: "default-python2"
-      env: TEST_TARGET=default PY=2.7
     - name: "default-python3"
       env: TEST_TARGET=default PY=3.8
-    - name: "integration-python2"
-      env: TEST_TARGET=integration PY=2.7
     - name: "integration-python3"
       env: TEST_TARGET=integration PY=3.8
     - name: "coding_standards"
@@ -24,8 +20,6 @@ matrix:
     - name: "ugrid plugin"
       env: TEST_TARGET=cc-checker-ugrid PY=3.8
   allow_failures:
-    - name: "integration-python2"
-      env: TEST_TARGET=integration PY=2.7
     - name: "integration-python3"
       env: TEST_TARGET=integration PY=3.8
     - name: "coding_standards"
