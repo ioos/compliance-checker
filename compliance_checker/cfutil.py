@@ -8,7 +8,6 @@ from pkg_resources import resource_filename
 from collections import defaultdict
 import warnings
 from functools import partial
-import six
 import csv
 import re
 try:
@@ -86,7 +85,7 @@ def attr_membership(attr_val, value_set, attr_type=basestring,
             # if the expected type is basestring, try casting to unicode type
             # since basestring can't be instantiated
             if attr_type is basestring:
-                new_attr_val = six.text_type(attr_val)
+                new_attr_val = str(attr_val)
             else:
                 new_attr_val = attr_type(attr_val)
         # catch casting errors

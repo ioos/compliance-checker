@@ -32,7 +32,6 @@ import codecs
 import re
 import textwrap
 from pkg_resources import working_set
-import six
 
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
@@ -107,13 +106,7 @@ class CheckSuite(object):
         for c, _ in check_functions:
             print("- {}".format(c.__name__))
             if c.__doc__ is not None:
-                # necessary for unicode characters in docstrings under Python
-                # 2, aside from converting everything over to u'' strings
-                try:
-                    u_doc = six.u(c.__doc__)
-                except TypeError:
-                    u_doc = c.__doc__
-
+                u_doc = c.__doc__
                 print("\n{}\n".format(extract_docstring_summary(u_doc)))
 
     @classmethod

@@ -7,7 +7,6 @@ import json
 from collections import OrderedDict
 from contextlib import contextmanager
 from compliance_checker.suite import CheckSuite
-import six
 
 
 # Py 3.4+ has contextlib.redirect_stdout to redirect stdout to a different
@@ -53,14 +52,14 @@ class ComplianceChecker(object):
         # using OrderedDict is important here to preserve the order
         # of multiple datasets which may be passed in
         score_dict = OrderedDict()
-        if not isinstance(ds_loc, six.string_types):
+        if not isinstance(ds_loc, str):
             locs = ds_loc
         # if single dataset, put in list
         else:
             locs = [ds_loc]
 
         # Make sure output format is a list
-        if isinstance(output_format, six.string_types):
+        if isinstance(output_format, str):
             output_format = [output_format]
 
         for loc in locs: # loop through each dataset and run specified checks
@@ -135,8 +134,8 @@ class ComplianceChecker(object):
         @param limit        The degree of strictness, 1 being the strictest, and going up from there.
         '''
 
-        for ds, score_groups in six.iteritems(score_dict):
-            for checker, rpair in six.iteritems(score_groups):
+        for ds, score_groups in score_dict.items():
+            for checker, rpair in score_groups.items():
                 groups, errors = rpair
                 score_list, points, out_of = cs.standard_output(ds, limit,
                                                                 checker,
@@ -157,8 +156,8 @@ class ComplianceChecker(object):
         @param limit           The degree of strictness, 1 being the strictest, and going up from there.
         '''
         checkers_html = []
-        for ds, score_groups in six.iteritems(score_dict):
-            for checker, (groups, errors) in six.iteritems(score_groups):
+        for ds, score_groups in score_dict.items():
+            for checker, (groups, errors) in score_groups.items():
                 checkers_html.append(cs.checker_html_output(checker, groups,
                                                             ds, limit))
 
@@ -191,15 +190,15 @@ class ComplianceChecker(object):
             raise ValueError("output_type must be set to 'json_new' if outputting multiple datasets to a single json file or stdout")
 
         if output_type == 'json':
-            for ds, score_groups in six.iteritems(score_dict):
-                for checker, rpair in six.iteritems(score_groups):
+            for ds, score_groups in score_dict.items():
+                for checker, rpair in score_groups.items():
                     groups, errors = rpair
                     results[checker] = cs.dict_output(
                         checker, groups, ds, limit,
                     )
         elif output_type == 'json_new':
-            for ds, score_groups in six.iteritems(score_dict):
-                for checker, rpair in six.iteritems(score_groups):
+            for ds, score_groups in score_dict.items():
+                for checker, rpair in score_groups.items():
                     groups, errors = rpair
                     results[ds] = {}
                     results[ds][checker] = cs.dict_output(
