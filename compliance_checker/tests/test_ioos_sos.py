@@ -2,6 +2,8 @@ import unittest
 from compliance_checker.suite import CheckSuite
 from compliance_checker.runner import ComplianceChecker
 import os
+import httpretty
+
 
 # TODO: Use inheritance to eliminate redundant code in test setup, etc
 class TestIOOSSOSGetCapabilities(unittest.TestCase):
