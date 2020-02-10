@@ -177,11 +177,6 @@ class Result(object):
             ret += ' ({!s} children)'.format(len(self.children))
             ret += '\n' + pprint.pformat(self.children)
 
-        # python 2 requires repr to be an ASCII string
-        # python 3 requires repr to be a unicode string
-        if sys.version_info[0] < 3:
-            return ret.encode("utf-8")
-
         return ret
 
     def serialize(self):
