@@ -8,7 +8,7 @@ from lxml.etree import XPath
 from compliance_checker.acdd import ACDD1_3Check
 from compliance_checker.cfutil import get_geophysical_variables, get_instrument_variables
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
-from rfc3986 import is_valid_uri
+from rfc3986 import api, exceptions, validators
 
 
 class IOOSBaseCheck(BaseCheck):
@@ -637,8 +637,9 @@ class IOOS1_2Check(IOOSNCCheck):
 
     def check_qartod_variables_references(self, ds):
         """
-        For any variables that are deemed QARTOD variables,
-        check that they contain the "references" attribute.
+        For any variables that are deemed QARTOD variables, check that they
+        contain the "references" attribute and that the value of the attribute
+        is a valid URL.
 
         Args:
             ds (netCDF4.Dataset): open Dataset
@@ -647,17 +648,21 @@ class IOOS1_2Check(IOOSNCCheck):
             list of Results
         """
 
-        # TODO
-        # is_valid_uri will be deprecated soon, use validators.Validator
-        # what schemes should be allowed?
+        vldr = validators.Validator()
+        vldr.require_presence_of("scheme", "host")
+        vldr.allow_schemes("http", "https")
 
         results = []
         ctxt = "qartod_variable:references"
         for v in ds.get_variables_by_attributes(standard_name=lambda x: x in self._qartod_std_names):
-            msg = f"\"references\" attribute for variable \"{v.name}\" must be a valid URI"
+            msg = f"\"references\" attribute for variable \"{v.name}\" must be a valid URL"
             val = True
-            ref = getattr(v, "references", None)
-            if not (isinstance(ref, str) and is_valid_uri(ref)):
+            ref = getattr(v, "references", b'')
+            url = api.uri_reference(ref)
+
+            try:
+                vldr.validate(url)
+            except exceptions.MissingComponentError:
                 val = False
             results.append(Result(BaseCheck.MEDIUM, val, ctxt, [msg]))
 
