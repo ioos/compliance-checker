@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, division, print_function
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates_1_6, dimless_vertical_coordinates_1_7,
                                               no_missing_terms)

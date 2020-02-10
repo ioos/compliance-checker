@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 '''Tests for base compliance checker class'''
 
-from __future__ import unicode_literals
 from unittest import TestCase
 from netCDF4 import Dataset
 from compliance_checker import base
