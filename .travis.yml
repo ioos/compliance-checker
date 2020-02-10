@@ -44,8 +44,7 @@ before_install:
     conda config --add channels conda-forge --force
     conda config --set channel_priority strict
     conda config --set safety_checks disabled
-    python gen_conda_requirements.py --groups requirements.txt --py${PY:0:1} > conda-requirements.txt
-    conda create --name TEST python=$PY --file conda-requirements.txt --file test_requirements.txt
+    conda create --name TEST python=$PY --file requirements.txt --file test_requirements.txt
     source activate TEST
 
 # Test source distribution.
