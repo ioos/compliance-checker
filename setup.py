@@ -29,6 +29,7 @@ setup(
     url                  = "https://github.com/ioos/compliance-checker",
     packages             = find_packages(),
     install_requires     = pip_requirements(),
+    python_requires      = "~=3.5",
     tests_require        = ['pytest'],
     classifiers          = [
         'Development Status :: 5 - Production/Stable',
