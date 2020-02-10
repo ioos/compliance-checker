@@ -6,10 +6,6 @@ import pendulum
 from collections import OrderedDict
 
 
-def isstring(obj):
-    return isinstance(obj, str)
-
-
 def datetime_is_iso(date_str):
     """Attempts to parse a date formatted in ISO 8601 format"""
     try:
