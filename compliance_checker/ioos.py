@@ -1,7 +1,6 @@
 '''
 Check for IOOS-approved attributes
 '''
-from __future__ import unicode_literals
 from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, Result
 from owslib.namespaces import Namespaces
 from lxml.etree import XPath

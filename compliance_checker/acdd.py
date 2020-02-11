@@ -5,7 +5,6 @@ This module contains classes defined as checks part of the compliance checker
 project for the verification and scoring of attributes for datasets.
 '''
 
-from __future__ import unicode_literals
 import numpy as np
 from netCDF4 import num2date
 from datetime import timedelta
