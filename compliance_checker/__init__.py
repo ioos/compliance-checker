@@ -3,11 +3,7 @@ __version__ = get_versions()['version']
 del get_versions
 
 from netCDF4 import Dataset
-try:
-    from functools import lru_cache
-# Fallback for Python < 3.2
-except ImportError:
-    from functools32 import lru_cache
+from functools import lru_cache
 
 class MemoizedDataset(Dataset):
     """

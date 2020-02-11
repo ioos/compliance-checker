@@ -3,7 +3,6 @@
 """
 Compliance Checker
 """
-from __future__ import unicode_literals
 from functools import wraps
 import pprint
 import warnings
@@ -177,11 +176,6 @@ class Result(object):
         if len(self.children):
             ret += ' ({!s} children)'.format(len(self.children))
             ret += '\n' + pprint.pformat(self.children)
-
-        # python 2 requires repr to be an ASCII string
-        # python 3 requires repr to be a unicode string
-        if sys.version_info[0] < 3:
-            return ret.encode("utf-8")
 
         return ret
 

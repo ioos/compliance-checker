@@ -32,8 +32,7 @@ install:
   - conda config --set channel_priority strict
   - set PYTHONUNBUFFERED=1
 
-  - python gen_conda_requirements.py --groups requirements.txt --py%PY:~0,1% > conda-requirements.txt
-  - conda create --name TEST python=%PY% --file conda-requirements.txt --file test_requirements.txt
+  - conda create --name TEST python=%PY% --file requirements.txt --file test_requirements.txt
 
   - conda activate TEST
   - conda info --all

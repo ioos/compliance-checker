@@ -1,8 +1,6 @@
 """
 Compliance Checker suite runner
 """
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import sys
@@ -22,17 +20,13 @@ from compliance_checker.base import BaseCheck
 from compliance_checker import MemoizedDataset
 from collections import defaultdict
 import warnings
-try:
-    from urlparse import urlparse
-except ImportError:
-    from urllib.parse import urlparse
+from urllib.parse import urlparse
 from datetime import datetime
 import requests
 import codecs
 import re
 import textwrap
 from pkg_resources import working_set
-import six
 
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
@@ -107,13 +101,7 @@ class CheckSuite(object):
         for c, _ in check_functions:
             print("- {}".format(c.__name__))
             if c.__doc__ is not None:
-                # necessary for unicode characters in docstrings under Python
-                # 2, aside from converting everything over to u'' strings
-                try:
-                    u_doc = six.u(c.__doc__)
-                except TypeError:
-                    u_doc = c.__doc__
-
+                u_doc = c.__doc__
                 print("\n{}\n".format(extract_docstring_summary(u_doc)))
 
     @classmethod

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, division, print_function
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates_1_6, dimless_vertical_coordinates_1_7,
                                               no_missing_terms)
@@ -25,11 +24,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
-try:
-    basestring
-except NameError:
-    basestring = str
 
 
 def print_exceptions(f):
@@ -141,7 +135,7 @@ class CFBaseCheck(BaseCheck):
         self._find_cf_standard_name_table(ds)
         self._find_geophysical_vars(ds)
         coord_containing_vars = ds.get_variables_by_attributes(coordinates=
-                                       lambda val: isinstance(val, basestring))
+                                       lambda val: isinstance(val, str))
 
         # coordinate data variables
 
@@ -216,10 +210,10 @@ class CFBaseCheck(BaseCheck):
             defines_grid_mapping = self.get_test_ctx(BaseCheck.HIGH,
                                                      self.section_titles["5.6"],
                                                      variable.name)
-            defines_grid_mapping.assert_true((isinstance(grid_mapping, basestring) and grid_mapping),
+            defines_grid_mapping.assert_true((isinstance(grid_mapping, str) and grid_mapping),
                                              "{}'s grid_mapping attribute must be a "+\
                                              "space-separated non-empty string".format(variable.name))
-            if isinstance(grid_mapping, basestring):
+            if isinstance(grid_mapping, str):
                 # TODO (badams): refactor functionality to split functionality
                 #                into requisite classes
                 if ':' in grid_mapping and self._cc_spec_version >= '1.7':
@@ -364,7 +358,7 @@ class CFBaseCheck(BaseCheck):
         formula_terms = getattr(variable, 'formula_terms', None)
         valid_formula_terms = TestCtx(BaseCheck.HIGH, self.section_titles['4.3'])
 
-        valid_formula_terms.assert_true(isinstance(formula_terms, basestring) and formula_terms,
+        valid_formula_terms.assert_true(isinstance(formula_terms, str) and formula_terms,
                                         '§4.3.2: {}\'s formula_terms is a required attribute and must be a non-empty string'
                                         ''.format(coord))
         # We can't check any more
@@ -441,7 +435,7 @@ class CFBaseCheck(BaseCheck):
         """
         attr_val = var.getncattr(attr_name)
 
-        if isinstance(attr_val, basestring):
+        if isinstance(attr_val, str):
             type_match = var.dtype.kind == 'S'
             val_type = type(attr_val)
         else:
@@ -823,7 +817,7 @@ class CFBaseCheck(BaseCheck):
         :returns: A list of variable dimensions
         '''
         ret_val = []
-        for variable in ds.get_variables_by_attributes(cf_role=lambda x: isinstance(x, basestring)):
+        for variable in ds.get_variables_by_attributes(cf_role=lambda x: isinstance(x, str)):
             if variable.ndim > 0:
                 ret_val.append(variable.dimensions[0])
         return ret_val
@@ -872,7 +866,7 @@ class CFBaseCheck(BaseCheck):
         :return: 2-tuple of standard_name and modifier as strings
         '''
 
-        if isinstance(standard_name, basestring) and ' ' in standard_name:
+        if isinstance(standard_name, str) and ' ' in standard_name:
             return standard_name.split(' ', 1)
         # if this isn't a string, then it doesn't make sense to split
         # -- treat value as standard name with no modifier
@@ -1042,7 +1036,7 @@ class CFBaseCheck(BaseCheck):
         """
 
         if attr_type == 'S':
-            if not isinstance(attribute, basestring):
+            if not isinstance(attribute, str):
                 return [False,
                         "{} must be a string".format(attr_name)]
         else:
@@ -1105,7 +1099,7 @@ class CFBaseCheck(BaseCheck):
                                              variable)
 
         # if the second element is a string, format it
-        if isinstance(return_value[1], basestring):
+        if isinstance(return_value[1], str):
             return_value[1] = return_value[1].format(attr_str)
 
         # convert to tuple for immutability and return
@@ -1430,7 +1424,7 @@ class CF1_6Check(CFNCCheck):
             attrs = variable.ncattrs()
 
             if 'valid_range' in attrs:
-                if isinstance(variable.valid_range, basestring):
+                if isinstance(variable.valid_range, str):
                     m = '§2.5.1 Fill Values should be outside the range specified by valid_range' # subsection message
                     valid_fill_range.assert_true(False, '{};\n\t{}:valid_range must be a numeric type not a string'.format(m, name))
                     continue
@@ -1438,12 +1432,12 @@ class CF1_6Check(CFNCCheck):
                 spec_by = 'valid_range'
 
             elif 'valid_min' in attrs and 'valid_max' in attrs:
-                if isinstance(variable.valid_min, basestring):
+                if isinstance(variable.valid_min, str):
                     valid_fill_range.assert_true(False, '{}:valid_min must be a numeric type not a string'.format(name))
-                if isinstance(variable.valid_max, basestring):
+                if isinstance(variable.valid_max, str):
                     valid_fill_range.assert_true(False, '{}:valid_max must be a numeric type not a string'.format(name))
-                if isinstance(variable.valid_min, basestring) or \
-                   isinstance(variable.valid_max, basestring):
+                if isinstance(variable.valid_min, str) or \
+                   isinstance(variable.valid_max, str):
                     continue
                 rmin = variable.valid_min
                 rmax = variable.valid_max
@@ -1479,7 +1473,7 @@ class CF1_6Check(CFNCCheck):
 
         for attr in attrs:
             dataset_attr = getattr(ds, attr, None)
-            is_string = isinstance(dataset_attr, basestring)
+            is_string = isinstance(dataset_attr, str)
             valid_globals.assert_true(is_string and len(dataset_attr),
                                       "§2.6.2 global attribute {} should exist and be a non-empty string" # subsection message
                                       "".format(attr))
@@ -1511,7 +1505,7 @@ class CF1_6Check(CFNCCheck):
             for attribute in variable.ncattrs():
                 varattr = getattr(variable, attribute)
                 if attribute in attrs:
-                    is_string = isinstance(varattr, basestring)
+                    is_string = isinstance(varattr, str)
                     valid_attributes.assert_true(is_string and len(varattr) > 0,
                                                  "§2.6.2 {}:{} should be a non-empty string"
                                                  "".format(name, attribute))
@@ -1521,7 +1515,7 @@ class CF1_6Check(CFNCCheck):
         for attribute in ds.ncattrs():
             dsattr = getattr(ds, attribute)
             if attribute in attrs:
-                is_string = isinstance(dsattr, basestring)
+                is_string = isinstance(dsattr, str)
                 valid_attributes.assert_true(is_string and len(dsattr) > 0,
                                              "§2.6.2 {} global attribute should be a non-empty string"
                                              "".format(attribute))
@@ -1590,14 +1584,14 @@ class CF1_6Check(CFNCCheck):
 
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(
-                isinstance(units, basestring),
+                isinstance(units, str),
                 "units ({}) attribute of '{}' must be a string compatible with UDUNITS".format(units, variable.name)
             ):
                 valid_udunits = self._check_valid_udunits(ds, name)
                 ret_val.append(valid_udunits)
             ret_val.append(units_attr_is_string.to_result())
 
-            if isinstance(standard_name, basestring):
+            if isinstance(standard_name, str):
                 valid_standard_units = self._check_valid_standard_units(ds,
                                                                         name)
                 ret_val.append(valid_standard_units)
@@ -1639,7 +1633,7 @@ class CF1_6Check(CFNCCheck):
         if units is None and not should_be_dimensionless:
             return valid_units.to_result()
         # 2) units attribute must be a string
-        valid_units.assert_true(should_be_dimensionless or isinstance(units, basestring),
+        valid_units.assert_true(should_be_dimensionless or isinstance(units, str),
                                 'units attribute for {} needs to be a string'.format(variable_name))
 
         # 3) units are not deprecated
@@ -1790,7 +1784,7 @@ class CF1_6Check(CFNCCheck):
             long_or_std_name = TestCtx(BaseCheck.HIGH, self.section_titles['3.3'])
             if long_name is not None:
                 long_name_present = True
-                long_or_std_name.assert_true(isinstance(long_name, basestring),
+                long_or_std_name.assert_true(isinstance(long_name, str),
                                              "Attribute long_name for variable {} must be a string".format(name))
             else:
                 long_name_present = False
@@ -1804,9 +1798,9 @@ class CF1_6Check(CFNCCheck):
             if standard_name is not None:
                 standard_name_present = True
                 valid_std_name = TestCtx(BaseCheck.HIGH, self.section_titles['3.3'])
-                valid_std_name.assert_true(isinstance(standard_name, basestring),
+                valid_std_name.assert_true(isinstance(standard_name, str),
                                         "Attribute standard_name for variable {} must be a string".format(name))
-                if isinstance(standard_name, basestring):
+                if isinstance(standard_name, str):
                     valid_std_name.assert_true(standard_name in self._std_names,
                                             "standard_name {} is not defined in Standard Name Table v{}".format(
                                                 standard_name or 'undefined',
@@ -1859,12 +1853,12 @@ class CF1_6Check(CFNCCheck):
             valid_ancillary = TestCtx(BaseCheck.HIGH, self.section_titles["3.4"])
             ancillary_variables = ncvar.ancillary_variables
 
-            valid_ancillary.assert_true(isinstance(ancillary_variables, basestring),
+            valid_ancillary.assert_true(isinstance(ancillary_variables, str),
                                         "ancillary_variables attribute defined by {} "
                                         "should be string".format(name))
 
             # Can't perform the second check if it's not a string
-            if not isinstance(ancillary_variables, basestring):
+            if not isinstance(ancillary_variables, str):
                 ret_val.append(valid_ancillary.to_result())
                 continue
 
@@ -1983,7 +1977,7 @@ class CF1_6Check(CFNCCheck):
                                  "flag_values ({}) must be the same data type as {} ({})"
                                  "".format(flag_values.dtype.type, name, variable.dtype.type))
 
-        if isinstance(flag_meanings, basestring):
+        if isinstance(flag_meanings, str):
             flag_meanings = flag_meanings.split()
             valid_values.assert_true(len(flag_meanings) == len(flag_values),
                                      "{}'s flag_meanings and flag_values should have the same number ".format(name)+\
@@ -2027,7 +2021,7 @@ class CF1_6Check(CFNCCheck):
 
         valid_masks.assert_true(type_ok, "{}'s data type must be capable of bit-field expression".format(name))
 
-        if isinstance(flag_meanings, basestring):
+        if isinstance(flag_meanings, str):
             flag_meanings = flag_meanings.split()
             valid_masks.assert_true(len(flag_meanings) == len(flag_masks),
                                     "{} flag_meanings and flag_masks should have the same number ".format(name)+\
@@ -2054,11 +2048,11 @@ class CF1_6Check(CFNCCheck):
         valid_meanings.assert_true(flag_meanings is not None,
                                    "{}'s flag_meanings attribute is required for flag variables".format(name))
 
-        valid_meanings.assert_true(isinstance(flag_meanings, basestring),
+        valid_meanings.assert_true(isinstance(flag_meanings, str),
                                    "{}'s flag_meanings attribute must be a string".format(name))
 
         # We can't perform any additional checks if it's not a string
-        if not isinstance(flag_meanings, basestring):
+        if not isinstance(flag_meanings, str):
             return valid_meanings.to_result()
 
         valid_meanings.assert_true(len(flag_meanings) > 0,
@@ -2134,7 +2128,7 @@ class CF1_6Check(CFNCCheck):
         axis = variable.axis
 
         valid_axis = TestCtx(BaseCheck.HIGH, self.section_titles['4'])
-        axis_is_string = isinstance(axis, basestring),
+        axis_is_string = isinstance(axis, str),
         valid_axis.assert_true(axis_is_string and len(axis) > 0,
                                "{}'s axis attribute must be a non-empty string".format(name))
 
@@ -2195,7 +2189,7 @@ class CF1_6Check(CFNCCheck):
         for latitude in latitude_variables:
             variable = ds.variables[latitude]
             units = getattr(variable, 'units', None)
-            units_is_string = isinstance(units, basestring)
+            units_is_string = isinstance(units, str)
             standard_name = getattr(variable, 'standard_name', None)
             axis = getattr(variable, 'axis', None)
 
@@ -2289,7 +2283,7 @@ class CF1_6Check(CFNCCheck):
         for longitude in longitude_variables:
             variable = ds.variables[longitude]
             units = getattr(variable, 'units', None)
-            units_is_string = isinstance(units, basestring)
+            units_is_string = isinstance(units, str)
             standard_name = getattr(variable, 'standard_name', None)
             axis = getattr(variable, 'axis', None)
 
@@ -2377,7 +2371,7 @@ class CF1_6Check(CFNCCheck):
                 continue
 
             valid_vertical_coord = TestCtx(BaseCheck.HIGH, self.section_titles["4.3"])
-            valid_vertical_coord.assert_true(isinstance(units, basestring) and units,
+            valid_vertical_coord.assert_true(isinstance(units, str) and units,
                                              "§4.3.1 {}'s units must be defined for vertical coordinates, "
                                              "there is no default".format(name))
 
@@ -2629,7 +2623,7 @@ class CF1_6Check(CFNCCheck):
             # We use a set so we can assert
             dim_set = set(variable.dimensions)
             # No auxiliary coordinates, no check
-            if not isinstance(coordinates, basestring) or coordinates == '':
+            if not isinstance(coordinates, str) or coordinates == '':
                 continue
 
             valid_aux_coords = TestCtx(BaseCheck.HIGH,
@@ -2845,11 +2839,11 @@ class CF1_6Check(CFNCCheck):
 
             valid_rgrid = TestCtx(BaseCheck.HIGH, self.section_titles['5.3'])
             # Make sure reduced grid features define coordinates
-            valid_rgrid.assert_true(isinstance(coords, basestring) and coords,
+            valid_rgrid.assert_true(isinstance(coords, str) and coords,
                                     "reduced grid feature {} must define coordinates attribute"
                                     "".format(name))
             # We can't check anything else if there are no defined coordinates
-            if not isinstance(coords, basestring) and coords:
+            if not isinstance(coords, str) and coords:
                 continue
 
             coord_set = set(coords.split())
@@ -2866,10 +2860,10 @@ class CF1_6Check(CFNCCheck):
             for compressed_coord in axis_map['C']:
                 coord = ds.variables[compressed_coord]
                 compress = getattr(coord, 'compress', None)
-                valid_rgrid.assert_true(isinstance(compress, basestring) and compress,
+                valid_rgrid.assert_true(isinstance(compress, str) and compress,
                                         "compress attribute for compression coordinate {} must be a non-empty string"
                                         "".format(compressed_coord))
-                if not isinstance(compress, basestring):
+                if not isinstance(compress, str):
                     continue
                 for dim in compress.split():
                     valid_rgrid.assert_true(dim in ds.dimensions,
