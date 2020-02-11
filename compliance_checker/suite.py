@@ -697,20 +697,20 @@ class CheckSuite(object):
             ds_str = cdl_path + '.nc'
 
         # generate netCDF-4 file
-        iostat = subprocess.run(['ncgen', '-k', 'nc4', '-o', ds_str, cdl_path], capture_output=True)
+        iostat = subprocess.run(['ncgen', '-k', 'nc4', '-o', ds_str, cdl_path], stderr=subprocess.PIPE)
         if iostat.returncode != 0:
           # if not successfull, create netCDF classic file
           print('netCDF-4 file could not be generated from cdl file with ' +
                 'message:')
-          print(iostat.stderr)
+          print(iostat.stderr.decode())
           print('Trying to create netCDF Classic file instead.')
-          iostat = subprocess.run(['ncgen', '-k', 'nc3', '-o', ds_str, cdl_path], capture_output=True)
+          iostat = subprocess.run(['ncgen', '-k', 'nc3', '-o', ds_str, cdl_path], stderr=subprocess.PIPE)
           if iostat.returncode != 0:
             # Exit program if neither a netCDF Classic nor a netCDF-4 file
             # could be created.
             print('netCDF Classic file could not be generated from cdl file' +
                   'with message:')
-            print(iostat.stderr)
+            print(iostat.stderr.decode())
             sys.exit(1)
         return ds_str
 
