@@ -7,8 +7,7 @@ from lxml.etree import XPath
 from compliance_checker.acdd import ACDD1_3Check
 from compliance_checker.cfutil import get_geophysical_variables, get_instrument_variables
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
-from rfc3986 import api, exceptions, validators
-
+import validators
 
 class IOOSBaseCheck(BaseCheck):
     _cc_spec = 'ioos'
@@ -510,7 +509,7 @@ class IOOS1_2Check(IOOSNCCheck):
             ds (netCDF-4 Dataset): open Dataset object
 
         Returns:
-            None
+            Result
         """
 
         platform_set = set()
@@ -522,7 +521,7 @@ class IOOS1_2Check(IOOSNCCheck):
         for v in ds.get_variables_by_attributes(platform=lambda x: x is not None):
             platform_set.add(v.getncattr("platform"))
 
-        msg = f"A dataset may only have one platform; {len(platform_set)} found"
+        msg = "A dataset may only have one platform; {} found".format(len(platform_set))
         if len(platform_set) > 1:
             return Result(BaseCheck.HIGH, False, "platform", [msg])
         elif len(platform_set) == 0:
@@ -615,7 +614,7 @@ class IOOS1_2Check(IOOSNCCheck):
         for instr in instr_vars:
             if instr in ds.variables:
                 compnt = getattr(ds.variables[instr], "component", None)
-                m = [f"component attribute of {instr} ({compnt}) must be a string"]
+                m = ["component attribute of {} ({}) must be a string".format(instr, compnt)]
                 if compnt:
                     results.append(
                         Result(BaseCheck.MEDIUM, isinstance(compnt, str), "instrument_variable", m)
@@ -624,7 +623,7 @@ class IOOS1_2Check(IOOSNCCheck):
                     results.append(Result(BaseCheck.MEDIUM, True, "instrument_variable", m))
 
                 disct = getattr(ds.variables[instr], "discriminant", None)
-                m = [f"discriminant attribute of {instr} ({disct}) must be a string"]
+                m = ["discriminant attribute of {} ({}) must be a string".format(instr, disct)]
                 if disct:
                     results.append(
                         Result(BaseCheck.MEDIUM, isinstance(disct, str), "instrument_variable", m)
@@ -647,22 +646,11 @@ class IOOS1_2Check(IOOSNCCheck):
             list of Results
         """
 
-        vldr = validators.Validator()
-        vldr.require_presence_of("scheme", "host")
-        vldr.allow_schemes("http", "https")
-
         results = []
         ctxt = "qartod_variable:references"
         for v in ds.get_variables_by_attributes(standard_name=lambda x: x in self._qartod_std_names):
-            msg = f"\"references\" attribute for variable \"{v.name}\" must be a valid URL"
-            val = True
-            ref = getattr(v, "references", b'')
-            url = api.uri_reference(ref)
-
-            try:
-                vldr.validate(url)
-            except exceptions.MissingComponentError:
-                val = False
+            msg = "\"references\" attribute for variable \"{}\" must be a valid URL".format(v.name)
+            val = bool(validators.url(getattr(v, "references", "")))
             results.append(Result(BaseCheck.MEDIUM, val, ctxt, [msg]))
 
         return results
@@ -689,7 +677,7 @@ class IOOS1_2Check(IOOSNCCheck):
            if not (
                isinstance(code, str) and
                code.isnumeric() and
-               (len(code) == 5 or len(code) == 7)
+               (5 <= len(code) <= 7)
            ):
                valid = False
 

@@ -301,14 +301,6 @@ class TestIOOS1_2(BaseTestCase):
     for NetCDF, Version 1.1
     '''
 
-    # for reference
-        #ds.createDimension('siglev', 20)
-
-        #temp = ds.createVariable("temp", np.float64, dimensions=("time",),
-        #                         fill_value=np.float(99999999999999999999.))
-        #temp.coordinates = "sigma noexist"
-        #ds.createVariable("sigma", np.float64, dimensions=('siglev',))
-
     def setUp(self):
         self.ioos = IOOS1_2Check() 
 
