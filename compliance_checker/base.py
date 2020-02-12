@@ -301,7 +301,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
     if other is None:
         res = std_check(ds, name)
         if not res:
-            msgs = ["%s not present" % display_name]
+            msgs = ["{} not present".format(display_name)]
         else:
             try:
                 # see if this attribute is a string, try stripping
@@ -309,8 +309,8 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
                 att_strip = base_context.getncattr(name).strip()
                 if not att_strip:
                     res = False
-                    msgs = ["%s is empty or completely whitespace" %
-                            display_name]
+                    msgs = ["{} is empty or completely whitespace".format(
+                                      display_name)]
             # if not a string/has no strip method we should be OK
             except AttributeError:
                 pass
@@ -328,10 +328,10 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
         # check instead
         res = std_check_in(base_context, name, other)
         if res == 0:
-            msgs.append("%s not present" % display_name)
+            msgs.append("{} not present".format(display_name))
         elif res == 1:
-            msgs.append("%s present, but not in expected value list (%s)" %
-                        (display_name, sorted(other)))
+            msgs.append("{} present, but not in expected value list ({})"
+                        .format(display_name, sorted(other)))
 
         ret_val.append(
             Result(
@@ -373,7 +373,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
 
         res = other(base_context) # call the method on the dataset
         if not res:
-            msgs = ["%s not present" % display_name]
+            msgs = ["{} not present".format(display_name)]
             ret_val.append(
                 Result(
                     priority,
@@ -387,7 +387,8 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
             ret_val.append(res(priority))
     # unsupported second type in second
     else:
-        raise TypeError("Second arg in tuple has unsupported type: {}".format(type(other)))
+        raise TypeError("Second arg in tuple has unsupported type: {}"
+                        .format(type(other)))
 
 
     return ret_val
