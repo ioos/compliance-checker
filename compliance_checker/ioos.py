@@ -5,7 +5,9 @@ from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, Base
 from owslib.namespaces import Namespaces
 from lxml.etree import XPath
 from compliance_checker.acdd import ACDD1_3Check
-from compliance_checker.cfutil import get_geophysical_variables, get_instrument_variables
+from compliance_checker.cfutil import (get_geophysical_variables,
+                                       get_instrument_variables)
+from compliance_checker import base
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
 import validators
 import re
@@ -348,6 +350,10 @@ class IOOS1_1Check(IOOSNCCheck):
         cf16 = CF1_6Check()
         return cf16.check_units(ds)
 
+class IOOS1_2_ConventionsValidator(base.RegexValidator):
+    validator_regex = r"\bIOOS-1.2\b"
+    validator_fail_message = "{} must contain the string \"IOOS 1.2\""
+
 class IOOS1_2Check(IOOSNCCheck):
     """
     Class to implement the IOOS Metadata 1.2 Specification
@@ -392,23 +398,25 @@ class IOOS1_2Check(IOOSNCCheck):
             #( "wmo_platform_code", BaseCheck.HIGH # only "if applicable", see check_wmo_platform_code()
         )
 
-        # Define the global attributes
         self.required_atts = [
-            'Conventions',
+            ('Conventions', IOOS1_2_ConventionsValidator),
             'creator_country',
-            'creator_email',
+            ('creator_email', base.EmailValidator),
             'creator_institution',
-            'creator_sector',
-            'creator_url',
+            ('creator_sector', {"gov_state", "nonprofit", "tribal", "other",
+                                "unknown", "gov_municipal", "industry",
+                                "gov_federal", "academic"}),
+            ('creator_url', base.UrlValidator),
             'featureType',
             'id',
+            ('infoUrl', base.UrlValidator),
             'license',
             'naming_authority',
             'platform',
             'platform_name',
             'platform_vocabulary',
             'publisher_country',
-            'publisher_email',
+            ('publisher_email', base.EmailValidator),
             'publisher_institution',
             'publisher_url',
             # TODO: handle standard name table exclusion for v38?
@@ -419,11 +427,11 @@ class IOOS1_2Check(IOOSNCCheck):
         ]
 
         self.rec_atts = [
-            'contributor_email',
+            ('contributor_email', base.EmailValidator),
             'contributor_name',
             'contributor_role',
             'contributor_role_vocabulary',
-            'contributor_url',
+            ('contributor_url', base.UrlValidator),
             'creator_address',
             'creator_city',
             'creator_name',
@@ -443,7 +451,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'publisher_postalcode',
             'publisher_state',
             'publisher_type',
-            'references',
+            ('references', base.UrlValidator)
         ]
 
     @check_has(BaseCheck.HIGH)
