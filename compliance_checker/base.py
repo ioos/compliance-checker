@@ -231,7 +231,26 @@ class TestCtx(object):
 
 def std_check_in(base_context, name, allowed_vals):
     """
-    Returns 0 if attr not present, 1 if present but not in correct value, 2 if good
+    Check that a value is contained within an iterable
+
+    Parameters:
+    -----------
+    base_context: netCDF4.Dataset or netCDF4.variable
+       The context in which to look for the attribute, either a
+       netCDF4.Dataset or netCDF4.Variable.  If a netCDF dataset,
+       the attribute is searched for in the global attributes.
+       If a variable, the attributes are limited to those contained
+       in the corresponding variable.
+    name: str
+       The name of the attribute to search for.
+    allowed_vals: iterable
+       An iterable, usually a set, which provides the possible valid values for
+       the attribute.
+    Returns:
+    --------
+    int
+        Returns 0 if attr not present, 1 if present but not in correct value, 2
+        if good.
     """
     if not hasattr(base_context, name):
         return 0

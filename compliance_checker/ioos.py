@@ -449,6 +449,20 @@ class IOOS1_2Check(IOOSNCCheck):
         self.platform_vars = self._find_platform_vars(ds)
 
     def _find_platform_vars(self, ds):
+        """
+        Finds any variables referenced by 'platform' attribute which exist in
+        the dataset.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+            An open netCDF4 Dataset.
+
+        Returns
+        -------
+        set of netCDF4.Variable
+            Set of variables which are platform variables.
+        """
         plat_vars = ds.get_variables_by_attributes(platform=
                                                    lambda p: isinstance(p, str))
         return {ds.variables[var.platform] for var in plat_vars if
