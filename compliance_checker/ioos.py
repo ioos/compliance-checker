@@ -615,7 +615,6 @@ class IOOS1_2Check(IOOSNCCheck):
 
             # filter out cf_role exists
             cf_role_vars = ds.get_variables_by_attributes(cf_role=lambda x: x is not None)
-            print(cf_role_vars)
             num_cf_role_vars = len(cf_role_vars)
             msg = "With a single platform provided, the dimension of the cf_role " +\
                   "variable {cf_role_var} (cf_role=={cf_role}) should also " +\
@@ -629,7 +628,6 @@ class IOOS1_2Check(IOOSNCCheck):
                        and
                        cf_role in ["timeseries_id", "profile_id", "trajectory_id"]
                    ):
-                    print(var)
                     if (num_cf_role_vars==1) or (num_cf_role_vars>1 and cf_role!="profile_id"):
                         # shape must be 1 (or if no length, that's okay too)
                         _val = shp==1
@@ -663,16 +661,16 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         m = "platform_vocabulary must be a valid URL"
-        pvocab = getattr(ds, "platform_vocabulary", None)
-        val = bool(validators.url(getattr(v, "references", "")))
+        pvocab = getattr(ds, "platform_vocabulary", "")
+        val = bool(validators.url(pvocab))
         return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", [m])
             
-    def _check_var_gts_ingest(self, ds, var, var_ingest_val, do_ingest, msg):
+    def _check_var_gts_ingest(self, ds, var, do_ingest, msg):
         """
         Helper function for check_gts_ingest(). Check that a given variable
-          - has a valid CF standard name
+          - has a valid CF standard name (checked with check_standard_names())
           - has a QARTOD aggregates variable
-          - has valid units
+          - has valid units (checked with check_units())
 
         Args:
             attr (?): attribute value
@@ -682,23 +680,18 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         val = False
-        if ingest == "true":
 
-            # should have an ancillary variable with standard_name aggregate_quality_flag
-            avar_val = False
-            anc_vars = getattr(var, "ancillary_variables", "").split(" ")
-            for av in anc_vars:
-                if av in ds.variables:
-                    if getattr(ds.variables[av], "standard_name", "") == "aggregate_quality_flag":
-                        avar_val = True
-                        break
+        # should have an ancillary variable with standard_name aggregate_quality_flag
+        avar_val = False
+        anc_vars = getattr(var, "ancillary_variables", "").split(" ")
+        for av in anc_vars:
+            if av in ds.variables:
+                if getattr(ds.variables[av], "standard_name", "") == "aggregate_quality_flag":
+                    avar_val = True
+                    break
 
-            # if variable is flagged for ingest, but no global attr present, error
-            val = True if (avar_val and do_ingest) else False
-
-        elif ingest == "false":
-            # return positive result
-            val = True
+        # if variable is flagged for ingest, but no global attr present, error
+        val = True if (avar_val and do_ingest) else False
 
         return Result(BaseCheck.HIGH, val, "gts_ingest variable", [msg])
 
@@ -717,7 +710,7 @@ class IOOS1_2Check(IOOSNCCheck):
         gts_ingest attribute with a value of true. The variable must:
           - have a valid CF standard_name attribute (already checked)
           - have an ancillary variable reqpresenting QARTOD aggregate flags
-          - have a valid udunits units attribute
+          - have a valid udunits units attribute (already checked)
 
         Args:
             ds (netCDF4.Dataset): open Dataset
@@ -734,8 +727,8 @@ class IOOS1_2Check(IOOSNCCheck):
         glb_msg = ("If provided, the global attribute \"gts_ingest\" must be a "
                    "string and its value must be one of \"true\" or \"false\"")
         glb_gts_attr = getattr(ds, "gts_ingest", None)
-        if glb_gts_attr and (glb_gts_attr=="true" or glb_gts_ingest=="false"):
-            do_gts = True if glb_gts_ingest == "true" else False
+        if glb_gts_attr and (glb_gts_attr=="true" or glb_gts_attr=="false"):
+            do_gts = True if glb_gts_attr == "true" else False
             results.append(Result(BaseCheck.HIGH, True, "gts_ingest", [glb_msg]))
         else:
             do_gts = False
@@ -751,12 +744,8 @@ class IOOS1_2Check(IOOSNCCheck):
                    "The global attribute \"gts_ingest\" "
                    "must also have a value of \"true\".")
 
-        for v in ds.variables:
-            _attr = getattr(ds.variables[v], "gts_ingest", None)
-            if _attr:
-                results.append(self._check_var_gts_ingest(ds, var, _attr, do_ingest, var_msg.format(v=v)))
-            else:
-                results.append(default_pass_result)
+        for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x=="true"):
+            results.append(self._check_var_gts_ingest(ds, v, do_gts, var_msg.format(v=v)))
 
         return results
 

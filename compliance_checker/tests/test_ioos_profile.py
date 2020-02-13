@@ -366,16 +366,25 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(scored, out_of)
 
         # give one variable the gts_ingest attribute
+        # no ancillary vars, should fail
         ds.variables["time"].setncattr("gts_ingest", "true")
         results = self.ioos.check_gts_ingest(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        self.assertLess(scored, out_of)
 
-        # give a poor value
-        ds.variables["time"].setncattr("gts_ingest", "blah")
+        # set ancillary var with bad standard name
+        tmp = ds.createVariable("tmp", np.byte, ("time",))
+        tmp.setncattr("standard_name", "bad")
+        ds.variables["time"].setncattr("ancillary_variables", "tmp")
         results = self.ioos.check_gts_ingest(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
+
+         # good ancillary var standard name
+        tmp.setncattr("standard_name", "aggregate_quality_flag")
+        results = self.ioos.check_gts_ingest(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
 
     def test_check_instrument_variables(self):
 
@@ -520,22 +529,45 @@ class TestIOOS1_2(BaseTestCase):
 
         # global attribute, one platform variable, correct cf_role & featureType, pass
         ds.setncattr("featureType", "profile")
+        ds.createDimension("profile", 1)
         temp = ds.createVariable("temp", "d", ("time"))
         temp.setncattr("platform", "platform_var")
         plat = ds.createVariable("platform_var", np.byte)
-        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("time",))
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("profile",))
         cf_role_var.setncattr("cf_role", "timeseries_id")
         results = self.ioos.check_single_platform(ds)
         self.assertTrue(all(r.value for r in results))
 
+        # global attr, multiple platform variables, correct cf_role & featureType, fail
+        plat2 = ds.createVariable("platform_var_2", np.byte)
+        temp2 = ds.createVariable("temp2", "d", ("time"))
+        temp2.setncattr("platform", "platform_var2")
+        results = self.ioos.check_single_platform(ds)
+        self.assertFalse(results[0].value)
+
+        # no global attr, one platform var, correct cf_role & featureType, fail
+        ds.delncattr("platform")
+        self.assertFalse(results[0].value)
+
+        # global attr, one platform var, correct featureType, incorrect cf_role var dimension
+        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds.setncattr("featureType", "trajectoryprofile")
+        ds.createDimension("trajectory", 2) # should only be 1
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("trajectory",))
+        cf_role_var.setncattr("cf_role", "trajectory_id")
+        results = self.ioos.check_single_platform(ds)
+        self.assertFalse(results[0].value)
+
     def test_check_platform_vocabulary(self):
-        raise NotImplementedError
+        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds.setncattr("platform_vocabulary", "http://google.com")
+        self.assertTrue(self.ioos.check_platform_vocabulary(ds).value)
 
-    def test_check_gts_var_ingest(self):
-        raise NotImplementedError 
-
-    def test_check_gts_ingest(self):
-        raise NotImplementedError
+        ds.setncattr("platform_vocabulary", "bad")
+        self.assertFalse(self.ioos.check_platform_vocabulary(ds).value)
 
     def test_check_qartod_variables_references(self):
         ds = MockTimeSeries() # time, lat, lon, depth
