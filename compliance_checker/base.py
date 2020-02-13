@@ -229,15 +229,34 @@ class TestCtx(object):
         return test
 
 
-def std_check_in(dataset, name, allowed_vals):
+def std_check_in(base_context, name, allowed_vals):
     """
-    Returns 0 if attr not present, 1 if present but not in correct value, 2 if good
+    Check that a value is contained within an iterable
+
+    Parameters:
+    -----------
+    base_context: netCDF4.Dataset or netCDF4.variable
+       The context in which to look for the attribute, either a
+       netCDF4.Dataset or netCDF4.Variable.  If a netCDF dataset,
+       the attribute is searched for in the global attributes.
+       If a variable, the attributes are limited to those contained
+       in the corresponding variable.
+    name: str
+       The name of the attribute to search for.
+    allowed_vals: iterable
+       An iterable, usually a set, which provides the possible valid values for
+       the attribute.
+    Returns:
+    --------
+    int
+        Returns 0 if attr not present, 1 if present but not in correct value, 2
+        if good.
     """
-    if not hasattr(dataset, name):
+    if not hasattr(base_context, name):
         return 0
 
     ret_val = 1
-    if getattr(dataset, name) in allowed_vals:
+    if base_context.getncattr(name) in allowed_vals:
         ret_val += 1
 
     return ret_val
@@ -256,7 +275,7 @@ def xpath_check(tree, xpath):
     return len(xpath(tree)) > 0
 
 
-def attr_check(kvp, ds, priority, ret_val, gname=None):
+def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
     """
     Handles attribute checks for simple presence of an attribute, presence of
     one of several attributes, and passing a validation function.  Returns a
@@ -268,22 +287,30 @@ def attr_check(kvp, ds, priority, ret_val, gname=None):
     :param int priority             : priority level of check
     :param list ret_val             : result to be returned
     :param str or None gname        : group name assigned to a group of attribute Results
+    :param str or None var_name     : name of the variable which contains this attribute
     """
 
     msgs = []
     name, other = kvp
+    if var_name is not None:
+        display_name = "attribute {} in variable {}".format(name, var_name)
+        base_context = ds.variables[var_name]
+    else:
+        display_name = name
+        base_context = ds
     if other is None:
         res = std_check(ds, name)
         if not res:
-            msgs = ["%s not present" % name]
+            msgs = ["{} not present".format(display_name)]
         else:
             try:
                 # see if this attribute is a string, try stripping
                 # whitespace, and return an error if empty
-                att_strip = getattr(ds, name).strip()
+                att_strip = base_context.getncattr(name).strip()
                 if not att_strip:
                     res = False
-                    msgs = ["%s is empty or completely whitespace" % name]
+                    msgs = ["{} is empty or completely whitespace".format(
+                                      display_name)]
             # if not a string/has no strip method we should be OK
             except AttributeError:
                 pass
@@ -293,37 +320,42 @@ def attr_check(kvp, ds, priority, ret_val, gname=None):
             priority,
             value=res,
             name=gname if gname else name,
-            msgs=msgs
+            msgs=msgs,
+            variable_name=var_name
         ))
     elif hasattr(other, '__iter__'):
         # redundant, we could easily do this with a hasattr
         # check instead
-        res = std_check_in(ds, name, other)
+        res = std_check_in(base_context, name, other)
         if res == 0:
-            msgs.append("%s not present" % name)
+            msgs.append("{} not present".format(display_name))
         elif res == 1:
-            msgs.append("%s present, but not in expected value list (%s)" % (name, other))
+            msgs.append("{} present, but not in expected value list ({})"
+                        .format(display_name, sorted(other)))
 
         ret_val.append(
             Result(
                 priority,
                 (res, 2),
                 gname if gname else name, # groups Globals if supplied
-                msgs
+                msgs,
+                variable_name=var_name
             )
         )
     # if we have an XPath expression, call it on the document
     elif type(other) is etree.XPath:
         # TODO: store tree instead of creating it each time?
+        # no execution path for variable
         res = xpath_check(ds._root, other)
         if not res:
-            msgs = ["XPath for {} not found".format(name)]
+            msgs = ["XPath for {} not found".format(display_name)]
         ret_val.append(
             Result(
                 priority,
                 res,
                 gname if gname else name,
-                msgs
+                msgs,
+                variable_name=var_name
             )
         )
     # if the attribute is a function, call it
@@ -339,22 +371,24 @@ def attr_check(kvp, ds, priority, ret_val, gname=None):
         # and instead focuses on the core functionality of the
         # test
 
-        res = other(ds) # call the method on the dataset
+        res = other(base_context) # call the method on the dataset
         if not res:
-            msgs = ["%s not present" % name]
+            msgs = ["{} not present".format(display_name)]
             ret_val.append(
                 Result(
                     priority,
                     res,
                     gname if gname else name,
-                    msgs
+                    msgs,
+                    variable_name=var_name
                 )
             )
         else:
             ret_val.append(res(priority))
     # unsupported second type in second
     else:
-        raise TypeError("Second arg in tuple has unsupported type: {}".format(type(other)))
+        raise TypeError("Second arg in tuple has unsupported type: {}"
+                        .format(type(other)))
 
 
     return ret_val

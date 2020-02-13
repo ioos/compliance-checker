@@ -476,9 +476,38 @@ class TestIOOS1_2(BaseTestCase):
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
+    def test_check_platform_cf_role(self):
+        """
+        Check that cf_role inside platform variables only allows certain
+        values, namely "profile_id", "timeseries_id", or "trajectory_id"
+        """
+        ds = MockTimeSeries()
+        plat_var = ds.createVariable("platform", np.int8, ())
+        ds.variables['depth'].platform = "platform"
+        self.ioos.setup(ds)
+        results = self.ioos.check_platform_variable_cf_role(ds)
+        # don't set attribute, should raise error about attribute not
+        # existing
+        self.assertEqual(len(results), 1)
+        score, out_of = results[0].value
+        self.assertLess(score, out_of)
+        # set to invalid value
+        plat_var.setncattr("cf_role", "bad_value")
+        results = self.ioos.check_platform_variable_cf_role(ds)
+        self.assertLess(score, out_of)
+        expected_vals = ["profile_id", "timeseries_id", "trajectory_id"]
+        expect_msg = ("attribute cf_role in variable platform present, but not "
+                      "in expected value list ({})".format(expected_vals))
+        self.assertEqual(results[0].msgs, [expect_msg])
+        # set to valid value
+        plat_var.setncattr("cf_role", "timeseries_id")
+        results = self.ioos.check_platform_variable_cf_role(ds)
+        score, out_of = results[0].value
+        self.assertEqual(score, out_of)
+
     def test_check_qartod_variables_references(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
-        
+        ds = MockTimeSeries() # time, lat, lon, depth
+
         # no QARTOD variables
         results = self.ioos.check_qartod_variables_references(ds)
         scored, out_of, messages = get_results(results)

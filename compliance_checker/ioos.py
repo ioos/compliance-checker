@@ -1,7 +1,9 @@
 '''
 Check for IOOS-approved attributes
 '''
-from compliance_checker.base import BaseCheck, BaseNCCheck, BaseSOSGCCheck, BaseSOSDSCheck, check_has, Result
+from compliance_checker.base import (BaseCheck, BaseNCCheck, BaseSOSGCCheck,
+                                     BaseSOSDSCheck, check_has, Result,
+                                     attr_check)
 from owslib.namespaces import Namespaces
 from lxml.etree import XPath
 from compliance_checker.acdd import ACDD1_3Check
@@ -34,7 +36,8 @@ class IOOSBaseCheck(BaseCheck):
         return Result(priority, val, concept_name, msgs)
 
     @classmethod
-    def _has_var_attr(cls, dataset, vname, attr, concept_name, priority=BaseCheck.HIGH):
+    def _has_var_attr(cls, dataset, vname, attr, concept_name,
+                      priority=BaseCheck.HIGH):
         """
         Checks for the existance of an attr on variable vname in dataset, with the name/message using concept_name.
         """
@@ -442,6 +445,29 @@ class IOOS1_2Check(IOOSNCCheck):
             'references',
         ]
 
+    def setup(self, ds):
+        self.platform_vars = self._find_platform_vars(ds)
+
+    def _find_platform_vars(self, ds):
+        """
+        Finds any variables referenced by 'platform' attribute which exist in
+        the dataset.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+            An open netCDF4 Dataset.
+
+        Returns
+        -------
+        set of netCDF4.Variable
+            Set of variables which are platform variables.
+        """
+        plat_vars = ds.get_variables_by_attributes(platform=
+                                                   lambda p: isinstance(p, str))
+        return {ds.variables[var.platform] for var in plat_vars if
+                var.platform in ds.variables}
+
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         '''
@@ -501,6 +527,23 @@ class IOOS1_2Check(IOOSNCCheck):
         return results
 
 
+    def check_platform_variable_cf_role(self, ds):
+        """
+        Verify that any platform variables have valid CF roles
+
+        Args:
+            ds (netCDF-4 Dataset): open Dataset object
+
+        Returns:
+            list of Result objects
+        """
+        valid_cf_roles = {"timeseries_id", "profile_id", "trajectory_id"}
+        cf_role_results = []
+        for var in self.platform_vars:
+            attr_check(("cf_role", valid_cf_roles), ds, BaseCheck.HIGH,
+                        cf_role_results, var_name=var.name)
+        return cf_role_results
+
     def check_single_platform(self, ds):
         """
         Verify that a dataset only has a single platform attribute.
@@ -528,7 +571,7 @@ class IOOS1_2Check(IOOSNCCheck):
             return Result(BaseCheck.HIGH, False, "platform", ["A dataset must have a global attribute \"platform\""])
         else:
             return Result(BaseCheck.HIGH, True, "platform", [msg])
-        
+
     def _check_gts_ingest(self, attr, msg):
         """
         Helper function for check_gts_ingest().
@@ -547,7 +590,7 @@ class IOOS1_2Check(IOOSNCCheck):
         ):
             val = True
         else:
-            val = False   
+            val = False
         return Result(BaseCheck.HIGH, val, "gts_ingest", [msg])
 
     def check_gts_ingest(self, ds):
