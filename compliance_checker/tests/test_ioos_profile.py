@@ -302,12 +302,12 @@ class TestIOOS1_2(BaseTestCase):
     '''
 
     def setUp(self):
-        self.ioos = IOOS1_2Check() 
+        self.ioos = IOOS1_2Check()
 
     def test_check_vars_have_attrs(self):
 
         # create geophysical variable
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, dimensions=("time",))
 
         # should fail here
@@ -316,7 +316,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
         # should pass
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, fill_value=9999999999.) # _FillValue
         temp.setncattr("missing_value", 9999999999.)
         temp.setncattr("standard_name", "sea_surface_temperature")
@@ -351,8 +351,36 @@ class TestIOOS1_2(BaseTestCase):
         result = self.ioos.check_single_platform(ds)
         self.assertTrue(result.value)
 
+    def test_check_creator_and_publisher_type(self):
+        """
+        Checks the creator_type and publisher_type global attributes with
+        the following values:
+        Empty: Valid, defaults to "person" when not specified, which is
+               contained in the list of valid values.
+        Bad values: Invalid, not contained in list of valid values.
+        Good values: Valid, contained in list.
+        """
+        ds = MockTimeSeries()
+        # values which are not set/specified default to person, which is valid
+        result_list = self.ioos.check_creator_and_publisher_type(ds)
+        self.assertTrue(all(res.value for res in result_list))
+        # create invalid values for attribute
+        ds.setncattr('creator_type', 'PI')
+        ds.setncattr('publisher_type', 'Funder')
+        result_list = self.ioos.check_creator_and_publisher_type(ds)
+        err_regex = (r"^If specified, \w+_type must be in value list "
+                     r"\(\['group', 'institution', 'person', 'position'\]\)$")
+        for res in result_list:
+            self.assertFalse(res.value)
+            self.assertRegexpMatches(res.msgs[0], err_regex)
+        # good values
+        ds.setncattr('creator_type', 'person')
+        ds.setncattr('publisher_type', 'institution')
+        result_list = self.ioos.check_creator_and_publisher_type(ds)
+        self.assertTrue(all(res.value for res in result_list))
+
     def test_check_gts_ingest(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no gts_ingest, should pass
         results = self.ioos.check_gts_ingest(ds)
@@ -379,7 +407,7 @@ class TestIOOS1_2(BaseTestCase):
 
     def test_check_instrument_variables(self):
 
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no instrument variable, should pass
         results = self.ioos.check_instrument_variables(ds)
@@ -414,7 +442,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
     def test_check_wmo_platform_code(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no wmo_platform_code, pass
         result = self.ioos.check_wmo_platform_code(ds)
@@ -434,14 +462,14 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("wmo_platform_code", "abcd1")
         result = self.ioos.check_wmo_platform_code(ds)
         self.assertFalse(result.value)
-    
+
         # invalid length, fail
         ds.setncattr("wmo_platform_code", "123")
         result = self.ioos.check_wmo_platform_code(ds)
         self.assertFalse(result.value)
 
     def test_check_standard_name(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no standard names
         results = self.ioos.check_standard_name(ds)
@@ -507,7 +535,7 @@ class TestIOOS1_2(BaseTestCase):
 
     def test_check_single_platform(self):
 
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no global attr but also no platform variables, should pass
         results = self.ioos.check_single_platform(ds)
@@ -532,7 +560,7 @@ class TestIOOS1_2(BaseTestCase):
         raise NotImplementedError
 
     def test_check_gts_var_ingest(self):
-        raise NotImplementedError 
+        raise NotImplementedError
 
     def test_check_gts_ingest(self):
         raise NotImplementedError
@@ -558,6 +586,6 @@ class TestIOOS1_2(BaseTestCase):
         self.assertTrue(all(r.value for r in results))
 
         # QARTOD variable with bad references (fail)
-        qr.setncattr("references", "p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht")
+        qr.setncattr("references", r"p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht")
         results = self.ioos.check_qartod_variables_references(ds)
         self.assertFalse(all(r.value for r in results))

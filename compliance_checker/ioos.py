@@ -440,7 +440,8 @@ class IOOS1_2Check(IOOSNCCheck):
             'creator_phone',
             'creator_postalcode',
             'creator_state',
-            'creator_type',
+            # checked in check_creator_and_publisher_type
+            #'creator_type',
             'institution',
             'instrument',
             'ioos_ingest',
@@ -452,7 +453,8 @@ class IOOS1_2Check(IOOSNCCheck):
             'publisher_phone',
             'publisher_postalcode',
             'publisher_state',
-            'publisher_type',
+            # checked in check_creator_and_publisher_type
+            #'publisher_type',
             ('references', base.UrlValidator)
         ]
 
@@ -555,10 +557,50 @@ class IOOS1_2Check(IOOSNCCheck):
                         cf_role_results, var_name=var.name)
         return cf_role_results
 
+    def check_creator_and_publisher_type(self, ds):
+        """
+        Check if global attribute creator_type and publisher_type
+        are contained within the values "person", "group", "institution", or
+        "position".  If creator_type is not present within the global
+        attributes, assume it is set to a value of "person".
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+            An open netCDF4 Dataset
+
+        Returns
+        -------
+        list of Result
+        """
+        result_list = []
+        for global_att_name in ("creator_type", "publisher_type"):
+            messages = []
+            try:
+                att_value = ds.getncattr(global_att_name)
+            except AttributeError:
+                # if the attribute isn't found, it's implicitly assigned
+                # a value of "person", so it automatically passes.
+                pass_stat = True
+            else:
+                expected_types = {"person", "group", "institution", "position"}
+                if att_value in expected_types:
+                    pass_stat = True
+                else:
+                    pass_stat = False
+                    messages.append("If specified, {} must be in value list "
+                                    "({})".format(global_att_name,
+                                                  sorted(expected_types)))
+
+            result_list.append(Result(BaseCheck.MEDIUM, pass_stat,
+                                      global_att_name, messages))
+
+        return result_list
+
     def check_single_platform(self, ds):
         """
         Verify that a dataset only has a single platform attribute. If one exists,
-        examine the featureType of the dataset. If the featureType is 
+        examine the featureType of the dataset. If the featureType is
         [point, timeSeries, profile, trajectory] and cf_role in [timeseries_id,
         profile_id, trajectory_id] dimensionality of the variable containing
         cf_role must be 1 as "we only want a single glider/auv/ship"; if
@@ -666,7 +708,7 @@ class IOOS1_2Check(IOOSNCCheck):
         pvocab = getattr(ds, "platform_vocabulary", None)
         val = bool(validators.url(getattr(v, "references", "")))
         return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", [m])
-            
+
     def _check_var_gts_ingest(self, ds, var, var_ingest_val, do_ingest, msg):
         """
         Helper function for check_gts_ingest(). Check that a given variable
