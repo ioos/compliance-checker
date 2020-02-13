@@ -505,6 +505,38 @@ class TestIOOS1_2(BaseTestCase):
         score, out_of = results[0].value
         self.assertEqual(score, out_of)
 
+    def test_check_single_platform(self):
+
+        ds = MockTimeSeries() # time, lat, lon, depth 
+
+        # no global attr but also no platform variables, should pass
+        results = self.ioos.check_single_platform(ds)
+        self.assertTrue(results[0].value)
+
+        # give platform global, no variables, fail
+        ds.setncattr("platform", "buoy")
+        results = self.ioos.check_single_platform(ds)
+        self.assertFalse(results[0].value)
+
+        # global attribute, one platform variable, correct cf_role & featureType, pass
+        ds.setncattr("featureType", "profile")
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("time",))
+        cf_role_var.setncattr("cf_role", "timeseries_id")
+        results = self.ioos.check_single_platform(ds)
+        self.assertTrue(all(r.value for r in results))
+
+    def test_check_platform_vocabulary(self):
+        raise NotImplementedError
+
+    def test_check_gts_var_ingest(self):
+        raise NotImplementedError 
+
+    def test_check_gts_ingest(self):
+        raise NotImplementedError
+
     def test_check_qartod_variables_references(self):
         ds = MockTimeSeries() # time, lat, lon, depth
 
