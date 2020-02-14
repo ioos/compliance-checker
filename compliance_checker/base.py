@@ -17,6 +17,7 @@ from lxml import etree
 import sys
 import re
 from email.utils import parseaddr
+import validators
 
 # Python 3.5+ should work, also have a fallback
 try:

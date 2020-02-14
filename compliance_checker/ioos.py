@@ -421,7 +421,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'publisher_country',
             ('publisher_email', base.EmailValidator),
             'publisher_institution',
-            'publisher_url',
+            ('publisher_url', base.UrlValidator),
             # TODO: handle standard name table exclusion for v38?
             ('standard_name_vocabulary',
              re.compile(r'^CF Standard Name Table v[1-9]\d*$')),
@@ -456,7 +456,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'publisher_state',
             # checked in check_creator_and_publisher_type
             #'publisher_type',
-            ('references', base.UrlValidator)
+            'references'
         ]
 
     def setup(self, ds):
@@ -508,6 +508,12 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         return self.cf1_7.check_standard_name(ds)
+
+    def check_feature_type(self, ds):
+        """
+        Wrapper for checking featureType global attribute using the CF module.
+        """
+        return self.cf1_7.check_feature_type(ds)
 
     def check_units(self, ds):
         """
