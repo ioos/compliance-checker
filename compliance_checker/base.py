@@ -15,7 +15,18 @@ from compliance_checker.util import kvp_convert
 from collections import defaultdict
 from lxml import etree
 import sys
+import re
+import csv
+from io import StringIO
+import validators
+import itertools
 
+# Python 3.5+ should work, also have a fallback
+try:
+    from typing import Pattern
+    re_pattern_type = Pattern
+except ImportError:
+    re_pattern_type = type(re.compile(''))
 
 def get_namespaces():
     n = Namespaces()
@@ -23,6 +34,87 @@ def get_namespaces():
     ns["ows"] = n.get_namespace("ows110")
     return ns
 
+def csv_splitter(input_string):
+    """
+    csv_splitter(input_string)
+
+    Splits a string in CSV format and returns a flattened list
+
+    Parameters:
+    -----------
+    input_string: str
+        The string to be processed
+
+    Returns:
+    --------
+    list of str
+        A flattened list from the CSV processing contents
+    """
+    csv_contents = csv.reader(StringIO(input_string))
+    return list(itertools.chain.from_iterable(csv_contents))
+
+class ValidationObject(object):
+    validator_fail_msg = ''
+    expected_type = None
+
+    def __init__(self, split_func=None):
+        if split_func is None:
+            self.split_func = lambda x: [x]
+        else:
+            self.split_func = split_func
+
+    def validator_func(self, input_value):
+        """
+        validator_func(self, input_value)
+
+        Function that should validate the result of a given input value
+        """
+        raise NotImplementedError
+
+
+    def validate(self, input_name, input_value):
+        if self.expected_type is not None:
+            type_result = self.validate_type(input_name, input_value)
+            if not type_result[0]:
+                return type_result
+        validator_stat = True
+        for processed_value in self.split_func(input_value):
+            validator_result = self.validator_func(processed_value)
+            if not validator_result:
+                return False, self.validator_fail_msg.format(input_name)
+        # if all pass, then we're good.
+        return True, None
+
+    def validate_type(self, input_name, input_value):
+        if not isinstance(input_value, self.expected_type):
+            expected_type_fmt = "Attribute {} should be instance of type {}"
+            return (False,
+                    [expected_type_fmt.format(input_name,
+                                             self.expected_type.__name__)])
+        else:
+            return True, None
+
+class EmailValidator(ValidationObject):
+    validator_fail_msg = "{} must be a valid email address"
+    expected_type = str
+
+    def validator_func(self, input_value):
+        return validators.email(input_value)
+
+class RegexValidator(ValidationObject):
+    expected_type = str
+    validator_regex = r'^.+$'
+    validator_fail_msg = "{} must not be an empty string"
+
+    def validator_func(self, input_value):
+        return bool(re.search(self.validator_regex, input_value))
+
+class UrlValidator(ValidationObject):
+    validator_fail_msg = "{} must be a valid URL"
+    expected_type = str
+
+    def validator_func(self, input_value):
+        return bool(validators.url(input_value))
 
 # Simple class for Generic File type (default to this if file not recognised)
 class GenericFile(object):
@@ -229,15 +321,34 @@ class TestCtx(object):
         return test
 
 
-def std_check_in(dataset, name, allowed_vals):
+def std_check_in(base_context, name, allowed_vals):
     """
-    Returns 0 if attr not present, 1 if present but not in correct value, 2 if good
+    Check that a value is contained within an iterable
+
+    Parameters:
+    -----------
+    base_context: netCDF4.Dataset or netCDF4.variable
+       The context in which to look for the attribute, either a
+       netCDF4.Dataset or netCDF4.Variable.  If a netCDF dataset,
+       the attribute is searched for in the global attributes.
+       If a variable, the attributes are limited to those contained
+       in the corresponding variable.
+    name: str
+       The name of the attribute to search for.
+    allowed_vals: iterable
+       An iterable, usually a set, which provides the possible valid values for
+       the attribute.
+    Returns:
+    --------
+    int
+        Returns 0 if attr not present, 1 if present but not in correct value, 2
+        if good.
     """
-    if not hasattr(dataset, name):
+    if not hasattr(base_context, name):
         return 0
 
     ret_val = 1
-    if getattr(dataset, name) in allowed_vals:
+    if base_context.getncattr(name) in allowed_vals:
         ret_val += 1
 
     return ret_val
@@ -255,8 +366,15 @@ def xpath_check(tree, xpath):
     """Checks whether tree contains one or more elements matching xpath"""
     return len(xpath(tree)) > 0
 
+def maybe_get_global_attr(attr_name, ds):
+    if attr_name in ds.ncattrs():
+        return True, ds.getncattr(attr_name)
+    else:
+        err_msg = "{} not present"
+        return False, [err_msg.format(attr_name)]
 
-def attr_check(kvp, ds, priority, ret_val, gname=None):
+
+def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
     """
     Handles attribute checks for simple presence of an attribute, presence of
     one of several attributes, and passing a validation function.  Returns a
@@ -268,22 +386,30 @@ def attr_check(kvp, ds, priority, ret_val, gname=None):
     :param int priority             : priority level of check
     :param list ret_val             : result to be returned
     :param str or None gname        : group name assigned to a group of attribute Results
+    :param str or None var_name     : name of the variable which contains this attribute
     """
 
     msgs = []
     name, other = kvp
+    if var_name is not None:
+        display_name = "attribute {} in variable {}".format(name, var_name)
+        base_context = ds.variables[var_name]
+    else:
+        display_name = name
+        base_context = ds
     if other is None:
         res = std_check(ds, name)
         if not res:
-            msgs = ["%s not present" % name]
+            msgs = ["{} not present".format(display_name)]
         else:
             try:
                 # see if this attribute is a string, try stripping
                 # whitespace, and return an error if empty
-                att_strip = getattr(ds, name).strip()
+                att_strip = base_context.getncattr(name).strip()
                 if not att_strip:
                     res = False
-                    msgs = ["%s is empty or completely whitespace" % name]
+                    msgs = ["{} is empty or completely whitespace".format(
+                                      display_name)]
             # if not a string/has no strip method we should be OK
             except AttributeError:
                 pass
@@ -293,39 +419,84 @@ def attr_check(kvp, ds, priority, ret_val, gname=None):
             priority,
             value=res,
             name=gname if gname else name,
-            msgs=msgs
+            msgs=msgs,
+            variable_name=var_name
         ))
     elif hasattr(other, '__iter__'):
         # redundant, we could easily do this with a hasattr
         # check instead
-        res = std_check_in(ds, name, other)
+        res = std_check_in(base_context, name, other)
         if res == 0:
-            msgs.append("%s not present" % name)
+            msgs.append("{} not present".format(display_name))
         elif res == 1:
-            msgs.append("%s present, but not in expected value list (%s)" % (name, other))
+            msgs.append("{} present, but not in expected value list ({})"
+                        .format(display_name, sorted(other)))
 
         ret_val.append(
             Result(
                 priority,
                 (res, 2),
                 gname if gname else name, # groups Globals if supplied
-                msgs
+                msgs,
+                variable_name=var_name
             )
         )
     # if we have an XPath expression, call it on the document
     elif type(other) is etree.XPath:
         # TODO: store tree instead of creating it each time?
+        # no execution path for variable
         res = xpath_check(ds._root, other)
         if not res:
-            msgs = ["XPath for {} not found".format(name)]
+            msgs = ["XPath for {} not found".format(display_name)]
         ret_val.append(
             Result(
                 priority,
                 res,
                 gname if gname else name,
-                msgs
+                msgs,
+                variable_name=var_name
             )
         )
+    # check if this is a subclass of ValidationObject
+    elif isinstance(other, ValidationObject):
+        attr_result = maybe_get_global_attr(name, ds)
+        if not attr_result[0]:
+            res_tup = attr_result
+        else:
+            check_val = attr_result[1]
+            res_tup = other.validate(name, check_val)
+        ret_val.append(
+            Result(
+                priority,
+                res_tup[0],
+                name,
+                res_tup[1]
+            )
+        )
+    elif isinstance(other, re_pattern_type):
+        attr_result = maybe_get_global_attr(name, ds)
+        if not attr_result[0]:
+            return attr_result
+        else:
+            check_val = attr_result[1]
+        if not isinstance(check_val, str):
+            res = False
+            msgs = ["{} must be a string".format(name)]
+        elif not other.search(check_val):
+            res = False
+            msgs = ["{} must match regular expression {}".format(name, other)]
+        else:
+            res = True
+            msgs = []
+
+        ret_val.append(Result(
+            priority,
+            value=res,
+            name=gname if gname else name,
+            msgs=msgs
+        ))
+
+
     # if the attribute is a function, call it
     # right now only supports single attribute
     # important note: current magic approach uses all functions
@@ -339,22 +510,24 @@ def attr_check(kvp, ds, priority, ret_val, gname=None):
         # and instead focuses on the core functionality of the
         # test
 
-        res = other(ds) # call the method on the dataset
+        res = other(base_context) # call the method on the dataset
         if not res:
-            msgs = ["%s not present" % name]
+            msgs = ["{} not present".format(display_name)]
             ret_val.append(
                 Result(
                     priority,
                     res,
                     gname if gname else name,
-                    msgs
+                    msgs,
+                    variable_name=var_name
                 )
             )
         else:
             ret_val.append(res(priority))
     # unsupported second type in second
     else:
-        raise TypeError("Second arg in tuple has unsupported type: {}".format(type(other)))
+        raise TypeError("Second arg in tuple has unsupported type: {}"
+                        .format(type(other)))
 
 
     return ret_val

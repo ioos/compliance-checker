@@ -112,6 +112,42 @@ class TestBase(TestCase):
                                                        [base.BaseCheck.HIGH]
                                                      ))
 
+    def test_email_validation(self):
+        test_attr_name = 'test'
+        validator = base.EmailValidator()
+        self.assertTrue(validator.validate(test_attr_name,
+                                           'foo@bar.com')[0])
+        bad_result = validator.validate(test_attr_name, 'foo@@bar.com')
+        self.assertFalse(bad_result[0])
+        self.assertEqual(bad_result[1],
+                         "test must be a valid email address")
+
+    def test_url_validation(self):
+        """
+        Test that URL validation works properly
+        """
+        test_attr_name = "test"
+        # invalid URL
+        test_url = "ssh://invalid_url"
+        validator = base.UrlValidator()
+        bad_result = validator.validate(test_attr_name, test_url)
+        self.assertFalse(bad_result[0])
+        self.assertEqual(bad_result[1], "test must be a valid URL")
+        # valid URL
+        test_url = "https://ioos.us"
+        self.assertTrue(validator.validate(test_attr_name, test_url)[0])
+        # test with CSV splitting rules, including checks with embedded commas,
+        # which can appear in parts of URLs
+        validator = base.UrlValidator(base.csv_splitter)
+        url_multi_string = '"http://some-scientific-site.com/depth,temp",https://ioos.us/,http://google.com'
+        self.assertTrue(validator.validate(test_attr_name,
+                                           url_multi_string)[0])
+        # add something that's invalid as a URL and check
+        url_multi_string += ",noaa.ioos.webmaster@noaa.gov"
+        bad_result = validator.validate(test_attr_name, url_multi_string)
+        self.assertFalse(bad_result[0])
+        self.assertEqual(bad_result[1], "test must be a valid URL")
+
 
 class TestGenericFile(TestCase):
     '''
