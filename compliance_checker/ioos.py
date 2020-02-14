@@ -355,7 +355,7 @@ class IOOS1_1Check(IOOSNCCheck):
 
 class IOOS1_2_ConventionsValidator(base.RegexValidator):
     validator_regex = r"\bIOOS-1.2\b"
-    validator_fail_message = "{} must contain the string \"IOOS 1.2\""
+    validator_fail_msg = "{} must contain the string \"IOOS 1.2\""
 
 class IOOS1_2Check(IOOSNCCheck):
     """
@@ -402,26 +402,26 @@ class IOOS1_2Check(IOOSNCCheck):
         )
 
         self.required_atts = [
-            ('Conventions', IOOS1_2_ConventionsValidator),
+            ('Conventions', IOOS1_2_ConventionsValidator()),
             'creator_country',
-            ('creator_email', base.EmailValidator),
+            ('creator_email', base.EmailValidator()),
             'creator_institution',
             ('creator_sector', {"gov_state", "nonprofit", "tribal", "other",
                                 "unknown", "gov_municipal", "industry",
                                 "gov_federal", "academic"}),
-            ('creator_url', base.UrlValidator),
+            ('creator_url', base.UrlValidator()),
             'featureType',
             'id',
-            ('infoUrl', base.UrlValidator),
+            ('infoUrl', base.UrlValidator()),
             'license',
             'naming_authority',
             'platform',
             'platform_name',
             'platform_vocabulary',
             'publisher_country',
-            ('publisher_email', base.EmailValidator),
+            ('publisher_email', base.EmailValidator()),
             'publisher_institution',
-            ('publisher_url', base.UrlValidator),
+            ('publisher_url', base.UrlValidator()),
             # TODO: handle standard name table exclusion for v38?
             ('standard_name_vocabulary',
              re.compile(r'^CF Standard Name Table v[1-9]\d*$')),
@@ -430,11 +430,11 @@ class IOOS1_2Check(IOOSNCCheck):
         ]
 
         self.rec_atts = [
-            ('contributor_email', base.EmailValidator),
+            ('contributor_email', base.EmailValidator()),
             'contributor_name',
             'contributor_role',
             'contributor_role_vocabulary',
-            ('contributor_url', base.UrlValidator),
+            ('contributor_url', base.UrlValidator(base.csv_splitter)),
             'creator_address',
             'creator_city',
             'creator_name',
