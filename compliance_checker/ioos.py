@@ -431,8 +431,6 @@ class IOOS1_2Check(IOOSNCCheck):
         self.rec_atts = [
             ('contributor_email', base.EmailValidator),
             'contributor_name',
-            'contributor_role',
-            'contributor_role_vocabulary',
             ('contributor_url', base.UrlValidator),
             'creator_address',
             'creator_city',
@@ -512,6 +510,70 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         return self.cf1_7.check_units(ds)
+
+    def check_contributor_role_and_vocabulary(self, ds):
+        """
+        Check the dataset has global attributes contributor_role and
+        contributor_role_vocabulary. It is recommended to come from
+        one of NERC or GEOIDE.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset (open)
+
+        Returns
+        -------
+        list of Result objects
+        """
+
+        # NOTE the URL to GEOIDE is invalid (400), so this only tests
+        # the NERC specification
+
+        role = getattr(ds, "contributor_role", None)
+        vocb = getattr(ds, "contributor_role_vocabulary", None)
+
+        role_val = False
+        vocb_val = False
+
+        role_msg = "contributor_role should be from NERC or GEOIDE"
+        vocb_msg = "contributor_role_vocabulary should be one of NERC or GEOIDE"
+
+        if role:
+            if role in [
+                "author",
+                "coAuthor",
+                "collaborator",
+                "contributor",
+                "custodian",
+                "distributor",
+                "editor",
+                "funder",
+                "mediator",
+                "originator",
+                "owner",
+                "pointOfContact",
+                "principalInvestigator",
+                "processor",
+                "publisher",
+                "resourceProvider",
+                "rightsHolder",
+                "sponsor",
+                "stakeholder",
+                "user"
+            ]:
+                role_val = True
+
+        if vocb:
+            if vocb in [
+                "http://vocab.nerc.ac.uk/collection/G04/current/",
+                "https://geo-ide.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode"
+            ]:
+                vocb_val = True
+
+        return [
+            Result(BaseCheck.MEDIUM, role_val, "contributor_role", [role_msg]),
+            Result(BaseCheck.MEDIUM, vocb_val, "contributor_role_vocabulary", [vocb_msg]),
+        ]
 
     def check_vars_have_attrs(self, ds):
         """
