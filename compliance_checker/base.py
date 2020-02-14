@@ -18,7 +18,6 @@ import sys
 import re
 import csv
 from io import StringIO
-from email.utils import parseaddr
 import validators
 import itertools
 
