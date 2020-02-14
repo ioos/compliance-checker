@@ -117,7 +117,7 @@ class TestBase(TestCase):
         validator = base.EmailValidator()
         self.assertTrue(validator.validate(test_attr_name,
                                            'foo@bar.com')[0])
-        bad_result = validator.validate(test_attr_name, 'foo@bar.com')
+        bad_result = validator.validate(test_attr_name, 'foo@@bar.com')
         self.assertFalse(bad_result[0])
         self.assertEqual(bad_result[1],
                          "test must be a valid email address")
@@ -143,7 +143,7 @@ class TestBase(TestCase):
         self.assertTrue(validator.validate(test_attr_name,
                                            url_multi_string)[0])
         # add something that's invalid as a URL and check
-        url_multi_string += "noaa.ioos.webmaster@noaa.gov"
+        url_multi_string += ",noaa.ioos.webmaster@noaa.gov"
         bad_result = validator.validate(test_attr_name, url_multi_string)
         self.assertFalse(bad_result[0])
         self.assertEqual(bad_result[1], "test must be a valid URL")

@@ -100,7 +100,7 @@ class EmailValidator(ValidationObject):
     expected_type = str
 
     def validator_func(self, input_value):
-        return parseaddr(input_value) != ("", "")
+        return validators.email(input_value)
 
 class RegexValidator(ValidationObject):
     expected_type = str
