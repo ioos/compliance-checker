@@ -355,7 +355,7 @@ class IOOS1_1Check(IOOSNCCheck):
 
 class IOOS1_2_ConventionsValidator(base.RegexValidator):
     validator_regex = r"\bIOOS-1.2\b"
-    validator_fail_message = "{} must contain the string \"IOOS 1.2\""
+    validator_fail_msg = "{} must contain the string \"IOOS 1.2\""
 
 class IOOS1_2Check(IOOSNCCheck):
     """
