@@ -673,3 +673,21 @@ class TestIOOS1_2(BaseTestCase):
         qr.setncattr("references", r"p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht")
         results = self.ioos.check_qartod_variables_references(ds)
         self.assertFalse(all(r.value for r in results))
+
+    def test_check_ioos_ingest(self):
+        ds = MockTimeSeries()
+
+        # no value, pass
+        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+
+        # value false
+        ds.setncattr("ioos_ingest", "false")
+        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+
+        # value anything but false
+        ds.setncattr("ioos_ingest", "true")
+        self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
+        ds.setncattr("ioos_ingest", 0)
+        self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
+        ds.setncattr("ioos_ingest", "False")
+        self.assertFalse(self.ioos.check_ioos_ingest(ds).value)

@@ -534,6 +534,31 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return self.cf1_7.check_units(ds)
 
+    def check_ioos_ingest(self, ds):
+        """
+        If a dataset contains the global attribute ioos_ingest,
+        its value must be "false". All datasets are assumed to be
+        ingested except those with this flag. If the dataset should
+        be ingested, no flag should be present.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset (open)
+
+        Returns
+        -------
+        Result
+        """
+
+        r = True
+        m = "Global attribute \"ioos_ingest\" must be a string with value \"false\""
+        igst = getattr(ds, "ioos_ingest", None)
+        if igst is not None:
+            if igst != "false":
+                r = False
+
+        return Result(BaseCheck.MEDIUM, r, "ioos_ingest", [m])
+
     def check_contributor_role_and_vocabulary(self, ds):
         """
         Check the dataset has global attributes contributor_role and
