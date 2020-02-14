@@ -305,18 +305,18 @@ class TestIOOS1_2(BaseTestCase):
     def setUp(self):
         self.ioos = IOOS1_2Check()
 
-    def test_check_vars_have_attrs(self):
+    def test_check_geophysical_vars_have_attrs(self):
 
         # create geophysical variable
         ds = MockTimeSeries() # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, dimensions=("time",))
 
         # should fail here
-        results = self.ioos.check_vars_have_attrs(ds)
+        results = self.ioos.check_geophysical_vars_have_attrs(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
 
-        # should pass
+        # set the necessary attributes
         ds = MockTimeSeries(default_fill_value=9999999999.) # time, lat, lon, depth 
         temp = ds.createVariable("temp", np.float64, fill_value=9999999999.) # _FillValue
         temp.setncattr("missing_value", 9999999999.)
@@ -325,13 +325,30 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("units", "degree_C")
         temp.setncattr("platform", "myPlatform")
 
-        ds.variables["time"].setncattr("platform", "myPlatform")
+        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+    def test_check_geospatial_vars_have_attrs(self):
+
+        # create geophysical variable
+        ds = MockTimeSeries() # time, lat, lon, depth 
+        temp = ds.createVariable("temp", np.float64, dimensions=("time",))
+
+        # should fail here
+        results = self.ioos.check_geospatial_vars_have_attrs(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # should pass - default_fill_value sets _FillValue attr
+        ds = MockTimeSeries(default_fill_value=9999999999.) # time, lat, lon, depth 
+
         ds.variables["time"].setncattr("standard_name", "time")
         ds.variables["time"].setncattr("standard_name_uri", "time")
         ds.variables["time"].setncattr("units", "hours since 1970-01-01T00:00:00")
         ds.variables["time"].setncattr("missing_value", 9999999999.)
 
-        results = self.ioos.check_vars_have_attrs(ds)
+        results = self.ioos.check_geospatial_vars_have_attrs(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 

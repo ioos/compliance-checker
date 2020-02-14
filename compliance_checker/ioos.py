@@ -403,16 +403,23 @@ class IOOS1_2Check(IOOSNCCheck):
         ]
         self.cf1_7._std_names._names.extend(self._qartod_std_names)
 
-        # check geophysical variables have the following attrs:
-        self.check_var_attrs = (
+        self._default_check_var_attrs = set([
             ("_FillValue", BaseCheck.MEDIUM),
             ("missing_value", BaseCheck.MEDIUM),
             #( "standard_name", BaseCheck.HIGH # already checked in CF1_7Check.check_standard_name()
-            ("standard_name_uri", BaseCheck.MEDIUM),
             #( "units", BaseCheck.HIGH # already checked in CF1_7Check.check_units()
-            ("platform", BaseCheck.HIGH),
-            #( "wmo_platform_code", BaseCheck.HIGH # only "if applicable", see check_wmo_platform_code()
-        )
+        ])
+
+        # geophysical variables must have the following attrs:
+        self.geophys_check_var_attrs = self._default_check_var_attrs.union(set([
+            ("standard_name_uri", BaseCheck.MEDIUM),
+            #( "platform", BaseCheck.HIGH) # checked under check_single_platform()
+            #( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
+            #( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest() 
+        ]))
+
+        # geospatial vars must have the following attrs:
+        self.geospat_check_var_attrs = self._default_check_var_attrs
 
         self.required_atts = [
             ('Conventions', IOOS1_2_ConventionsValidator()),
@@ -623,26 +630,62 @@ class IOOS1_2Check(IOOSNCCheck):
             Result(BaseCheck.MEDIUM, vocb_val, "contributor_role_vocabulary", [vocb_msg]),
         ]
 
-    def check_vars_have_attrs(self, ds):
+    def check_geophysical_vars_have_attrs(self, ds):
         """
-        Using the tuples defined in __init__, check that each variable has
-        the attributes using the corresponding priority.
+        All geophysical variables must have certain attributes.
 
-        :param netCDF4.Dataset: open netCDF4 dataset
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+
+        Returns
+        -------
+        list: list of Result objects
+        """
+
+        return self._check_vars_have_attrs(
+            ds,
+            get_geophysical_variables(ds),
+            self.geophys_check_var_attrs
+        )
+
+    def check_geospatial_vars_have_attrs(self, ds):
+        """
+        All geospatial variables must have certain attributes.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+
+        Returns
+        -------
+        list: list of Result objects
+        """
+
+        return self._check_vars_have_attrs(
+            ds,
+            get_coordinate_variables(ds),
+            self.geospat_check_var_attrs
+        )
+
+
+    def _check_vars_have_attrs(self, ds, vars_to_check, atts_to_check):
+        """
+        Check that the variables in vars_to_check have the attributes in
+        atts_to_check.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset (open)
+
+        Returns
+        -------
+        list of Result objects
         """
 
         results = []
-
-        # get coordinate and geophysical variables
-        vars_to_check = set(get_geophysical_variables(ds))
-        vars_to_check.update(set(get_coordinate_variables(ds)))
-
-        # NOTE: time is included in coorindate variables, but time
-        # should not be required to have a "platform" attribute.
-        # Potential solutions?
-
         for var in vars_to_check:
-            for attr_tuple in self.check_var_attrs:
+            for attr_tuple in atts_to_check:
                 results.append(
                     self._has_var_attr(
                         ds,
@@ -652,9 +695,7 @@ class IOOS1_2Check(IOOSNCCheck):
                         attr_tuple[1]  # priority level
                     )
                 )
-
         return results
-
 
     def check_platform_variable_cf_role(self, ds):
         """
