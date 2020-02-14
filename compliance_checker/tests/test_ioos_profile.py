@@ -352,6 +352,34 @@ class TestIOOS1_2(BaseTestCase):
         result = self.ioos.check_single_platform(ds)
         self.assertTrue(result.value)
 
+    def test_check_creator_and_publisher_type(self):
+        """
+        Checks the creator_type and publisher_type global attributes with
+        the following values:
+        Empty: Valid, defaults to "person" when not specified, which is
+               contained in the list of valid values.
+        Bad values: Invalid, not contained in list of valid values.
+        Good values: Valid, contained in list.
+        """
+        ds = MockTimeSeries()
+        # values which are not set/specified default to person, which is valid
+        result_list = self.ioos.check_creator_and_publisher_type(ds)
+        self.assertTrue(all(res.value for res in result_list))
+        # create invalid values for attribute
+        ds.setncattr('creator_type', 'PI')
+        ds.setncattr('publisher_type', 'Funder')
+        result_list = self.ioos.check_creator_and_publisher_type(ds)
+        err_regex = (r"^If specified, \w+_type must be in value list "
+                     r"\(\['group', 'institution', 'person', 'position'\]\)$")
+        for res in result_list:
+            self.assertFalse(res.value)
+            self.assertRegex(res.msgs[0], err_regex)
+        # good values
+        ds.setncattr('creator_type', 'person')
+        ds.setncattr('publisher_type', 'institution')
+        result_list = self.ioos.check_creator_and_publisher_type(ds)
+        self.assertTrue(all(res.value for res in result_list))
+
     def test_check_gts_ingest(self):
         ds = MockTimeSeries() # time, lat, lon, depth
 
@@ -544,6 +572,6 @@ class TestIOOS1_2(BaseTestCase):
         self.assertTrue(all(r.value for r in results))
 
         # QARTOD variable with bad references (fail)
-        qr.setncattr("references", "p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht")
+        qr.setncattr("references", r"p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht")
         results = self.ioos.check_qartod_variables_references(ds)
         self.assertFalse(all(r.value for r in results))

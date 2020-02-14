@@ -453,7 +453,8 @@ class IOOS1_2Check(IOOSNCCheck):
             'creator_phone',
             'creator_postalcode',
             'creator_state',
-            'creator_type',
+            # checked in check_creator_and_publisher_type
+            #'creator_type',
             'institution',
             'instrument',
             'ioos_ingest',
@@ -465,7 +466,8 @@ class IOOS1_2Check(IOOSNCCheck):
             'publisher_phone',
             'publisher_postalcode',
             'publisher_state',
-            'publisher_type',
+            # checked in check_creator_and_publisher_type
+            #'publisher_type',
             'references'
         ]
 
@@ -573,6 +575,46 @@ class IOOS1_2Check(IOOSNCCheck):
             attr_check(("cf_role", valid_cf_roles), ds, BaseCheck.HIGH,
                         cf_role_results, var_name=var.name)
         return cf_role_results
+
+    def check_creator_and_publisher_type(self, ds):
+        """
+        Check if global attribute creator_type and publisher_type
+        are contained within the values "person", "group", "institution", or
+        "position".  If creator_type is not present within the global
+        attributes, assume it is set to a value of "person".
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+            An open netCDF4 Dataset
+
+        Returns
+        -------
+        list of Result
+        """
+        result_list = []
+        for global_att_name in ("creator_type", "publisher_type"):
+            messages = []
+            try:
+                att_value = ds.getncattr(global_att_name)
+            except AttributeError:
+                # if the attribute isn't found, it's implicitly assigned
+                # a value of "person", so it automatically passes.
+                pass_stat = True
+            else:
+                expected_types = {"person", "group", "institution", "position"}
+                if att_value in expected_types:
+                    pass_stat = True
+                else:
+                    pass_stat = False
+                    messages.append("If specified, {} must be in value list "
+                                    "({})".format(global_att_name,
+                                                  sorted(expected_types)))
+
+            result_list.append(Result(BaseCheck.MEDIUM, pass_stat,
+                                      global_att_name, messages))
+
+        return result_list
 
     def check_single_platform(self, ds):
         """
