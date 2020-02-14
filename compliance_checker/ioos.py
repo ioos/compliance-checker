@@ -357,6 +357,18 @@ class IOOS1_2_ConventionsValidator(base.RegexValidator):
     validator_regex = r"\bIOOS-1.2\b"
     validator_fail_message = "{} must contain the string \"IOOS 1.2\""
 
+class NamingAuthorityValidator(base.UrlValidator):
+    """
+    Class to check for URL or reversed DNS strings contained within
+    naming_authority
+    """
+    validator_fail_msg = "{} should either be a URL or a reversed DNS name (e.g \"edu.ucar.unidata\")"
+
+    def validator_func(self, input_value):
+        return (super().validator_func(input_value) or
+                # check for reverse DNS strings
+                validators.domain(".".join(input_value.split(".")[::-1])))
+
 class IOOS1_2Check(IOOSNCCheck):
     """
     Class to implement the IOOS Metadata 1.2 Specification
@@ -414,7 +426,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'id',
             ('infoUrl', base.UrlValidator),
             'license',
-            'naming_authority',
+            ('naming_authority', NamingAuthorityValidator),
             'platform',
             'platform_name',
             'platform_vocabulary',
