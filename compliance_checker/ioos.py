@@ -421,7 +421,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'publisher_country',
             ('publisher_email', base.EmailValidator),
             'publisher_institution',
-            'publisher_url',
+            ('publisher_url', base.UrlValidator),
             # TODO: handle standard name table exclusion for v38?
             ('standard_name_vocabulary',
              re.compile(r'^CF Standard Name Table v[1-9]\d*$')),
