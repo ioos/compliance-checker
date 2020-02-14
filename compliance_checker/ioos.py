@@ -8,7 +8,8 @@ from owslib.namespaces import Namespaces
 from lxml.etree import XPath
 from compliance_checker.acdd import ACDD1_3Check
 from compliance_checker.cfutil import (get_geophysical_variables,
-                                       get_instrument_variables)
+                                       get_instrument_variables,
+                                       get_coordinate_variables)
 from compliance_checker import base
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
 import validators
@@ -606,13 +607,21 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         results = []
-        # NOTE should it also find 'geospatial` variables?
-        for geo_var in get_geophysical_variables(ds):
+
+        # get coordinate and geophysical variables
+        vars_to_check = set(get_geophysical_variables(ds))
+        vars_to_check.update(set(get_coordinate_variables(ds)))
+
+        # NOTE: time is included in coorindate variables, but time
+        # should not be required to have a "platform" attribute.
+        # Potential solutions?
+
+        for var in vars_to_check:
             for attr_tuple in self.check_var_attrs:
                 results.append(
                     self._has_var_attr(
                         ds,
-                        geo_var,
+                        var,
                         attr_tuple[0], # attribute name
                         attr_tuple[0], # attribute name used as 'concept_name'
                         attr_tuple[1]  # priority level
