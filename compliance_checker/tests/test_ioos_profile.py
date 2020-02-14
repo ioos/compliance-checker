@@ -329,28 +329,38 @@ class TestIOOS1_2(BaseTestCase):
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
-    def test_check_single_platform(self):
+    def test_check_contributor_role_and_vocabulary(self):
+        ds = MockTimeSeries() # time, lat, lon, depth 
 
-        ds = MockTimeSeries()
+        # no contributor_role or vocab, fail both
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertFalse(all(r.value for r in results))
 
-        # should fail as no platform attrs exist
-        result = self.ioos.check_single_platform(ds)
-        self.assertFalse(result.value)
+        # bad contributor_role and vocab
+        ds.setncattr("contributor_role", "bad")
+        ds.setncattr("contributor_role_vocabulary", "bad")
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertFalse(all(r.value for r in results))
 
-        # should pass with single platform
-        ds.setncattr("platform", "myPlatform")
-        result = self.ioos.check_single_platform(ds)
-        self.assertTrue(result.value)
+        # good role, bad vocab
+        ds.setncattr("contributor_role", "contributor")
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertTrue(results[0].value)
+        self.assertFalse(results[1].value)
 
-        # add a different platform
-        ds.variables["time"].setncattr("platform", "myPlatform2")
-        result = self.ioos.check_single_platform(ds)
-        self.assertFalse(result.value)
-
-        # make all the same
-        ds.variables["time"].setncattr("platform", "myPlatform")
-        result = self.ioos.check_single_platform(ds)
-        self.assertTrue(result.value)
+        # bad role, good vocab
+        ds.setncattr("contributor_role", "bad")
+        ds.setncattr("contributor_role_vocabulary", "http://vocab.nerc.ac.uk/collection/G04/current/")
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertFalse(results[0].value)
+        self.assertTrue(results[1].value)
+        
+        # good role, good vocab
+        ds.setncattr("contributor_role", "contributor")
+        ds.setncattr("contributor_role_vocabulary", "http://vocab.nerc.ac.uk/collection/G04/current/")
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertTrue(results[0].value)
+        self.assertTrue(results[1].value)
 
     def test_check_creator_and_publisher_type(self):
         """
