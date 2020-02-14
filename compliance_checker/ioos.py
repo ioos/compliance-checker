@@ -454,7 +454,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'publisher_postalcode',
             'publisher_state',
             'publisher_type',
-            ('references', base.UrlValidator())
+            'references'
         ]
 
     def setup(self, ds):
