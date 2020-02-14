@@ -507,6 +507,12 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return self.cf1_7.check_standard_name(ds)
 
+    def check_feature_type(self, ds):
+        """
+        Wrapper for checking featureType global attribute using the CF module.
+        """
+        return self.cf1_7.check_feature_type(ds)
+
     def check_units(self, ds):
         """
         Wrapper to check units with the CF module.
