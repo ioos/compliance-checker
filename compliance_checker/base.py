@@ -18,7 +18,6 @@ import sys
 import re
 import csv
 from io import StringIO
-from email.utils import parseaddr
 import validators
 import itertools
 
@@ -100,7 +99,7 @@ class EmailValidator(ValidationObject):
     expected_type = str
 
     def validator_func(self, input_value):
-        return parseaddr(input_value) != ("", "")
+        return validators.email(input_value)
 
 class RegexValidator(ValidationObject):
     expected_type = str
