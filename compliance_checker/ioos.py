@@ -416,7 +416,6 @@ class IOOS1_2Check(IOOSNCCheck):
             ('infoUrl', base.UrlValidator),
             'license',
             'naming_authority',
-            'platform',
             'platform_name',
             'publisher_country',
             ('publisher_email', base.EmailValidator),
@@ -625,6 +624,30 @@ class IOOS1_2Check(IOOSNCCheck):
             attr_check(("cf_role", valid_cf_roles), ds, BaseCheck.HIGH,
                         cf_role_results, var_name=var.name)
         return cf_role_results
+
+    def check_platform_global(self, ds):
+        """
+        The "platform" attribute must be a single string containing
+        no blank characters.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset (open)
+
+        Returns
+        -------
+        Result
+        """
+
+        r = False
+        m = "The global attribute \"platform\" must be a single string " +\
+            "containing no blank characters; it is {}"
+        p = getattr(ds, "platform", None)
+        if p:
+            if re.match(r'\w+(?!\s)$', p):
+                r = True
+
+        return Result(BaseCheck.HIGH, r, "platform", [m.format(p)])
 
     def check_single_platform(self, ds):
         """
