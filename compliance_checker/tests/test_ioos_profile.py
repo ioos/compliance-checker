@@ -1,4 +1,5 @@
-from compliance_checker.ioos import IOOS0_1Check, IOOS1_1Check, IOOS1_2Check
+from compliance_checker.ioos import (IOOS0_1Check, IOOS1_1Check, IOOS1_2Check,
+                                     NamingAuthorityValidator)
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
@@ -302,12 +303,12 @@ class TestIOOS1_2(BaseTestCase):
     '''
 
     def setUp(self):
-        self.ioos = IOOS1_2Check() 
+        self.ioos = IOOS1_2Check()
 
     def test_check_vars_have_attrs(self):
 
         # create geophysical variable
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, dimensions=("time",))
 
         # should fail here
@@ -316,7 +317,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
         # should pass
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, fill_value=9999999999.) # _FillValue
         temp.setncattr("missing_value", 9999999999.)
         temp.setncattr("standard_name", "sea_surface_temperature")
@@ -352,7 +353,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertTrue(result.value)
 
     def test_check_gts_ingest(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no gts_ingest, should pass
         results = self.ioos.check_gts_ingest(ds)
@@ -379,7 +380,7 @@ class TestIOOS1_2(BaseTestCase):
 
     def test_check_instrument_variables(self):
 
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no instrument variable, should pass
         results = self.ioos.check_instrument_variables(ds)
@@ -414,7 +415,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
     def test_check_wmo_platform_code(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no wmo_platform_code, pass
         result = self.ioos.check_wmo_platform_code(ds)
@@ -434,14 +435,14 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("wmo_platform_code", "abcd1")
         result = self.ioos.check_wmo_platform_code(ds)
         self.assertFalse(result.value)
-    
+
         # invalid length, fail
         ds.setncattr("wmo_platform_code", "123")
         result = self.ioos.check_wmo_platform_code(ds)
         self.assertFalse(result.value)
 
     def test_check_standard_name(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no standard names
         results = self.ioos.check_standard_name(ds)
@@ -475,6 +476,23 @@ class TestIOOS1_2(BaseTestCase):
         results = self.ioos.check_standard_name(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
+
+    def test_naming_authority_validation(self):
+        test_attr_name = "naming_authority"
+        validator = NamingAuthorityValidator()
+        # check URL - should pass
+        self.assertTrue(validator.validate(test_attr_name,
+                                           "https://ioos.us")[0])
+        # check reverse DNS - should pass
+        self.assertTrue(validator.validate(test_attr_name,
+                                           "edu.ucar.unidata")[0])
+        # email address is neither of the above, so should fail
+        bad_result = validator.validate(test_attr_name,
+                                        "webmaster.ioos.us@noaa.gov")
+        self.assertFalse(bad_result[0])
+        self.assertEqual(bad_result[1],
+                         "naming_authority should either be a URL or a "
+                         "reversed DNS name (e.g \"edu.ucar.unidata\")")
 
     def test_check_platform_cf_role(self):
         """
