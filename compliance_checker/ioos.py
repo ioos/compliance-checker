@@ -773,7 +773,7 @@ class IOOS1_2Check(IOOSNCCheck):
             "containing no blank characters; it is {}"
         p = getattr(ds, "platform", None)
         if p:
-            if re.match(r'\w+(?!\s)$', p):
+            if re.match(r'^\S+$', p):
                 r = True
 
         return Result(BaseCheck.HIGH, r, "platform", [m.format(p)])
