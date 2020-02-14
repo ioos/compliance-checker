@@ -305,19 +305,19 @@ class TestIOOS1_2(BaseTestCase):
     def setUp(self):
         self.ioos = IOOS1_2Check()
 
-    def test_check_vars_have_attrs(self):
+    def test_check_geophysical_vars_have_attrs(self):
 
         # create geophysical variable
         ds = MockTimeSeries() # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, dimensions=("time",))
 
         # should fail here
-        results = self.ioos.check_vars_have_attrs(ds)
+        results = self.ioos.check_geophysical_vars_have_attrs(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
 
-        # should pass
-        ds = MockTimeSeries() # time, lat, lon, depth
+        # set the necessary attributes
+        ds = MockTimeSeries(default_fill_value=9999999999.) # time, lat, lon, depth 
         temp = ds.createVariable("temp", np.float64, fill_value=9999999999.) # _FillValue
         temp.setncattr("missing_value", 9999999999.)
         temp.setncattr("standard_name", "sea_surface_temperature")
@@ -325,32 +325,65 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("units", "degree_C")
         temp.setncattr("platform", "myPlatform")
 
-        results = self.ioos.check_vars_have_attrs(ds)
+        results = self.ioos.check_geophysical_vars_have_attrs(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
-    def test_check_single_platform(self):
+    def test_check_geospatial_vars_have_attrs(self):
 
-        ds = MockTimeSeries()
+        # create geophysical variable
+        ds = MockTimeSeries() # time, lat, lon, depth 
+        temp = ds.createVariable("temp", np.float64, dimensions=("time",))
 
-        # should fail as no platform attrs exist
-        result = self.ioos.check_single_platform(ds)
-        self.assertFalse(result.value)
+        # should fail here
+        results = self.ioos.check_geospatial_vars_have_attrs(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
 
-        # should pass with single platform
-        ds.setncattr("platform", "myPlatform")
-        result = self.ioos.check_single_platform(ds)
-        self.assertTrue(result.value)
+        # should pass - default_fill_value sets _FillValue attr
+        ds = MockTimeSeries(default_fill_value=9999999999.) # time, lat, lon, depth 
 
-        # add a different platform
-        ds.variables["time"].setncattr("platform", "myPlatform2")
-        result = self.ioos.check_single_platform(ds)
-        self.assertFalse(result.value)
+        ds.variables["time"].setncattr("standard_name", "time")
+        ds.variables["time"].setncattr("standard_name_uri", "time")
+        ds.variables["time"].setncattr("units", "hours since 1970-01-01T00:00:00")
+        ds.variables["time"].setncattr("missing_value", 9999999999.)
 
-        # make all the same
-        ds.variables["time"].setncattr("platform", "myPlatform")
-        result = self.ioos.check_single_platform(ds)
-        self.assertTrue(result.value)
+        results = self.ioos.check_geospatial_vars_have_attrs(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+    def test_check_contributor_role_and_vocabulary(self):
+        ds = MockTimeSeries() # time, lat, lon, depth 
+
+        # no contributor_role or vocab, fail both
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertFalse(all(r.value for r in results))
+
+        # bad contributor_role and vocab
+        ds.setncattr("contributor_role", "bad")
+        ds.setncattr("contributor_role_vocabulary", "bad")
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertFalse(all(r.value for r in results))
+
+        # good role, bad vocab
+        ds.setncattr("contributor_role", "contributor")
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertTrue(results[0].value)
+        self.assertFalse(results[1].value)
+
+        # bad role, good vocab
+        ds.setncattr("contributor_role", "bad")
+        ds.setncattr("contributor_role_vocabulary", "http://vocab.nerc.ac.uk/collection/G04/current/")
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertFalse(results[0].value)
+        self.assertTrue(results[1].value)
+        
+        # good role, good vocab
+        ds.setncattr("contributor_role", "contributor")
+        ds.setncattr("contributor_role_vocabulary", "http://vocab.nerc.ac.uk/collection/G04/current/")
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertTrue(results[0].value)
+        self.assertTrue(results[1].value)
 
     def test_check_creator_and_publisher_type(self):
         """
@@ -395,16 +428,25 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(scored, out_of)
 
         # give one variable the gts_ingest attribute
+        # no ancillary vars, should fail
         ds.variables["time"].setncattr("gts_ingest", "true")
         results = self.ioos.check_gts_ingest(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        self.assertLess(scored, out_of)
 
-        # give a poor value
-        ds.variables["time"].setncattr("gts_ingest", "blah")
+        # set ancillary var with bad standard name
+        tmp = ds.createVariable("tmp", np.byte, ("time",))
+        tmp.setncattr("standard_name", "bad")
+        ds.variables["time"].setncattr("ancillary_variables", "tmp")
         results = self.ioos.check_gts_ingest(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
+
+         # good ancillary var standard name
+        tmp.setncattr("standard_name", "aggregate_quality_flag")
+        results = self.ioos.check_gts_ingest(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
 
     def test_check_instrument_variables(self):
 
@@ -551,6 +593,79 @@ class TestIOOS1_2(BaseTestCase):
         score, out_of = results[0].value
         self.assertEqual(score, out_of)
 
+    def test_check_platform_global(self):
+        ds = MockTimeSeries() # time, lat, lon, depth 
+
+        # no global attr, fail
+        self.assertFalse(self.ioos.check_platform_global(ds).value)
+
+        # bad global attr, fail
+        ds.setncattr("platform", "bad value")
+        self.assertFalse(self.ioos.check_platform_global(ds).value)
+
+        # another bad value
+        ds.setncattr("platform", " bad")
+        self.assertFalse(self.ioos.check_platform_global(ds).value)
+
+        # good value
+        ds.setncattr("platform", "single_string")
+        self.assertTrue(self.ioos.check_platform_global(ds).value)
+
+    def test_check_single_platform(self):
+
+        ds = MockTimeSeries() # time, lat, lon, depth 
+
+        # no global attr but also no platform variables, should pass
+        results = self.ioos.check_single_platform(ds)
+        self.assertTrue(results[0].value)
+
+        # give platform global, no variables, fail
+        ds.setncattr("platform", "buoy")
+        results = self.ioos.check_single_platform(ds)
+        self.assertFalse(results[0].value)
+
+        # global attribute, one platform variable, correct cf_role & featureType, pass
+        ds.setncattr("featureType", "profile")
+        ds.createDimension("profile", 1)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("profile",))
+        cf_role_var.setncattr("cf_role", "timeseries_id")
+        results = self.ioos.check_single_platform(ds)
+        self.assertTrue(all(r.value for r in results))
+
+        # global attr, multiple platform variables, correct cf_role & featureType, fail
+        plat2 = ds.createVariable("platform_var_2", np.byte)
+        temp2 = ds.createVariable("temp2", "d", ("time"))
+        temp2.setncattr("platform", "platform_var2")
+        results = self.ioos.check_single_platform(ds)
+        self.assertFalse(results[0].value)
+
+        # no global attr, one platform var, correct cf_role & featureType, fail
+        ds.delncattr("platform")
+        self.assertFalse(results[0].value)
+
+        # global attr, one platform var, correct featureType, incorrect cf_role var dimension
+        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds.setncattr("featureType", "trajectoryprofile")
+        ds.createDimension("trajectory", 2) # should only be 1
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("trajectory",))
+        cf_role_var.setncattr("cf_role", "trajectory_id")
+        results = self.ioos.check_single_platform(ds)
+        self.assertFalse(results[0].value)
+
+    def test_check_platform_vocabulary(self):
+        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds.setncattr("platform_vocabulary", "http://google.com")
+        self.assertTrue(self.ioos.check_platform_vocabulary(ds).value)
+
+        ds.setncattr("platform_vocabulary", "bad")
+        self.assertFalse(self.ioos.check_platform_vocabulary(ds).value)
+
     def test_check_qartod_variables_references(self):
         ds = MockTimeSeries() # time, lat, lon, depth
 
@@ -575,3 +690,21 @@ class TestIOOS1_2(BaseTestCase):
         qr.setncattr("references", r"p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht")
         results = self.ioos.check_qartod_variables_references(ds)
         self.assertFalse(all(r.value for r in results))
+
+    def test_check_ioos_ingest(self):
+        ds = MockTimeSeries()
+
+        # no value, pass
+        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+
+        # value false
+        ds.setncattr("ioos_ingest", "false")
+        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+
+        # value anything but false
+        ds.setncattr("ioos_ingest", "true")
+        self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
+        ds.setncattr("ioos_ingest", 0)
+        self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
+        ds.setncattr("ioos_ingest", "False")
+        self.assertFalse(self.ioos.check_ioos_ingest(ds).value)

@@ -21,11 +21,11 @@ class MockTimeSeries(MockNetCDF):
     Mock time series with time dimension and time, lon, lat, and depth
     variables defined
     """
-    def __init__(self):
+    def __init__(self, default_fill_value=None):
         super(MockTimeSeries, self).__init__()
         self.createDimension('time', 500)
         for v in ('time', 'lon', 'lat', 'depth'):
-            self.createVariable(v, 'd', ('time',))
+            self.createVariable(v, 'd', ('time',), fill_value=default_fill_value)
 
         # give some applicable units
         self.variables["time"].units  = "seconds since 2019-04-11T00:00:00"

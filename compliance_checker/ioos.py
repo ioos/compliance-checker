@@ -8,7 +8,8 @@ from owslib.namespaces import Namespaces
 from lxml.etree import XPath
 from compliance_checker.acdd import ACDD1_3Check
 from compliance_checker.cfutil import (get_geophysical_variables,
-                                       get_instrument_variables)
+                                       get_instrument_variables,
+                                       get_coordinate_variables)
 from compliance_checker import base
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
 import validators
@@ -402,16 +403,23 @@ class IOOS1_2Check(IOOSNCCheck):
         ]
         self.cf1_7._std_names._names.extend(self._qartod_std_names)
 
-        # check geophysical variables have the following attrs:
-        self.check_var_attrs = (
+        self._default_check_var_attrs = set([
             ("_FillValue", BaseCheck.MEDIUM),
             ("missing_value", BaseCheck.MEDIUM),
             #( "standard_name", BaseCheck.HIGH # already checked in CF1_7Check.check_standard_name()
-            ("standard_name_uri", BaseCheck.MEDIUM),
             #( "units", BaseCheck.HIGH # already checked in CF1_7Check.check_units()
-            ("platform", BaseCheck.HIGH),
-            #( "wmo_platform_code", BaseCheck.HIGH # only "if applicable", see check_wmo_platform_code()
-        )
+        ])
+
+        # geophysical variables must have the following attrs:
+        self.geophys_check_var_attrs = self._default_check_var_attrs.union(set([
+            ("standard_name_uri", BaseCheck.MEDIUM),
+            #( "platform", BaseCheck.HIGH) # checked under check_single_platform()
+            #( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
+            #( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest() 
+        ]))
+
+        # geospatial vars must have the following attrs:
+        self.geospat_check_var_attrs = self._default_check_var_attrs
 
         self.required_atts = [
             ('Conventions', IOOS1_2_ConventionsValidator()),
@@ -429,7 +437,6 @@ class IOOS1_2Check(IOOSNCCheck):
             ('naming_authority', NamingAuthorityValidator),
             'platform',
             'platform_name',
-            'platform_vocabulary',
             'publisher_country',
             ('publisher_email', base.EmailValidator()),
             'publisher_institution',
@@ -534,30 +541,161 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return self.cf1_7.check_units(ds)
 
-    def check_vars_have_attrs(self, ds):
+    def check_ioos_ingest(self, ds):
         """
-        Using the tuples defined in __init__, check that each variable has
-        the attributes using the corresponding priority.
+        If a dataset contains the global attribute ioos_ingest,
+        its value must be "false". All datasets are assumed to be
+        ingested except those with this flag. If the dataset should
+        be ingested, no flag should be present.
 
-        :param netCDF4.Dataset: open netCDF4 dataset
+        Parameters
+        ----------
+        ds: netCDF4.Dataset (open)
+
+        Returns
+        -------
+        Result
+        """
+
+        r = True
+        m = "Global attribute \"ioos_ingest\" must be a string with value \"false\""
+        igst = getattr(ds, "ioos_ingest", None)
+        if igst is not None:
+            if igst != "false":
+                r = False
+
+        return Result(BaseCheck.MEDIUM, r, "ioos_ingest", [m])
+
+    def check_contributor_role_and_vocabulary(self, ds):
+        """
+        Check the dataset has global attributes contributor_role and
+        contributor_role_vocabulary. It is recommended to come from
+        one of NERC or GEOIDE.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset (open)
+
+        Returns
+        -------
+        list of Result objects
+        """
+
+        # NOTE the URL to GEOIDE is invalid (400), so this only tests
+        # the NERC specification
+
+        role = getattr(ds, "contributor_role", None)
+        vocb = getattr(ds, "contributor_role_vocabulary", None)
+
+        role_val = False
+        vocb_val = False
+
+        role_msg = "contributor_role should be from NERC or GEOIDE"
+        vocb_msg = "contributor_role_vocabulary should be one of NERC or GEOIDE"
+
+        if role:
+            if role in [
+                "author",
+                "coAuthor",
+                "collaborator",
+                "contributor",
+                "custodian",
+                "distributor",
+                "editor",
+                "funder",
+                "mediator",
+                "originator",
+                "owner",
+                "pointOfContact",
+                "principalInvestigator",
+                "processor",
+                "publisher",
+                "resourceProvider",
+                "rightsHolder",
+                "sponsor",
+                "stakeholder",
+                "user"
+            ]:
+                role_val = True
+
+        if vocb:
+            if vocb in [
+                "http://vocab.nerc.ac.uk/collection/G04/current/",
+                "https://geo-ide.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode"
+            ]:
+                vocb_val = True
+
+        return [
+            Result(BaseCheck.MEDIUM, role_val, "contributor_role", [role_msg]),
+            Result(BaseCheck.MEDIUM, vocb_val, "contributor_role_vocabulary", [vocb_msg]),
+        ]
+
+    def check_geophysical_vars_have_attrs(self, ds):
+        """
+        All geophysical variables must have certain attributes.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+
+        Returns
+        -------
+        list: list of Result objects
+        """
+
+        return self._check_vars_have_attrs(
+            ds,
+            get_geophysical_variables(ds),
+            self.geophys_check_var_attrs
+        )
+
+    def check_geospatial_vars_have_attrs(self, ds):
+        """
+        All geospatial variables must have certain attributes.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+
+        Returns
+        -------
+        list: list of Result objects
+        """
+
+        return self._check_vars_have_attrs(
+            ds,
+            get_coordinate_variables(ds),
+            self.geospat_check_var_attrs
+        )
+
+
+    def _check_vars_have_attrs(self, ds, vars_to_check, atts_to_check):
+        """
+        Check that the variables in vars_to_check have the attributes in
+        atts_to_check.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset (open)
+
+        Returns
+        -------
+        list of Result objects
         """
 
         results = []
-        # NOTE should it also find 'geospatial` variables?
-        for geo_var in get_geophysical_variables(ds):
-            for attr_tuple in self.check_var_attrs:
+        for var in vars_to_check:
+            for attr_tuple in atts_to_check:
                 results.append(
                     self._has_var_attr(
                         ds,
-                        geo_var,
+                        var,
                         attr_tuple[0], # attribute name
                         attr_tuple[0], # attribute name used as 'concept_name'
                         attr_tuple[1]  # priority level
                     )
                 )
-
         return results
-
 
     def check_platform_variable_cf_role(self, ds):
         """
@@ -616,9 +754,43 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return result_list
 
+    def check_platform_global(self, ds):
+        """
+        The "platform" attribute must be a single string containing
+        no blank characters.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset (open)
+
+        Returns
+        -------
+        Result
+        """
+
+        r = False
+        m = "The global attribute \"platform\" must be a single string " +\
+            "containing no blank characters; it is {}"
+        p = getattr(ds, "platform", None)
+        if p:
+            if re.match(r'^\S+$', p):
+                r = True
+
+        return Result(BaseCheck.HIGH, r, "platform", [m.format(p)])
+
     def check_single_platform(self, ds):
         """
-        Verify that a dataset only has a single platform attribute.
+        Verify that a dataset only has a single platform attribute. If one exists,
+        examine the featureType of the dataset. If the featureType is 
+        [point, timeSeries, profile, trajectory] and cf_role in [timeseries_id,
+        profile_id, trajectory_id] dimensionality of the variable containing
+        cf_role must be 1 as "we only want a single glider/auv/ship"; if
+        featureType in [timeseries_id, trajectory_id], dimensionality of the
+        variable must also be one as  "we only want a single timeSeries aka buoy".
+        If cf_role==profile_id, it can have whatever dimension.
+
+        Gridded model datasets are not required to declare a platform
+        or platform variables.
 
         Args:
             ds (netCDF-4 Dataset): open Dataset object
@@ -627,26 +799,101 @@ class IOOS1_2Check(IOOSNCCheck):
             Result
         """
 
+        results = []
+        glb_platform = getattr(ds, "platform", None)
+
         platform_set = set()
-
-        global_platform = getattr(ds, "platform", None)
-        if global_platform:
-            platform_set.add(global_platform)
-
         for v in ds.get_variables_by_attributes(platform=lambda x: x is not None):
             platform_set.add(v.getncattr("platform"))
 
-        msg = "A dataset may only have one platform; {} found".format(len(platform_set))
-        if len(platform_set) > 1:
-            return Result(BaseCheck.HIGH, False, "platform", [msg])
-        elif len(platform_set) == 0:
-            return Result(BaseCheck.HIGH, False, "platform", ["A dataset must have a global attribute \"platform\""])
-        else:
-            return Result(BaseCheck.HIGH, True, "platform", [msg])
+        num_platforms = len(platform_set)
+        if num_platforms > 1 and glb_platform:
+            msg = "A dataset may only have one platform; {} found".format(len(platform_set))
+            val = False
+            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
 
-    def _check_gts_ingest(self, attr, msg):
+
+        elif ((not glb_platform) and num_platforms > 0):
+            msg = "If platform variables exist, a global attribute \"platform\" must also exist"
+            val = False
+            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+
+        elif num_platforms == 0 and glb_platform:
+            msg = "A dataset with a global \"platform\" attribute must platform have variables"
+            val = False
+            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+
+        elif num_platforms == 0 and (not glb_platform):
+            msg = "Gridded model datasets are not required to declare a platform"
+            val = True
+            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+
+        else: # num_platforms==1 and glb_platform, test the dimensionality
+
+            num_plat_val = True if num_platforms == 1 else False
+
+            feature_type = getattr(ds, "featureType", "").lower()
+            if not feature_type:
+                return results
+
+            # filter out cf_role exists
+            cf_role_vars = ds.get_variables_by_attributes(cf_role=lambda x: x is not None)
+            num_cf_role_vars = len(cf_role_vars)
+            msg = "With a single platform provided, the dimension of the cf_role " +\
+                  "variable {cf_role_var} (cf_role=={cf_role}) should also " +\
+                  "be equal to 1 (it is {dim})"
+
+            for var in cf_role_vars:
+                cf_role = getattr(var, "cf_role")
+                shp = var.shape[0] if len(var.shape) > 0 else 1
+                if (
+                       feature_type in ["point", "timeseries", "profile", "trajectory", "timeseriesprofile", "trajectoryprofile"]
+                       and
+                       cf_role in ["timeseries_id", "profile_id", "trajectory_id"]
+                   ):
+                    if (num_cf_role_vars==1) or (num_cf_role_vars>1 and cf_role!="profile_id"):
+                        # shape must be 1 (or if no length, that's okay too)
+                        _val = shp==1
+                    elif (num_cf_role_vars>1) and (cf_role=="profile_id"):
+                        # can have any dimension if there are more than one cf_role?
+                        _val = True
+
+                    results.append(
+                       Result(
+                           BaseCheck.HIGH,
+                           _val,
+                           "platform variables",
+                           [msg.format(cf_role_var=var.name, cf_role=cf_role, dim=shp)]
+                       )
+                    )
+
+        return results
+
+    def check_platform_vocabulary(self, ds):
         """
-        Helper function for check_gts_ingest().
+        The platform_vocabulary attribute is recommended to be a URL to
+        http://mmisw.org/ont/ioos/platform or
+        http://vocab.nerc.ac.uk/collection/L06/current/. However,
+        it is required to at least be a URL.
+
+        Args:
+            ds (netCDF4.Dataset): open Dataset
+
+        Returns:
+            Result
+        """
+
+        m = "platform_vocabulary must be a valid URL"
+        pvocab = getattr(ds, "platform_vocabulary", "")
+        val = bool(validators.url(pvocab))
+        return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", [m])
+            
+    def _check_var_gts_ingest(self, ds, var, do_ingest, msg):
+        """
+        Helper function for check_gts_ingest(). Check that a given variable
+          - has a valid CF standard name (checked with check_standard_names())
+          - has a QARTOD aggregates variable
+          - has valid units (checked with check_units())
 
         Args:
             attr (?): attribute value
@@ -655,15 +902,21 @@ class IOOS1_2Check(IOOSNCCheck):
             Result
         """
 
-        if (
-            isinstance(attr, str)
-            and
-            ((attr == "true") or (attr == "false"))
-        ):
-            val = True
-        else:
-            val = False
-        return Result(BaseCheck.HIGH, val, "gts_ingest", [msg])
+        val = False
+
+        # should have an ancillary variable with standard_name aggregate_quality_flag
+        avar_val = False
+        anc_vars = getattr(var, "ancillary_variables", "").split(" ")
+        for av in anc_vars:
+            if av in ds.variables:
+                if getattr(ds.variables[av], "standard_name", "") == "aggregate_quality_flag":
+                    avar_val = True
+                    break
+
+        # if variable is flagged for ingest, but no global attr present, error
+        val = True if (avar_val and do_ingest) else False
+
+        return Result(BaseCheck.HIGH, val, "gts_ingest variable", [msg])
 
     def check_gts_ingest(self, ds):
         """
@@ -675,6 +928,12 @@ class IOOS1_2Check(IOOSNCCheck):
         cannot accurately guess applicability of a certain dataset or variable,
         this check simply verifies that if it exists, the value is a string
         denoting "true" or "false".
+
+        Any variables which a user would like ingested must also contain the
+        gts_ingest attribute with a value of true. The variable must:
+          - have a valid CF standard_name attribute (already checked)
+          - have an ancillary variable reqpresenting QARTOD aggregate flags
+          - have a valid udunits units attribute (already checked)
 
         Args:
             ds (netCDF4.Dataset): open Dataset
@@ -691,22 +950,25 @@ class IOOS1_2Check(IOOSNCCheck):
         glb_msg = ("If provided, the global attribute \"gts_ingest\" must be a "
                    "string and its value must be one of \"true\" or \"false\"")
         glb_gts_attr = getattr(ds, "gts_ingest", None)
-        if glb_gts_attr:
-            results.append(self._check_gts_ingest(glb_gts_attr, glb_msg))
+        if glb_gts_attr and (glb_gts_attr=="true" or glb_gts_attr=="false"):
+            do_gts = True if glb_gts_attr == "true" else False
+            results.append(Result(BaseCheck.HIGH, True, "gts_ingest", [glb_msg]))
         else:
+            do_gts = False
             results.append(default_pass_result)
 
         # check variables
-        var_msg = ("If provided, the attribute \"gts_ingest\" of variable \"{v}\" "
-                   "must be a string and its value must be one of "
-                   "\"true\" or \"false\"")
-        for v in ds.variables:
-            _attr = getattr(ds.variables[v], "gts_ingest", None)
-            if _attr:
-                print(_attr)
-                results.append((self._check_gts_ingest(_attr, var_msg.format(v=v))))
-            else:
-                results.append(default_pass_result)
+        var_msg = ("The attribute \"gts_ingest\" of variable \"{v}\" "
+                   " must fulfill the following:\n"
+                   "  - must be a string with value \"true\" or \"false\";\n"
+                   "  - have a valid CF standard_name attribute (already checked);\n"
+                   "  - have an ancillary variable reqpresenting QARTOD aggregate flags;\n"
+                   "  - have a valid udunits units attribute\n"
+                   "The global attribute \"gts_ingest\" "
+                   "must also have a value of \"true\".")
+
+        for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x=="true"):
+            results.append(self._check_var_gts_ingest(ds, v, do_gts, var_msg.format(v=v)))
 
         return results
 
