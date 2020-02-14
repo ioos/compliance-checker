@@ -16,8 +16,11 @@ from collections import defaultdict
 from lxml import etree
 import sys
 import re
+import csv
+from io import StringIO
 from email.utils import parseaddr
 import validators
+import itertools
 
 # Python 3.5+ should work, also have a fallback
 try:
@@ -32,30 +35,63 @@ def get_namespaces():
     ns["ows"] = n.get_namespace("ows110")
     return ns
 
+def csv_splitter(input_string):
+    """
+    csv_splitter(input_string)
+
+    Splits a string in CSV format and returns a flattened list
+
+    Parameters:
+    -----------
+    input_string: str
+        The string to be processed
+
+    Returns:
+    --------
+    list of str
+        A flattened list from the CSV processing contents
+    """
+    csv_contents = csv.reader(StringIO(input_string))
+    return list(itertools.chain.from_iterable(csv_contents))
+
 class ValidationObject(object):
     validator_fail_msg = ''
     expected_type = None
 
+    def __init__(self, split_func=None):
+        if split_func is None:
+            self.split_func = lambda x: [x]
+        else:
+            self.split_func = split_func
+
     def validator_func(self, input_value):
+        """
+        validator_func(self, input_value)
+
+        Function that should validate the result of a given input value
+        """
         raise NotImplementedError
+
 
     def validate(self, input_name, input_value):
         if self.expected_type is not None:
             type_result = self.validate_type(input_name, input_value)
             if not type_result[0]:
                 return type_result
-        validator_result = self.validator_func(input_value)
-        if validator_result:
-            return True, None
-        else:
-            return False, self.validator_fail_msg.format(input_name)
+        validator_stat = True
+        for processed_value in self.split_func(input_value):
+            validator_result = self.validator_func(processed_value)
+            if not validator_result:
+                return False, self.validator_fail_msg.format(input_name)
+        # if all pass, then we're good.
+        return True, None
 
     def validate_type(self, input_name, input_value):
         if not isinstance(input_value, self.expected_type):
             expected_type_fmt = "Attribute {} should be instance of type {}"
             return (False,
-                    expected_type_fmt.format(input_name,
-                                             self.expected_type.__name__))
+                    [expected_type_fmt.format(input_name,
+                                             self.expected_type.__name__)])
         else:
             return True, None
 
@@ -422,18 +458,14 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
                 variable_name=var_name
             )
         )
-    # check if this is a class and subclass of ValidationObject
-    elif isinstance(other, type) and issubclass(other, ValidationObject):
+    # check if this is a subclass of ValidationObject
+    elif isinstance(other, ValidationObject):
         attr_result = maybe_get_global_attr(name, ds)
         if not attr_result[0]:
             res_tup = attr_result
         else:
             check_val = attr_result[1]
-            check_result = other().validate(name, check_val)
-            if check_result[0]:
-                res_tup = True, []
-            else:
-                res_tup = False, [check_result[1]]
+            res_tup = other.validate(name, check_val)
         ret_val.append(
             Result(
                 priority,
