@@ -688,6 +688,30 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return result_list
 
+    def check_platform_global(self, ds):
+        """
+        The "platform" attribute must be a single string containing
+        no blank characters.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset (open)
+
+        Returns
+        -------
+        Result
+        """
+
+        r = False
+        m = "The global attribute \"platform\" must be a single string " +\
+            "containing no blank characters; it is {}"
+        p = getattr(ds, "platform", None)
+        if p:
+            if re.match(r'\w+(?!\s)$', p):
+                r = True
+
+        return Result(BaseCheck.HIGH, r, "platform", [m.format(p)])
+
     def check_single_platform(self, ds):
         """
         Verify that a dataset only has a single platform attribute. If one exists,

@@ -576,6 +576,24 @@ class TestIOOS1_2(BaseTestCase):
         score, out_of = results[0].value
         self.assertEqual(score, out_of)
 
+    def test_check_platform_global(self):
+        ds = MockTimeSeries() # time, lat, lon, depth 
+
+        # no global attr, fail
+        self.assertFalse(self.ioos.check_platform_global(ds).value)
+
+        # bad global attr, fail
+        ds.setncattr("platform", "bad value")
+        self.assertFalse(self.ioos.check_platform_global(ds).value)
+
+        # another bad value
+        ds.setncattr("platform", " bad")
+        self.assertFalse(self.ioos.check_platform_global(ds).value)
+
+        # good value
+        ds.setncattr("platform", "single_string")
+        self.assertTrue(self.ioos.check_platform_global(ds).value)
+
     def test_check_single_platform(self):
 
         ds = MockTimeSeries() # time, lat, lon, depth 
