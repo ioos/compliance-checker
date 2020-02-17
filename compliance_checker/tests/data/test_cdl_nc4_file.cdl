@@ -1,0 +1,40 @@
+netcdf example_with_netcdf4_feature {
+dimensions:
+	time = UNLIMITED ; // (2 currently)
+	z = 3 ;
+	lat = 10 ;
+	lon = 10 ;
+variables:
+	float time(time) ;
+		time:units = "seconds since 2000-06-21 00:00:00" ;
+		time:axis = "T" ;
+		time:standard_name = "time" ;
+	float tas(time, z, lat, lon) ;
+		tas:_FillValue = -999.f ;
+		tas:standard_name = "air_temperature" ;
+		tas:units = "degree_C" ;
+	int64 mask(time, z, lat, lon) ;
+		mask:_FillValue = -999LL ;
+		mask:long_name = "a mask" ;
+		mask:units = "1" ;
+	double z(z) ;
+		z:units = "m" ;
+		z:axis = "Z" ;
+		z:standard_name = "height" ;
+		z:positive = "up" ;
+	double lon(lon) ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+		lon:axis = "X" ;
+	double lat(lat) ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+		lat:axis = "Y" ;
+
+// global attributes:
+		:title = "A test file" ;
+		:history = "2020-02-04T18:00 manually create by Daniel Neumann, DKRZ" ;
+		:global_att_of_type_int = 2 ;
+		:global_att_of_type_int64 = 2LL ;
+		:Conventions = "CF-1.7" ;
+}
