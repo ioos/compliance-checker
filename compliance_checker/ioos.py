@@ -434,7 +434,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'id',
             ('infoUrl', base.UrlValidator()),
             'license',
-            ('naming_authority', NamingAuthorityValidator),
+            ('naming_authority', NamingAuthorityValidator()),
             'platform',
             'platform_name',
             'publisher_country',
