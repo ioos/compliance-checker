@@ -465,12 +465,13 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
         else:
             check_val = attr_result[1]
             res_tup = other.validate(name, check_val)
+            msgs = [] if res_tup[1] is None else [res_tup[1]]
         ret_val.append(
             Result(
                 priority,
                 res_tup[0],
                 name,
-                res_tup[1]
+                msgs
             )
         )
     elif isinstance(other, re_pattern_type):
