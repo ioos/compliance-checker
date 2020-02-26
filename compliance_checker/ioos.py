@@ -462,7 +462,6 @@ class IOOS1_2Check(IOOSNCCheck):
             #'creator_type',
             'institution',
             'instrument',
-            'ioos_ingest',
             'keywords',
             'platform_id',
             'publisher_address',
