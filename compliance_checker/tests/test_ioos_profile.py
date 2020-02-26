@@ -593,23 +593,6 @@ class TestIOOS1_2(BaseTestCase):
         score, out_of = results[0].value
         self.assertEqual(score, out_of)
 
-    def test_check_platform_global(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
-
-        # no global attr, fail
-        self.assertFalse(self.ioos.check_platform_global(ds).value)
-
-        # bad global attr, fail
-        ds.setncattr("platform", "bad value")
-        self.assertFalse(self.ioos.check_platform_global(ds).value)
-
-        # another bad value
-        ds.setncattr("platform", " bad")
-        self.assertFalse(self.ioos.check_platform_global(ds).value)
-
-        # good value
-        ds.setncattr("platform", "single_string")
-        self.assertTrue(self.ioos.check_platform_global(ds).value)
 
     def test_check_single_platform(self):
 
@@ -628,7 +611,11 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("featureType", "profile")
         ds.createDimension("profile", 1)
         temp = ds.createVariable("temp", "d", ("time"))
+        ds.setncattr("platform", "buoy")
         temp.setncattr("platform", "platform_var")
+        ds.setncattr("platform_name", "A Platform")
+        ds.setncattr("platform_id", "8675309")
+        ds.setncattr("platform_vocabulary", "https://mmisw.org/ont/ioos/platform")
         plat = ds.createVariable("platform_var", np.byte)
         cf_role_var = ds.createVariable("cf_role_var", np.byte, ("profile",))
         cf_role_var.setncattr("cf_role", "timeseries_id")
@@ -661,10 +648,10 @@ class TestIOOS1_2(BaseTestCase):
     def test_check_platform_vocabulary(self):
         ds = MockTimeSeries() # time, lat, lon, depth 
         ds.setncattr("platform_vocabulary", "http://google.com")
-        self.assertTrue(self.ioos.check_platform_vocabulary(ds).value)
+        self.assertTrue(self.ioos._check_platform_vocabulary(ds).value)
 
         ds.setncattr("platform_vocabulary", "bad")
-        self.assertFalse(self.ioos.check_platform_vocabulary(ds).value)
+        self.assertFalse(self.ioos._check_platform_vocabulary(ds).value)
 
     def test_check_qartod_variables_references(self):
         ds = MockTimeSeries() # time, lat, lon, depth
@@ -708,3 +695,28 @@ class TestIOOS1_2(BaseTestCase):
         self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
         ds.setncattr("ioos_ingest", "False")
         self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
+
+    def test_check_platform_is_str(self):
+        a = "some_string"
+        self.assertTrue(self.ioos._check_platform_is_str(a).value)
+
+        a = 5
+        self.assertFalse(self.ioos._check_platform_is_str(a).value)
+
+        a = "bad string"
+        self.assertFalse(self.ioos._check_platform_is_str(a).value)
+
+    def test_check_platform_id(self):
+        ds = MockTimeSeries()
+
+        # no attr, pass
+        self.assertTrue(self.ioos.check_platform_id(ds).value)
+
+        # attr, str, pass
+        ds.setncattr("platform_id", "8675309")
+        self.assertTrue(self.ioos.check_platform_id(ds).value)
+
+        # attr, not str, fail
+        ds.setncattr("platform_id", 25)
+        self.assertFalse(self.ioos.check_platform_id(ds).value)
+

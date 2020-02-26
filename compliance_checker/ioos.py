@@ -435,8 +435,9 @@ class IOOS1_2Check(IOOSNCCheck):
             ('infoUrl', base.UrlValidator()),
             'license',
             ('naming_authority', NamingAuthorityValidator()),
-            'platform',
-            'platform_name',
+            # checked in check_single_platform
+            #'platform',
+            #'platform_name',
             'publisher_country',
             ('publisher_email', base.EmailValidator()),
             'publisher_institution',
@@ -466,7 +467,8 @@ class IOOS1_2Check(IOOSNCCheck):
             'instrument',
             'ioos_ingest',
             'keywords',
-            'platform_id',
+            # checked in check_platform_id
+            #'platform_id',
             'publisher_address',
             'publisher_city',
             'publisher_name',
@@ -754,10 +756,10 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return result_list
 
-    def check_platform_global(self, ds):
+    def check_platform_id(self, ds):
         """
-        The "platform" attribute must be a single string containing
-        no blank characters.
+        The "platform_id" attribute should be present if the "platform"
+        attribute is also present.
 
         Parameters
         ----------
@@ -768,13 +770,36 @@ class IOOS1_2Check(IOOSNCCheck):
         Result
         """
 
-        r = False
-        m = "The global attribute \"platform\" must be a single string " +\
-            "containing no blank characters; it is {}"
-        p = getattr(ds, "platform", None)
-        if p:
-            if re.match(r'^\S+$', p):
-                r = True
+        r = True
+        plid = getattr(ds, "platform_id", None)
+
+        if plid:
+           if not isinstance(plid, str):
+                r = False
+
+        m = "The \"platform_id\" attribute is {} of type {}; " +\
+            "it must be a string"
+        return Result(BaseCheck.MEDIUM, r, "platform_id", [m.format(plid, type(plid))])
+
+    def _check_platform_is_str(self, p):
+        """
+        Helper method to check if the platform attribute is a string
+        and contains no whitespace.
+
+        Parameters
+        ----------
+        p: unknown type
+
+        Returns
+        -------
+        Result
+        """
+
+        m = "Global attribute \"platform\" must be a string containing no spaces; " +\
+            "it is \"{}\""
+        r = True
+        if not (isinstance(p, str) and re.match(r'^\S+$', p)):
+            r = False
 
         return Result(BaseCheck.HIGH, r, "platform", [m.format(p)])
 
@@ -812,24 +837,40 @@ class IOOS1_2Check(IOOSNCCheck):
             val = False
             results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
 
-
         elif ((not glb_platform) and num_platforms > 0):
             msg = "If platform variables exist, a global attribute \"platform\" must also exist"
             val = False
             results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
 
         elif num_platforms == 0 and glb_platform:
-            msg = "A dataset with a global \"platform\" attribute must platform have variables"
+            msg = "A dataset with a global \"platform\" attribute must have platform variables"
             val = False
             results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
 
         elif num_platforms == 0 and (not glb_platform):
+            # can't determine if the data should actually have a platform or not,
+            # so this must result in a pass
             msg = "Gridded model datasets are not required to declare a platform"
             val = True
             results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
 
-        else: # num_platforms==1 and glb_platform, test the dimensionality
+        else: # num_platforms==1 and glb_platform
 
+            # check the platform is a string and has no whitespace
+            results.append(self._check_platform_is_str(glb_platform))
+
+            # check the platform_name attribute exists and its value is a string
+            pname = getattr(ds, "platform_name", None)
+            if not (pname and isinstance(pname, str)):
+                results.append(Result(
+                    BaseCheck.HIGH, False, "platform_name",
+                    ["platform_name must be a string"]
+                ))
+
+            # check the platform_vocabulary exists and is valid
+            results.append(self._check_platform_vocabulary(ds))
+
+            # test the dimensionality
             num_plat_val = True if num_platforms == 1 else False
 
             feature_type = getattr(ds, "featureType", "").lower()
@@ -839,9 +880,10 @@ class IOOS1_2Check(IOOSNCCheck):
             # filter out cf_role exists
             cf_role_vars = ds.get_variables_by_attributes(cf_role=lambda x: x is not None)
             num_cf_role_vars = len(cf_role_vars)
-            msg = "With a single platform provided, the dimension of the cf_role " +\
-                  "variable {cf_role_var} (cf_role=={cf_role}) should also " +\
-                  "be equal to 1 (it is {dim})"
+            msg = "The IOOS metadata profile restricts datasets to a single CF " +\
+                  "DSG platform per dataset.\n  For {featureType} featureType, " +\
+                  "the dimensions of the cf_role variable \"{cf_role_var}\"\n  " +\
+                  "(cf_role=={cf_role}) should be equal to 1 (it is {dim})"
 
             for var in cf_role_vars:
                 cf_role = getattr(var, "cf_role")
@@ -863,13 +905,13 @@ class IOOS1_2Check(IOOSNCCheck):
                            BaseCheck.HIGH,
                            _val,
                            "platform variables",
-                           [msg.format(cf_role_var=var.name, cf_role=cf_role, dim=shp)]
+                           [msg.format(cf_role_var=var.name, cf_role=cf_role, dim=shp, featureType=feature_type)]
                        )
                     )
 
         return results
 
-    def check_platform_vocabulary(self, ds):
+    def _check_platform_vocabulary(self, ds):
         """
         The platform_vocabulary attribute is recommended to be a URL to
         http://mmisw.org/ont/ioos/platform or
@@ -877,15 +919,14 @@ class IOOS1_2Check(IOOSNCCheck):
         it is required to at least be a URL.
 
         Args:
-            ds (netCDF4.Dataset): open Dataset
-
+            ds: netCDF4.Dataset (open)
         Returns:
             Result
         """
 
         m = "platform_vocabulary must be a valid URL"
-        pvocab = getattr(ds, "platform_vocabulary", "")
-        val = bool(validators.url(pvocab))
+        v = getattr(ds, "platform_vocabulary", "")
+        val = bool(validators.url(v))
         return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", [m])
             
     def _check_var_gts_ingest(self, ds, var, do_ingest, msg):
