@@ -962,7 +962,7 @@ class IOOS1_2Check(IOOSNCCheck):
                    " must fulfill the following:\n"
                    "  - must be a string with value \"true\" or \"false\";\n"
                    "  - have a valid CF standard_name attribute (already checked);\n"
-                   "  - have an ancillary variable reqpresenting QARTOD aggregate flags;\n"
+                   "  - have an ancillary variable representing QARTOD aggregate flags;\n"
                    "  - have a valid udunits units attribute\n"
                    "The global attribute \"gts_ingest\" "
                    "must also have a value of \"true\".")
