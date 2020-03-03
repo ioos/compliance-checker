@@ -385,6 +385,12 @@ class TestIOOS1_2(BaseTestCase):
         self.assertTrue(results[0].value)
         self.assertTrue(results[1].value)
 
+        ds.setncattr("contributor_role", "resourceProvider")
+        ds.setncattr("contributor_role_vocabulary", "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode")
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        self.assertTrue(results[0].value)
+        self.assertTrue(results[1].value)
+
     def test_check_creator_and_publisher_type(self):
         """
         Checks the creator_type and publisher_type global attributes with
