@@ -1,15 +1,16 @@
+import pkg_resources
 from functools import lru_cache
 
 from netCDF4 import Dataset
 
-from ._version import get_versions
+try:
+    __version__ = pkg_resources.get_distribution("compliance_checker").version
+except Exception:
+    __version__ = "unknown"
 
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO, Generator
-
-__version__ = get_versions()["version"]
-del get_versions
 
 
 class MemoizedDataset(Dataset):
