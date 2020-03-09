@@ -777,8 +777,8 @@ class IOOS1_2Check(IOOSNCCheck):
            if not isinstance(plid, str):
                 r = False
 
-        m = "The \"platform_id\" attribute is {} of type {}; " +\
-            "it must be a string"
+        m = ("The \"platform_id\" attribute is {} of type {}; "
+            "it must be a string")
         return Result(BaseCheck.MEDIUM, r, "platform_id", [m.format(plid, type(plid))])
 
     def _check_platform_is_str(self, p):
@@ -795,13 +795,10 @@ class IOOS1_2Check(IOOSNCCheck):
         Result
         """
 
-        m = "Global attribute \"platform\" must be a string containing no spaces; " +\
-            "it is \"{}\""
-        r = True
-        if not (isinstance(p, str) and re.match(r'^\S+$', p)):
-            r = False
+        m = ("Global attribute \"platform\" must be a string containing no spaces; "
+            "it is \"{}\"")
 
-        return Result(BaseCheck.HIGH, r, "platform", [m.format(p)])
+        return Result(BaseCheck.HIGH, (isinstance(p, str) and re.match(r'^\S+$', p)), "platform", [m.format(p)])
 
     def check_single_platform(self, ds):
         """
