@@ -570,7 +570,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
         Check the dataset has global attributes contributor_role and
         contributor_role_vocabulary. It is recommended to come from
-        one of NERC or GEOIDE.
+        one of NERC or NOAA-NCEI.
 
         Parameters
         ----------
@@ -581,7 +581,7 @@ class IOOS1_2Check(IOOSNCCheck):
         list of Result objects
         """
 
-        # NOTE the URL to GEOIDE is invalid (400), so this only tests
+        # NOTE the URL to NOAA-NCEI is invalid (400), so this only tests
         # the NERC specification
 
         role = getattr(ds, "contributor_role", None)
@@ -590,38 +590,38 @@ class IOOS1_2Check(IOOSNCCheck):
         role_val = False
         vocb_val = False
 
-        role_msg = "contributor_role should be from NERC or GEOIDE"
-        vocb_msg = "contributor_role_vocabulary should be one of NERC or GEOIDE"
+        role_msg = "contributor_role should be from NERC or NOAA-NCEI"
+        vocb_msg = "contributor_role_vocabulary should be one of NERC or NOAA-NCEI"
 
         if role:
-            if role in [
-                "author",
-                "coAuthor",
-                "collaborator",
-                "contributor",
-                "custodian",
-                "distributor",
-                "editor",
-                "funder",
-                "mediator",
-                "originator",
-                "owner",
-                "pointOfContact",
+            if role in [ # each in both vocabularies
+                "author",               
+                "coAuthor",             
+                "collaborator",         
+                "contributor",          
+                "custodian",            
+                "distributor",          
+                "editor",               
+                "funder",               
+                "mediator",             
+                "originator",           
+                "owner",                
+                "pointOfContact",       
                 "principalInvestigator",
-                "processor",
-                "publisher",
-                "resourceProvider",
-                "rightsHolder",
-                "sponsor",
-                "stakeholder",
-                "user"
+                "processor",            
+                "publisher",            
+                "resourceProvider",     
+                "rightsHolder",         
+                "sponsor",              
+                "stakeholder",          
+                "user"                  
             ]:
                 role_val = True
 
         if vocb:
             if vocb in [
                 "http://vocab.nerc.ac.uk/collection/G04/current/",
-                "https://geo-ide.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode"
+                "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode"
             ]:
                 vocb_val = True
 
