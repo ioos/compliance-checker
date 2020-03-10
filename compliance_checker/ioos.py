@@ -594,27 +594,27 @@ class IOOS1_2Check(IOOSNCCheck):
         vocb_msg = "contributor_role_vocabulary should be one of NERC or NOAA-NCEI"
 
         if role:
-            if role in [
-                "author",                # both
-                "coAuthor",              # both
-                "collaborator",          # both
-                "contributor",           # both
-                "custodian",             # both
-                "distributor",           # both
-                "editor",                # both
-                "funder",                # both
-                "mediator",              # both
-                "originator",            # both
-                "owner",                 # both
-                "pointOfContact",        # both
-                "principalInvestigator", # both
-                "processor",             # both
-                "publisher",             # both
-                "resourceProvider",      # both
-                "rightsHolder",          # both
-                "sponsor",               # both
-                "stakeholder",           # both
-                "user"                   # both
+            if role in [ # each in both vocabularies
+                "author",               
+                "coAuthor",             
+                "collaborator",         
+                "contributor",          
+                "custodian",            
+                "distributor",          
+                "editor",               
+                "funder",               
+                "mediator",             
+                "originator",           
+                "owner",                
+                "pointOfContact",       
+                "principalInvestigator",
+                "processor",            
+                "publisher",            
+                "resourceProvider",     
+                "rightsHolder",         
+                "sponsor",              
+                "stakeholder",          
+                "user"                  
             ]:
                 role_val = True
 
