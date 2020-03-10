@@ -832,24 +832,24 @@ class IOOS1_2Check(IOOSNCCheck):
         if num_platforms > 1 and glb_platform:
             msg = "A dataset may only have one platform; {} found".format(len(platform_set))
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", [msg] if not val else []))
 
         elif ((not glb_platform) and num_platforms > 0):
             msg = "If platform variables exist, a global attribute \"platform\" must also exist"
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", [msg] if not val else []))
 
         elif num_platforms == 0 and glb_platform:
             msg = "A dataset with a global \"platform\" attribute must have platform variables"
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", [msg] if not val else []))
 
         elif num_platforms == 0 and (not glb_platform):
             # can't determine if the data should actually have a platform or not,
             # so this must result in a pass
             msg = "Gridded model datasets are not required to declare a platform"
             val = True
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", [msg] if not val else []))
 
         else: # num_platforms==1 and glb_platform
 
@@ -902,7 +902,14 @@ class IOOS1_2Check(IOOSNCCheck):
                            BaseCheck.HIGH,
                            _val,
                            "platform variables",
-                           [msg.format(cf_role_var=var.name, cf_role=cf_role, dim=shp, featureType=feature_type)]
+                           [
+                               msg.format(
+                                   cf_role_var=var.name,
+                                   cf_role=cf_role,
+                                   dim=shp,
+                                   featureType=feature_type
+                               )
+                           ] if not _val else []
                        )
                     )
 
