@@ -466,7 +466,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'instrument',
             'ioos_ingest',
             'keywords',
-            'platform_id',
+            ('platform_id', re.compile(r"^\w+$")), # alphanumeric only
             'publisher_address',
             'publisher_city',
             'publisher_name',
