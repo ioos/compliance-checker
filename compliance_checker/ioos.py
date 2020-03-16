@@ -918,7 +918,53 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return Result(BaseCheck.HIGH, val, "gts_ingest variable", [msg])
 
-    def check_gts_ingest(self, ds):
+    def _check_gts_ingest_val(self, val):
+        """
+        Check that `val` is a str and is equal to "true" or "false"
+
+        Parmeters
+        ---------
+        val (?): value to check
+
+        Returns
+        -------
+        bool
+        """
+
+        r = True
+        if isinstance(val, str):
+            if not (val.lower()=="true" or val.lower()=="false"):
+                r = False
+
+        elif (not isinstance(val, str)):
+            r = False
+
+        return r
+
+
+    def check_gts_ingest_global(self, ds):
+        """
+        Check if a dataset has the global attribute "gts_ingest" and that
+        it matches "true" or "false". This attribute is "required, if applicable".
+
+        Parameters
+        ----------
+        ds (netCDF4.Dataset): open dataset
+
+        Returns
+        -------
+        Result
+        """
+
+        r = True # default
+        gts = getattr(ds, "gts_ingest", None)
+
+        if gts:
+            r = self._check_gts_ingest_val(gts)
+
+        return Result(BaseCheck.HIGH, r, "gts_ingest", ["gts_ingest must be a string \"true\" or \"false\""])
+
+    def check_gts_ingest_requirements(self, ds):
         """
         Check if a dataset has a global gts_ingest attribute and if any
         variables also have the gts_ingest attribute.
