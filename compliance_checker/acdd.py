@@ -6,7 +6,7 @@ project for the verification and scoring of attributes for datasets.
 '''
 
 import numpy as np
-from netCDF4 import num2date
+from cftime import num2pydate
 from datetime import timedelta
 from compliance_checker.base import (BaseCheck, BaseNCCheck, check_has,
                                      Result, ratable_result)
@@ -536,9 +536,9 @@ class ACDDBaseCheck(BaseCheck):
             # subtraction from t_min/t_max will assume that a naive timestamp is
             # in the same time zone and cause erroneous results.
             # Pendulum uses UTC by default, but we are being explicit here
-            time0 = pendulum.instance(num2date(ds.variables[timevar][0],
+            time0 = pendulum.instance(num2pydate(ds.variables[timevar][0],
                                       ds.variables[timevar].units), 'UTC')
-            time1 = pendulum.instance(num2date(ds.variables[timevar][-1],
+            time1 = pendulum.instance(num2pydate(ds.variables[timevar][-1],
                                       ds.variables[timevar].units), 'UTC')
         except:
             return Result(BaseCheck.MEDIUM,
