@@ -1,3 +1,4 @@
+cftime>=1.1.0
 OWSLib>=0.8.3
 lxml>=3.2.1
 cf-units>=2
