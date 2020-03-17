@@ -1029,9 +1029,9 @@ class IOOS1_2Check(IOOSNCCheck):
 
             for vtup in var_passed_ingest_reqs:
                 if vtup[1]:
-                    var_passed_ingest_msg += "\n - {}".format(v)
+                    var_passed_ingest_msg += "\n - {}".format(vtup[0])
                 else:
-                    var_failed_ingest_msg += "\n - {}".format(v)
+                    var_failed_ingest_msg += "\n - {}".format(vtup[0])
                     all_passed_ingest_reqs = False
     
             # join messages together
