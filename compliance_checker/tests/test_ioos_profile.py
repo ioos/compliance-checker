@@ -321,7 +321,7 @@ class TestIOOS1_2(BaseTestCase):
         temp = ds.createVariable("temp", np.float64, fill_value=9999999999.) # _FillValue
         temp.setncattr("missing_value", 9999999999.)
         temp.setncattr("standard_name", "sea_surface_temperature")
-        temp.setncattr("standard_name_uri", "http://cfconventions.org/Data/cf-standard-names/64/build/cf-standard-name-table.html")
+        temp.setncattr("standard_name_url", "http://cfconventions.org/Data/cf-standard-names/64/build/cf-standard-name-table.html")
         temp.setncattr("units", "degree_C")
         temp.setncattr("platform", "myPlatform")
 
@@ -344,7 +344,7 @@ class TestIOOS1_2(BaseTestCase):
         ds = MockTimeSeries(default_fill_value=9999999999.) # time, lat, lon, depth 
 
         ds.variables["time"].setncattr("standard_name", "time")
-        ds.variables["time"].setncattr("standard_name_uri", "time")
+        ds.variables["time"].setncattr("standard_name_url", "http://cfconventions.org/Data/cf-standard-names/64/build/cf-standard-name-table.html")
         ds.variables["time"].setncattr("units", "hours since 1970-01-01T00:00:00")
         ds.variables["time"].setncattr("missing_value", 9999999999.)
 

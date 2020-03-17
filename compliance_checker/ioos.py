@@ -412,7 +412,7 @@ class IOOS1_2Check(IOOSNCCheck):
 
         # geophysical variables must have the following attrs:
         self.geophys_check_var_attrs = self._default_check_var_attrs.union(set([
-            ("standard_name_uri", BaseCheck.MEDIUM),
+            ("standard_name_url", BaseCheck.MEDIUM),
             #( "platform", BaseCheck.HIGH) # checked under check_single_platform()
             #( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
             #( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest() 
