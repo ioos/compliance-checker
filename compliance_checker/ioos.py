@@ -1062,7 +1062,6 @@ class IOOS1_2Check(IOOSNCCheck):
            if not (
                isinstance(code, str) and
                (
-                   (code.isnumeric() and (len(code)==5 or len(code)==7)) or
                    re.search(r"^(?:[a-zA-Z0-9]{5}|[0-9]{7})$", code)
                )
            ):
