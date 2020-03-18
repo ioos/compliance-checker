@@ -359,7 +359,7 @@ class IOOS1_2_ConventionsValidator(base.RegexValidator):
     validator_fail_msg = "{} must contain the string \"IOOS 1.2\""
 
 class IOOS1_2_PlatformIDValidator(base.RegexValidator):
-    validator_regex = r"^\w+$"
+    validator_regex = r"^[a-zA-Z0-9]+$"
     validator_fail_msg = "{} must be alphanumeric"
 
 class NamingAuthorityValidator(base.UrlValidator):
