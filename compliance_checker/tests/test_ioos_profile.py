@@ -419,40 +419,68 @@ class TestIOOS1_2(BaseTestCase):
         result_list = self.ioos.check_creator_and_publisher_type(ds)
         self.assertTrue(all(res.value for res in result_list))
 
-    def test_check_gts_ingest(self):
+    def test_check_gts_ingest_global(self):
         ds = MockTimeSeries() # time, lat, lon, depth
 
-        # no gts_ingest, should pass
-        results = self.ioos.check_gts_ingest(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        # no gts_ingest_requirements, should pass
+        result = self.ioos.check_gts_ingest_global(ds)
+        self.assertTrue(result.value)
 
-        # global
+        # passing value
         ds.setncattr("gts_ingest", "true")
-        results = self.ioos.check_gts_ingest(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        result = self.ioos.check_gts_ingest_global(ds)
+        self.assertTrue(result.value)
+
+        ds.setncattr("gts_ingest", "false")
+        result = self.ioos.check_gts_ingest_global(ds)
+        self.assertTrue(result.value)
+
+        ds.setncattr("gts_ingest", "notgood")
+        result = self.ioos.check_gts_ingest_global(ds)
+        self.assertFalse(result.value)
+
+    def test_check_gts_ingest_requirements(self):
+        ds = MockTimeSeries() # time, lat, lon, depth
+
+        # no gts_ingest_requirements, should pass
+        result = self.ioos.check_gts_ingest_requirements(ds)
+        self.assertTrue(result.value)
+
+        # flag for ingest, no variables flagged - default pass
+        ds.setncattr("gts_ingest", "true")
+        result = self.ioos.check_gts_ingest_requirements(ds)
+        self.assertTrue(result.value)
 
         # give one variable the gts_ingest attribute
+        # no standard_name or ancillary vars, should fail
+        ds.variables["time"].setncattr("gts_ingest", "true")
+        result = self.ioos.check_gts_ingest_requirements(ds)
+        self.assertFalse(result.value)
+
         # no ancillary vars, should fail
         ds.variables["time"].setncattr("gts_ingest", "true")
-        results = self.ioos.check_gts_ingest(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        ds.variables["time"].setncattr("standard_name", "time")
+        result = self.ioos.check_gts_ingest_requirements(ds)
+        self.assertFalse(result.value)
 
         # set ancillary var with bad standard name
         tmp = ds.createVariable("tmp", np.byte, ("time",))
         tmp.setncattr("standard_name", "bad")
         ds.variables["time"].setncattr("ancillary_variables", "tmp")
-        results = self.ioos.check_gts_ingest(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        result = self.ioos.check_gts_ingest_requirements(ds)
+        self.assertFalse(result.value)
 
-         # good ancillary var standard name
+        # good ancillary var standard name, time units are bad
         tmp.setncattr("standard_name", "aggregate_quality_flag")
-        results = self.ioos.check_gts_ingest(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        ds.variables["time"].setncattr("units", "bad since bad")
+        result = self.ioos.check_gts_ingest_requirements(ds)
+        self.assertFalse(result.value)
+
+        # good ancillary var stdname, good units, pass
+        tmp.setncattr("standard_name", "aggregate_quality_flag")
+        ds.variables["time"].setncattr("units", "seconds since 1970-01-01T00:00:00Z")
+        result = self.ioos.check_gts_ingest_requirements(ds)
+        self.assertTrue(result.value)
 
     def test_check_instrument_variables(self):
 
