@@ -1102,9 +1102,16 @@ class IOOS1_2Check(IOOSNCCheck):
 
     def check_wmo_platform_code(self, ds):
         """
-        If a WMO Platform Code is given as a global variable, check that it is
-        well-formed. According to the WMO, valid codes are a numeric string
-        comprised of 5 or 7 characters.
+        Per the spec:
+
+        "The WMO identifier for the platform used to measure the data. This
+        identifier can be any of the following types:
+          - WMO ID for buoys (numeric, 5 digits)
+          - WMO ID for gliders (numeric, 7 digits)
+          - NWS ID (alphanumeric, 5 digits)"
+
+        This attribute is "required, if applicable" -- a warning message will
+        only show up if the attribute is present and does not conform.
 
         Args:
             ds (netCDF4.Dataset): open Dataset
@@ -1115,14 +1122,16 @@ class IOOS1_2Check(IOOSNCCheck):
 
         valid = True
         ctxt = "wmo_platform_code"
-        msg = "The wmo_platform_code must be a numeric string of 5 or 7 characters"
+        msg = ("The wmo_platform_code must be an alphanumeric string of 5 "
+               "characters or a numeric string of 7 characters")
 
         code = getattr(ds, "wmo_platform_code", None)
         if code:
            if not (
                isinstance(code, str) and
-               code.isnumeric() and
-               (5 <= len(code) <= 7)
+               (
+                   re.search(r"^(?:[a-zA-Z0-9]{5}|[0-9]{7})$", code)
+               )
            ):
                valid = False
 

@@ -536,13 +536,18 @@ class TestIOOS1_2(BaseTestCase):
         result = self.ioos.check_wmo_platform_code(ds)
         self.assertTrue(result.value)
 
-        # non-numeric, fail
+        # alphanumeric, valid
         ds.setncattr("wmo_platform_code", "abcd1")
         result = self.ioos.check_wmo_platform_code(ds)
-        self.assertFalse(result.value)
+        self.assertTrue(result.value)
 
         # invalid length, fail
         ds.setncattr("wmo_platform_code", "123")
+        result = self.ioos.check_wmo_platform_code(ds)
+        self.assertFalse(result.value)
+
+        # alphanumeric len 7, fail
+        ds.setncattr("wmo_platform_code", "1a2b3c7")
         result = self.ioos.check_wmo_platform_code(ds)
         self.assertFalse(result.value)
 
