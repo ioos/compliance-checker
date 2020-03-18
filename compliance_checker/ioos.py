@@ -359,6 +359,10 @@ class IOOS1_2_ConventionsValidator(base.RegexValidator):
     validator_regex = r"\bIOOS-1.2\b"
     validator_fail_msg = "{} must contain the string \"IOOS 1.2\""
 
+class IOOS1_2_PlatformIDValidator(base.RegexValidator):
+    validator_regex = r"^[a-zA-Z0-9]+$"
+    validator_fail_msg = "{} must be alphanumeric"
+
 class NamingAuthorityValidator(base.UrlValidator):
     """
     Class to check for URL or reversed DNS strings contained within
@@ -464,7 +468,7 @@ class IOOS1_2Check(IOOSNCCheck):
             'institution',
             'instrument',
             'keywords',
-            'platform_id',
+            ('platform_id', IOOS1_2_PlatformIDValidator()), # alphanumeric only
             'publisher_address',
             'publisher_city',
             'publisher_name',
