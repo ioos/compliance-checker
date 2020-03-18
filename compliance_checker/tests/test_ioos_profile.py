@@ -759,10 +759,18 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("ioos_ingest", "false")
         self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
 
-        # value anything but false
+        # value true
         ds.setncattr("ioos_ingest", "true")
+        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+
+        # case insensitive
+        ds.setncattr("ioos_ingest", "True")
+        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+        ds.setncattr("ioos_ingest", "False")
+        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+
+        # anything else fails
+        ds.setncattr("ioos_ingest", "badval")
         self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
         ds.setncattr("ioos_ingest", 0)
-        self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
-        ds.setncattr("ioos_ingest", "False")
         self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
