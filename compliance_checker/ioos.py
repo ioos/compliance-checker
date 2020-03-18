@@ -902,15 +902,7 @@ class IOOS1_2Check(IOOSNCCheck):
         bool
         """
 
-        r = True
-        if isinstance(val, str):
-            if not (val.lower()=="true" or val.lower()=="false"):
-                r = False
-
-        elif (not isinstance(val, str)):
-            r = False
-
-        return r
+        return isinstance(val, str) and val.lower() in {"true", "false"}
 
 
     def check_gts_ingest_global(self, ds):
@@ -1027,11 +1019,11 @@ class IOOS1_2Check(IOOSNCCheck):
             for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x=="true"):
                 var_passed_ingest_reqs.add((v.name, self._var_qualifies_for_gts_ingest(ds, v)))
 
-            for vtup in var_passed_ingest_reqs:
-                if vtup[1]:
-                    var_passed_ingest_msg += "\n - {}".format(vtup[0])
+            for var_name, pass_result in var_passed_ingest_reqs:
+                if pass_result:
+                    var_passed_ingest_msg += "\n - {}".format(var_name)
                 else:
-                    var_failed_ingest_msg += "\n - {}".format(vtup[0])
+                    var_failed_ingest_msg += "\n - {}".format(var_name)
                     all_passed_ingest_reqs = False
     
             # join messages together
