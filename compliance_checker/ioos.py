@@ -451,8 +451,6 @@ class IOOS1_2Check(IOOSNCCheck):
         self.rec_atts = [
             ('contributor_email', base.EmailValidator()),
             'contributor_name',
-            'contributor_role',
-            'contributor_role_vocabulary',
             ('contributor_url', base.UrlValidator(base.csv_splitter)),
             'creator_address',
             'creator_city',
@@ -464,7 +462,6 @@ class IOOS1_2Check(IOOSNCCheck):
             #'creator_type',
             'institution',
             'instrument',
-            'ioos_ingest',
             'keywords',
             'platform_id',
             'publisher_address',
