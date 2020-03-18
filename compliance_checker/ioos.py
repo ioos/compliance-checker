@@ -565,8 +565,11 @@ class IOOS1_2Check(IOOSNCCheck):
         m = ("To disallow harvest of this dataset to IOOS national products, "
              "global attribute \"ioos_ingest\" must be a string with value \"false\"")
         igst = getattr(ds, "ioos_ingest", None)
-        if igst is not None:
-            if igst not in ("true", "false"):
+        if igst is not None: # if not supplied, return default pass
+            if isinstance(igst, str):
+                if igst.lower() not in ("true", "false"):
+                    r = False
+            else:
                 r = False
 
         return Result(BaseCheck.MEDIUM, r, "ioos_ingest", [m])
