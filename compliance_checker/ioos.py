@@ -11,6 +11,7 @@ from compliance_checker.cfutil import (get_geophysical_variables,
                                        get_instrument_variables,
                                        get_coordinate_variables)
 from compliance_checker import base
+from compliance_checker.cf import util as cf_util # not to be confused with cfutil.py
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
 import validators
 import re
@@ -358,6 +359,10 @@ class IOOS1_2_ConventionsValidator(base.RegexValidator):
     validator_regex = r"\bIOOS-1.2\b"
     validator_fail_msg = "{} must contain the string \"IOOS 1.2\""
 
+class IOOS1_2_PlatformIDValidator(base.RegexValidator):
+    validator_regex = r"^[a-zA-Z0-9]+$"
+    validator_fail_msg = "{} must be alphanumeric"
+
 class NamingAuthorityValidator(base.UrlValidator):
     """
     Class to check for URL or reversed DNS strings contained within
@@ -451,8 +456,6 @@ class IOOS1_2Check(IOOSNCCheck):
         self.rec_atts = [
             ('contributor_email', base.EmailValidator()),
             'contributor_name',
-            'contributor_role',
-            'contributor_role_vocabulary',
             ('contributor_url', base.UrlValidator(base.csv_splitter)),
             'creator_address',
             'creator_city',
@@ -467,7 +470,7 @@ class IOOS1_2Check(IOOSNCCheck):
             # checked in check_ioos_ingest
             #'ioos_ingest',
             'keywords',
-            'platform_id',
+            ('platform_id', IOOS1_2_PlatformIDValidator()), # alphanumeric only
             'publisher_address',
             'publisher_city',
             'publisher_name',
@@ -890,89 +893,155 @@ class IOOS1_2Check(IOOSNCCheck):
         val = bool(validators.url(pvocab))
         return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", [m])
             
-    def _check_var_gts_ingest(self, ds, var, do_ingest, msg):
+    def _check_gts_ingest_val(self, val):
         """
-        Helper function for check_gts_ingest(). Check that a given variable
+        Check that `val` is a str and is equal to "true" or "false"
+
+        Parmeters
+        ---------
+        val (?): value to check
+
+        Returns
+        -------
+        bool
+        """
+
+        return isinstance(val, str) and val.lower() in {"true", "false"}
+
+
+    def check_gts_ingest_global(self, ds):
+        """
+        Check if a dataset has the global attribute "gts_ingest" and that
+        it matches "true" or "false". This attribute is "required, if applicable".
+
+        Parameters
+        ----------
+        ds (netCDF4.Dataset): open dataset
+
+        Returns
+        -------
+        Result
+        """
+
+        r = True # default
+        gts = getattr(ds, "gts_ingest", None)
+
+        if gts:
+            r = self._check_gts_ingest_val(gts)
+
+        return Result(BaseCheck.HIGH, r, "gts_ingest", ["gts_ingest must be a string \"true\" or \"false\""])
+
+    def _var_qualifies_for_gts_ingest(self, ds, var):
+        """
+        Examine a variable to see if it qualifies for GTS Ingest.
+        Check that a given variable
           - has a valid CF standard name (checked with check_standard_names())
           - has a QARTOD aggregates variable
           - has valid units (checked with check_units())
 
-        Args:
-            attr (?): attribute value
+        Parameters
+        ----------
+        ds (netCDF4.Dataset): open Dataset
+        var (netCDF4.Variable): variable from dataset
 
-        Returns:
-            Result
+        Returns
+        -------
+        bool
         """
 
         val = False
 
         # should have an ancillary variable with standard_name aggregate_quality_flag
         avar_val = False
-        anc_vars = getattr(var, "ancillary_variables", "").split(" ")
+        anc_vars = str(getattr(var, "ancillary_variables", "")).split(" ")
         for av in anc_vars:
             if av in ds.variables:
                 if getattr(ds.variables[av], "standard_name", "") == "aggregate_quality_flag":
                     avar_val = True
                     break
 
-        # if variable is flagged for ingest, but no global attr present, error
-        val = True if (avar_val and do_ingest) else False
+        # should have compliant standard_name
+        # NOTE: standard names are checked extensively in self.check_standard_names()
+        # but that method delegates to CF1_7Check.check_standard_name(), which loops through
+        # ALL the variables; this takes the absolute core of that check and ASSUMES that the
+        # current variable being checked is a coordinate variable, auxiliary coordinate
+        # variable, axis variable, flag variable, or geophysical variable
+        std_name = getattr(var, "standard_name", False)
+        valid_std_name = std_name in self.cf1_7._std_names
 
-        return Result(BaseCheck.HIGH, val, "gts_ingest variable", [msg])
+        # should have compliant units
+        # NOTE: units are checked extensively in self.check_units(), which delegates
+        # to CF1_7Check.check_units() --> CF1_6Check.check_units(), which loops through
+        # ALL variables; this takes the absolute core and assumes that the variable does
+        # not need dimensionless units nor are the units to be compared with any known
+        # deprecated ones; it would be nice to reuse machinery, but the similarly convoluted
+        # CF1_6Check.check_units() method is too tangled to use directly and would cause a huge
+        # time increase
+        units = getattr(var, "units", None)
+        has_udunits = (units is not None and cf_util.units_known(units))
 
-    def check_gts_ingest(self, ds):
+        return (avar_val and valid_std_name and has_udunits)
+
+    def check_gts_ingest_requirements(self, ds):
         """
-        Check if a dataset has a global gts_ingest attribute and if any
-        variables also have the gts_ingest attribute.
+        If a dataset is flagged for gts_ingest, check which variables
+        qualify for ingest.
 
         According to https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#requirements-for-ioos-dataset-gts-ingest,
-        the gts_ingest is "required, if applicable". Because the Compliance Checker
-        cannot accurately guess applicability of a certain dataset or variable,
-        this check simply verifies that if it exists, the value is a string
-        denoting "true" or "false".
-
-        Any variables which a user would like ingested must also contain the
-        gts_ingest attribute with a value of true. The variable must:
+        the gts_ingest is "required, if applicable". Any variables which a user
+        would like ingested must also contain the gts_ingest attribute with a
+        value of true. The variable must:
           - have a valid CF standard_name attribute (already checked)
           - have an ancillary variable reqpresenting QARTOD aggregate flags
           - have a valid udunits units attribute (already checked)
 
-        Args:
-            ds (netCDF4.Dataset): open Dataset
+        Parameters
+        ----------
+        ds (netCDF4.Dataset): open Dataset
 
-        Returns:
-            list of Result objects
+        Returns
+        -------
+        Result
         """
 
-        default_pass_result = Result(BaseCheck.HIGH, True, "gts_ingest", ["gts_ingest"])
-
-        results = []
-
-        # check global
-        glb_msg = ("If provided, the global attribute \"gts_ingest\" must be a "
-                   "string and its value must be one of \"true\" or \"false\"")
+        # is dataset properly flagged for ingest?
         glb_gts_attr = getattr(ds, "gts_ingest", None)
         if glb_gts_attr and (glb_gts_attr=="true" or glb_gts_attr=="false"):
             do_gts = True if glb_gts_attr == "true" else False
-            results.append(Result(BaseCheck.HIGH, True, "gts_ingest", [glb_msg]))
         else:
             do_gts = False
-            results.append(default_pass_result)
 
         # check variables
-        var_msg = ("The attribute \"gts_ingest\" of variable \"{v.name}\" "
-                   " must fulfill the following:\n"
-                   "  - must be a string with value \"true\" or \"false\";\n"
-                   "  - have a valid CF standard_name attribute (already checked);\n"
-                   "  - have an ancillary variable representing QARTOD aggregate flags;\n"
-                   "  - have a valid udunits units attribute\n"
-                   "The global attribute \"gts_ingest\" "
-                   "must also have a value of \"true\".")
+        all_passed_ingest_reqs = True # default
 
-        for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x=="true"):
-            results.append(self._check_var_gts_ingest(ds, v, do_gts, var_msg.format(v=v)))
+        if do_gts: # execute if dataset flagged for ingest
 
-        return results
+            var_passed_ingest_reqs = set()
+            var_passed_ingest_msg  = "The following variables qualifed for GTS Ingest:"
+            var_failed_ingest_msg  = "The following variables did not qualify for GTS Ingest:"
+
+            for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x=="true"):
+                var_passed_ingest_reqs.add((v.name, self._var_qualifies_for_gts_ingest(ds, v)))
+
+            for var_name, pass_result in var_passed_ingest_reqs:
+                if pass_result:
+                    var_passed_ingest_msg += "\n - {}".format(var_name)
+                else:
+                    var_failed_ingest_msg += "\n - {}".format(var_name)
+                    all_passed_ingest_reqs = False
+    
+            # join messages together
+            var_passed_ingest_msg += "\n{}".format(var_failed_ingest_msg)
+
+        else:
+            var_passed_ingest_msg = "Dataset not flagged for GTS Ingest; skipping variable checks"
+
+        return Result(
+            BaseCheck.HIGH,
+            all_passed_ingest_reqs,
+            "gts_ingest requirements",
+            [var_passed_ingest_msg]
+        )
 
     def check_instrument_variables(self, ds):
         """
@@ -1036,9 +1105,16 @@ class IOOS1_2Check(IOOSNCCheck):
 
     def check_wmo_platform_code(self, ds):
         """
-        If a WMO Platform Code is given as a global variable, check that it is
-        well-formed. According to the WMO, valid codes are a numeric string
-        comprised of 5 or 7 characters.
+        Per the spec:
+
+        "The WMO identifier for the platform used to measure the data. This
+        identifier can be any of the following types:
+          - WMO ID for buoys (numeric, 5 digits)
+          - WMO ID for gliders (numeric, 7 digits)
+          - NWS ID (alphanumeric, 5 digits)"
+
+        This attribute is "required, if applicable" -- a warning message will
+        only show up if the attribute is present and does not conform.
 
         Args:
             ds (netCDF4.Dataset): open Dataset
@@ -1049,14 +1125,16 @@ class IOOS1_2Check(IOOSNCCheck):
 
         valid = True
         ctxt = "wmo_platform_code"
-        msg = "The wmo_platform_code must be a numeric string of 5 or 7 characters"
+        msg = ("The wmo_platform_code must be an alphanumeric string of 5 "
+               "characters or a numeric string of 7 characters")
 
         code = getattr(ds, "wmo_platform_code", None)
         if code:
            if not (
                isinstance(code, str) and
-               code.isnumeric() and
-               (5 <= len(code) <= 7)
+               (
+                   re.search(r"^(?:[a-zA-Z0-9]{5}|[0-9]{7})$", code)
+               )
            ):
                valid = False
 
