@@ -1,5 +1,6 @@
 from compliance_checker.ioos import (IOOS0_1Check, IOOS1_1Check, IOOS1_2Check,
-                                     NamingAuthorityValidator)
+                                     NamingAuthorityValidator,
+                                     IOOS1_2_PlatformIDValidator)
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
@@ -569,6 +570,24 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(bad_result[1],
                          "naming_authority should either be a URL or a "
                          "reversed DNS name (e.g \"edu.ucar.unidata\")")
+
+    def test_platform_id_validation(self):
+        attn = "platform_id"
+        attv = "alphaNum3R1C"
+        v = IOOS1_2_PlatformIDValidator()
+        self.assertTrue(v.validate(attn, attv)[0])
+        
+        attv = "alpha"
+        v = IOOS1_2_PlatformIDValidator()
+        self.assertTrue(v.validate(attn, attv)[0])
+
+        attv = "311123331112"
+        v = IOOS1_2_PlatformIDValidator()
+        self.assertTrue(v.validate(attn, attv)[0])
+
+        attv = "---fail---"
+        v = IOOS1_2_PlatformIDValidator()
+        self.assertFalse(v.validate(attn, attv)[0])
 
     def test_check_platform_cf_role(self):
         """
