@@ -550,7 +550,7 @@ class IOOS1_2Check(IOOSNCCheck):
         If a dataset contains the global attribute ioos_ingest,
         its value must be "false". All datasets are assumed to be
         ingested except those with this flag. If the dataset should
-        be ingested, no flag should be present.
+        be ingested, no flag (or "true") should be present.
 
         Parameters
         ----------
@@ -565,12 +565,9 @@ class IOOS1_2Check(IOOSNCCheck):
         m = ("To disallow harvest of this dataset to IOOS national products, "
              "global attribute \"ioos_ingest\" must be a string with value \"false\"")
         igst = getattr(ds, "ioos_ingest", None)
-        if igst is not None: # if not supplied, return default pass
-            if isinstance(igst, str):
-                if igst.lower() not in ("true", "false"):
-                    r = False
-            else:
-                r = False
+        if (isinstance(igst, str) and igst.lower() not in ("true", "false")) or (
+            not isinstance(igst, str) and igst is not None):
+            r = False
 
         return Result(BaseCheck.MEDIUM, r, "ioos_ingest", [m])
 
