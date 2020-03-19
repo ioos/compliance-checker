@@ -1095,11 +1095,17 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         results = []
-        ctxt = "qartod_variable:references"
         for v in ds.get_variables_by_attributes(standard_name=lambda x: x in self._qartod_std_names):
-            msg = "\"references\" attribute for variable \"{}\" must be a valid URL".format(v.name)
-            val = bool(validators.url(getattr(v, "references", "")))
-            results.append(Result(BaseCheck.MEDIUM, val, ctxt, [msg]))
+            attval = getattr(v, "references", None)
+            if attval is None:
+                msg = ("\"references\" attribute not present for variable {}."
+                       "If present, it should be a valid URL.").format(v.name)
+                val = False
+            else:
+                msg = "\"references\" attribute for variable \"{}\" must be a valid URL".format(v.name)
+                val = bool(validators.url(attval))
+
+            results.append(Result(BaseCheck.MEDIUM, val, "qartod_variable:references", [msg]))
 
         return results
 
