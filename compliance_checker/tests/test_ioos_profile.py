@@ -724,6 +724,44 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("platform_vocabulary", "bad")
         self.assertFalse(self.ioos.check_platform_vocabulary(ds).value)
 
+    def test_check_qartod_variables_flags(self):
+        ds = MockTimeSeries() # time, lat, lon, depth
+
+        # no QARTOD variables
+        results = self.ioos.check_qartod_variables_flags(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # QARTOD variable without flag_values, flag_meanings (fail)
+        qr = ds.createVariable("depth_qc", np.byte)
+        qr.setncattr("standard_name", "spike_test_quality_flag")
+        results = self.ioos.check_qartod_variables_flags(ds)
+        self.assertTrue(not any(r.value for r in results)) # all False
+
+        # QARTOD variable with flag meanings, without flag_meanings
+        qr.setncattr("flag_values", np.array([0, 1, 2], dtype=np.byte))
+        results = self.ioos.check_qartod_variables_flags(ds)
+        self.assertEqual(results[0].value[0], results[0].value[1]) # should pass
+        self.assertFalse(results[1].value) # still fail
+
+        # QARTOD variable with flag meanings, flag_values
+        qr.setncattr("flag_meanings", "x y z") # alphanumeric, space-separated
+        results = self.ioos.check_qartod_variables_flags(ds)
+        self.assertEqual(results[0].value[0], results[0].value[1]) # pass
+        self.assertEqual(results[1].value[0], results[1].value[1]) # pass
+
+        # flag_values array not equal to length of flag_meanings
+        qr.setncattr("flag_values", np.array([0, 1], dtype=np.byte))
+        results = self.ioos.check_qartod_variables_flags(ds)
+        self.assertLess(results[0].value[0], results[0].value[1])  # should fail
+        self.assertEqual(results[1].value[0], results[1].value[1]) # pass
+
+        # flag_values right length, wrong type
+        qr.setncattr("flag_values", np.array([0, 1, 2], dtype=np.float64))
+        results = self.ioos.check_qartod_variables_flags(ds)
+        self.assertLess(results[0].value[0], results[0].value[1])  # should fail
+        self.assertEqual(results[1].value[0], results[1].value[1]) # pass
+
     def test_check_qartod_variables_references(self):
         ds = MockTimeSeries() # time, lat, lon, depth
 
