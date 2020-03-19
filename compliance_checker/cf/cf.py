@@ -1955,7 +1955,7 @@ class CF1_6Check(CFNCCheck):
         '''
         variable = ds.variables[name]
 
-        flag_values = variable.flag_values
+        flag_values = getattr(variable, "flag_values", None)
         flag_meanings = getattr(variable, 'flag_meanings', None)
         valid_values = TestCtx(BaseCheck.HIGH, self.section_titles['3.5'])
 

@@ -1081,6 +1081,49 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return results
 
+    def check_qartod_variables_flags(self, ds):
+        """
+        https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#quality-controlqartod
+
+        Check that all QARTOD variables have flag_meanings and flag_values attributes.
+        Use delegation to methods in the CF module.
+
+        Parameters
+        ----------
+        ds (netCDF4.Dataset): open dataset
+
+        Returns
+        -------
+        list of Result objects
+        """
+
+        results = []
+        # get qartod variables
+        for v in ds.get_variables_by_attributes(standard_name=lambda x: x in self._qartod_std_names):
+
+            missing_msg = "flag_{} not present on {}"
+
+            # check if each has flag_values, flag_meanings
+            # need isinstance() as can't compare truth value of array
+            if getattr(v, "flag_values", None) is None:
+                results.append(Result(BaseCheck.MEDIUM, False, "qartod_variables flags", missing_msg.format("values", v.name)))
+
+            else: # if exist, test
+                results.append(self.cf1_7._check_flag_values(ds, v.name))
+
+            if getattr(v, "flag_meanings", None) is None:
+                results.append(Result(BaseCheck.MEDIUM, False, "qartod_variables flags", missing_msg.format("meanings", v.name)))
+
+            else: # if exist, test
+                results.append(self.cf1_7._check_flag_meanings(ds, v.name))
+
+        # Ensure message name is "qartod_variables flags"
+        # NOTE this is a bit of a hack to shove into CF results
+        for r in results:
+            r.name = "qartod_variables flags"
+
+        return results
+
     def check_qartod_variables_references(self, ds):
         """
         For any variables that are deemed QARTOD variables, check that they
