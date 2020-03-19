@@ -1083,7 +1083,7 @@ class IOOS1_2Check(IOOSNCCheck):
 
     def check_qartod_variables_flags(self, ds):
         """
-        https://github.com/ioos/ioos-metadata/pull/16/commits/c1833adce183d67e0f05edaa0b52c34de431214f
+        https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#quality-controlqartod
 
         Check that all QARTOD variables have flag_meanings and flag_values attributes.
         Use delegation to methods in the CF module.
