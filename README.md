@@ -255,16 +255,16 @@ Ensure to supply the URL *without* the format extension at the end (no `.nc`, `.
 
 Some examples of ERDDAP datasets:
 
-  - https://pae-paha.pacioos.hawaii.edu/erddap/info/AWS-HIMB/index.html
-  - http://erddap.secoora.org/erddap/tabledap/edu_usf_marine_comps_1407d550.html
-  - http://erddap.cencoos.org/erddap/tabledap/bodega-bay-bml_wts.html
-  - http://erddap.cencoos.org/erddap/tabledap/fort-point.html
-  - http://erddap.cencoos.org/erddap/tabledap/edu_humboldt_humboldt.html
-  - http://erddap.cencoos.org/erddap/tabledap/edu_calpoly_marine_morro.html
-  - http://erddap.cencoos.org/erddap/tabledap/mlml_mlml_sea.html
-  - http://erddap.cencoos.org/erddap/tabledap/mlml_mlml_met.html
-  - http://erddap.cencoos.org/erddap/tabledap/mlml_monterey.html
-  - http://erddap.cencoos.org/erddap/tabledap/edu_humboldt_tdp.html
+  - https://pae-paha.pacioos.hawaii.edu/erddap/info/AWS-HIMB/index
+  - http://erddap.secoora.org/erddap/tabledap/edu_usf_marine_comps_1407d550
+  - http://erddap.cencoos.org/erddap/tabledap/bodega-bay-bml_wts
+  - http://erddap.cencoos.org/erddap/tabledap/fort-point
+  - http://erddap.cencoos.org/erddap/tabledap/edu_humboldt_humboldt
+  - http://erddap.cencoos.org/erddap/tabledap/edu_calpoly_marine_morro
+  - http://erddap.cencoos.org/erddap/tabledap/mlml_mlml_sea
+  - http://erddap.cencoos.org/erddap/tabledap/mlml_mlml_met
+  - http://erddap.cencoos.org/erddap/tabledap/mlml_monterey
+  - http://erddap.cencoos.org/erddap/tabledap/edu_humboldt_tdp
 
 ### Write results to text file
 
