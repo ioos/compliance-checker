@@ -82,7 +82,6 @@ https://data.ioos.us/compliance/api/run?report_format=html&test=acdd&url=http://
 
 https://data.ioos.us/compliance/api/run?report_format=json&test=acdd&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
 
-
 # The Compliance Checker Command Line Tool
 
 
@@ -244,6 +243,29 @@ The remote dataset url is taken from the Data URL section of an OPeNDAP endpoint
 $ compliance-checker --test=acdd:1.3 "http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml"
 ```
 
+### Checking against remote ERDDAP Datasets
+
+ERDDAP datasets are becoming a popular way to access data. Supply an ERDDAP `TableDAP` or `GridDAP` URL to the checker:
+
+```shell
+$ compliance-checker --test ioos:1.2 "https://pae-paha.pacioos.hawaii.edu/erddap/griddap/pibhmc_bathy_60m_guam"
+```
+
+Ensure to supply the URL *without* the format extension at the end (no `.nc`, `.ncCF`, etc.).
+
+Some examples of ERDDAP datasets:
+
+  - https://pae-paha.pacioos.hawaii.edu/erddap/info/AWS-HIMB/index.html
+  - http://erddap.secoora.org/erddap/tabledap/edu_usf_marine_comps_1407d550.html
+  - http://erddap.cencoos.org/erddap/tabledap/bodega-bay-bml_wts.html
+  - http://erddap.cencoos.org/erddap/tabledap/fort-point.html
+  - http://erddap.cencoos.org/erddap/tabledap/edu_humboldt_humboldt.html
+  - http://erddap.cencoos.org/erddap/tabledap/edu_calpoly_marine_morro.html
+  - http://erddap.cencoos.org/erddap/tabledap/mlml_mlml_sea.html
+  - http://erddap.cencoos.org/erddap/tabledap/mlml_mlml_met.html
+  - http://erddap.cencoos.org/erddap/tabledap/mlml_monterey.html
+  - http://erddap.cencoos.org/erddap/tabledap/edu_humboldt_tdp.html
+
 ### Write results to text file
 
 ```shell
@@ -404,7 +426,6 @@ compliance-checker -t ncei-trajectory-profile-orthogonal -v ~/data/sample-trajec
 ```
 compliance-checker -t ncei-grid -f json -o ~/Documents/sample_grid_report.json ~/Documents/sample_grid_report.nc
 ```
-
 
 ## Contributors
 
