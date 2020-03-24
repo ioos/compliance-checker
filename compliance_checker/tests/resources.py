@@ -48,6 +48,7 @@ STATIC_FILES = {
     'dimension_order'                      : get_filename('tests/data/dimension_order.cdl'),
     'example-grid'                         : get_filename('tests/data/example-grid.cdl'),
     'featureType'                          : get_filename('tests/data/example-grid.cdl'),
+    'forecast_reference'                   : get_filename('tests/data/forecast_reference.cdl'),
     'fvcom'                                : get_filename('tests/data/examples/fvcom.cdl'),
     'ghrsst'                               : get_filename('tests/data/20160919092000-ABOM-L3S_GHRSST-SSTfnd-AVHRR_D-1d_dn_truncate.cdl'),
     'glcfs'                                : get_filename('tests/data/examples/glcfs.cdl'),

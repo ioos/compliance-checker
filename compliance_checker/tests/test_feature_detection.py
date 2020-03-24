@@ -226,6 +226,20 @@ class TestFeatureDetection(TestCase):
             aux_coord_vards = util.get_auxiliary_coordinate_variables(nc)
             assert set(['lat', 'lon']) == set(aux_coord_vards)
 
+    def test_forecast_reference_metadata(self):
+        '''
+        Tests variables used for forecast reference metadata to ensure they are
+        not misclassified as geophysical variables.
+        '''
+        with Dataset(resources.STATIC_FILES['forecast_reference']) as nc:
+            assert util.is_geophysical(nc, 'forecast_reference_time') is False
+            assert util.is_geophysical(nc, 'forecast_hour') is False
+            assert util.is_geophysical(nc, 'air_temp') is True
+            assert util.is_geophysical(nc, 'time') is False
+
+            assert len(util.get_coordinate_variables(nc)) == 3
+            assert len(util.get_geophysical_variables(nc)) == 1
+
     def test_rotated_pole_grid(self):
         with Dataset(resources.STATIC_FILES['rotated_pole_grid']) as nc:
             latitudes = util.get_latitude_variables(nc)
