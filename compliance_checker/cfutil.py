@@ -307,10 +307,10 @@ def get_forecast_metadata_variables(ds):
     :param netCDF4.Dataset ds: An open netCDF4 Dataset.
     :rtype: list
     '''
-    forecast_metadata_standard_names = [
+    forecast_metadata_standard_names = {
         'forecast_period',
         'forecast_reference_time',
-    ]
+    }
     forecast_metadata_variables = []
     for varname in ds.variables:
         standard_name = getattr(ds.variables[varname], 'standard_name', None)

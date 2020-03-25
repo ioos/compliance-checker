@@ -232,10 +232,10 @@ class TestFeatureDetection(TestCase):
         not misclassified as geophysical variables.
         '''
         with Dataset(resources.STATIC_FILES['forecast_reference']) as nc:
-            assert util.is_geophysical(nc, 'forecast_reference_time') is False
-            assert util.is_geophysical(nc, 'forecast_hour') is False
-            assert util.is_geophysical(nc, 'air_temp') is True
-            assert util.is_geophysical(nc, 'time') is False
+            self.assertFalse(util.is_geophysical(nc, 'forecast_reference_time'))
+            self.assertFalse(util.is_geophysical(nc, 'forecast_hour'))
+            self.assertTrue(util.is_geophysical(nc, 'air_temp'))
+            self.assertFalse(util.is_geophysical(nc, 'time'))
 
             assert len(util.get_coordinate_variables(nc)) == 3
             assert len(util.get_geophysical_variables(nc)) == 1
