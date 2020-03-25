@@ -194,6 +194,9 @@ def is_geophysical(ds, variable):
     if variable in get_auxiliary_coordinate_variables(ds):
         return False
 
+    if variable in get_forecast_metadata_variables(ds):
+        return False
+
     # Is it dimensionless and unitless?
     if len(ncvar.shape) == 0 and unitless:
         return False
@@ -294,6 +297,26 @@ def get_auxiliary_coordinate_variables(ds):
         ret_val.append(aux_var)
 
     return ret_val
+
+
+def get_forecast_metadata_variables(ds):
+    '''
+    Returns a list of variables that represent forecast reference time
+    metadata.
+
+    :param netCDF4.Dataset ds: An open netCDF4 Dataset.
+    :rtype: list
+    '''
+    forecast_metadata_standard_names = {
+        'forecast_period',
+        'forecast_reference_time',
+    }
+    forecast_metadata_variables = []
+    for varname in ds.variables:
+        standard_name = getattr(ds.variables[varname], 'standard_name', None)
+        if standard_name in forecast_metadata_standard_names:
+            forecast_metadata_variables.append(varname)
+    return forecast_metadata_variables
 
 
 def get_cell_boundary_map(ds):
