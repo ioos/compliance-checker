@@ -420,7 +420,7 @@ class IOOS1_2Check(IOOSNCCheck):
             ("standard_name_url", BaseCheck.MEDIUM),
             #( "platform", BaseCheck.HIGH) # checked under check_single_platform()
             #( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
-            #( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest() 
+            #( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest()
         ]))
 
         # geospatial vars must have the following attrs:
@@ -600,26 +600,26 @@ class IOOS1_2Check(IOOSNCCheck):
 
         if role:
             if role in [ # each in both vocabularies
-                "author",               
-                "coAuthor",             
-                "collaborator",         
-                "contributor",          
-                "custodian",            
-                "distributor",          
-                "editor",               
-                "funder",               
-                "mediator",             
-                "originator",           
-                "owner",                
-                "pointOfContact",       
+                "author",
+                "coAuthor",
+                "collaborator",
+                "contributor",
+                "custodian",
+                "distributor",
+                "editor",
+                "funder",
+                "mediator",
+                "originator",
+                "owner",
+                "pointOfContact",
                 "principalInvestigator",
-                "processor",            
-                "publisher",            
-                "resourceProvider",     
-                "rightsHolder",         
-                "sponsor",              
-                "stakeholder",          
-                "user"                  
+                "processor",
+                "publisher",
+                "resourceProvider",
+                "rightsHolder",
+                "sponsor",
+                "stakeholder",
+                "user"
             ]:
                 role_val = True
 
@@ -786,7 +786,7 @@ class IOOS1_2Check(IOOSNCCheck):
     def check_single_platform(self, ds):
         """
         Verify that a dataset only has a single platform attribute. If one exists,
-        examine the featureType of the dataset. If the featureType is 
+        examine the featureType of the dataset. If the featureType is
         [point, timeSeries, profile, trajectory] and cf_role in [timeseries_id,
         profile_id, trajectory_id] dimensionality of the variable containing
         cf_role must be 1 as "we only want a single glider/auv/ship"; if
@@ -892,7 +892,7 @@ class IOOS1_2Check(IOOSNCCheck):
         pvocab = getattr(ds, "platform_vocabulary", "")
         val = bool(validators.url(pvocab))
         return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", [m])
-            
+
     def _check_gts_ingest_val(self, val):
         """
         Check that `val` is a str and is equal to "true" or "false"
@@ -923,13 +923,14 @@ class IOOS1_2Check(IOOSNCCheck):
         Result
         """
 
-        r = True # default
-        gts = getattr(ds, "gts_ingest", None)
+        gts_ingest_value = getattr(ds, "gts_ingest", None)
 
-        if gts:
-            r = self._check_gts_ingest_val(gts)
+        if isinstance(gts_ingest_value, str):
+            is_valid_string = self._check_gts_ingest_val(gts_ingest_value)
 
-        return Result(BaseCheck.HIGH, r, "gts_ingest", ["gts_ingest must be a string \"true\" or \"false\""])
+        fail_message = ["gts_ingest must be a string \"true\" or \"false\""]
+        return Result(BaseCheck.HIGH, is_valid_string, "gts_ingest",
+                      None if is_valid_string else fail_message)
 
     def _var_qualifies_for_gts_ingest(self, ds, var):
         """
@@ -1029,7 +1030,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 else:
                     var_failed_ingest_msg += "\n - {}".format(var_name)
                     all_passed_ingest_reqs = False
-    
+
             # join messages together
             var_passed_ingest_msg += "\n{}".format(var_failed_ingest_msg)
 
