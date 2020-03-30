@@ -1015,34 +1015,40 @@ class IOOS1_2Check(IOOSNCCheck):
 
         # check variables
         all_passed_ingest_reqs = True # default
+        var_failed_ingest_msg = None
+        var_passed_ingest_msg = None
 
         if do_gts: # execute if dataset flagged for ingest
 
             var_passed_ingest_reqs = set()
-            var_passed_ingest_msg  = "The following variables qualifed for GTS Ingest:"
-            var_failed_ingest_msg  = "The following variables did not qualify for GTS Ingest:"
-
             for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x=="true"):
                 var_passed_ingest_reqs.add((v.name, self._var_qualifies_for_gts_ingest(ds, v)))
 
-            for var_name, pass_result in var_passed_ingest_reqs:
-                if pass_result:
-                    var_passed_ingest_msg += "\n - {}".format(var_name)
-                else:
-                    var_failed_ingest_msg += "\n - {}".format(var_name)
-                    all_passed_ingest_reqs = False
+            all_passed_ingest_reqs = all(map(lambda x: x[1], var_passed_ingest_reqs))
+            if not all_passed_ingest_reqs:
+                _var_failed = map(lambda y: y[0], filter(lambda x: not x[1], var_passed_ingest_reqs))
+                _var_passed = map(lambda y: y[0], filter(lambda x: x[1], var_passed_ingest_reqs))
 
-            # join messages together
-            var_passed_ingest_msg += "\n{}".format(var_failed_ingest_msg)
+                var_failed_ingest_msg = (
+                                            "The following variables did not "
+                                            "qualify for GTS Ingest: {}".format(
+                                                ", ".join(_var_failed),
+                                            )
+                                        )
 
-        else:
-            var_passed_ingest_msg = "Dataset not flagged for GTS Ingest; skipping variable checks"
+                var_passed_ingest_msg = (
+                                            "The following variables qualified "
+                                            "for GTS Ingest: {}\n".format(
+                                                  ", ".join(_var_passed)
+                                            )
+                                        )
+
 
         return Result(
             BaseCheck.HIGH,
             all_passed_ingest_reqs,
             "gts_ingest requirements",
-            [var_passed_ingest_msg]
+            [var_passed_ingest_msg, var_failed_ingest_msg]
         )
 
     def check_instrument_variables(self, ds):
