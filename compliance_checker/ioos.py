@@ -925,6 +925,7 @@ class IOOS1_2Check(IOOSNCCheck):
 
         gts_ingest_value = getattr(ds, "gts_ingest", None)
 
+        is_valid_string = True
         if isinstance(gts_ingest_value, str):
             is_valid_string = self._check_gts_ingest_val(gts_ingest_value)
 
