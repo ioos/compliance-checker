@@ -432,11 +432,13 @@ class TestIOOS1_2(BaseTestCase):
         # no gts_ingest_requirements, should pass
         result = self.ioos.check_gts_ingest_global(ds)
         self.assertTrue(result.value)
+        self.assertEqual(result.msgs, [])
 
         # passing value
         ds.setncattr("gts_ingest", "true")
         result = self.ioos.check_gts_ingest_global(ds)
         self.assertTrue(result.value)
+        self.assertEqual(result.msgs, [])
 
         ds.setncattr("gts_ingest", "false")
         result = self.ioos.check_gts_ingest_global(ds)
@@ -794,6 +796,7 @@ class TestIOOS1_2(BaseTestCase):
         qr.setncattr("references", "http://services.cormp.org/quality.php")
         results = self.ioos.check_qartod_variables_references(ds)
         self.assertTrue(all(r.value for r in results))
+        self.assertEqual(results[0].msgs, []) # only one Result to test
 
         # QARTOD variable with bad references (fail)
         qr.setncattr("references", r"p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht")
