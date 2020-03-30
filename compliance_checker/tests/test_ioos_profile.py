@@ -370,6 +370,7 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("contributor_role", "contributor")
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         self.assertTrue(results[0].value)
+        self.assertEqual(results[0].msgs, [])
         self.assertFalse(results[1].value)
 
         # bad role, good vocab
@@ -378,19 +379,24 @@ class TestIOOS1_2(BaseTestCase):
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         self.assertFalse(results[0].value)
         self.assertTrue(results[1].value)
+        self.assertEqual(results[1].msgs, [])
         
         # good role, good vocab
         ds.setncattr("contributor_role", "contributor")
         ds.setncattr("contributor_role_vocabulary", "http://vocab.nerc.ac.uk/collection/G04/current/")
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         self.assertTrue(results[0].value)
+        self.assertEqual(results[0].msgs, [])
         self.assertTrue(results[1].value)
+        self.assertEqual(results[1].msgs, [])
 
         ds.setncattr("contributor_role", "resourceProvider")
         ds.setncattr("contributor_role_vocabulary", "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode")
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         self.assertTrue(results[0].value)
+        self.assertEqual(results[0].msgs, [])
         self.assertTrue(results[1].value)
+        self.assertEqual(results[1].msgs, [])
 
     def test_check_creator_and_publisher_type(self):
         """

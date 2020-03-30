@@ -631,8 +631,8 @@ class IOOS1_2Check(IOOSNCCheck):
                 vocb_val = True
 
         return [
-            Result(BaseCheck.MEDIUM, role_val, "contributor_role", [role_msg]),
-            Result(BaseCheck.MEDIUM, vocb_val, "contributor_role_vocabulary", [vocb_msg]),
+            Result(BaseCheck.MEDIUM, role_val, "contributor_role", None if role_val else [role_msg]),
+            Result(BaseCheck.MEDIUM, vocb_val, "contributor_role_vocabulary", None if vocb_val else [vocb_msg]),
         ]
 
     def check_geophysical_vars_have_attrs(self, ds):
