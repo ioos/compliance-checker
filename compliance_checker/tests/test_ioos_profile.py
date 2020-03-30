@@ -730,7 +730,9 @@ class TestIOOS1_2(BaseTestCase):
     def test_check_platform_vocabulary(self):
         ds = MockTimeSeries() # time, lat, lon, depth 
         ds.setncattr("platform_vocabulary", "http://google.com")
-        self.assertTrue(self.ioos.check_platform_vocabulary(ds).value)
+        result = self.ioos.check_platform_vocabulary(ds)
+        self.assertTrue(result.value)
+        self.assertEqual(result.msgs, [])
 
         ds.setncattr("platform_vocabulary", "bad")
         self.assertFalse(self.ioos.check_platform_vocabulary(ds).value)

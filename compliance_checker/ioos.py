@@ -891,7 +891,7 @@ class IOOS1_2Check(IOOSNCCheck):
         m = "platform_vocabulary must be a valid URL"
         pvocab = getattr(ds, "platform_vocabulary", "")
         val = bool(validators.url(pvocab))
-        return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", [m])
+        return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", None if val else [m])
 
     def _check_gts_ingest_val(self, val):
         """
