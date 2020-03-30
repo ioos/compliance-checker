@@ -781,7 +781,7 @@ class IOOS1_2Check(IOOSNCCheck):
             if re.match(r'^\S+$', p):
                 r = True
 
-        return Result(BaseCheck.HIGH, r, "platform", [m.format(p)])
+        return Result(BaseCheck.HIGH, r, "platform", None if r else [m.format(p)])
 
     def check_single_platform(self, ds):
         """

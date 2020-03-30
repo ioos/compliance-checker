@@ -674,7 +674,9 @@ class TestIOOS1_2(BaseTestCase):
 
         # good value
         ds.setncattr("platform", "single_string")
-        self.assertTrue(self.ioos.check_platform_global(ds).value)
+        res = self.ioos.check_platform_global(ds)
+        self.assertTrue(res.value)
+        self.assertEqual(res.msgs, [])
 
     def test_check_single_platform(self):
 
