@@ -378,7 +378,7 @@ class TestIOOS1_2(BaseTestCase):
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         self.assertFalse(results[0].value)
         self.assertTrue(results[1].value)
-        
+
         # good role, good vocab
         ds.setncattr("contributor_role", "contributor")
         ds.setncattr("contributor_role_vocabulary", "http://vocab.nerc.ac.uk/collection/G04/current/")
@@ -601,15 +601,15 @@ class TestIOOS1_2(BaseTestCase):
                                         "webmaster.ioos.us@noaa.gov")
         self.assertFalse(bad_result[0])
         self.assertEqual(bad_result[1],
-                         "naming_authority should either be a URL or a "
-                         "reversed DNS name (e.g \"edu.ucar.unidata\")")
+                         ["naming_authority should either be a URL or a "
+                          "reversed DNS name (e.g \"edu.ucar.unidata\")"])
 
     def test_platform_id_validation(self):
         attn = "platform_id"
         attv = "alphaNum3R1C"
         v = IOOS1_2_PlatformIDValidator()
         self.assertTrue(v.validate(attn, attv)[0])
-        
+
         attv = "alpha"
         v = IOOS1_2_PlatformIDValidator()
         self.assertTrue(v.validate(attn, attv)[0])
