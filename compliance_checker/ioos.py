@@ -420,7 +420,7 @@ class IOOS1_2Check(IOOSNCCheck):
             ("standard_name_url", BaseCheck.MEDIUM),
             #( "platform", BaseCheck.HIGH) # checked under check_single_platform()
             #( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
-            #( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest() 
+            #( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest()
         ]))
 
         # geospatial vars must have the following attrs:
@@ -569,7 +569,7 @@ class IOOS1_2Check(IOOSNCCheck):
             not isinstance(igst, str) and igst is not None):
             r = False
 
-        return Result(BaseCheck.MEDIUM, r, "ioos_ingest", [m])
+        return Result(BaseCheck.MEDIUM, r, "ioos_ingest", None if r else [m])
 
     def check_contributor_role_and_vocabulary(self, ds):
         """
@@ -600,26 +600,26 @@ class IOOS1_2Check(IOOSNCCheck):
 
         if role:
             if role in [ # each in both vocabularies
-                "author",               
-                "coAuthor",             
-                "collaborator",         
-                "contributor",          
-                "custodian",            
-                "distributor",          
-                "editor",               
-                "funder",               
-                "mediator",             
-                "originator",           
-                "owner",                
-                "pointOfContact",       
+                "author",
+                "coAuthor",
+                "collaborator",
+                "contributor",
+                "custodian",
+                "distributor",
+                "editor",
+                "funder",
+                "mediator",
+                "originator",
+                "owner",
+                "pointOfContact",
                 "principalInvestigator",
-                "processor",            
-                "publisher",            
-                "resourceProvider",     
-                "rightsHolder",         
-                "sponsor",              
-                "stakeholder",          
-                "user"                  
+                "processor",
+                "publisher",
+                "resourceProvider",
+                "rightsHolder",
+                "sponsor",
+                "stakeholder",
+                "user"
             ]:
                 role_val = True
 
@@ -631,8 +631,8 @@ class IOOS1_2Check(IOOSNCCheck):
                 vocb_val = True
 
         return [
-            Result(BaseCheck.MEDIUM, role_val, "contributor_role", [role_msg]),
-            Result(BaseCheck.MEDIUM, vocb_val, "contributor_role_vocabulary", [vocb_msg]),
+            Result(BaseCheck.MEDIUM, role_val, "contributor_role", None if role_val else [role_msg]),
+            Result(BaseCheck.MEDIUM, vocb_val, "contributor_role_vocabulary", None if vocb_val else [vocb_msg]),
         ]
 
     def check_geophysical_vars_have_attrs(self, ds):
@@ -781,12 +781,12 @@ class IOOS1_2Check(IOOSNCCheck):
             if re.match(r'^\S+$', p):
                 r = True
 
-        return Result(BaseCheck.HIGH, r, "platform", [m.format(p)])
+        return Result(BaseCheck.HIGH, r, "platform", None if r else [m.format(p)])
 
     def check_single_platform(self, ds):
         """
         Verify that a dataset only has a single platform attribute. If one exists,
-        examine the featureType of the dataset. If the featureType is 
+        examine the featureType of the dataset. If the featureType is
         [point, timeSeries, profile, trajectory] and cf_role in [timeseries_id,
         profile_id, trajectory_id] dimensionality of the variable containing
         cf_role must be 1 as "we only want a single glider/auv/ship"; if
@@ -815,23 +815,23 @@ class IOOS1_2Check(IOOSNCCheck):
         if num_platforms > 1 and glb_platform:
             msg = "A dataset may only have one platform; {} found".format(len(platform_set))
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
 
         elif ((not glb_platform) and num_platforms > 0):
             msg = "If platform variables exist, a global attribute \"platform\" must also exist"
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
         elif num_platforms == 0 and glb_platform:
             msg = "A dataset with a global \"platform\" attribute must platform have variables"
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
         elif num_platforms == 0 and (not glb_platform):
             msg = "Gridded model datasets are not required to declare a platform"
             val = True
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
         else: # num_platforms==1 and glb_platform, test the dimensionality
 
@@ -868,7 +868,7 @@ class IOOS1_2Check(IOOSNCCheck):
                            BaseCheck.HIGH,
                            _val,
                            "platform variables",
-                           [msg.format(cf_role_var=var.name, cf_role=cf_role, dim=shp)]
+                           None if _val else [msg.format(cf_role_var=var.name, cf_role=cf_role, dim=shp)]
                        )
                     )
 
@@ -891,8 +891,8 @@ class IOOS1_2Check(IOOSNCCheck):
         m = "platform_vocabulary must be a valid URL"
         pvocab = getattr(ds, "platform_vocabulary", "")
         val = bool(validators.url(pvocab))
-        return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", [m])
-            
+        return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", None if val else [m])
+
     def _check_gts_ingest_val(self, val):
         """
         Check that `val` is a str and is equal to "true" or "false"
@@ -923,13 +923,15 @@ class IOOS1_2Check(IOOSNCCheck):
         Result
         """
 
-        r = True # default
-        gts = getattr(ds, "gts_ingest", None)
+        gts_ingest_value = getattr(ds, "gts_ingest", None)
 
-        if gts:
-            r = self._check_gts_ingest_val(gts)
+        is_valid_string = True
+        if isinstance(gts_ingest_value, str):
+            is_valid_string = self._check_gts_ingest_val(gts_ingest_value)
 
-        return Result(BaseCheck.HIGH, r, "gts_ingest", ["gts_ingest must be a string \"true\" or \"false\""])
+        fail_message = ["gts_ingest must be a string \"true\" or \"false\""]
+        return Result(BaseCheck.HIGH, is_valid_string, "gts_ingest",
+                      None if is_valid_string else fail_message)
 
     def _var_qualifies_for_gts_ingest(self, ds, var):
         """
@@ -1013,34 +1015,40 @@ class IOOS1_2Check(IOOSNCCheck):
 
         # check variables
         all_passed_ingest_reqs = True # default
+        var_failed_ingest_msg = None
+        var_passed_ingest_msg = None
 
         if do_gts: # execute if dataset flagged for ingest
 
             var_passed_ingest_reqs = set()
-            var_passed_ingest_msg  = "The following variables qualifed for GTS Ingest:"
-            var_failed_ingest_msg  = "The following variables did not qualify for GTS Ingest:"
-
             for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x=="true"):
                 var_passed_ingest_reqs.add((v.name, self._var_qualifies_for_gts_ingest(ds, v)))
 
-            for var_name, pass_result in var_passed_ingest_reqs:
-                if pass_result:
-                    var_passed_ingest_msg += "\n - {}".format(var_name)
-                else:
-                    var_failed_ingest_msg += "\n - {}".format(var_name)
-                    all_passed_ingest_reqs = False
-    
-            # join messages together
-            var_passed_ingest_msg += "\n{}".format(var_failed_ingest_msg)
+            all_passed_ingest_reqs = all(map(lambda x: x[1], var_passed_ingest_reqs))
+            if not all_passed_ingest_reqs:
+                _var_failed = map(lambda y: y[0], filter(lambda x: not x[1], var_passed_ingest_reqs))
+                _var_passed = map(lambda y: y[0], filter(lambda x: x[1], var_passed_ingest_reqs))
 
-        else:
-            var_passed_ingest_msg = "Dataset not flagged for GTS Ingest; skipping variable checks"
+                var_failed_ingest_msg = (
+                                            "The following variables did not "
+                                            "qualify for GTS Ingest: {}".format(
+                                                ", ".join(_var_failed),
+                                            )
+                                        )
+
+                var_passed_ingest_msg = (
+                                            "The following variables qualified "
+                                            "for GTS Ingest: {}\n".format(
+                                                  ", ".join(_var_passed)
+                                            )
+                                        )
+
 
         return Result(
             BaseCheck.HIGH,
             all_passed_ingest_reqs,
             "gts_ingest requirements",
-            [var_passed_ingest_msg]
+            [var_passed_ingest_msg, var_failed_ingest_msg]
         )
 
     def check_instrument_variables(self, ds):
@@ -1148,7 +1156,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 msg = "\"references\" attribute for variable \"{}\" must be a valid URL".format(v.name)
                 val = bool(validators.url(attval))
 
-            results.append(Result(BaseCheck.MEDIUM, val, "qartod_variable:references", [msg]))
+            results.append(Result(BaseCheck.MEDIUM, val, "qartod_variable:references", None if val else [msg]))
 
         return results
 
@@ -1187,7 +1195,7 @@ class IOOS1_2Check(IOOSNCCheck):
            ):
                valid = False
 
-        return Result(BaseCheck.HIGH, valid, ctxt, [msg])
+        return Result(BaseCheck.HIGH, valid, ctxt, None if valid else [msg])
 
 class IOOSBaseSOSCheck(BaseCheck):
     _cc_spec = 'ioos_sos'

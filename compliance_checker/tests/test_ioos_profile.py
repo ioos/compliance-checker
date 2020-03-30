@@ -370,6 +370,7 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("contributor_role", "contributor")
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         self.assertTrue(results[0].value)
+        self.assertEqual(results[0].msgs, [])
         self.assertFalse(results[1].value)
 
         # bad role, good vocab
@@ -378,19 +379,24 @@ class TestIOOS1_2(BaseTestCase):
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         self.assertFalse(results[0].value)
         self.assertTrue(results[1].value)
-
+        self.assertEqual(results[1].msgs, [])
+        
         # good role, good vocab
         ds.setncattr("contributor_role", "contributor")
         ds.setncattr("contributor_role_vocabulary", "http://vocab.nerc.ac.uk/collection/G04/current/")
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         self.assertTrue(results[0].value)
+        self.assertEqual(results[0].msgs, [])
         self.assertTrue(results[1].value)
+        self.assertEqual(results[1].msgs, [])
 
         ds.setncattr("contributor_role", "resourceProvider")
         ds.setncattr("contributor_role_vocabulary", "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode")
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         self.assertTrue(results[0].value)
+        self.assertEqual(results[0].msgs, [])
         self.assertTrue(results[1].value)
+        self.assertEqual(results[1].msgs, [])
 
     def test_check_creator_and_publisher_type(self):
         """
@@ -426,11 +432,13 @@ class TestIOOS1_2(BaseTestCase):
         # no gts_ingest_requirements, should pass
         result = self.ioos.check_gts_ingest_global(ds)
         self.assertTrue(result.value)
+        self.assertEqual(result.msgs, [])
 
         # passing value
         ds.setncattr("gts_ingest", "true")
         result = self.ioos.check_gts_ingest_global(ds)
         self.assertTrue(result.value)
+        self.assertEqual(result.msgs, [])
 
         ds.setncattr("gts_ingest", "false")
         result = self.ioos.check_gts_ingest_global(ds)
@@ -525,6 +533,7 @@ class TestIOOS1_2(BaseTestCase):
         # no wmo_platform_code, pass
         result = self.ioos.check_wmo_platform_code(ds)
         self.assertTrue(result.value)
+        self.assertEqual(result.msgs, [])
 
         # valid code
         ds.setncattr("wmo_platform_code", "12345")
@@ -667,7 +676,9 @@ class TestIOOS1_2(BaseTestCase):
 
         # good value
         ds.setncattr("platform", "single_string")
-        self.assertTrue(self.ioos.check_platform_global(ds).value)
+        res = self.ioos.check_platform_global(ds)
+        self.assertTrue(res.value)
+        self.assertEqual(res.msgs, [])
 
     def test_check_single_platform(self):
 
@@ -676,6 +687,7 @@ class TestIOOS1_2(BaseTestCase):
         # no global attr but also no platform variables, should pass
         results = self.ioos.check_single_platform(ds)
         self.assertTrue(results[0].value)
+        self.assertEqual(results[0].msgs, [])
 
         # give platform global, no variables, fail
         ds.setncattr("platform", "buoy")
@@ -692,6 +704,7 @@ class TestIOOS1_2(BaseTestCase):
         cf_role_var.setncattr("cf_role", "timeseries_id")
         results = self.ioos.check_single_platform(ds)
         self.assertTrue(all(r.value for r in results))
+        self.assertTrue(all(r.msgs==[] for r in results))
 
         # global attr, multiple platform variables, correct cf_role & featureType, fail
         plat2 = ds.createVariable("platform_var_2", np.byte)
@@ -719,7 +732,9 @@ class TestIOOS1_2(BaseTestCase):
     def test_check_platform_vocabulary(self):
         ds = MockTimeSeries() # time, lat, lon, depth
         ds.setncattr("platform_vocabulary", "http://google.com")
-        self.assertTrue(self.ioos.check_platform_vocabulary(ds).value)
+        result = self.ioos.check_platform_vocabulary(ds)
+        self.assertTrue(result.value)
+        self.assertEqual(result.msgs, [])
 
         ds.setncattr("platform_vocabulary", "bad")
         self.assertFalse(self.ioos.check_platform_vocabulary(ds).value)
@@ -781,6 +796,7 @@ class TestIOOS1_2(BaseTestCase):
         qr.setncattr("references", "http://services.cormp.org/quality.php")
         results = self.ioos.check_qartod_variables_references(ds)
         self.assertTrue(all(r.value for r in results))
+        self.assertEqual(results[0].msgs, []) # only one Result to test
 
         # QARTOD variable with bad references (fail)
         qr.setncattr("references", r"p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht")
@@ -791,7 +807,9 @@ class TestIOOS1_2(BaseTestCase):
         ds = MockTimeSeries()
 
         # no value, pass
-        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+        res = self.ioos.check_ioos_ingest(ds)
+        self.assertTrue(res.value)
+        self.assertEqual(res.msgs, [])
 
         # value false
         ds.setncattr("ioos_ingest", "false")
