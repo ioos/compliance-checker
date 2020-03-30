@@ -148,7 +148,7 @@ class TestCF1_6(BaseTestCase):
         # delete the dataset and start over to create the variable with _FillValue at time of creation
         del ds
         ds = MockTimeSeries()
-        ds.createVariable("temp", np.float64, dimensions=("time"),
+        ds.createVariable("temp", np.float64, dimensions=("time",),
                           fill_value=np.float(99999999999999999999.))
 
         # give temp _FillValue as a float, expect good result
@@ -157,6 +157,26 @@ class TestCF1_6(BaseTestCase):
 
         # give temp valid_range as an array of floats, all should check out
         ds.variables['temp'].setncattr("valid_range", np.array([35., 38.]))
+        result = self.cf.check_child_attr_data_types(ds)
+        self.assert_result_is_good(result)
+
+        # dimensions would probably not be time for platform,
+        # but this makes for an easy sanity check against string-like
+        # variables and attributes
+        var = ds.createVariable("platform", 'S1', dimensions=("time",),
+                                fill_value="")
+
+        # this probably doesn't make much sense -- more for _FillValue,
+        # but _FillVaue data type checks are done at variable creation time?
+        # Can't set manually
+        var.setncattr("valid_max", -999)
+        result = self.cf.check_child_attr_data_types(ds)
+        self.assert_result_is_bad(result)
+        # str or bytes should work
+        var.setncattr("valid_max", "@")
+        result = self.cf.check_child_attr_data_types(ds)
+        self.assert_result_is_good(result)
+        var.setncattr("valid_max", b"@")
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_good(result)
 

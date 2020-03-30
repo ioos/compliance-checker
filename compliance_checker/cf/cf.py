@@ -435,7 +435,7 @@ class CFBaseCheck(BaseCheck):
         """
         attr_val = var.getncattr(attr_name)
 
-        if isinstance(attr_val, str):
+        if isinstance(attr_val, (str, bytes)):
             type_match = var.dtype.kind == 'S'
             val_type = type(attr_val)
         else:
