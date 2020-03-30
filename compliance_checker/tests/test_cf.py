@@ -166,16 +166,17 @@ class TestCF1_6(BaseTestCase):
         var = ds.createVariable("platform", 'S1', dimensions=("time",),
                                 fill_value="")
 
-        # can't actually set _FillValue to non-matching type here, so it might
-        # be impossible to test
-        #var.setncattr("_FillValue", -999)
-        #result = self.cf.check_child_attr_data_types(ds)
-        #self.assert_result_is_bad(result)
+        # this probably doesn't make much sense -- more for _FillValue,
+        # but _FillVaue data type checks are done at variable creation time?
+        # Can't set manually
+        var.setncattr("valid_max", -999)
+        result = self.cf.check_child_attr_data_types(ds)
+        self.assert_result_is_bad(result)
         # str or bytes should work
-        var.setncattr("_FillValue", "@")
+        var.setncattr("valid_max", "@")
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_good(result)
-        var.setncattr("_FillValue", b"@")
+        var.setncattr("valid_max", b"@")
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_good(result)
 
