@@ -1195,7 +1195,7 @@ class IOOS1_2Check(IOOSNCCheck):
            ):
                valid = False
 
-        return Result(BaseCheck.HIGH, valid, ctxt, [msg])
+        return Result(BaseCheck.HIGH, valid, ctxt, None if valid else [msg])
 
 class IOOSBaseSOSCheck(BaseCheck):
     _cc_spec = 'ioos_sos'

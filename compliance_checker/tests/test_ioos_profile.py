@@ -525,6 +525,7 @@ class TestIOOS1_2(BaseTestCase):
         # no wmo_platform_code, pass
         result = self.ioos.check_wmo_platform_code(ds)
         self.assertTrue(result.value)
+        self.assertEqual(result.msgs, [])
 
         # valid code
         ds.setncattr("wmo_platform_code", "12345")
