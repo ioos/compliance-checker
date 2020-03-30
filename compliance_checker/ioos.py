@@ -569,7 +569,7 @@ class IOOS1_2Check(IOOSNCCheck):
             not isinstance(igst, str) and igst is not None):
             r = False
 
-        return Result(BaseCheck.MEDIUM, r, "ioos_ingest", [m])
+        return Result(BaseCheck.MEDIUM, r, "ioos_ingest", None if r else [m])
 
     def check_contributor_role_and_vocabulary(self, ds):
         """

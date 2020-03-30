@@ -792,7 +792,9 @@ class TestIOOS1_2(BaseTestCase):
         ds = MockTimeSeries()
 
         # no value, pass
-        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+        res = self.ioos.check_ioos_ingest(ds)
+        self.assertTrue(res.value)
+        self.assertEqual(res.msgs, [])
 
         # value false
         ds.setncattr("ioos_ingest", "false")
