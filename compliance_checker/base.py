@@ -77,11 +77,10 @@ class ValidationObject(object):
             type_result = self.validate_type(input_name, input_value)
             if not type_result[0]:
                 return type_result
-        validator_stat = True
         for processed_value in self.split_func(input_value):
             validator_result = self.validator_func(processed_value)
             if not validator_result:
-                return False, self.validator_fail_msg.format(input_name)
+                return False, [self.validator_fail_msg.format(input_name)]
         # if all pass, then we're good.
         return True, None
 
@@ -465,7 +464,9 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
         else:
             check_val = attr_result[1]
             res_tup = other.validate(name, check_val)
+
         msgs = [] if res_tup[1] is None else res_tup[1]
+
         ret_val.append(
             Result(
                 priority,

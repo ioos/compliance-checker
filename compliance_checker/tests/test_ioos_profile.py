@@ -318,7 +318,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
         # set the necessary attributes
-        ds = MockTimeSeries(default_fill_value=9999999999.) # time, lat, lon, depth 
+        ds = MockTimeSeries(default_fill_value=9999999999.) # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, fill_value=9999999999.) # _FillValue
         temp.setncattr("missing_value", 9999999999.)
         temp.setncattr("standard_name", "sea_surface_temperature")
@@ -333,7 +333,7 @@ class TestIOOS1_2(BaseTestCase):
     def test_check_geospatial_vars_have_attrs(self):
 
         # create geophysical variable
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, dimensions=("time",))
 
         # should fail here
@@ -342,7 +342,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
         # should pass - default_fill_value sets _FillValue attr
-        ds = MockTimeSeries(default_fill_value=9999999999.) # time, lat, lon, depth 
+        ds = MockTimeSeries(default_fill_value=9999999999.) # time, lat, lon, depth
 
         ds.variables["time"].setncattr("standard_name", "time")
         ds.variables["time"].setncattr("standard_name_url", "http://cfconventions.org/Data/cf-standard-names/64/build/cf-standard-name-table.html")
@@ -354,7 +354,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(scored, out_of)
 
     def test_check_contributor_role_and_vocabulary(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no contributor_role or vocab, fail both
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
@@ -610,15 +610,15 @@ class TestIOOS1_2(BaseTestCase):
                                         "webmaster.ioos.us@noaa.gov")
         self.assertFalse(bad_result[0])
         self.assertEqual(bad_result[1],
-                         "naming_authority should either be a URL or a "
-                         "reversed DNS name (e.g \"edu.ucar.unidata\")")
+                         ["naming_authority should either be a URL or a "
+                          "reversed DNS name (e.g \"edu.ucar.unidata\")"])
 
     def test_platform_id_validation(self):
         attn = "platform_id"
         attv = "alphaNum3R1C"
         v = IOOS1_2_PlatformIDValidator()
         self.assertTrue(v.validate(attn, attv)[0])
-        
+
         attv = "alpha"
         v = IOOS1_2_PlatformIDValidator()
         self.assertTrue(v.validate(attn, attv)[0])
@@ -661,7 +661,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(score, out_of)
 
     def test_check_platform_global(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no global attr, fail
         self.assertFalse(self.ioos.check_platform_global(ds).value)
@@ -682,7 +682,7 @@ class TestIOOS1_2(BaseTestCase):
 
     def test_check_single_platform(self):
 
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
 
         # no global attr but also no platform variables, should pass
         results = self.ioos.check_single_platform(ds)
@@ -718,7 +718,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertFalse(results[0].value)
 
         # global attr, one platform var, correct featureType, incorrect cf_role var dimension
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
         ds.setncattr("featureType", "trajectoryprofile")
         ds.createDimension("trajectory", 2) # should only be 1
         temp = ds.createVariable("temp", "d", ("time"))
@@ -730,7 +730,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertFalse(results[0].value)
 
     def test_check_platform_vocabulary(self):
-        ds = MockTimeSeries() # time, lat, lon, depth 
+        ds = MockTimeSeries() # time, lat, lon, depth
         ds.setncattr("platform_vocabulary", "http://google.com")
         result = self.ioos.check_platform_vocabulary(ds)
         self.assertTrue(result.value)
