@@ -685,6 +685,7 @@ class TestIOOS1_2(BaseTestCase):
         # no global attr but also no platform variables, should pass
         results = self.ioos.check_single_platform(ds)
         self.assertTrue(results[0].value)
+        self.assertEqual(results[0].msgs, [])
 
         # give platform global, no variables, fail
         ds.setncattr("platform", "buoy")
@@ -701,6 +702,7 @@ class TestIOOS1_2(BaseTestCase):
         cf_role_var.setncattr("cf_role", "timeseries_id")
         results = self.ioos.check_single_platform(ds)
         self.assertTrue(all(r.value for r in results))
+        self.assertTrue(all(r.msgs==[] for r in results))
 
         # global attr, multiple platform variables, correct cf_role & featureType, fail
         plat2 = ds.createVariable("platform_var_2", np.byte)

@@ -815,23 +815,23 @@ class IOOS1_2Check(IOOSNCCheck):
         if num_platforms > 1 and glb_platform:
             msg = "A dataset may only have one platform; {} found".format(len(platform_set))
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
 
         elif ((not glb_platform) and num_platforms > 0):
             msg = "If platform variables exist, a global attribute \"platform\" must also exist"
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
         elif num_platforms == 0 and glb_platform:
             msg = "A dataset with a global \"platform\" attribute must platform have variables"
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
         elif num_platforms == 0 and (not glb_platform):
             msg = "Gridded model datasets are not required to declare a platform"
             val = True
-            results.append(Result(BaseCheck.HIGH, val, "platform", [msg]))
+            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
         else: # num_platforms==1 and glb_platform, test the dimensionality
 
@@ -868,7 +868,7 @@ class IOOS1_2Check(IOOSNCCheck):
                            BaseCheck.HIGH,
                            _val,
                            "platform variables",
-                           [msg.format(cf_role_var=var.name, cf_role=cf_role, dim=shp)]
+                           None if _val else [msg.format(cf_role_var=var.name, cf_role=cf_role, dim=shp)]
                        )
                     )
 
