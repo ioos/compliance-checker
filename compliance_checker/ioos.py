@@ -1156,7 +1156,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 msg = "\"references\" attribute for variable \"{}\" must be a valid URL".format(v.name)
                 val = bool(validators.url(attval))
 
-            results.append(Result(BaseCheck.MEDIUM, val, "qartod_variable:references", [msg]))
+            results.append(Result(BaseCheck.MEDIUM, val, "qartod_variable:references", None if val else [msg]))
 
         return results
 
