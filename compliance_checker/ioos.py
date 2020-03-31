@@ -817,7 +817,6 @@ class IOOS1_2Check(IOOSNCCheck):
             val = False
             results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
-
         elif ((not glb_platform) and num_platforms > 0):
             msg = "If platform variables exist, a global attribute \"platform\" must also exist"
             val = False
@@ -1048,7 +1047,9 @@ class IOOS1_2Check(IOOSNCCheck):
             BaseCheck.HIGH,
             all_passed_ingest_reqs,
             "gts_ingest requirements",
-            [var_passed_ingest_msg, var_failed_ingest_msg]
+            None if all_passed_ingest_reqs else [
+                var_passed_ingest_msg, var_failed_ingest_msg
+            ]
         )
 
     def check_instrument_variables(self, ds):
