@@ -45,18 +45,18 @@ li{
   <div class="col-md-12">
     <div class="page-header">
       <h2 align="center">IOOS Compliance Checker Report</h2>
-      <p align="center">For dataset {{source_name}}</p>
+      <p align="center">For dataset {{source_name|e}}</p>
     </div>
   </div>
   <div class="col-md-12">
     <h3 align="center">
       {% if cc_url %}
-        <a href={{cc_url}} target="_blank">{{testname}}</a>
+        <a href={{cc_url|e}} target="_blank">{{testname|e}}</a>
       {% else %}
-        {{testname}}
+        {{testname|e}}
       {% endif %}
     </h3>
-    <!--<a href={{cc_url}}>Reference Page</a>-->
+    <!--<a href={{cc_url|e}}>Reference Page</a>-->
   </div>
 
   <!-- -------------- -->
@@ -71,7 +71,7 @@ li{
       <!-- High Priority -->
 
       <div class="table-collapse">
-        <a data-target="high-priority-table" href="#"> {{scoreheader.get(3)}} <i class="glyphicon glyphicon-collapse-up"></i></a>
+        <a data-target="high-priority-table" href="#"> {{scoreheader.get(3)|e}} <i class="glyphicon glyphicon-collapse-up"></i></a>
       </div>
       {% if high_count -%}
       <div class="failures">
@@ -93,13 +93,13 @@ li{
 
                   <tr>
                     {% if result["msgs"]|length > 0 -%}
-                      <td>{{result['name']}}</td>
+                      <td>{{result['name']|e}}</td>
                       <td>
                           {% for msg in result['msgs'] -%}
 
                           <!-- bulleted list inside the table row -->
                         <ul>
-                          <li>{{msg}}</li>
+                          <li>{{msg|e}}</li>
                         </ul>
 
                         {% endfor -%}
@@ -136,7 +136,7 @@ li{
     <div class="col-md-12">
       {% if medium_count -%}
       <div class="table-collapse">
-        <a data-target="medium-priority-table" href="#"> {{scoreheader.get(2)}} <i class="glyphicon glyphicon-collapse-up"></i></a>
+        <a data-target="medium-priority-table" href="#"> {{scoreheader.get(2)|e}} <i class="glyphicon glyphicon-collapse-up"></i></a>
       </div>
       <div class="failures">
         | <span class="label label-danger label-as-badge">{{ medium_count }}</span>
@@ -156,13 +156,13 @@ li{
 
                   <tr>
                     {% if result["msgs"]|length -%}
-                      <td>{{result['name']}}</td>
+                      <td>{{result['name']|e}}</td>
                       <td>
                           {% for msg in result['msgs'] -%}
 
                           <!-- bulleted list inside the table row -->
                         <ul>
-                          <li>{{msg}}</li>
+                          <li>{{msg|e}}</li>
                         </ul>
 
                         {% endfor -%}
@@ -185,7 +185,7 @@ li{
     <div class="col-md-12">
       {% if low_count -%}
       <div class="table-collapse">
-        <a data-target="low-priority-table" href="#"> {{scoreheader.get(1)}} <i class="glyphicon glyphicon-collapse-up"></i></a>
+        <a data-target="low-priority-table" href="#"> {{scoreheader.get(1)|e}} <i class="glyphicon glyphicon-collapse-up"></i></a>
       </div>
       <div class="failures">
         | <span class="label label-danger label-as-badge">{{ low_count }}</span>
@@ -205,13 +205,13 @@ li{
 
                   <tr>
                     {% if result["msgs"]|length -%}
-                      <td>{{result['name']}}</td>
+                      <td>{{result['name']|e}}</td>
                       <td>
                           {% for msg in result['msgs'] -%}
 
                           <!-- bulleted list inside the table row -->
                         <ul>
-                          <li>{{msg}}</li>
+                          <li>{{msg|e}}</li>
                         </ul>
 
                         {% endfor -%}
