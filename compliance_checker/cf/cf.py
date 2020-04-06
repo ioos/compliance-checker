@@ -2006,7 +2006,7 @@ class CF1_6Check(CFNCCheck):
         valid_masks = TestCtx(BaseCheck.HIGH, self.section_titles['3.5'])
 
         valid_masks.assert_true(isinstance(flag_masks, np.ndarray),
-                                "{}'s flag_masks must be an array of values not {}".format(name, type(flag_masks)))
+                                "{}'s flag_masks must be an array of values not {}".format(name, type(flag_masks).__name__))
 
         if not isinstance(flag_masks, np.ndarray):
             return valid_masks.to_result()
