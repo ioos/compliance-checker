@@ -1,7 +1,6 @@
 from compliance_checker.ioos import (IOOS0_1Check, IOOS1_1Check, IOOS1_2Check,
                                      NamingAuthorityValidator,
                                      IOOS1_2_PlatformIDValidator)
-from compliance_checker.base import BaseCheck
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
@@ -758,9 +757,8 @@ class TestIOOS1_2(BaseTestCase):
         cf_role_var.setncattr("cf_role", "timeseries_id")
         results = self.ioos.check_cf_dsg(ds)
 
-        # check should auto-fail
-        self.assertFalse(results[0].value)
-        self.assertEqual(results[0].weight, BaseCheck.HIGH)
+        # check should pass with no results
+        self.assertEqual(results, [])
 
         # featureType==timeSeriesProfile, cf_role==timeseries_id, dim 1, pass
         ds = MockTimeSeries()

@@ -829,13 +829,15 @@ class IOOS1_2Check(IOOSNCCheck):
         Check that the dataset follows the restrictions for CF Discrete
         Sampling Geometries set by the IOOS Metadata Profile.
 
-        Examine the featureType of the dataset. If the featureType is
-        [profile, trajectory, timeSeriesProfile, trajectoryProfile] and cf_role
-        in [profile_id, trajectory_id], the dimensionality of the variable containing
-        cf_role must be 1. If featureType==timeSeries, a warning will be
-        triggered to inform the user that the Metadata Profile restrict features to share the
-        same lat/lon position (e.g., multiple features should be on the same
-        platform). If featureType==point, it can have whatever dimension.
+        Examine each variable with a cf_role. For each (featureType, cf_role):
+            - (timeSeries, timeseries_id)
+            - (timeSeriesProfile, timeseries_id)
+            - (trajectory, trajectory_id)
+            - (trajectoryProfile, trajectory_id)
+            - (profile, profile_id)
+        the dimension of the variable should be 1. For datasets with
+        the "point" featureType, do nothing.
+
 
         https://github.com/ioos/compliance-checker/issues/748#issuecomment-606659685
 
@@ -873,17 +875,15 @@ class IOOS1_2Check(IOOSNCCheck):
                     "are not valid and will cause harvesting errors."
                 ).format(dim=shp)
  
-                # "fails" regardless so the message is displayed
-                _val = False
+                _val = shp<=1 # fails if > 1
  
-            elif (
-                   feature_type in ["profile", "trajectory", "timeseriesprofile", "trajectoryprofile"]
-                   and
-                   cf_role in ["profile_id", "timeseries_id", "trajectory_id"]
-               ):
- 
-                # shape must be 1
-                # high priority, different message
+            elif ( # even though tested condition is the same, different msg
+                     feature_type=="profile" and cf_role=="profile_id" or
+                     feature_type=="trajectory" and cf_role=="trajectory_id" or
+                     feature_type=="timeseriesprofile" and cf_role=="timeseries_id" or
+                     feature_type=="trajectoryprofile" and cf_role=="trajectory_id"
+                 ):
+
                 msg = (
                     "Dimension length of the variable `{cf_role_var}` with "
                     "cf_role=`{cf_role}` (the 'station/trajectory/profile' "
@@ -895,9 +895,12 @@ class IOOS1_2Check(IOOSNCCheck):
                     dim=shp, feature_type=feature_type
                 )
  
-                _val = shp==1 # value must equal 1
+                _val = shp==1
  
             elif feature_type=="point": # do nothing
+                _val = True
+
+            else: # featureType and cf_role don't match up to our restrictions
                 _val = True
  
             if not _val:
