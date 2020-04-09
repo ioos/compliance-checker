@@ -128,7 +128,10 @@ def main():
 
     parser.add_argument('-d', '--download-standard-names',
                         help=("Specify a version of the cf standard name table"
-                              " to download as packaged version"))
+                              " to download as packaged version. Either specify"
+                              " a version number (e.g. \"72\") to fetch a "
+                              "specific version or \"latest\" to get the "
+                              "latest CF standard name table."))
 
     # Add command line args from generator plugins
     check_suite.add_plugin_args(parser)

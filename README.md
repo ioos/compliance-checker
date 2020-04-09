@@ -190,7 +190,9 @@ optional arguments:
   -l, --list-tests      List the available tests
   -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
                         Specify a version of the cf standard name table to
-                        download as packaged version
+                        download as packaged version. Either specify a version
+                        number (e.g. "72") to fetch a specific version or
+                        "latest" to get the latest CF standard name table.
 ```
 
 ## Examples
