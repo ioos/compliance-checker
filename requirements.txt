@@ -12,3 +12,4 @@ regex>=2017.07.28
 pendulum>=1.2.4
 pyproj>=2.2.1
 validators>=0.14.2           
+beautifulsoup4>=4.8.1
