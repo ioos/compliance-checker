@@ -808,7 +808,7 @@ class IOOS1_2Check(IOOSNCCheck):
             val = False
 
         elif ((not glb_platform) and num_platforms > 0):
-            msg = "If platform variables exist, a global attribute \"platform\" must also exist"
+            msg = "If a platform variable exists, a global attribute \"platform\" must also exist"
             val = False
 
         elif num_platforms == 0 and glb_platform:
@@ -864,7 +864,7 @@ class IOOS1_2Check(IOOSNCCheck):
             cf_role = getattr(var, "cf_role")
             shp = var.shape[0] if len(var.shape) > 0 else 1
  
-            if feature_type=="timeseries" and cf_role=="timeseries_id":
+            if feature_type == "timeseries" and cf_role == "timeseries_id":
                 msg = (
                     "Dimension length of the variable with "
                     "cf_role='timeseries_id (the 'station' dimension) "
@@ -875,13 +875,13 @@ class IOOS1_2Check(IOOSNCCheck):
                     "are not valid and will cause harvesting errors."
                 ).format(dim=shp)
  
-                _val = shp<=1 # fails if > 1
+                _val = shp <= 1 # fails if > 1
  
             elif ( # even though tested condition is the same, different msg
-                     feature_type=="profile" and cf_role=="profile_id" or
-                     feature_type=="trajectory" and cf_role=="trajectory_id" or
-                     feature_type=="timeseriesprofile" and cf_role=="timeseries_id" or
-                     feature_type=="trajectoryprofile" and cf_role=="trajectory_id"
+                     feature_type == "profile" and cf_role == "profile_id" or
+                     feature_type == "trajectory" and cf_role == "trajectory_id" or
+                     feature_type == "timeseriesprofile" and cf_role == "timeseries_id" or
+                     feature_type == "trajectoryprofile" and cf_role == "trajectory_id"
                  ):
 
                 msg = (
@@ -895,9 +895,9 @@ class IOOS1_2Check(IOOSNCCheck):
                     dim=shp, feature_type=feature_type
                 )
  
-                _val = shp==1
+                _val = shp == 1
  
-            elif feature_type=="point": # do nothing
+            elif feature_type == "point": # do nothing
                 _val = True
 
             else: # featureType and cf_role don't match up to our restrictions
