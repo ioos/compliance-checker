@@ -440,7 +440,7 @@ class IOOS1_2Check(IOOSNCCheck):
             ('infoUrl', base.UrlValidator()),
             'license',
             ('naming_authority', NamingAuthorityValidator()),
-            'platform',
+            #'platform', # checked in check_platform_global
             'platform_name',
             'publisher_country',
             ('publisher_email', base.EmailValidator()),
@@ -785,17 +785,9 @@ class IOOS1_2Check(IOOSNCCheck):
 
     def check_single_platform(self, ds):
         """
-        Verify that a dataset only has a single platform attribute. If one exists,
-        examine the featureType of the dataset. If the featureType is
-        [point, timeSeries, profile, trajectory] and cf_role in [timeseries_id,
-        profile_id, trajectory_id] dimensionality of the variable containing
-        cf_role must be 1 as "we only want a single glider/auv/ship"; if
-        featureType in [timeseries_id, trajectory_id], dimensionality of the
-        variable must also be one as  "we only want a single timeSeries aka buoy".
-        If cf_role==profile_id, it can have whatever dimension.
-
-        Gridded model datasets are not required to declare a platform
-        or platform variables.
+        Verify that a dataset only has a single platform attribute, and thus
+        a single platform variable. Gridded model datasets are not required
+        to declare a platform or platform variables.
 
         Args:
             ds (netCDF-4 Dataset): open Dataset object
@@ -804,7 +796,6 @@ class IOOS1_2Check(IOOSNCCheck):
             Result
         """
 
-        results = []
         glb_platform = getattr(ds, "platform", None)
 
         platform_set = set()
@@ -815,62 +806,114 @@ class IOOS1_2Check(IOOSNCCheck):
         if num_platforms > 1 and glb_platform:
             msg = "A dataset may only have one platform; {} found".format(len(platform_set))
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
         elif ((not glb_platform) and num_platforms > 0):
-            msg = "If platform variables exist, a global attribute \"platform\" must also exist"
+            msg = "If a platform variable exists, a global attribute \"platform\" must also exist"
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
         elif num_platforms == 0 and glb_platform:
             msg = "A dataset with a global \"platform\" attribute must platform have variables"
             val = False
-            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
         elif num_platforms == 0 and (not glb_platform):
             msg = "Gridded model datasets are not required to declare a platform"
             val = True
-            results.append(Result(BaseCheck.HIGH, val, "platform", None if val else [msg]))
 
-        else: # num_platforms==1 and glb_platform, test the dimensionality
+        else:
+            val = True
 
-            num_plat_val = True if num_platforms == 1 else False
+        return Result(BaseCheck.HIGH, val, "platform", None if val else [msg])
 
-            feature_type = getattr(ds, "featureType", "").lower()
-            if not feature_type:
-                return results
+    def check_cf_dsg(self, ds):
+        """
+        Check that the dataset follows the restrictions for CF Discrete
+        Sampling Geometries set by the IOOS Metadata Profile.
 
-            # filter out cf_role exists
-            cf_role_vars = ds.get_variables_by_attributes(cf_role=lambda x: x is not None)
-            num_cf_role_vars = len(cf_role_vars)
-            msg = "With a single platform provided, the dimension of the cf_role " +\
-                  "variable {cf_role_var} (cf_role=={cf_role}) should also " +\
-                  "be equal to 1 (it is {dim})"
+        Examine each variable with a cf_role. For each (featureType, cf_role):
+            - (timeSeries, timeseries_id)
+            - (timeSeriesProfile, timeseries_id)
+            - (trajectory, trajectory_id)
+            - (trajectoryProfile, trajectory_id)
+            - (profile, profile_id)
+        the dimension of the variable should be 1. For datasets with
+        the "point" featureType, do nothing.
 
-            for var in cf_role_vars:
-                cf_role = getattr(var, "cf_role")
-                shp = var.shape[0] if len(var.shape) > 0 else 1
-                if (
-                       feature_type in ["point", "timeseries", "profile", "trajectory", "timeseriesprofile", "trajectoryprofile"]
-                       and
-                       cf_role in ["timeseries_id", "profile_id", "trajectory_id"]
-                   ):
-                    if (num_cf_role_vars==1) or (num_cf_role_vars>1 and cf_role!="profile_id"):
-                        # shape must be 1 (or if no length, that's okay too)
-                        _val = shp==1
-                    elif (num_cf_role_vars>1) and (cf_role=="profile_id"):
-                        # can have any dimension if there are more than one cf_role?
-                        _val = True
 
-                    results.append(
-                       Result(
-                           BaseCheck.HIGH,
-                           _val,
-                           "platform variables",
-                           None if _val else [msg.format(cf_role_var=var.name, cf_role=cf_role, dim=shp)]
-                       )
+        https://github.com/ioos/compliance-checker/issues/748#issuecomment-606659685
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset (open)
+
+        Returns
+        -------
+        list of Result objects
+        """
+
+        results = []
+
+        feature_type = getattr(ds, "featureType", "").lower()
+        if not feature_type:
+            return results
+ 
+        # loop through all variables with cf_role
+        cf_role_vars = ds.get_variables_by_attributes(cf_role=lambda x: x is not None)
+        num_cf_role_vars = len(cf_role_vars)
+
+        for var in cf_role_vars:
+            cf_role = getattr(var, "cf_role")
+            shp = var.shape[0] if len(var.shape) > 0 else 1
+ 
+            if feature_type == "timeseries" and cf_role == "timeseries_id":
+                msg = (
+                    "Dimension length of the variable with "
+                    "cf_role='timeseries_id (the 'station' dimension) "
+                    "is {dim}. Note that the IOOS profile restricts "
+                    "timeSeries datasets with multiple features to share "
+                    "the same lat/lon position (ie. to exist on the same "
+                    "platform). Datasets that include multiple platforms "
+                    "are not valid and will cause harvesting errors."
+                ).format(dim=shp)
+ 
+                _val = shp <= 1 # fails if > 1
+ 
+            elif ( # even though tested condition is the same, different msg
+                     feature_type == "profile" and cf_role == "profile_id" or
+                     feature_type == "trajectory" and cf_role == "trajectory_id" or
+                     feature_type == "timeseriesprofile" and cf_role == "timeseries_id" or
+                     feature_type == "trajectoryprofile" and cf_role == "trajectory_id"
+                 ):
+
+                msg = (
+                    "Dimension length of the variable `{cf_role_var}` with "
+                    "cf_role=`{cf_role}` (the 'station/trajectory/profile' "
+                    "dimension) must be equal to 1 (it is {dim}). The IOOS "
+                    "profile restricts {feature_type} datasets to a "
+                    "single platform (ie. station/trajectory/profile) per dataset."
+                ).format(
+                    cf_role_var=var.name, cf_role=cf_role,
+                    dim=shp, feature_type=feature_type
+                )
+ 
+                _val = shp == 1
+ 
+            elif feature_type == "point": # do nothing
+                _val = True
+
+            else: # featureType and cf_role don't match up to our restrictions
+                _val = True
+ 
+            if not _val:
+                results.append(
+                    Result(
+                        BaseCheck.HIGH,
+                        _val,
+                        "CF Discrete Sampling Geometry Compliance",
+                        [msg]
                     )
-
+                )
+ 
+ 
         return results
 
     def check_platform_vocabulary(self, ds):

@@ -685,16 +685,44 @@ class TestIOOS1_2(BaseTestCase):
         ds = MockTimeSeries() # time, lat, lon, depth
 
         # no global attr but also no platform variables, should pass
-        results = self.ioos.check_single_platform(ds)
-        self.assertTrue(results[0].value)
-        self.assertEqual(results[0].msgs, [])
+        result = self.ioos.check_single_platform(ds)
+        self.assertTrue(result.value)
+        self.assertEqual(result.msgs, [])
 
         # give platform global, no variables, fail
         ds.setncattr("platform", "buoy")
-        results = self.ioos.check_single_platform(ds)
-        self.assertFalse(results[0].value)
+        result = self.ioos.check_single_platform(ds)
+        self.assertFalse(result.value)
 
-        # global attribute, one platform variable, correct cf_role & featureType, pass
+        # global platform, one platform variable, pass
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        result = self.ioos.check_single_platform(ds)
+        self.assertTrue(result.value)
+        self.assertEqual(result.msgs, [])
+
+        # two platform variables, fail
+        temp2 = ds.createVariable("temp2", "d", ("time"))
+        temp2.setncattr("platform", "platform_var2")
+        plat = ds.createVariable("platform_var2", np.byte)
+        result = self.ioos.check_single_platform(ds)
+        self.assertFalse(result.value)
+
+        # no global attr, one variable, fail
+        ds = MockTimeSeries() # time, lat, lon, depth
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        result = self.ioos.check_single_platform(ds)
+        self.assertFalse(result.value)
+ 
+    def test_check_cf_dsg(self):
+
+        ds = MockTimeSeries() # time, lat, lon, depth
+        ds.setncattr("platform", "single_string")
+
+        # correct cf_role & featureType, pass
         ds.setncattr("featureType", "profile")
         ds.createDimension("profile", 1)
         temp = ds.createVariable("temp", "d", ("time"))
@@ -702,22 +730,11 @@ class TestIOOS1_2(BaseTestCase):
         plat = ds.createVariable("platform_var", np.byte)
         cf_role_var = ds.createVariable("cf_role_var", np.byte, ("profile",))
         cf_role_var.setncattr("cf_role", "timeseries_id")
-        results = self.ioos.check_single_platform(ds)
+        results = self.ioos.check_cf_dsg(ds)
         self.assertTrue(all(r.value for r in results))
         self.assertTrue(all(r.msgs==[] for r in results))
 
-        # global attr, multiple platform variables, correct cf_role & featureType, fail
-        plat2 = ds.createVariable("platform_var_2", np.byte)
-        temp2 = ds.createVariable("temp2", "d", ("time"))
-        temp2.setncattr("platform", "platform_var2")
-        results = self.ioos.check_single_platform(ds)
-        self.assertFalse(results[0].value)
-
-        # no global attr, one platform var, correct cf_role & featureType, fail
-        ds.delncattr("platform")
-        self.assertFalse(results[0].value)
-
-        # global attr, one platform var, correct featureType, incorrect cf_role var dimension
+        # correct featureType, incorrect cf_role var dimension
         ds = MockTimeSeries() # time, lat, lon, depth
         ds.setncattr("featureType", "trajectoryprofile")
         ds.createDimension("trajectory", 2) # should only be 1
@@ -726,8 +743,131 @@ class TestIOOS1_2(BaseTestCase):
         plat = ds.createVariable("platform_var", np.byte)
         cf_role_var = ds.createVariable("cf_role_var", np.byte, ("trajectory",))
         cf_role_var.setncattr("cf_role", "trajectory_id")
-        results = self.ioos.check_single_platform(ds)
+        results = self.ioos.check_cf_dsg(ds)
         self.assertFalse(results[0].value)
+
+        # featureType==timeSeries, cf_role=timeseries_id
+        ds = MockTimeSeries()
+        ds.setncattr("featureType", "timeSeries")
+        ds.createDimension("station", 1)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("station",))
+        cf_role_var.setncattr("cf_role", "timeseries_id")
+        results = self.ioos.check_cf_dsg(ds)
+
+        # check should pass with no results
+        self.assertEqual(results, [])
+
+        # featureType==timeSeriesProfile, cf_role==timeseries_id, dim 1, pass
+        ds = MockTimeSeries()
+        ds.setncattr("featureType", "timeSeriesProfile")
+        ds.createDimension("station", 1)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("station",))
+        cf_role_var.setncattr("cf_role", "timeseries_id")
+        results = self.ioos.check_cf_dsg(ds)
+        self.assertEqual(results, [])
+
+        # featureType==timeSeriesProfile, cf_role==timeseries_id, dim 2, fail
+        ds = MockTimeSeries()
+        ds.setncattr("platform", "platform")
+        ds.setncattr("featureType", "timeSeriesProfile")
+        ds.createDimension("station", 2)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("station",))
+        cf_role_var.setncattr("cf_role", "timeseries_id")
+        results = self.ioos.check_cf_dsg(ds)
+        self.assertFalse(results[0].value)
+
+        # featureType==trajectory, cf_role==trajectory_id, dim 1, pass
+        ds = MockTimeSeries()
+        ds.setncattr("featureType", "trajectory")
+        ds.createDimension("trajectory", 1)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("trajectory",))
+        cf_role_var.setncattr("cf_role", "trajectory_id")
+        results = self.ioos.check_cf_dsg(ds)
+        self.assertEqual(results, [])
+
+        # featureType==trajectory, cf_role==trajectory, dim 2, fail
+        ds = MockTimeSeries()
+        ds.setncattr("featureType", "trajectory")
+        ds.createDimension("trajectory", 2)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("trajectory",))
+        cf_role_var.setncattr("cf_role", "trajectory_id")
+        results = self.ioos.check_cf_dsg(ds)
+        self.assertFalse(results[0].value)
+
+        # featureType==trajectoryProfile, cf_role==trajectory_id, dim 1, pass
+        ds = MockTimeSeries()
+        ds.setncattr("featureType", "trajectoryProfile")
+        ds.createDimension("trajectoryprof", 1)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("trajectoryprof",))
+        cf_role_var.setncattr("cf_role", "trajectory_id")
+        results = self.ioos.check_cf_dsg(ds)
+        self.assertEqual(results, [])
+
+        # featureType==trajectoryProfile, cf_role==trajectory_id, dim 2, fail
+        ds = MockTimeSeries()
+        ds.setncattr("featureType", "trajectoryProfile")
+        ds.createDimension("trajectoryprof", 2)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("trajectoryprof",))
+        cf_role_var.setncattr("cf_role", "trajectory_id")
+        results = self.ioos.check_cf_dsg(ds)
+        self.assertFalse(results[0].value)
+
+        # featureType==profile, cf_role==profile_id, dim 1, pass
+        ds = MockTimeSeries()
+        ds.setncattr("featureType", "profile")
+        ds.createDimension("prof", 1)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("prof",))
+        cf_role_var.setncattr("cf_role", "profile_id")
+        results = self.ioos.check_cf_dsg(ds)
+        self.assertEqual(results, [])
+
+        # featureType==profile, cf_role==profile_id, dim 2, fail
+        ds = MockTimeSeries()
+        ds.setncattr("featureType", "profile")
+        ds.createDimension("prof", 2)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("prof",))
+        cf_role_var.setncattr("cf_role", "profile_id")
+        results = self.ioos.check_cf_dsg(ds)
+        self.assertFalse(results[0].value)
+
+        # featureType==point -- do nothing
+        ds = MockTimeSeries()
+        ds.setncattr("featureType", "point")
+        ds.createDimension("blah", 2)
+        temp = ds.createVariable("temp", "d", ("time"))
+        temp.setncattr("platform", "platform_var")
+        plat = ds.createVariable("platform_var", np.byte)
+        cf_role_var = ds.createVariable("cf_role_var", np.byte, ("blah",))
+        cf_role_var.setncattr("cf_role", "profile_id")
+        results = self.ioos.check_cf_dsg(ds)
+        self.assertEqual(results, [])
 
     def test_check_platform_vocabulary(self):
         ds = MockTimeSeries() # time, lat, lon, depth
