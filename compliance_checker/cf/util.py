@@ -6,7 +6,9 @@ import sys
 from copy import deepcopy
 from collections import defaultdict
 from lxml import etree
+import lxml.html
 from cf_units import Unit
+from urllib.parse import urljoin
 from netCDF4 import Dimension, Variable
 from pkgutil import get_data
 from pkg_resources import resource_filename
@@ -264,7 +266,8 @@ class StandardNameTable(object):
             with io.open(cached_location, 'r', encoding='utf-8') as fp:
                 resource_text = fp.read()
         elif os.environ.get('CF_STANDARD_NAME_TABLE') and os.path.exists(os.environ['CF_STANDARD_NAME_TABLE']):
-            with io.open(os.environ['CF_STANDARD_NAME_TABLE'], 'r', encoding='utf-8') as fp:
+            with io.open(os.environ['CF_STANDARD_NAME_TABLE'], 'r',
+                         encoding='utf-8') as fp:
                 resource_text = fp.read()
         else:
             resource_text = get_data("compliance_checker", "data/cf-standard-name-table.xml")
@@ -327,15 +330,25 @@ def download_cf_standard_name_table(version, location=None):
     if location is None:  # This case occurs when updating the packaged version from command line
         location = resource_filename('compliance_checker', 'data/cf-standard-name-table.xml')
 
-    url = "http://cfconventions.org/Data/cf-standard-names/{0}/src/cf-standard-name-table.xml".format(version)
-    r = requests.get(url, allow_redirects=True)
-    if r.status_code == 200:
-        print("Downloading cf-standard-names table version {0} from: {1}".format(version, url), file=sys.stderr)
-        with open(location, 'wb') as f:
-            f.write(r.content)
+    if version == 'latest':
+        tables_tree = lxml.html.parse("http://cfconventions.org/documents.html")
+        end_str = "cf-standard-name-table.xml"
+        xpath_expr = ("//a[substring(@href, string-length(@href) - "
+                      "string-length('{0}') +1) "
+                      " = '{0}'][1]".format(end_str))
+        latest_vers = tables_tree.xpath(xpath_expr)[0]
+
+        url = urljoin("http://cfconventions.org", latest_vers.attrib['href'])
     else:
-        r.raise_for_status()
-    return
+        url = "http://cfconventions.org/Data/cf-standard-names/{0}/src/cf-standard-name-table.xml".format(version)
+
+    r = requests.get(url, allow_redirects=True)
+    r.raise_for_status()
+
+    print("Downloading cf-standard-names table version {0} from: {1}".format(version, url),
+            file=sys.stderr)
+    with open(location, 'wb') as f:
+        f.write(r.content)
 
 
 def create_cached_data_dir():
