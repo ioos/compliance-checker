@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 Appendix D compliance support for CF 1.6 and CF 1.7
 
 The definitions given here allow an application to compute dimensional
@@ -20,33 +20,67 @@ example, a vertical coordinate whose definition contains a time index is not
 necessarily time dependent in all netCDF files. Also, the definitions are given
 in general forms that may be simplified by omitting certain terms. A term that
 is omitted from the formula_terms attribute should be assumed to be zero.
-'''
+"""
 
 # Contains the standard name followed by a 2-tuple:
 # (the set of expected formula terms, set of computed_standard_name(s)). Most
 # vertical coordinates only have one computed_standard_name, but some have
 # multiple acceptable values.
 ocean_computed_standard_names = {
-    'altitude', 'height_above_geopotential_datum',
-    'height_above_reference_ellipsoid', 'height_above_mean_sea_level'
+    "altitude",
+    "height_above_geopotential_datum",
+    "height_above_reference_ellipsoid",
+    "height_above_mean_sea_level",
 }
-dimless_vertical_coordinates_1_6 = { # only for CF-1.6
-    "atmosphere_ln_pressure_coordinate"          : ({'p0', 'lev'}, {'air_pressure'}),
-    "atmosphere_sigma_coordinate"                : ({'sigma', 'ps', 'ptop'}, {'air_pressure'}),
-    "atmosphere_hybrid_sigma_pressure_coordinate": (({'a', 'b', 'ps'}, {'ap', 'b', 'ps'}), {'air_pressure'}),
-    "atmosphere_hybrid_height_coordinate"        : ({'a', 'b', 'orog'}, {'altitude', 'height_above_geopotential_datum'}),
-    "atmosphere_sleve_coordinate"                : ({'a', 'b1', 'b2', 'ztop', 'zsurf1', 'zsurf2'}, {'altitude', 'height_above_geopotential_datum'}),
-    "ocean_sigma_coordinate"                     : ({'sigma', 'eta', 'depth'}, ocean_computed_standard_names),
-    "ocean_s_coordinate"                         : ({'s', 'eta', 'depth', 'a', 'b', 'depth_c'}, ocean_computed_standard_names),
-    "ocean_sigma_z_coordinate"                   : ({'sigma', 'eta', 'depth', 'depth_c', 'nsigma', 'zlev'}, ocean_computed_standard_names),
-    "ocean_double_sigma_coordinate"              : ({'sigma', 'depth', 'z1', 'z2', 'a', 'href', 'k_c'}, ocean_computed_standard_names)
+dimless_vertical_coordinates_1_6 = {  # only for CF-1.6
+    "atmosphere_ln_pressure_coordinate": ({"p0", "lev"}, {"air_pressure"}),
+    "atmosphere_sigma_coordinate": ({"sigma", "ps", "ptop"}, {"air_pressure"}),
+    "atmosphere_hybrid_sigma_pressure_coordinate": (
+        ({"a", "b", "ps"}, {"ap", "b", "ps"}),
+        {"air_pressure"},
+    ),
+    "atmosphere_hybrid_height_coordinate": (
+        {"a", "b", "orog"},
+        {"altitude", "height_above_geopotential_datum"},
+    ),
+    "atmosphere_sleve_coordinate": (
+        {"a", "b1", "b2", "ztop", "zsurf1", "zsurf2"},
+        {"altitude", "height_above_geopotential_datum"},
+    ),
+    "ocean_sigma_coordinate": (
+        {"sigma", "eta", "depth"},
+        ocean_computed_standard_names,
+    ),
+    "ocean_s_coordinate": (
+        {"s", "eta", "depth", "a", "b", "depth_c"},
+        ocean_computed_standard_names,
+    ),
+    "ocean_sigma_z_coordinate": (
+        {"sigma", "eta", "depth", "depth_c", "nsigma", "zlev"},
+        ocean_computed_standard_names,
+    ),
+    "ocean_double_sigma_coordinate": (
+        {"sigma", "depth", "z1", "z2", "a", "href", "k_c"},
+        ocean_computed_standard_names,
+    ),
 }
 
-dimless_vertical_coordinates_1_7 = dimless_vertical_coordinates_1_6.copy() # shallow copy
-dimless_vertical_coordinates_1_7.update({ # extends 1.6
-    "ocean_s_coordinate_g1": ({'s', 'C', 'eta', 'depth', 'depth_c'}, ocean_computed_standard_names),
-    "ocean_s_coordinate_g2": ({'s', 'C', 'eta', 'depth', 'depth_c'}, ocean_computed_standard_names)
- })
+dimless_vertical_coordinates_1_7 = (
+    dimless_vertical_coordinates_1_6.copy()
+)  # shallow copy
+dimless_vertical_coordinates_1_7.update(
+    {  # extends 1.6
+        "ocean_s_coordinate_g1": (
+            {"s", "C", "eta", "depth", "depth_c"},
+            ocean_computed_standard_names,
+        ),
+        "ocean_s_coordinate_g2": (
+            {"s", "C", "eta", "depth", "depth_c"},
+            ocean_computed_standard_names,
+        ),
+    }
+)
+
 
 def no_missing_terms(formula_name, term_set, dimless_vertical_coordinates):
     """
@@ -55,6 +89,7 @@ def no_missing_terms(formula_name, term_set, dimless_vertical_coordinates):
     equal, and not contain more or less terms than expected.
     """
     reqd_terms = dimless_vertical_coordinates[formula_name][0]
+
     def has_all_terms(reqd_termset):
         return len(reqd_termset ^ term_set) == 0
 

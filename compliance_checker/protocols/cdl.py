@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-'''
+"""
 compliance_checker/protocols/cdl.py
-'''
+"""
 import os
 
 
 def is_cdl(filename):
-    '''
+    """
     Quick check for .cdl ascii file
 
     Example:
@@ -23,12 +23,12 @@ def is_cdl(filename):
 
     :param str filename: Absolute path of file to check
     :param str data: First chuck of data from file to check
-    '''
-    if os.path.splitext(filename)[-1] != '.cdl':
+    """
+    if os.path.splitext(filename)[-1] != ".cdl":
         return False
 
-    with open(filename, 'rb') as f:
+    with open(filename, "rb") as f:
         data = f.read(32)
-    if data.startswith(b'netcdf') or b'dimensions' in data:
+    if data.startswith(b"netcdf") or b"dimensions" in data:
         return True
     return False

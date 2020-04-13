@@ -1,7 +1,7 @@
 netcdf {
 dimensions:
     time = 2;
-    max_strlen = 50; 
+    max_strlen = 50;
     station_id = 2;
 variables:
     double time(time);

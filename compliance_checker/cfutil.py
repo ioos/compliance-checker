@@ -1,57 +1,57 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+"""
 compliance_checker/cfutil.py
-'''
-from cf_units import Unit
-from pkg_resources import resource_filename
-from collections import defaultdict
-import warnings
-from functools import partial
+"""
 import csv
 import re
-from functools import lru_cache
+import warnings
 
+from collections import defaultdict
+from functools import lru_cache, partial
+
+from cf_units import Unit
+from pkg_resources import resource_filename
 
 
 _UNITLESS_DB = None
 _SEA_NAMES = None
 
 VALID_LAT_UNITS = {
-    'degrees_north',
-    'degree_north',
-    'degree_n',
-    'degrees_n',
-    'degreen',
-    'degreesn'
+    "degrees_north",
+    "degree_north",
+    "degree_n",
+    "degrees_n",
+    "degreen",
+    "degreesn",
 }
 VALID_LON_UNITS = {
-    'degrees_east',
-    'degree_east',
-    'degree_e',
-    'degrees_e',
-    'degreee',
-    'degreese'
+    "degrees_east",
+    "degree_east",
+    "degree_e",
+    "degrees_e",
+    "degreee",
+    "degreese",
 }
 
 
 # We can't import appendix d without getting circular imports
 DIMENSIONLESS_VERTICAL_COORDINATES = {
-    'ocean_s_coordinate',
-    'ocean_s_coordinate_g1',
-    'ocean_s_coordinate_g2',
-    'atmosphere_hybrid_sigma_pressure_coordinate',
-    'atmosphere_hybrid_height_coordinate',
-    'ocean_double_sigma_coordinate',
-    'ocean_sigma_z_coordinate',
-    'ocean_sigma_coordinate',
-    'atmosphere_sigma_coordinate',
-    'atmosphere_ln_pressure_coordinate',
-    'atmosphere_sleve_coordinate'
+    "ocean_s_coordinate",
+    "ocean_s_coordinate_g1",
+    "ocean_s_coordinate_g2",
+    "atmosphere_hybrid_sigma_pressure_coordinate",
+    "atmosphere_hybrid_height_coordinate",
+    "ocean_double_sigma_coordinate",
+    "ocean_sigma_z_coordinate",
+    "ocean_sigma_coordinate",
+    "atmosphere_sigma_coordinate",
+    "atmosphere_ln_pressure_coordinate",
+    "atmosphere_sleve_coordinate",
 }
 
-def attr_membership(attr_val, value_set, attr_type=str,
-                          modifier_fn=lambda x: x):
+
+def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x):
     """
     Helper function passed to netCDF4.Dataset.get_attributes_by_value
     Checks that `attr_val` exists, has the same type as `attr_type`,
@@ -69,9 +69,10 @@ def attr_membership(attr_val, value_set, attr_type=str,
         return False
 
     if not isinstance(attr_val, attr_type):
-        warnings.warn("Attribute is of type {}, {} expected. "
-                      "Attempting to cast to expected type.".format(type(attr_val),
-                                                                    attr_type))
+        warnings.warn(
+            "Attribute is of type {}, {} expected. "
+            "Attempting to cast to expected type.".format(type(attr_val), attr_type)
+        )
         try:
             # if the expected type is str, try casting to unicode type
             # since str can't be instantiated
@@ -89,8 +90,10 @@ def attr_membership(attr_val, value_set, attr_type=str,
     try:
         is_in_set = modifier_fn(new_attr_val) in value_set
     except Exception as e:
-        warnings.warn('Could not apply modifier function {} to value: '
-                      ' {}'.format(modifier_fn, e.msg))
+        warnings.warn(
+            "Could not apply modifier function {} to value: "
+            " {}".format(modifier_fn, e.msg)
+        )
         return False
 
     return is_in_set
@@ -98,40 +101,41 @@ def attr_membership(attr_val, value_set, attr_type=str,
 
 @lru_cache(128)
 def is_dimensionless_standard_name(xml_tree, standard_name):
-    '''
+    """
     Returns True if the units for the associated standard name are
     dimensionless.  Dimensionless standard names include those that have no
     units and units that are defined as constant units in the CF standard name
     table i.e. '1', or '1e-3'.
-    '''
+    """
     # standard_name must be string, so if it is not, it is *wrong* by default
     if not isinstance(standard_name, str):
         return False
     found_standard_name = xml_tree.find(".//entry[@id='{}']".format(standard_name))
     if found_standard_name is not None:
-        canonical_units = found_standard_name.find('canonical_units')
+        canonical_units = found_standard_name.find("canonical_units")
         # so far, standard name XML table includes
         # 1 and 1e-3 for constant units, but expanding to valid udunits
         # prefixes to be on the safe side
         # taken from CF Table 3.1 of valid UDUnits prefixes
-        dimless_units = r'1(?:e-?(?:1|2|3|6|9|12|15|18|21|24))?$'
-        return canonical_units is None or re.match(dimless_units,
-                                                   canonical_units.text)
+        dimless_units = r"1(?:e-?(?:1|2|3|6|9|12|15|18|21|24))?$"
+        return canonical_units is None or re.match(dimless_units, canonical_units.text)
     # if the standard name is not found, assume we need units for the time being
     else:
         return False
 
 
 def get_sea_names():
-    '''
+    """
     Returns a list of NODC sea names
 
     source of list: https://www.nodc.noaa.gov/General/NODC-Archive/seanamelist.txt
-    '''
+    """
     global _SEA_NAMES
     if _SEA_NAMES is None:
         buf = {}
-        with open(resource_filename('compliance_checker', 'data/seanames.csv'), 'r') as f:
+        with open(
+            resource_filename("compliance_checker", "data/seanames.csv"), "r"
+        ) as f:
             reader = csv.reader(f)
             for code, sea_name in reader:
                 buf[sea_name] = code
@@ -140,7 +144,7 @@ def get_sea_names():
 
 
 def is_unitless(ds, variable):
-    '''
+    """
     Returns true if the variable is unitless
 
     Note units of '1' are considered whole numbers or parts but still represent
@@ -148,44 +152,54 @@ def is_unitless(ds, variable):
 
     :param netCDF4.Dataset ds: An open netCDF dataset
     :param str variable: Name of the variable
-    '''
-    units = getattr(ds.variables[variable], 'units', None)
-    return units is None or units == ''
+    """
+    units = getattr(ds.variables[variable], "units", None)
+    return units is None or units == ""
 
 
 def is_geophysical(ds, variable):
-    '''
+    """
     Returns true if the dataset's variable is likely a geophysical variable
 
     :param netCDF4.Dataset ds: An open netCDF dataset
     :param str variable: Name of the variable
-    '''
+    """
     ncvar = ds.variables[variable]
 
-    if getattr(ncvar, 'cf_role', None):
+    if getattr(ncvar, "cf_role", None):
         return False
 
     # Check for axis
-    if getattr(ncvar, 'axis', None):
+    if getattr(ncvar, "axis", None):
         return False
 
-    standard_name_test = getattr(ncvar, 'standard_name', '')
+    standard_name_test = getattr(ncvar, "standard_name", "")
     unitless = is_unitless(ds, variable)
 
     if not isinstance(standard_name_test, str):
-        warnings.warn("Variable {} has non string standard name, "
-                      "Attempting cast to string".format(variable))
+        warnings.warn(
+            "Variable {} has non string standard name, "
+            "Attempting cast to string".format(variable)
+        )
         try:
             standard_name = str(standard_name_test)
         except ValueError:
-            warnings.warn("Unable to cast standard name to string, excluding "
-                          "from geophysical variables")
+            warnings.warn(
+                "Unable to cast standard name to string, excluding "
+                "from geophysical variables"
+            )
     else:
         standard_name = standard_name_test
 
     # Is the standard name associated with coordinates
-    if standard_name in {'time', 'latitude', 'longitude',
-                         'height', 'depth', 'altitude'}:
+    if standard_name in {
+        "time",
+        "latitude",
+        "longitude",
+        "height",
+        "depth",
+        "altitude",
+    }:
         return False
 
     if variable in get_coordinate_variables(ds):
@@ -202,7 +216,7 @@ def is_geophysical(ds, variable):
         return False
 
     # Is it a QC Flag?
-    if 'status_flag' in standard_name or hasattr(ncvar, 'flag_meanings'):
+    if "status_flag" in standard_name or hasattr(ncvar, "flag_meanings"):
         return False
 
     # Is it a §7.1 Cell Boundaries variable
@@ -213,7 +227,7 @@ def is_geophysical(ds, variable):
         return False
 
     # Is it a string but with no defined units?
-    if ncvar.dtype.char == 'S':
+    if ncvar.dtype.char == "S":
         return False
 
     # Is it an instrument descriptor?
@@ -225,14 +239,14 @@ def is_geophysical(ds, variable):
         return False
 
     # Skip count variables too
-    if hasattr(ncvar, 'sample_dimension'):
+    if hasattr(ncvar, "sample_dimension"):
         return False
 
     return True
 
 
 def get_coordinate_variables(ds):
-    '''
+    """
     Returns a list of variable names that identify as coordinate variables.
 
     A coordinate variable is a netCDF variable with exactly one dimension. The
@@ -246,7 +260,7 @@ def get_coordinate_variables(ds):
     variables.
 
     :param netCDF4.Dataset ds: An open netCDF dataset
-    '''
+    """
     coord_vars = []
     for dimension in ds.dimensions:
         if dimension in ds.variables:
@@ -256,7 +270,7 @@ def get_coordinate_variables(ds):
 
 
 def get_auxiliary_coordinate_variables(ds):
-    '''
+    """
     Returns a list of auxiliary coordinate variables
 
     An auxiliary coordinate variable is any netCDF variable that contains
@@ -264,15 +278,20 @@ def get_auxiliary_coordinate_variables(ds):
     defined by CF).
 
     :param netCDf4.Dataset ds: An open netCDF dataset
-    '''
+    """
     aux_vars = []
     # get any variables referecned by the coordinates attribute
-    for ncvar in ds.get_variables_by_attributes(coordinates=lambda x: isinstance(x, str)):
+    for ncvar in ds.get_variables_by_attributes(
+        coordinates=lambda x: isinstance(x, str)
+    ):
         # split the coordinates into individual variable names
-        referenced_variables = ncvar.coordinates.split(' ')
+        referenced_variables = ncvar.coordinates.split(" ")
         # if the variable names exist, add them
         for referenced_variable in referenced_variables:
-            if referenced_variable in ds.variables and referenced_variable not in aux_vars:
+            if (
+                referenced_variable in ds.variables
+                and referenced_variable not in aux_vars
+            ):
                 aux_vars.append(referenced_variable)
 
     # axis variables are automatically in
@@ -281,11 +300,20 @@ def get_auxiliary_coordinate_variables(ds):
             aux_vars.append(variable)
 
     # Last are any variables that define the common coordinate standard names
-    coordinate_standard_names = ['time', 'longitude', 'latitude', 'height', 'depth', 'altitude']
+    coordinate_standard_names = [
+        "time",
+        "longitude",
+        "latitude",
+        "height",
+        "depth",
+        "altitude",
+    ]
     coordinate_standard_names += DIMENSIONLESS_VERTICAL_COORDINATES
 
     # Some datasets like ROMS use multiple variables to define coordinates
-    for ncvar in ds.get_variables_by_attributes(standard_name=lambda x: x in coordinate_standard_names):
+    for ncvar in ds.get_variables_by_attributes(
+        standard_name=lambda x: x in coordinate_standard_names
+    ):
         if ncvar.name not in aux_vars:
             aux_vars.append(ncvar.name)
 
@@ -300,33 +328,33 @@ def get_auxiliary_coordinate_variables(ds):
 
 
 def get_forecast_metadata_variables(ds):
-    '''
+    """
     Returns a list of variables that represent forecast reference time
     metadata.
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset.
     :rtype: list
-    '''
+    """
     forecast_metadata_standard_names = {
-        'forecast_period',
-        'forecast_reference_time',
+        "forecast_period",
+        "forecast_reference_time",
     }
     forecast_metadata_variables = []
     for varname in ds.variables:
-        standard_name = getattr(ds.variables[varname], 'standard_name', None)
+        standard_name = getattr(ds.variables[varname], "standard_name", None)
         if standard_name in forecast_metadata_standard_names:
             forecast_metadata_variables.append(varname)
     return forecast_metadata_variables
 
 
 def get_cell_boundary_map(ds):
-    '''
+    """
     Returns a dictionary mapping a variable to its boundary variable. The
     returned dictionary maps a string variable name to the name of the boundary
     variable.
 
     :param netCDF4.Dataset nc: netCDF dataset
-    '''
+    """
     boundary_map = {}
     for variable in ds.get_variables_by_attributes(bounds=lambda x: x is not None):
         if variable.bounds in ds.variables:
@@ -335,12 +363,12 @@ def get_cell_boundary_map(ds):
 
 
 def get_cell_boundary_variables(ds):
-    '''
+    """
     Returns a list of variable names for variables that represent cell
     boundaries through the `bounds` attribute
 
     :param netCDF4.Dataset nc: netCDF dataset
-    '''
+    """
     boundary_variables = []
     has_bounds = ds.get_variables_by_attributes(bounds=lambda x: x is not None)
     for var in has_bounds:
@@ -348,14 +376,15 @@ def get_cell_boundary_variables(ds):
             boundary_variables.append(var.bounds)
     return boundary_variables
 
+
 @lru_cache(128)
 def get_geophysical_variables(ds):
-    '''
+    """
     Returns a list of variable names for the variables detected as geophysical
     variables.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
-    '''
+    """
 
     parameters = []
     for variable in ds.variables:
@@ -366,11 +395,11 @@ def get_geophysical_variables(ds):
 
 @lru_cache(128)
 def get_z_variable(nc):
-    '''
+    """
     Returns the name of the variable that defines the Z axis or height/depth
 
     :param netCDF4.Dataset nc: netCDF dataset
-    '''
+    """
     z_variables = get_z_variables(nc)
     if not z_variables:
         return None
@@ -378,27 +407,27 @@ def get_z_variable(nc):
     # Priority is standard_name, units
     for var in z_variables:
         ncvar = nc.variables[var]
-        if getattr(ncvar, 'standard_name', None) in ('depth', 'height', 'altitude'):
+        if getattr(ncvar, "standard_name", None) in ("depth", "height", "altitude"):
             return var
 
     for var in z_variables:
         ncvar = nc.variables[var]
-        units = getattr(ncvar, 'units', None)
+        units = getattr(ncvar, "units", None)
         if isinstance(units, str):
-            if units_convertible(units, 'bar'):
+            if units_convertible(units, "bar"):
                 return var
-            if units_convertible(units, 'm'):
+            if units_convertible(units, "m"):
                 return var
 
     return z_variables[0]
 
 
 def get_z_variables(nc):
-    '''
+    """
     Returns a list of all variables matching definitions for Z
 
     :param netcdf4.dataset nc: an open netcdf dataset object
-    '''
+    """
     z_variables = []
     # Vertical coordinates will be identifiable by units of pressure or the
     # presence of the positive attribute with a value of up/down
@@ -411,24 +440,31 @@ def get_z_variables(nc):
         if coord_name in z_variables:
             continue
         coord_var = nc.variables[coord_name]
-        units = getattr(coord_var, 'units', None)
-        positive = getattr(coord_var, 'positive', None)
-        standard_name = getattr(coord_var, 'standard_name', None)
-        axis = getattr(coord_var, 'axis', None)
+        units = getattr(coord_var, "units", None)
+        positive = getattr(coord_var, "positive", None)
+        standard_name = getattr(coord_var, "standard_name", None)
+        axis = getattr(coord_var, "axis", None)
         # If there are no units, we can't identify it as a vertical coordinate
         # by checking pressure or positive
         if units is not None:
-            if units_convertible(units, 'bar'):
+            if units_convertible(units, "bar"):
                 z_variables.append(coord_name)
             elif isinstance(positive, str):
-                if positive.lower() in ['up', 'down']:
+                if positive.lower() in ["up", "down"]:
                     z_variables.append(coord_name)
         # if axis='Z' we're good
-        if coord_name not in z_variables and axis == 'Z':
+        if coord_name not in z_variables and axis == "Z":
             z_variables.append(coord_name)
-        if coord_name not in z_variables and standard_name in ('depth', 'height', 'altitude'):
+        if coord_name not in z_variables and standard_name in (
+            "depth",
+            "height",
+            "altitude",
+        ):
             z_variables.append(coord_name)
-        if coord_name not in z_variables and standard_name in DIMENSIONLESS_VERTICAL_COORDINATES:
+        if (
+            coord_name not in z_variables
+            and standard_name in DIMENSIONLESS_VERTICAL_COORDINATES
+        ):
             z_variables.append(coord_name)
 
     return z_variables
@@ -436,11 +472,11 @@ def get_z_variables(nc):
 
 @lru_cache(128)
 def get_lat_variable(nc):
-    '''
+    """
     Returns the first variable matching latitude
 
     :param netcdf4.dataset nc: an open netcdf dataset object
-    '''
+    """
     latitudes = get_latitude_variables(nc)
     if latitudes:
         return latitudes[0]
@@ -448,23 +484,24 @@ def get_lat_variable(nc):
 
 
 def get_latitude_variables(nc):
-    '''
+    """
     Returns a list of all variables matching definitions for latitude
 
     :param netcdf4.dataset nc: an open netcdf dataset object
-    '''
+    """
     latitude_variables = []
     # standard_name takes precedence
     for variable in nc.get_variables_by_attributes(standard_name="latitude"):
         latitude_variables.append(variable.name)
 
     # Then axis
-    for variable in nc.get_variables_by_attributes(axis='Y'):
+    for variable in nc.get_variables_by_attributes(axis="Y"):
         if variable.name not in latitude_variables:
             latitude_variables.append(variable.name)
 
-    check_fn = partial(attr_membership, value_set=VALID_LAT_UNITS,
-                           modifier_fn=lambda s: s.lower())
+    check_fn = partial(
+        attr_membership, value_set=VALID_LAT_UNITS, modifier_fn=lambda s: s.lower()
+    )
     for variable in nc.get_variables_by_attributes(units=check_fn):
         if variable.name not in latitude_variables:
             latitude_variables.append(variable.name)
@@ -473,7 +510,7 @@ def get_latitude_variables(nc):
 
 
 def get_true_latitude_variables(nc):
-    '''
+    """
     Returns a list of variables defining true latitude.
 
     CF Chapter 4 refers to latitude as a coordinate variable that can also be
@@ -485,13 +522,13 @@ def get_true_latitude_variables(nc):
     the standard_name is latitude or the units are degrees_north.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
-    '''
+    """
     lats = get_latitude_variables(nc)
     true_lats = []
     for lat in lats:
         standard_name = getattr(nc.variables[lat], "standard_name", None)
         units = getattr(nc.variables[lat], "units", None)
-        if standard_name == 'latitude':
+        if standard_name == "latitude":
             true_lats.append(lat)
         elif isinstance(units, str) and units.lower() in VALID_LAT_UNITS:
             true_lats.append(lat)
@@ -500,11 +537,11 @@ def get_true_latitude_variables(nc):
 
 @lru_cache(128)
 def get_lon_variable(nc):
-    '''
+    """
     Returns the variable for longitude
 
     :param netCDF4.Dataset nc: netCDF dataset
-    '''
+    """
     longitudes = get_longitude_variables(nc)
     if longitudes:
         return longitudes[0]
@@ -512,23 +549,24 @@ def get_lon_variable(nc):
 
 
 def get_longitude_variables(nc):
-    '''
+    """
     Returns a list of all variables matching definitions for longitude
 
     :param netcdf4.dataset nc: an open netcdf dataset object
-    '''
+    """
     longitude_variables = []
     # standard_name takes precedence
     for variable in nc.get_variables_by_attributes(standard_name="longitude"):
         longitude_variables.append(variable.name)
 
     # Then axis
-    for variable in nc.get_variables_by_attributes(axis='X'):
+    for variable in nc.get_variables_by_attributes(axis="X"):
         if variable.name not in longitude_variables:
             longitude_variables.append(variable.name)
 
-    check_fn = partial(attr_membership, value_set=VALID_LON_UNITS,
-                       modifier_fn=lambda s: s.lower())
+    check_fn = partial(
+        attr_membership, value_set=VALID_LON_UNITS, modifier_fn=lambda s: s.lower()
+    )
     for variable in nc.get_variables_by_attributes(units=check_fn):
         if variable.name not in longitude_variables:
             longitude_variables.append(variable.name)
@@ -537,7 +575,7 @@ def get_longitude_variables(nc):
 
 
 def get_true_longitude_variables(nc):
-    '''
+    """
     Returns a list of variables defining true longitude.
 
     CF Chapter 4 refers to longitude as a coordinate variable that can also be
@@ -549,13 +587,13 @@ def get_true_longitude_variables(nc):
     the standard_name is longitude or the units are degrees_north.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
-    '''
+    """
     lons = get_longitude_variables(nc)
     true_lons = []
     for lon in lons:
         standard_name = getattr(nc.variables[lon], "standard_name", None)
         units = getattr(nc.variables[lon], "units", None)
-        if standard_name == 'longitude':
+        if standard_name == "longitude":
             true_lons.append(lon)
         elif isinstance(units, str) and units.lower() in VALID_LON_UNITS:
             true_lons.append(lon)
@@ -563,19 +601,19 @@ def get_true_longitude_variables(nc):
 
 
 def get_platform_variables(ds):
-    '''
+    """
     Returns a list of platform variable NAMES
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
-    '''
+    """
     candidates = []
     for variable in ds.variables:
-        platform = getattr(ds.variables[variable], 'platform', '')
+        platform = getattr(ds.variables[variable], "platform", "")
         if platform and platform in ds.variables:
             if platform not in candidates:
                 candidates.append(platform)
 
-    platform = getattr(ds, 'platform', '')
+    platform = getattr(ds, "platform", "")
     if platform and platform in ds.variables:
         if platform not in candidates:
             candidates.append(platform)
@@ -583,19 +621,19 @@ def get_platform_variables(ds):
 
 
 def get_instrument_variables(ds):
-    '''
+    """
     Returns a list of instrument variables
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
-    '''
+    """
     candidates = []
     for variable in ds.variables:
-        instrument = getattr(ds.variables[variable], 'instrument', '')
+        instrument = getattr(ds.variables[variable], "instrument", "")
         if instrument and instrument in ds.variables:
             if instrument not in candidates:
                 candidates.append(instrument)
 
-    instrument = getattr(ds, 'instrument', '')
+    instrument = getattr(ds, "instrument", "")
     if instrument and instrument in ds.variables:
         if instrument not in candidates:
             candidates.append(instrument)
@@ -603,16 +641,16 @@ def get_instrument_variables(ds):
 
 
 def get_time_variable(ds):
-    '''
+    """
     Returns the likeliest variable to be the time coordiante variable
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
-    '''
+    """
     for var in ds.variables:
-        if getattr(ds.variables[var], 'axis', '') == 'T':
+        if getattr(ds.variables[var], "axis", "") == "T":
             return var
     else:
-        candidates = ds.get_variables_by_attributes(standard_name='time')
+        candidates = ds.get_variables_by_attributes(standard_name="time")
         if len(candidates) == 1:
             return candidates[0].name
         else:  # Look for a coordinate variable time
@@ -634,20 +672,20 @@ def get_time_variable(ds):
 
 @lru_cache(128)
 def get_time_variables(ds):
-    '''
+    """
     Returns a list of variables describing the time coordinate
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
-    '''
+    """
     time_variables = set()
-    for variable in ds.get_variables_by_attributes(standard_name='time'):
+    for variable in ds.get_variables_by_attributes(standard_name="time"):
         time_variables.add(variable.name)
 
-    for variable in ds.get_variables_by_attributes(axis='T'):
+    for variable in ds.get_variables_by_attributes(axis="T"):
         if variable.name not in time_variables:
             time_variables.add(variable.name)
 
-    regx = r'^(?:day|d|hour|hr|h|minute|min|second|s)s? since .*$'
+    regx = r"^(?:day|d|hour|hr|h|minute|min|second|s)s? since .*$"
     for variable in ds.get_variables_by_attributes(units=lambda x: isinstance(x, str)):
         if re.match(regx, variable.units) and variable.name not in time_variables:
             time_variables.add(variable.name)
@@ -656,11 +694,11 @@ def get_time_variables(ds):
 
 
 def get_axis_variables(ds):
-    '''
+    """
     Returns a list of variables that define an axis of the dataset
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
-    '''
+    """
     axis_variables = []
     for ncvar in ds.get_variables_by_attributes(axis=lambda x: x is not None):
         axis_variables.append(ncvar.name)
@@ -668,7 +706,7 @@ def get_axis_variables(ds):
 
 
 def get_climatology_variable(ds):
-    '''
+    """
     Returns the variable describing climatology bounds if it exists.
 
     Climatology variables are similar to cell boundary variables that describe
@@ -678,41 +716,41 @@ def get_climatology_variable(ds):
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
     :rtype: str or None
-    '''
+    """
     time = get_time_variable(ds)
     # If there's no time dimension there's no climatology bounds
     if not time:
         return None
     # Climatology variable is simply whatever time points to under the
     # `climatology` attribute.
-    if hasattr(ds.variables[time], 'climatology'):
+    if hasattr(ds.variables[time], "climatology"):
         if ds.variables[time].climatology in ds.variables:
             return ds.variables[time].climatology
     return None
 
 
 def get_flag_variables(ds):
-    '''
+    """
     Returns a list of variables that are defined as flag variables
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
-    '''
+    """
     flag_variables = []
     for name, ncvar in ds.variables.items():
-        standard_name = getattr(ncvar, 'standard_name', None)
-        if isinstance(standard_name, str) and 'status_flag' in standard_name:
+        standard_name = getattr(ncvar, "standard_name", None)
+        if isinstance(standard_name, str) and "status_flag" in standard_name:
             flag_variables.append(name)
-        elif hasattr(ncvar, 'flag_meanings'):
+        elif hasattr(ncvar, "flag_meanings"):
             flag_variables.append(name)
     return flag_variables
 
 
 def get_grid_mapping_variables(ds):
-    '''
+    """
     Returns a list of grid mapping variables
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
-    '''
+    """
     grid_mapping_variables = set()
     for ncvar in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
         if ncvar.grid_mapping in ds.variables:
@@ -722,7 +760,7 @@ def get_grid_mapping_variables(ds):
 
 @lru_cache(128)
 def get_axis_map(ds, variable):
-    '''
+    """
     Returns an axis_map dictionary that contains an axis key and the coordinate
     names as values.
 
@@ -736,7 +774,7 @@ def get_axis_map(ds, variable):
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: Variable name
-    '''
+    """
     all_coords = get_coordinate_variables(ds) + get_auxiliary_coordinate_variables(ds)
 
     latitudes = get_latitude_variables(ds)
@@ -748,26 +786,26 @@ def get_axis_map(ds, variable):
     if not isinstance(coordinates, str):
         coordinates = []
     else:
-        coordinates = coordinates.split(' ')
+        coordinates = coordinates.split(" ")
 
     # For example
     # {'x': ['longitude'], 'y': ['latitude'], 't': ['time']}
     axis_map = defaultdict(list)
     for coord_name in all_coords:
-        axis = getattr(ds.variables[coord_name], 'axis', None)
-        if not axis or axis not in ('X', 'Y', 'Z', 'T'):
+        axis = getattr(ds.variables[coord_name], "axis", None)
+        if not axis or axis not in ("X", "Y", "Z", "T"):
             if is_compression_coordinate(ds, coord_name):
-                axis = 'C'
+                axis = "C"
             elif coord_name in times:
-                axis = 'T'
+                axis = "T"
             elif coord_name in longitudes:
-                axis = 'X'
+                axis = "X"
             elif coord_name in latitudes:
-                axis = 'Y'
+                axis = "Y"
             elif coord_name in heights:
-                axis = 'Z'
+                axis = "Z"
             else:
-                axis = 'U'
+                axis = "U"
 
         if coord_name in ds.variables[variable].dimensions:
             if coord_name not in axis_map[axis]:
@@ -780,30 +818,30 @@ def get_axis_map(ds, variable):
 
 
 def is_coordinate_variable(ds, variable):
-    '''
+    """
     Returns True if the variable is a coordinate variable
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: Variable name
-    '''
+    """
     if variable not in ds.variables:
         return False
     return ds.variables[variable].dimensions == (variable,)
 
 
 def is_compression_coordinate(ds, variable):
-    '''
+    """
     Returns True if the variable is a coordinate variable that defines a
     compression scheme.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: Variable name
-    '''
+    """
     # Must be a coordinate variable
     if not is_coordinate_variable(ds, variable):
         return False
     # must have a string attribute compress
-    compress = getattr(ds.variables[variable], 'compress', None)
+    compress = getattr(ds.variables[variable], "compress", None)
     if not isinstance(compress, str):
         return False
     if not compress:
@@ -819,36 +857,36 @@ def is_compression_coordinate(ds, variable):
 
 
 def coordinate_dimension_matrix(nc):
-    '''
+    """
     Returns a dictionary of coordinates mapped to their dimensions
 
     :param netCDF4.Dataset nc: An open netCDF dataset
-    '''
+    """
     retval = {}
     x = get_lon_variable(nc)
     if x:
-        retval['x'] = nc.variables[x].dimensions
+        retval["x"] = nc.variables[x].dimensions
     y = get_lat_variable(nc)
     if y:
-        retval['y'] = nc.variables[y].dimensions
+        retval["y"] = nc.variables[y].dimensions
 
     z = get_z_variable(nc)
     if z:
-        retval['z'] = nc.variables[z].dimensions
+        retval["z"] = nc.variables[z].dimensions
 
     t = get_time_variable(nc)
     if t:
-        retval['t'] = nc.variables[t].dimensions
+        retval["t"] = nc.variables[t].dimensions
     return retval
 
 
 def is_point(nc, variable):
-    '''
+    """
     Returns true if the variable is a point feature type
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(o), y(o), z(o), t(o)
     # X(o)
 
@@ -856,30 +894,30 @@ def is_point(nc, variable):
 
     cmatrix = coordinate_dimension_matrix(nc)
     first_coord = None
-    if 't' in cmatrix:
-        first_coord = cmatrix['t']
-        if len(cmatrix['t']) > 1:
+    if "t" in cmatrix:
+        first_coord = cmatrix["t"]
+        if len(cmatrix["t"]) > 1:
             return False
-    if 'x' in cmatrix:
+    if "x" in cmatrix:
         if first_coord is None:
-            first_coord = cmatrix['x']
-        if first_coord != cmatrix['x']:
+            first_coord = cmatrix["x"]
+        if first_coord != cmatrix["x"]:
             return False
-        if len(cmatrix['x']) > 1:
+        if len(cmatrix["x"]) > 1:
             return False
-    if 'y' in cmatrix:
+    if "y" in cmatrix:
         if first_coord is None:
-            first_coord = cmatrix['y']
-        if first_coord != cmatrix['y']:
+            first_coord = cmatrix["y"]
+        if first_coord != cmatrix["y"]:
             return False
-        if len(cmatrix['y']) > 1:
+        if len(cmatrix["y"]) > 1:
             return False
-    if 'z' in cmatrix:
+    if "z" in cmatrix:
         if first_coord is None:
-            first_coord = cmatrix['z']
-        if first_coord != cmatrix['z']:
+            first_coord = cmatrix["z"]
+        if first_coord != cmatrix["z"]:
             return False
-        if len(cmatrix['z']) > 1:
+        if len(cmatrix["z"]) > 1:
             return False
     if first_coord and dims != first_coord:
         return False
@@ -893,12 +931,12 @@ def is_point(nc, variable):
 
 
 def is_timeseries(nc, variable):
-    '''
+    """
     Returns true if the variable is a time series feature type.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
 
     # x, y, z, t(t)
     # X(t)
@@ -912,21 +950,21 @@ def is_timeseries(nc, variable):
     if dim not in time_variables:
         return False
     # No other coordinates can vary with time
-    if 'x' in cmatrix:
-        if len(cmatrix['x']) != 0:
+    if "x" in cmatrix:
+        if len(cmatrix["x"]) != 0:
             return False
-    if 'y' in cmatrix:
-        if len(cmatrix['y']) != 0:
+    if "y" in cmatrix:
+        if len(cmatrix["y"]) != 0:
             return False
-    if 'z' in cmatrix:
-        if len(cmatrix['z']) != 0:
+    if "z" in cmatrix:
+        if len(cmatrix["z"]) != 0:
             return False
 
     return True
 
 
 def is_multi_timeseries_orthogonal(nc, variable):
-    '''
+    """
     Returns true if the variable is a orthogonal multidimensional array
     representation of time series. For more information on what this means see
     CF 1.6 §H.2.1
@@ -935,34 +973,34 @@ def is_multi_timeseries_orthogonal(nc, variable):
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(i), y(i), z(i), t(o)
     # X(i, o)
     dims = nc.variables[variable].dimensions
 
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 't'):
+    for req in ("x", "y", "t"):
         if req not in cmatrix:
             return False
-    if len(cmatrix['x']) != 1 or cmatrix['x'] != cmatrix['y']:
+    if len(cmatrix["x"]) != 1 or cmatrix["x"] != cmatrix["y"]:
         return False
-    if 'z' in cmatrix and cmatrix['x'] != cmatrix['z']:
+    if "z" in cmatrix and cmatrix["x"] != cmatrix["z"]:
         return False
 
     timevar = get_time_variable(nc)
-    if cmatrix['t'] != (timevar,):
+    if cmatrix["t"] != (timevar,):
         return False
 
-    i = cmatrix['x'][0]
-    o = cmatrix['t'][0]
+    i = cmatrix["x"][0]
+    o = cmatrix["t"][0]
     if dims == (i, o):
         return True
     return False
 
 
 def is_multi_timeseries_incomplete(nc, variable):
-    '''
+    """
     Returns true if the variable is an incomplete multidimensional array
     representation of time series. For more information on what this means see
     CF 1.6 §H.2.2
@@ -971,27 +1009,27 @@ def is_multi_timeseries_incomplete(nc, variable):
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
 
     # x(i), y(i), z(i), t(i, o)
     # X(i, o)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 't'):
+    for req in ("x", "y", "t"):
         if req not in cmatrix:
             return False
-    if len(cmatrix['x']) != 1:
+    if len(cmatrix["x"]) != 1:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
-    if len(cmatrix['t']) != 2:
+    if len(cmatrix["t"]) != 2:
         return False
-    if cmatrix['x'][0] != cmatrix['t'][0]:
+    if cmatrix["x"][0] != cmatrix["t"][0]:
         return False
 
-    i = cmatrix['x'][0]
-    o = cmatrix['t'][1]
+    i = cmatrix["x"][0]
+    o = cmatrix["t"][1]
 
     if dims == (i, o):
         return True
@@ -999,40 +1037,40 @@ def is_multi_timeseries_incomplete(nc, variable):
 
 
 def is_cf_trajectory(nc, variable):
-    '''
+    """
     Returns true if the variable is a CF trajectory feature type
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(i, o), y(i, o), z(i, o), t(i, o)
     # X(i, o)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 't'):
+    for req in ("x", "y", "t"):
         if req not in cmatrix:
             return False
-    if len(cmatrix['x']) != 2:
+    if len(cmatrix["x"]) != 2:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
-    if cmatrix['x'] != cmatrix['t']:
+    if cmatrix["x"] != cmatrix["t"]:
         return False
-    if 'z' in cmatrix and cmatrix['x'] != cmatrix['z']:
+    if "z" in cmatrix and cmatrix["x"] != cmatrix["z"]:
         return False
-    if dims == cmatrix['x']:
+    if dims == cmatrix["x"]:
         return True
     return False
 
 
 def is_single_trajectory(nc, variable):
-    '''
+    """
     Returns true if the variable is a single trajectory feature
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(o), y(o), z(o), t(o)
     # X(o)
     # cf_role must be trajectory
@@ -1040,19 +1078,19 @@ def is_single_trajectory(nc, variable):
 
     cmatrix = coordinate_dimension_matrix(nc)
     # Time is required for trajectories
-    if 't' not in cmatrix:
+    if "t" not in cmatrix:
         return False
     # Coordinates changing with time are optional
-    if 'x' in cmatrix:
-        if cmatrix['x'] != cmatrix['t']:
+    if "x" in cmatrix:
+        if cmatrix["x"] != cmatrix["t"]:
             return False
-    if 'y' in cmatrix:
-        if cmatrix['y'] != cmatrix['t']:
+    if "y" in cmatrix:
+        if cmatrix["y"] != cmatrix["t"]:
             return False
-    if 'z' in cmatrix:
-        if cmatrix['z'] != cmatrix['t']:
+    if "z" in cmatrix:
+        if cmatrix["z"] != cmatrix["t"]:
             return False
-    if dims != cmatrix['t']:
+    if dims != cmatrix["t"]:
         return False
     traj_ids = nc.get_variables_by_attributes(cf_role="trajectory_id")
     if len(traj_ids) != 1:
@@ -1061,32 +1099,32 @@ def is_single_trajectory(nc, variable):
 
 
 def is_profile_orthogonal(nc, variable):
-    '''
+    """
     Returns true if the variable is a orthogonal profile feature type
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # Every profile has the exact same depths, think thermister or ADCP
     # x(i), y(i), z(j), t(i)
     # X(i, j)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
-    if len(cmatrix['x']) != 1:
+    if len(cmatrix["x"]) != 1:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
-    if cmatrix['x'] != cmatrix['t']:
+    if cmatrix["x"] != cmatrix["t"]:
         return False
-    if len(cmatrix['z']) != 1:
+    if len(cmatrix["z"]) != 1:
         return False
 
-    i = cmatrix['x'][0]
-    j = cmatrix['z'][0]
+    i = cmatrix["x"][0]
+    j = cmatrix["z"][0]
 
     if dims == (i, j):
         return True
@@ -1094,34 +1132,34 @@ def is_profile_orthogonal(nc, variable):
 
 
 def is_profile_incomplete(nc, variable):
-    '''
+    """
     Returns true if the variable is a incomplete profile feature type
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # Every profile may have different depths
     # x(i), y(i), z(i, j), t(i)
     # X(i, j)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
-    if len(cmatrix['x']) != 1:
+    if len(cmatrix["x"]) != 1:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
-    if cmatrix['x'] != cmatrix['t']:
+    if cmatrix["x"] != cmatrix["t"]:
         return False
-    if len(cmatrix['z']) != 2:
+    if len(cmatrix["z"]) != 2:
         return False
-    if cmatrix['z'][0] != cmatrix['x'][0]:
+    if cmatrix["z"][0] != cmatrix["x"][0]:
         return False
 
-    i = cmatrix['x'][0]
-    j = cmatrix['z'][1]
+    i = cmatrix["x"][0]
+    j = cmatrix["z"][1]
 
     if dims == (i, j):
         return True
@@ -1129,32 +1167,32 @@ def is_profile_incomplete(nc, variable):
 
 
 def is_timeseries_profile_single_station(nc, variable):
-    '''
+    """
     Returns true if the variable is a time-series profile that represents a
     single station and each profile is the same length.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
 
     # x, y, z(z), t(t)
     # X(t, z)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
-    if len(cmatrix['x']) != 0:
+    if len(cmatrix["x"]) != 0:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
 
     z = get_z_variable(nc)
-    if cmatrix['z'] != (z,):
+    if cmatrix["z"] != (z,):
         return False
     t = get_time_variable(nc)
-    if cmatrix['t'] != (t,):
+    if cmatrix["t"] != (t,):
         return False
 
     if dims == (t, z):
@@ -1163,31 +1201,31 @@ def is_timeseries_profile_single_station(nc, variable):
 
 
 def is_timeseries_profile_multi_station(nc, variable):
-    '''
+    """
     Returns true if the variable is a time-series profile that represents multiple stations with orthogonal time and depth
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(i), y(i), z(z), t(t)
     # X(i, t, z)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
-    if len(cmatrix['x']) != 1:
+    if len(cmatrix["x"]) != 1:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
-    i = cmatrix['x'][0]
+    i = cmatrix["x"][0]
 
     z = get_z_variable(nc)
-    if cmatrix['z'] != (z,):
+    if cmatrix["z"] != (z,):
         return False
     t = get_time_variable(nc)
-    if cmatrix['t'] != (t,):
+    if cmatrix["t"] != (t,):
         return False
 
     if dims == (i, t, z):
@@ -1196,38 +1234,38 @@ def is_timeseries_profile_multi_station(nc, variable):
 
 
 def is_timeseries_profile_single_ortho_time(nc, variable):
-    '''
+    """
     Returns true if the variable is a time-series profile that represents a
     single station with orthogonal time only.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x, y, z(t, j), t(t)
     # X(t, j)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
 
-    if len(cmatrix['x']) != 0:
+    if len(cmatrix["x"]) != 0:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
 
     t = get_time_variable(nc)
-    if cmatrix['t'] != (t,):
+    if cmatrix["t"] != (t,):
         return False
 
-    if len(cmatrix['z']) != 2:
+    if len(cmatrix["z"]) != 2:
         return False
 
-    if cmatrix['z'][0] != t:
+    if cmatrix["z"][0] != t:
         return False
 
-    j = cmatrix['z'][1]
+    j = cmatrix["z"][1]
 
     if dims == (t, j):
         return True
@@ -1235,41 +1273,41 @@ def is_timeseries_profile_single_ortho_time(nc, variable):
 
 
 def is_timeseries_profile_multi_ortho_time(nc, variable):
-    '''
+    """
     Returns true if the variable is a time-series profile that represents a
     multi station with orthogonal time only.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(i), y(i), z(i, t, j), t(t)
     # X(i, t, j)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
 
-    if len(cmatrix['x']) != 1:
+    if len(cmatrix["x"]) != 1:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
 
     t = get_time_variable(nc)
-    if cmatrix['t'] != (t,):
+    if cmatrix["t"] != (t,):
         return False
 
-    if len(cmatrix['z']) != 3:
+    if len(cmatrix["z"]) != 3:
         return False
 
-    if cmatrix['z'][1] != t:
+    if cmatrix["z"][1] != t:
         return False
-    if cmatrix['z'][0] != cmatrix['x'][0]:
+    if cmatrix["z"][0] != cmatrix["x"][0]:
         return False
 
-    i = cmatrix['x'][0]
-    j = cmatrix['z'][2]
+    i = cmatrix["x"][0]
+    j = cmatrix["z"][2]
 
     if dims == (i, t, j):
         return True
@@ -1277,39 +1315,39 @@ def is_timeseries_profile_multi_ortho_time(nc, variable):
 
 
 def is_timeseries_profile_ortho_depth(nc, variable):
-    '''
+    """
     Returns true if the variable is a time-series profile with orthogonal depth
     only.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(i), y(i), z(z), t(i, j)
     # X(i, j, z)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
 
-    if len(cmatrix['x']) != 1:
+    if len(cmatrix["x"]) != 1:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
 
     z = get_z_variable(nc)
-    if cmatrix['z'] != (z,):
+    if cmatrix["z"] != (z,):
         return False
 
-    i = cmatrix['x'][0]
+    i = cmatrix["x"][0]
 
-    if len(cmatrix['t']) != 2:
+    if len(cmatrix["t"]) != 2:
         return False
-    if cmatrix['t'][0] != i:
+    if cmatrix["t"][0] != i:
         return False
 
-    j = cmatrix['t'][1]
+    j = cmatrix["t"][1]
 
     if dims == (i, j, z):
         return True
@@ -1317,41 +1355,41 @@ def is_timeseries_profile_ortho_depth(nc, variable):
 
 
 def is_timeseries_profile_incomplete(nc, variable):
-    '''
+    """
     Returns true if the variable is a time-series profile incomplete depth and
     incomplete time.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(i), y(i), z(i, j, k), t(i, j)
     # X(i, j, k)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
 
-    if len(cmatrix['x']) != 1:
+    if len(cmatrix["x"]) != 1:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
-    i = cmatrix['x'][0]
+    i = cmatrix["x"][0]
 
-    if len(cmatrix['t']) != 2:
+    if len(cmatrix["t"]) != 2:
         return False
-    if cmatrix['t'][0] != i:
+    if cmatrix["t"][0] != i:
         return False
-    j = cmatrix['t'][1]
+    j = cmatrix["t"][1]
 
-    if len(cmatrix['z']) != 3:
+    if len(cmatrix["z"]) != 3:
         return False
-    if cmatrix['z'][0] != i:
+    if cmatrix["z"][0] != i:
         return False
-    if cmatrix['z'][1] != j:
+    if cmatrix["z"][1] != j:
         return False
-    k = cmatrix['z'][2]
+    k = cmatrix["z"][2]
 
     if dims == (i, j, k):
         return True
@@ -1359,33 +1397,33 @@ def is_timeseries_profile_incomplete(nc, variable):
 
 
 def is_trajectory_profile_orthogonal(nc, variable):
-    '''
+    """
     Returns true if the variable is a trajectory profile with orthogonal
     depths.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(i, o), y(i, o), z(z), t(i, o)
     # X(i, o, z)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
 
-    if len(cmatrix['x']) != 2:
+    if len(cmatrix["x"]) != 2:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
-    if cmatrix['x'] != cmatrix['t']:
+    if cmatrix["x"] != cmatrix["t"]:
         return False
 
-    i, o = cmatrix['x']
+    i, o = cmatrix["x"]
 
     z = get_z_variable(nc)
-    if cmatrix['z'] != (z,):
+    if cmatrix["z"] != (z,):
         return False
 
     if dims == (i, o, z):
@@ -1394,40 +1432,40 @@ def is_trajectory_profile_orthogonal(nc, variable):
 
 
 def is_trajectory_profile_incomplete(nc, variable):
-    '''
+    """
     Returns true if the variable is a trajectory profile with incomplete
     depths.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(i, o), y(i, o), z(i, o, j), t(i, o)
     # X(i, o, j)
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
 
-    if len(cmatrix['x']) != 2:
+    if len(cmatrix["x"]) != 2:
         return False
-    if cmatrix['x'] != cmatrix['y']:
+    if cmatrix["x"] != cmatrix["y"]:
         return False
-    if cmatrix['x'] != cmatrix['t']:
-        return False
-
-    i, o = cmatrix['x']
-
-    if len(cmatrix['z']) != 3:
+    if cmatrix["x"] != cmatrix["t"]:
         return False
 
-    if cmatrix['z'][0] != i:
-        return False
-    if cmatrix['z'][1] != o:
+    i, o = cmatrix["x"]
+
+    if len(cmatrix["z"]) != 3:
         return False
 
-    j = cmatrix['z'][2]
+    if cmatrix["z"][0] != i:
+        return False
+    if cmatrix["z"][1] != o:
+        return False
+
+    j = cmatrix["z"][2]
 
     if dims == (i, o, j):
         return True
@@ -1435,12 +1473,12 @@ def is_trajectory_profile_incomplete(nc, variable):
 
 
 def is_2d_regular_grid(nc, variable):
-    '''
+    """
     Returns True if the variable is a 2D Regular grid.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(x), y(y), t(t)
     # X(t, y, x)
 
@@ -1451,7 +1489,7 @@ def is_2d_regular_grid(nc, variable):
 
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 't'):
+    for req in ("x", "y", "t"):
         if req not in cmatrix:
             return False
 
@@ -1459,11 +1497,11 @@ def is_2d_regular_grid(nc, variable):
     y = get_lat_variable(nc)
     t = get_time_variable(nc)
 
-    if cmatrix['x'] != (x,):
+    if cmatrix["x"] != (x,):
         return False
-    if cmatrix['y'] != (y,):
+    if cmatrix["y"] != (y,):
         return False
-    if cmatrix['t'] != (t,):
+    if cmatrix["t"] != (t,):
         return False
 
     # Relaxed dimension ordering
@@ -1473,13 +1511,13 @@ def is_2d_regular_grid(nc, variable):
 
 
 def is_2d_static_grid(nc, variable):
-    '''
+    """
     Returns True if the variable is a 2D Regular grid that does not vary with
     time.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(x), y(y)
     # X(y, x)
 
@@ -1489,17 +1527,17 @@ def is_2d_static_grid(nc, variable):
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y'):
+    for req in ("x", "y"):
         if req not in cmatrix:
             return False
 
     x = get_lon_variable(nc)
     y = get_lat_variable(nc)
 
-    if cmatrix['x'] != (x,):
+    if cmatrix["x"] != (x,):
         return False
 
-    if cmatrix['y'] != (y,):
+    if cmatrix["y"] != (y,):
         return False
 
     if len(dims) != 2 or x not in dims or y not in dims:
@@ -1509,12 +1547,12 @@ def is_2d_static_grid(nc, variable):
 
 
 def is_3d_regular_grid(nc, variable):
-    '''
+    """
     Returns True if the variable is a 3D Regular grid.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(x), y(y), z(z), t(t)
     # X(t, z, y, x)
 
@@ -1525,7 +1563,7 @@ def is_3d_regular_grid(nc, variable):
 
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z', 't'):
+    for req in ("x", "y", "z", "t"):
         if req not in cmatrix:
             return False
 
@@ -1534,13 +1572,13 @@ def is_3d_regular_grid(nc, variable):
     z = get_z_variable(nc)
     t = get_time_variable(nc)
 
-    if cmatrix['x'] != (x,):
+    if cmatrix["x"] != (x,):
         return False
-    if cmatrix['y'] != (y,):
+    if cmatrix["y"] != (y,):
         return False
-    if cmatrix['z'] != (z,):
+    if cmatrix["z"] != (z,):
         return False
-    if cmatrix['t'] != (t,):
+    if cmatrix["t"] != (t,):
         return False
 
     # Relaxed dimension ordering
@@ -1550,13 +1588,13 @@ def is_3d_regular_grid(nc, variable):
 
 
 def is_3d_static_grid(nc, variable):
-    '''
+    """
     Returns True if the variable is a 2D Regular grid that does not vary with
     time.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(x), y(y), z(z)
     # X(z, y, x)
 
@@ -1566,7 +1604,7 @@ def is_3d_static_grid(nc, variable):
     dims = nc.variables[variable].dimensions
     cmatrix = coordinate_dimension_matrix(nc)
 
-    for req in ('x', 'y', 'z'):
+    for req in ("x", "y", "z"):
         if req not in cmatrix:
             return False
 
@@ -1574,13 +1612,13 @@ def is_3d_static_grid(nc, variable):
     y = get_lat_variable(nc)
     z = get_z_variable(nc)
 
-    if cmatrix['x'] != (x,):
+    if cmatrix["x"] != (x,):
         return False
 
-    if cmatrix['y'] != (y,):
+    if cmatrix["y"] != (y,):
         return False
 
-    if cmatrix['z'] != (z,):
+    if cmatrix["z"] != (z,):
         return False
 
     if len(dims) != 3 or x not in dims or y not in dims or z not in dims:
@@ -1590,13 +1628,13 @@ def is_3d_static_grid(nc, variable):
 
 
 def is_mapped_grid(nc, variable):
-    '''
+    """
     Returns true if the feature-type of variable corresponds to a mapped grid
     type. Characterized by Appedix F of CF-1.6
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     # x(j, i), y(j, i), z?, t?
     # F(t?, z?, j, i)
 
@@ -1606,7 +1644,7 @@ def is_mapped_grid(nc, variable):
     # dimensions.
     dims = nc.variables[variable].dimensions
     # For cases like ROMS, the coordinates are mapped using the coordinates attribute
-    variable_coordinates = getattr(nc.variables[variable], 'coordinates', '').split()
+    variable_coordinates = getattr(nc.variables[variable], "coordinates", "").split()
 
     lons = get_longitude_variables(nc)
     for lon in lons:
@@ -1636,36 +1674,36 @@ def is_mapped_grid(nc, variable):
     if x != y:
         return False
 
-    comma_dimension = ','.join(dims)
+    comma_dimension = ",".join(dims)
     # Dimensions must be in the same order and the mapping coordinates i and j
     # must be in the same order
-    if ','.join(x) not in comma_dimension:
+    if ",".join(x) not in comma_dimension:
         return False
 
     return True
 
 
 def is_reduced_grid(nc, variable):
-    '''
+    """
     Returns True if the feature-type of the variable corresponds to a reduced
     horizontal grid.
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     axis_map = get_axis_map(nc, variable)
 
-    if 'X' not in axis_map:
+    if "X" not in axis_map:
         return False
-    if 'Y' not in axis_map:
+    if "Y" not in axis_map:
         return False
-    if 'C' not in axis_map:
+    if "C" not in axis_map:
         return False
 
-    compressed_coordinates = axis_map['C']
+    compressed_coordinates = axis_map["C"]
     if len(compressed_coordinates) > 1:
         return False
-    compressed_coordinate = axis_map['C'][0]
+    compressed_coordinate = axis_map["C"][0]
     for dim in nc.variables[compressed_coordinate].compress.split():
         if dim not in nc.dimensions:
             return False
@@ -1673,56 +1711,56 @@ def is_reduced_grid(nc, variable):
 
 
 def guess_feature_type(nc, variable):
-    '''
+    """
     Returns a string describing the feature type for this variable
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
-    '''
+    """
     if is_point(nc, variable):
-        return 'point'
+        return "point"
     if is_timeseries(nc, variable):
-        return 'timeseries'
+        return "timeseries"
     if is_multi_timeseries_orthogonal(nc, variable):
-        return 'multi-timeseries-orthogonal'
+        return "multi-timeseries-orthogonal"
     if is_multi_timeseries_incomplete(nc, variable):
-        return 'multi-timeseries-incomplete'
+        return "multi-timeseries-incomplete"
     if is_cf_trajectory(nc, variable):
-        return 'cf-trajectory'
+        return "cf-trajectory"
     if is_single_trajectory(nc, variable):
-        return 'single-trajectory'
+        return "single-trajectory"
     if is_profile_orthogonal(nc, variable):
-        return 'profile-orthogonal'
+        return "profile-orthogonal"
     if is_profile_incomplete(nc, variable):
-        return 'profile-incomplete'
+        return "profile-incomplete"
     if is_timeseries_profile_single_station(nc, variable):
-        return 'timeseries-profile-single-station'
+        return "timeseries-profile-single-station"
     if is_timeseries_profile_multi_station(nc, variable):
-        return 'timeseries-profile-multi-station'
+        return "timeseries-profile-multi-station"
     if is_timeseries_profile_single_ortho_time(nc, variable):
-        return 'timeseries-profile-single-ortho-time'
+        return "timeseries-profile-single-ortho-time"
     if is_timeseries_profile_multi_ortho_time(nc, variable):
-        return 'timeseries-profile-multi-ortho-time'
+        return "timeseries-profile-multi-ortho-time"
     if is_timeseries_profile_ortho_depth(nc, variable):
-        return 'timeseries-profile-ortho-depth'
+        return "timeseries-profile-ortho-depth"
     if is_timeseries_profile_incomplete(nc, variable):
-        return 'timeseries-profile-incomplete'
+        return "timeseries-profile-incomplete"
     if is_trajectory_profile_orthogonal(nc, variable):
-        return 'trajectory-profile-orthogonal'
+        return "trajectory-profile-orthogonal"
     if is_trajectory_profile_incomplete(nc, variable):
-        return 'trajectory-profile-incomplete'
+        return "trajectory-profile-incomplete"
     if is_2d_regular_grid(nc, variable):
-        return '2d-regular-grid'
+        return "2d-regular-grid"
     if is_2d_static_grid(nc, variable):
-        return '2d-static-grid'
+        return "2d-static-grid"
     if is_3d_regular_grid(nc, variable):
-        return '3d-regular-grid'
+        return "3d-regular-grid"
     if is_3d_static_grid(nc, variable):
-        return '3d-static-grid'
+        return "3d-static-grid"
     if is_mapped_grid(nc, variable):
-        return 'mapped-grid'
+        return "mapped-grid"
     if is_reduced_grid(nc, variable):
-        return 'reduced-grid'
+        return "reduced-grid"
 
 
 def units_convertible(units1, units2, reftimeistime=True):
