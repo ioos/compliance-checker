@@ -380,7 +380,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertFalse(results[0].value)
         self.assertTrue(results[1].value)
         self.assertEqual(results[1].msgs, [])
-        
+
         # good role, good vocab
         ds.setncattr("contributor_role", "contributor")
         ds.setncattr("contributor_role_vocabulary", "http://vocab.nerc.ac.uk/collection/G04/current/")
@@ -970,3 +970,27 @@ class TestIOOS1_2(BaseTestCase):
         self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
         ds.setncattr("ioos_ingest", 0)
         self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
+
+    def test_vertical_dimension(self):
+        # MockTimeSeries has a depth variable, with axis of 'Z', units of 'm',
+        # and positive = 'down'
+        nc_obj = MockTimeSeries()
+        result = self.ioos.check_vertical_coordinates(nc_obj)[0]
+        self.assertEqual(*result.value)
+        nc_obj.variables['depth'].positive = 'upwards'
+        result = self.ioos.check_vertical_coordinates(nc_obj)[0]
+        self.assertNotEqual(*result.value)
+        nc_obj.variables['depth'].positive = 'up'
+        result = self.ioos.check_vertical_coordinates(nc_obj)[0]
+        self.assertEqual(*result.value)
+        # test units
+        nc_obj.variables['depth'].units = 'furlong'
+        result = self.ioos.check_vertical_coordinates(nc_obj)[0]
+        expected_msg = ("depth's units attribute furlong is not equivalent to "
+                        "one of ('meter', 'inch', 'foot', 'yard', "
+                        "'US_survey_foot', 'fathom')")
+        self.assertEqual(result.msgs[0], expected_msg)
+        self.assertNotEqual(*result.value)
+        nc_obj.variables['depth'].units = 'fathom'
+        result = self.ioos.check_vertical_coordinates(nc_obj)[0]
+        self.assertEqual(*result.value)

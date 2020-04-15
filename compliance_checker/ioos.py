@@ -6,11 +6,14 @@ from compliance_checker.base import (BaseCheck, BaseNCCheck, BaseSOSGCCheck,
                                      attr_check)
 from owslib.namespaces import Namespaces
 from lxml.etree import XPath
+from cf_units import Unit
 from compliance_checker.acdd import ACDD1_3Check
+from compliance_checker import cfutil
 from compliance_checker.cfutil import (get_geophysical_variables,
                                        get_instrument_variables,
                                        get_coordinate_variables)
 from compliance_checker import base
+from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf import util as cf_util # not to be confused with cfutil.py
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
 import validators
@@ -950,6 +953,56 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return isinstance(val, str) and val.lower() in {"true", "false"}
 
+    def check_vertical_coordinates(self, ds):
+        '''
+        Check that vertical units (corresponding to axis "Z") are a unit
+        equivalent to one of "meter", "inch", "foot", "yard", "US_survey_foot",
+        or "fathom".  Check that the vertical coordinate variable "positive"
+        attribute is either "up" or "down".  Note that unlike the CF version
+        of this check, pressure units are not accepted and length units are
+        constrained to the aforementioned set instead of accepting any valid
+        UDUNITS length unit.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of results
+        '''
+        ret_val = []
+        z_variables = cfutil.get_z_variables(ds)
+        for name in z_variables:
+            variable = ds.variables[name]
+            standard_name = getattr(variable, 'standard_name', None)
+            units_str = getattr(variable, 'units', None)
+            positive = getattr(variable, 'positive', None)
+            expected_unit_strs = ('meter', 'inch', 'foot', 'yard',
+                                  'US_survey_foot', 'fathom')
+
+            unit_def_set = {Unit(unit_str).definition for unit_str
+                               in expected_unit_strs}
+
+            try:
+                units = Unit(units_str)
+                pass_stat = units.definition in unit_def_set
+            # unknown unit not convertible to UDUNITS
+            except ValueError:
+                pass_stat = False
+
+            valid_vertical_coord = TestCtx(BaseCheck.HIGH,
+                                           "Vertical coordinates")
+            units_set_msg = ("{}'s units attribute {} is not equivalent to one "
+                             "of {}".format(name, units_str,
+                                            expected_unit_strs))
+            valid_vertical_coord.assert_true(pass_stat, units_set_msg)
+
+            pos_msg = ("{}: vertical coordinates must include a positive "
+                       "attribute that is either 'up' or 'down'".format(name))
+            valid_vertical_coord.assert_true(positive in ('up', 'down'),
+                                             pos_msg)
+
+
+            ret_val.append(valid_vertical_coord.to_result())
+
+        return ret_val
 
     def check_gts_ingest_global(self, ds):
         """
