@@ -40,4 +40,4 @@ variables:
         temperature:long_name = "Seawater Temperature";
         temperature:coordinates = "time lat lon z";
 
-} 
+}

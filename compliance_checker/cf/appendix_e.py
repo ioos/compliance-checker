@@ -16,14 +16,16 @@ cell_methods16 = {
     "variance",
     "mode",
     "median",
-    "sum_of_squares"
+    "sum_of_squares",
 }
 
-cell_methods17 = cell_methods16.union({ # returns new set with elements from both
-    "maximum_absolute_value",
-    "minimum_absolute_value",
-    "mean_absolute_value",
-    "mean_of_upper_decile",
-    "range",
-    "root_mean_square"
-})
+cell_methods17 = cell_methods16.union(
+    {  # returns new set with elements from both
+        "maximum_absolute_value",
+        "minimum_absolute_value",
+        "mean_absolute_value",
+        "mean_of_upper_decile",
+        "range",
+        "root_mean_square",
+    }
+)

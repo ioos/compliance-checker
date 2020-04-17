@@ -9,8 +9,6 @@ matrix:
       env: TEST_TARGET=default PY=3.8
     - name: "integration-python3"
       env: TEST_TARGET=integration PY=3.8
-    - name: "coding_standards"
-      env: TEST_TARGET=coding_standards PY=3.8
     - name: "glider plugin"
       env: TEST_TARGET=cc-plugin-glider PY=3.8
     - name: "ncei plugin"
@@ -22,8 +20,6 @@ matrix:
   allow_failures:
     - name: "integration-python3"
       env: TEST_TARGET=integration PY=3.8
-    - name: "coding_standards"
-      env: TEST_TARGET=coding_standards PY=3.8
     - name: "glider plugin"
       env: TEST_TARGET=cc-plugin-glider PY=3.8
     - name: "ncei plugin"
@@ -54,10 +50,6 @@ install:
 script:
   - if [[ $TEST_TARGET == "default" ]]; then
       pytest -k "not integration" -s -rxs -v ;
-    fi
-
-  - if [[ $TEST_TARGET == "coding_standards" ]]; then
-      flake8 --ignore=E501,E251,E221,E201,E202,E203 -qq --statistics . ;
     fi
 
   - if [[ $TEST_TARGET == "integration" ]]; then

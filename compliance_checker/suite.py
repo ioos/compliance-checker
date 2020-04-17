@@ -2,38 +2,42 @@
 Compliance Checker suite runner
 """
 
-import os
-import sys
-import subprocess
+import codecs
 import inspect
 import itertools
-from operator import itemgetter
-from netCDF4 import Dataset
-from lxml import etree as ET
+import os
+import re
+import subprocess
+import sys
+import textwrap
+import warnings
+
+from collections import defaultdict
+from datetime import datetime
 from distutils.version import StrictVersion
-from compliance_checker.base import fix_return_value, Result, GenericFile
-from compliance_checker.cf.cf import CFBaseCheck
+from operator import itemgetter
+from urllib.parse import urlparse
+
+import requests
+
+from lxml import etree as ET
+from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
-from compliance_checker.protocols import opendap, netcdf, cdl
-from compliance_checker.base import BaseCheck
-from compliance_checker import MemoizedDataset
-from collections import defaultdict
-import warnings
-from urllib.parse import urlparse
-from datetime import datetime
-import requests
-import codecs
-import re
-import textwrap
 from pkg_resources import working_set
+
+from compliance_checker import MemoizedDataset
+from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
+from compliance_checker.cf.cf import CFBaseCheck
+from compliance_checker.protocols import cdl, netcdf, opendap
 
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
-    sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+    sys.stdout = codecs.getwriter("utf8")(sys.stdout)
 if sys.stderr.encoding is None:
-    sys.stderr = codecs.getwriter('utf8')(sys.stderr)
+    sys.stderr = codecs.getwriter("utf8")(sys.stderr)
+
 
 def extract_docstring_summary(docstring):
     """
@@ -44,15 +48,22 @@ def extract_docstring_summary(docstring):
     """
     # return a dedented, then indented two spaces docstring with leading and
     # trailing whitespace removed.
-    return re.sub(r'^(?=.)', '  ',
-                  textwrap.dedent(re.split(r'\n\s*:\w', docstring,
-                                           flags=re.MULTILINE)[0]).strip(),
-                  flags=re.MULTILINE)
+    return re.sub(
+        r"^(?=.)",
+        "  ",
+        textwrap.dedent(
+            re.split(r"\n\s*:\w", docstring, flags=re.MULTILINE)[0]
+        ).strip(),
+        flags=re.MULTILINE,
+    )
+
 
 class CheckSuite(object):
 
-    checkers = {}       # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
-    templates_root = 'compliance_checker'  # modify to load alternative Jinja2 templates
+    checkers = (
+        {}
+    )  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
+    templates_root = "compliance_checker"  # modify to load alternative Jinja2 templates
 
     def __init__(self, options=None):
         self.col_width = 40
@@ -65,8 +76,8 @@ class CheckSuite(object):
         generate checker classes
         """
 
-        if not hasattr(cls, 'suite_generators'):
-            gens = working_set.iter_entry_points('compliance_checker.generators')
+        if not hasattr(cls, "suite_generators"):
+            gens = working_set.iter_entry_points("compliance_checker.generators")
             cls.suite_generators = [x.resolve() for x in gens]
 
         return cls.suite_generators
@@ -81,11 +92,12 @@ class CheckSuite(object):
         :type verbose: int
         """
         for checker in sorted(self.checkers.keys()):
-            version = getattr(self.checkers[checker],
-                            '_cc_checker_version', "???")
+            version = getattr(self.checkers[checker], "_cc_checker_version", "???")
             if verbose > 0:
                 print(" - {} (v{})".format(checker, version))
-            elif ':' in checker and not checker.endswith(':latest'):  # Skip the "latest" output
+            elif ":" in checker and not checker.endswith(
+                ":latest"
+            ):  # Skip the "latest" output
                 print(" - {}".format(checker))
 
     def _print_checker(self, checker_obj):
@@ -96,8 +108,7 @@ class CheckSuite(object):
         :type checker_obj: subclass of compliance_checker.base.BaseChecker
         """
 
-        check_functions = self._get_checks(checker_obj,
-                                           defaultdict(lambda: None))
+        check_functions = self._get_checks(checker_obj, defaultdict(lambda: None))
         for c, _ in check_functions:
             print("- {}".format(c.__name__))
             if c.__doc__ is not None:
@@ -129,8 +140,7 @@ class CheckSuite(object):
         Helper method to retrieve all sub checker classes derived from various
         base classes.
         """
-        cls._load_checkers(working_set
-                           .iter_entry_points('compliance_checker.suites'))
+        cls._load_checkers(working_set.iter_entry_points("compliance_checker.suites"))
 
     @classmethod
     def _load_checkers(cls, checkers):
@@ -142,23 +152,28 @@ class CheckSuite(object):
         for c in checkers:
             try:
                 check_obj = c.resolve()
-                if (hasattr(check_obj, '_cc_spec') and
-                    hasattr(check_obj, '_cc_spec_version')):
-                    check_version_str = ':'.join((check_obj._cc_spec,
-                                                  check_obj._cc_spec_version))
+                if hasattr(check_obj, "_cc_spec") and hasattr(
+                    check_obj, "_cc_spec_version"
+                ):
+                    check_version_str = ":".join(
+                        (check_obj._cc_spec, check_obj._cc_spec_version)
+                    )
                     cls.checkers[check_version_str] = check_obj
                 # TODO: remove this once all checkers move over to the new
                 #       _cc_spec, _cc_spec_version
                 else:
                     # if _cc_spec and _cc_spec_version attributes aren't
                     # present, fall back to using name attribute
-                    checker_name = (getattr(check_obj, 'name', None) or
-                                    getattr(check_obj, '_cc_spec', None))
-                    warnings.warn('Checker for {} should implement both '
-                                '"_cc_spec" and "_cc_spec_version" '
-                                'attributes. "name" attribute is deprecated. '
-                                'Assuming checker is latest version.',
-                                DeprecationWarning)
+                    checker_name = getattr(check_obj, "name", None) or getattr(
+                        check_obj, "_cc_spec", None
+                    )
+                    warnings.warn(
+                        "Checker for {} should implement both "
+                        '"_cc_spec" and "_cc_spec_version" '
+                        'attributes. "name" attribute is deprecated. '
+                        "Assuming checker is latest version.",
+                        DeprecationWarning,
+                    )
                     # append "unknown" to version string since no versioning
                     # info was provided
                     cls.checkers["{}:unknown".format(checker_name)] = check_obj
@@ -167,19 +182,18 @@ class CheckSuite(object):
                 print("Could not load", c, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
-        ver_checkers = sorted([c.split(':', 1) for c
-                               in cls.checkers if ':' in c])
+        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":" in c])
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
             version_nums = [v[-1] for v in versions]
             try:
-                latest_version = str(max(StrictVersion(v) for v
-                                         in version_nums))
+                latest_version = str(max(StrictVersion(v) for v in version_nums))
             # if the version can't be parsed as a StrictVersion, parse
             # according to character collation
             except ValueError:
                 latest_version = max(version_nums)
-            cls.checkers[spec] = cls.checkers[spec + ':latest'] = \
-                cls.checkers[':'.join((spec, latest_version))]
+            cls.checkers[spec] = cls.checkers[spec + ":latest"] = cls.checkers[
+                ":".join((spec, latest_version))
+            ]
 
     def _get_checks(self, checkclass, skip_checks):
         """
@@ -193,8 +207,7 @@ class CheckSuite(object):
         # return all check methods not among the skipped checks
         returned_checks = []
         for fn_name, fn_obj in meths:
-            if (fn_name.startswith("check_") and
-                skip_checks[fn_name] != BaseCheck.HIGH):
+            if fn_name.startswith("check_") and skip_checks[fn_name] != BaseCheck.HIGH:
                 returned_checks.append((fn_obj, skip_checks[fn_name]))
 
         return returned_checks
@@ -208,7 +221,7 @@ class CheckSuite(object):
         @return list: list of Result objects
         """
         val = check_method(ds)
-        if hasattr(val, '__iter__'):
+        if hasattr(val, "__iter__"):
             # Handle OrderedDict when we need to modify results in a superclass
             # i.e. some checks in CF 1.7 which extend CF 1.6 behaviors
             if isinstance(val, dict):
@@ -217,15 +230,20 @@ class CheckSuite(object):
                 val_iter = val
             check_val = []
             for v in val_iter:
-                res = fix_return_value(v, check_method.__func__.__name__,
-                                       check_method, check_method.__self__)
+                res = fix_return_value(
+                    v,
+                    check_method.__func__.__name__,
+                    check_method,
+                    check_method.__self__,
+                )
                 if max_level is None or res.weight > max_level:
                     check_val.append(res)
 
             return check_val
         else:
-            check_val = fix_return_value(val, check_method.__func__.__name__,
-                                         check_method, check_method.__self__)
+            check_val = fix_return_value(
+                val, check_method.__func__.__name__, check_method, check_method.__self__
+            )
             if max_level is None or check_val.weight > max_level:
                 return [check_val]
             else:
@@ -239,9 +257,10 @@ class CheckSuite(object):
 
         Returns the check name with the version number it checked
         """
-        if ':' not in check_name or ':latest' in check_name:
-            check_name = ':'.join((check_name.split(':')[0],
-                                   self.checkers[check_name]._cc_spec_version))
+        if ":" not in check_name or ":latest" in check_name:
+            check_name = ":".join(
+                (check_name.split(":")[0], self.checkers[check_name]._cc_spec_version)
+            )
         return check_name
 
     def _get_check_url(self, check_name):
@@ -250,7 +269,7 @@ class CheckSuite(object):
         @param check_name str: name of the check being run returned by
                                _get_check_versioned_name()
         """
-        return getattr(self.checkers[check_name], '_cc_url', '')
+        return getattr(self.checkers[check_name], "_cc_url", "")
 
     def _get_valid_checkers(self, ds, checker_names):
         """
@@ -263,7 +282,11 @@ class CheckSuite(object):
         if len(checker_names) == 0:
             checker_names = list(self.checkers.keys())
 
-        args = [(name, self.checkers[name]) for name in checker_names if name in self.checkers]
+        args = [
+            (name, self.checkers[name])
+            for name in checker_names
+            if name in self.checkers
+        ]
         valid = []
 
         all_checked = set(a[1] for a in args)  # only class types
@@ -284,7 +307,6 @@ class CheckSuite(object):
 
         return valid
 
-
     @classmethod
     def _process_skip_checks(cls, skip_checks):
         """
@@ -294,28 +316,28 @@ class CheckSuite(object):
 
         check_dict = defaultdict(lambda: None)
         # A is for "all", "M" is for medium, "L" is for low
-        check_lookup = {'A': BaseCheck.HIGH,
-                        'M': BaseCheck.MEDIUM,
-                        'L': BaseCheck.LOW}
+        check_lookup = {"A": BaseCheck.HIGH, "M": BaseCheck.MEDIUM, "L": BaseCheck.LOW}
 
         for skip_check_spec in skip_checks:
-            split_check_spec = skip_check_spec.split(':')
+            split_check_spec = skip_check_spec.split(":")
             check_name = split_check_spec[0]
             if len(split_check_spec) < 2:
-               check_max_level = BaseCheck.HIGH
+                check_max_level = BaseCheck.HIGH
             else:
                 try:
                     check_max_level = check_lookup[split_check_spec[1]]
                 except KeyError:
-                    warnings.warn("Skip specifier '{}' on check '{}' not found,"
-                                  " defaulting to skip entire check".format(split_check_spec[1], check_name))
+                    warnings.warn(
+                        "Skip specifier '{}' on check '{}' not found,"
+                        " defaulting to skip entire check".format(
+                            split_check_spec[1], check_name
+                        )
+                    )
                     check_max_level = BaseCheck.HIGH
 
             check_dict[check_name] = check_max_level
 
         return check_dict
-
-
 
     def run(self, ds, skip_checks, *checker_names):
         """
@@ -333,14 +355,16 @@ class CheckSuite(object):
             skip_check_dict = defaultdict(lambda: None)
 
         if len(checkers) == 0:
-            print("No valid checkers found for tests '{}'".format(",".join(checker_names)))
+            print(
+                "No valid checkers found for tests '{}'".format(",".join(checker_names))
+            )
 
         for checker_name, checker_class in checkers:
             # TODO: maybe this a little more reliable than depending on
             #       a string to determine the type of the checker -- perhaps
             #       use some kind of checker object with checker type and
             #       version baked in
-            checker_type_name = checker_name.split(':')[0]
+            checker_type_name = checker_name.split(":")[0]
             checker_opts = self.options.get(checker_type_name, set())
 
             # instantiate a Checker object
@@ -356,7 +380,7 @@ class CheckSuite(object):
 
             checks = self._get_checks(checker, skip_check_dict)
             vals = []
-            errs = {}   # check method name -> (exc, traceback)
+            errs = {}  # check method name -> (exc, traceback)
 
             for c, max_level in checks:
                 try:
@@ -385,7 +409,7 @@ class CheckSuite(object):
         return True
 
     def build_structure(self, check_name, groups, source_name, limit=1):
-        '''
+        """
         Compiles the checks, results and scores into an aggregate structure which looks like:
 
             {
@@ -405,19 +429,19 @@ class CheckSuite(object):
         @param check_name  The test which was run
         @param groups      List of results from compliance checker
         @param source_name Source of the dataset, used for title
-        '''
+        """
         aggregates = {}
 
-        aggregates['scored_points'] = 0
-        aggregates['possible_points'] = 0
+        aggregates["scored_points"] = 0
+        aggregates["possible_points"] = 0
         high_priorities = []
         medium_priorities = []
         low_priorities = []
         all_priorities = []
 
-        aggregates['high_count'] = 0
-        aggregates['medium_count'] = 0
-        aggregates['low_count'] = 0
+        aggregates["high_count"] = 0
+        aggregates["medium_count"] = 0
+        aggregates["low_count"] = 0
 
         def named_function(result):
             for child in result.children:
@@ -433,39 +457,39 @@ class CheckSuite(object):
             # this dataset and contains no meaningful information
             if res.value[1] == 0:
                 continue
-            aggregates['scored_points'] += res.value[0]
-            aggregates['possible_points'] += res.value[1]
+            aggregates["scored_points"] += res.value[0]
+            aggregates["possible_points"] += res.value[1]
             if res.weight == 3:
                 high_priorities.append(res)
                 if res.value[0] < res.value[1]:
-                    aggregates['high_count'] += 1
+                    aggregates["high_count"] += 1
             elif res.weight == 2:
                 medium_priorities.append(res)
                 if res.value[0] < res.value[1]:
-                    aggregates['medium_count'] += 1
+                    aggregates["medium_count"] += 1
             else:
                 low_priorities.append(res)
                 if res.value[0] < res.value[1]:
-                    aggregates['low_count'] += 1
+                    aggregates["low_count"] += 1
             all_priorities.append(res)
             # Some results have children
             # We don't render children inline with the top three tables, but we
             # do total the points and display the messages
             named_function(res)
 
-        aggregates['high_priorities'] = high_priorities
-        aggregates['medium_priorities'] = medium_priorities
-        aggregates['low_priorities'] = low_priorities
-        aggregates['all_priorities'] = all_priorities
-        aggregates['testname'] = self._get_check_versioned_name(check_name)
-        aggregates['source_name'] = source_name
-        aggregates['scoreheader'] = self.checkers[check_name]._cc_display_headers
-        aggregates['cc_spec_version'] = self.checkers[check_name]._cc_spec_version
-        aggregates['cc_url'] = self._get_check_url(aggregates['testname'])
+        aggregates["high_priorities"] = high_priorities
+        aggregates["medium_priorities"] = medium_priorities
+        aggregates["low_priorities"] = low_priorities
+        aggregates["all_priorities"] = all_priorities
+        aggregates["testname"] = self._get_check_versioned_name(check_name)
+        aggregates["source_name"] = source_name
+        aggregates["scoreheader"] = self.checkers[check_name]._cc_display_headers
+        aggregates["cc_spec_version"] = self.checkers[check_name]._cc_spec_version
+        aggregates["cc_url"] = self._get_check_url(aggregates["testname"])
         return aggregates
 
     def dict_output(self, check_name, groups, source_name, limit):
-        '''
+        """
         Builds the results into a JSON structure and writes it to the file buffer.
 
         @param check_name      The test which was run
@@ -473,16 +497,16 @@ class CheckSuite(object):
         @param output_filename Path to file to save output
         @param source_name     Source of the dataset, used for title
         @param limit           Integer value for limiting output
-        '''
+        """
         aggregates = self.build_structure(check_name, groups, source_name, limit)
         return self.serialize(aggregates)
 
     def serialize(self, o):
-        '''
+        """
         Returns a safe serializable object that can be serialized into JSON.
 
         @param o Python object to serialize
-        '''
+        """
         if isinstance(o, (list, tuple)):
             return [self.serialize(i) for i in o]
         if isinstance(o, dict):
@@ -494,7 +518,7 @@ class CheckSuite(object):
         return o
 
     def checker_html_output(self, check_name, groups, source_name, limit):
-        '''
+        """
         Renders the HTML output for a single test using Jinja2 and returns it
         as a string.
 
@@ -502,24 +526,27 @@ class CheckSuite(object):
         @param groups          List of results from compliance checker
         @param source_name     Source of the dataset, used for title
         @param limit           Integer value for limiting output
-        '''
+        """
         from jinja2 import Environment, PackageLoader
-        self.j2 = Environment(loader=PackageLoader(self.templates_root, 'data/templates'))
-        template = self.j2.get_template('ccheck.html.j2')
+
+        self.j2 = Environment(
+            loader=PackageLoader(self.templates_root, "data/templates")
+        )
+        template = self.j2.get_template("ccheck.html.j2")
 
         template_vars = self.build_structure(check_name, groups, source_name, limit)
         return template.render(**template_vars)
 
     def html_output(self, checkers_html):
-        '''
+        """
         Renders the HTML output for multiple tests and returns it as a string.
 
         @param checkers_html     List of HTML for single tests as returned by
                                  checker_html_output
-        '''
+        """
         # Note: This relies on checker_html_output having been called so that
         # self.j2 is initialised
-        template = self.j2.get_template('ccheck_wrapper.html.j2')
+        template = self.j2.get_template("ccheck_wrapper.html.j2")
         return template.render(checkers=checkers_html)
 
     def get_points(self, groups, limit):
@@ -553,30 +580,33 @@ class CheckSuite(object):
         check_name = self._get_check_versioned_name(check_name)
         check_url = self._get_check_url(check_name)
         width = 2 * self.col_width
-        print('\n')
+        print("\n")
         print("-" * width)
-        print('{:^{width}}'.format("IOOS Compliance Checker Report", width=width))
-        print('{:^{width}}'.format(check_name, width=width))
-        print('{:^{width}}'.format(check_url, width=width))
+        print("{:^{width}}".format("IOOS Compliance Checker Report", width=width))
+        print("{:^{width}}".format(check_name, width=width))
+        print("{:^{width}}".format(check_url, width=width))
         print("-" * width)
         if issue_count > 0:
-            print('{:^{width}}'.format("Corrective Actions", width=width))
-            plural = '' if issue_count == 1 else 's'
-            print("{} has {} potential issue{}".format(os.path.basename(ds), issue_count, plural))
+            print("{:^{width}}".format("Corrective Actions", width=width))
+            plural = "" if issue_count == 1 else "s"
+            print(
+                "{} has {} potential issue{}".format(
+                    os.path.basename(ds), issue_count, plural
+                )
+            )
 
         return [groups, points, out_of]
 
     def standard_output_generation(self, groups, limit, points, out_of, check):
-        '''
+        """
         Generates the Terminal Output
-        '''
+        """
         if points < out_of:
             self.reasoning_routine(groups, check, priority_flag=limit)
         else:
             print("All tests passed!")
 
-    def reasoning_routine(self, groups, check, priority_flag=3,
-                          _top_level=True):
+    def reasoning_routine(self, groups, check, priority_flag=3, _top_level=True):
         """
         print routine performed
         @param list groups: the Result groups
@@ -590,9 +620,10 @@ class CheckSuite(object):
         groups_sorted = sorted(groups, key=sort_fn, reverse=True)
 
         # create dict of the groups -> {level: [reasons]}
-        result = {key: [v for v in valuesiter if v.value[0] != v.value[1]]
-                    for key, valuesiter in itertools.groupby(groups_sorted,
-                                                             key=sort_fn)}
+        result = {
+            key: [v for v in valuesiter if v.value[0] != v.value[1]]
+            for key, valuesiter in itertools.groupby(groups_sorted, key=sort_fn)
+        }
         priorities = self.checkers[check]._cc_display_headers
 
         def process_table(res, check):
@@ -605,8 +636,9 @@ class CheckSuite(object):
             if not res.children:
                 reasons = res.msgs
             else:
-                child_reasons = self.reasoning_routine(res.children,
-                                                       check, _top_level=False)
+                child_reasons = self.reasoning_routine(
+                    res.children, check, _top_level=False
+                )
                 # there shouldn't be messages if there are children
                 # is this a valid assumption?
                 reasons = child_reasons
@@ -632,7 +664,7 @@ class CheckSuite(object):
                 if _top_level:
                     width = 2 * self.col_width
                     print("\n")
-                    print('{:^{width}}'.format(level_name, width=width))
+                    print("{:^{width}}".format(level_name, width=width))
                     print("-" * width)
 
                 data_issues = [process_table(res, check) for res in result[level]]
@@ -644,13 +676,14 @@ class CheckSuite(object):
                     if has_printed:
                         print("")
                     # join alphabetized reasons together
-                    reason_str = "\n".join('* {}'.format(r) for r in sorted(reasons, key=lambda x: x[0]))
+                    reason_str = "\n".join(
+                        "* {}".format(r) for r in sorted(reasons, key=lambda x: x[0])
+                    )
                     proc_str = "{}\n{}".format(issue, reason_str)
                     print(proc_str)
                     proc_strs.append(proc_str)
                     has_printed = True
         return "\n".join(proc_strs)
-
 
     def process_doc(self, doc):
         """
@@ -671,35 +704,44 @@ class CheckSuite(object):
         return ds
 
     def generate_dataset(self, cdl_path):
-        '''
+        """
         Use ncgen to generate a netCDF file from a .cdl file
         Returns the path to the generated netcdf file. If ncgen fails, uses
         sys.exit(1) to terminate program so a long stack trace is not reported
         to the user.
 
         :param str cdl_path: Absolute path to cdl file that is used to generate netCDF file
-        '''
-        if '.cdl' in cdl_path:  # it's possible the filename doesn't have the .cdl extension
-            ds_str = cdl_path.replace('.cdl', '.nc')
+        """
+        if (
+            ".cdl" in cdl_path
+        ):  # it's possible the filename doesn't have the .cdl extension
+            ds_str = cdl_path.replace(".cdl", ".nc")
         else:
-            ds_str = cdl_path + '.nc'
+            ds_str = cdl_path + ".nc"
 
         # generate netCDF-4 file
-        iostat = subprocess.run(['ncgen', '-k', 'nc4', '-o', ds_str, cdl_path], stderr=subprocess.PIPE)
+        iostat = subprocess.run(
+            ["ncgen", "-k", "nc4", "-o", ds_str, cdl_path], stderr=subprocess.PIPE
+        )
         if iostat.returncode != 0:
-          # if not successfull, create netCDF classic file
-          print('netCDF-4 file could not be generated from cdl file with ' +
-                'message:')
-          print(iostat.stderr.decode())
-          print('Trying to create netCDF Classic file instead.')
-          iostat = subprocess.run(['ncgen', '-k', 'nc3', '-o', ds_str, cdl_path], stderr=subprocess.PIPE)
-          if iostat.returncode != 0:
-            # Exit program if neither a netCDF Classic nor a netCDF-4 file
-            # could be created.
-            print('netCDF Classic file could not be generated from cdl file' +
-                  'with message:')
+            # if not successfull, create netCDF classic file
+            print(
+                "netCDF-4 file could not be generated from cdl file with " + "message:"
+            )
             print(iostat.stderr.decode())
-            sys.exit(1)
+            print("Trying to create netCDF Classic file instead.")
+            iostat = subprocess.run(
+                ["ncgen", "-k", "nc3", "-o", ds_str, cdl_path], stderr=subprocess.PIPE
+            )
+            if iostat.returncode != 0:
+                # Exit program if neither a netCDF Classic nor a netCDF-4 file
+                # could be created.
+                print(
+                    "netCDF Classic file could not be generated from cdl file"
+                    + "with message:"
+                )
+                print(iostat.stderr.decode())
+                sys.exit(1)
         return ds_str
 
     def load_dataset(self, ds_str):
@@ -717,11 +759,11 @@ class CheckSuite(object):
         return self.load_local_dataset(ds_str)
 
     def load_remote_dataset(self, ds_str):
-        '''
+        """
         Returns a dataset instance for the remote resource, either OPeNDAP or SOS
 
         :param str ds_str: URL to the remote resource
-        '''
+        """
 
         if opendap.is_opendap(ds_str):
             return Dataset(ds_str)
@@ -729,17 +771,21 @@ class CheckSuite(object):
             # Check if the HTTP response is XML, if it is, it's likely SOS so
             # we'll attempt to parse the response as SOS
             response = requests.get(ds_str, allow_redirects=True)
-            if 'text/xml' in response.headers['content-type']:
+            if "text/xml" in response.headers["content-type"]:
                 return self.process_doc(response.content)
 
-            raise ValueError("Unknown service with content-type: {}".format(response.headers['content-type']))
+            raise ValueError(
+                "Unknown service with content-type: {}".format(
+                    response.headers["content-type"]
+                )
+            )
 
     def load_local_dataset(self, ds_str):
-        '''
+        """
         Returns a dataset instance for the local resource
 
         :param ds_str: Path to the resource
-        '''
+        """
         if cdl.is_cdl(ds_str):
             ds_str = self.generate_dataset(ds_str)
 
@@ -758,7 +804,7 @@ class CheckSuite(object):
         """
         grouped = self._group_raw(raw_scores)
 
-        return (grouped)
+        return grouped
 
     def _group_raw(self, raw_scores, cur=None, level=1):
         """
@@ -792,20 +838,20 @@ class CheckSuite(object):
             """
             if isinstance(r.name, tuple) or isinstance(r.name, list):
                 if len(r.name) == 0:
-                    retval = ''
+                    retval = ""
                 else:
                     retval = r.name[0:1][0]
             else:
                 retval = r.name
             return retval, r.weight
+
         # END INTERNAL FUNCS ##########################################
 
         # NOTE until this point, *ALL* Results in raw_scores are
         # individual Result objects.
 
         # sort then group by name, then by priority weighting
-        grouped = itertools.groupby(sorted(raw_scores, key=group_func),
-                                    key=group_func)
+        grouped = itertools.groupby(sorted(raw_scores, key=group_func), key=group_func)
 
         # NOTE: post-grouping, grouped looks something like
         # [(('Global Attributes', 1), <itertools._grouper at 0x7f10982b5390>),
@@ -815,10 +861,10 @@ class CheckSuite(object):
 
         ret_val = []
 
-        for k, v in grouped: # iterate through the grouped tuples
+        for k, v in grouped:  # iterate through the grouped tuples
 
-            k = k[0]         # slice ("name", weight_val) --> "name"
-            v = list(v)      # from itertools._grouper to list
+            k = k[0]  # slice ("name", weight_val) --> "name"
+            v = list(v)  # from itertools._grouper to list
 
             cv = self._group_raw(list(map(trim_groups, v)), k, level + 1)
             if len(cv):
@@ -829,10 +875,16 @@ class CheckSuite(object):
 
             else:
                 max_weight = max([x.weight for x in v])
-                sum_scores = tuple(map(sum, list(zip(*([self._translate_value(x.value) for x in v])))))
+                sum_scores = tuple(
+                    map(sum, list(zip(*([self._translate_value(x.value) for x in v]))))
+                )
                 msgs = sum([x.msgs for x in v], [])
 
-            ret_val.append(Result(name=k, weight=max_weight, value=sum_scores, children=cv, msgs=msgs))
+            ret_val.append(
+                Result(
+                    name=k, weight=max_weight, value=sum_scores, children=cv, msgs=msgs
+                )
+            )
 
         return ret_val
 
