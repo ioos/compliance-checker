@@ -1,10 +1,10 @@
-'''
+"""
 Check for IOOS-approved attributes
-'''
-from compliance_checker.base import (BaseCheck, BaseNCCheck, BaseSOSGCCheck,
-                                     BaseSOSDSCheck, check_has, Result,
-                                     attr_check)
-from owslib.namespaces import Namespaces
+"""
+import re
+
+import validators
+
 from lxml.etree import XPath
 from cf_units import Unit
 from compliance_checker.acdd import ACDD1_3Check
@@ -15,21 +15,34 @@ from compliance_checker.cfutil import (get_geophysical_variables,
 from compliance_checker import base
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf import util as cf_util # not to be confused with cfutil.py
+from owslib.namespaces import Namespaces
+
+from compliance_checker import base
+from compliance_checker.acdd import ACDD1_3Check
+from compliance_checker.base import (
+    BaseCheck,
+    BaseNCCheck,
+    BaseSOSDSCheck,
+    BaseSOSGCCheck,
+    Result,
+    attr_check,
+    check_has,
+)
+from compliance_checker.cf import util as cf_util  # not to be confused with cfutil.py
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
-import validators
-import re
+from compliance_checker.cfutil import (
+    get_coordinate_variables,
+    get_geophysical_variables,
+    get_instrument_variables,
+)
 
 
 class IOOSBaseCheck(BaseCheck):
-    _cc_spec = 'ioos'
-    _cc_spec_version = '0.1'
-    _cc_description = 'IOOS Inventory Metadata'
-    _cc_url = 'https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes'
-    _cc_display_headers = {
-        3: 'Highly Recommended',
-        2: 'Recommended',
-        1: 'Suggested'
-    }
+    _cc_spec = "ioos"
+    _cc_spec_version = "0.1"
+    _cc_description = "IOOS Inventory Metadata"
+    _cc_url = "https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes"
+    _cc_display_headers = {3: "Highly Recommended", 2: "Recommended", 1: "Suggested"}
 
     @classmethod
     def _has_attr(cls, ds, attr, concept_name, priority=BaseCheck.HIGH):
@@ -40,13 +53,16 @@ class IOOSBaseCheck(BaseCheck):
         msgs = []
 
         if not val:
-            msgs.append("Attr '{}' (IOOS concept: '{}') not found in dataset".format(attr, concept_name))
+            msgs.append(
+                "Attr '{}' (IOOS concept: '{}') not found in dataset".format(
+                    attr, concept_name
+                )
+            )
 
         return Result(priority, val, concept_name, msgs)
 
     @classmethod
-    def _has_var_attr(cls, dataset, vname, attr, concept_name,
-                      priority=BaseCheck.HIGH):
+    def _has_var_attr(cls, dataset, vname, attr, concept_name, priority=BaseCheck.HIGH):
         """
         Checks for the existance of an attr on variable vname in dataset, with the name/message using concept_name.
         """
@@ -54,24 +70,31 @@ class IOOSBaseCheck(BaseCheck):
         msgs = []
         if vname not in dataset.variables:
             val = False
-            msgs.append("Variable '{}' not present while checking for attr '{}' for IOOS concept: '{}'".format(vname, attr, concept_name))
+            msgs.append(
+                "Variable '{}' not present while checking for attr '{}' for IOOS concept: '{}'".format(
+                    vname, attr, concept_name
+                )
+            )
         else:
             v = dataset.variables[vname]
             if attr not in v.ncattrs():
                 val = False
-                msgs.append("Attr '{}' not present on var '{}' while checking for IOOS concept: '{}'".format(attr, vname, concept_name))
+                msgs.append(
+                    "Attr '{}' not present on var '{}' while checking for IOOS concept: '{}'".format(
+                        attr, vname, concept_name
+                    )
+                )
 
         return Result(priority, val, concept_name, msgs)
 
 
 class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
-
     def check_time_period(self, ds):
         """
         Check that time period attributes are both set.
         """
-        start = self.std_check(ds, 'time_coverage_start')
-        end = self.std_check(ds, 'time_coverage_end')
+        start = self.std_check(ds, "time_coverage_start")
+        end = self.std_check(ds, "time_coverage_end")
 
         msgs = []
         count = 2
@@ -82,14 +105,14 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
             count -= 1
             msgs.append("Attr 'time_coverage_end' is missing")
 
-        return Result(BaseCheck.HIGH, (count, 2), 'time coverage start/end', msgs)
+        return Result(BaseCheck.HIGH, (count, 2), "time coverage start/end", msgs)
 
     def check_station_location_lat(self, ds):
         """
         Checks station lat attributes are set
         """
-        gmin = self.std_check(ds, 'geospatial_lat_min')
-        gmax = self.std_check(ds, 'geospatial_lat_max')
+        gmin = self.std_check(ds, "geospatial_lat_min")
+        gmax = self.std_check(ds, "geospatial_lat_max")
 
         msgs = []
         count = 2
@@ -100,14 +123,14 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
             count -= 1
             msgs.append("Attr 'geospatial_lat_max' is missing")
 
-        return Result(BaseCheck.HIGH, (count, 2), 'geospatial lat min/max', msgs)
+        return Result(BaseCheck.HIGH, (count, 2), "geospatial lat min/max", msgs)
 
     def check_station_location_lon(self, ds):
         """
         Checks station lon attributes are set
         """
-        gmin = self.std_check(ds, 'geospatial_lon_min')
-        gmax = self.std_check(ds, 'geospatial_lon_max')
+        gmin = self.std_check(ds, "geospatial_lon_min")
+        gmax = self.std_check(ds, "geospatial_lon_max")
 
         msgs = []
         count = 2
@@ -118,12 +141,12 @@ class IOOSNCCheck(BaseNCCheck, IOOSBaseCheck):
             count -= 1
             msgs.append("Attr 'geospatial_lon_max' is missing")
 
-        return Result(BaseCheck.HIGH, (count, 2), 'geospatial lon min/max', msgs)
+        return Result(BaseCheck.HIGH, (count, 2), "geospatial lon min/max", msgs)
 
 
 class IOOS0_1Check(IOOSNCCheck):
-    _cc_spec_version = '0.1'
-    _cc_description = 'IOOS Inventory Metadata'
+    _cc_spec_version = "0.1"
+    _cc_description = "IOOS Inventory Metadata"
     register_checker = True
 
     def check_global_attributes(self, ds):
@@ -133,13 +156,23 @@ class IOOS0_1Check(IOOSNCCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
         return [
-            self._has_attr(ds, 'acknowledgement', 'Platform Sponsor'),
-            self._has_attr(ds, 'publisher_email', 'Station Publisher Email'),
-            self._has_attr(ds, 'publisher_email', 'Service Contact Email', BaseCheck.MEDIUM),
-            self._has_attr(ds, 'institution', 'Service Provider Name', BaseCheck.MEDIUM),
-            self._has_attr(ds, 'publisher_name', 'Service Contact Name', BaseCheck.MEDIUM),
-            self._has_attr(ds, 'Conventions', 'Data Format Template Version', BaseCheck.MEDIUM),
-            self._has_attr(ds, 'publisher_name', 'Station Publisher Name', BaseCheck.HIGH),
+            self._has_attr(ds, "acknowledgement", "Platform Sponsor"),
+            self._has_attr(ds, "publisher_email", "Station Publisher Email"),
+            self._has_attr(
+                ds, "publisher_email", "Service Contact Email", BaseCheck.MEDIUM
+            ),
+            self._has_attr(
+                ds, "institution", "Service Provider Name", BaseCheck.MEDIUM
+            ),
+            self._has_attr(
+                ds, "publisher_name", "Service Contact Name", BaseCheck.MEDIUM
+            ),
+            self._has_attr(
+                ds, "Conventions", "Data Format Template Version", BaseCheck.MEDIUM
+            ),
+            self._has_attr(
+                ds, "publisher_name", "Station Publisher Name", BaseCheck.HIGH
+            ),
         ]
 
     def check_variable_attributes(self, ds):
@@ -149,12 +182,12 @@ class IOOS0_1Check(IOOSNCCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
         return [
-            self._has_var_attr(ds, 'platform', 'long_name', 'Station Long Name'),
-            self._has_var_attr(ds, 'platform', 'short_name', 'Station Short Name'),
-            self._has_var_attr(ds, 'platform', 'source', 'Platform Type'),
-            self._has_var_attr(ds, 'platform', 'ioos_name', 'Station ID'),
-            self._has_var_attr(ds, 'platform', 'wmo_id', 'Station WMO ID'),
-            self._has_var_attr(ds, 'platform', 'comment', 'Station Description'),
+            self._has_var_attr(ds, "platform", "long_name", "Station Long Name"),
+            self._has_var_attr(ds, "platform", "short_name", "Station Short Name"),
+            self._has_var_attr(ds, "platform", "source", "Platform Type"),
+            self._has_var_attr(ds, "platform", "ioos_name", "Station ID"),
+            self._has_var_attr(ds, "platform", "wmo_id", "Station WMO ID"),
+            self._has_var_attr(ds, "platform", "comment", "Station Description"),
         ]
 
     def check_variable_names(self, ds):
@@ -165,12 +198,14 @@ class IOOS0_1Check(IOOSNCCheck):
         count = 0
 
         for k, v in ds.variables.items():
-            if 'standard_name' in v.ncattrs():
+            if "standard_name" in v.ncattrs():
                 count += 1
             else:
                 msgs.append("Variable '{}' missing standard_name attr".format(k))
 
-        return Result(BaseCheck.MEDIUM, (count, len(ds.variables)), 'Variable Names', msgs)
+        return Result(
+            BaseCheck.MEDIUM, (count, len(ds.variables)), "Variable Names", msgs
+        )
 
     def check_altitude_units(self, ds):
         """
@@ -179,14 +214,16 @@ class IOOS0_1Check(IOOSNCCheck):
         @TODO: this is duplicated with check_variable_units
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
-        if 'z' in ds.variables:
+        if "z" in ds.variables:
             msgs = []
-            val = 'units' in ds.variables['z'].ncattrs()
+            val = "units" in ds.variables["z"].ncattrs()
             if not val:
                 msgs.append("Variable 'z' has no units attr")
-            return Result(BaseCheck.LOW, val, 'Altitude Units', msgs)
+            return Result(BaseCheck.LOW, val, "Altitude Units", msgs)
 
-        return Result(BaseCheck.LOW, (0, 0), 'Altitude Units', ["Dataset has no 'z' variable"])
+        return Result(
+            BaseCheck.LOW, (0, 0), "Altitude Units", ["Dataset has no 'z' variable"]
+        )
 
     def check_variable_units(self, ds):
         """
@@ -196,88 +233,91 @@ class IOOS0_1Check(IOOSNCCheck):
         count = 0
 
         for k, v in ds.variables.items():
-            if 'units' in v.ncattrs():
+            if "units" in v.ncattrs():
                 count += 1
             else:
                 msgs.append("Variable '{}' missing units attr".format(k))
 
-        return Result(BaseCheck.MEDIUM, (count, len(ds.variables)), 'Variable Units', msgs)
+        return Result(
+            BaseCheck.MEDIUM, (count, len(ds.variables)), "Variable Units", msgs
+        )
 
 
 class IOOS1_1Check(IOOSNCCheck):
-    '''
+    """
     Compliance checker implementation of IOOS Metadata Profile, Version 1.1
 
     Related links:
     https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes
     https://github.com/ioos/compliance-checker/issues/69
     https://github.com/ioos/compliance-checker/issues/358
-    '''
-    _cc_spec_version = '1.1'
-    _cc_description = 'IOOS Metadata Profile, Version 1.1'
-    _cc_url = 'https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes'
+    """
+
+    _cc_spec_version = "1.1"
+    _cc_description = "IOOS Metadata Profile, Version 1.1"
+    _cc_url = "https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes"
     register_checker = True
 
     def __init__(self):
         # Define the global attributes
         self.required_atts = [
-            'contributor_name',
-            'contributor_role',
-            'creator_country',
-            'creator_email',
-            'creator_sector',
-            'featureType',
-            'id',
-            'institution',
-            'naming_authority',
-            'platform',
-            'platform_vocabulary',
-            'publisher_country',
-            'publisher_email',
-            'publisher_name',
-            'standard_name_vocabulary',
-            'title'
+            "contributor_name",
+            "contributor_role",
+            "creator_country",
+            "creator_email",
+            "creator_sector",
+            "featureType",
+            "id",
+            "institution",
+            "naming_authority",
+            "platform",
+            "platform_vocabulary",
+            "publisher_country",
+            "publisher_email",
+            "publisher_name",
+            "standard_name_vocabulary",
+            "title",
         ]
 
         self.rec_atts = [
-            'creator_address',
-            'creator_city',
-            'creator_name',
-            'creator_phone',
-            'creator_state',
-            'creator_url',
-            'creator_zipcode',
-            'keywords',
-            'license',
-            'publisher_address',
-            'publisher_city',
-            'publisher_phone',
-            'publisher_state',
-            'publisher_url',
-            'publisher_zipcode',
-            'summary'
+            "creator_address",
+            "creator_city",
+            "creator_name",
+            "creator_phone",
+            "creator_state",
+            "creator_url",
+            "creator_zipcode",
+            "keywords",
+            "license",
+            "publisher_address",
+            "publisher_city",
+            "publisher_phone",
+            "publisher_state",
+            "publisher_url",
+            "publisher_zipcode",
+            "summary",
         ]
 
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
-        '''
+        """
         Performs a check on each highly recommended attributes' existence in the dataset
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
+        """
         return self.required_atts
 
     @check_has(BaseCheck.MEDIUM)
     def check_recommended(self, ds):
-        '''
+        """
         Performs a check on each recommended attributes' existence in the dataset
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
+        """
         return self.rec_atts
 
     def check_platform_variables(self, ds):
-        '''
+        """
         The value of platform attribute should be set to another variable which
         contains the details of the platform. There can be multiple platforms
         involved depending on if all the instances of the featureType in the
@@ -286,19 +326,23 @@ class IOOS1_1Check(IOOSNCCheck):
         from the geophysical variable in a space separated string.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
-        platform_names = getattr(ds, 'platform', '').split(' ')
+        """
+        platform_names = getattr(ds, "platform", "").split(" ")
         val = all(platform_name in ds.variables for platform_name in platform_names)
         msgs = []
         if not val:
-            msgs = [('The value of "platform" global attribute should be set to another variable '
-                     'which contains the details of the platform. If multiple platforms are '
-                     'involved, a variable should be defined for each platform and referenced '
-                     'from the geophysical variable in a space separated string.')]
-        return [Result(BaseCheck.HIGH, val, 'platform variables', msgs)]
+            msgs = [
+                (
+                    'The value of "platform" global attribute should be set to another variable '
+                    "which contains the details of the platform. If multiple platforms are "
+                    "involved, a variable should be defined for each platform and referenced "
+                    "from the geophysical variable in a space separated string."
+                )
+            ]
+        return [Result(BaseCheck.HIGH, val, "platform variables", msgs)]
 
     def check_platform_variable_attributes(self, ds):
-        '''
+        """
         Platform variables must contain the following attributes:
             ioos_code
             long_name
@@ -306,93 +350,109 @@ class IOOS1_1Check(IOOSNCCheck):
             type
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
+        """
         results = []
-        platform_name = getattr(ds, 'platform', '')
+        platform_name = getattr(ds, "platform", "")
         # There can be multiple platforms defined here (space separated)
-        for platform in platform_name.split(' '):
+        for platform in platform_name.split(" "):
             if platform in ds.variables:
                 results += [
-                    self._has_var_attr(ds, platform, 'long_name', 'Platform Long Name'),
-                    self._has_var_attr(ds, platform, 'short_name', 'Platform Short Name'),
-                    self._has_var_attr(ds, platform, 'ioos_code', 'Platform IOOS Code'),
-                    self._has_var_attr(ds, platform, 'type', 'Platform Type')
+                    self._has_var_attr(ds, platform, "long_name", "Platform Long Name"),
+                    self._has_var_attr(
+                        ds, platform, "short_name", "Platform Short Name"
+                    ),
+                    self._has_var_attr(ds, platform, "ioos_code", "Platform IOOS Code"),
+                    self._has_var_attr(ds, platform, "type", "Platform Type"),
                 ]
         return results
 
     def check_geophysical_vars_fill_value(self, ds):
-        '''
+        """
         Check that geophysical variables contain fill values.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
+        """
         results = []
         for geo_var in get_geophysical_variables(ds):
             results.append(
-                self._has_var_attr(ds, geo_var, '_FillValue', '_FillValue', BaseCheck.MEDIUM),
+                self._has_var_attr(
+                    ds, geo_var, "_FillValue", "_FillValue", BaseCheck.MEDIUM
+                ),
             )
         return results
 
     def check_geophysical_vars_standard_name(self, ds):
-        '''
+        """
         Check that geophysical variables contain standard names.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
+        """
         results = []
         for geo_var in get_geophysical_variables(ds):
             results.append(
-                self._has_var_attr(ds, geo_var, 'standard_name', 'geophysical variables standard_name'),
+                self._has_var_attr(
+                    ds, geo_var, "standard_name", "geophysical variables standard_name"
+                ),
             )
         return results
 
     def check_units(self, ds):
-        '''
+        """
         Required for most all variables that represent dimensional quantities.
         The value should come from udunits authoritative vocabulary, which is
         documented in the CF standard name table with it's corresponding
         standard name.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
+        """
         cf16 = CF1_6Check()
         return cf16.check_units(ds)
 
+
 class IOOS1_2_ConventionsValidator(base.RegexValidator):
     validator_regex = r"\bIOOS-1.2\b"
-    validator_fail_msg = "{} must contain the string \"IOOS 1.2\""
+    validator_fail_msg = '{} must contain the string "IOOS 1.2"'
+
 
 class IOOS1_2_PlatformIDValidator(base.RegexValidator):
     validator_regex = r"^[a-zA-Z0-9]+$"
     validator_fail_msg = "{} must be alphanumeric"
+
 
 class NamingAuthorityValidator(base.UrlValidator):
     """
     Class to check for URL or reversed DNS strings contained within
     naming_authority
     """
-    validator_fail_msg = "{} should either be a URL or a reversed DNS name (e.g \"edu.ucar.unidata\")"
+
+    validator_fail_msg = (
+        '{} should either be a URL or a reversed DNS name (e.g "edu.ucar.unidata")'
+    )
 
     def validator_func(self, input_value):
-        return (super().validator_func(input_value) or
-                # check for reverse DNS strings
-                validators.domain(".".join(input_value.split(".")[::-1])))
+        return (
+            super().validator_func(input_value)
+            or
+            # check for reverse DNS strings
+            validators.domain(".".join(input_value.split(".")[::-1]))
+        )
+
 
 class IOOS1_2Check(IOOSNCCheck):
     """
     Class to implement the IOOS Metadata 1.2 Specification
     """
 
-    _cc_spec_version = '1.2'
-    _cc_description = 'IOOS Metadata Profile, Version 1.2'
-    _cc_url = 'https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html'
+    _cc_spec_version = "1.2"
+    _cc_description = "IOOS Metadata Profile, Version 1.2"
+    _cc_url = "https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html"
     register_checker = True
 
     def __init__(self):
 
         # instantiate objects used for delegation
         self.acdd1_6 = ACDD1_3Check()
-        self.cf1_7   = CF1_7Check()
+        self.cf1_7 = CF1_7Check()
 
         # extend standard_names set to include QARTOD standard_names
         self._qartod_std_names = [
@@ -407,82 +467,101 @@ class IOOS1_2Check(IOOSNCCheck):
             "neighbor_test_quality_flag",
             "rate_of_change_test_quality_flag",
             "spike_test_quality_flag",
-            "syntax_test_quality_flag"
+            "syntax_test_quality_flag",
         ]
         self.cf1_7._std_names._names.extend(self._qartod_std_names)
 
-        self._default_check_var_attrs = set([
-            ("_FillValue", BaseCheck.MEDIUM),
-            ("missing_value", BaseCheck.MEDIUM),
-            #( "standard_name", BaseCheck.HIGH # already checked in CF1_7Check.check_standard_name()
-            #( "units", BaseCheck.HIGH # already checked in CF1_7Check.check_units()
-        ])
+        self._default_check_var_attrs = set(
+            [
+                ("_FillValue", BaseCheck.MEDIUM),
+                ("missing_value", BaseCheck.MEDIUM),
+                # ( "standard_name", BaseCheck.HIGH # already checked in CF1_7Check.check_standard_name()
+                # ( "units", BaseCheck.HIGH # already checked in CF1_7Check.check_units()
+            ]
+        )
 
         # geophysical variables must have the following attrs:
-        self.geophys_check_var_attrs = self._default_check_var_attrs.union(set([
-            ("standard_name_url", BaseCheck.MEDIUM),
-            #( "platform", BaseCheck.HIGH) # checked under check_single_platform()
-            #( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
-            #( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest()
-        ]))
+        self.geophys_check_var_attrs = self._default_check_var_attrs.union(
+            set(
+                [
+                    ("standard_name_url", BaseCheck.MEDIUM),
+                    # ( "platform", BaseCheck.HIGH) # checked under check_single_platform()
+                    # ( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
+                    # ( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest()
+                ]
+            )
+        )
 
         # geospatial vars must have the following attrs:
         self.geospat_check_var_attrs = self._default_check_var_attrs
 
         self.required_atts = [
-            ('Conventions', IOOS1_2_ConventionsValidator()),
-            'creator_country',
-            ('creator_email', base.EmailValidator()),
-            'creator_institution',
-            ('creator_sector', {"gov_state", "nonprofit", "tribal", "other",
-                                "unknown", "gov_municipal", "industry",
-                                "gov_federal", "academic"}),
-            ('creator_url', base.UrlValidator()),
-            'featureType',
-            'id',
-            ('infoUrl', base.UrlValidator()),
-            'license',
-            ('naming_authority', NamingAuthorityValidator()),
+            ("Conventions", IOOS1_2_ConventionsValidator()),
+            "creator_country",
+            ("creator_email", base.EmailValidator()),
+            "creator_institution",
+            (
+                "creator_sector",
+                {
+                    "gov_state",
+                    "nonprofit",
+                    "tribal",
+                    "other",
+                    "unknown",
+                    "gov_municipal",
+                    "industry",
+                    "gov_federal",
+                    "academic",
+                },
+            ),
+            ("creator_url", base.UrlValidator()),
+            "featureType",
+            "id",
+            ("infoUrl", base.UrlValidator()),
+            "license",
+            ("naming_authority", NamingAuthorityValidator()),
             #'platform', # checked in check_platform_global
-            'platform_name',
-            'publisher_country',
-            ('publisher_email', base.EmailValidator()),
-            'publisher_institution',
-            ('publisher_url', base.UrlValidator()),
+            "platform_name",
+            "publisher_country",
+            ("publisher_email", base.EmailValidator()),
+            "publisher_institution",
+            ("publisher_url", base.UrlValidator()),
             # TODO: handle standard name table exclusion for v38?
-            ('standard_name_vocabulary',
-             re.compile(r'^CF Standard Name Table v[1-9]\d*$')),
-            'summary',
-            'title'
+            (
+                "standard_name_vocabulary",
+                re.compile(r"^CF Standard Name Table v[1-9]\d*$"),
+            ),
+            "summary",
+            "title",
         ]
 
         self.rec_atts = [
-            ('contributor_email', base.EmailValidator()),
-            'contributor_name',
-            ('contributor_url', base.UrlValidator(base.csv_splitter)),
-            'creator_address',
-            'creator_city',
-            'creator_name',
-            'creator_phone',
-            'creator_postalcode',
-            'creator_state',
+            ("contributor_email", base.EmailValidator()),
+            "contributor_name",
+            ("contributor_url", base.UrlValidator(base.csv_splitter)),
+            "creator_address",
+            "creator_city",
+            "creator_name",
+            "creator_phone",
+            "creator_postalcode",
+            "creator_state",
             # checked in check_creator_and_publisher_type
             #'creator_type',
-            'institution',
-            'instrument',
+            "institution",
+            "instrument",
             # checked in check_ioos_ingest
             #'ioos_ingest',
-            'keywords',
-            ('platform_id', IOOS1_2_PlatformIDValidator()), # alphanumeric only
-            'publisher_address',
-            'publisher_city',
-            'publisher_name',
-            'publisher_phone',
-            'publisher_postalcode',
-            'publisher_state',
+            "keywords",
+            ("platform_id", IOOS1_2_PlatformIDValidator()),  # alphanumeric only
+            "publisher_address",
+            "publisher_city",
+            "publisher_name",
+            "publisher_phone",
+            "publisher_postalcode",
+            "publisher_state",
             # checked in check_creator_and_publisher_type
             #'publisher_type',
-            'references'
+            "references",
         ]
 
     def setup(self, ds):
@@ -503,27 +582,31 @@ class IOOS1_2Check(IOOSNCCheck):
         set of netCDF4.Variable
             Set of variables which are platform variables.
         """
-        plat_vars = ds.get_variables_by_attributes(platform=
-                                                   lambda p: isinstance(p, str))
-        return {ds.variables[var.platform] for var in plat_vars if
-                var.platform in ds.variables}
+        plat_vars = ds.get_variables_by_attributes(
+            platform=lambda p: isinstance(p, str)
+        )
+        return {
+            ds.variables[var.platform]
+            for var in plat_vars
+            if var.platform in ds.variables
+        }
 
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
-        '''
+        """
         Performs a check on each highly recommended attributes' existence in the dataset
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
+        """
         return self.required_atts
 
     @check_has(BaseCheck.MEDIUM)
     def check_recommended(self, ds):
-        '''
+        """
         Performs a check on each recommended attributes' existence in the dataset
 
         :param netCDF4.Dataset ds: An open netCDF dataset
-        '''
+        """
         return self.rec_atts
 
     def check_standard_name(self, ds):
@@ -565,11 +648,14 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         r = True
-        m = ("To disallow harvest of this dataset to IOOS national products, "
-             "global attribute \"ioos_ingest\" must be a string with value \"false\"")
+        m = (
+            "To disallow harvest of this dataset to IOOS national products, "
+            'global attribute "ioos_ingest" must be a string with value "false"'
+        )
         igst = getattr(ds, "ioos_ingest", None)
         if (isinstance(igst, str) and igst.lower() not in ("true", "false")) or (
-            not isinstance(igst, str) and igst is not None):
+            not isinstance(igst, str) and igst is not None
+        ):
             r = False
 
         return Result(BaseCheck.MEDIUM, r, "ioos_ingest", None if r else [m])
@@ -602,7 +688,7 @@ class IOOS1_2Check(IOOSNCCheck):
         vocb_msg = "contributor_role_vocabulary should be one of NERC or NOAA-NCEI"
 
         if role:
-            if role in [ # each in both vocabularies
+            if role in [  # each in both vocabularies
                 "author",
                 "coAuthor",
                 "collaborator",
@@ -622,20 +708,30 @@ class IOOS1_2Check(IOOSNCCheck):
                 "rightsHolder",
                 "sponsor",
                 "stakeholder",
-                "user"
+                "user",
             ]:
                 role_val = True
 
         if vocb:
             if vocb in [
                 "http://vocab.nerc.ac.uk/collection/G04/current/",
-                "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode"
+                "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
             ]:
                 vocb_val = True
 
         return [
-            Result(BaseCheck.MEDIUM, role_val, "contributor_role", None if role_val else [role_msg]),
-            Result(BaseCheck.MEDIUM, vocb_val, "contributor_role_vocabulary", None if vocb_val else [vocb_msg]),
+            Result(
+                BaseCheck.MEDIUM,
+                role_val,
+                "contributor_role",
+                None if role_val else [role_msg],
+            ),
+            Result(
+                BaseCheck.MEDIUM,
+                vocb_val,
+                "contributor_role_vocabulary",
+                None if vocb_val else [vocb_msg],
+            ),
         ]
 
     def check_geophysical_vars_have_attrs(self, ds):
@@ -652,9 +748,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         return self._check_vars_have_attrs(
-            ds,
-            get_geophysical_variables(ds),
-            self.geophys_check_var_attrs
+            ds, get_geophysical_variables(ds), self.geophys_check_var_attrs
         )
 
     def check_geospatial_vars_have_attrs(self, ds):
@@ -671,11 +765,8 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         return self._check_vars_have_attrs(
-            ds,
-            get_coordinate_variables(ds),
-            self.geospat_check_var_attrs
+            ds, get_coordinate_variables(ds), self.geospat_check_var_attrs
         )
-
 
     def _check_vars_have_attrs(self, ds, vars_to_check, atts_to_check):
         """
@@ -698,9 +789,9 @@ class IOOS1_2Check(IOOSNCCheck):
                     self._has_var_attr(
                         ds,
                         var,
-                        attr_tuple[0], # attribute name
-                        attr_tuple[0], # attribute name used as 'concept_name'
-                        attr_tuple[1]  # priority level
+                        attr_tuple[0],  # attribute name
+                        attr_tuple[0],  # attribute name used as 'concept_name'
+                        attr_tuple[1],  # priority level
                     )
                 )
         return results
@@ -718,8 +809,13 @@ class IOOS1_2Check(IOOSNCCheck):
         valid_cf_roles = {"timeseries_id", "profile_id", "trajectory_id"}
         cf_role_results = []
         for var in self.platform_vars:
-            attr_check(("cf_role", valid_cf_roles), ds, BaseCheck.HIGH,
-                        cf_role_results, var_name=var.name)
+            attr_check(
+                ("cf_role", valid_cf_roles),
+                ds,
+                BaseCheck.HIGH,
+                cf_role_results,
+                var_name=var.name,
+            )
         return cf_role_results
 
     def check_creator_and_publisher_type(self, ds):
@@ -753,12 +849,14 @@ class IOOS1_2Check(IOOSNCCheck):
                     pass_stat = True
                 else:
                     pass_stat = False
-                    messages.append("If specified, {} must be in value list "
-                                    "({})".format(global_att_name,
-                                                  sorted(expected_types)))
+                    messages.append(
+                        "If specified, {} must be in value list "
+                        "({})".format(global_att_name, sorted(expected_types))
+                    )
 
-            result_list.append(Result(BaseCheck.MEDIUM, pass_stat,
-                                      global_att_name, messages))
+            result_list.append(
+                Result(BaseCheck.MEDIUM, pass_stat, global_att_name, messages)
+            )
 
         return result_list
 
@@ -777,11 +875,13 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         r = False
-        m = "The global attribute \"platform\" must be a single string " +\
-            "containing no blank characters; it is {}"
+        m = (
+            'The global attribute "platform" must be a single string '
+            + "containing no blank characters; it is {}"
+        )
         p = getattr(ds, "platform", None)
         if p:
-            if re.match(r'^\S+$', p):
+            if re.match(r"^\S+$", p):
                 r = True
 
         return Result(BaseCheck.HIGH, r, "platform", None if r else [m.format(p)])
@@ -807,15 +907,17 @@ class IOOS1_2Check(IOOSNCCheck):
 
         num_platforms = len(platform_set)
         if num_platforms > 1 and glb_platform:
-            msg = "A dataset may only have one platform; {} found".format(len(platform_set))
+            msg = "A dataset may only have one platform; {} found".format(
+                len(platform_set)
+            )
             val = False
 
-        elif ((not glb_platform) and num_platforms > 0):
-            msg = "If a platform variable exists, a global attribute \"platform\" must also exist"
+        elif (not glb_platform) and num_platforms > 0:
+            msg = 'If a platform variable exists, a global attribute "platform" must also exist'
             val = False
 
         elif num_platforms == 0 and glb_platform:
-            msg = "A dataset with a global \"platform\" attribute must platform have variables"
+            msg = 'A dataset with a global "platform" attribute must platform have variables'
             val = False
 
         elif num_platforms == 0 and (not glb_platform):
@@ -858,7 +960,7 @@ class IOOS1_2Check(IOOSNCCheck):
         feature_type = getattr(ds, "featureType", "").lower()
         if not feature_type:
             return results
- 
+
         # loop through all variables with cf_role
         cf_role_vars = ds.get_variables_by_attributes(cf_role=lambda x: x is not None)
         num_cf_role_vars = len(cf_role_vars)
@@ -866,7 +968,7 @@ class IOOS1_2Check(IOOSNCCheck):
         for var in cf_role_vars:
             cf_role = getattr(var, "cf_role")
             shp = var.shape[0] if len(var.shape) > 0 else 1
- 
+
             if feature_type == "timeseries" and cf_role == "timeseries_id":
                 msg = (
                     "Dimension length of the variable with "
@@ -877,15 +979,19 @@ class IOOS1_2Check(IOOSNCCheck):
                     "platform). Datasets that include multiple platforms "
                     "are not valid and will cause harvesting errors."
                 ).format(dim=shp)
- 
-                _val = shp <= 1 # fails if > 1
- 
-            elif ( # even though tested condition is the same, different msg
-                     feature_type == "profile" and cf_role == "profile_id" or
-                     feature_type == "trajectory" and cf_role == "trajectory_id" or
-                     feature_type == "timeseriesprofile" and cf_role == "timeseries_id" or
-                     feature_type == "trajectoryprofile" and cf_role == "trajectory_id"
-                 ):
+
+                _val = shp <= 1  # fails if > 1
+
+            elif (  # even though tested condition is the same, different msg
+                feature_type == "profile"
+                and cf_role == "profile_id"
+                or feature_type == "trajectory"
+                and cf_role == "trajectory_id"
+                or feature_type == "timeseriesprofile"
+                and cf_role == "timeseries_id"
+                or feature_type == "trajectoryprofile"
+                and cf_role == "trajectory_id"
+            ):
 
                 msg = (
                     "Dimension length of the variable `{cf_role_var}` with "
@@ -894,29 +1000,30 @@ class IOOS1_2Check(IOOSNCCheck):
                     "profile restricts {feature_type} datasets to a "
                     "single platform (ie. station/trajectory/profile) per dataset."
                 ).format(
-                    cf_role_var=var.name, cf_role=cf_role,
-                    dim=shp, feature_type=feature_type
+                    cf_role_var=var.name,
+                    cf_role=cf_role,
+                    dim=shp,
+                    feature_type=feature_type,
                 )
- 
+
                 _val = shp == 1
- 
-            elif feature_type == "point": # do nothing
+
+            elif feature_type == "point":  # do nothing
                 _val = True
 
-            else: # featureType and cf_role don't match up to our restrictions
+            else:  # featureType and cf_role don't match up to our restrictions
                 _val = True
- 
+
             if not _val:
                 results.append(
                     Result(
                         BaseCheck.HIGH,
                         _val,
                         "CF Discrete Sampling Geometry Compliance",
-                        [msg]
+                        [msg],
                     )
                 )
- 
- 
+
         return results
 
     def check_platform_vocabulary(self, ds):
@@ -936,7 +1043,9 @@ class IOOS1_2Check(IOOSNCCheck):
         m = "platform_vocabulary must be a valid URL"
         pvocab = getattr(ds, "platform_vocabulary", "")
         val = bool(validators.url(pvocab))
-        return Result(BaseCheck.MEDIUM, val, "platform_vocabulary", None if val else [m])
+        return Result(
+            BaseCheck.MEDIUM, val, "platform_vocabulary", None if val else [m]
+        )
 
     def _check_gts_ingest_val(self, val):
         """
@@ -1022,9 +1131,13 @@ class IOOS1_2Check(IOOSNCCheck):
         if isinstance(gts_ingest_value, str):
             is_valid_string = self._check_gts_ingest_val(gts_ingest_value)
 
-        fail_message = ["gts_ingest must be a string \"true\" or \"false\""]
-        return Result(BaseCheck.HIGH, is_valid_string, "gts_ingest",
-                      None if is_valid_string else fail_message)
+        fail_message = ['gts_ingest must be a string "true" or "false"']
+        return Result(
+            BaseCheck.HIGH,
+            is_valid_string,
+            "gts_ingest",
+            None if is_valid_string else fail_message,
+        )
 
     def _var_qualifies_for_gts_ingest(self, ds, var):
         """
@@ -1051,7 +1164,10 @@ class IOOS1_2Check(IOOSNCCheck):
         anc_vars = str(getattr(var, "ancillary_variables", "")).split(" ")
         for av in anc_vars:
             if av in ds.variables:
-                if getattr(ds.variables[av], "standard_name", "") == "aggregate_quality_flag":
+                if (
+                    getattr(ds.variables[av], "standard_name", "")
+                    == "aggregate_quality_flag"
+                ):
                     avar_val = True
                     break
 
@@ -1073,9 +1189,9 @@ class IOOS1_2Check(IOOSNCCheck):
         # CF1_6Check.check_units() method is too tangled to use directly and would cause a huge
         # time increase
         units = getattr(var, "units", None)
-        has_udunits = (units is not None and cf_util.units_known(units))
+        has_udunits = units is not None and cf_util.units_known(units)
 
-        return (avar_val and valid_std_name and has_udunits)
+        return avar_val and valid_std_name and has_udunits
 
     def check_gts_ingest_requirements(self, ds):
         """
@@ -1101,49 +1217,50 @@ class IOOS1_2Check(IOOSNCCheck):
 
         # is dataset properly flagged for ingest?
         glb_gts_attr = getattr(ds, "gts_ingest", None)
-        if glb_gts_attr and (glb_gts_attr=="true" or glb_gts_attr=="false"):
+        if glb_gts_attr and (glb_gts_attr == "true" or glb_gts_attr == "false"):
             do_gts = True if glb_gts_attr == "true" else False
         else:
             do_gts = False
 
         # check variables
-        all_passed_ingest_reqs = True # default
+        all_passed_ingest_reqs = True  # default
         var_failed_ingest_msg = None
         var_passed_ingest_msg = None
 
-        if do_gts: # execute if dataset flagged for ingest
+        if do_gts:  # execute if dataset flagged for ingest
 
             var_passed_ingest_reqs = set()
-            for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x=="true"):
-                var_passed_ingest_reqs.add((v.name, self._var_qualifies_for_gts_ingest(ds, v)))
+            for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x == "true"):
+                var_passed_ingest_reqs.add(
+                    (v.name, self._var_qualifies_for_gts_ingest(ds, v))
+                )
 
             all_passed_ingest_reqs = all(map(lambda x: x[1], var_passed_ingest_reqs))
             if not all_passed_ingest_reqs:
-                _var_failed = map(lambda y: y[0], filter(lambda x: not x[1], var_passed_ingest_reqs))
-                _var_passed = map(lambda y: y[0], filter(lambda x: x[1], var_passed_ingest_reqs))
+                _var_failed = map(
+                    lambda y: y[0], filter(lambda x: not x[1], var_passed_ingest_reqs)
+                )
+                _var_passed = map(
+                    lambda y: y[0], filter(lambda x: x[1], var_passed_ingest_reqs)
+                )
 
                 var_failed_ingest_msg = (
-                                            "The following variables did not "
-                                            "qualify for GTS Ingest: {}".format(
-                                                ", ".join(_var_failed),
-                                            )
-                                        )
+                    "The following variables did not "
+                    "qualify for GTS Ingest: {}".format(", ".join(_var_failed),)
+                )
 
                 var_passed_ingest_msg = (
-                                            "The following variables qualified "
-                                            "for GTS Ingest: {}\n".format(
-                                                  ", ".join(_var_passed)
-                                            )
-                                        )
-
+                    "The following variables qualified "
+                    "for GTS Ingest: {}\n".format(", ".join(_var_passed))
+                )
 
         return Result(
             BaseCheck.HIGH,
             all_passed_ingest_reqs,
             "gts_ingest requirements",
-            None if all_passed_ingest_reqs else [
-                var_passed_ingest_msg, var_failed_ingest_msg
-            ]
+            None
+            if all_passed_ingest_reqs
+            else [var_passed_ingest_msg, var_failed_ingest_msg],
         )
 
     def check_instrument_variables(self, ds):
@@ -1165,22 +1282,44 @@ class IOOS1_2Check(IOOSNCCheck):
         for instr in instr_vars:
             if instr in ds.variables:
                 compnt = getattr(ds.variables[instr], "component", None)
-                m = ["component attribute of {} ({}) must be a string".format(instr, compnt)]
+                m = [
+                    "component attribute of {} ({}) must be a string".format(
+                        instr, compnt
+                    )
+                ]
                 if compnt:
                     results.append(
-                        Result(BaseCheck.MEDIUM, isinstance(compnt, str), "instrument_variable", m)
+                        Result(
+                            BaseCheck.MEDIUM,
+                            isinstance(compnt, str),
+                            "instrument_variable",
+                            m,
+                        )
                     )
                 else:
-                    results.append(Result(BaseCheck.MEDIUM, True, "instrument_variable", m))
+                    results.append(
+                        Result(BaseCheck.MEDIUM, True, "instrument_variable", m)
+                    )
 
                 disct = getattr(ds.variables[instr], "discriminant", None)
-                m = ["discriminant attribute of {} ({}) must be a string".format(instr, disct)]
+                m = [
+                    "discriminant attribute of {} ({}) must be a string".format(
+                        instr, disct
+                    )
+                ]
                 if disct:
                     results.append(
-                        Result(BaseCheck.MEDIUM, isinstance(disct, str), "instrument_variable", m)
+                        Result(
+                            BaseCheck.MEDIUM,
+                            isinstance(disct, str),
+                            "instrument_variable",
+                            m,
+                        )
                     )
                 else:
-                    results.append(Result(BaseCheck.MEDIUM, True, "instrument_variable", m))
+                    results.append(
+                        Result(BaseCheck.MEDIUM, True, "instrument_variable", m)
+                    )
 
         return results
 
@@ -1202,22 +1341,38 @@ class IOOS1_2Check(IOOSNCCheck):
 
         results = []
         # get qartod variables
-        for v in ds.get_variables_by_attributes(standard_name=lambda x: x in self._qartod_std_names):
+        for v in ds.get_variables_by_attributes(
+            standard_name=lambda x: x in self._qartod_std_names
+        ):
 
             missing_msg = "flag_{} not present on {}"
 
             # check if each has flag_values, flag_meanings
             # need isinstance() as can't compare truth value of array
             if getattr(v, "flag_values", None) is None:
-                results.append(Result(BaseCheck.MEDIUM, False, "qartod_variables flags", missing_msg.format("values", v.name)))
+                results.append(
+                    Result(
+                        BaseCheck.MEDIUM,
+                        False,
+                        "qartod_variables flags",
+                        missing_msg.format("values", v.name),
+                    )
+                )
 
-            else: # if exist, test
+            else:  # if exist, test
                 results.append(self.cf1_7._check_flag_values(ds, v.name))
 
             if getattr(v, "flag_meanings", None) is None:
-                results.append(Result(BaseCheck.MEDIUM, False, "qartod_variables flags", missing_msg.format("meanings", v.name)))
+                results.append(
+                    Result(
+                        BaseCheck.MEDIUM,
+                        False,
+                        "qartod_variables flags",
+                        missing_msg.format("meanings", v.name),
+                    )
+                )
 
-            else: # if exist, test
+            else:  # if exist, test
                 results.append(self.cf1_7._check_flag_meanings(ds, v.name))
 
         # Ensure message name is "qartod_variables flags"
@@ -1241,17 +1396,30 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         results = []
-        for v in ds.get_variables_by_attributes(standard_name=lambda x: x in self._qartod_std_names):
+        for v in ds.get_variables_by_attributes(
+            standard_name=lambda x: x in self._qartod_std_names
+        ):
             attval = getattr(v, "references", None)
             if attval is None:
-                msg = ("\"references\" attribute not present for variable {}."
-                       "If present, it should be a valid URL.").format(v.name)
+                msg = (
+                    '"references" attribute not present for variable {}.'
+                    "If present, it should be a valid URL."
+                ).format(v.name)
                 val = False
             else:
-                msg = "\"references\" attribute for variable \"{}\" must be a valid URL".format(v.name)
+                msg = '"references" attribute for variable "{}" must be a valid URL'.format(
+                    v.name
+                )
                 val = bool(validators.url(attval))
 
-            results.append(Result(BaseCheck.MEDIUM, val, "qartod_variable:references", None if val else [msg]))
+            results.append(
+                Result(
+                    BaseCheck.MEDIUM,
+                    val,
+                    "qartod_variable:references",
+                    None if val else [msg],
+                )
+            )
 
         return results
 
@@ -1277,109 +1445,276 @@ class IOOS1_2Check(IOOSNCCheck):
 
         valid = True
         ctxt = "wmo_platform_code"
-        msg = ("The wmo_platform_code must be an alphanumeric string of 5 "
-               "characters or a numeric string of 7 characters")
+        msg = (
+            "The wmo_platform_code must be an alphanumeric string of 5 "
+            "characters or a numeric string of 7 characters"
+        )
 
         code = getattr(ds, "wmo_platform_code", None)
         if code:
-           if not (
-               isinstance(code, str) and
-               (
-                   re.search(r"^(?:[a-zA-Z0-9]{5}|[0-9]{7})$", code)
-               )
-           ):
-               valid = False
+            if not (
+                isinstance(code, str)
+                and (re.search(r"^(?:[a-zA-Z0-9]{5}|[0-9]{7})$", code))
+            ):
+                valid = False
 
         return Result(BaseCheck.HIGH, valid, ctxt, None if valid else [msg])
 
+
 class IOOSBaseSOSCheck(BaseCheck):
-    _cc_spec = 'ioos_sos'
-    _cc_spec_version = '0.1'
-    _cc_description = ('IOOS Inventory Metadata checks for the Sensor Observation System (SOS). '
-                       'Checks SOS functions GetCapabilities and DescribeSensor.')
+    _cc_spec = "ioos_sos"
+    _cc_spec_version = "0.1"
+    _cc_description = (
+        "IOOS Inventory Metadata checks for the Sensor Observation System (SOS). "
+        "Checks SOS functions GetCapabilities and DescribeSensor."
+    )
     register_checker = True
     # requires login
-    _cc_url = 'http://sdf.ndbc.noaa.gov/sos/'
+    _cc_url = "http://sdf.ndbc.noaa.gov/sos/"
 
 
 class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseSOSCheck):
 
     # set up namespaces for XPath
-    ns = Namespaces().get_namespaces(['sos', 'gml', 'xlink'])
-    ns['ows'] = Namespaces().get_namespace('ows110')
+    ns = Namespaces().get_namespaces(["sos", "gml", "xlink"])
+    ns["ows"] = Namespaces().get_namespace("ows110")
 
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
-        return [
-
-        ]
+        return []
 
     @check_has(BaseCheck.MEDIUM)
     def check_recommended(self, ds):
         return [
-            ('service_contact_email', XPath("/sos:Capabilities/ows:ServiceProvider/ows:ServiceContact/ows:ContactInfo/ows:Address/ows:ElectronicMailAddress", namespaces=self.ns)),
-            ('service_contact_name', XPath("/sos:Capabilities/ows:ServiceProvider/ows:ServiceContact/ows:IndividualName", namespaces=self.ns)),
-            ('service_provider_name', XPath("/sos:Capabilities/ows:ServiceProvider/ows:ProviderName", namespaces=self.ns)),
-
-            ('service_title', XPath("/sos:Capabilities/ows:ServiceProvider/ows:ProviderName", namespaces=self.ns)),
-            ('service_type_name', XPath("/sos:Capabilities/ows:ServiceIdentification/ows:ServiceType", namespaces=self.ns)),
-            ('service_type_version', XPath("/sos:Capabilities/ows:ServiceIdentification/ows:ServiceTypeVersion", namespaces=self.ns)),
+            (
+                "service_contact_email",
+                XPath(
+                    "/sos:Capabilities/ows:ServiceProvider/ows:ServiceContact/ows:ContactInfo/ows:Address/ows:ElectronicMailAddress",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "service_contact_name",
+                XPath(
+                    "/sos:Capabilities/ows:ServiceProvider/ows:ServiceContact/ows:IndividualName",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "service_provider_name",
+                XPath(
+                    "/sos:Capabilities/ows:ServiceProvider/ows:ProviderName",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "service_title",
+                XPath(
+                    "/sos:Capabilities/ows:ServiceProvider/ows:ProviderName",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "service_type_name",
+                XPath(
+                    "/sos:Capabilities/ows:ServiceIdentification/ows:ServiceType",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "service_type_version",
+                XPath(
+                    "/sos:Capabilities/ows:ServiceIdentification/ows:ServiceTypeVersion",
+                    namespaces=self.ns,
+                ),
+            ),
             # ds.identification[0].observed_properties has this as well, but
             # don't want to try to shoehorn a function here
             # ('variable_names', len(ds.identification[0].observed_properties) > 0)
-            ('variable_names', XPath("/sos:Capabilities/sos:Contents/sos:ObservationOfferingList/sos:ObservationOffering/sos:observedProperty",
-             namespaces=self.ns)),
-            ('data_format_template_version', XPath("/sos:Capabilities/ows:OperationsMetadata/ows:ExtendedCapabilities/gml:metaDataProperty[@xlink:title='ioosTemplateVersion']/gml:version",
-             namespaces=self.ns))
+            (
+                "variable_names",
+                XPath(
+                    "/sos:Capabilities/sos:Contents/sos:ObservationOfferingList/sos:ObservationOffering/sos:observedProperty",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "data_format_template_version",
+                XPath(
+                    "/sos:Capabilities/ows:OperationsMetadata/ows:ExtendedCapabilities/gml:metaDataProperty[@xlink:title='ioosTemplateVersion']/gml:version",
+                    namespaces=self.ns,
+                ),
+            ),
         ]
 
     @check_has(BaseCheck.LOW)
     def check_suggested(self, ds):
-        return [
-            'altitude_units'
-        ]
+        return ["altitude_units"]
 
 
 class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseSOSCheck):
 
     # set up namespaces for XPath
-    ns = Namespaces().get_namespaces(['sml', 'swe', 'gml', 'xlink'])
+    ns = Namespaces().get_namespaces(["sml", "swe", "gml", "xlink"])
 
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         return [
-            ('platform_sponsor', XPath("/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='sponsor']/sml:Term/sml:value", namespaces=self.ns)),
-            ('platform_type', XPath("/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='platformType']/sml:Term/sml:value", namespaces=self.ns)),
-            ('station_publisher_name', XPath("/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/publisher']/sml:ResponsibleParty/sml:organizationName", namespaces=self.ns)),
-            ('station_publisher_email', XPath("/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/publisher']/sml:ResponsibleParty/sml:contactInfo/address/sml:electronicMailAddress", namespaces=self.ns)),
-            ('station_id', XPath("/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='stationID']/sml:Term/sml:value", namespaces=self.ns)),
-            ('station_long_name', XPath("/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='longName']/sml:Term/sml:value", namespaces=self.ns)),
-            ('station_short_name', XPath("/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='shortName']/sml:Term/sml:value", namespaces=self.ns)),
-            ('station_wmo_id', XPath("/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier/sml:Term[@definition=\"http://mmisw.org/ont/ioos/definition/wmoID\"]/sml:value", namespaces=self.ns)),
-            ('time_period', XPath("/sml:SensorML/sml:member/sml:System/sml:capabilities[@name='observationTimeRange']/swe:DataRecord/swe:field[@name='observationTimeRange']/swe:TimeRange/swe:value", namespaces=self.ns)),
-            ('operator_email', XPath("/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/operator']/sml:ResponsibleParty/sml:contactInfo/address/sml:electronicMailAddress", namespaces=self.ns)),
-            ('operator_name', XPath("/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/operator']/sml:ResponsibleParty/sml:organizationName", namespaces=self.ns)),
-            ('station_description', XPath("/sml:SensorML/sml:member/sml:System/gml:description", namespaces=self.ns)),
+            (
+                "platform_sponsor",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='sponsor']/sml:Term/sml:value",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "platform_type",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='platformType']/sml:Term/sml:value",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "station_publisher_name",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/publisher']/sml:ResponsibleParty/sml:organizationName",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "station_publisher_email",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/publisher']/sml:ResponsibleParty/sml:contactInfo/address/sml:electronicMailAddress",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "station_id",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='stationID']/sml:Term/sml:value",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "station_long_name",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='longName']/sml:Term/sml:value",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "station_short_name",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier[@name='shortName']/sml:Term/sml:value",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "station_wmo_id",
+                XPath(
+                    '/sml:SensorML/sml:member/sml:System/sml:identification/sml:IdentifierList/sml:identifier/sml:Term[@definition="http://mmisw.org/ont/ioos/definition/wmoID"]/sml:value',
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "time_period",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:capabilities[@name='observationTimeRange']/swe:DataRecord/swe:field[@name='observationTimeRange']/swe:TimeRange/swe:value",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "operator_email",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/operator']/sml:ResponsibleParty/sml:contactInfo/address/sml:electronicMailAddress",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "operator_name",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:contact/sml:ContactList/sml:member[@xlink:role='http://mmisw.org/ont/ioos/definition/operator']/sml:ResponsibleParty/sml:organizationName",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "station_description",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/gml:description",
+                    namespaces=self.ns,
+                ),
+            ),
             # replaced with lon/lat with point
-            ('station_location_point', XPath("/sml:SensorML/sml:member/sml:System/sml:location/gml:Point/gml:pos", namespaces=self.ns))
+            (
+                "station_location_point",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:location/gml:Point/gml:pos",
+                    namespaces=self.ns,
+                ),
+            ),
         ]
 
     @check_has(BaseCheck.MEDIUM)
     def check_recommended(self, ds):
         return [
-            ('sensor_descriptions', XPath("/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/gml:description", namespaces=self.ns)),
-            ('sensor_ids', XPath("/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/@gml:id", namespaces=self.ns)),
-            ('sensor_names', XPath("/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/@name", namespaces=self.ns)),
-
-            ('data_format_template_version', XPath("/sml:SensorML/sml:capabilities/swe:SimpleDataRecord/swe:field[@name='ioosTemplateVersion']/swe:Text/swe:value", namespaces=self.ns)),
-
-            ('variable_names', XPath("/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/sml:outputs/sml:OutputList/sml:output/swe:Quantity/@definition", namespaces=self.ns)),
-            ('variable_units', XPath("/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/sml:outputs/sml:OutputList/sml:output/swe:Quantity/swe:uom/@code", namespaces=self.ns)),
-            ('network_id', XPath("/sml:SensorML/sml:member/sml:System/sml:capabilities[@name='networkProcedures']/swe:SimpleDataRecord/gml:metaDataProperty/@xlink:href", namespaces=self.ns)),
-            ('operator_sector', XPath("/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='operatorSector']/sml:Term/sml:value", namespaces=self.ns)),
+            (
+                "sensor_descriptions",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/gml:description",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "sensor_ids",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/@gml:id",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "sensor_names",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/@name",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "data_format_template_version",
+                XPath(
+                    "/sml:SensorML/sml:capabilities/swe:SimpleDataRecord/swe:field[@name='ioosTemplateVersion']/swe:Text/swe:value",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "variable_names",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/sml:outputs/sml:OutputList/sml:output/swe:Quantity/@definition",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "variable_units",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:components/sml:ComponentList/sml:component/sml:System/sml:outputs/sml:OutputList/sml:output/swe:Quantity/swe:uom/@code",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "network_id",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:capabilities[@name='networkProcedures']/swe:SimpleDataRecord/gml:metaDataProperty/@xlink:href",
+                    namespaces=self.ns,
+                ),
+            ),
+            (
+                "operator_sector",
+                XPath(
+                    "/sml:SensorML/sml:member/sml:System/sml:classification/sml:ClassifierList/sml:classifier[@name='operatorSector']/sml:Term/sml:value",
+                    namespaces=self.ns,
+                ),
+            ),
         ]
 
     @check_has(BaseCheck.LOW)
     def check_suggested(self, ds):
-        return [
-        ]
+        return []

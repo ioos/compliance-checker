@@ -3,36 +3,44 @@
 """
 Compliance Checker
 """
-from functools import wraps
+import csv
+import itertools
 import pprint
+import re
+import sys
 import warnings
+
+from collections import defaultdict
+from functools import wraps
+from io import StringIO
+
+import validators
+
+from lxml import etree
 from netCDF4 import Dataset
+from owslib.namespaces import Namespaces
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
-from owslib.namespaces import Namespaces
-from compliance_checker import __version__, MemoizedDataset
+
+from compliance_checker import MemoizedDataset, __version__
 from compliance_checker.util import kvp_convert
-from collections import defaultdict
-from lxml import etree
-import sys
-import re
-import csv
-from io import StringIO
-import validators
-import itertools
+
 
 # Python 3.5+ should work, also have a fallback
 try:
     from typing import Pattern
+
     re_pattern_type = Pattern
 except ImportError:
-    re_pattern_type = type(re.compile(''))
+    re_pattern_type = type(re.compile(""))
+
 
 def get_namespaces():
     n = Namespaces()
     ns = n.get_namespaces(["ogc", "sml", "gml", "sos", "swe", "xlink"])
     ns["ows"] = n.get_namespace("ows110")
     return ns
+
 
 def csv_splitter(input_string):
     """
@@ -53,8 +61,9 @@ def csv_splitter(input_string):
     csv_contents = csv.reader(StringIO(input_string))
     return list(itertools.chain.from_iterable(csv_contents))
 
+
 class ValidationObject(object):
-    validator_fail_msg = ''
+    validator_fail_msg = ""
     expected_type = None
 
     def __init__(self, split_func=None):
@@ -71,7 +80,6 @@ class ValidationObject(object):
         """
         raise NotImplementedError
 
-
     def validate(self, input_name, input_value):
         if self.expected_type is not None:
             type_result = self.validate_type(input_name, input_value)
@@ -87,11 +95,13 @@ class ValidationObject(object):
     def validate_type(self, input_name, input_value):
         if not isinstance(input_value, self.expected_type):
             expected_type_fmt = "Attribute {} should be instance of type {}"
-            return (False,
-                    [expected_type_fmt.format(input_name,
-                                             self.expected_type.__name__)])
+            return (
+                False,
+                [expected_type_fmt.format(input_name, self.expected_type.__name__)],
+            )
         else:
             return True, None
+
 
 class EmailValidator(ValidationObject):
     validator_fail_msg = "{} must be a valid email address"
@@ -100,13 +110,15 @@ class EmailValidator(ValidationObject):
     def validator_func(self, input_value):
         return validators.email(input_value)
 
+
 class RegexValidator(ValidationObject):
     expected_type = str
-    validator_regex = r'^.+$'
+    validator_regex = r"^.+$"
     validator_fail_msg = "{} must not be an empty string"
 
     def validator_func(self, input_value):
         return bool(re.search(self.validator_regex, input_value))
+
 
 class UrlValidator(ValidationObject):
     validator_fail_msg = "{} must be a valid URL"
@@ -115,11 +127,13 @@ class UrlValidator(ValidationObject):
     def validator_func(self, input_value):
         return bool(validators.url(input_value))
 
+
 # Simple class for Generic File type (default to this if file not recognised)
 class GenericFile(object):
     """
     Simple class for any file. Has same path lookup as netCDF4.Dataset.
     """
+
     def __init__(self, fpath):
         self.fpath = fpath
 
@@ -128,16 +142,12 @@ class GenericFile(object):
 
 
 class BaseCheck(object):
-    HIGH   = 3
+    HIGH = 3
     MEDIUM = 2
-    LOW    = 1
+    LOW = 1
 
     _cc_checker_version = __version__
-    _cc_display_headers = {
-        3: 'High Priority',
-        2: 'Medium Priority',
-        1: 'Low Priority'
-    }
+    _cc_display_headers = {3: "High Priority", 2: "Medium Priority", 1: "Low Priority"}
 
     supported_ds = []
 
@@ -172,8 +182,9 @@ class BaseCheck(object):
         # Is it necessary to key out by severity?  Is severity level unique
         # per check?  If so, it could be eliminated from key hierarchy
         if severity not in self._defined_results[name][variable]:
-            self._defined_results[name][variable][severity] = \
-             TestCtx(severity, name, variable=variable)
+            self._defined_results[name][variable][severity] = TestCtx(
+                severity, name, variable=variable
+            )
         return self._defined_results[name][variable][severity]
 
 
@@ -181,6 +192,7 @@ class BaseNCCheck(object):
     """
     Base Class for NetCDF Dataset supporting Check Suites.
     """
+
     supported_ds = {Dataset, MemoizedDataset}
 
     @classmethod
@@ -206,6 +218,7 @@ class BaseSOSGCCheck(object):
     """
     Base class for SOS-GetCapabilities supporting Check Suites.
     """
+
     supported_ds = [SensorObservationService_1_0_0]
 
 
@@ -213,6 +226,7 @@ class BaseSOSDSCheck(object):
     """
     Base class for SOS-DescribeSensor supporting Check Suites.
     """
+
     supported_ds = [SensorML]
 
 
@@ -227,27 +241,29 @@ class Result(object):
     Stores the checker instance and the check method that produced this result.
     """
 
-    def __init__(self,
-                 weight=BaseCheck.MEDIUM,
-                 value=None,
-                 name=None,
-                 msgs=None,
-                 children=None,
-                 checker=None,
-                 check_method=None,
-                 variable_name=None):
+    def __init__(
+        self,
+        weight=BaseCheck.MEDIUM,
+        value=None,
+        name=None,
+        msgs=None,
+        children=None,
+        checker=None,
+        check_method=None,
+        variable_name=None,
+    ):
 
         self.weight = weight
 
         if value is None:
             self.value = None
         elif isinstance(value, tuple):
-            assert len(value) == 2, 'Result value must be 2-tuple or boolean!'
+            assert len(value) == 2, "Result value must be 2-tuple or boolean!"
             self.value = value
         else:
             self.value = bool(value)
-        self.name   = name
-        self.msgs   = msgs or []
+        self.name = name
+        self.msgs = msgs or []
 
         self.children = children or []
 
@@ -256,30 +272,30 @@ class Result(object):
         self.variable_name = variable_name
 
     def __repr__(self):
-        ret = '{} (*{}): {}'.format(self.name, self.weight, self.value)
+        ret = "{} (*{}): {}".format(self.name, self.weight, self.value)
 
         if len(self.msgs):
             if len(self.msgs) == 1:
-                ret += ' ({})'.format(self.msgs[0])
+                ret += " ({})".format(self.msgs[0])
             else:
-                ret += ' ({!s} msgs)'.format(len(self.msgs))
+                ret += " ({!s} msgs)".format(len(self.msgs))
 
         if len(self.children):
-            ret += ' ({!s} children)'.format(len(self.children))
-            ret += '\n' + pprint.pformat(self.children)
+            ret += " ({!s} children)".format(len(self.children))
+            ret += "\n" + pprint.pformat(self.children)
 
         return ret
 
     def serialize(self):
-        '''
+        """
         Returns a serializable dictionary that represents the result object
-        '''
+        """
         return {
-            'name' : self.name,
-            'weight' : self.weight,
-            'value' : self.value,
-            'msgs' : self.msgs,
-            'children' : [i.serialize() for i in self.children]
+            "name": self.name,
+            "weight": self.weight,
+            "value": self.value,
+            "msgs": self.msgs,
+            "children": [i.serialize() for i in self.children],
         }
 
     def __eq__(self, other):
@@ -287,29 +303,41 @@ class Result(object):
 
 
 class TestCtx(object):
-    '''
+    """
     Simple struct object that holds score values and messages to compile into a result
-    '''
-    def __init__(self, category=None, description='', out_of=0, score=0,
-                 messages=None, variable=None):
+    """
+
+    def __init__(
+        self,
+        category=None,
+        description="",
+        out_of=0,
+        score=0,
+        messages=None,
+        variable=None,
+    ):
         self.category = category or BaseCheck.LOW
         self.out_of = out_of
         self.score = score
         self.messages = messages or []
-        self.description = description or ''
+        self.description = description or ""
         self.variable = variable
 
     def to_result(self):
-        return Result(self.category, (self.score, self.out_of),
-                      self.description, self.messages,
-                      variable_name=self.variable)
+        return Result(
+            self.category,
+            (self.score, self.out_of),
+            self.description,
+            self.messages,
+            variable_name=self.variable,
+        )
 
     def assert_true(self, test, message):
-        '''
+        """
         Increments score if test is true otherwise appends a message
         :rtype: bool
         :return: Boolean indicating whether test condition passed or not
-        '''
+        """
         self.out_of += 1
 
         if test:
@@ -365,6 +393,7 @@ def xpath_check(tree, xpath):
     """Checks whether tree contains one or more elements matching xpath"""
     return len(xpath(tree)) > 0
 
+
 def maybe_get_global_attr(attr_name, ds):
     if attr_name in ds.ncattrs():
         return True, ds.getncattr(attr_name)
@@ -407,37 +436,41 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
                 att_strip = base_context.getncattr(name).strip()
                 if not att_strip:
                     res = False
-                    msgs = ["{} is empty or completely whitespace".format(
-                                      display_name)]
+                    msgs = ["{} is empty or completely whitespace".format(display_name)]
             # if not a string/has no strip method we should be OK
             except AttributeError:
                 pass
 
         # gname arg allows the global attrs to be grouped together
-        ret_val.append(Result(
-            priority,
-            value=res,
-            name=gname if gname else name,
-            msgs=msgs,
-            variable_name=var_name
-        ))
-    elif hasattr(other, '__iter__'):
+        ret_val.append(
+            Result(
+                priority,
+                value=res,
+                name=gname if gname else name,
+                msgs=msgs,
+                variable_name=var_name,
+            )
+        )
+    elif hasattr(other, "__iter__"):
         # redundant, we could easily do this with a hasattr
         # check instead
         res = std_check_in(base_context, name, other)
         if res == 0:
             msgs.append("{} not present".format(display_name))
         elif res == 1:
-            msgs.append("{} present, but not in expected value list ({})"
-                        .format(display_name, sorted(other)))
+            msgs.append(
+                "{} present, but not in expected value list ({})".format(
+                    display_name, sorted(other)
+                )
+            )
 
         ret_val.append(
             Result(
                 priority,
                 (res, 2),
-                gname if gname else name, # groups Globals if supplied
+                gname if gname else name,  # groups Globals if supplied
                 msgs,
-                variable_name=var_name
+                variable_name=var_name,
             )
         )
     # if we have an XPath expression, call it on the document
@@ -449,11 +482,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
             msgs = ["XPath for {} not found".format(display_name)]
         ret_val.append(
             Result(
-                priority,
-                res,
-                gname if gname else name,
-                msgs,
-                variable_name=var_name
+                priority, res, gname if gname else name, msgs, variable_name=var_name
             )
         )
     # check if this is a subclass of ValidationObject
@@ -467,14 +496,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
 
         msgs = [] if res_tup[1] is None else res_tup[1]
 
-        ret_val.append(
-            Result(
-                priority,
-                res_tup[0],
-                name,
-                msgs
-            )
-        )
+        ret_val.append(Result(priority, res_tup[0], name, msgs))
     elif isinstance(other, re_pattern_type):
         attr_result = maybe_get_global_attr(name, ds)
         if not attr_result[0]:
@@ -491,13 +513,9 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
             res = True
             msgs = []
 
-        ret_val.append(Result(
-            priority,
-            value=res,
-            name=gname if gname else name,
-            msgs=msgs
-        ))
-
+        ret_val.append(
+            Result(priority, value=res, name=gname if gname else name, msgs=msgs)
+        )
 
     # if the attribute is a function, call it
     # right now only supports single attribute
@@ -505,14 +523,14 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
     # starting with "check".  Avoid naming check functions
     # starting with check if you want to pass them in with
     # a tuple to avoid them being checked more than once
-    elif hasattr(other, '__call__'):
+    elif hasattr(other, "__call__"):
         # check that the attribute is actually present.
         # This reduces boilerplate in functions by not needing
         # to check whether the attribute is present every time
         # and instead focuses on the core functionality of the
         # test
 
-        res = other(base_context) # call the method on the dataset
+        res = other(base_context)  # call the method on the dataset
         if not res:
             msgs = ["{} not present".format(display_name)]
             ret_val.append(
@@ -521,16 +539,16 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
                     res,
                     gname if gname else name,
                     msgs,
-                    variable_name=var_name
+                    variable_name=var_name,
                 )
             )
         else:
             ret_val.append(res(priority))
     # unsupported second type in second
     else:
-        raise TypeError("Second arg in tuple has unsupported type: {}"
-                        .format(type(other)))
-
+        raise TypeError(
+            "Second arg in tuple has unsupported type: {}".format(type(other))
+        )
 
     return ret_val
 
@@ -561,13 +579,13 @@ def fix_return_value(v, method_name, method=None, checker=None):
     Transforms scalar return values into Result.
     """
     # remove common check prefix
-    method_name = (method_name or method.__func__.__name__).replace("check_","")
+    method_name = (method_name or method.__func__.__name__).replace("check_", "")
     if v is None or not isinstance(v, Result):
         v = Result(value=v, name=method_name)
 
-    v.name         = v.name or method_name
+    v.name = v.name or method_name
 
-    v.checker      = checker
+    v.checker = checker
     v.check_method = method
 
     return v
@@ -579,13 +597,14 @@ def ratable_result(value, name, msgs, variable_name=None):
 
 
 def score_group(group_name=None):
-    '''
+    """
     Warning this is deprecated as of Compliance Checker v3.2!
 
     Please do not using scoring groups and update your plugins
     if necessary
-    '''
-    warnings.warn('Score_group is deprecated as of Compliance Checker v3.2.')
+    """
+    warnings.warn("Score_group is deprecated as of Compliance Checker v3.2.")
+
     def _inner(func):
         def _dec(s, ds):
             ret_val = func(s, ds)
@@ -609,10 +628,11 @@ def score_group(group_name=None):
 
                 return Result(r.weight, r.value, tuple(cur_grouping), r.msgs)
 
-            ret_val = [fix_return_value(x, func.__name__, func, s) for x in
-                       ret_val]
+            ret_val = [fix_return_value(x, func.__name__, func, s) for x in ret_val]
             ret_val = list(map(dogroup, ret_val))
 
             return ret_val
+
         return wraps(func)(_dec)
+
     return _inner

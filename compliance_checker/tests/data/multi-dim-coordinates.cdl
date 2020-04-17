@@ -17,5 +17,5 @@ variables:
         temperature:standard_name = "sea_water_temperature";
         temperature:units = "deg_C";
         temperature:coordinates = "lat lon";
-    
+
 }

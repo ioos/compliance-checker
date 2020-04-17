@@ -2,12 +2,15 @@
 
 import argparse
 import sys
-from compliance_checker.runner import ComplianceChecker, CheckSuite
-from compliance_checker.cf.util import download_cf_standard_name_table
-from compliance_checker import __version__
+import warnings
+
 from collections import defaultdict
 from textwrap import dedent
-import warnings
+
+from compliance_checker import __version__
+from compliance_checker.cf.util import download_cf_standard_name_table
+from compliance_checker.runner import CheckSuite, ComplianceChecker
+
 
 def _print_checker_name_header(checker_str):
     """
@@ -16,6 +19,7 @@ def _print_checker_name_header(checker_str):
     :type checker: str
     """
     print("{0}\n {1} \n{0}".format("=" * (len(checker_str) + 2), checker_str))
+
 
 def parse_options(opts):
     """
@@ -29,12 +33,13 @@ def parse_options(opts):
     options_dict = defaultdict(set)
     for opt_str in opts:
         try:
-            checker_type, checker_opt = opt_str.split(':', 1)
+            checker_type, checker_opt = opt_str.split(":", 1)
         except ValueError:
             warnings.warn("Could not split option {}, ignoring".format(opt_str))
         else:
             options_dict[checker_type].add(checker_opt)
     return options_dict
+
 
 def main():
     # Load all available checker classes
@@ -42,32 +47,57 @@ def main():
     check_suite.load_all_available_checkers()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--test', '-t', '--test=', '-t=', default=[],
-                        action='append',
-                        help=("Select the Checks you want to perform. Defaults to 'acdd'"
-                              " if unspecified.  Versions of standards can be specified via "
-                              "`-t <test_standard>:<version>`.  If `<version>` is omitted, or "
-                              "is \"latest\", the latest version of the test standard is used."))
+    parser.add_argument(
+        "--test",
+        "-t",
+        "--test=",
+        "-t=",
+        default=[],
+        action="append",
+        help=(
+            "Select the Checks you want to perform. Defaults to 'acdd'"
+            " if unspecified.  Versions of standards can be specified via "
+            "`-t <test_standard>:<version>`.  If `<version>` is omitted, or "
+            'is "latest", the latest version of the test standard is used.'
+        ),
+    )
 
-    parser.add_argument('--criteria', '-c',
-                        help=("Define the criteria for the checks. "
-                              "Either Strict, Normal, or Lenient.  Defaults to Normal."),
-                        nargs='?', default='normal',
-                        choices=['lenient', 'normal', 'strict'])
+    parser.add_argument(
+        "--criteria",
+        "-c",
+        help=(
+            "Define the criteria for the checks. "
+            "Either Strict, Normal, or Lenient.  Defaults to Normal."
+        ),
+        nargs="?",
+        default="normal",
+        choices=["lenient", "normal", "strict"],
+    )
 
-    parser.add_argument('--verbose', '-v',
-                        help="Increase output. May be specified up to three times.",
-                        action="count",
-                        default=0)
+    parser.add_argument(
+        "--verbose",
+        "-v",
+        help="Increase output. May be specified up to three times.",
+        action="count",
+        default=0,
+    )
 
-    parser.add_argument('--describe-checks', '-D',
-                        help=("Describes checks for checkers specified using "
-                              "`-t`. If `-t` is not specified, lists checks "
-                              "from all available checkers."),
-                        action='store_true')
+    parser.add_argument(
+        "--describe-checks",
+        "-D",
+        help=(
+            "Describes checks for checkers specified using "
+            "`-t`. If `-t` is not specified, lists checks "
+            "from all available checkers."
+        ),
+        action="store_true",
+    )
 
-    parser.add_argument('--skip-checks', '-s',
-                        help=dedent("""
+    parser.add_argument(
+        "--skip-checks",
+        "-s",
+        help=dedent(
+            """
                                     Specifies tests to skip. Can take the form
                                     of either `<check_name>` or
                                     `<check_name>:<skip_level>`.  The first
@@ -80,30 +110,51 @@ def main():
                                     will skip medium and low.  "L" will show
                                     both high and medium priority issues, while
                                     skipping low priority issues.
-                                    """),
-                        action='append')
+                                    """
+        ),
+        action="append",
+    )
 
-    parser.add_argument('-f', '--format', default=[], action='append',
-                        help=("Output format(s). Options are 'text', 'html', 'json', 'json_new'."
-                              " The difference between the 'json' and the 'json_new'"
-                              " formats is that the 'json' format has the check as the top level"
-                              " key, whereas the 'json_new' format has the dataset name(s) as the"
-                              " main key in the output follow by any checks as subkeys.  Also, "
-                              "'json' format can be only be run against one input file, whereas "
-                              "'json_new' can be run against multiple files."),
-                        choices=['text', 'html', 'json', 'json_new'])
+    parser.add_argument(
+        "-f",
+        "--format",
+        default=[],
+        action="append",
+        help=(
+            "Output format(s). Options are 'text', 'html', 'json', 'json_new'."
+            " The difference between the 'json' and the 'json_new'"
+            " formats is that the 'json' format has the check as the top level"
+            " key, whereas the 'json_new' format has the dataset name(s) as the"
+            " main key in the output follow by any checks as subkeys.  Also, "
+            "'json' format can be only be run against one input file, whereas "
+            "'json_new' can be run against multiple files."
+        ),
+        choices=["text", "html", "json", "json_new"],
+    )
 
-    parser.add_argument('-o', '--output', default=[], action='append',
-                        help=("Output filename(s).  If '-' is supplied, output to stdout."
-                              " Can either be one or many files.  If one file is supplied,"
-                              " but the checker is run against many files, all the output"
-                              " from the checks goes to that file (does not presently work "
-                              "with 'json' format).  If more than one output file is "
-                              "supplied, the number of input datasets supplied must match "
-                              "the number of output files."))
+    parser.add_argument(
+        "-o",
+        "--output",
+        default=[],
+        action="append",
+        help=(
+            "Output filename(s).  If '-' is supplied, output to stdout."
+            " Can either be one or many files.  If one file is supplied,"
+            " but the checker is run against many files, all the output"
+            " from the checks goes to that file (does not presently work "
+            "with 'json' format).  If more than one output file is "
+            "supplied, the number of input datasets supplied must match "
+            "the number of output files."
+        ),
+    )
 
-    parser.add_argument('-O', '--option', default=[], action='append',
-                        help=dedent("""
+    parser.add_argument(
+        "-O",
+        "--option",
+        default=[],
+        action="append",
+        help=dedent(
+            """
                                     Additional options to be passed to the
                                     checkers.  Multiple options can be specified
                                     via multiple invocations of this switch.
@@ -115,23 +166,38 @@ def main():
                                     'cf:enable_appendix_a_checks' - Allow check
                                     results against CF Appendix A for attribute
                                     location and data types.
-                                    """))
+                                    """
+        ),
+    )
 
-    parser.add_argument('-V', '--version', action='store_true',
-                        help='Display the IOOS Compliance Checker version information.')
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="store_true",
+        help="Display the IOOS Compliance Checker version information.",
+    )
 
-    parser.add_argument('dataset_location', nargs='*',
-                        help="Defines the location of the dataset to be checked.")
+    parser.add_argument(
+        "dataset_location",
+        nargs="*",
+        help="Defines the location of the dataset to be checked.",
+    )
 
-    parser.add_argument('-l', '--list-tests', action='store_true',
-                        help='List the available tests')
+    parser.add_argument(
+        "-l", "--list-tests", action="store_true", help="List the available tests"
+    )
 
-    parser.add_argument('-d', '--download-standard-names',
-                        help=("Specify a version of the cf standard name table"
-                              " to download as packaged version. Either specify"
-                              " a version number (e.g. \"72\") to fetch a "
-                              "specific version or \"latest\" to get the "
-                              "latest CF standard name table."))
+    parser.add_argument(
+        "-d",
+        "--download-standard-names",
+        help=(
+            "Specify a version of the cf standard name table"
+            " to download as packaged version. Either specify"
+            ' a version number (e.g. "72") to fetch a '
+            'specific version or "latest" to get the '
+            "latest CF standard name table."
+        ),
+    )
 
     # Add command line args from generator plugins
     check_suite.add_plugin_args(parser)
@@ -144,9 +210,7 @@ def main():
         print("IOOS compliance checker version %s" % __version__)
         sys.exit(0)
 
-
-    options_dict = (parse_options(args.option) if args.option else
-                    defaultdict(set))
+    options_dict = parse_options(args.option) if args.option else defaultdict(set)
 
     if args.describe_checks:
         error_stat = 0
@@ -155,13 +219,19 @@ def main():
         else:
             # skip "latest" meta-versions (":latest" or no explicit version
             # specifier)
-            checker_names = [c for c in check_suite.checkers
-                             if ':' in c and not c.endswith(':latest')]
+            checker_names = [
+                c
+                for c in check_suite.checkers
+                if ":" in c and not c.endswith(":latest")
+            ]
 
         for checker_name in sorted(checker_names):
             if checker_name not in check_suite.checkers:
-                print("Cannot find checker '{}' with which to "
-                      "describe checks".format(checker_name), file=sys.stderr)
+                print(
+                    "Cannot find checker '{}' with which to "
+                    "describe checks".format(checker_name),
+                    file=sys.stderr,
+                )
                 error_stat = 1
             else:
                 _print_checker_name_header(checker_name)
@@ -182,10 +252,13 @@ def main():
 
     # Check the number of output files
     if not args.output:
-        args.output = '-'
+        args.output = "-"
     output_len = len(args.output)
     if not (output_len == 1 or output_len == len(args.dataset_location)):
-        print('The number of output files must either be one or the same as the number of datasets', file=sys.stderr)
+        print(
+            "The number of output files must either be one or the same as the number of datasets",
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     # Run the compliance checker
@@ -193,30 +266,44 @@ def main():
     return_values = []
     had_errors = []
     if output_len == 1:
-        if args.format != 'json':
-            print("Running Compliance Checker on the datasets from: {}".format(args.dataset_location), file=sys.stderr)
-        return_value, errors = ComplianceChecker.run_checker(args.dataset_location,
-                                                             args.test or ['acdd'],
-                                                             args.verbose,
-                                                             args.criteria,
-                                                             args.skip_checks,
-                                                             args.output[0],
-                                                             args.format or ['text'],
-                                                             options=options_dict)
+        if args.format != "json":
+            print(
+                "Running Compliance Checker on the datasets from: {}".format(
+                    args.dataset_location
+                ),
+                file=sys.stderr,
+            )
+        return_value, errors = ComplianceChecker.run_checker(
+            args.dataset_location,
+            args.test or ["acdd"],
+            args.verbose,
+            args.criteria,
+            args.skip_checks,
+            args.output[0],
+            args.format or ["text"],
+            options=options_dict,
+        )
         return_values.append(return_value)
         had_errors.append(errors)
     else:
         for output, dataset in zip(args.output, args.dataset_location):
-            if args.format != 'json':
-                print("Running Compliance Checker on the dataset from: {}".format(dataset), file=sys.stderr)
-            return_value, errors = ComplianceChecker.run_checker([dataset],
-                                                                args.test or ['acdd'],
-                                                                args.verbose,
-                                                                args.criteria,
-                                                                args.skip_checks,
-                                                                output,
-                                                                args.format or ['text'],
-                                                                options=options_dict)
+            if args.format != "json":
+                print(
+                    "Running Compliance Checker on the dataset from: {}".format(
+                        dataset
+                    ),
+                    file=sys.stderr,
+                )
+            return_value, errors = ComplianceChecker.run_checker(
+                [dataset],
+                args.test or ["acdd"],
+                args.verbose,
+                args.criteria,
+                args.skip_checks,
+                output,
+                args.format or ["text"],
+                options=options_dict,
+            )
             return_values.append(return_value)
             had_errors.append(errors)
 

@@ -1,10 +1,12 @@
-import os
-import traceback
-import sys
 import io
 import json
+import os
+import sys
+import traceback
+
 from collections import OrderedDict
 from contextlib import contextmanager
+
 from compliance_checker.suite import CheckSuite
 
 
@@ -28,11 +30,20 @@ class ComplianceChecker(object):
     Ties together the entire compliance checker framework, is used from
     the command line or can be used via import.
     """
+
     # Consider using __init__ instead of so many classmethods
     @classmethod
-    def run_checker(cls, ds_loc, checker_names, verbose, criteria,
-                    skip_checks=None, output_filename='-',
-                    output_format=['text'], options=None):
+    def run_checker(
+        cls,
+        ds_loc,
+        checker_names,
+        verbose,
+        criteria,
+        skip_checks=None,
+        output_filename="-",
+        output_format=["text"],
+        options=None,
+    ):
         """
         Static check runner.
 
@@ -61,68 +72,77 @@ class ComplianceChecker(object):
         if isinstance(output_format, str):
             output_format = [output_format]
 
-        for loc in locs: # loop through each dataset and run specified checks
+        for loc in locs:  # loop through each dataset and run specified checks
             ds = cs.load_dataset(loc)
 
             score_groups = cs.run(ds, skip_checks, *checker_names)
             for group in score_groups.values():
                 all_groups.append(group[0])
             # TODO: consider wrapping in a proper context manager instead
-            if hasattr(ds, 'close'):
+            if hasattr(ds, "close"):
                 ds.close()
 
             if not score_groups:
-                raise ValueError("No checks found, please check the name of the checker(s) and that they are installed")
+                raise ValueError(
+                    "No checks found, please check the name of the checker(s) and that they are installed"
+                )
             else:
                 score_dict[loc] = score_groups
 
         # define a score limit to truncate the ouput to the strictness level
         # specified by the user
-        if criteria == 'normal':
+        if criteria == "normal":
             limit = 2
-        elif criteria == 'strict':
+        elif criteria == "strict":
             limit = 1
-        elif criteria == 'lenient':
+        elif criteria == "lenient":
             limit = 3
 
         for out_fmt in output_format:
-            if out_fmt == 'text':
-                if output_filename == '-':
+            if out_fmt == "text":
+                if output_filename == "-":
                     cls.stdout_output(cs, score_dict, verbose, limit)
                 # need to redirect output from stdout since print functions are
                 # presently used to generate the standard report output
                 else:
                     if len(output_format) > 1:
                         # Update file name if needed
-                        output_filename = '{}.txt'.format(os.path.splitext(output_filename)[0])
-                    with io.open(output_filename, 'w', encoding='utf-8') as f:
+                        output_filename = "{}.txt".format(
+                            os.path.splitext(output_filename)[0]
+                        )
+                    with io.open(output_filename, "w", encoding="utf-8") as f:
                         with stdout_redirector(f):
                             cls.stdout_output(cs, score_dict, verbose, limit)
 
-            elif out_fmt == 'html':
+            elif out_fmt == "html":
                 # Update file name if needed
-                if len(output_format) > 1 and output_filename != '-':
-                    output_filename = '{}.html'.format(os.path.splitext(output_filename)[0])
+                if len(output_format) > 1 and output_filename != "-":
+                    output_filename = "{}.html".format(
+                        os.path.splitext(output_filename)[0]
+                    )
                 cls.html_output(cs, score_dict, output_filename, ds_loc, limit)
 
-            elif out_fmt in {'json', 'json_new'}:
+            elif out_fmt in {"json", "json_new"}:
                 # Update file name if needed
-                if len(output_format) > 1 and output_filename != '-':
-                    output_filename = '{}.json'.format(os.path.splitext(output_filename)[0])
-                cls.json_output(cs, score_dict, output_filename, ds_loc, limit,
-                                out_fmt)
+                if len(output_format) > 1 and output_filename != "-":
+                    output_filename = "{}.json".format(
+                        os.path.splitext(output_filename)[0]
+                    )
+                cls.json_output(cs, score_dict, output_filename, ds_loc, limit, out_fmt)
 
             else:
-                raise TypeError('Invalid format %s' % out_fmt)
+                raise TypeError("Invalid format %s" % out_fmt)
 
             errors_occurred = cls.check_errors(score_groups, verbose)
 
-        return (all(cs.passtree(groups, limit) for groups in all_groups),
-                errors_occurred)
+        return (
+            all(cs.passtree(groups, limit) for groups in all_groups),
+            errors_occurred,
+        )
 
     @classmethod
     def stdout_output(cls, cs, score_dict, verbose, limit):
-        '''
+        """
         Calls output routine to display results in terminal, including scoring.
         Goes to verbose function if called by user.
 
@@ -131,48 +151,49 @@ class ComplianceChecker(object):
                             value
         @param verbose      Integer value for verbosity level
         @param limit        The degree of strictness, 1 being the strictest, and going up from there.
-        '''
+        """
 
         for ds, score_groups in score_dict.items():
             for checker, rpair in score_groups.items():
                 groups, errors = rpair
-                score_list, points, out_of = cs.standard_output(ds, limit,
-                                                                checker,
-                                                                groups)
+                score_list, points, out_of = cs.standard_output(
+                    ds, limit, checker, groups
+                )
                 # send list of grouped result objects to stdout & reasoning_routine
-                cs.standard_output_generation(groups, limit, points, out_of,
-                                              check=checker)
+                cs.standard_output_generation(
+                    groups, limit, points, out_of, check=checker
+                )
         return groups
 
     @classmethod
     def html_output(cls, cs, score_dict, output_filename, ds_loc, limit):
-        '''
+        """
         Generates rendered HTML output for the compliance score(s)
         @param cs              Compliance Checker Suite
         @param score_groups    List of results
         @param output_filename The file path to output to
         @param ds_loc          List of source datasets
         @param limit           The degree of strictness, 1 being the strictest, and going up from there.
-        '''
+        """
         checkers_html = []
         for ds, score_groups in score_dict.items():
             for checker, (groups, errors) in score_groups.items():
-                checkers_html.append(cs.checker_html_output(checker, groups,
-                                                            ds, limit))
+                checkers_html.append(cs.checker_html_output(checker, groups, ds, limit))
 
         html = cs.html_output(checkers_html)
-        if output_filename == '-':
+        if output_filename == "-":
             print(html)
         else:
-            with io.open(output_filename, 'w', encoding='utf8') as f:
+            with io.open(output_filename, "w", encoding="utf8") as f:
                 f.write(html)
 
         return groups
 
     @classmethod
-    def json_output(cls, cs, score_dict, output_filename, ds_loc, limit,
-                    output_type='json'):
-        '''
+    def json_output(
+        cls, cs, score_dict, output_filename, ds_loc, limit, output_type="json"
+    ):
+        """
         Generates JSON output for the ocmpliance score(s)
         @param cs              Compliance Checker Suite
         @param score_groups    List of results
@@ -182,57 +203,63 @@ class ComplianceChecker(object):
                                and going up from there.
         @param output_type     Either 'json' or 'json_new'. json_new is the new
                                json output format that supports multiple datasets
-        '''
+        """
         results = {}
         # json output keys out at the top level by
-        if len(score_dict) > 1 and output_type != 'json_new':
-            raise ValueError("output_type must be set to 'json_new' if outputting multiple datasets to a single json file or stdout")
+        if len(score_dict) > 1 and output_type != "json_new":
+            raise ValueError(
+                "output_type must be set to 'json_new' if outputting multiple datasets to a single json file or stdout"
+            )
 
-        if output_type == 'json':
+        if output_type == "json":
             for ds, score_groups in score_dict.items():
                 for checker, rpair in score_groups.items():
                     groups, errors = rpair
-                    results[checker] = cs.dict_output(
-                        checker, groups, ds, limit,
-                    )
-        elif output_type == 'json_new':
+                    results[checker] = cs.dict_output(checker, groups, ds, limit,)
+        elif output_type == "json_new":
             for ds, score_groups in score_dict.items():
                 for checker, rpair in score_groups.items():
                     groups, errors = rpair
                     results[ds] = {}
-                    results[ds][checker] = cs.dict_output(
-                        checker, groups, ds, limit
-                    )
+                    results[ds][checker] = cs.dict_output(checker, groups, ds, limit)
         json_results = json.dumps(results, indent=2, ensure_ascii=False)
 
-        if output_filename == '-':
+        if output_filename == "-":
             print(json_results)
         else:
-            with io.open(output_filename, 'w', encoding='utf8') as f:
+            with io.open(output_filename, "w", encoding="utf8") as f:
                 f.write(json_results)
 
         return groups
 
     @classmethod
     def check_errors(cls, score_groups, verbose):
-        '''
+        """
         Reports any errors (exceptions) that occurred during checking to stderr.
         Goes to verbose function if called by user.
 
         @param score_groups List of results
         @param verbose      Integer value for verbosity level
-        '''
+        """
         errors_occurred = False
         for checker, rpair in score_groups.items():
             errors = rpair[-1]
             if len(errors):
                 errors_occurred = True
-                print("WARNING: The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker, file=sys.stderr)
+                print(
+                    "WARNING: The following exceptions occured during the %s checker (possibly indicate compliance checker issues):"
+                    % checker,
+                    file=sys.stderr,
+                )
                 for check_name, epair in errors.items():
-                    print("%s.%s: %s" % (checker, check_name, epair[0]), file=sys.stderr)
+                    print(
+                        "%s.%s: %s" % (checker, check_name, epair[0]), file=sys.stderr
+                    )
 
                     if verbose > 0:
-                        traceback.print_tb(epair[1].tb_next.tb_next)    # skip first two as they are noise from the running itself @TODO search for check_name
+                        traceback.print_tb(
+                            epair[1].tb_next.tb_next
+                        )  # skip first two as they are noise from the running itself @TODO search for check_name
                         print(file=sys.stderr)
 
         return errors_occurred

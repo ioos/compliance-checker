@@ -1,110 +1,170 @@
 import io
 import itertools
-import requests
 import os
 import sys
-from copy import deepcopy
+
 from collections import defaultdict
-from lxml import etree
-import lxml.html
-from cf_units import Unit
-from urllib.parse import urljoin
-from netCDF4 import Dimension, Variable
+from copy import deepcopy
 from pkgutil import get_data
+from urllib.parse import urljoin
+
+import lxml.html
+import requests
+
+from cf_units import Unit
+from lxml import etree
+from netCDF4 import Dimension, Variable
 from pkg_resources import resource_filename
+
 
 # copied from paegan
 # paegan may depend on these later
-_possiblet = {"time", "TIME", "Time",
-              "t", "T",
-              "ocean_time", "OCEAN_TIME",
-              "jd", "JD",
-              "dn", "DN",
-              "times", "TIMES", "Times",
-              "mt", "MT",
-              "dt", "DT",
-              }
-_possiblez = {"depth", "DEPTH",
-              "depths", "DEPTHS",
-              "height", "HEIGHT",
-              "altitude", "ALTITUDE",
-              "alt", "ALT",
-              "Alt", "Altitude",
-              "h", "H",
-              "s_rho", "S_RHO",
-              "s_w", "S_W",
-              "z", "Z",
-              "siglay", "SIGLAY",
-              "siglev", "SIGLEV",
-              "sigma", "SIGMA",
-              "vertical", "VERTICAL", "lev", "LEV", "level", "LEVEL"
-              }
-_possiblex = {"x", "X",
-              "lon", "LON",
-              "xlon", "XLON",
-              "lonx", "lonx",
-              "lon_u", "LON_U",
-              "lon_v", "LON_V",
-              "lonc", "LONC",
-              "Lon", "Longitude",
-              "longitude", "LONGITUDE",
-              "lon_rho", "LON_RHO",
-              "lon_psi", "LON_PSI",
-              }
-_possibley = {"y", "Y",
-              "lat", "LAT",
-              "ylat", "YLAT",
-              "laty", "laty",
-              "lat_u", "LAT_U",
-              "lat_v", "LAT_V",
-              "latc", "LATC",
-              "Lat", "Latitude",
-              "latitude", "LATITUDE",
-              "lat_rho", "LAT_RHO",
-              "lat_psi", "LAT_PSI",
-
-              }
+_possiblet = {
+    "time",
+    "TIME",
+    "Time",
+    "t",
+    "T",
+    "ocean_time",
+    "OCEAN_TIME",
+    "jd",
+    "JD",
+    "dn",
+    "DN",
+    "times",
+    "TIMES",
+    "Times",
+    "mt",
+    "MT",
+    "dt",
+    "DT",
+}
+_possiblez = {
+    "depth",
+    "DEPTH",
+    "depths",
+    "DEPTHS",
+    "height",
+    "HEIGHT",
+    "altitude",
+    "ALTITUDE",
+    "alt",
+    "ALT",
+    "Alt",
+    "Altitude",
+    "h",
+    "H",
+    "s_rho",
+    "S_RHO",
+    "s_w",
+    "S_W",
+    "z",
+    "Z",
+    "siglay",
+    "SIGLAY",
+    "siglev",
+    "SIGLEV",
+    "sigma",
+    "SIGMA",
+    "vertical",
+    "VERTICAL",
+    "lev",
+    "LEV",
+    "level",
+    "LEVEL",
+}
+_possiblex = {
+    "x",
+    "X",
+    "lon",
+    "LON",
+    "xlon",
+    "XLON",
+    "lonx",
+    "lonx",
+    "lon_u",
+    "LON_U",
+    "lon_v",
+    "LON_V",
+    "lonc",
+    "LONC",
+    "Lon",
+    "Longitude",
+    "longitude",
+    "LONGITUDE",
+    "lon_rho",
+    "LON_RHO",
+    "lon_psi",
+    "LON_PSI",
+}
+_possibley = {
+    "y",
+    "Y",
+    "lat",
+    "LAT",
+    "ylat",
+    "YLAT",
+    "laty",
+    "laty",
+    "lat_u",
+    "LAT_U",
+    "lat_v",
+    "LAT_V",
+    "latc",
+    "LATC",
+    "Lat",
+    "Latitude",
+    "latitude",
+    "LATITUDE",
+    "lat_rho",
+    "LAT_RHO",
+    "lat_psi",
+    "LAT_PSI",
+}
 
 _possibleaxis = _possiblet | _possiblez | _possiblex | _possibley
 
 
-_possiblexunits = {'degrees_east',
-                   'degree_east',
-                   'degrees_E',
-                   'degree_E',
-                   'degreesE',
-                   'degreeE'
-                   }
+_possiblexunits = {
+    "degrees_east",
+    "degree_east",
+    "degrees_E",
+    "degree_E",
+    "degreesE",
+    "degreeE",
+}
 
-_possibleyunits = {'degrees_north',
-                   'degree_north',
-                   'degrees_N',
-                   'degree_N',
-                   'degreesN',
-                   'degreeN'
-                   }
+_possibleyunits = {
+    "degrees_north",
+    "degree_north",
+    "degrees_N",
+    "degree_N",
+    "degreesN",
+    "degreeN",
+}
 
-_possibletunits = {'day',
-                   'days',
-                   'd',
-                   'hour',
-                   'hours',
-                   'hr',
-                   'hrs',
-                   'h',
-                   'year',
-                   'years',
-                   'minute',
-                   'minutes',
-                   'm',
-                   'min',
-                   'mins',
-                   'second',
-                   'seconds',
-                   's',
-                   'sec',
-                   'secs'
-                   }
+_possibletunits = {
+    "day",
+    "days",
+    "d",
+    "hour",
+    "hours",
+    "hr",
+    "hrs",
+    "h",
+    "year",
+    "years",
+    "minute",
+    "minutes",
+    "m",
+    "min",
+    "mins",
+    "second",
+    "seconds",
+    "s",
+    "sec",
+    "secs",
+}
 
 _possibleaxisunits = _possiblexunits | _possibleyunits | _possibletunits
 
@@ -126,8 +186,9 @@ class DotDict(dict):
             return self[key]
         import sys
         import dis
+
         frame = sys._getframe(1)
-        if '\x00%c' % dis.opmap['STORE_ATTR'] in frame.f_code.co_code:
+        if "\x00%c" % dis.opmap["STORE_ATTR"] in frame.f_code.co_code:
             self[key] = DotDict()
             return self[key]
 
@@ -135,7 +196,7 @@ class DotDict(dict):
 
     def __setattr__(self, key, value):
         if key in dir(dict):
-            raise AttributeError('%s conflicts with builtin.' % key)
+            raise AttributeError("%s conflicts with builtin." % key)
         if isinstance(value, dict):
             self[key] = DotDict(value)
         else:
@@ -167,7 +228,7 @@ def get_safe(dict_instance, keypath, default=None):
     """
     try:
         obj = dict_instance
-        keylist = keypath if type(keypath) is list else keypath.split('.')
+        keylist = keypath if type(keypath) is list else keypath.split(".")
         for key in keylist:
             obj = obj[key]
         return obj
@@ -176,15 +237,16 @@ def get_safe(dict_instance, keypath, default=None):
 
 
 class NCGraph(object):
+    def __init__(
+        self, ds, name, nc_object, self_reference_variables, reference_map=None
+    ):
 
-    def __init__(self, ds, name, nc_object, self_reference_variables, reference_map=None):
-
-        self.ds           = ds
-        self.name         = name
-        self.coords       = DotDict()
-        self.dims         = DotDict()
+        self.ds = ds
+        self.name = name
+        self.coords = DotDict()
+        self.dims = DotDict()
         self.grid_mapping = DotDict()
-        self.obj          = nc_object
+        self.obj = nc_object
 
         self.reference_variables = self_reference_variables
         self.reference_map = reference_map or {}
@@ -192,10 +254,10 @@ class NCGraph(object):
         self.reference_map[name] = self
 
         if isinstance(nc_object, Dimension):
-            self._type = 'dim'
+            self._type = "dim"
 
         elif isinstance(nc_object, Variable):
-            self._type = 'var'
+            self._type = "var"
 
             self.get_references()
 
@@ -206,19 +268,25 @@ class NCGraph(object):
         for dim in self.obj.dimensions:
             self.dims[dim] = self.get_dimension(dim)
 
-        if hasattr(self.obj, 'coordinates'):
-            coords = self.obj.coordinates.split(' ')
+        if hasattr(self.obj, "coordinates"):
+            coords = self.obj.coordinates.split(" ")
             for coord in coords:
                 self.coords[coord] = self.get_coordinate(coord)
 
-        if hasattr(self.obj, 'grid_mapping'):
+        if hasattr(self.obj, "grid_mapping"):
             gm = self.obj.grid_mapping
             self.grid_mapping[gm] = self.get_grid_mapping(gm)
 
     def get_dimension(self, dim):
         if dim in self.reference_map:
             return self.reference_map[dim]
-        return NCGraph(self.ds, dim, self.ds.dimensions[dim], self.reference_variables, self.reference_map)
+        return NCGraph(
+            self.ds,
+            dim,
+            self.ds.dimensions[dim],
+            self.reference_variables,
+            self.reference_map,
+        )
 
     def get_coordinate(self, coord):
         if coord not in self.ds.variables:
@@ -227,14 +295,26 @@ class NCGraph(object):
             if self.name == coord:
                 self.reference_variables.add(self.name)
             return self.reference_map[coord]
-        return NCGraph(self.ds, coord, self.ds.variables[coord], self.reference_variables, self.reference_map)
+        return NCGraph(
+            self.ds,
+            coord,
+            self.ds.variables[coord],
+            self.reference_variables,
+            self.reference_map,
+        )
 
     def get_grid_mapping(self, gm):
         if gm not in self.ds.variables:
             return
         if gm in self.reference_map:
             return self.reference_map[gm]
-        return NCGraph(self.ds, gm, self.ds.variables[gm], self.reference_variables, self.reference_map)
+        return NCGraph(
+            self.ds,
+            gm,
+            self.ds.variables[gm],
+            self.reference_variables,
+            self.reference_map,
+        )
 
     def __getattr__(self, key):
         if key in self.__dict__:
@@ -243,14 +323,12 @@ class NCGraph(object):
 
 
 class StandardNameTable(object):
-
     class NameEntry(object):
-
         def __init__(self, entrynode):
-            self.canonical_units = self._get(entrynode, 'canonical_units', True)
-            self.grib            = self._get(entrynode, 'grib')
-            self.amip            = self._get(entrynode, 'amip')
-            self.description     = self._get(entrynode, 'description')
+            self.canonical_units = self._get(entrynode, "canonical_units", True)
+            self.grib = self._get(entrynode, "grib")
+            self.amip = self._get(entrynode, "amip")
+            self.description = self._get(entrynode, "description")
 
         def _get(self, entrynode, attrname, required=False):
             vals = entrynode.xpath(attrname)
@@ -263,22 +341,27 @@ class StandardNameTable(object):
 
     def __init__(self, cached_location=None):
         if cached_location:
-            with io.open(cached_location, 'r', encoding='utf-8') as fp:
+            with io.open(cached_location, "r", encoding="utf-8") as fp:
                 resource_text = fp.read()
-        elif os.environ.get('CF_STANDARD_NAME_TABLE') and os.path.exists(os.environ['CF_STANDARD_NAME_TABLE']):
-            with io.open(os.environ['CF_STANDARD_NAME_TABLE'], 'r',
-                         encoding='utf-8') as fp:
+        elif os.environ.get("CF_STANDARD_NAME_TABLE") and os.path.exists(
+            os.environ["CF_STANDARD_NAME_TABLE"]
+        ):
+            with io.open(
+                os.environ["CF_STANDARD_NAME_TABLE"], "r", encoding="utf-8"
+            ) as fp:
                 resource_text = fp.read()
         else:
-            resource_text = get_data("compliance_checker", "data/cf-standard-name-table.xml")
+            resource_text = get_data(
+                "compliance_checker", "data/cf-standard-name-table.xml"
+            )
 
         parser = etree.XMLParser(remove_blank_text=True)
         self._root = etree.fromstring(resource_text, parser)
 
         # generate and save a list of all standard names in file
-        self._names = [node.get('id') for node in self._root.iter('entry')]
-        self._aliases = [node.get('id') for node in self._root.iter('alias')]
-        self._version = self._root.xpath('version_number')[0].text
+        self._names = [node.get("id") for node in self._root.iter("entry")]
+        self._aliases = [node.get("id") for node in self._root.iter("alias")]
+        self._version = self._root.xpath("version_number")[0].text
 
     def __len__(self):
         return len(self._names) + len(self._aliases)
@@ -289,10 +372,13 @@ class StandardNameTable(object):
 
         if key in self._aliases:
             idx = self._aliases.index(key)
-            entryids = self._root.xpath('alias')[idx].xpath('entry_id')
+            entryids = self._root.xpath("alias")[idx].xpath("entry_id")
 
             if len(entryids) != 1:
-                raise Exception("Inconsistency in standard name table, could not lookup alias for %s" % key)
+                raise Exception(
+                    "Inconsistency in standard name table, could not lookup alias for %s"
+                    % key
+                )
 
             key = entryids[0].text
 
@@ -300,13 +386,13 @@ class StandardNameTable(object):
             raise KeyError("%s not found in standard name table" % key)
 
         idx = self._names.index(key)
-        entry = self.NameEntry(self._root.xpath('entry')[idx])
+        entry = self.NameEntry(self._root.xpath("entry")[idx])
         return entry
 
     def get(self, key, default=None):
-        '''
+        """
         Returns the item for the key or returns the default if it does not exist
-        '''
+        """
         try:
             return self[key]
         except KeyError:
@@ -320,45 +406,58 @@ class StandardNameTable(object):
 
 
 def download_cf_standard_name_table(version, location=None):
-    '''
+    """
     Downloads the specified CF standard name table version and saves it to file
 
     :param str version: CF standard name table version number (i.e 34)
     :param str location: Path/filename to write downloaded xml file to
-    '''
+    """
 
-    if location is None:  # This case occurs when updating the packaged version from command line
-        location = resource_filename('compliance_checker', 'data/cf-standard-name-table.xml')
+    if (
+        location is None
+    ):  # This case occurs when updating the packaged version from command line
+        location = resource_filename(
+            "compliance_checker", "data/cf-standard-name-table.xml"
+        )
 
-    if version == 'latest':
+    if version == "latest":
         tables_tree = lxml.html.parse("http://cfconventions.org/documents.html")
         end_str = "cf-standard-name-table.xml"
-        xpath_expr = ("//a[substring(@href, string-length(@href) - "
-                      "string-length('{0}') +1) "
-                      " = '{0}'][1]".format(end_str))
+        xpath_expr = (
+            "//a[substring(@href, string-length(@href) - "
+            "string-length('{0}') +1) "
+            " = '{0}'][1]".format(end_str)
+        )
         latest_vers = tables_tree.xpath(xpath_expr)[0]
 
-        url = urljoin("http://cfconventions.org", latest_vers.attrib['href'])
+        url = urljoin("http://cfconventions.org", latest_vers.attrib["href"])
     else:
-        url = "http://cfconventions.org/Data/cf-standard-names/{0}/src/cf-standard-name-table.xml".format(version)
+        url = "http://cfconventions.org/Data/cf-standard-names/{0}/src/cf-standard-name-table.xml".format(
+            version
+        )
 
     r = requests.get(url, allow_redirects=True)
     r.raise_for_status()
 
-    print("Downloading cf-standard-names table version {0} from: {1}".format(version, url),
-            file=sys.stderr)
-    with open(location, 'wb') as f:
+    print(
+        "Downloading cf-standard-names table version {0} from: {1}".format(
+            version, url
+        ),
+        file=sys.stderr,
+    )
+    with open(location, "wb") as f:
         f.write(r.content)
 
 
 def create_cached_data_dir():
-    '''
+    """
     Returns the path to the data directory to download CF standard names.
     Use $XDG_DATA_HOME.
-    '''
-    writable_directory = os.path.join(os.path.expanduser('~'), '.local', 'share')
-    data_directory = os.path.join(os.environ.get("XDG_DATA_HOME", writable_directory),
-                                  'compliance-checker')
+    """
+    writable_directory = os.path.join(os.path.expanduser("~"), ".local", "share")
+    data_directory = os.path.join(
+        os.environ.get("XDG_DATA_HOME", writable_directory), "compliance-checker"
+    )
     if not os.path.isdir(data_directory):
         os.makedirs(data_directory)
 
@@ -398,10 +497,10 @@ def map_axes(dim_vars, reverse_map=False):
     dimension name  -> [axis_name], length 0 if reverse_map
     """
     ret_val = defaultdict(list)
-    axes = ['X', 'Y', 'Z', 'T']
+    axes = ["X", "Y", "Z", "T"]
 
     for k, v in dim_vars.items():
-        axis = getattr(v, 'axis', '')
+        axis = getattr(v, "axis", "")
         if not axis:
             continue
 
@@ -434,10 +533,12 @@ def is_time_variable(varname, var):
     """
     Identifies if a variable is represents time
     """
-    satisfied = varname.lower() == 'time'
-    satisfied |= getattr(var, 'standard_name', '') == 'time'
-    satisfied |= getattr(var, 'axis', '') == 'T'
-    satisfied |= units_convertible('seconds since 1900-01-01', getattr(var, 'units', ''))
+    satisfied = varname.lower() == "time"
+    satisfied |= getattr(var, "standard_name", "") == "time"
+    satisfied |= getattr(var, "axis", "") == "T"
+    satisfied |= units_convertible(
+        "seconds since 1900-01-01", getattr(var, "units", "")
+    )
     return satisfied
 
 
@@ -452,12 +553,12 @@ def is_vertical_coordinate(var_name, var):
     """
     # Known name
     satisfied = var_name.lower() in _possiblez
-    satisfied |= getattr(var, 'standard_name', '') in _possiblez
+    satisfied |= getattr(var, "standard_name", "") in _possiblez
     # Is the axis set to Z?
-    satisfied |= getattr(var, 'axis', '').lower() == 'z'
-    is_pressure = units_convertible(getattr(var, 'units', '1'), 'dbar')
+    satisfied |= getattr(var, "axis", "").lower() == "z"
+    is_pressure = units_convertible(getattr(var, "units", "1"), "dbar")
     # Pressure defined or positive defined
     satisfied |= is_pressure
     if not is_pressure:
-        satisfied |= getattr(var, 'positive', '').lower() in ('up', 'down')
+        satisfied |= getattr(var, "positive", "").lower() in ("up", "down")
     return satisfied
