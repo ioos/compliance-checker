@@ -1,7 +1,9 @@
-import pkg_resources
 from functools import lru_cache
 
+import pkg_resources
+
 from netCDF4 import Dataset
+
 
 try:
     __version__ = pkg_resources.get_distribution("compliance_checker").version
@@ -11,7 +13,6 @@ except Exception:
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO, Generator
-
 
 class MemoizedDataset(Dataset):
     """
