@@ -968,10 +968,8 @@ class IOOS1_2Check(IOOSNCCheck):
         :return: List of results
         '''
         ret_val = []
-        z_variables = cfutil.get_z_variables(ds)
-        for name in z_variables:
+        for name in cfutil.get_z_variables(ds):
             variable = ds.variables[name]
-            standard_name = getattr(variable, 'standard_name', None)
             units_str = getattr(variable, 'units', None)
             positive = getattr(variable, 'positive', None)
             expected_unit_strs = ('meter', 'inch', 'foot', 'yard',
