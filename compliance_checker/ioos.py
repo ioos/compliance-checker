@@ -8,10 +8,10 @@ from owslib.namespaces import Namespaces
 from lxml.etree import XPath
 from cf_units import Unit
 from compliance_checker.acdd import ACDD1_3Check
-from compliance_checker import cfutil
 from compliance_checker.cfutil import (get_geophysical_variables,
                                        get_instrument_variables,
-                                       get_coordinate_variables)
+                                       get_coordinate_variables,
+                                       get_z_variables)
 from compliance_checker import base
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf import util as cf_util # not to be confused with cfutil.py
@@ -968,7 +968,7 @@ class IOOS1_2Check(IOOSNCCheck):
         :return: List of results
         '''
         ret_val = []
-        for name in cfutil.get_z_variables(ds):
+        for name in get_z_variables(ds):
             variable = ds.variables[name]
             units_str = getattr(variable, 'units', None)
             positive = getattr(variable, 'positive', None)
