@@ -15,7 +15,7 @@ from compliance_checker.base import fix_return_value, Result, GenericFile
 from compliance_checker.cf.cf import CFBaseCheck
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
-from compliance_checker.protocols import opendap, netcdf, cdl
+from compliance_checker.protocols import opendap, netcdf, cdl, erddap
 from compliance_checker.base import BaseCheck
 from compliance_checker import MemoizedDataset
 from collections import defaultdict
@@ -723,7 +723,13 @@ class CheckSuite(object):
         :param str ds_str: URL to the remote resource
         '''
 
-        if opendap.is_opendap(ds_str):
+        if erddap.is_tabledap(ds_str):
+            return Dataset(
+                ds_str,
+                mode="r",
+                memory=erddap.get_tabledap_bytes(ds_str, "ncCF").getbuffer()
+            )
+        elif opendap.is_opendap(ds_str):
             return Dataset(ds_str)
         else:
             # Check if the HTTP response is XML, if it is, it's likely SOS so
