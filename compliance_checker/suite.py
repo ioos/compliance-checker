@@ -765,20 +765,43 @@ class CheckSuite(object):
         :param str ds_str: URL to the remote resource
         """
 
-        if opendap.is_opendap(ds_str):
-            return Dataset(ds_str)
+
+        # Some datasets do not support HEAD requests!  The vast majority will,
+        # however, support GET requests
+        try:
+            head_req = requests.head(ds_str, allow_redirects=True, timeout=10)
+            head_req.raise_for_status()
+        except:
+            warnings.warn("Could not complete HEAD request for resource "
+                          "{}.  Skipping content-type headers".format(ds_str))
+            content_type = None
         else:
+            content_type = head_req.headers.get("content-type")
+
+        # if the Content-Type header returned was "application/x-netcdf",
+        # or a netCDF file (not OPeNDAP) we can open this into an
+        if content_type == "application/x-netcdf":
+            response = requests.get(ds_str, allow_redirects=True,
+                                    timeout=60)
+            # TODO: handle case when netCDF C libs weren't compiled with
+            # in-memory support by using tempfiles or other means
+            return MemoizedDataset(response.content, memory=response.content)
+
+        elif opendap.is_opendap(ds_str):
+            return Dataset(ds_str)
             # Check if the HTTP response is XML, if it is, it's likely SOS so
             # we'll attempt to parse the response as SOS
-            response = requests.get(ds_str, allow_redirects=True)
-            if "text/xml" in response.headers["content-type"]:
-                return self.process_doc(response.content)
+         # some SOS servers don't seem to support HEAD requests.
+         # Issue GET instead if we reach here and can't get the response
+        response = requests.get(ds_str, allow_redirects=True,
+                                timeout=60)
+        if content_type is None:
+            content_type = response.headers.get("content-type")
 
-            raise ValueError(
-                "Unknown service with content-type: {}".format(
-                    response.headers["content-type"]
-                )
-            )
+        if content_type == "text/xml":
+            return self.process_doc(response.content)
+        else:
+            raise ValueError("Unknown service with content-type: {}".format(content_type))
 
     def load_local_dataset(self, ds_str):
         """
