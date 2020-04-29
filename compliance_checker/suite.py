@@ -24,12 +24,13 @@ from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
+from compliance_checker.protocols import opendap, netcdf, cdl, erddap
+from datetime import datetime
 from pkg_resources import working_set
 
 from compliance_checker import MemoizedDataset
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.cf.cf import CFBaseCheck
-from compliance_checker.protocols import cdl, netcdf, opendap
 
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
@@ -765,7 +766,6 @@ class CheckSuite(object):
         :param str ds_str: URL to the remote resource
         """
 
-
         # Some datasets do not support HEAD requests!  The vast majority will,
         # however, support GET requests
         try:
@@ -775,6 +775,13 @@ class CheckSuite(object):
             warnings.warn("Could not complete HEAD request for resource "
                           "{}.  Skipping content-type headers".format(ds_str))
             content_type = None
+
+        if erddap.is_tabledap(ds_str):
+            return Dataset(
+                ds_str,
+                mode="r",
+                memory=erddap.get_tabledap_bytes(ds_str, "ncCF").getbuffer()
+            )
         else:
             content_type = head_req.headers.get("content-type")
 
