@@ -28,7 +28,7 @@ from compliance_checker.protocols import opendap, netcdf, cdl, erddap
 from datetime import datetime
 from pkg_resources import working_set
 
-from compliance_checker import MemoizedDataset
+from compliance_checker import MemoizedDataset, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.cf.cf import CFBaseCheck
 
@@ -776,9 +776,13 @@ class CheckSuite(object):
         if netcdf.is_remote_netcdf(ds_str):
             response = requests.get(ds_str, allow_redirects=True,
                                     timeout=60)
-            # TODO: handle case when netCDF C libs weren't compiled with
-            # in-memory support by using tempfiles or other means
-            return MemoizedDataset(response.content, memory=response.content)
+            try:
+                return MemoizedDataset(response.content, memory=response.content)
+            except OSError as e:
+                # handle case when netCDF C libs weren't compiled with
+                # in-memory support by using tempfile
+                with tempnc(response.content) as _nc:
+                    return MemoizedDataset(_nc)
 
         elif opendap.is_opendap(ds_str):
             return Dataset(ds_str)
