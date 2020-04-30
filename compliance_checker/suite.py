@@ -766,28 +766,14 @@ class CheckSuite(object):
         :param str ds_str: URL to the remote resource
         """
 
-        # Some datasets do not support HEAD requests!  The vast majority will,
-        # however, support GET requests
-        try:
-            head_req = requests.head(ds_str, allow_redirects=True, timeout=10)
-            head_req.raise_for_status()
-        except:
-            warnings.warn("Could not complete HEAD request for resource "
-                          "{}.  Skipping content-type headers".format(ds_str))
-            content_type = None
+        if "tabledap" in ds_str: # ERDDAP TableDAP request
+            # modify ds_str to contain the full variable request
+            variables_str = opendap.create_DAP_variable_str(ds_str)
 
-        if erddap.is_tabledap(ds_str):
-            return Dataset(
-                ds_str,
-                mode="r",
-                memory=erddap.get_tabledap_bytes(ds_str, "ncCF").getbuffer()
-            )
-        else:
-            content_type = head_req.headers.get("content-type")
+            # join to create a URL to an .ncCF resource
+            ds_str = "{}.ncCF?{}".format(ds_str, variables_str)
 
-        # if the Content-Type header returned was "application/x-netcdf",
-        # or a netCDF file (not OPeNDAP) we can open this into an
-        if content_type == "application/x-netcdf":
+        if netcdf.is_remote_netcdf(ds_str):
             response = requests.get(ds_str, allow_redirects=True,
                                     timeout=60)
             # TODO: handle case when netCDF C libs weren't compiled with
@@ -798,13 +784,13 @@ class CheckSuite(object):
             return Dataset(ds_str)
             # Check if the HTTP response is XML, if it is, it's likely SOS so
             # we'll attempt to parse the response as SOS
-         # some SOS servers don't seem to support HEAD requests.
-         # Issue GET instead if we reach here and can't get the response
+
+
+        # some SOS servers don't seem to support HEAD requests.
+        # Issue GET instead if we reach here and can't get the response
         response = requests.get(ds_str, allow_redirects=True,
                                 timeout=60)
-        if content_type is None:
-            content_type = response.headers.get("content-type")
-
+        content_type = response.headers.get("content-type")
         if content_type == "text/xml":
             return self.process_doc(response.content)
         else:
