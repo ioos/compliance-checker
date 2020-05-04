@@ -1020,9 +1020,18 @@ class TestIOOS1_2(BaseTestCase):
         result = self.ioos.check_vertical_coordinates(nc_obj)[0]
         expected_msg = ("depth's units attribute furlong is not equivalent to "
                         "one of ('meter', 'inch', 'foot', 'yard', "
-                        "'US_survey_foot', 'fathom')")
+                        "'US_survey_foot', 'mile', 'fathom')")
         self.assertEqual(result.msgs[0], expected_msg)
         self.assertNotEqual(*result.value)
-        nc_obj.variables['depth'].units = 'fathom'
-        result = self.ioos.check_vertical_coordinates(nc_obj)[0]
-        self.assertEqual(*result.value)
+        accepted_units = ("meter", "meters", "inch", "foot", "yard", "mile",
+                          "miles", "US_survey_foot", "US_survey_feet", "fathom",
+                          "fathoms", "international_inch",
+                          "international_inches", "international_foot",
+                          "international_feet", "international_yard",
+                          "international_yards", "international_mile",
+                          "international_miles", "inches", "in", "feet", "ft",
+                          "yd", "mi")
+        for units in accepted_units:
+            nc_obj.variables['depth'].units = units
+            result = self.ioos.check_vertical_coordinates(nc_obj)[0]
+            self.assertEqual(*result.value)

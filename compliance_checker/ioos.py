@@ -1066,10 +1066,10 @@ class IOOS1_2Check(IOOSNCCheck):
         '''
         Check that vertical units (corresponding to axis "Z") are a unit
         equivalent to one of "meter", "inch", "foot", "yard", "US_survey_foot",
-        or "fathom".  Check that the vertical coordinate variable "positive"
-        attribute is either "up" or "down".  Note that unlike the CF version
-        of this check, pressure units are not accepted and length units are
-        constrained to the aforementioned set instead of accepting any valid
+        "mile", or "fathom".  Check that the vertical coordinate variable
+        "positive" attribute is either "up" or "down".  Note that unlike the CF
+        version of this check, pressure units are not accepted and length units
+        are constrained to the aforementioned set instead of accepting any valid
         UDUNITS length unit.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
@@ -1082,7 +1082,7 @@ class IOOS1_2Check(IOOSNCCheck):
             units_str = getattr(variable, 'units', None)
             positive = getattr(variable, 'positive', None)
             expected_unit_strs = ('meter', 'inch', 'foot', 'yard',
-                                  'US_survey_foot', 'fathom')
+                                  'US_survey_foot', 'mile', 'fathom')
 
             unit_def_set = {Unit(unit_str).definition for unit_str
                                in expected_unit_strs}
