@@ -1246,12 +1246,12 @@ class IOOS1_2Check(IOOSNCCheck):
 
                 var_failed_ingest_msg = (
                     "The following variables did not "
-                    "qualify for GTS Ingest: {}".format(", ".join(_var_failed),)
+                    "qualify for NDBC/GTS Ingest: {}".format(", ".join(_var_failed),)
                 )
 
                 var_passed_ingest_msg = (
                     "The following variables qualified "
-                    "for GTS Ingest: {}\n".format(", ".join(_var_passed))
+                    "for NDBC/GTS Ingest: {}\n".format(", ".join(_var_passed))
                 )
 
         return Result(
