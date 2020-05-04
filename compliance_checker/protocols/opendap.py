@@ -5,7 +5,39 @@ compliance_checker/protocols/opendap.py
 Functions to assist in determining if the URL is an OPeNDAP endpoint
 """
 import requests
+import urllib.parse
+import urllib.request
 
+def create_DAP_variable_str(url):
+    """
+    Create a URL-encoded string of variables for a given DAP dataset.
+    Works on OPeNDAP datasets.
+
+    Parameters
+    ----------
+    url (str): endpoint to *DAP dataset
+
+    Returns
+    -------
+    str
+    """
+
+    # get dds
+    with urllib.request.urlopen(f"{url}.dds") as resp:
+        _str = resp.read().decode()[8:]
+
+    # remove beginning and ending braces, split on newlines
+    no_braces_newlines = list(filter(lambda x: "{" not in x and "}" not in x, _str.split("\n")))
+
+    # remove all the extra space used in the DDS string
+    no_spaces = list(filter(None, map(lambda x: x.strip(" "), no_braces_newlines)))
+
+    # now need to split from type, grab only the variable and remove ;
+    vars_only = list(map(lambda x: x.split(" ")[-1].strip(";"), no_spaces))
+
+    # encode as proper URL characters
+    varstr = urllib.parse.quote(",".join(vars_only))
+    return varstr
 
 def is_opendap(url):
     """

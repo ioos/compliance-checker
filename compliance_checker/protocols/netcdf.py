@@ -5,6 +5,7 @@ compliance_checker/protocols/netcdf.py
 Functions to assist in determining if the URL points to a netCDF file
 """
 
+import requests
 
 def is_netcdf(url):
     """
@@ -57,3 +58,30 @@ def is_hdf5(file_buffer):
     if file_buffer == b"\x89\x48\x44\x46":
         return True
     return False
+
+def is_remote_netcdf(ds_str):
+    """
+    Check a remote path points to a NetCDF resource.
+
+    Parameters
+    ----------
+    ds_str (str): remote path to a dataset
+
+    Returns
+    -------
+    bool
+    """
+
+    # Some datasets do not support HEAD requests!  The vast majority will,
+    # however, support GET requests
+    try:
+        head_req = requests.head(ds_str, allow_redirects=True, timeout=10)
+        head_req.raise_for_status()
+    except:
+        content_type = None
+    else:
+        content_type = head_req.headers.get("content-type")
+
+    # if the Content-Type header returned was "application/x-netcdf",
+    # or a netCDF file (not OPeNDAP) we can open this into a Dataset
+    return content_type == "application/x-netcdf"

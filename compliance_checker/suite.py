@@ -24,12 +24,13 @@ from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
+from compliance_checker.protocols import opendap, netcdf, cdl, erddap
+from datetime import datetime
 from pkg_resources import working_set
 
-from compliance_checker import MemoizedDataset
+from compliance_checker import MemoizedDataset, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.cf.cf import CFBaseCheck
-from compliance_checker.protocols import cdl, netcdf, opendap
 
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
@@ -765,20 +766,39 @@ class CheckSuite(object):
         :param str ds_str: URL to the remote resource
         """
 
-        if opendap.is_opendap(ds_str):
+        if "tabledap" in ds_str: # ERDDAP TableDAP request
+            # modify ds_str to contain the full variable request
+            variables_str = opendap.create_DAP_variable_str(ds_str)
+
+            # join to create a URL to an .ncCF resource
+            ds_str = "{}.ncCF?{}".format(ds_str, variables_str)
+
+        if netcdf.is_remote_netcdf(ds_str):
+            response = requests.get(ds_str, allow_redirects=True,
+                                    timeout=60)
+            try:
+                return MemoizedDataset(response.content, memory=response.content)
+            except OSError as e:
+                # handle case when netCDF C libs weren't compiled with
+                # in-memory support by using tempfile
+                with tempnc(response.content) as _nc:
+                    return MemoizedDataset(_nc)
+
+        elif opendap.is_opendap(ds_str):
             return Dataset(ds_str)
-        else:
             # Check if the HTTP response is XML, if it is, it's likely SOS so
             # we'll attempt to parse the response as SOS
-            response = requests.get(ds_str, allow_redirects=True)
-            if "text/xml" in response.headers["content-type"]:
-                return self.process_doc(response.content)
 
-            raise ValueError(
-                "Unknown service with content-type: {}".format(
-                    response.headers["content-type"]
-                )
-            )
+
+        # some SOS servers don't seem to support HEAD requests.
+        # Issue GET instead if we reach here and can't get the response
+        response = requests.get(ds_str, allow_redirects=True,
+                                timeout=60)
+        content_type = response.headers.get("content-type")
+        if content_type == "text/xml":
+            return self.process_doc(response.content)
+        else:
+            raise ValueError("Unknown service with content-type: {}".format(content_type))
 
     def load_local_dataset(self, ds_str):
         """
