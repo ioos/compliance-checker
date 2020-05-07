@@ -1131,11 +1131,11 @@ class IOOS1_2Check(IOOSNCCheck):
         if isinstance(gts_ingest_value, str):
             is_valid_string = self._check_gts_ingest_val(gts_ingest_value)
 
-        fail_message = ['gts_ingest must be a string "true" or "false"']
+        fail_message = ['Global attribute "gts_ingest" must be a string "true" or "false"']
         return Result(
             BaseCheck.HIGH,
             is_valid_string,
-            "gts_ingest",
+            "NDBC/GTS Ingest Requirements",
             None if is_valid_string else fail_message,
         )
 
@@ -1257,7 +1257,7 @@ class IOOS1_2Check(IOOSNCCheck):
         return Result(
             BaseCheck.HIGH,
             all_passed_ingest_reqs,
-            "gts_ingest requirements",
+            "NDBC/GTS Ingest Requirements",
             None
             if all_passed_ingest_reqs
             else [var_passed_ingest_msg, var_failed_ingest_msg],
