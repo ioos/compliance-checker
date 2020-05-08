@@ -23,7 +23,7 @@ def create_DAP_variable_str(url):
     """
 
     # get dds
-    with urllib.request.urlopen(f"{url}.dds") as resp:
+    with urllib.request.urlopen("{}.dds".format(url)) as resp:
         _str = resp.read().decode()[8:]
 
     # remove beginning and ending braces, split on newlines
