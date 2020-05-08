@@ -757,22 +757,10 @@ class CheckSuite(object):
         pr = urlparse(ds_str)
         if pr.netloc:
             return self.load_remote_dataset(ds_str)
-        return self.load_local_dataset(ds_str)
+        else:
+            return self.load_local_dataset(ds_str)
 
-    def load_remote_dataset(self, ds_str):
-        """
-        Returns a dataset instance for the remote resource, either OPeNDAP or SOS
-
-        :param str ds_str: URL to the remote resource
-        """
-
-        if "tabledap" in ds_str: # ERDDAP TableDAP request
-            # modify ds_str to contain the full variable request
-            variables_str = opendap.create_DAP_variable_str(ds_str)
-
-            # join to create a URL to an .ncCF resource
-            ds_str = "{}.ncCF?{}".format(ds_str, variables_str)
-
+    def check_remote_netcdf(self, ds_str):
         if netcdf.is_remote_netcdf(ds_str):
             response = requests.get(ds_str, allow_redirects=True,
                                     timeout=60)
@@ -784,13 +772,41 @@ class CheckSuite(object):
                 with tempnc(response.content) as _nc:
                     return MemoizedDataset(_nc)
 
+    def load_remote_dataset(self, ds_str):
+        """
+        Returns a dataset instance for the remote resource, either OPeNDAP or SOS
+
+        :param str ds_str: URL to the remote resource
+        """
+
+        url_parsed = urlparse(ds_str)
+        # ERDDAP TableDAP request
+
+        nc_remote_result = self.check_remote_netcdf(ds_str)
+        if nc_remote_result:
+            return nc_remote_result
+
+        # if application/x-netcdf wasn't detected in the Content-Type headers
+        # and this is some kind of erddap tabledap form, then try to get the
+        # .ncCF file from ERDDAP
+        elif "tabledap" in ds_str and not url_parsed.query:
+            # modify ds_str to contain the full variable request
+            variables_str = opendap.create_DAP_variable_str(ds_str)
+
+            # join to create a URL to an .ncCF resource
+            ds_str = "{}.ncCF?{}".format(ds_str, variables_str)
+
+        nc_remote_result = self.check_remote_netcdf(ds_str)
+        if nc_remote_result:
+            return nc_remote_result
+
+        # if it's just an OPeNDAP endpoint, use that
         elif opendap.is_opendap(ds_str):
             return Dataset(ds_str)
-            # Check if the HTTP response is XML, if it is, it's likely SOS so
-            # we'll attempt to parse the response as SOS
 
-
-        # some SOS servers don't seem to support HEAD requests.
+        # Check if the HTTP response is XML, if it is, it's likely SOS so
+        # we'll attempt to parse the response as SOS.
+        # Some SOS servers don't seem to support HEAD requests.
         # Issue GET instead if we reach here and can't get the response
         response = requests.get(ds_str, allow_redirects=True,
                                 timeout=60)
