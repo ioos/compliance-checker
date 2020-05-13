@@ -11,6 +11,7 @@ def readme():
 
 
 def pip_requirements(fname="requirements.txt"):
+    reqs = []
     with open(fname, "r") as f:
         for line in f:
             line = line.strip()
@@ -19,8 +20,6 @@ def pip_requirements(fname="requirements.txt"):
             reqs.append(line)
     return reqs
 
-
-reqs = [line.strip() for line in open("requirements.txt")]
 
 setup(
     name="compliance-checker",
