@@ -1195,8 +1195,7 @@ class IOOS1_2Check(IOOSNCCheck):
 
     def check_gts_ingest_requirements(self, ds):
         """
-        If a dataset is flagged for gts_ingest, check which variables
-        qualify for ingest.
+        Check which variables qualify for ingest.
 
         According to https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#requirements-for-ioos-dataset-gts-ingest,
         the gts_ingest is "required, if applicable". Any variables which a user
@@ -1205,6 +1204,10 @@ class IOOS1_2Check(IOOSNCCheck):
           - have a valid CF standard_name attribute (already checked)
           - have an ancillary variable reqpresenting QARTOD aggregate flags
           - have a valid udunits units attribute (already checked)
+
+        This check will always fail so as to notify the user which variables
+        qualified/did not qualify for ingest.
+        https://github.com/ioos/compliance-checker/issues/759#issuecomment-629454412
 
         Parameters
         ----------
@@ -1217,50 +1220,39 @@ class IOOS1_2Check(IOOSNCCheck):
 
         # is dataset properly flagged for ingest?
         glb_gts_attr = getattr(ds, "gts_ingest", None)
-        if glb_gts_attr and (glb_gts_attr == "true" or glb_gts_attr == "false"):
-            do_gts = True if glb_gts_attr == "true" else False
-        else:
-            do_gts = False
 
         # check variables
         all_passed_ingest_reqs = True  # default
-        var_failed_ingest_msg = None
-        var_passed_ingest_msg = None
+        var_failed_ingest_msg = "The following variables did not qualify for NDBC/GTS Ingest: {}\n"
+        var_passed_ingest_msg = "The following variables qualified for NDBC/GTS Ingest: {}\n"
 
-        if do_gts:  # execute if dataset flagged for ingest
+        var_passed_ingest_reqs = set()
+        for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x == "true"):
+            var_passed_ingest_reqs.add(
+                (v.name, self._var_qualifies_for_gts_ingest(ds, v))
+            )
 
-            var_passed_ingest_reqs = set()
-            for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x == "true"):
-                var_passed_ingest_reqs.add(
-                    (v.name, self._var_qualifies_for_gts_ingest(ds, v))
-                )
+        # always show which variables have passed
+        _var_passed = map(
+            lambda y: y[0], filter(lambda x: x[1], var_passed_ingest_reqs)
+        )
 
-            all_passed_ingest_reqs = all(map(lambda x: x[1], var_passed_ingest_reqs))
-            if not all_passed_ingest_reqs:
-                _var_failed = map(
-                    lambda y: y[0], filter(lambda x: not x[1], var_passed_ingest_reqs)
-                )
-                _var_passed = map(
-                    lambda y: y[0], filter(lambda x: x[1], var_passed_ingest_reqs)
-                )
-
-                var_failed_ingest_msg = (
-                    "The following variables did not "
-                    "qualify for NDBC/GTS Ingest: {}".format(", ".join(_var_failed),)
-                )
-
-                var_passed_ingest_msg = (
-                    "The following variables qualified "
-                    "for NDBC/GTS Ingest: {}\n".format(", ".join(_var_passed))
-                )
+        all_passed_ingest_reqs = all(map(lambda x: x[1], var_passed_ingest_reqs))
+        if not all_passed_ingest_reqs:
+            _var_failed = map(
+                lambda y: y[0], filter(lambda x: not x[1], var_passed_ingest_reqs)
+            )
 
         return Result(
             BaseCheck.HIGH,
-            all_passed_ingest_reqs,
+            False, # always fail
             "NDBC/GTS Ingest Requirements",
-            None
+            [var_passed_ingest_msg.format(", ".join(_var_passed))]
             if all_passed_ingest_reqs
-            else [var_passed_ingest_msg, var_failed_ingest_msg],
+            else [
+                var_passed_ingest_msg.format(", ".join(_var_passed)),
+                var_failed_ingest_msg.format(", ".join(_var_failed))
+            ]
         )
 
     def check_instrument_variables(self, ds):

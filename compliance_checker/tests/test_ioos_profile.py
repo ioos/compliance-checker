@@ -478,14 +478,18 @@ class TestIOOS1_2(BaseTestCase):
     def test_check_gts_ingest_requirements(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
 
+        # NOTE: this check will always have a "failing" result; see
+        # https://github.com/ioos/compliance-checker/issues/759#issuecomment-625356938
+        # and subsequent discussion
+
         # no gts_ingest_requirements, should pass
         result = self.ioos.check_gts_ingest_requirements(ds)
-        self.assertTrue(result.value)
+        self.assertFalse(result.value)
 
         # flag for ingest, no variables flagged - default pass
         ds.setncattr("gts_ingest", "true")
         result = self.ioos.check_gts_ingest_requirements(ds)
-        self.assertTrue(result.value)
+        self.assertFalse(result.value)
 
         # give one variable the gts_ingest attribute
         # no standard_name or ancillary vars, should fail
@@ -498,6 +502,7 @@ class TestIOOS1_2(BaseTestCase):
         ds.variables["time"].setncattr("standard_name", "time")
         result = self.ioos.check_gts_ingest_requirements(ds)
         self.assertFalse(result.value)
+        self.assertIn('The following variables did not qualify for NDBC/GTS Ingest: time\n', result.msgs) 
 
         # set ancillary var with bad standard name
         tmp = ds.createVariable("tmp", np.byte, ("time",))
@@ -505,18 +510,21 @@ class TestIOOS1_2(BaseTestCase):
         ds.variables["time"].setncattr("ancillary_variables", "tmp")
         result = self.ioos.check_gts_ingest_requirements(ds)
         self.assertFalse(result.value)
+        self.assertIn('The following variables did not qualify for NDBC/GTS Ingest: time\n', result.msgs) 
 
         # good ancillary var standard name, time units are bad
         tmp.setncattr("standard_name", "aggregate_quality_flag")
         ds.variables["time"].setncattr("units", "bad since bad")
         result = self.ioos.check_gts_ingest_requirements(ds)
         self.assertFalse(result.value)
+        self.assertIn('The following variables did not qualify for NDBC/GTS Ingest: time\n', result.msgs) 
 
         # good ancillary var stdname, good units, pass
         tmp.setncattr("standard_name", "aggregate_quality_flag")
         ds.variables["time"].setncattr("units", "seconds since 1970-01-01T00:00:00Z")
         result = self.ioos.check_gts_ingest_requirements(ds)
-        self.assertTrue(result.value)
+        self.assertFalse(result.value)
+        self.assertIn('The following variables qualified for NDBC/GTS Ingest: time\n', result.msgs) 
 
     def test_check_instrument_variables(self):
 
