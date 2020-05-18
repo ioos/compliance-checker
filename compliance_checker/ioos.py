@@ -675,9 +675,6 @@ class IOOS1_2Check(IOOSNCCheck):
         list of Result objects
         """
 
-        # NOTE the URL to NOAA-NCEI is invalid (400), so this only tests
-        # the NERC specification
-
         role = getattr(ds, "contributor_role", None)
         vocb = getattr(ds, "contributor_role_vocabulary", None)
 
@@ -715,6 +712,8 @@ class IOOS1_2Check(IOOSNCCheck):
         if vocb:
             if vocb in [
                 "http://vocab.nerc.ac.uk/collection/G04/current/",
+                "https://vocab.nerc.ac.uk/collection/G04/current/",
+                "http://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
                 "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
             ]:
                 vocb_val = True
