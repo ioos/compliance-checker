@@ -807,6 +807,7 @@ class IOOS1_2Check(IOOSNCCheck):
             list of Result objects
         """
         valid_cf_roles = {"timeseries_id", "profile_id", "trajectory_id"}
+
         cf_role_results = []
         for var in self.platform_vars:
             attr_check(
@@ -816,6 +817,16 @@ class IOOS1_2Check(IOOSNCCheck):
                 cf_role_results,
                 var_name=var.name,
             )
+        # there should really only be one platform variable, but in case
+        # someone mistakenly puts mulitple, print out any errors for each,
+        # as multiple platform vars will raise its own separate errors
+        for result in cf_role_results:
+            if result.value[0] != 2:
+                result.msgs[0] = ("Platform variable \"{}\" must have a "
+                                  "cf_role attribute with one of the "
+                                  "values {}".format(result.variable_name,
+                                                     valid_cf_roles))
+
         return cf_role_results
 
     def check_creator_and_publisher_type(self, ds):
