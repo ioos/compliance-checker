@@ -824,7 +824,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 result.msgs[0] = ("Platform variable \"{}\" must have a "
                                   "cf_role attribute with one of the "
                                   "values {}".format(result.variable_name,
-                                                     valid_cf_roles))
+                                                     sorted(valid_cf_roles)))
 
         return cf_role_results
 
