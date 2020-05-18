@@ -686,11 +686,10 @@ class TestIOOS1_2(BaseTestCase):
         plat_var.setncattr("cf_role", "bad_value")
         results = self.ioos.check_platform_variable_cf_role(ds)
         self.assertLess(score, out_of)
-        expected_vals = ["profile_id", "timeseries_id", "trajectory_id"]
+        expected_vals = {"profile_id", "timeseries_id", "trajectory_id"}
         expect_msg = (
-            "attribute cf_role in variable platform present, but not "
-            "in expected value list ({})".format(expected_vals)
-        )
+            "Platform variable \"platform\" must have a cf_role attribute "
+            "with one of the values {}".format(expected_vals))
         self.assertEqual(results[0].msgs, [expect_msg])
         # set to valid value
         plat_var.setncattr("cf_role", "timeseries_id")
