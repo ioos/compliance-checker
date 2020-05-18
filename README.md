@@ -130,6 +130,13 @@ usage: cchecker.py [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
 
 positional arguments:
   dataset_location      Defines the location of the dataset to be checked.
+                        The location can be a local netCDF file, a remote
+                        OPeNDAP endpoint, a remote netCDF file which returns
+                        content-type header of 'application/x-netcdf', or an
+                        ERDDAP TableDAP endpoint. Note that the ERDDAP TableDAP
+                        endpoint will currently attempt to fetch the entire
+                        TableDAP dataset.
+
 
 optional arguments:
   -h, --help            show this help message and exit
