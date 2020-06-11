@@ -198,7 +198,7 @@ class CheckSuite(object):
 
     def _get_checks(self, checkclass, skip_checks):
         """
-        Helper method to retreive check methods from a Checker class.  Excludes
+        Helper method to retrieve check methods from a Checker class.  Excludes
         any checks in `skip_checks`.
 
         The name of the methods in the Checker class should start with "check_"
@@ -266,7 +266,7 @@ class CheckSuite(object):
 
     def _get_check_url(self, check_name):
         """
-        Return the check's reference URL if it exists. If not, return emtpy str.
+        Return the check's reference URL if it exists. If not, return empty str.
         @param check_name str: name of the check being run returned by
                                _get_check_versioned_name()
         """
@@ -725,7 +725,7 @@ class CheckSuite(object):
             ["ncgen", "-k", "nc4", "-o", ds_str, cdl_path], stderr=subprocess.PIPE
         )
         if iostat.returncode != 0:
-            # if not successfull, create netCDF classic file
+            # if not successful, create netCDF classic file
             print(
                 "netCDF-4 file could not be generated from cdl file with " + "message:"
             )

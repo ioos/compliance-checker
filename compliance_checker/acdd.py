@@ -740,7 +740,7 @@ class ACDD1_3Check(ACDDNCCheck):
             ]
         )
 
-        # overrride the ISO date checks in
+        # override the ISO date checks in
         def _check_attr_is_iso_date(attr, ds):
             result_name = "{}_is_iso".format(attr)
             if not hasattr(ds, attr):

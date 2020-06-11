@@ -424,7 +424,7 @@ class TestACDD1_3(BaseTestCase):
         empty_ds = Dataset(os.devnull, "w", diskless=True)
         self.addCleanup(empty_ds.close)
 
-        # Mispelled WKT. Error message should include the attribute checked
+        # Misspelled WKT. Error message should include the attribute checked
         # and the value that was provided for easy troubleshooting
         empty_ds.geospatial_bounds = "POIT (-123.458000 38.048000)"
         results = self.acdd.check_recommended(empty_ds)
