@@ -73,5 +73,9 @@ setup(
             "data/templates/*.j2",
         ],
     },
-    use_scm_version=True,
+    use_scm_version={
+        "write_to": "compliance_checker/_version.py",
+        "write_to_template": '__version__ = "{version}"',
+        "tag_regex": r"^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$",
+    },
 )
