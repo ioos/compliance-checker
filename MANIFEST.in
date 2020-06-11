@@ -1,6 +1,7 @@
 include *.txt
 include README.md
 include LICENSE
+recursive-include compliance_checker *.py
 include compliance_checker/data/*.json
 include compliance_checker/data/*.xml
 include compliance_checker/data/templates/*.j2
