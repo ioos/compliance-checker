@@ -24,13 +24,12 @@ from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
-from compliance_checker.protocols import opendap, netcdf, cdl, erddap
-from datetime import datetime
 from pkg_resources import working_set
 
 from compliance_checker import MemoizedDataset, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.cf.cf import CFBaseCheck
+from compliance_checker.protocols import cdl, erddap, netcdf, opendap
 
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
@@ -762,8 +761,7 @@ class CheckSuite(object):
 
     def check_remote_netcdf(self, ds_str):
         if netcdf.is_remote_netcdf(ds_str):
-            response = requests.get(ds_str, allow_redirects=True,
-                                    timeout=60)
+            response = requests.get(ds_str, allow_redirects=True, timeout=60)
             try:
                 return MemoizedDataset(response.content, memory=response.content)
             except OSError as e:
@@ -808,13 +806,14 @@ class CheckSuite(object):
         # we'll attempt to parse the response as SOS.
         # Some SOS servers don't seem to support HEAD requests.
         # Issue GET instead if we reach here and can't get the response
-        response = requests.get(ds_str, allow_redirects=True,
-                                timeout=60)
+        response = requests.get(ds_str, allow_redirects=True, timeout=60)
         content_type = response.headers.get("content-type")
         if content_type == "text/xml":
             return self.process_doc(response.content)
         else:
-            raise ValueError("Unknown service with content-type: {}".format(content_type))
+            raise ValueError(
+                "Unknown service with content-type: {}".format(content_type)
+            )
 
     def load_local_dataset(self, ds_str):
         """
