@@ -13,7 +13,7 @@ import textwrap
 import warnings
 
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from distutils.version import StrictVersion
 from operator import itemgetter
 from urllib.parse import urlparse
@@ -28,10 +28,9 @@ from compliance_checker.protocols import opendap, netcdf, cdl, erddap
 from datetime import datetime
 from pkg_resources import working_set
 
-from compliance_checker import MemoizedDataset, tempnc
+from compliance_checker import MemoizedDataset, tempnc, __version__
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.cf.cf import CFBaseCheck
-
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
@@ -60,7 +59,6 @@ def extract_docstring_summary(docstring):
 
 
 class CheckSuite(object):
-
     checkers = (
         {}
     )  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
@@ -487,6 +485,8 @@ class CheckSuite(object):
         aggregates["scoreheader"] = self.checkers[check_name]._cc_display_headers
         aggregates["cc_spec_version"] = self.checkers[check_name]._cc_spec_version
         aggregates["cc_url"] = self._get_check_url(aggregates["testname"])
+        aggregates["report_timestamp"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        aggregates["cc_version"] = __version__
         return aggregates
 
     def dict_output(self, check_name, groups, source_name, limit):
@@ -584,6 +584,10 @@ class CheckSuite(object):
         print("\n")
         print("-" * width)
         print("{:^{width}}".format("IOOS Compliance Checker Report", width=width))
+        print("{:^{width}}".format("Version {}".format(__version__), width=width))
+        print("{:^{width}}".format("Report generated {}".format(
+            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            ), width=width))
         print("{:^{width}}".format(check_name, width=width))
         print("{:^{width}}".format(check_url, width=width))
         print("-" * width)
