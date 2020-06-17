@@ -763,8 +763,9 @@ class CheckSuite(object):
         if netcdf.is_remote_netcdf(ds_str):
             response = requests.get(ds_str, allow_redirects=True, timeout=60)
             try:
-                return MemoizedDataset(urlparse(response.url).path,
-                                       memory=response.content)
+                return MemoizedDataset(
+                    urlparse(response.url).path, memory=response.content
+                )
             except OSError as e:
                 # handle case when netCDF C libs weren't compiled with
                 # in-memory support by using tempfile
