@@ -581,18 +581,25 @@ class CheckSuite(object):
         check_name = self._get_check_versioned_name(check_name)
         check_url = self._get_check_url(check_name)
         width = 2 * self.col_width
+
+        # NOTE: printing and use of .center()
+        # Nested .format() calls should be avoided when possible.
+        # As a future enhancement, a string.Template string might work best here
+        # but for the time being individual lines are printed and centered with
+        # .center()
+
         print("\n")
         print("-" * width)
-        print("{:^{width}}".format("IOOS Compliance Checker Report", width=width))
-        print("{:^{width}}".format("Version {}".format(__version__), width=width))
-        print("{:^{width}}".format("Report generated {}".format(
+        print("IOOS Compliance Checker Report".center(width))
+        print("Version {}".format(__version__).center(width))
+        print("Report generated {}".format(
             datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-            ), width=width))
-        print("{:^{width}}".format(check_name, width=width))
-        print("{:^{width}}".format(check_url, width=width))
+            ).center(width))
+        print("{}".format(check_name).center(width))
+        print("{}".format(check_url).center(width))
         print("-" * width)
         if issue_count > 0:
-            print("{:^{width}}".format("Corrective Actions", width=width))
+            print("Corrective Actions".center(width))
             plural = "" if issue_count == 1 else "s"
             print(
                 "{} has {} potential issue{}".format(
