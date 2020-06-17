@@ -89,7 +89,7 @@ class ComplianceChecker(object):
             else:
                 score_dict[loc] = score_groups
 
-        # define a score limit to truncate the ouput to the strictness level
+        # define a score limit to truncate the output to the strictness level
         # specified by the user
         if criteria == "normal":
             limit = 2
@@ -247,7 +247,7 @@ class ComplianceChecker(object):
             if len(errors):
                 errors_occurred = True
                 print(
-                    "WARNING: The following exceptions occured during the %s checker (possibly indicate compliance checker issues):"
+                    "WARNING: The following exceptions occurred during the %s checker (possibly indicate compliance checker issues):"
                     % checker,
                     file=sys.stderr,
                 )

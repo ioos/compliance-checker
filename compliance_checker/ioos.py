@@ -41,7 +41,7 @@ class IOOSBaseCheck(BaseCheck):
     @classmethod
     def _has_attr(cls, ds, attr, concept_name, priority=BaseCheck.HIGH):
         """
-        Checks for the existance of attr in ds, with the name/message using concept_name.
+        Checks for the existence of attr in ds, with the name/message using concept_name.
         """
         val = cls.std_check(ds, attr)
         msgs = []
@@ -58,7 +58,7 @@ class IOOSBaseCheck(BaseCheck):
     @classmethod
     def _has_var_attr(cls, dataset, vname, attr, concept_name, priority=BaseCheck.HIGH):
         """
-        Checks for the existance of an attr on variable vname in dataset, with the name/message using concept_name.
+        Checks for the existence of an attr on variable vname in dataset, with the name/message using concept_name.
         """
         val = True
         msgs = []
@@ -811,7 +811,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 var_name=var.name,
             )
         # there should really only be one platform variable, but in case
-        # someone mistakenly puts mulitple, print out any errors for each,
+        # someone mistakenly puts multiple, print out any errors for each,
         # as multiple platform vars will raise its own separate errors
         for result in cf_role_results:
             if result.value[0] != 2:
@@ -1056,8 +1056,8 @@ class IOOS1_2Check(IOOSNCCheck):
         """
         Check that `val` is a str and is equal to "true" or "false"
 
-        Parmeters
-        ---------
+        Parameters
+        ----------
         val (?): value to check
 
         Returns

@@ -1439,7 +1439,7 @@ class TestCF1_7(BaseTestCase):
         """Test the check_actual_range method works as expected"""
 
         # using a with block closes the ds; for checks operating on the data, we need
-        # to intialize and then manually close
+        # to initialize and then manually close
 
         dataset = MockTimeSeries()
         dataset.createVariable("a", "d", ("time",))  # dtype=double, dims=time

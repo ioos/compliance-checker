@@ -516,7 +516,7 @@ def get_true_latitude_variables(nc):
     CF Chapter 4 refers to latitude as a coordinate variable that can also be
     used in non-standard coordinate systems like rotated pole and other
     projections. Chapter 5 refers to a concept of true latitude where the
-    variabe defines latitude in a standard projection.
+    variable defines latitude in a standard projection.
 
     True latitude, for lack of a better definition, is simply latitude where
     the standard_name is latitude or the units are degrees_north.
@@ -581,7 +581,7 @@ def get_true_longitude_variables(nc):
     CF Chapter 4 refers to longitude as a coordinate variable that can also be
     used in non-standard coordinate systems like rotated pole and other
     projections. Chapter 5 refers to a concept of true longitude where the
-    variabe defines longitude in a standard projection.
+    variable defines longitude in a standard projection.
 
     True longitude, for lack of a better definition, is simply longitude where
     the standard_name is longitude or the units are degrees_north.
@@ -642,7 +642,7 @@ def get_instrument_variables(ds):
 
 def get_time_variable(ds):
     """
-    Returns the likeliest variable to be the time coordiante variable
+    Returns the likeliest variable to be the time coordinate variable
 
     :param netCDF4.Dataset ds: An open netCDF4 Dataset
     """

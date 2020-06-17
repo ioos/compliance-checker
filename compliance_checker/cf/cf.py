@@ -933,7 +933,7 @@ class CFBaseCheck(BaseCheck):
 
     def _get_pretty_dimension_order(self, ds, name):
         """
-        Returns a comma seperated string of the dimensions for a specified
+        Returns a comma separated string of the dimensions for a specified
         variable
 
         :param netCDF4.Dataset ds: An open netCDF dataset
@@ -3154,7 +3154,7 @@ class CF1_6Check(CFNCCheck):
         :return: List of results
         """
         ret_val = []
-        # Create a set of coordinate varaibles defining `compress`
+        # Create a set of coordinate variables defining `compress`
         lats = set(cfutil.get_latitude_variables(ds))
         lons = set(cfutil.get_longitude_variables(ds))
 
@@ -3494,7 +3494,7 @@ class CF1_6Check(CFNCCheck):
             must be ordered consistently with the associated coordinate, e.g., for an increasing coordinate, lat(1) > lat(0)
             implies latbnd(i,1) >= latbnd(i,0) for all i
 
-            If adjacent intervals are contiguous, the shared endpoint must be represented indentically in each instance where
+            If adjacent intervals are contiguous, the shared endpoint must be represented identically in each instance where
             it occurs in the boundary variable. For example, if the intervals that contain grid points lat(i) and lat(i+1) are
             contiguous, then latbnd(i+1,0) = latbnd(i,1).
 
@@ -3910,7 +3910,7 @@ class CF1_6Check(CFNCCheck):
         )
 
         # first, to determine whether or not we have a valid climatological time
-        # coordindate variable, we need to make sure it has the attribute "climatology",
+        # coordinate variable, we need to make sure it has the attribute "climatology",
         # but not the attribute "bounds"
         for clim_coord_var in clim_time_coord_vars:
             if hasattr(clim_coord_var, "bounds"):
@@ -4461,9 +4461,9 @@ class CF1_7Check(CF1_6Check):
         """Check the actual_range attribute of variables. As stated in
         section 2.5.1 of version 1.7, this convention defines a two-element
         vector attribute designed to describe the actual minimum and actual
-        maximium values of variables containing numeric data. Conditions:
+        maximum values of variables containing numeric data. Conditions:
           - the fist value of the two-element vector must be equal to the
-            minimum of the data, and the second element equal to the maximium
+            minimum of the data, and the second element equal to the maximum
           - if the data is packed, the elements of actual_range should have
             the same data type as the *unpacked* data
           - if valid_range is specified, both elements of actual_range should
@@ -4890,7 +4890,7 @@ class CF1_7Check(CF1_6Check):
         Execute a query string in a database connection with the given argument
         tuple. Return a result set.
 
-        :param str qstr: desired query to be exectued
+        :param str qstr: desired query to be executed
         :param tuple argtuple: tuple of arguments to be supplied to query
         :rtype set
         """
@@ -4900,7 +4900,7 @@ class CF1_7Check(CF1_6Check):
 
     def _evaluate_geographic_crs_name(self, val):
         """
-        Evalute the condition for the geographic_crs_name attribute.
+        Evaluate the condition for the geographic_crs_name attribute.
 
         :param val: value to be tested
         :rtype tuple
@@ -4925,7 +4925,7 @@ class CF1_7Check(CF1_6Check):
 
     def _evaluate_geoid_name(self, val):
         """
-        Evalute the condition for the geod_name attribute.
+        Evaluate the condition for the geod_name attribute.
 
         :param val: value to be tested
         :rtype tuple
@@ -4949,7 +4949,7 @@ class CF1_7Check(CF1_6Check):
 
     def _evaluate_geopotential_datum_name(self, val):
         """
-        Evalute the condition for the geogpotential_datum_name attribute.
+        Evaluate the condition for the geogpotential_datum_name attribute.
 
         :param val: value to be tested
         :rtype tuple
@@ -4973,7 +4973,7 @@ class CF1_7Check(CF1_6Check):
 
     def _evaluate_horizontal_datum_name(self, val):
         """
-        Evalute the condition for the horizontal_datum_name attribute.
+        Evaluate the condition for the horizontal_datum_name attribute.
 
         :param val: value to be tested
         :rtype tuple
