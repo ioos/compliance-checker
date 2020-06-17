@@ -2,8 +2,6 @@ import io
 
 from setuptools import find_packages, setup
 
-import versioneer
-
 
 def readme():
     with io.open("README.md", encoding="utf-8") as f:
@@ -23,7 +21,6 @@ def pip_requirements(fname="requirements.txt"):
 
 setup(
     name="compliance-checker",
-    version=versioneer.get_version(),
     description="Checks Datasets and SOS endpoints for standards compliance",
     long_description=readme(),
     long_description_content_type="text/markdown",
@@ -76,5 +73,9 @@ setup(
             "data/templates/*.j2",
         ],
     },
-    cmdclass=versioneer.get_cmdclass(),
+    use_scm_version={
+        "write_to": "compliance_checker/_version.py",
+        "write_to_template": '__version__ = "{version}"',
+        "tag_regex": r"^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$",
+    },
 )

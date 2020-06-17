@@ -13,13 +13,12 @@ from compliance_checker.suite import CheckSuite
 
 @pytest.mark.integration
 class TestProtocols(TestCase):
-
     def test_netcdf_content_type(self):
         """
         Check that urls with Content-Type header of "application/x-netcdf" can
         successfully be read into memory for checks.
         """
-        url = 'https://gliders.ioos.us/erddap/tabledap/amelia-20180501T0000.ncCF?&time%3E=max(time)-1%20hour'
+        url = "https://gliders.ioos.us/erddap/tabledap/amelia-20180501T0000.ncCF?&time%3E=max(time)-1%20hour"
         cs = CheckSuite()
         ds = cs.load_dataset(url)
         assert ds is not None

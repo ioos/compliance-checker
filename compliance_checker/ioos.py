@@ -5,16 +5,8 @@ import re
 
 import validators
 
-from lxml.etree import XPath
 from cf_units import Unit
-from compliance_checker.acdd import ACDD1_3Check
-from compliance_checker.cfutil import (get_geophysical_variables,
-                                       get_instrument_variables,
-                                       get_coordinate_variables,
-                                       get_z_variables)
-from compliance_checker import base
-from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
-from compliance_checker.cf import util as cf_util # not to be confused with cfutil.py
+from lxml.etree import XPath
 from owslib.namespaces import Namespaces
 
 from compliance_checker import base
@@ -25,6 +17,7 @@ from compliance_checker.base import (
     BaseSOSDSCheck,
     BaseSOSGCCheck,
     Result,
+    TestCtx,
     attr_check,
     check_has,
 )
@@ -34,6 +27,7 @@ from compliance_checker.cfutil import (
     get_coordinate_variables,
     get_geophysical_variables,
     get_instrument_variables,
+    get_z_variables,
 )
 
 
@@ -821,10 +815,11 @@ class IOOS1_2Check(IOOSNCCheck):
         # as multiple platform vars will raise its own separate errors
         for result in cf_role_results:
             if result.value[0] != 2:
-                result.msgs[0] = ("Platform variable \"{}\" must have a "
-                                  "cf_role attribute with one of the "
-                                  "values {}".format(result.variable_name,
-                                                     sorted(valid_cf_roles)))
+                result.msgs[0] = (
+                    'Platform variable "{}" must have a '
+                    "cf_role attribute with one of the "
+                    "values {}".format(result.variable_name, sorted(valid_cf_roles))
+                )
 
         return cf_role_results
 
@@ -1073,7 +1068,7 @@ class IOOS1_2Check(IOOSNCCheck):
         return isinstance(val, str) and val.lower() in {"true", "false"}
 
     def check_vertical_coordinates(self, ds):
-        '''
+        """
         Check that vertical units (corresponding to axis "Z") are a unit
         equivalent to one of "meter", "inch", "foot", "yard", "US_survey_foot",
         "mile", or "fathom".  Check that the vertical coordinate variable
@@ -1085,17 +1080,25 @@ class IOOS1_2Check(IOOSNCCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: list
         :return: List of results
-        '''
+        """
         ret_val = []
         for name in get_z_variables(ds):
             variable = ds.variables[name]
-            units_str = getattr(variable, 'units', None)
-            positive = getattr(variable, 'positive', None)
-            expected_unit_strs = ('meter', 'inch', 'foot', 'yard',
-                                  'US_survey_foot', 'mile', 'fathom')
+            units_str = getattr(variable, "units", None)
+            positive = getattr(variable, "positive", None)
+            expected_unit_strs = (
+                "meter",
+                "inch",
+                "foot",
+                "yard",
+                "US_survey_foot",
+                "mile",
+                "fathom",
+            )
 
-            unit_def_set = {Unit(unit_str).definition for unit_str
-                               in expected_unit_strs}
+            unit_def_set = {
+                Unit(unit_str).definition for unit_str in expected_unit_strs
+            }
 
             try:
                 units = Unit(units_str)
@@ -1104,18 +1107,18 @@ class IOOS1_2Check(IOOSNCCheck):
             except ValueError:
                 pass_stat = False
 
-            valid_vertical_coord = TestCtx(BaseCheck.HIGH,
-                                           "Vertical coordinates")
-            units_set_msg = ("{}'s units attribute {} is not equivalent to one "
-                             "of {}".format(name, units_str,
-                                            expected_unit_strs))
+            valid_vertical_coord = TestCtx(BaseCheck.HIGH, "Vertical coordinates")
+            units_set_msg = (
+                "{}'s units attribute {} is not equivalent to one "
+                "of {}".format(name, units_str, expected_unit_strs)
+            )
             valid_vertical_coord.assert_true(pass_stat, units_set_msg)
 
-            pos_msg = ("{}: vertical coordinates must include a positive "
-                       "attribute that is either 'up' or 'down'".format(name))
-            valid_vertical_coord.assert_true(positive in ('up', 'down'),
-                                             pos_msg)
-
+            pos_msg = (
+                "{}: vertical coordinates must include a positive "
+                "attribute that is either 'up' or 'down'".format(name)
+            )
+            valid_vertical_coord.assert_true(positive in ("up", "down"), pos_msg)
 
             ret_val.append(valid_vertical_coord.to_result())
 
@@ -1141,7 +1144,9 @@ class IOOS1_2Check(IOOSNCCheck):
         if isinstance(gts_ingest_value, str):
             is_valid_string = self._check_gts_ingest_val(gts_ingest_value)
 
-        fail_message = ['Global attribute "gts_ingest" must be a string "true" or "false"']
+        fail_message = [
+            'Global attribute "gts_ingest" must be a string "true" or "false"'
+        ]
         return Result(
             BaseCheck.HIGH,
             is_valid_string,
@@ -1233,8 +1238,12 @@ class IOOS1_2Check(IOOSNCCheck):
 
         # check variables
         all_passed_ingest_reqs = True  # default
-        var_failed_ingest_msg = "The following variables did not qualify for NDBC/GTS Ingest: {}\n"
-        var_passed_ingest_msg = "The following variables qualified for NDBC/GTS Ingest: {}\n"
+        var_failed_ingest_msg = (
+            "The following variables did not qualify for NDBC/GTS Ingest: {}\n"
+        )
+        var_passed_ingest_msg = (
+            "The following variables qualified for NDBC/GTS Ingest: {}\n"
+        )
 
         var_passed_ingest_reqs = set()
         for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x == "true"):
@@ -1255,14 +1264,14 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return Result(
             BaseCheck.HIGH,
-            False, # always fail
+            False,  # always fail
             "NDBC/GTS Ingest Requirements",
             [var_passed_ingest_msg.format(", ".join(_var_passed))]
             if all_passed_ingest_reqs
             else [
                 var_passed_ingest_msg.format(", ".join(_var_passed)),
-                var_failed_ingest_msg.format(", ".join(_var_failed))
-            ]
+                var_failed_ingest_msg.format(", ".join(_var_failed)),
+            ],
         )
 
     def check_instrument_variables(self, ds):

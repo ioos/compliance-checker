@@ -1,12 +1,10 @@
 include *.txt
 include README.md
 include LICENSE
+recursive-include compliance_checker *.py
 include compliance_checker/data/*.json
 include compliance_checker/data/*.xml
 include compliance_checker/data/templates/*.j2
 include compliance_checker/tests/data/*.cdl
 include compliance_checker/tests/data/*.nc
 include compliance_checker/tests/data/non-comp/*.cdl
-
-include versioneer.py
-include compliance_checker/_version.py

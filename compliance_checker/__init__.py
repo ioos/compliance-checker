@@ -1,15 +1,15 @@
-from functools import lru_cache
-
-from netCDF4 import Dataset
-
-from ._version import get_versions
-
 from contextlib import contextmanager
+from functools import lru_cache
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO, Generator
 
-__version__ = get_versions()["version"]
-del get_versions
+from netCDF4 import Dataset
+
+
+try:
+    from ._version import __version__
+except ImportError:
+    __version__ = "unknown"
 
 
 class MemoizedDataset(Dataset):
@@ -23,6 +23,7 @@ class MemoizedDataset(Dataset):
     @lru_cache(128)
     def get_variables_by_attributes(self, **kwargs):
         return super(MemoizedDataset, self).get_variables_by_attributes(**kwargs)
+
 
 @contextmanager
 def tempnc(data: BinaryIO) -> Generator[str, None, None]:

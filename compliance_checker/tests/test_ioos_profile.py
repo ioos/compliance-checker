@@ -502,7 +502,10 @@ class TestIOOS1_2(BaseTestCase):
         ds.variables["time"].setncattr("standard_name", "time")
         result = self.ioos.check_gts_ingest_requirements(ds)
         self.assertFalse(result.value)
-        self.assertIn('The following variables did not qualify for NDBC/GTS Ingest: time\n', result.msgs)
+        self.assertIn(
+            "The following variables did not qualify for NDBC/GTS Ingest: time\n",
+            result.msgs,
+        )
 
         # set ancillary var with bad standard name
         tmp = ds.createVariable("tmp", np.byte, ("time",))
@@ -510,21 +513,29 @@ class TestIOOS1_2(BaseTestCase):
         ds.variables["time"].setncattr("ancillary_variables", "tmp")
         result = self.ioos.check_gts_ingest_requirements(ds)
         self.assertFalse(result.value)
-        self.assertIn('The following variables did not qualify for NDBC/GTS Ingest: time\n', result.msgs)
+        self.assertIn(
+            "The following variables did not qualify for NDBC/GTS Ingest: time\n",
+            result.msgs,
+        )
 
         # good ancillary var standard name, time units are bad
         tmp.setncattr("standard_name", "aggregate_quality_flag")
         ds.variables["time"].setncattr("units", "bad since bad")
         result = self.ioos.check_gts_ingest_requirements(ds)
         self.assertFalse(result.value)
-        self.assertIn('The following variables did not qualify for NDBC/GTS Ingest: time\n', result.msgs)
+        self.assertIn(
+            "The following variables did not qualify for NDBC/GTS Ingest: time\n",
+            result.msgs,
+        )
 
         # good ancillary var stdname, good units, pass
         tmp.setncattr("standard_name", "aggregate_quality_flag")
         ds.variables["time"].setncattr("units", "seconds since 1970-01-01T00:00:00Z")
         result = self.ioos.check_gts_ingest_requirements(ds)
         self.assertFalse(result.value)
-        self.assertIn('The following variables qualified for NDBC/GTS Ingest: time\n', result.msgs)
+        self.assertIn(
+            "The following variables qualified for NDBC/GTS Ingest: time\n", result.msgs
+        )
 
     def test_check_instrument_variables(self):
 
@@ -688,8 +699,9 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(score, out_of)
         expected_vals = {"profile_id", "timeseries_id", "trajectory_id"}
         expect_msg = (
-            "Platform variable \"platform\" must have a cf_role attribute "
-            "with one of the values {}".format(sorted(expected_vals)))
+            'Platform variable "platform" must have a cf_role attribute '
+            "with one of the values {}".format(sorted(expected_vals))
+        )
         self.assertEqual(results[0].msgs, [expect_msg])
         # set to valid value
         plat_var.setncattr("cf_role", "timeseries_id")
@@ -1016,29 +1028,50 @@ class TestIOOS1_2(BaseTestCase):
         nc_obj = MockTimeSeries()
         result = self.ioos.check_vertical_coordinates(nc_obj)[0]
         self.assertEqual(*result.value)
-        nc_obj.variables['depth'].positive = 'upwards'
+        nc_obj.variables["depth"].positive = "upwards"
         result = self.ioos.check_vertical_coordinates(nc_obj)[0]
         self.assertNotEqual(*result.value)
-        nc_obj.variables['depth'].positive = 'up'
+        nc_obj.variables["depth"].positive = "up"
         result = self.ioos.check_vertical_coordinates(nc_obj)[0]
         self.assertEqual(*result.value)
         # test units
-        nc_obj.variables['depth'].units = 'furlong'
+        nc_obj.variables["depth"].units = "furlong"
         result = self.ioos.check_vertical_coordinates(nc_obj)[0]
-        expected_msg = ("depth's units attribute furlong is not equivalent to "
-                        "one of ('meter', 'inch', 'foot', 'yard', "
-                        "'US_survey_foot', 'mile', 'fathom')")
+        expected_msg = (
+            "depth's units attribute furlong is not equivalent to "
+            "one of ('meter', 'inch', 'foot', 'yard', "
+            "'US_survey_foot', 'mile', 'fathom')"
+        )
         self.assertEqual(result.msgs[0], expected_msg)
         self.assertNotEqual(*result.value)
-        accepted_units = ("meter", "meters", "inch", "foot", "yard", "mile",
-                          "miles", "US_survey_foot", "US_survey_feet", "fathom",
-                          "fathoms", "international_inch",
-                          "international_inches", "international_foot",
-                          "international_feet", "international_yard",
-                          "international_yards", "international_mile",
-                          "international_miles", "inches", "in", "feet", "ft",
-                          "yd", "mi")
+        accepted_units = (
+            "meter",
+            "meters",
+            "inch",
+            "foot",
+            "yard",
+            "mile",
+            "miles",
+            "US_survey_foot",
+            "US_survey_feet",
+            "fathom",
+            "fathoms",
+            "international_inch",
+            "international_inches",
+            "international_foot",
+            "international_feet",
+            "international_yard",
+            "international_yards",
+            "international_mile",
+            "international_miles",
+            "inches",
+            "in",
+            "feet",
+            "ft",
+            "yd",
+            "mi",
+        )
         for units in accepted_units:
-            nc_obj.variables['depth'].units = units
+            nc_obj.variables["depth"].units = units
             result = self.ioos.check_vertical_coordinates(nc_obj)[0]
             self.assertEqual(*result.value)

@@ -101,3 +101,5 @@ ENV/
 # netCDF Files
 *.nc
 conda-requirements.txt
+
+compliance_checker/_version.py

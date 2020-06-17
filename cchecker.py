@@ -180,12 +180,15 @@ def main():
     parser.add_argument(
         "dataset_location",
         nargs="*",
-        help=("Defines the location of the dataset to be checked. The location "
-              "can be a local netCDF file, a remote OPeNDAP endpoint, a remote "
-              "netCDF file which returns content-type header of "
-              "'application/x-netcdf', or an ERDDAP TableDAP endpoint. "
-              "Note that the ERDDAP TableDAP endpoint will currently attempt "
-              "to fetch the entire TableDAP dataset."))
+        help=(
+            "Defines the location of the dataset to be checked. The location "
+            "can be a local netCDF file, a remote OPeNDAP endpoint, a remote "
+            "netCDF file which returns content-type header of "
+            "'application/x-netcdf', or an ERDDAP TableDAP endpoint. "
+            "Note that the ERDDAP TableDAP endpoint will currently attempt "
+            "to fetch the entire TableDAP dataset."
+        ),
+    )
 
     parser.add_argument(
         "-l", "--list-tests", action="store_true", help="List the available tests"

@@ -7,6 +7,7 @@ Functions to assist in determining if the URL points to a netCDF file
 
 import requests
 
+
 def is_netcdf(url):
     """
     Returns True if the URL points to a valid local netCDF file
@@ -58,6 +59,7 @@ def is_hdf5(file_buffer):
     if file_buffer == b"\x89\x48\x44\x46":
         return True
     return False
+
 
 def is_remote_netcdf(ds_str):
     """
