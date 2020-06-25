@@ -3,6 +3,7 @@
 """
 Compliance Checker
 """
+import compliance_checker.cfutil as cfutil
 import csv
 import itertools
 import pprint
@@ -186,6 +187,16 @@ class BaseCheck(object):
                 severity, name, variable=variable
             )
         return self._defined_results[name][variable][severity]
+
+    def __del__(self):
+        """
+        Finalizer. Ensure any caches shared by multiple checkers
+        are cleared before the next checker uses it. Some caches were
+        inadvertently mutated by other functions.
+        """
+
+        cfutil.get_geophysical_variables.cache_clear()
+        cfutil.get_time_variables.cache_clear()
 
 
 class BaseNCCheck(object):
