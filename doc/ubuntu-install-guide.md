@@ -57,5 +57,3 @@ from compliance_checker.runner import ComplianceCheckerCheckSuite
 ```
 
 If it succeeds, then the Compliance Checker should be working correctly.
-
-

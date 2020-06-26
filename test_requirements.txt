@@ -1,3 +1,4 @@
+codespell
 flake8
 httpretty
 mypy
