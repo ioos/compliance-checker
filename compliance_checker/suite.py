@@ -13,7 +13,7 @@ import textwrap
 import warnings
 
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from distutils.version import StrictVersion
 from operator import itemgetter
 from urllib.parse import urlparse
@@ -26,11 +26,10 @@ from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from pkg_resources import working_set
 
-from compliance_checker import MemoizedDataset, tempnc
+from compliance_checker import MemoizedDataset, tempnc, __version__
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.cf.cf import CFBaseCheck
 from compliance_checker.protocols import cdl, erddap, netcdf, opendap
-
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
@@ -59,7 +58,6 @@ def extract_docstring_summary(docstring):
 
 
 class CheckSuite(object):
-
     checkers = (
         {}
     )  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
@@ -486,6 +484,8 @@ class CheckSuite(object):
         aggregates["scoreheader"] = self.checkers[check_name]._cc_display_headers
         aggregates["cc_spec_version"] = self.checkers[check_name]._cc_spec_version
         aggregates["cc_url"] = self._get_check_url(aggregates["testname"])
+        aggregates["report_timestamp"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        aggregates["cc_version"] = __version__
         return aggregates
 
     def dict_output(self, check_name, groups, source_name, limit):
@@ -580,14 +580,25 @@ class CheckSuite(object):
         check_name = self._get_check_versioned_name(check_name)
         check_url = self._get_check_url(check_name)
         width = 2 * self.col_width
+
+        # NOTE: printing and use of .center()
+        # Nested .format() calls should be avoided when possible.
+        # As a future enhancement, a string.Template string might work best here
+        # but for the time being individual lines are printed and centered with
+        # .center()
+
         print("\n")
         print("-" * width)
-        print("{:^{width}}".format("IOOS Compliance Checker Report", width=width))
-        print("{:^{width}}".format(check_name, width=width))
-        print("{:^{width}}".format(check_url, width=width))
+        print("IOOS Compliance Checker Report".center(width))
+        print("Version {}".format(__version__).center(width))
+        print("Report generated {}".format(
+            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            ).center(width))
+        print("{}".format(check_name).center(width))
+        print("{}".format(check_url).center(width))
         print("-" * width)
         if issue_count > 0:
-            print("{:^{width}}".format("Corrective Actions", width=width))
+            print("Corrective Actions".center(width))
             plural = "" if issue_count == 1 else "s"
             print(
                 "{} has {} potential issue{}".format(
