@@ -3,7 +3,6 @@
 """
 Compliance Checker
 """
-import compliance_checker.cfutil as cfutil
 import csv
 import itertools
 import pprint
@@ -22,6 +21,8 @@ from netCDF4 import Dataset
 from owslib.namespaces import Namespaces
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
+
+import compliance_checker.cfutil as cfutil
 
 from compliance_checker import MemoizedDataset, __version__
 from compliance_checker.util import kvp_convert
