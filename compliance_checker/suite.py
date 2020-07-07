@@ -26,10 +26,11 @@ from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from pkg_resources import working_set
 
-from compliance_checker import MemoizedDataset, tempnc, __version__
+from compliance_checker import MemoizedDataset, __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.cf.cf import CFBaseCheck
 from compliance_checker.protocols import cdl, erddap, netcdf, opendap
+
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
@@ -487,7 +488,9 @@ class CheckSuite(object):
         aggregates["scoreheader"] = self.checkers[check_name]._cc_display_headers
         aggregates["cc_spec_version"] = self.checkers[check_name]._cc_spec_version
         aggregates["cc_url"] = self._get_check_url(aggregates["testname"])
-        aggregates["report_timestamp"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        aggregates["report_timestamp"] = datetime.now(timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
         aggregates["cc_version"] = __version__
         return aggregates
 
@@ -594,9 +597,11 @@ class CheckSuite(object):
         print("-" * width)
         print("IOOS Compliance Checker Report".center(width))
         print("Version {}".format(__version__).center(width))
-        print("Report generated {}".format(
-            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-            ).center(width))
+        print(
+            "Report generated {}".format(
+                datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            ).center(width)
+        )
         print("{}".format(check_name).center(width))
         print("{}".format(check_url).center(width))
         print("-" * width)
