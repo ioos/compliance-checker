@@ -489,6 +489,41 @@ class IOOS1_2Check(IOOSNCCheck):
         # geospatial vars must have the following attrs:
         self.geospat_check_var_attrs = self._default_check_var_attrs
 
+        # valid contributor_role values
+        self.valid_contributor_roles = set(
+            [  # NERC and NOAA
+                "author",
+                "coAuthor",
+                "collaborator",
+                "contributor",
+                "custodian",
+                "distributor",
+                "editor",
+                "funder",
+                "mediator",
+                "originator",
+                "owner",
+                "pointOfContact",
+                "principalInvestigator",
+                "processor",
+                "publisher",
+                "resourceProvider",
+                "rightsHolder",
+                "sponsor",
+                "stakeholder",
+                "user",
+            ]
+        )
+
+        self.valid_contributor_role_vocabs = set(
+            [
+                "http://vocab.nerc.ac.uk/collection/G04/current/",
+                "https://vocab.nerc.ac.uk/collection/G04/current/",
+                "http://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
+                "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
+            ]
+        )
+
         self.required_atts = [
             ("Conventions", IOOS1_2_ConventionsValidator()),
             "creator_country",
@@ -530,7 +565,7 @@ class IOOS1_2Check(IOOSNCCheck):
         ]
 
         self.rec_atts = [
-            ("contributor_email", base.EmailValidator()),
+            ("contributor_email", base.EmailValidator(base.csv_splitter)),
             "contributor_name",
             ("contributor_url", base.UrlValidator(base.csv_splitter)),
             "creator_address",
@@ -675,57 +710,81 @@ class IOOS1_2Check(IOOSNCCheck):
         role_val = False
         vocb_val = False
 
-        role_msg = "contributor_role should be from NERC or NOAA-NCEI"
-        vocb_msg = "contributor_role_vocabulary should be one of NERC or NOAA-NCEI"
+        role_msg = "contributor_role '{}' should be from NERC or NOAA-NCEI"
+        vocb_msg = "contributor_role_vocabulary '{}' should be one of NERC or NOAA-NCEI"
 
+        role_results = []
         if role:
-            if role in [  # each in both vocabularies
-                "author",
-                "coAuthor",
-                "collaborator",
-                "contributor",
-                "custodian",
-                "distributor",
-                "editor",
-                "funder",
-                "mediator",
-                "originator",
-                "owner",
-                "pointOfContact",
-                "principalInvestigator",
-                "processor",
-                "publisher",
-                "resourceProvider",
-                "rightsHolder",
-                "sponsor",
-                "stakeholder",
-                "user",
-            ]:
-                role_val = True
+            # in case it's a CSV, split it and iterate through all
+            try:
+                _roles = base.csv_splitter(role)
+                for _role in _roles:
+                    role_val = _role in self.valid_contributor_roles
+                    role_results.append(
+                        Result(
+                            BaseCheck.MEDIUM,
+                            role_val,
+                            "contributor_role",
+                            None if role_val else [role_msg.format(_role)],
+                        )
+                    )
+            except TypeError as e:
+                role_results.append(
+                    Result(
+                        BaseCheck.MEDIUM,
+                        False,
+                        "contributor_role",
+                        ["contributor_role '{}' must be of type 'string'".format(role)],
+                    )
+                )
+        else:
+            role_results.append(
+                Result(
+                    BaseCheck.MEDIUM,
+                    False,
+                    "contributor_role",
+                    ["contributor_role should be present"],
+                )
+            )
 
+        vocb_results = []
         if vocb:
-            if vocb in [
-                "http://vocab.nerc.ac.uk/collection/G04/current/",
-                "https://vocab.nerc.ac.uk/collection/G04/current/",
-                "http://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
-                "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
-            ]:
-                vocb_val = True
+            try:
+                _vocbs = base.csv_splitter(vocb)
+                for _vocb in _vocbs:
+                    vocb_val = _vocb in self.valid_contributor_role_vocabs
+                    vocb_results.append(
+                        Result(
+                            BaseCheck.MEDIUM,
+                            vocb_val,
+                            "contributor_role_vocabulary",
+                            None if vocb_val else [vocb_msg.format(_vocb)],
+                        )
+                    )
+            except TypeError as e:
+                vocb_results.append(
+                    Result(
+                        BaseCheck.MEDIUM,
+                        False,
+                        "contributor_role_vocabulary",
+                        [
+                            "contributor_role_vocabulary '{}' must be of type 'string'".format(
+                                vocb
+                            )
+                        ],
+                    )
+                )
+        else:
+            vocb_results.append(
+                Result(
+                    BaseCheck.MEDIUM,
+                    False,
+                    "contributor_role_vocabulary",
+                    ["contributor_role_vocabulary should be present"],
+                )
+            )
 
-        return [
-            Result(
-                BaseCheck.MEDIUM,
-                role_val,
-                "contributor_role",
-                None if role_val else [role_msg],
-            ),
-            Result(
-                BaseCheck.MEDIUM,
-                vocb_val,
-                "contributor_role_vocabulary",
-                None if vocb_val else [vocb_msg],
-            ),
-        ]
+        return role_results + vocb_results
 
     def check_geophysical_vars_have_attrs(self, ds):
         """
