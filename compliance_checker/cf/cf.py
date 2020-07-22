@@ -1562,7 +1562,8 @@ class CF1_6Check(CFNCCheck):
                     "".format(
                         name,
                         self._get_pretty_dimension_order(ds, name),
-                        ", ".join(dimension_order)),
+                        ", ".join(dimension_order),
+                    ),
                 )
         return valid_dimension_order.to_result()
 
