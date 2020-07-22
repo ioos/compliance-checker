@@ -1089,6 +1089,23 @@ class TestCF1_6(BaseTestCase):
         )
         assert all(r.name == expected_name for r in results.values())
 
+    def test_is_geophysical(self):
+
+        # check whether string type variable, which are not `cf_role`, are
+        # properly processed
+        dataset = self.load_dataset(STATIC_FILES["string"])
+        if dataset.file_format != 'NETCDF4':
+            raise RuntimeError("netCDF file of wrong format (not netCDF4) was "
+                "created for checking")
+        try:
+            result = cfutil.is_geophysical(dataset, 'j')
+        except AttributeError:
+            pytest.fail("Test probably fails because var.dtype.kind or "
+                "var.dtype.char was tested on string-type variable. Consider "
+                "checking for `var.dtype is str`")
+        assert not result
+        # assert False
+
     # TODO: overhaul to use netCDF global attributes or mocks and variable
     #       attributes
     def test_check_attr_type(self):
