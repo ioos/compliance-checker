@@ -1559,7 +1559,9 @@ class CF1_6Check(CFNCCheck):
                     "are not located left of T, Z, Y, X. The dims are {}. "
                     "Their guessed types are {} (with U: unknown/other; L: "
                     "unlimited)."
-                    "".format(name, self._get_pretty_dimension_order(ds, name),
+                    "".format(
+                        name,
+                        self._get_pretty_dimension_order(ds, name),
                         ", ".join(dimension_order)),
                 )
         return valid_dimension_order.to_result()
