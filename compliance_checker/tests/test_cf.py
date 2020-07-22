@@ -135,7 +135,7 @@ class TestCF1_6(BaseTestCase):
 
         # check if variables of type `string` is properly processed
         dataset = self.load_dataset(STATIC_FILES["string"])
-        if dataset.file_format != 'NETCDF4':
+        if dataset.file_format != "NETCDF4":
             raise RuntimeError(
                 "netCDF file of wrong format (not netCDF4) was created for checking"
             )
@@ -1095,7 +1095,7 @@ class TestCF1_6(BaseTestCase):
         # check whether string type variable, which are not `cf_role`, are
         # properly processed
         dataset = self.load_dataset(STATIC_FILES["string"])
-        if dataset.file_format != 'NETCDF4':
+        if dataset.file_format != "NETCDF4":
             raise RuntimeError(
                 "netCDF file of wrong format (not netCDF4) was created for checking"
             )
