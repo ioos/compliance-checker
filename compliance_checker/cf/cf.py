@@ -871,10 +871,7 @@ class CFBaseCheck(BaseCheck):
         for coord_name in self._find_aux_coord_vars(ds):
             coord_var = ds.variables[coord_name]
             # Skip label auxiliary coordinates
-            if (
-                hasattr(coord_var.dtype, "char")
-                and coord_var.dtype.char == "S"
-            ):
+            if hasattr(coord_var.dtype, "char") and coord_var.dtype.char == "S":
                 continue
             elif coord_var.dtype == str:
                 continue
@@ -4200,9 +4197,8 @@ class CF1_6Check(CFNCCheck):
                 )
             # ensure compression variable is a proper index, and thus is an
             # signed or unsigned integer type of some sort
-            if (
-                (compress_var.dtype is str) or 
-                (compress_var.dtype.kind not in {"i", "u"})
+            if (compress_var.dtype is str) or (
+                compress_var.dtype.kind not in {"i", "u"}
             ):
                 valid = False
                 reasoning.append(
