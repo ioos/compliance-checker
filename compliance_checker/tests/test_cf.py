@@ -123,14 +123,25 @@ class TestCF1_6(BaseTestCase):
     def test_check_data_types(self):
         """
         Invoke check_data_types() and loop through all variables to check data
-        types. Pertains to 2.2 The netCDF data types char, byte, short, int,
-        float or real, and double are all acceptable.
+        types. Pertains to 2.2. The netCDF data types char, byte, short, int,
+        float or real, and double are all acceptable. NetCDF4 allows string as
+        data type, which is also acceptable.
         """
 
+        # check default netCDF data types
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
         result = self.cf.check_data_types(dataset)
         assert result.value[0] == result.value[1]
 
+        # check if variables of type `string` is properly processed
+        dataset = self.load_dataset(STATIC_FILES["string"])
+        if dataset.file_format != 'NETCDF4':
+            raise RuntimeError("netCDF file of wrong format (not netCDF4) was "
+                "created for checking")
+        result = self.cf.check_data_types(dataset)
+        assert result.value[0] == result.value[1]
+
+        # check bad data types
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_data_types(dataset)
 
