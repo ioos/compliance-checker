@@ -227,7 +227,7 @@ def is_geophysical(ds, variable):
         return False
 
     # Is it a string but with no defined units?
-    if ncvar.dtype.char == "S":
+    if (ncvar.dtype is str) or (ncvar.dtype.char == "S"):
         return False
 
     # Is it an instrument descriptor?
