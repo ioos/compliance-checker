@@ -1554,9 +1554,13 @@ class CF1_6Check(CFNCCheck):
                 dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
                 valid_dimension_order.assert_true(
                     self._dims_in_order(dimension_order),
-                    "{}'s dimensions are not in the recommended order "
-                    "T, Z, Y, X. They are {}"
-                    "".format(name, self._get_pretty_dimension_order(ds, name)),
+                    "{}'s spatio-temporal dimensions are not in the "
+                    "recommended order T, Z, Y, X and/or further dimensions "
+                    "are not located left of T, Z, Y, X. The dims are {}. "
+                    "Their guessed types are {} (with U: unknown/other; L: "
+                    "unlimited)."
+                    "".format(name, self._get_pretty_dimension_order(ds, name),
+                        ", ".join(dimension_order)),
                 )
         return valid_dimension_order.to_result()
 
