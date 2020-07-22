@@ -307,8 +307,10 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_dimension_order(dataset)
         assert result.value == (5, 6)
         assert result.msgs[0] == (
-            u"really_bad's dimensions are not in the recommended order "
-            "T, Z, Y, X. They are latitude, power"
+            u"really_bad's spatio-temporal dimensions are not in the "
+            "recommended order T, Z, Y, X and/or further dimensions are not "
+            "located left of T, Z, Y, X. The dims are latitude, power. Their "
+            "guessed types are Y, U (with U: unknown/other; L: unlimited)."
         )
 
         dataset = self.load_dataset(STATIC_FILES["dimension_order"])
