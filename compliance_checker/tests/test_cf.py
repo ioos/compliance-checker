@@ -309,8 +309,9 @@ class TestCF1_6(BaseTestCase):
         assert result.msgs[0] == (
             u"really_bad's spatio-temporal dimensions are not in the "
             "recommended order T, Z, Y, X and/or further dimensions are not "
-            "located left of T, Z, Y, X. The dims are latitude, power. Their "
-            "guessed types are Y, U (with U: unknown/other; L: unlimited)."
+            "located left of T, Z, Y, X. The dimensions (and their guessed "
+            "types) are latitude (Y), power (U) (with U: other/unknown; L: "
+            "unlimited)."
         )
 
         dataset = self.load_dataset(STATIC_FILES["dimension_order"])
