@@ -1580,7 +1580,7 @@ class CF1_6Check(CFNCCheck):
                     "{}'s spatio-temporal dimensions are not in the "
                     "recommended order T, Z, Y, X and/or further dimensions "
                     "are not located left of T, Z, Y, X. The dimensions (and "
-                    "their guessed types) are {} (U: other/unknown; L: "
+                    "their guessed types) are {} (with U: other/unknown; L: "
                     "unlimited).".format(
                         name,
                         self._get_pretty_dimension_order_with_type(
