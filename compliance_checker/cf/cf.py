@@ -953,7 +953,7 @@ class CFBaseCheck(BaseCheck):
     def _get_pretty_dimension_order_with_type(self, ds, name, dim_types):
         """
         Returns a comma separated string of the dimensions for a specified
-        variable of format "DIMENSIONS_NAME (DIMENSION_TYPE[, Unlimited])"
+        variable of format "DIMENSIONS_NAME (DIMENSION_TYPE[, unlimited])"
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :param str name: A string with a valid NetCDF variable name for the
@@ -967,7 +967,7 @@ class CFBaseCheck(BaseCheck):
         for dim, dim_type in zip(ds.variables[name].dimensions, dim_types):
             dim_name = "{} ({}".format(dim, dim_type)
             if ds.dimensions[dim].isunlimited():
-                dim_name += ", Unlimited)"
+                dim_name += ", unlimited)"
             else:
                 dim_name += ")"
             dim_names.append(dim_name)
