@@ -339,6 +339,37 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("units", "degree_C")
         temp.setncattr("platform", "myPlatform")
 
+        # doesn't have accuracy, precision, resolution, should fail
+
+        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # add non-numeric vals for accuracy, precision, resolution
+        temp.setncattr("accuracy", "bad")
+        temp.setncattr("precision", "bad")
+        temp.setncattr("resolution", "123")  # still non-numeric
+        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # add numeric for accuracy
+        temp.setncattr("accuracy", 45)
+        temp.setncattr("precision", "bad")
+        temp.setncattr("resolution", "123")  # still non-numeric
+        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # add numeric for precision
+        temp.setncattr("precision", 21)
+        temp.setncattr("resolution", "123")  # still non-numeric
+        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # add numeric for resolution
+        temp.setncattr("resolution", 0.25)
         results = self.ioos.check_geophysical_vars_have_attrs(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)

@@ -3,6 +3,8 @@ Check for IOOS-approved attributes
 """
 import re
 
+from numbers import Number
+
 import validators
 
 from cf_units import Unit
@@ -482,6 +484,7 @@ class IOOS1_2Check(IOOSNCCheck):
                     # ( "platform", BaseCheck.HIGH) # checked under check_single_platform()
                     # ( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
                     # ( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest()
+                    # accuracy, precision, resolution - see check_geophysical_vars_have_attrs()
                 ]
             )
         )
@@ -740,9 +743,38 @@ class IOOS1_2Check(IOOSNCCheck):
         list: list of Result objects
         """
 
-        return self._check_vars_have_attrs(
-            ds, get_geophysical_variables(ds), self.geophys_check_var_attrs
+        # get geophysical variables
+        geophys_vars = get_geophysical_variables(ds)  # list of str
+        results = self._check_vars_have_attrs(  # list
+            ds, geophys_vars, self.geophys_check_var_attrs
         )
+
+        # accuracy, precision, resolution must be numeric
+        # https://github.com/ioos/compliance-checker/issues/839
+        for v in get_geophysical_variables(ds):
+            _v = ds.variables[v]
+            for att in ("accuracy", "precision", "resolution"):
+                val = getattr(_v, att, None)
+                if isinstance(val, Number):
+                    r = True
+                else:
+                    r = False
+
+                results.append(
+                    Result(
+                        BaseCheck.MEDIUM,
+                        r,
+                        f"geophysical_variable:{att}",
+                        [
+                            (
+                                f"Variable '{_v.name}' attribute '{att}' must be numeric and of "
+                                "the same units as '{_v.name}'"
+                            )
+                        ],
+                    )
+                )
+
+        return results
 
     def check_geospatial_vars_have_attrs(self, ds):
         """
