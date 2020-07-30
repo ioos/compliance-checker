@@ -1,0 +1,25 @@
+name: windows
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  windows:
+    runs-on: "windows-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: goanpeca/setup-miniconda@v1
+        with:
+          auto-update-conda: true
+      - shell: bash -l {0}
+        run: |
+          conda config --add channels conda-forge --force
+          conda config --set channel_priority strict
+          conda create --name TEST python=3.8 pip --file requirements.txt --file test_requirements.txt
+          conda activate TEST
+          conda info
+          conda list
+          python -m pip install . --no-deps -vv
+          pytest -s -rxs -v -k "not integration" compliance_checker
