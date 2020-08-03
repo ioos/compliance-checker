@@ -8,16 +8,21 @@ on:
 jobs:
   windows:
     runs-on: "windows-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.6", "3.7", "3.8"]
     steps:
       - uses: actions/checkout@v2
       - uses: goanpeca/setup-miniconda@v1
         with:
           auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
       - shell: bash -l {0}
         run: |
           conda config --add channels conda-forge --force
           conda config --set channel_priority strict
-          conda create --name TEST python=3.8 pip --file requirements.txt --file test_requirements.txt
+          conda create --name TEST python=${{ matrix.python-version }} pip --file requirements.txt --file test_requirements.txt
           conda activate TEST
           conda info
           conda list
