@@ -1370,8 +1370,6 @@ class CF1_6Check(CFNCCheck):
             "valid_min",
             "valid_max",
             "valid_range",
-            "scale_factor",
-            "add_offset",
             "_FillValue",
         }
 
@@ -1379,6 +1377,64 @@ class CF1_6Check(CFNCCheck):
             for att_name in special_attrs.intersection(var.ncattrs()):
                 self._parent_var_attr_type_check(att_name, var, ctx)
         return ctx.to_result()
+
+    def _check_add_offset_scale_factor_type(self, variable, attr_name):
+        """
+        Reusable function for checking both add_offset and scale_factor.
+        """
+
+        msg = (
+            f"Variable {variable.name} and {attr_name} must be quivalent "
+            "data types or {variable.name} must be of type byte, short, or int "
+            "and {attr_name} must be float or double"
+        )
+
+        att = getattr(variable, attr_name, None)
+        if not (isinstance(att, (np.number, float))):  # can't compare dtypes
+            val = False
+
+        else:
+            val = (
+                att.dtype == variable.dtype
+            ) or (  # will short-circuit or if first condition is true
+                isinstance(att.dtype, (np.float, np.double, float))
+                and isinstance(variable.dtype, (np.byte, np.short, np.int, int))
+            )
+
+        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"], [msg])
+
+    def check_add_offset_scale_factor_type(self, ds):
+        """
+        If a variable has the attributes add_offset and scale_factor,
+        check that the variables and attributes are of the same type
+        OR that the variable is of type byte, short or int and the
+        attributes are of type float or double.
+        """
+
+        results = []
+        add_offset_vars = ds.get_variables_by_attributes(
+            add_offset=lambda x: x is not None
+        )
+        scale_factor_vars = ds.get_variables_by_attributes(
+            scale_factor=lambda x: x is not None
+        )
+
+        for _att_vars_tup in (
+            ("add_offset", add_offset_vars),
+            ("scale_factor", scale_factor_vars),
+        ):
+            results.extend(
+                list(
+                    map(
+                        lambda x: self._check_scale_factor_add_offset(
+                            ds.variables[x], _att_vars_tup[0]
+                        ),
+                        _att_vars_tup[1],
+                    )
+                )
+            )
+
+        return results
 
     def check_naming_conventions(self, ds):
         """
@@ -3562,7 +3618,7 @@ class CF1_6Check(CFNCCheck):
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
-                    u"Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
+                    "Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
                     "".format(variable.name, boundary_variable.dimensions)
                 )
 
@@ -3947,7 +4003,7 @@ class CF1_6Check(CFNCCheck):
                 ]
             ):
                 reasoning.append(
-                    u"Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
+                    "Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
                         ds.variables[clim_coord_var.climatology].dimensions
                     )
                 )
@@ -3960,7 +4016,7 @@ class CF1_6Check(CFNCCheck):
                 != 2
             ):
                 reasoning.append(
-                    u"Climatology dimension {} should only contain two elements".format(
+                    "Climatology dimension {} should only contain two elements".format(
                         boundary_variable.dimensions
                     )
                 )
@@ -4638,7 +4694,7 @@ class CF1_7Check(CF1_6Check):
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
-                    u"Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
+                    "Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
                     "".format(variable.name, boundary_variable.dimensions)
                 )
 
