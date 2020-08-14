@@ -749,30 +749,62 @@ class IOOS1_2Check(IOOSNCCheck):
             ds, geophys_vars, self.geophys_check_var_attrs
         )
 
-        # accuracy, precision, resolution must be numeric
-        # https://github.com/ioos/compliance-checker/issues/839
+        return results
+
+    def check_accuracy_precision_resolution(self, ds):
+        """
+        Accuracy, precision, resolution must be numeric. Special check for
+        accuracy when in the salinity context.
+        https://github.com/ioos/compliance-checker/issues/839
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+
+        Returns
+        -------
+        list of Results objects
+        """
+
+        import pdb; pdb.set_trace()
+        results = []
         for v in get_geophysical_variables(ds):
             _v = ds.variables[v]
-            for att in ("accuracy", "precision", "resolution"):
-                val = getattr(_v, att, None)
-                if isinstance(val, Number):
-                    r = True
-                else:
-                    r = False
-
+            msg = (
+                       "Variable '{v}' attribute '{att}' should have the "
+                       "same units as '{v}'"
+                  )
+            for att in ("precision", "resolution"):
+                r = getattr(_v, att, None) is not None
                 results.append(
                     Result(
                         BaseCheck.MEDIUM,
                         r,
                         f"geophysical_variable:{att}",
-                        [
-                            (
-                                f"Variable '{_v.name}' attribute '{att}' must be numeric and of "
-                                "the same units as '{_v.name}'"
-                            )
-                        ],
+                        [msg.format(v=v, att=att)],
                     )
                 )
+
+            # special case for accuracy
+            std_name = getattr(_v, "standard_name", None)
+            gts_ingest = getattr(_v, "gts_ingest", None)
+            if (std_name=="sea_water_practical_salinity") and (gts_ingest=="true"):
+                msg = (
+                           "Variable '{v}' should have an 'accuracy' attribute "
+                           "that is numeric and of the same units as '{v}'"
+                      )
+                r = isinstance(getattr(_v, "accuracy", None), Number)
+            else: # only test if exists
+                r = getattr(_v, "accuracy", None) is not None
+
+            results.append(
+                Result(
+                    BaseCheck.MEDIUM,
+                    r,
+                    f"geophysical_variable:accuracy",
+                    [msg.format(v=v, att=att)],
+                )
+            )
 
         return results
 

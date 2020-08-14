@@ -339,9 +339,19 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("units", "degree_C")
         temp.setncattr("platform", "myPlatform")
 
+        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+    def test_check_accuracy_precision_resolution(self):
         # doesn't have accuracy, precision, resolution, should fail
 
-        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        ds = MockTimeSeries()  # time, lat, lon, depth
+        temp = ds.createVariable(
+            "temp", np.float64, dimensions=("time",), fill_value=9999999999.0
+        )  # _FillValue
+        temp.setncattr("standard_name", "sea_water_temperature")
+        results = self.ioos.check_accuracy_precision_resolution(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
 
@@ -349,7 +359,7 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("accuracy", "bad")
         temp.setncattr("precision", "bad")
         temp.setncattr("resolution", "123")  # still non-numeric
-        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        results = self.ioos.check_accuracy_precision_resolution(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
 
@@ -357,20 +367,20 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("accuracy", 45)
         temp.setncattr("precision", "bad")
         temp.setncattr("resolution", "123")  # still non-numeric
-        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        results = self.ioos.check_accuracy_precision_resolution(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
 
         # add numeric for precision
         temp.setncattr("precision", 21)
         temp.setncattr("resolution", "123")  # still non-numeric
-        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        results = self.ioos.check_accuracy_precision_resolution(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
 
         # add numeric for resolution
         temp.setncattr("resolution", 0.25)
-        results = self.ioos.check_geophysical_vars_have_attrs(ds)
+        results = self.ioos.check_accuracy_precision_resolution(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
