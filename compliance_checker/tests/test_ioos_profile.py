@@ -343,32 +343,6 @@ class TestIOOS1_2(BaseTestCase):
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
-    def test_check_geospatial_vars_have_attrs(self):
-
-        # create geophysical variable
-        ds = MockTimeSeries()  # time, lat, lon, depth
-        temp = ds.createVariable("temp", np.float64, dimensions=("time",))
-
-        # should fail here
-        results = self.ioos.check_geospatial_vars_have_attrs(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
-
-        # should pass - default_fill_value sets _FillValue attr
-        ds = MockTimeSeries(default_fill_value=9999999999.0)  # time, lat, lon, depth
-
-        ds.variables["time"].setncattr("standard_name", "time")
-        ds.variables["time"].setncattr(
-            "standard_name_url",
-            "http://cfconventions.org/Data/cf-standard-names/64/build/cf-standard-name-table.html",
-        )
-        ds.variables["time"].setncattr("units", "hours since 1970-01-01T00:00:00")
-        ds.variables["time"].setncattr("missing_value", 9999999999.0)
-
-        results = self.ioos.check_geospatial_vars_have_attrs(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
-
     def test_check_contributor_role_and_vocabulary(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
 
