@@ -506,7 +506,7 @@ class CFBaseCheck(BaseCheck):
         attr_val = var.getncattr(attr_name)
 
         if isinstance(attr_val, (str, bytes)):
-            type_match = var.dtype.kind == "S"
+            type_match = (var.dtype is str) or (var.dtype.kind == "S")
             val_type = type(attr_val)
         else:
             val_type = attr_val.dtype.type
@@ -871,7 +871,9 @@ class CFBaseCheck(BaseCheck):
         for coord_name in self._find_aux_coord_vars(ds):
             coord_var = ds.variables[coord_name]
             # Skip label auxiliary coordinates
-            if coord_var.dtype.char == "S":
+            if hasattr(coord_var.dtype, "char") and coord_var.dtype.char == "S":
+                continue
+            elif coord_var.dtype == str:
                 continue
             for dimension in coord_var.dimensions:
                 if dimension not in coord_axis_map:
@@ -1323,16 +1325,20 @@ class CF1_6Check(CFNCCheck):
         total = len(ds.variables)
 
         for k, v in ds.variables.items():
-            if v.dtype.kind != "S" and all(
-                v.dtype.type != t
-                for t in (
-                    np.character,
-                    np.dtype("|S1"),
-                    np.dtype("b"),
-                    np.dtype("i2"),
-                    np.dtype("i4"),
-                    np.float32,
-                    np.double,
+            if (
+                v.dtype is not str
+                and v.dtype.kind != "S"
+                and all(
+                    v.dtype.type != t
+                    for t in (
+                        np.character,
+                        np.dtype("|S1"),
+                        np.dtype("b"),
+                        np.dtype("i2"),
+                        np.dtype("i4"),
+                        np.float32,
+                        np.double,
+                    )
                 )
             ):
                 fails.append(
@@ -1752,7 +1758,9 @@ class CF1_6Check(CFNCCheck):
                 continue
 
             # Skip labels
-            if variable.dtype.char == "S":
+            if hasattr(variable.dtype, "char") and variable.dtype.char == "S":
+                continue
+            elif variable.dtype == str:
                 continue
 
             standard_name = getattr(variable, "standard_name", None)
@@ -1810,7 +1818,8 @@ class CF1_6Check(CFNCCheck):
         # Is this even in the database? also, if there is no standard_name,
         # there's no way to know if it is dimensionless.
         should_be_dimensionless = (
-            variable.dtype.char == "S"
+            variable.dtype is str
+            or (hasattr(variable.dtype, "char") and variable.dtype.char == "S")
             or std_name_units_dimensionless
             or standard_name is None
         )
@@ -1859,7 +1868,9 @@ class CF1_6Check(CFNCCheck):
 
         # If the variable is supposed to be dimensionless, it automatically passes
         should_be_dimensionless = (
-            variable.dtype.char == "S" or std_name_units_dimensionless
+            variable.dtype is str
+            or (hasattr(variable.dtype, "char") and variable.dtype.char == "S")
+            or std_name_units_dimensionless
         )
 
         valid_udunits = TestCtx(BaseCheck.HIGH, self.section_titles["3.1"])
@@ -1991,7 +2002,9 @@ class CF1_6Check(CFNCCheck):
 
             # Unfortunately, §6.1 allows for string types to be listed as
             # coordinates.
-            if ncvar.dtype.char == "S":
+            if hasattr(ncvar.dtype, "char") and ncvar.dtype.char == "S":
+                continue
+            elif ncvar.dtype == str:
                 continue
 
             standard_name = getattr(ncvar, "standard_name", None)
@@ -2386,7 +2399,9 @@ class CF1_6Check(CFNCCheck):
             # §6.1 allows for labels to be referenced as auxiliary coordinate
             # variables, which should not be checked like the rest of the
             # coordinates.
-            if variable.dtype.char == "S":
+            if hasattr(variable.dtype, "char") and variable.dtype.char == "S":
+                continue
+            elif variable.dtype == str:
                 continue
 
             axis = getattr(variable, "axis", None)
@@ -2958,7 +2973,12 @@ class CF1_6Check(CFNCCheck):
                     continue
 
                 # §6.1 Allows for "labels" to be referenced as coordinates
-                if ds.variables[aux_coord].dtype.char == "S":
+                if (
+                    hasattr(ds.variables[aux_coord].dtype, "char")
+                    and ds.variables[aux_coord].dtype.char == "S"
+                ):
+                    continue
+                elif ds.variables[aux_coord].dtype == str:
                     continue
 
                 aux_coord_dims = set(ds.variables[aux_coord].dimensions)
@@ -4180,7 +4200,9 @@ class CF1_6Check(CFNCCheck):
                 )
             # ensure compression variable is a proper index, and thus is an
             # signed or unsigned integer type of some sort
-            if compress_var.dtype.kind not in {"i", "u"}:
+            if (compress_var.dtype is str) or (
+                compress_var.dtype.kind not in {"i", "u"}
+            ):
                 valid = False
                 reasoning.append(
                     "Compression variable {} must be an integer type to form a proper array index".format(
@@ -4226,7 +4248,12 @@ class CF1_6Check(CFNCCheck):
         """
         all_the_same = TestCtx(BaseCheck.HIGH, self.section_titles["9.1"])
         feature_types_found = defaultdict(list)
-        for name in self._find_geophysical_vars(ds):
+        # iterate all geophysical variables with at least one dimension
+        for name in (
+            name
+            for name in self._find_geophysical_vars(ds)
+            if ds.variables[name].ndim > 0
+        ):
             feature = cfutil.guess_feature_type(ds, name)
             # If we can't figure out the feature type, penalize. Originally,
             # it was not penalized. However, this led to the issue that the

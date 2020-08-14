@@ -523,7 +523,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
             ]
         )
-
+        
         self.required_atts = [
             ("Conventions", IOOS1_2_ConventionsValidator()),
             "creator_country",
@@ -801,23 +801,6 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return self._check_vars_have_attrs(
             ds, get_geophysical_variables(ds), self.geophys_check_var_attrs
-        )
-
-    def check_geospatial_vars_have_attrs(self, ds):
-        """
-        All geospatial variables must have certain attributes.
-
-        Parameters
-        ----------
-        ds: netCDF4.Dataset
-
-        Returns
-        -------
-        list: list of Result objects
-        """
-
-        return self._check_vars_have_attrs(
-            ds, get_coordinate_variables(ds), self.geospat_check_var_attrs
         )
 
     def _check_vars_have_attrs(self, ds, vars_to_check, atts_to_check):

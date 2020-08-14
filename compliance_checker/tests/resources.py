@@ -107,6 +107,7 @@ STATIC_FILES = {
     "self-referencing-var": get_filename("tests/data/self-referencing-var.cdl"),
     "self_referencing": get_filename("tests/data/non-comp/self_referencing.cdl"),
     "sldmb_43093_agg": get_filename("tests/data/examples/sldmb_43093_agg.cdl"),
+    "string": get_filename("tests/data/string_type_variable.cdl"),
     "swan": get_filename("tests/data/examples/swan.cdl"),
     "sp041": get_filename("tests/data/examples/sp041.cdl"),
     "timeseries": get_filename("tests/data/timeseries.cdl"),
