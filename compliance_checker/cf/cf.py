@@ -4226,7 +4226,12 @@ class CF1_6Check(CFNCCheck):
         """
         all_the_same = TestCtx(BaseCheck.HIGH, self.section_titles["9.1"])
         feature_types_found = defaultdict(list)
-        for name in self._find_geophysical_vars(ds):
+        # iterate all geophysical variables with at least one dimension
+        for name in (
+            name
+            for name in self._find_geophysical_vars(ds)
+            if ds.variables[name].ndim > 0
+        ):
             feature = cfutil.guess_feature_type(ds, name)
             # If we can't figure out the feature type, penalize. Originally,
             # it was not penalized. However, this led to the issue that the
