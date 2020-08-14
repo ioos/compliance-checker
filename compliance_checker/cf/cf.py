@@ -4230,7 +4230,7 @@ class CF1_6Check(CFNCCheck):
         for name in (
             name
             for name in self._find_geophysical_vars(ds)
-            if len(ds.variables[name].shape) > 0
+            if ds.variables[name].ndim > 0
         ):
             feature = cfutil.guess_feature_type(ds, name)
             # If we can't figure out the feature type, penalize. Originally,
