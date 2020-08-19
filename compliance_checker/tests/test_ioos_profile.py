@@ -338,6 +338,8 @@ class TestIOOS1_2(BaseTestCase):
         )
         temp.setncattr("units", "degree_C")
         temp.setncattr("platform", "myPlatform")
+        temp.setncattr("precision", "0.0025")
+        temp.setncattr("resolution", "0.0001")
 
         results = self.ioos.check_geophysical_vars_have_attrs(ds)
         scored, out_of, messages = get_results(results)
@@ -351,25 +353,30 @@ class TestIOOS1_2(BaseTestCase):
             "temp", np.float64, dimensions=("time",), fill_value=9999999999.0
         )  # _FillValue
         temp.setncattr("standard_name", "sea_water_temperature")
-        results = self.ioos.check_accuracy_precision_resolution(ds)
+        results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
 
-        # add non-numeric vals for accuracy, precision, resolution
+        # add non-numeric vals for accuracy
         # no gts_ingest attr, so only existence tested
         temp.setncattr("accuracy", "bad")
-        temp.setncattr("precision", "bad")
-        temp.setncattr("resolution", "123")  # still non-numeric
-        results = self.ioos.check_accuracy_precision_resolution(ds)
+        results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
+        # add gts_ingest, accuracy should be numeric
+        temp.setncattr("gts_ingest", "true")
+        temp.setncattr("standard_name", "sea_water_practical_salinity")
+        temp.setncattr("accuracy", "45")
+        results = self.ioos.check_accuracy(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
         # add numeric for accuracy
         temp.setncattr("gts_ingest", "true")
+        temp.setncattr("standard_name", "sea_water_practical_salinity")
         temp.setncattr("accuracy", 45)
-        temp.setncattr("precision", "bad")
-        temp.setncattr("resolution", "123")
-        results = self.ioos.check_accuracy_precision_resolution(ds)
+        results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
@@ -1105,3 +1112,39 @@ class TestIOOS1_2(BaseTestCase):
             nc_obj.variables["depth"].units = units
             result = self.ioos.check_vertical_coordinates(nc_obj)[0]
             self.assertEqual(*result.value)
+
+    def test_check_instrument_make_model_calib_date(self):
+        """
+        Per the IOOS-1.2 spec, instrument variables should have
+        make_model and calibration_date attributes.
+        """
+        ds = MockTimeSeries()  # time, lat, lon, depth
+
+        results = self.ioos.check_instrument_make_model_calib_date(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # make an instrument variable
+        temp = ds.createVariable("temperature", "d", dimensions=("time",))
+        temp.setncattr("instrument", "inst")
+        inst = ds.createVariable("inst", "d", dimensions=()) # no make_model or calibration_date
+        results = self.ioos.check_instrument_make_model_calib_date(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # add make_model
+        inst.setncattr("make_model", "yessir")
+        results = self.ioos.check_instrument_make_model_calib_date(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # add calibration_date
+        inst.setncattr("calibration_date", "2020-08-19") # not ISO, fail
+        results = self.ioos.check_instrument_make_model_calib_date(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        inst.setncattr("calibration_date", "2020-08-19T00:00:00") # ISO, pass
+        results = self.ioos.check_instrument_make_model_calib_date(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
