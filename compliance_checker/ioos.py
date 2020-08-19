@@ -766,14 +766,13 @@ class IOOS1_2Check(IOOSNCCheck):
         list of Results objects
         """
 
-        import pdb; pdb.set_trace()
         results = []
+        msg = (
+                   "Variable '{v}' attribute '{att}' should have the "
+                   "same units as '{v}'"
+              )
         for v in get_geophysical_variables(ds):
             _v = ds.variables[v]
-            msg = (
-                       "Variable '{v}' attribute '{att}' should have the "
-                       "same units as '{v}'"
-                  )
             for att in ("precision", "resolution"):
                 r = getattr(_v, att, None) is not None
                 results.append(

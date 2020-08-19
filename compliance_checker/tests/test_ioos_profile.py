@@ -356,30 +356,19 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
         # add non-numeric vals for accuracy, precision, resolution
+        # no gts_ingest attr, so only existence tested
         temp.setncattr("accuracy", "bad")
         temp.setncattr("precision", "bad")
         temp.setncattr("resolution", "123")  # still non-numeric
         results = self.ioos.check_accuracy_precision_resolution(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        self.assertEqual(scored, out_of)
 
         # add numeric for accuracy
+        temp.setncattr("gts_ingest", "true")
         temp.setncattr("accuracy", 45)
         temp.setncattr("precision", "bad")
-        temp.setncattr("resolution", "123")  # still non-numeric
-        results = self.ioos.check_accuracy_precision_resolution(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
-
-        # add numeric for precision
-        temp.setncattr("precision", 21)
-        temp.setncattr("resolution", "123")  # still non-numeric
-        results = self.ioos.check_accuracy_precision_resolution(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
-
-        # add numeric for resolution
-        temp.setncattr("resolution", 0.25)
+        temp.setncattr("resolution", "123")
         results = self.ioos.check_accuracy_precision_resolution(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
