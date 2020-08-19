@@ -345,9 +345,7 @@ class TestIOOS1_2(BaseTestCase):
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
-    def test_check_accuracy_precision_resolution(self):
-        # doesn't have accuracy, precision, resolution, should fail
-
+    def test_check_accuracy(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
         temp = ds.createVariable(
             "temp", np.float64, dimensions=("time",), fill_value=9999999999.0
