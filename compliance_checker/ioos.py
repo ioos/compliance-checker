@@ -902,7 +902,7 @@ class IOOS1_2Check(IOOSNCCheck):
             val = False
 
         elif num_platforms == 0 and glb_platform:
-            msg = 'A dataset with a global "platform" attribute must platform have variables'
+            msg = 'A dataset with a global "platform" attribute must have at least one platform variable'
             val = False
 
         elif num_platforms == 0 and (not glb_platform):
