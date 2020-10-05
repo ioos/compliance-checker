@@ -952,6 +952,29 @@ class CFBaseCheck(BaseCheck):
             dim_names.append(dim_name)
         return ", ".join(dim_names)
 
+    def _get_pretty_dimension_order_with_type(self, ds, name, dim_types):
+        """
+        Returns a comma separated string of the dimensions for a specified
+        variable of format "DIMENSIONS_NAME (DIMENSION_TYPE[, unlimited])"
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: A string with a valid NetCDF variable name for the
+                         dataset
+        :param list dim_types: A list of strings returned by
+                               _get_dimension_order for the same "name"
+        :rtype: str
+        :return: A comma separated string of the variable's dimensions
+        """
+        dim_names = []
+        for dim, dim_type in zip(ds.variables[name].dimensions, dim_types):
+            dim_name = "{} ({}".format(dim, dim_type)
+            if ds.dimensions[dim].isunlimited():
+                dim_name += ", unlimited)"
+            else:
+                dim_name += ")"
+            dim_names.append(dim_name)
+        return ", ".join(dim_names)
+
     def _is_station_var(self, var):
         """
         Returns True if the NetCDF variable is associated with a station, False
@@ -1560,9 +1583,16 @@ class CF1_6Check(CFNCCheck):
                 dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
                 valid_dimension_order.assert_true(
                     self._dims_in_order(dimension_order),
-                    "{}'s dimensions are not in the recommended order "
-                    "T, Z, Y, X. They are {}"
-                    "".format(name, self._get_pretty_dimension_order(ds, name)),
+                    "{}'s spatio-temporal dimensions are not in the "
+                    "recommended order T, Z, Y, X and/or further dimensions "
+                    "are not located left of T, Z, Y, X. The dimensions (and "
+                    "their guessed types) are {} (with U: other/unknown; L: "
+                    "unlimited).".format(
+                        name,
+                        self._get_pretty_dimension_order_with_type(
+                            ds, name, dimension_order
+                        ),
+                    ),
                 )
         return valid_dimension_order.to_result()
 
