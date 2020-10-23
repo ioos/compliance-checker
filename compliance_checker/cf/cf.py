@@ -5262,7 +5262,7 @@ class CF1_7Check(CF1_6Check):
         correct_computed_std_name_ctx.assert_true(
             getattr(variable, "computed_standard_name", None) in _comp_std_name,
             "§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`".format(
-                vname, _comp_std_name
+                vname, sorted(_comp_std_name)
             ),
         )
         ret_val.append(correct_computed_std_name_ctx.to_result())

@@ -81,141 +81,120 @@ class TestCFIntegration(BaseTestCase):
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 7
 
-        msgs = [
+        expected_messages = [
             u"attribute time:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"attribute lat:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"attribute lon:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"§2.6.2 global attribute history should exist and be a non-empty string",
-            u"standard_name temperature is not defined in Standard Name Table v49",
+            u"standard_name temperature is not defined in Standard Name Table v72",
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lat, is not a variable in this dataset",
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
         ]
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
 
     @pytest.mark.slowtest
     def test_ocos(self):
         dataset = self.load_dataset(STATIC_FILES["ocos"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
-        assert len(messages) == 63
 
-        msgs = [
-            u"zeta's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u"ubar's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_u, xi_u",
-            u"vbar's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_v, xi_v",
-            u"u's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_u, xi_u",
-            u"v's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_v, xi_v",
-            u"w's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
-            u"temp's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_rho, xi_rho",
-            u"salt's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_rho, xi_rho",
-            u"AKv's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
-            u"AKt's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
-            u"AKs's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
-            u"tke's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
-            u"shflux's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u"latent's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u"sensible's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u"lwrad's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u"swrad's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u'§2.6.1 Conventions global attribute does not contain "CF-1.6". The CF Checker only supports CF-1.6 at this time.',
-            u"units (None) attribute of 's_w' must be a string compatible with UDUNITS",
-            u"units (None) attribute of 's_rho' must be a string compatible with UDUNITS",
-            u"units (None) attribute of 'Cs_w' must be a string compatible with UDUNITS",
-            u"units (None) attribute of 'user' must be a string compatible with UDUNITS",
-            u"units (None) attribute of 'Cs_r' must be a string compatible with UDUNITS",
-            u"CF recommends latitude variable 'lat_rho' to use units degrees_north",
-            u"CF recommends latitude variable 'lat_u' to use units degrees_north",
-            u"CF recommends latitude variable 'lat_v' to use units degrees_north",
-            u"CF recommends latitude variable 'lat_psi' to use units degrees_north",
-            u"CF recommends longitude variable 'lon_rho' to use units degrees_east",
-            u"CF recommends longitude variable 'lon_u' to use units degrees_east",
-            u"CF recommends longitude variable 'lon_v' to use units degrees_east",
-            u"CF recommends longitude variable 'lon_psi' to use units degrees_east",
-            u"Unidentifiable feature for variable dt",
-            u"Unidentifiable feature for variable dtfast",
-            u"Unidentifiable feature for variable dstart",
-            u"Unidentifiable feature for variable nl_tnu2",
-            u"Unidentifiable feature for variable nl_visc2",
-            u"Unidentifiable feature for variable Akt_bak",
-            u"Unidentifiable feature for variable Akv_bak",
-            u"Unidentifiable feature for variable Akk_bak",
-            u"Unidentifiable feature for variable Akp_bak",
-            u"Unidentifiable feature for variable rdrg",
-            u"Unidentifiable feature for variable Zob",
-            u"Unidentifiable feature for variable Zos",
-            u"Unidentifiable feature for variable Znudg",
-            u"Unidentifiable feature for variable M2nudg",
-            u"Unidentifiable feature for variable M3nudg",
-            u"Unidentifiable feature for variable Tnudg",
-            u"Unidentifiable feature for variable FSobc_in",
-            u"Unidentifiable feature for variable FSobc_out",
-            u"Unidentifiable feature for variable M2obc_in",
-            u"Unidentifiable feature for variable M2obc_out",
-            u"Unidentifiable feature for variable Tobc_in",
-            u"Unidentifiable feature for variable Tobc_out",
-            u"Unidentifiable feature for variable M3obc_in",
-            u"Unidentifiable feature for variable M3obc_out",
-            u"Unidentifiable feature for variable rho0",
-            u"Unidentifiable feature for variable xl",
-            u"Unidentifiable feature for variable el",
-            u"Unidentifiable feature for variable Tcline",
-            u"Unidentifiable feature for variable hc",
-            u"Unidentifiable feature for variable Cs_r",
-            u"Unidentifiable feature for variable Cs_w",
-            u"Unidentifiable feature for variable user",
+        expected_messages = [
+            "zeta's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
+            "ubar's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_u, xi_u",
+            "vbar's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_v, xi_v",
+            "u's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_u, xi_u",
+            "v's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_v, xi_v",
+            "w's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
+            "temp's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_rho, xi_rho",
+            "salt's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_rho, xi_rho",
+            "AKv's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
+            "AKt's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
+            "AKs's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
+            "tke's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
+            "shflux's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
+            "latent's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
+            "sensible's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
+            "lwrad's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
+            "swrad's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"',
+            "units (None) attribute of 's_w' must be a string compatible with UDUNITS",
+            "units (None) attribute of 's_rho' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'Cs_w' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'user' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'Cs_r' must be a string compatible with UDUNITS",
+            "CF recommends latitude variable 'lat_rho' to use units degrees_north",
+            "CF recommends latitude variable 'lat_u' to use units degrees_north",
+            "CF recommends latitude variable 'lat_v' to use units degrees_north",
+            "CF recommends latitude variable 'lat_psi' to use units degrees_north",
+            "CF recommends longitude variable 'lon_rho' to use units degrees_east",
+            "CF recommends longitude variable 'lon_u' to use units degrees_east",
+            "CF recommends longitude variable 'lon_v' to use units degrees_east",
+            "CF recommends longitude variable 'lon_psi' to use units degrees_east",
+            "Unidentifiable feature for variable nl_tnu2",
+            "Unidentifiable feature for variable Akt_bak",
+            "Unidentifiable feature for variable Tnudg",
+            "Unidentifiable feature for variable FSobc_in",
+            "Unidentifiable feature for variable FSobc_out",
+            "Unidentifiable feature for variable M2obc_in",
+            "Unidentifiable feature for variable M2obc_out",
+            "Unidentifiable feature for variable Tobc_in",
+            "Unidentifiable feature for variable Tobc_out",
+            "Unidentifiable feature for variable M3obc_in",
+            "Unidentifiable feature for variable M3obc_out",
+            "Unidentifiable feature for variable Cs_r",
+            "Unidentifiable feature for variable Cs_w",
+            "Unidentifiable feature for variable user",
+            "§4.3.3 The standard_name of `s_rho` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
+            "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`"
         ]
-        assert all([m in messages for m in msgs])
+        assert all([m in messages for m in expected_messages])
 
     def test_l01_met(self):
         dataset = self.load_dataset(STATIC_FILES["l01-met"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 16
 
         # The variable is supposed to be a status flag but it's mislabled
-        msgs = [
-            u"units for variable air_temperature_qc must be convertible to K currently they are 1",
-            u"units for variable wind_speed_qc must be convertible to m s-1 currently they are 1",
-            u"standard_name visibility is not defined in Standard Name Table v49",
-            u"standard_name modifier data_quality for variable visibility_qc is not a valid modifier according to appendix C",
-            u"standard_name wind_direction is not defined in Standard Name Table v49",
-            u"standard_name modifier data_quality for variable wind_direction_qc is not a valid modifier according to appendix C",
-            u"standard_name wind_gust is not defined in Standard Name Table v49",
-            u"standard_name modifier data_quality for variable wind_gust_qc is not a valid modifier according to appendix C",
-            u"standard_name modifier data_quality for variable air_temperature_qc is not a valid modifier according to appendix C",
-            u"standard_name use_wind is not defined in Standard Name Table v49",
-            u"standard_name barometric_pressure is not defined in Standard Name Table v49",
-            u"standard_name modifier data_quality for variable barometric_pressure_qc is not a valid modifier according to appendix C",
-            u"standard_name modifier data_quality for variable wind_speed_qc is not a valid modifier according to appendix C",
-            u"standard_name barometric_pressure is not defined in Standard Name Table v49",
-            u"CF recommends latitude variable 'lat' to use units degrees_north",
-            u"CF recommends longitude variable 'lon' to use units degrees_east",
+        expected_messages = [
+            "units for variable air_temperature_qc must be convertible to K currently they are 1",
+            "units for variable wind_speed_qc must be convertible to m s-1 currently they are 1",
+            "standard_name visibility is not defined in Standard Name Table v72",
+            "standard_name modifier data_quality for variable visibility_qc is not a valid modifier according to appendix C",
+            "standard_name wind_direction is not defined in Standard Name Table v72",
+            "standard_name modifier data_quality for variable wind_direction_qc is not a valid modifier according to appendix C",
+            "standard_name wind_gust is not defined in Standard Name Table v72",
+            "standard_name modifier data_quality for variable wind_gust_qc is not a valid modifier according to appendix C",
+            "standard_name modifier data_quality for variable air_temperature_qc is not a valid modifier according to appendix C",
+            "standard_name use_wind is not defined in Standard Name Table v72",
+            "standard_name barometric_pressure is not defined in Standard Name Table v72",
+            "standard_name modifier data_quality for variable barometric_pressure_qc is not a valid modifier according to appendix C",
+            "standard_name modifier data_quality for variable wind_speed_qc is not a valid modifier according to appendix C",
+            "standard_name barometric_pressure is not defined in Standard Name Table v72",
+            "CF recommends latitude variable 'lat' to use units degrees_north",
+            "CF recommends longitude variable 'lon' to use units degrees_east",
         ]
 
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
 
     def test_usgs_dem_saipan(self):
         dataset = self.load_dataset(STATIC_FILES["usgs_dem_saipan"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 1
 
-        msgs = [
-            u'§2.6.1 Conventions global attribute does not contain "CF-1.6". The CF Checker only supports CF-1.6 at this time.'
+        expected_messages = [
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"'
         ]
 
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
 
     def test_sp041(self):
         dataset = self.load_dataset(STATIC_FILES["sp041"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 3
         assert (u"lat_qc is not a variable in this dataset") in messages
         for i, msg in enumerate(messages):
             if msg.startswith("Different feature types"):
