@@ -1771,11 +1771,14 @@ class CF1_6Check(CFNCCheck):
         coordinate_variables = self._find_coord_vars(ds)
         auxiliary_coordinates = self._find_aux_coord_vars(ds)
         geophysical_variables = self._find_geophysical_vars(ds)
-        unit_required_variables = (
+        forecast_variables = cfutil.get_forecast_metadata_variables(ds)
+
+        unit_required_variables = set(
             coordinate_variables + auxiliary_coordinates + geophysical_variables
+            + forecast_variables
         )
 
-        for name in set(unit_required_variables):
+        for name in unit_required_variables:
             # For reduced horizontal grids, the compression index variable does
             # not require units.
             if cfutil.is_compression_coordinate(ds, name):
@@ -1788,9 +1791,8 @@ class CF1_6Check(CFNCCheck):
                 continue
 
             # Skip labels
-            if hasattr(variable.dtype, "char") and variable.dtype.char == "S":
-                continue
-            elif variable.dtype == str:
+            if ((hasattr(variable.dtype, "char") and variable.dtype.char == "S")
+                or variable.dtype == str):
                 continue
 
             standard_name = getattr(variable, "standard_name", None)
@@ -1803,7 +1805,8 @@ class CF1_6Check(CFNCCheck):
             valid_units = self._check_valid_cf_units(ds, name)
             ret_val.append(valid_units)
 
-            units_attr_is_string = TestCtx(BaseCheck.MEDIUM, self.section_titles["3.1"])
+            units_attr_is_string = TestCtx(BaseCheck.MEDIUM,
+                                           self.section_titles["3.1"])
 
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(
@@ -1988,7 +1991,8 @@ class CF1_6Check(CFNCCheck):
             valid_standard_units.assert_true(
                 util.units_convertible(canonical_units, units),
                 "units for variable {} must be convertible to {} "
-                "currently they are {}".format(variable_name, canonical_units, units),
+                "currently they are {}".format(variable_name, canonical_units,
+                                               units),
             )
 
         return valid_standard_units.to_result()
