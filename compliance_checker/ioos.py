@@ -3,6 +3,8 @@ Check for IOOS-approved attributes
 """
 import re
 
+from numbers import Number
+
 import validators
 
 from cf_units import Unit
@@ -482,6 +484,9 @@ class IOOS1_2Check(IOOSNCCheck):
                     # ( "platform", BaseCheck.HIGH) # checked under check_single_platform()
                     # ( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
                     # ( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest()
+                    # ("accuracy", BaseCheck.MEDIUM), see check_accuracy
+                    ("precision", BaseCheck.MEDIUM),
+                    ("resolution", BaseCheck.MEDIUM)
                 ]
             )
         )
@@ -553,6 +558,7 @@ class IOOS1_2Check(IOOSNCCheck):
             # checked in check_creator_and_publisher_type
             #'publisher_type',
             "references",
+            "instrument_vocabulary"
         ]
 
     def setup(self, ds):
@@ -740,6 +746,49 @@ class IOOS1_2Check(IOOSNCCheck):
         return self._check_vars_have_attrs(
             ds, get_geophysical_variables(ds), self.geophys_check_var_attrs
         )
+
+    def check_accuracy(self, ds):
+        """
+        Special check for accuracy when in the salinity context.
+        https://github.com/ioos/compliance-checker/issues/839
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+
+        Returns
+        -------
+        list of Results objects
+        """
+
+        results = []
+        msg = (
+                   "Variable '{v}' attribute 'accuracy' should have the "
+                   "same units as '{v}'"
+              )
+        for v in get_geophysical_variables(ds):
+            _v = ds.variables[v]
+            std_name = getattr(_v, "standard_name", None)
+            gts_ingest = getattr(_v, "gts_ingest", None)
+            if (std_name=="sea_water_practical_salinity") and (gts_ingest=="true"):
+                msg = (
+                           "Variable '{v}' should have an 'accuracy' attribute "
+                           "that is numeric and of the same units as '{v}'"
+                      )
+                r = isinstance(getattr(_v, "accuracy", None), Number)
+            else: # only test if exists
+                r = getattr(_v, "accuracy", None) is not None
+
+            results.append(
+                Result(
+                    BaseCheck.MEDIUM,
+                    r,
+                    f"geophysical_variable:accuracy",
+                    [msg.format(v=v)],
+                )
+            )
+
+        return results
 
     def _check_vars_have_attrs(self, ds, vars_to_check, atts_to_check):
         """
@@ -1157,7 +1206,7 @@ class IOOS1_2Check(IOOSNCCheck):
             val = False
 
         elif num_platforms == 0 and glb_platform:
-            msg = 'A dataset with a global "platform" attribute must platform have variables'
+            msg = 'A dataset with a global "platform" attribute must have at least one platform variable'
             val = False
 
         elif num_platforms == 0 and (not glb_platform):
@@ -1609,6 +1658,46 @@ class IOOS1_2Check(IOOSNCCheck):
 
         return Result(BaseCheck.HIGH, valid, ctxt, None if valid else [msg])
 
+    def check_instrument_make_model_calib_date(self, ds):
+        """
+        Instrument variables should have attributes make_model and
+        calibration_date. Both should be strings, with calibration_date
+        following ISO-8601 date format.
+
+        https://github.com/ioos/compliance-checker/issues/839
+        """
+
+        results = []
+        ivars = get_instrument_variables(ds)
+        for v in ivars:
+            _v = ds.variables[v]
+
+            # make_model
+            mm = getattr(_v, "make_model", None)
+            valid = (isinstance(mm, str))
+            results.append(
+                Result(
+                    BaseCheck.MEDIUM,
+                    valid,
+                    "instrument_variable:make_model",
+                    None if valid else [f"Attribute {v}:make_model ({mm}) should be a string"]
+                )
+            )
+
+            # calibration_date
+            cd = getattr(_v, "calibration_date", "")
+            # thanks folks https://stackoverflow.com/questions/41129921/validate-an-iso-8601-datetime-string-in-python
+            valid = bool(re.match(r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$', cd))
+            results.append(
+                Result(
+                    BaseCheck.MEDIUM,
+                    valid,
+                    "instrument_variable:calibration_date",
+                    None if valid else [f"Attribute {v}:calibration_date ({cd}) should be an ISO-8601 string"]
+                )
+            )
+
+        return results
 
 class IOOSBaseSOSCheck(BaseCheck):
     _cc_spec = "ioos_sos"

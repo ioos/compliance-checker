@@ -319,8 +319,11 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_dimension_order(dataset)
         assert result.value == (5, 6)
         assert result.msgs[0] == (
-            u"really_bad's dimensions are not in the recommended order "
-            "T, Z, Y, X. They are latitude, power"
+            u"really_bad's spatio-temporal dimensions are not in the "
+            "recommended order T, Z, Y, X and/or further dimensions are not "
+            "located left of T, Z, Y, X. The dimensions (and their guessed "
+            "types) are latitude (Y), power (U) (with U: other/unknown; L: "
+            "unlimited)."
         )
 
         dataset = self.load_dataset(STATIC_FILES["dimension_order"])
@@ -1235,7 +1238,6 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
 
         msgs = [
-            u"Attributes add_offset and scale_factor have different data type.",
             u"Type of tempvalid_min attribute (int32) does not match variable type (int64)",
             u"Type of temp:valid_max attribute (int32) does not match variable type (int64)",
             u"Type of salinityvalid_min attribute (int32) does not match variable type (float64)",
@@ -2156,3 +2158,41 @@ class TestCF1_7(BaseTestCase):
         )
         self.assertFalse(res[0])
         dataset.close()
+
+    def test_check_add_offset_scale_factor_type(self):
+        dataset = MockTimeSeries()  # time lat lon depth
+        temp = dataset.createVariable("temp", "d", dimensions=("time",))
+
+        # set att bad (str)
+        temp.setncattr("add_offset", "foo")
+        r = self.cf._check_add_offset_scale_factor_type(temp, "add_offset")
+        self.assertFalse(r.value)
+
+        temp.setncattr("scale_factor", "foo")
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertFalse(r.value)
+
+        # set bad np val
+        temp.setncattr("scale_factor", np.float32(5))
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertFalse(r.value)
+
+        temp.setncattr("scale_factor", np.uint(5))
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertFalse(r.value)
+
+        # set good
+        temp.setncattr("scale_factor", np.float(5))
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertTrue(r.value)
+
+        temp.setncattr("scale_factor", np.double(5))
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertTrue(r.value)
+
+        # set same dtype
+        dataset = MockTimeSeries()  # time lat lon depth
+        temp = dataset.createVariable("temp", np.int, dimensions=("time",))
+        temp.setncattr("scale_factor", np.int(5))
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertTrue(r.value)
