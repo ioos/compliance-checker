@@ -6,25 +6,30 @@ on:
     branches: [master]
 
 jobs:
-  windows:
-    runs-on: "windows-latest"
+  run:
+    runs-on: windows-latest
     strategy:
-      fail-fast: false
       matrix:
-        python-version: ["3.6", "3.7", "3.8"]
+        python-version: [3.6, 3.9]
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: goanpeca/setup-miniconda@v1
-        with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-      - shell: bash -l {0}
-        run: |
-          conda config --add channels conda-forge --force
-          conda config --set channel_priority strict
-          conda create --name TEST python=${{ matrix.python-version }} pip --file requirements.txt --file test_requirements.txt
-          conda activate TEST
-          conda info
-          conda list
-          python -m pip install . --no-deps -vv
-          pytest -s -rxs -v -k "not integration" compliance_checker
+    - uses: actions/checkout@v2
+
+    - name: Setup Conda
+      uses: s-weigand/setup-conda@v1
+      with:
+        activate-conda: false
+        conda-channels: conda-forge
+
+    - name: Python ${{ matrix.python-version }}
+      shell: bash -l {0}
+      run: |
+        conda create --name TEST python=${{ matrix.python-version }} pip --file requirements.txt --file test_requirements.txt --strict-channel-priority
+        source activate TEST
+        pip install -e . --no-deps --force-reinstall
+
+    - name: Tests
+      shell: bash -l {0}
+      run: |
+        source activate TEST
+        pytest -s -rxs -v -k "not integration" compliance_checker
