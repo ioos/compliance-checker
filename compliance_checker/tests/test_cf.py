@@ -1041,7 +1041,7 @@ class TestCF1_6(BaseTestCase):
 
         result_dict = {result.name: result for result in results}
         result = result_dict[
-            u"§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections"
+            u"§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
         ]
         assert result.value == (2, 2)
         assert (scored, out_of) == (2, 2)
@@ -1061,7 +1061,7 @@ class TestCF1_6(BaseTestCase):
         assert scored < out_of
         assert all(
             r.name
-            == u"§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections"
+            == u"§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
             for r in results
         )
 
@@ -1089,7 +1089,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 6
         assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 1
         expected_name = (
-            u"§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections"
+            u"§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
         )
         assert all(r.name == expected_name for r in results.values())
 
