@@ -817,39 +817,294 @@ class IOOS1_2Check(IOOSNCCheck):
                 )
         return results
 
-    def check_platform_variable_cf_role(self, ds):
+    def check_cf_role_variables(self, ds):
         """
-        Verify that any platform variables have valid CF roles
+        The IOOS-1.2 specification details the following requirements regarding
+        the cf_role attribute and its relation to variable dimensionality:
 
-        Args:
-            ds (netCDF-4 Dataset): open Dataset object
+          cf_role may be applied to the "Platform Variable", as indicated by
+          geophysical_variable:platform, but it may also be an independent
+          variable. To comply with the single platform per dataset rule of
+          the IOOS Metadata Profile, the cf_role variable will typically
+          have a dimension of 1, unless it is a TimeSeries dataset following
+          the 'TimeSeries - multiple station' format.
 
-        Returns:
-            list of Result objects
+        To summarize the rules checked in this method:
+          - 'timeseries', cf_role var must have dim 1
+          - 'timeseriesprofile' must have
+            cf_role=timeseries_id variable have dim 1 and dim of cf_role=profile_id
+            can be > 1
+          - 'trajectory' or 'trajectoryprofile' variable with cf_role=trajectory_id
+            must have dim 1, cf_role=profile_id variable can be > 1
+
+        Relevant documentation found in the specification as well as GitHub issues:
+        https://github.com/ioos/compliance-checker/issues/748#issuecomment-606659685
+        https://github.com/ioos/compliance-checker/issues/828
         """
-        valid_cf_roles = {"timeseries_id", "profile_id", "trajectory_id"}
 
-        cf_role_results = []
-        for var in self.platform_vars:
-            attr_check(
-                ("cf_role", valid_cf_roles),
-                ds,
-                BaseCheck.HIGH,
-                cf_role_results,
-                var_name=var.name,
+        fType = getattr(ds, "featureType", None)
+        if (not fType) or (not isinstance(fType, str)):  # can't do anything, pass
+            return Result(
+                BaseCheck.MEDIUM,
+                False,
+                "CF DSG: Invalid featureType",
+                [
+                    (
+                        f"Invalid featureType '{fType}'; please see the "
+                        "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
+                    )
+                ]
             )
-        # there should really only be one platform variable, but in case
-        # someone mistakenly puts multiple, print out any errors for each,
-        # as multiple platform vars will raise its own separate errors
-        for result in cf_role_results:
-            if result.value[0] != 2:
-                result.msgs[0] = (
-                    'Platform variable "{}" must have a '
-                    "cf_role attribute with one of the "
-                    "values {}".format(result.variable_name, sorted(valid_cf_roles))
-                )
+        featType = fType.lower()
 
-        return cf_role_results
+        if featType == "timeseries":
+            return self._check_feattype_timeseries_cf_role(ds)
+
+        elif featType == "timeseriesprofile":
+            return self._check_feattype_timeseriesprof_cf_role(ds)
+
+        elif featType == "trajectory":
+            return self._check_feattype_trajectory_cf_role(ds)
+
+        elif featType == "trajectoryprofile":
+            return self._check_feattype_trajprof_cf_role(ds)
+
+        elif featType == "profile":
+            return self._check_feattype_profile_cf_role(ds)
+
+        elif featType == "point":
+            return good_result  # can't do anything
+
+        else:
+            return Result(
+                BaseCheck.MEDIUM,
+                False,
+                "CF DSG: Unknown featureType",
+                [
+                    (
+                        f"Invalid featureType '{featType}'; please see the "
+                        "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
+                    )
+                ],
+            )
+
+    def _check_feattype_timeseries_cf_role(self, ds):
+
+        ts_msg = (
+            "Dimension length of variable with cf_role={cf_role} "
+            "(the '{dim_type}' dimension) is {dim_len}. "
+            "The IOOS Profile restricts timeSeries "
+            "datasets with multiple features to share the same lat/lon position "
+            "(i.e. to exist on the same platform). Datasets that include multiple "
+            "platforms are not valid and will cause harvesting errors."
+        )
+
+        # looking for cf_role=timeseries_id
+        cf_role_vars = ds.get_variables_by_attributes(cf_role="timeseries_id")
+        if (not cf_role_vars) or (len(cf_role_vars) > 1):
+            _val = False
+            msgs = [
+                (
+                    "The IOOS-1.2 Profile specifies a single variable "
+                    "must be present with attribute cf_role=timeseries_id"
+                )
+            ]
+
+        else:
+            _v = cf_role_vars[0]
+            _dims = _v.get_dims()
+            if not _dims:
+                _dimsize = 0
+            else:
+                _dimsize = _dims[0].size
+
+            # dimension size must be == 1
+            _val = _dimsize == 1
+            msgs = [
+                ts_msg.format(
+                    cf_role="timeseries_id", dim_type="station", dim_len=_dimsize
+                )
+            ]
+
+        return Result(
+            BaseCheck.HIGH,
+            _val,
+            "CF DSG: featureType=timeseries",
+            msgs,
+        )
+
+    def _check_feattype_timeseriesprof_cf_role(self, ds):
+
+        ts_prof_msg = (
+            "Dimension length of non-platform variable with cf_role={cf_role} "
+            " (the '{dim_type}' dimension) is {dim_len}. "
+            "The IOOS profile restricts timeSeriesProfile datasets to a "
+            "single platform (ie. station) per dataset "
+            "(the profile dimension is permitted to be >= 1."
+        )
+
+        # looking for cf_roles timeseries_id and profile_id
+        cf_role_vars = []  # extend in specific order for easier checking
+        cf_role_vars.extend(ds.get_variables_by_attributes(cf_role="timeseries_id"))
+        cf_role_vars.extend(ds.get_variables_by_attributes(cf_role="profile_id"))
+
+        if len(cf_role_vars) != 2:
+            _val = False
+            msgs = [
+                (
+                    "Datasets of featureType=timeSeriesProfile must have variables "
+                    "containing cf_role=timeseries_id and cf_role=profile_id"
+                )
+            ]
+
+        else:
+            _ts_id_dims = cf_role_vars[0].get_dims()  # timeseries_id dimensions
+            if not _ts_id_dims:
+                _ts_id_dimsize = 0
+            else:
+                _ts_id_dimsize = _ts_id_dims[0].size
+
+            _pf_id_dims = cf_role_vars[1].get_dims()  # profilie_id dimensions
+            if not _pf_id_dims:
+                _pf_id_dimsize = 0
+            else:
+                _pf_id_dimsize = _pf_id_dims[0].size
+
+            # timeseries_id must be == 1, profile >= 1
+            _val = _ts_id_dimsize == 1 and _pf_id_dimsize >= 1
+            msgs = [
+                       ts_prof_msg.format(
+                           cf_role="timeseries_id",
+                           dim_type="station",
+                           dim_len=_ts_id_dimsize
+                       )
+                   ]
+
+        return Result(
+            BaseCheck.HIGH, _val, "CF DSG: featureType=timeSeriesProfile", msgs
+        )
+
+    def _check_feattype_trajectory_cf_role(self, ds):
+        trj_msg = (
+            "Dimension length of non-platform variable with cf_role={cf_role} "
+            " (the '{dim_type}' dimension) is {dim_len}. "
+            "The IOOS profile restricts trjectory "
+            "datasets to a single platform (i.e. trajectory) per dataset."
+        )
+
+        cf_role_vars = ds.get_variables_by_attributes(cf_role="trajectory_id")
+
+        if len(cf_role_vars) != 1:
+            _val = False
+            msgs = [
+                (
+                    "Datasets of featureType=trajectory must have a variable "
+                    "containing cf_role=trajectory_id"
+                )
+            ]
+
+        else:
+            _v = cf_role_vars[0]
+            _dims = _v.get_dims()
+            if not _dims:
+                _dimsize = 0
+            else:
+                _dimsize = _dims[0].size
+
+            # trajectory dimension must be 1
+            _val = _dimsize == 1
+            msgs = [
+                trj_msg.format(
+                    cf_role="trajectory_id", dim_type="station", dim_len=_dimsize
+                )
+            ]
+
+        return Result(BaseCheck.HIGH, _val, "CF DSG: featureType=trajectory", msgs)
+
+    def _check_feattype_trajectoryprof_cf_role(self, ds):
+        trj_prof_msg = (
+            "Dimension length of non-platform variable with cf_role={cf_role} "
+            "(the '{dim_type}' dimension) is {dim_len}. "
+            "The IOOS profile restricts trjectory and trajectoryProfile "
+            "datasets to a single platform (ie. trajectory) per dataset "
+            "(the profile dimension is permitted to be >= 1)."
+        )
+
+        # looking for cf_roles trajectory_id and profile_id
+        cf_role_vars = []  # extend in specific order for easier checking
+        cf_role_vars.extend(ds.get_variables_by_attributes(cf_role="trajectory_id"))
+        cf_role_vars.extend(ds.get_variables_by_attributes(cf_role="profile_id"))
+
+        if len(cf_role_vars) != 2:
+            _val = False
+            msgs = [
+                (
+                    "Datasets of featureType=trajectoryProfile must have variables "
+                    "containing cf_role=trajectory_id and cf_role=profile_id"
+                )
+            ]
+
+        else:
+            _trj_id_dims = cf_role_vars[0].get_dims()
+            if not _trj_id_dims:
+                _trj_id_dimsize = 0
+            else:
+                _trj_id_dimsize = _trj_id_dims[0].size
+
+            _prf_id_dims = cf_role_vars[1].get_dims()
+
+            if not _prf_id_dims:
+                _prf_id_dimsize = 0
+            else:
+                _prf_id_dimsize = _prf_id_dims[0].size
+
+            # trajectory dim must be == 1, profile must be >= 1
+            _val = _trj_id_dimsize == 1 and _prf_id_dimsize >= 1
+            msgs = [
+                       trj_prof_msg.format(
+                           cf_role="trajectory_id",
+                           dim_type="station",
+                           dim_len=_trj_id_dimsize
+                        )
+                   ]
+
+        return Result(
+            BaseCheck.HIGH, _val, "CF DSG: featureType=trajectoryProfile", msgs
+        )
+
+    def _check_feattype_profile_cf_role(self, ds):
+        prof_msg = (
+            "Dimension length of non-platform variable with cf_role={cf_role} "
+            " (the '{dim_type}' dimension) is {dim_len}. "
+            "The IOOS profile restricts profile datasets to a single "
+            "platform (ie. profile) per dataset."
+        )
+
+        # looking for cf_role=profile_id
+        cf_role_vars = ds.get_variables_by_attributes(cf_role="profile_id")
+        if (not cf_role_vars) or (len(cf_role_vars) > 1):
+            _val = False
+            msgs = [
+                "None or multiple variables found with cf_role=profile_id; only one is allowed"
+            ]
+
+        else:
+            _v = cf_role_vars[0]
+            _dims = _v.get_dims()
+            if not _dims:
+                _dimsize = 0
+            else:
+                _dimsize = _dims[0].size
+
+            # only one profile valid
+            _val = _dimsize == 1
+            msgs = [
+                prof_msg.format(
+                    cf_role="profile_id", dim_type="profile", dim_len=_dimsize
+                )
+            ]
+
+        return Result(BaseCheck.HIGH, _val, "CF DSG: featureType=profile", msgs)
 
     def check_creator_and_publisher_type(self, ds):
         """
@@ -961,103 +1216,6 @@ class IOOS1_2Check(IOOSNCCheck):
             val = True
 
         return Result(BaseCheck.HIGH, val, "platform", None if val else [msg])
-
-    def check_cf_dsg(self, ds):
-        """
-        Check that the dataset follows the restrictions for CF Discrete
-        Sampling Geometries set by the IOOS Metadata Profile.
-
-        Examine each variable with a cf_role. For each (featureType, cf_role):
-            - (timeSeries, timeseries_id)
-            - (timeSeriesProfile, timeseries_id)
-            - (trajectory, trajectory_id)
-            - (trajectoryProfile, trajectory_id)
-            - (profile, profile_id)
-        the dimension of the variable should be 1. For datasets with
-        the "point" featureType, do nothing.
-
-
-        https://github.com/ioos/compliance-checker/issues/748#issuecomment-606659685
-
-        Parameters
-        ----------
-        ds: netCDF4.Dataset (open)
-
-        Returns
-        -------
-        list of Result objects
-        """
-
-        results = []
-
-        feature_type = getattr(ds, "featureType", "").lower()
-        if not feature_type:
-            return results
-
-        # loop through all variables with cf_role
-        cf_role_vars = ds.get_variables_by_attributes(cf_role=lambda x: x is not None)
-        num_cf_role_vars = len(cf_role_vars)
-
-        for var in cf_role_vars:
-            cf_role = getattr(var, "cf_role")
-            shp = var.shape[0] if len(var.shape) > 0 else 1
-
-            if feature_type == "timeseries" and cf_role == "timeseries_id":
-                msg = (
-                    "Dimension length of the variable with "
-                    "cf_role='timeseries_id (the 'station' dimension) "
-                    "is {dim}. Note that the IOOS profile restricts "
-                    "timeSeries datasets with multiple features to share "
-                    "the same lat/lon position (ie. to exist on the same "
-                    "platform). Datasets that include multiple platforms "
-                    "are not valid and will cause harvesting errors."
-                ).format(dim=shp)
-
-                _val = shp <= 1  # fails if > 1
-
-            elif (  # even though tested condition is the same, different msg
-                feature_type == "profile"
-                and cf_role == "profile_id"
-                or feature_type == "trajectory"
-                and cf_role == "trajectory_id"
-                or feature_type == "timeseriesprofile"
-                and cf_role == "timeseries_id"
-                or feature_type == "trajectoryprofile"
-                and cf_role == "trajectory_id"
-            ):
-
-                msg = (
-                    "Dimension length of the variable `{cf_role_var}` with "
-                    "cf_role=`{cf_role}` (the 'station/trajectory/profile' "
-                    "dimension) must be equal to 1 (it is {dim}). The IOOS "
-                    "profile restricts {feature_type} datasets to a "
-                    "single platform (ie. station/trajectory/profile) per dataset."
-                ).format(
-                    cf_role_var=var.name,
-                    cf_role=cf_role,
-                    dim=shp,
-                    feature_type=feature_type,
-                )
-
-                _val = shp == 1
-
-            elif feature_type == "point":  # do nothing
-                _val = True
-
-            else:  # featureType and cf_role don't match up to our restrictions
-                _val = True
-
-            if not _val:
-                results.append(
-                    Result(
-                        BaseCheck.HIGH,
-                        _val,
-                        "CF Discrete Sampling Geometry Compliance",
-                        [msg],
-                    )
-                )
-
-        return results
 
     def check_platform_vocabulary(self, ds):
         """
