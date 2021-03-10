@@ -902,6 +902,61 @@ class TestIOOS1_2(BaseTestCase):
             result = self.ioos.check_vertical_coordinates(nc_obj)[0]
             self.assertEqual(*result.value)
 
+    def test_check_contributor_role_and_vocabulary(self):
+        ds = MockTimeSeries()
+
+        # no values, fail
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # valid role, no vocab, fail
+        ds.setncattr("contributor_role", "editor")
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # valid role, valid vocab, pass
+        ds.setncattr(
+            "contributor_role_vocabulary",
+            "https://vocab.nerc.ac.uk/collection/G04/current/",
+        )
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # one valid role, one valid vocab, should fail
+        ds.setncattr("contributor_role", "editor,notvalid")
+        ds.setncattr(
+            "contributor_role_vocabulary",
+            "https://vocab.nerc.ac.uk/collection/G04/current/,notvalid",
+        )
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # both valid
+        ds.setncattr("contributor_role", "editor,coAuthor")
+        ds.setncattr(
+            "contributor_role_vocabulary",
+            "https://vocab.nerc.ac.uk/collection/G04/current/,https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
+        )
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # bad value type
+        ds.setncattr("contributor_role", 21)
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        ds.setncattr("contributor_role", "editor,coAuthor")
+        ds.setncattr("contributor_role_vocabulary", 64)
+        results = self.ioos.check_contributor_role_and_vocabulary(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+        
     def test_check_feattype_timeseries_cf_role(self):
 
         ### featureType: timeseries and timeseries - msingle station require same tests ###
