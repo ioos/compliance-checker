@@ -110,8 +110,8 @@ class CFBaseCheck(BaseCheck):
             "5.3": "§5.3 Reduced Horizontal Grid",
             "5.4": "§5.4 Timeseries of Station Data",
             "5.5": "§5.5 Trajectories",
-            "5.6": "§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections",
-            "5.7": "§5.7 Scalar Coorindate Variables",
+            "5.6": "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections",
+            "5.7": "§5.7 Scalar Coordinate Variables",
             "6.1": "§6.1 Labels",
             "6.2": "§6.2 Alternative Coordinates",
             "7.1": "§7.1 Cell Boundaries",
@@ -952,6 +952,29 @@ class CFBaseCheck(BaseCheck):
             dim_names.append(dim_name)
         return ", ".join(dim_names)
 
+    def _get_pretty_dimension_order_with_type(self, ds, name, dim_types):
+        """
+        Returns a comma separated string of the dimensions for a specified
+        variable of format "DIMENSIONS_NAME (DIMENSION_TYPE[, unlimited])"
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: A string with a valid NetCDF variable name for the
+                         dataset
+        :param list dim_types: A list of strings returned by
+                               _get_dimension_order for the same "name"
+        :rtype: str
+        :return: A comma separated string of the variable's dimensions
+        """
+        dim_names = []
+        for dim, dim_type in zip(ds.variables[name].dimensions, dim_types):
+            dim_name = "{} ({}".format(dim, dim_type)
+            if ds.dimensions[dim].isunlimited():
+                dim_name += ", unlimited)"
+            else:
+                dim_name += ")"
+            dim_names.append(dim_name)
+        return ", ".join(dim_names)
+
     def _is_station_var(self, var):
         """
         Returns True if the NetCDF variable is associated with a station, False
@@ -1376,8 +1399,6 @@ class CF1_6Check(CFNCCheck):
             "valid_min",
             "valid_max",
             "valid_range",
-            "scale_factor",
-            "add_offset",
             "_FillValue",
         }
 
@@ -1385,6 +1406,64 @@ class CF1_6Check(CFNCCheck):
             for att_name in special_attrs.intersection(var.ncattrs()):
                 self._parent_var_attr_type_check(att_name, var, ctx)
         return ctx.to_result()
+
+    def _check_add_offset_scale_factor_type(self, variable, attr_name):
+        """
+        Reusable function for checking both add_offset and scale_factor.
+        """
+
+        msg = (
+            f"Variable {variable.name} and {attr_name} must be quivalent "
+            "data types or {variable.name} must be of type byte, short, or int "
+            "and {attr_name} must be float or double"
+        )
+
+        att = getattr(variable, attr_name, None)
+        if not (isinstance(att, (np.number, float))):  # can't compare dtypes
+            val = False
+
+        else:
+            val = (
+                att.dtype == variable.dtype
+            ) or (  # will short-circuit or if first condition is true
+                isinstance(att.dtype, (np.float, np.double, float))
+                and isinstance(variable.dtype, (np.byte, np.short, np.int, int))
+            )
+
+        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"], [msg])
+
+    def check_add_offset_scale_factor_type(self, ds):
+        """
+        If a variable has the attributes add_offset and scale_factor,
+        check that the variables and attributes are of the same type
+        OR that the variable is of type byte, short or int and the
+        attributes are of type float or double.
+        """
+
+        results = []
+        add_offset_vars = ds.get_variables_by_attributes(
+            add_offset=lambda x: x is not None
+        )
+        scale_factor_vars = ds.get_variables_by_attributes(
+            scale_factor=lambda x: x is not None
+        )
+
+        for _att_vars_tup in (
+            ("add_offset", add_offset_vars),
+            ("scale_factor", scale_factor_vars),
+        ):
+            results.extend(
+                list(
+                    map(
+                        lambda x: self._check_scale_factor_add_offset(
+                            ds.variables[x], _att_vars_tup[0]
+                        ),
+                        _att_vars_tup[1],
+                    )
+                )
+            )
+
+        return results
 
     def check_naming_conventions(self, ds):
         """
@@ -1560,9 +1639,16 @@ class CF1_6Check(CFNCCheck):
                 dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
                 valid_dimension_order.assert_true(
                     self._dims_in_order(dimension_order),
-                    "{}'s dimensions are not in the recommended order "
-                    "T, Z, Y, X. They are {}"
-                    "".format(name, self._get_pretty_dimension_order(ds, name)),
+                    "{}'s spatio-temporal dimensions are not in the "
+                    "recommended order T, Z, Y, X and/or further dimensions "
+                    "are not located left of T, Z, Y, X. The dimensions (and "
+                    "their guessed types) are {} (with U: other/unknown; L: "
+                    "unlimited).".format(
+                        name,
+                        self._get_pretty_dimension_order_with_type(
+                            ds, name, dimension_order
+                        ),
+                    ),
                 )
         return valid_dimension_order.to_result()
 
@@ -1741,11 +1827,14 @@ class CF1_6Check(CFNCCheck):
         coordinate_variables = self._find_coord_vars(ds)
         auxiliary_coordinates = self._find_aux_coord_vars(ds)
         geophysical_variables = self._find_geophysical_vars(ds)
-        unit_required_variables = (
+        forecast_variables = cfutil.get_forecast_metadata_variables(ds)
+
+        unit_required_variables = set(
             coordinate_variables + auxiliary_coordinates + geophysical_variables
+            + forecast_variables
         )
 
-        for name in set(unit_required_variables):
+        for name in unit_required_variables:
             # For reduced horizontal grids, the compression index variable does
             # not require units.
             if cfutil.is_compression_coordinate(ds, name):
@@ -1758,9 +1847,8 @@ class CF1_6Check(CFNCCheck):
                 continue
 
             # Skip labels
-            if hasattr(variable.dtype, "char") and variable.dtype.char == "S":
-                continue
-            elif variable.dtype == str:
+            if ((hasattr(variable.dtype, "char") and variable.dtype.char == "S")
+                or variable.dtype == str):
                 continue
 
             standard_name = getattr(variable, "standard_name", None)
@@ -1773,7 +1861,8 @@ class CF1_6Check(CFNCCheck):
             valid_units = self._check_valid_cf_units(ds, name)
             ret_val.append(valid_units)
 
-            units_attr_is_string = TestCtx(BaseCheck.MEDIUM, self.section_titles["3.1"])
+            units_attr_is_string = TestCtx(BaseCheck.MEDIUM,
+                                           self.section_titles["3.1"])
 
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(
@@ -1958,7 +2047,8 @@ class CF1_6Check(CFNCCheck):
             valid_standard_units.assert_true(
                 util.units_convertible(canonical_units, units),
                 "units for variable {} must be convertible to {} "
-                "currently they are {}".format(variable_name, canonical_units, units),
+                "currently they are {}".format(variable_name, canonical_units,
+                                               units),
             )
 
         return valid_standard_units.to_result()
@@ -3582,7 +3672,7 @@ class CF1_6Check(CFNCCheck):
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
-                    u"Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
+                    "Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
                     "".format(variable.name, boundary_variable.dimensions)
                 )
 
@@ -3967,7 +4057,7 @@ class CF1_6Check(CFNCCheck):
                 ]
             ):
                 reasoning.append(
-                    u"Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
+                    "Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
                         ds.variables[clim_coord_var.climatology].dimensions
                     )
                 )
@@ -3980,7 +4070,7 @@ class CF1_6Check(CFNCCheck):
                 != 2
             ):
                 reasoning.append(
-                    u"Climatology dimension {} should only contain two elements".format(
+                    "Climatology dimension {} should only contain two elements".format(
                         boundary_variable.dimensions
                     )
                 )
@@ -4665,7 +4755,7 @@ class CF1_7Check(CF1_6Check):
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
-                    u"Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
+                    "Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
                     "".format(variable.name, boundary_variable.dimensions)
                 )
 
@@ -5228,7 +5318,7 @@ class CF1_7Check(CF1_6Check):
         correct_computed_std_name_ctx.assert_true(
             getattr(variable, "computed_standard_name", None) in _comp_std_name,
             "§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`".format(
-                vname, _comp_std_name
+                vname, sorted(_comp_std_name)
             ),
         )
         ret_val.append(correct_computed_std_name_ctx.to_result())

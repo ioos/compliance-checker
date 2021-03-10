@@ -44,7 +44,7 @@ repos:
   hooks:
     - id: codespell
       args:
-        - --ignore-words-list=degreeE,degreee,varn,poit
+        - --ignore-words-list=degreeE,degreee,varn,poit,uint
       exclude: >
           (?x)^(
               .*\.xml|
