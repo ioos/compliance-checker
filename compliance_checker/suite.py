@@ -391,7 +391,7 @@ class CheckSuite(object):
             groups = self.scores(vals)
 
             # invoke finalizer explicitly
-            checker.__del__()
+            del checker
 
             ret_val[checker_name] = groups, errs
 

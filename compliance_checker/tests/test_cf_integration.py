@@ -81,141 +81,121 @@ class TestCFIntegration(BaseTestCase):
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 7
 
-        msgs = [
+        expected_messages = [
             u"attribute time:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"attribute lat:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"attribute lon:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"§2.6.2 global attribute history should exist and be a non-empty string",
-            u"standard_name temperature is not defined in Standard Name Table v49",
+            u"standard_name temperature is not defined in Standard Name Table v{}".format(self._std_names._version),
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lat, is not a variable in this dataset",
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
         ]
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
 
     @pytest.mark.slowtest
     def test_ocos(self):
         dataset = self.load_dataset(STATIC_FILES["ocos"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
-        assert len(messages) == 63
 
-        msgs = [
-            u"zeta's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u"ubar's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_u, xi_u",
-            u"vbar's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_v, xi_v",
-            u"u's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_u, xi_u",
-            u"v's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_v, xi_v",
-            u"w's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
-            u"temp's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_rho, xi_rho",
-            u"salt's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_rho, eta_rho, xi_rho",
-            u"AKv's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
-            u"AKt's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
-            u"AKs's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
-            u"tke's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, s_w, eta_rho, xi_rho",
-            u"shflux's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u"latent's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u"sensible's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u"lwrad's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u"swrad's dimensions are not in the recommended order T, Z, Y, X. They are ocean_time, eta_rho, xi_rho",
-            u'§2.6.1 Conventions global attribute does not contain "CF-1.6". The CF Checker only supports CF-1.6 at this time.',
-            u"units (None) attribute of 's_w' must be a string compatible with UDUNITS",
-            u"units (None) attribute of 's_rho' must be a string compatible with UDUNITS",
-            u"units (None) attribute of 'Cs_w' must be a string compatible with UDUNITS",
-            u"units (None) attribute of 'user' must be a string compatible with UDUNITS",
-            u"units (None) attribute of 'Cs_r' must be a string compatible with UDUNITS",
-            u"CF recommends latitude variable 'lat_rho' to use units degrees_north",
-            u"CF recommends latitude variable 'lat_u' to use units degrees_north",
-            u"CF recommends latitude variable 'lat_v' to use units degrees_north",
-            u"CF recommends latitude variable 'lat_psi' to use units degrees_north",
-            u"CF recommends longitude variable 'lon_rho' to use units degrees_east",
-            u"CF recommends longitude variable 'lon_u' to use units degrees_east",
-            u"CF recommends longitude variable 'lon_v' to use units degrees_east",
-            u"CF recommends longitude variable 'lon_psi' to use units degrees_east",
-            u"Unidentifiable feature for variable dt",
-            u"Unidentifiable feature for variable dtfast",
-            u"Unidentifiable feature for variable dstart",
-            u"Unidentifiable feature for variable nl_tnu2",
-            u"Unidentifiable feature for variable nl_visc2",
-            u"Unidentifiable feature for variable Akt_bak",
-            u"Unidentifiable feature for variable Akv_bak",
-            u"Unidentifiable feature for variable Akk_bak",
-            u"Unidentifiable feature for variable Akp_bak",
-            u"Unidentifiable feature for variable rdrg",
-            u"Unidentifiable feature for variable Zob",
-            u"Unidentifiable feature for variable Zos",
-            u"Unidentifiable feature for variable Znudg",
-            u"Unidentifiable feature for variable M2nudg",
-            u"Unidentifiable feature for variable M3nudg",
-            u"Unidentifiable feature for variable Tnudg",
-            u"Unidentifiable feature for variable FSobc_in",
-            u"Unidentifiable feature for variable FSobc_out",
-            u"Unidentifiable feature for variable M2obc_in",
-            u"Unidentifiable feature for variable M2obc_out",
-            u"Unidentifiable feature for variable Tobc_in",
-            u"Unidentifiable feature for variable Tobc_out",
-            u"Unidentifiable feature for variable M3obc_in",
-            u"Unidentifiable feature for variable M3obc_out",
-            u"Unidentifiable feature for variable rho0",
-            u"Unidentifiable feature for variable xl",
-            u"Unidentifiable feature for variable el",
-            u"Unidentifiable feature for variable Tcline",
-            u"Unidentifiable feature for variable hc",
-            u"Unidentifiable feature for variable Cs_r",
-            u"Unidentifiable feature for variable Cs_w",
-            u"Unidentifiable feature for variable user",
+        expected_messages = [
+
+            "AKs's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "AKt's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "AKv's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "latent's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "lwrad's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "salt's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "sensible's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "shflux's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "swrad's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "temp's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "tke's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "u's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_u (A), xi_u (A) (with U: other/unknown; L: unlimited).",
+            "ubar's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_u (A), xi_u (A) (with U: other/unknown; L: unlimited).",
+            "v's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_v (A), xi_v (A) (with U: other/unknown; L: unlimited).",
+            "vbar's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_v (A), xi_v (A) (with U: other/unknown; L: unlimited).",
+            "w's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "zeta's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"',
+            "units (None) attribute of 's_w' must be a string compatible with UDUNITS",
+            "units (None) attribute of 's_rho' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'Cs_w' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'user' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'Cs_r' must be a string compatible with UDUNITS",
+            "CF recommends latitude variable 'lat_rho' to use units degrees_north",
+            "CF recommends latitude variable 'lat_u' to use units degrees_north",
+            "CF recommends latitude variable 'lat_v' to use units degrees_north",
+            "CF recommends latitude variable 'lat_psi' to use units degrees_north",
+            "CF recommends longitude variable 'lon_rho' to use units degrees_east",
+            "CF recommends longitude variable 'lon_u' to use units degrees_east",
+            "CF recommends longitude variable 'lon_v' to use units degrees_east",
+            "CF recommends longitude variable 'lon_psi' to use units degrees_east",
+            "Unidentifiable feature for variable nl_tnu2",
+            "Unidentifiable feature for variable Akt_bak",
+            "Unidentifiable feature for variable Tnudg",
+            "Unidentifiable feature for variable FSobc_in",
+            "Unidentifiable feature for variable FSobc_out",
+            "Unidentifiable feature for variable M2obc_in",
+            "Unidentifiable feature for variable M2obc_out",
+            "Unidentifiable feature for variable Tobc_in",
+            "Unidentifiable feature for variable Tobc_out",
+            "Unidentifiable feature for variable M3obc_in",
+            "Unidentifiable feature for variable M3obc_out",
+            "Unidentifiable feature for variable Cs_r",
+            "Unidentifiable feature for variable Cs_w",
+            "Unidentifiable feature for variable user",
+            "§4.3.3 The standard_name of `s_rho` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
+            "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`"
         ]
-        assert all([m in messages for m in msgs])
+        assert set(messages).issubset(set(expected_messages))
 
     def test_l01_met(self):
         dataset = self.load_dataset(STATIC_FILES["l01-met"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 16
 
         # The variable is supposed to be a status flag but it's mislabled
-        msgs = [
-            u"units for variable air_temperature_qc must be convertible to K currently they are 1",
-            u"units for variable wind_speed_qc must be convertible to m s-1 currently they are 1",
-            u"standard_name visibility is not defined in Standard Name Table v49",
-            u"standard_name modifier data_quality for variable visibility_qc is not a valid modifier according to appendix C",
-            u"standard_name wind_direction is not defined in Standard Name Table v49",
-            u"standard_name modifier data_quality for variable wind_direction_qc is not a valid modifier according to appendix C",
-            u"standard_name wind_gust is not defined in Standard Name Table v49",
-            u"standard_name modifier data_quality for variable wind_gust_qc is not a valid modifier according to appendix C",
-            u"standard_name modifier data_quality for variable air_temperature_qc is not a valid modifier according to appendix C",
-            u"standard_name use_wind is not defined in Standard Name Table v49",
-            u"standard_name barometric_pressure is not defined in Standard Name Table v49",
-            u"standard_name modifier data_quality for variable barometric_pressure_qc is not a valid modifier according to appendix C",
-            u"standard_name modifier data_quality for variable wind_speed_qc is not a valid modifier according to appendix C",
-            u"standard_name barometric_pressure is not defined in Standard Name Table v49",
-            u"CF recommends latitude variable 'lat' to use units degrees_north",
-            u"CF recommends longitude variable 'lon' to use units degrees_east",
+        expected_messages = [
+            "units for variable air_temperature_qc must be convertible to K currently they are 1",
+            "units for variable wind_speed_qc must be convertible to m s-1 currently they are 1",
+            "standard_name visibility is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name modifier data_quality for variable visibility_qc is not a valid modifier according to appendix C",
+            "standard_name wind_direction is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name modifier data_quality for variable wind_direction_qc is not a valid modifier according to appendix C",
+            "standard_name wind_gust is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name modifier data_quality for variable wind_gust_qc is not a valid modifier according to appendix C",
+            "standard_name modifier data_quality for variable air_temperature_qc is not a valid modifier according to appendix C",
+            "standard_name use_wind is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name modifier data_quality for variable barometric_pressure_qc is not a valid modifier according to appendix C",
+            "standard_name modifier data_quality for variable wind_speed_qc is not a valid modifier according to appendix C",
+            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "CF recommends latitude variable 'lat' to use units degrees_north",
+            "CF recommends longitude variable 'lon' to use units degrees_east",
         ]
 
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
 
     def test_usgs_dem_saipan(self):
         dataset = self.load_dataset(STATIC_FILES["usgs_dem_saipan"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 1
 
-        msgs = [
-            u'§2.6.1 Conventions global attribute does not contain "CF-1.6". The CF Checker only supports CF-1.6 at this time.'
+        expected_messages = [
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"'
         ]
 
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
 
     def test_sp041(self):
         dataset = self.load_dataset(STATIC_FILES["sp041"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 3
         assert (u"lat_qc is not a variable in this dataset") in messages
         for i, msg in enumerate(messages):
             if msg.startswith("Different feature types"):
@@ -240,7 +220,7 @@ class TestCFIntegration(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["3mf07"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
-        msgs = [
+        expected_messages = [
             u"latitude:valid_min must be a numeric type not a string",
             u"latitude:valid_max must be a numeric type not a string",
             u"longitude:valid_min must be a numeric type not a string",
@@ -254,16 +234,15 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert scored < out_of
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
 
     def test_ooi_glider(self):
         dataset = self.load_dataset(STATIC_FILES["ooi_glider"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 5
 
-        msgs = [
+        expected_messages = [
             u"§2.6.2 comment global attribute should be a non-empty string",
             u"units (None) attribute of 'deployment' must be a string compatible with UDUNITS",
             u"Attribute long_name or/and standard_name is highly recommended for variable deployment",
@@ -271,36 +250,33 @@ class TestCFIntegration(BaseTestCase):
             u"longitude variable 'longitude' should define standard_name='longitude' or axis='X'",
         ]
 
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
 
     def test_swan(self):
         dataset = self.load_dataset(STATIC_FILES["swan"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 10
 
-        msgs = [
-            u"global attribute _CoordSysBuilder should begin with a letter and be composed of letters, digits, and underscores",
-            u'§2.6.1 Conventions global attribute does not contain "CF-1.6". The CF Checker only supports CF-1.6 at this time.',
-            u"units for variable time_offset must be convertible to s currently they are hours since 2013-02-18T00:00:00Z",
-            u"units for variable time_run must be convertible to s currently they are hours since 2013-02-18 00:00:00.000 UTC",
-            u"lon's axis attribute must be T, X, Y, or Z, currently x",
+        expected_messages = [
+            "global attribute _CoordSysBuilder should begin with a letter and be composed of letters, digits, and underscores",
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"',
+            "units for variable time_offset must be convertible to s currently they are hours since 2013-02-18T00:00:00Z",
+            "units for variable time_run must be convertible to s currently they are hours since 2013-02-18 00:00:00.000 UTC",
+            "lon's axis attribute must be T, X, Y, or Z, currently x",
             "lat's axis attribute must be T, X, Y, or Z, currently y",
-            u"z's axis attribute must be T, X, Y, or Z, currently z",
-            u"z: vertical coordinates not defining pressure must include a positive attribute that is either 'up' or 'down'",
-            u"GRID is not a valid CF featureType. It must be one of point, timeseries, trajectory, profile, timeseriesprofile, trajectoryprofile",
-            u"Unidentifiable feature for variable time_offset",
+            "z's axis attribute must be T, X, Y, or Z, currently z",
+            "z: vertical coordinates not defining pressure must include a positive attribute that is either 'up' or 'down'",
+            "GRID is not a valid CF featureType. It must be one of point, timeseries, trajectory, profile, timeseriesprofile, trajectoryprofile",
         ]
 
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
 
     def test_kibesillah(self):
         dataset = self.load_dataset(STATIC_FILES["kibesillah"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 1
         # test for global attributes (CF 2.6.2)
         assert (
             u"§2.6.2 global attribute title should exist and be a non-empty string"
@@ -311,39 +287,35 @@ class TestCFIntegration(BaseTestCase):
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 21
 
-        msgs = [
-            u"waterlevel's dimensions are not in the recommended order T, Z, Y, X. They are time, m, n",
-            u"velocity_x's dimensions are not in the recommended order T, Z, Y, X. They are time, Layer, m, n",
-            u"velocity_y's dimensions are not in the recommended order T, Z, Y, X. They are time, Layer, m, n",
-            u"tau_x's dimensions are not in the recommended order T, Z, Y, X. They are time, m, n",
-            u"tau_y's dimensions are not in the recommended order T, Z, Y, X. They are time, m, n",
-            u"§2.6.2 grid_depth:comment should be a non-empty string",
-            u"§2.6.2 depth:comment should be a non-empty string",
-            u"§2.6.2 institution global attribute should be a non-empty string",
-            u"§2.6.2 comment global attribute should be a non-empty string",
-            u"units (None) attribute of 'LayerInterf' must be a string compatible with UDUNITS",
-            u"units (None) attribute of 'time_bounds' must be a string compatible with UDUNITS",
-            u"units (None) attribute of 'Layer' must be a string compatible with UDUNITS",
-            u"units for variable area must be convertible to m2 currently they are degrees2",
-            u"k: vertical coordinates not defining pressure must include a positive attribute that is either 'up' or 'down'",
-            u"grid_longitude is not associated with a coordinate defining true latitude and sharing a subset of dimensions",
-            u"grid_longitude is not associated with a coordinate defining true longitude and sharing a subset of dimensions",
-            u"grid_latitude is not associated with a coordinate defining true latitude and sharing a subset of dimensions",
-            u"grid_latitude is not associated with a coordinate defining true longitude and sharing a subset of dimensions",
-            u"time_bounds might be a cell boundary variable but there are no variables that define it as a boundary using the `bounds` attribute.",
-            u"Unidentifiable feature for variable time_bounds",
-            u"Unidentifiable feature for variable grid_depth",
+        expected_messages = [
+            "waterlevel's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are time (T), m (A), n (A) (with U: other/unknown; L: unlimited).",
+            "velocity_x's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are time (T), Layer (Z), m (A), n (A) (with U: other/unknown; L: unlimited).",
+            "velocity_y's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are time (T), Layer (Z), m (A), n (A) (with U: other/unknown; L: unlimited).",
+            "tau_x's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are time (T), m (A), n (A) (with U: other/unknown; L: unlimited).",
+            "tau_y's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are time (T), m (A), n (A) (with U: other/unknown; L: unlimited).",
+            "§2.6.2 grid_depth:comment should be a non-empty string",
+            "§2.6.2 depth:comment should be a non-empty string",
+            "§2.6.2 institution global attribute should be a non-empty string",
+            "§2.6.2 comment global attribute should be a non-empty string",
+            "units (None) attribute of 'LayerInterf' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'time_bounds' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'Layer' must be a string compatible with UDUNITS",
+            "units for variable area must be convertible to m2 currently they are degrees2",
+            "k: vertical coordinates not defining pressure must include a positive attribute that is either 'up' or 'down'",
+            "grid_longitude has no coordinate associated with a variable identified as true latitude/longitude; its coordinate variable should also share a subset of grid_longitude's dimensions",
+            "grid_latitude has no coordinate associated with a variable identified as true latitude/longitude; its coordinate variable should also share a subset of grid_latitude's dimensions",
+            "time_bounds might be a cell boundary variable but there are no variables that define it as a boundary using the `bounds` attribute.",
+            "Unidentifiable feature for variable time_bounds",
+            "Unidentifiable feature for variable grid_depth",
         ]
-        assert all(m in messages for m in msgs)
+        assert set(expected_messages).issubset(messages)
 
     def test_fvcom(self):
         dataset = self.load_dataset(STATIC_FILES["fvcom"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 40
 
         for msg in messages:
             if msg.startswith("dimensions for auxiliary coordinate variable siglay"):
@@ -356,20 +328,16 @@ class TestCFIntegration(BaseTestCase):
                 " not in messages"
             )
         assert (u"Unidentifiable feature for variable x") in messages
-        assert (
-            u"§2.6.1 Conventions global attribute does not contain "
-            '"CF-1.6". The CF Checker only supports CF-1.6 '
-            "at this time."
-        ) in messages
+        assert ('§2.6.1 Conventions global attribute does not contain "CF-1.7"'
+               ) in messages
 
     def test_ww3(self):
         dataset = self.load_dataset(STATIC_FILES["ww3"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 8
 
-        msgs = [
+        expected_messages = [
             u"§2.6.2 global attribute title should exist and be a non-empty string",
             u"§2.6.2 global attribute history should exist and be a non-empty string",
             u"§2.6.1 Conventions field is not present",
@@ -380,20 +348,20 @@ class TestCFIntegration(BaseTestCase):
             u"longitude variable 'lon' should define standard_name='longitude' or axis='X'",
         ]
 
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
 
     def test_glcfs(self):
         dataset = self.load_dataset(STATIC_FILES["glcfs"])
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
-        assert len(messages) == 14
+        # TODO: referenced/relative time is treated like time units
         assert (
-            u"units for variable time_offset must be convertible to s currently "
+            "units for variable time_offset must be convertible to s currently "
             "they are hours since 2016-01-01T12:00:00Z"
         ) in messages
         assert (
-            u"standard_name cloud_cover is not defined in Standard Name Table v{}".format(
+            "standard_name cloud_cover is not defined in Standard Name Table v{}".format(
                 self._std_names._version
             )
         ) in messages
@@ -432,7 +400,7 @@ class TestCFIntegration(BaseTestCase):
         check_results = self.cs.run(dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results)
 
-        msgs = [
+        expected_messages = [
             u"§2.6.2 global attribute title should exist and be a non-empty string",
             u"§2.6.2 global attribute history should exist and be a non-empty string",
             u"§2.6.1 Conventions field is not present",
@@ -441,4 +409,4 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert scored < out_of
-        assert all(m in messages for m in msgs)
+        assert all(m in messages for m in expected_messages)
