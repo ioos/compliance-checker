@@ -881,6 +881,155 @@ def coordinate_dimension_matrix(nc):
         retval["t"] = nc.variables[t].dimensions
     return retval
 
+def is_dataset_valid_ragged_repr_single_featureType(
+    nc,
+    feature_type: str) -> bool:
+    """
+    This method uses the presence (or absence) of the
+    "cf_role" variable, a count variable, and/or an index
+    variable to determine if the data set is a valid
+    ragged array representation of any of the singular
+    featureType options:
+        - timeseries
+        - profile
+        - trajectory
+
+    For each of the singluar featureType options, a valid contiguous ragged
+    array representation has the following characteristics:
+        - a single variable has the attribute "cf_role=<featureType>_id",
+          where <featureType> substitutes one of the above types
+        - a single variable is used as a count variable, indicating the number
+          of observations for a "station" or "cast"
+          - this variable is indentified by having the attribute
+            "sample_dimension=<dim>", where <dim> is one of the dataset dims
+          - this variable must have the instance dimension as its only
+            dimension; in other words, it must have the same dimension as
+            the variable with the cf_role attribute
+        - any valid data variable members will have the instance dimension
+          as their dimension as well
+
+    A valid indexed ragged array representation has the following
+    characteristics:
+        - a single variable has the attribute "cf_role=<featureType>_id",
+        - a single variable is used as the index variable, denoting which
+          instance ("station", "cast", etc.) the observation belongs to
+          - said variable is identified by having the attribute
+            "instance_dimension=<dim>", where <dim> is the correct instance
+            dimension of the data
+          - unlike the contiguous repr, this variable must have the sample
+            dimension as its only dimension
+        - any valid data variable members will have the instance dimension
+          as their dimension as well
+    """
+
+    result = True
+    try:
+        cf_role_vars = ds.get_variables_by_attributes(
+            cf_role="{}_id".format(feature_type)
+        )
+    except AttributeError as e:
+        cf_role_vars = None
+    print(f"cf_role_vars: {cf_role_vars}")
+    if not cf_role_vars:
+        return False
+
+    else:
+        if len(cf_role_vars) > 1: # must only have 1
+            return False
+
+        cf_role_var = cf_role_vars[0]
+        print(f"cf_role_var: {cf_role_var}")
+        instance_dim = cf_role_var.dimensions[0]
+        print(f"instance_dim: {instance_dim}")
+
+
+        valid_contig_ragged_profile = True
+        valid_indexed_ragged_profile = True
+
+        # get count variables, index variables if they
+        # exist; we will try to indentify array representations
+        # using these
+        count_vars = ds.get_variables_by_attributes(
+            sample_dimension= lambda x: x is not None
+        )
+
+        index_vars = ds.get_variables_by_attributes(
+            instance_dimension= lambda x: x is not None
+        )
+
+        # -----------------------
+        # Contiguous Ragged Array
+        # -----------------------
+        # the variable with the sample_dimension attribute
+        # MUST have the instance dimension as its single
+        # dimension
+        if count_vars:
+            if len(count_vars) > 1: # should only have 1 per CF spec
+                valid_contig_ragged_prof = False
+            else:
+                count_var = count_vars[0]
+                print(f"count_var: {count_var}")
+                if count_var.dimensions != (instance_dim,) or \
+                nc[variable].dimensions != nc.variables[getattr(count_var, "sample_dimension")]:
+                    valid_contig_ragged_profile = False
+
+        # --------------------
+        # Indexed Ragged Array
+        # --------------------
+        # each index variable must have sample dimension as its only
+        # dimension; when in ragged array repr, the sample dim is
+        # also the instance dimension (see Section 9.3)
+        elif index_vars:
+            if len(index_vars) > 1: # should only have 1 per CF spec
+                valid_indexed_ragged_prof = False
+            else:
+                index_var = index_vars[0]
+                print(f"index_var: {index_var}")
+                if index_var.dimensions != (instance_dim,) or \
+                nc[variable].dimensions != (instance_dim,):
+                    valid_indexed_ragged_profile = False
+
+        else: # both are invalid
+            valid_contig_ragged_profile = False
+            valid_indexed_ragged_profile = False
+
+        result = valid_contig_ragged_profile or valid_indexed_ragged_profile
+
+    return result
+
+def is_dataset_valid_ragged_repr_compound_featureType(
+    nc,
+    variables,
+):
+    """
+    For timeSeriesProfile, trajectoryProfile
+    """
+    # TODO
+    raise NotImplementedError
+
+def is_variable_valid_ragged_repr_single_featureType(
+    nc,
+    variable: str,
+    instance_dim: tuple) -> bool:
+    """
+    This method returns a boolean indicating whether the variable
+    is a valid member of a contiguous ragged array representation
+    or indexed ragged array representation of any of the three singular
+    CF featureType types.
+
+    For any ragged array representation, any DATA VARIABLE must have
+    the instance dimension as its sole dimension.
+    """
+
+    # this is the only thing we have to work with
+    return nc.variables[variable].dimensions == (instance_dim,)
+
+def is_variable_valid_ragged_repr_compound_featureType(
+    nc,
+    variables,
+):
+    # TODO
+    raise NotImplementedError
 
 def is_point(nc, variable):
     """
@@ -930,6 +1079,20 @@ def is_point(nc, variable):
         return False
 
     return True
+
+def isTimeSeries(nc, variable):
+    """
+    Attempt to consolidate all of the disparate timeseries checks.
+    Is this being pragmatic or lazy? I'll argue pragmatic.
+    Confidently pragmatic.
+    """
+
+    if is_timeseries(nc, variable) or \
+        is_multi_timeseries_orthogonal(nc, variable) or \
+        is_multi_timeseries_incomplete(nc, variable):
+        return True
+
+    return False
 
 
 def is_timeseries(nc, variable):
@@ -1038,6 +1201,17 @@ def is_multi_timeseries_incomplete(nc, variable):
     return False
 
 
+def isTrajectory(nc, variable):
+    """
+    Wrapper method for checking if a variable is detected as
+    a trajectory featureType.
+    """
+
+    if is_cf_trajectory(nc, variable) or is_single_trajectory(nc, variable):
+        return True
+
+    return False
+
 def is_cf_trajectory(nc, variable):
     """
     Returns true if the variable is a CF trajectory feature type
@@ -1098,6 +1272,45 @@ def is_single_trajectory(nc, variable):
     if len(traj_ids) != 1:
         return False
     return True
+
+def isProfile(nc, variable: str):
+    """
+    Per Ch 9 of the CF spec, profiles are a part of the CF Discrete
+    Sampling Geometries. Profile data can be logically represented
+    in a file one of four ways: orthogonal multidimensional array,
+    incomplete multidimensional array, contiguous ragged array,
+    and indexed ragged array. If the variable is found to be any
+    valid for any one of these representations, return "profile"
+    else return None.
+
+    The very first part of this function attempts to use legacy code
+    to test if the variable is a profile in the orthogonal multidimensional
+    array representation or the incomplete multidimensional array
+    representation. If neither of these are true, it moves on to testing
+    for the contiguous ragged array and indexed ragged array representations.
+
+    Parameters
+    ----------
+    nc      : netCDF4 Dataset
+    variable: str name of variable
+
+    Returns
+    -------
+    str or None
+    """
+
+    # first check for orthogonal, incomplete
+    if is_profile_orthogonal(nc, variable) or is_profile_incomplete(nc, variable):
+        return True
+
+    # NOTE
+    # TODO
+    # Does this take into account a single profile? This is a valid profile.
+
+    # get the variable with attr cf_role=profile_id
+    # if this variable doesn't exist, we can't verify
+    # which dimension is the instance dimension, so fail
+
 
 
 def is_profile_orthogonal(nc, variable):
@@ -1167,6 +1380,13 @@ def is_profile_incomplete(nc, variable):
         return True
     return False
 
+def isTimeSeriesProfile(nc, variable):
+    """
+    Wrapper method
+    """
+
+    # TODO
+    raise NotImplementedError
 
 def is_timeseries_profile_single_station(nc, variable):
     """
@@ -1397,6 +1617,14 @@ def is_timeseries_profile_incomplete(nc, variable):
         return True
     return False
 
+
+def isTrajectoryProfile(nc, variable):
+    """
+    Wrapper method
+    """
+
+    # TODO
+    raise NotImplementedError
 
 def is_trajectory_profile_orthogonal(nc, variable):
     """

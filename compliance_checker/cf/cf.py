@@ -3040,6 +3040,26 @@ class CF1_6Check(CFNCCheck):
         """
 
         ret_val = []
+
+        # for contiguous ragged array/indexed ragged array representations,
+        # coodinates are not required to adhere to the same principles;
+        # these representaitions can be identified by two attributes:
+
+        # required for contiguous
+        count_vars = ds.get_variables_by_attributes(
+            sample_dimension= lambda x: x is not None
+        )
+
+        # required for indexed
+        index_vars = ds.get_variables_by_attributes(
+            instance_dimension= lambda x: x is not None
+        )
+
+        # if these attributes exist, we don't need to test
+        # the coordinates
+        if count_vars or index_vars:
+            return ret_val
+
         geophysical_variables = self._find_geophysical_vars(ds)
         for name in geophysical_variables:
             variable = ds.variables[name]
@@ -3159,7 +3179,11 @@ class CF1_6Check(CFNCCheck):
 
         return ret_val
 
+    # NOTE **********
+    # IS THIS EVEN NEEDED ANYMORE?
+    # ***************
     def check_grid_coordinates(self, ds):
+    #def _check_grid_coordinates(self, ds):
         """
         5.6 When the coordinate variables for a horizontal grid are not
         longitude and latitude, it is required that the true latitude and
@@ -4321,56 +4345,56 @@ class CF1_6Check(CFNCCheck):
     # Chapter 9: Discrete Sampling Geometries
     ###############################################################################
 
-    def check_all_features_are_same_type(self, ds):
-        """
-        Check that the feature types in a dataset are all the same.
+    #def check_all_features_are_same_type(self, ds): # COMMENTING JUST TO TEST OUT
+    #    """
+    #    Check that the feature types in a dataset are all the same.
 
-        9.1 The features contained within a collection must always be of the same type; and all the collections in a CF file
-        must be of the same feature type.
+    #    9.1 The features contained within a collection must always be of the same type; and all the collections in a CF file
+    #    must be of the same feature type.
 
-        point, timeSeries, trajectory, profile, timeSeriesProfile, trajectoryProfile.
+    #    point, timeSeries, trajectory, profile, timeSeriesProfile, trajectoryProfile.
 
-        The space-time coordinates that are indicated for each feature are mandatory.  However a featureType may also include
-        other space-time coordinates which are not mandatory (notably the z coordinate).
+    #    The space-time coordinates that are indicated for each feature are mandatory.  However a featureType may also include
+    #    other space-time coordinates which are not mandatory (notably the z coordinate).
 
-        :param netCDF4.Dataset ds: An open netCDF dataset
-        :rtype: compliance_checker.base.Result
-        """
-        all_the_same = TestCtx(BaseCheck.HIGH, self.section_titles["9.1"])
-        feature_types_found = defaultdict(list)
-        # iterate all geophysical variables with at least one dimension
-        for name in (
-            name
-            for name in self._find_geophysical_vars(ds)
-            if ds.variables[name].ndim > 0
-        ):
-            feature = cfutil.guess_feature_type(ds, name)
-            # If we can't figure out the feature type, penalize. Originally,
-            # it was not penalized. However, this led to the issue that the
-            # message did not appear in the output of compliance checker if
-            # no other error/warning/information was printed out for section
-            # 9.1.
-            found = False
-            if feature is not None:
-                feature_types_found[feature].append(name)
-                found = True
-            all_the_same.assert_true(
-                found, "Unidentifiable feature for variable {}" "".format(name)
-            )
-        feature_description = ", ".join(
-            [
-                "{} ({})".format(ftr, ", ".join(vrs))
-                for ftr, vrs in feature_types_found.items()
-            ]
-        )
+    #    :param netCDF4.Dataset ds: An open netCDF dataset
+    #    :rtype: compliance_checker.base.Result
+    #    """
+    #    all_the_same = TestCtx(BaseCheck.HIGH, self.section_titles["9.1"])
+    #    feature_types_found = defaultdict(list)
+    #    # iterate all geophysical variables with at least one dimension
+    #    for name in (
+    #        name
+    #        for name in self._find_geophysical_vars(ds)
+    #        if ds.variables[name].ndim > 0
+    #    ):
+    #        feature = cfutil.guess_feature_type(ds, name)
+    #        # If we can't figure out the feature type, penalize. Originally,
+    #        # it was not penalized. However, this led to the issue that the
+    #        # message did not appear in the output of compliance checker if
+    #        # no other error/warning/information was printed out for section
+    #        # 9.1.
+    #        found = False
+    #        if feature is not None:
+    #            feature_types_found[feature].append(name)
+    #            found = True
+    #        all_the_same.assert_true(
+    #            found, "Unidentifiable feature for variable {}" "".format(name)
+    #        )
+    #    feature_description = ", ".join(
+    #        [
+    #            "{} ({})".format(ftr, ", ".join(vrs))
+    #            for ftr, vrs in feature_types_found.items()
+    #        ]
+    #    )
 
-        all_the_same.assert_true(
-            len(feature_types_found) < 2,
-            "Different feature types discovered in this dataset: {}"
-            "".format(feature_description),
-        )
+    #    all_the_same.assert_true(
+    #        len(feature_types_found) < 2,
+    #        "Different feature types discovered in this dataset: {}"
+    #        "".format(feature_description),
+    #    )
 
-        return all_the_same.to_result()
+    #    return all_the_same.to_result()
 
     def check_feature_type(self, ds):
         """
@@ -4438,12 +4462,14 @@ class CF1_6Check(CFNCCheck):
 
     def check_variable_features(self, ds):
         """
-        Checks the variable feature types match the dataset featureType attribute
+        Checks the variable feature types match the dataset featureType attribute.
+        If more than one unique feature type is found, report this as an error.
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: list
         :return: List of results
         """
+        feature_types_found = defaultdict(list)
         ret_val = []
         feature_list = [
             "point",
@@ -4454,10 +4480,14 @@ class CF1_6Check(CFNCCheck):
             "trajectoryProfile",
         ]
         # Don't bother checking if it's not a legal featureType
+        # if the featureType attribute doesn't exist
         feature_type = getattr(ds, "featureType", None)
         if feature_type not in feature_list:
             return []
 
+        # TODO
+        # these need to be consolidated - no need for the mapping
+        # as the following aren't valid in CF 1.8
         feature_type_map = {
             "point": ["point"],
             "timeSeries": [
@@ -4485,6 +4515,7 @@ class CF1_6Check(CFNCCheck):
             # If we can't figure it out, don't check it.
             if variable_feature is None:
                 continue
+            feature_types_found[variable_feature].append(name)            
             matching_feature = TestCtx(BaseCheck.MEDIUM, self.section_titles["9.1"])
             matching_feature.assert_true(
                 variable_feature in feature_type_map[feature_type],
@@ -4492,6 +4523,22 @@ class CF1_6Check(CFNCCheck):
                 "".format(name, feature_type, variable_feature),
             )
             ret_val.append(matching_feature.to_result())
+
+        # create explanation of all of the different featureTypes
+        # found in the dataset
+        feature_description = ", ".join(
+            [
+                "{} ({})".format(ftr, ", ".join(vrs))
+                for ftr, vrs in feature_types_found.items()
+            ]
+        )
+        all_same_features = TestCtx(BaseCheck.HIGH, self.section_titles["9.1"])
+        all_same_features.assert_true(
+            len(feature_types_found) < 2,
+            "Different feature types discovered in this dataset: {}"
+            "".format(feature_description),
+        )
+        ret_val.append(all_same_features.to_result())
 
         return ret_val
 
