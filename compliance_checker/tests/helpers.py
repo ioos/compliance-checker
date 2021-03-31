@@ -139,7 +139,7 @@ class MockRaggedArrayRepr(MockNetCDF):
 
             # one variable for "timeseries" or "trajectory" which
             # has the station dimension and cf_role
-            _var_name = feature_type.split("profile")[0]
+            _var_name = feature_type.lower().split("profile")[0]
             self.createVariable(
                 "{}_id_variable".format(_var_name),
                 str,
