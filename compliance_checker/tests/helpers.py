@@ -105,7 +105,7 @@ class MockRaggedArrayRepr(MockNetCDF):
     structure: str (contiguous|indexed)
     """
 
-    def __init__(self, feature_type: str, structure: str):
+    def __init__(self, feature_type: str, structure="contiguous"):
         super(MockRaggedArrayRepr, self).__init__()
 
         if structure.lower() not in ("contiguous", "indexed"):

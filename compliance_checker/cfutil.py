@@ -240,8 +240,8 @@ def is_geophysical(ds, variable):
     if variable in get_platform_variables(ds):
         return False
 
-    # Skip count variables too
-    if hasattr(ncvar, "sample_dimension"):
+    # Skip count/index variables too
+    if hasattr(ncvar, "sample_dimension") or hasattr(ncvar, "instance_dimension"):
         return False
 
     return True
