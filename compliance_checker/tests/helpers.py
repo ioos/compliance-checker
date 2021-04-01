@@ -111,18 +111,18 @@ class MockRaggedArrayRepr(MockNetCDF):
         if structure.lower() not in ("contiguous", "indexed"):
             raise ValueError("Must initialize MockRaggedArray as contiguous or indexed")
         
-        if feature_type.lower() not in [
+        if feature_type.lower() not in {
             "point",
             "profile",
             "timeseries",
             "trajectory",
             "timeseriesprofile",
             "trajectoryprofile"
-        ]:
+        }:
             raise ValueError("Must initialize MockRaggedArray with valid featureType")
 
         is_compound = False
-        if feature_type.lower() in ["timeseriesprofile", "trajectoryprofile"]:
+        if feature_type.lower() in {"timeseriesprofile", "trajectoryprofile"}:
             is_compound = True
 
         # the data will have 10 instances of whatever and 100
@@ -175,7 +175,7 @@ class MockRaggedArrayRepr(MockNetCDF):
 
             self.variables["station_index_variable"].setncattr(
                 "instance_dimension", 
-                "INSTANCE_DIMENSION"
+                "STATION_DIMENSION"
             )
 
             # also need counter variable, as compound featureTypes

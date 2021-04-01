@@ -888,11 +888,11 @@ def is_dataset_valid_ragged_array_repr_featureType(
 ):
     """
     Check if a data set is a valid representation of a ragged
-    array structure.
+    array structure. See inline comments.
     """
 
     is_compound = False
-    if feature_type.lower() in ['timeseriesprofile', 'trajectoryprofile']:
+    if feature_type.lower() in {'timeseriesprofile', 'trajectoryprofile'}
         is_compound = True
         ftype = feature_type.lower().split("profile")[0]
     else:
@@ -905,9 +905,10 @@ def is_dataset_valid_ragged_array_repr_featureType(
     # regardless; if single feature type, cf_role must match that
     # featureType
     cf_role_vars = nc.get_variables_by_attributes(cf_role=lambda x: x is not None)
-    if not cf_role_vars or (len(cf_role_vars)>1 and not is_compound):
+    if not cf_role_vars or \
+        (len(cf_role_vars)>1 and not is_compound) or \
+        (len(cf_role_vars)>2 and is_compound):
         return False
-    import pdb; pdb.set_trace()
     cf_role_var = nc.get_variables_by_attributes(cf_role="{}_id".format(ftype))[0]
     if cf_role_var.cf_role.split("_id")[0].lower() != ftype:
         return False
@@ -956,6 +957,8 @@ def is_dataset_valid_ragged_array_repr_featureType(
     # must be present for the profile variable. To verify this, we will
     # check that the dimension of the index variable is the same dimension
     # that is present on the variable which has the attribute cf_role=profile_id.
+    # The attribute of the index variable 'instance_dimension' should point to the
+    # name of the dimension of the cf_role variable for either timeSeries or trajectory.
     # A count variable must also be present, and should have the same dimension,
     # but its attribute 'sample_dimension' must refer to the dimension, which is
     # DIFFERENT than the variable with the attribute cf_role=ftype, where ftype is the
@@ -973,6 +976,11 @@ def is_dataset_valid_ragged_array_repr_featureType(
 
         # we first check the dimension of the index variable
         if index_vars[0].dimensions != profile_cf_role_var.dimensions:
+            return False
+
+        # the attribute 'instance_dimension' must point to the dimension
+        # of the timeseries or trajectory cf_role var
+        if index_vars[0].instance_dimension != cf_role_var.dimensions[0]:
             return False
 
         # get all geophysical dims
