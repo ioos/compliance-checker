@@ -2207,26 +2207,54 @@ class TestCFUtil(BaseTestCase):
             "indexed"
         )
 
-        # add a variable
-        nc.createVariable(
+        # add a variable that isn't recognized as geophysical
+        v = nc.createVariable(
             "data1",
             "d",
             ("SAMPLE_DIMENSION",),
             fill_value=None
         )
+        v.setncattr("cf_role", "blah")
+        self.assertFalse(cfutil.is_variable_valid_ragged_array_repr_featureType(nc, "data1"))
 
+        # add geophysical variable with correct dimension
+        nc = MockRaggedArrayRepr(
+            "timeseries",
+            "indexed"
+        )
+        v = nc.createVariable(
+            "data1",
+            "d",
+            ("SAMPLE_DIMENSION",),
+            fill_value=None
+        )
+        v.setncattr("standard_name", "sea_water_pressure")
         # test the variable
-        self.assertTrue(cfutil.is_variable_valid_ragged_array_repr_featureType(nc, "data1", "SAMPLE_DIMENSION"))
+        self.assertTrue(cfutil.is_variable_valid_ragged_array_repr_featureType(nc, "data1"))
 
-        # add another variable, this time with the improper dimension
-        nc.createVariable(
+        # add good variable and another variable, this time with the improper dimension
+        nc = MockRaggedArrayRepr(
+            "timeseries",
+            "indexed"
+        )
+        v = nc.createVariable(
+            "data1",
+            "d",
+            ("SAMPLE_DIMENSION",),
+            fill_value=None
+        )
+        v.setncattr("standard_name", "sea_water_pressure")
+        v2 = nc.createVariable(
             "data2",
             "d",
             ("INSTANCE_DIMENSION",),
             fill_value=None
         )
+        v2.setncattr("standard_name", "sea_water_salinity")
 
-        self.assertFalse(cfutil.is_variable_valid_ragged_array_repr_featureType(nc, "data2", "SAMPLE_DIMENSION"))
+        # good variable should pass, second should fail
+        self.assertTrue(cfutil.is_variable_valid_ragged_array_repr_featureType(nc, "data1"))
+        self.assertFalse(cfutil.is_variable_valid_ragged_array_repr_featureType(nc, "data2"))
 
     def test_is_dataset_valid_ragged_array_repr_featureType(self):
 

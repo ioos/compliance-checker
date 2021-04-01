@@ -892,7 +892,7 @@ def is_dataset_valid_ragged_array_repr_featureType(
     """
 
     is_compound = False
-    if feature_type.lower() in {'timeseriesprofile', 'trajectoryprofile'}
+    if feature_type.lower() in {'timeseriesprofile', 'trajectoryprofile'}:
         is_compound = True
         ftype = feature_type.lower().split("profile")[0]
     else:
@@ -1000,20 +1000,10 @@ def is_dataset_valid_ragged_array_repr_featureType(
 
     return True
 
-def is_dataset_valid_ragged_repr_compound_featureType(
-    nc,
-    variables,
-):
-    """
-    For timeSeriesProfile, trajectoryProfile
-    """
-    # TODO
-    raise NotImplementedError
 
 def is_variable_valid_ragged_array_repr_featureType(
     nc,
-    variable: str,
-    sample_dim: str) -> bool:
+    variable: str) -> bool:
     """
     This method returns a boolean indicating whether the variable
     is a valid member of a contiguous ragged array representation
@@ -1026,8 +1016,16 @@ def is_variable_valid_ragged_array_repr_featureType(
     data variable must have the sample dimension as its dimension.
     """
 
+    # get all geophysical variables; should have only one
+    # dimension in the set, and the dimension of the variable
+    # should be equal
+    geo_vars = get_geophysical_variables(nc)
+    dims = [nc.variables[v].dimensions for v in geo_vars]
+    if len(dims) < 1: # NOTE is this appropriate? Not testing dataset here...
+        return False
+
     # this is the only thing we have to work with
-    return nc.variables[variable].dimensions == (sample_dim,)
+    return nc.variables[variable].dimensions == dims[0]
 
 
 def is_point(nc, variable):
@@ -1270,7 +1268,9 @@ def isTrajectory(nc, variable):
     a trajectory featureType.
     """
 
-    if is_cf_trajectory(nc, variable) or is_single_trajectory(nc, variable):
+    if is_cf_trajectory(nc, variable) or \
+        is_single_trajectory(nc, variable) or \
+        is_variable_valid_ragged_array_repr_featureType(nc, variable):
         return True
 
     return False
@@ -1368,19 +1368,15 @@ def isProfile(nc, variable: str):
     str or None
     """
 
-    # first check for orthogonal, incomplete
-    if is_profile_orthogonal(nc, variable) or is_profile_incomplete(nc, variable):
-        return True
-
     # NOTE
     # TODO
     # Does this take into account a single profile? This is a valid profile.
 
-    # get the variable with attr cf_role=profile_id
-    # if this variable doesn't exist, we can't verify
-    # which dimension is the instance dimension, so fail
-
-
+    # first check for orthogonal, incomplete
+    if is_profile_orthogonal(nc, variable) or \
+        is_profile_incomplete(nc, variable) or \
+        if_variable_valid_ragged_array_repr_featureType(nc, variable):
+        return True
 
 def is_timeseries_profile_single_station(nc, variable):
     """
