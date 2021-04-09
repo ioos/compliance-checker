@@ -14,8 +14,12 @@ from compliance_checker.suite import CheckSuite
 from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.resources import STATIC_FILES
 
+mult_msgs_diff = 'Failed to find the following messages:\n{missing_msgs}\n\n\
+        These were the messages captured:\n{found_msgs}\n\
+            Please check wording and section names if messages have been altered since this test was written'
 
 class TestCFIntegration(BaseTestCase):
+
     def setUp(self):
         """
         Initialize the dataset
@@ -91,7 +95,9 @@ class TestCFIntegration(BaseTestCase):
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lat, is not a variable in this dataset",
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
         ]
-        assert all([m in messages for m in expected_messages]), f'Failed to find the following messages:\n{[m for m in expected_messages if m not in messages]}\n\nThese were the messages captured:\n{messages}\nPlease check wording and section names if messages have been altered since this test was written'
+        assert all([m in messages for m in expected_messages]), \
+            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            found_msgs="\n".join(messages))
 
     @pytest.mark.slowtest
     def test_ocos(self):
@@ -132,20 +138,6 @@ class TestCFIntegration(BaseTestCase):
             "CF recommends longitude variable 'lon_u' to use units degrees_east",
             "CF recommends longitude variable 'lon_v' to use units degrees_east",
             "CF recommends longitude variable 'lon_psi' to use units degrees_east",
-            # "Unidentifiable feature for variable nl_tnu2",
-            # "Unidentifiable feature for variable Akt_bak",
-            # "Unidentifiable feature for variable Tnudg",
-            # "Unidentifiable feature for variable FSobc_in",
-            # "Unidentifiable feature for variable FSobc_out",
-            # "Unidentifiable feature for variable M2obc_in",
-            # "Unidentifiable feature for variable M2obc_out",
-            # "Unidentifiable feature for variable Tobc_in",
-            # "Unidentifiable feature for variable Tobc_out",
-            # "Unidentifiable feature for variable M3obc_in",
-            # "Unidentifiable feature for variable M3obc_out",
-            # "Unidentifiable feature for variable Cs_r",
-            # "Unidentifiable feature for variable Cs_w",
-            # "Unidentifiable feature for variable user",
             "§4.3.3 The standard_name of `s_rho` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
             "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`"
         ]
@@ -177,7 +169,9 @@ class TestCFIntegration(BaseTestCase):
             "CF recommends longitude variable 'lon' to use units degrees_east",
         ]
 
-        assert all([m in messages for m in expected_messages]), f'Failed to find the following messages:\n{[m for m in expected_messages if m not in messages]}\n\nThese were the messages captured:\n{messages}\nPlease check wording and section names if messages have been altered since this test was written'
+        assert all([m in messages for m in expected_messages]), \
+            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            found_msgs="\n".join(messages))
 
     def test_usgs_dem_saipan(self):
         dataset = self.load_dataset(STATIC_FILES["usgs_dem_saipan"])
@@ -189,7 +183,9 @@ class TestCFIntegration(BaseTestCase):
             '§2.6.1 Conventions global attribute does not contain "CF-1.7"'
         ]
 
-        assert all([m in messages for m in expected_messages]), f'Failed to find the following messages:\n{[m for m in expected_messages if m not in messages]}\n\nThese were the messages captured:\n{messages}\nPlease check wording and section names if messages have been altered since this test was written'
+        assert all([m in messages for m in expected_messages]), \
+            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            found_msgs="\n".join(messages))
 
     def test_sp041(self):
         dataset = self.load_dataset(STATIC_FILES["sp041"])
@@ -225,7 +221,9 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert scored < out_of
-        assert all([m in messages for m in expected_messages]), f'Failed to find the following messages:\n{[m for m in expected_messages if m not in messages]}\n\nThese were the messages captured:\n{messages}\nPlease check wording and section names if messages have been altered since this test was written'
+        assert all([m in messages for m in expected_messages]), \
+            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            found_msgs="\n".join(messages))
 
     def test_ooi_glider(self):
         dataset = self.load_dataset(STATIC_FILES["ooi_glider"])
@@ -241,7 +239,9 @@ class TestCFIntegration(BaseTestCase):
             u"longitude variable 'longitude' should define standard_name='longitude' or axis='X'",
         ]
 
-        assert all([m in messages for m in expected_messages]), f'Failed to find the following messages:\n{[m for m in expected_messages if m not in messages]}\n\nThese were the messages captured:\n{messages}\nPlease check wording and section names if messages have been altered since this test was written'
+        assert all([m in messages for m in expected_messages]), \
+            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            found_msgs="\n".join(messages))
 
     def test_swan(self):
         dataset = self.load_dataset(STATIC_FILES["swan"])
@@ -261,7 +261,9 @@ class TestCFIntegration(BaseTestCase):
             "GRID is not a valid CF featureType. It must be one of point, timeseries, trajectory, profile, timeseriesprofile, trajectoryprofile",
         ]
 
-        assert all([m in messages for m in expected_messages]), f'Failed to find the following messages:\n{[m for m in expected_messages if m not in messages]}\n\nThese were the messages captured:\n{messages}\nPlease check wording and section names if messages have been altered since this test was written'
+        assert all([m in messages for m in expected_messages]), \
+            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            found_msgs="\n".join(messages))
 
     def test_kibesillah(self):
         dataset = self.load_dataset(STATIC_FILES["kibesillah"])
@@ -332,11 +334,13 @@ class TestCFIntegration(BaseTestCase):
             u"Attribute long_name or/and standard_name is highly recommended for variable time",
             u"Attribute long_name or/and standard_name is highly recommended for variable lon",
             u"Attribute long_name or/and standard_name is highly recommended for variable lat",
-            u"latitude variable 'lat' should define standard_name='latitude' or axis='Y'",
+            u"GRatitude variable 'lat' should define standard_name='latitude' or axis='Y'",
             u"longitude variable 'lon' should define standard_name='longitude' or axis='X'",
         ]
 
-        assert all([m in messages for m in expected_messages]), f'Failed to find the following messages:\n{[m for m in expected_messages if m not in messages]}\n\nThese were the messages captured:\n{messages}\nPlease check wording and section names if messages have been altered since this test was written'
+        assert all([m in messages for m in expected_messages]), \
+            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            found_msgs="\n".join(messages))
 
     def test_glcfs(self):
         dataset = self.load_dataset(STATIC_FILES["glcfs"])
@@ -396,7 +400,9 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert scored < out_of
-        assert all([m in messages for m in expected_messages]), f'Failed to find the following messages:\n{[m for m in expected_messages if m not in messages]}\n\nThese were the messages captured:\n{messages}\nPlease check wording and section names if messages have been altered since this test was written'
+        assert all([m in messages for m in expected_messages]), \
+            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            found_msgs="\n".join(messages))
 
     def test_no_incorrect_errors_index_ragged_array__subset_of_dimensions(self):#,wrong_msg):
         """
