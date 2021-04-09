@@ -4345,57 +4345,6 @@ class CF1_6Check(CFNCCheck):
     # Chapter 9: Discrete Sampling Geometries
     ###############################################################################
 
-    #def check_all_features_are_same_type(self, ds): # COMMENTING JUST TO TEST OUT
-    #    """
-    #    Check that the feature types in a dataset are all the same.
-
-    #    9.1 The features contained within a collection must always be of the same type; and all the collections in a CF file
-    #    must be of the same feature type.
-
-    #    point, timeSeries, trajectory, profile, timeSeriesProfile, trajectoryProfile.
-
-    #    The space-time coordinates that are indicated for each feature are mandatory.  However a featureType may also include
-    #    other space-time coordinates which are not mandatory (notably the z coordinate).
-
-    #    :param netCDF4.Dataset ds: An open netCDF dataset
-    #    :rtype: compliance_checker.base.Result
-    #    """
-    #    all_the_same = TestCtx(BaseCheck.HIGH, self.section_titles["9.1"])
-    #    feature_types_found = defaultdict(list)
-    #    # iterate all geophysical variables with at least one dimension
-    #    for name in (
-    #        name
-    #        for name in self._find_geophysical_vars(ds)
-    #        if ds.variables[name].ndim > 0
-    #    ):
-    #        feature = cfutil.guess_feature_type(ds, name)
-    #        # If we can't figure out the feature type, penalize. Originally,
-    #        # it was not penalized. However, this led to the issue that the
-    #        # message did not appear in the output of compliance checker if
-    #        # no other error/warning/information was printed out for section
-    #        # 9.1.
-    #        found = False
-    #        if feature is not None:
-    #            feature_types_found[feature].append(name)
-    #            found = True
-    #        all_the_same.assert_true(
-    #            found, "Unidentifiable feature for variable {}" "".format(name)
-    #        )
-    #    feature_description = ", ".join(
-    #        [
-    #            "{} ({})".format(ftr, ", ".join(vrs))
-    #            for ftr, vrs in feature_types_found.items()
-    #        ]
-    #    )
-
-    #    all_the_same.assert_true(
-    #        len(feature_types_found) < 2,
-    #        "Different feature types discovered in this dataset: {}"
-    #        "".format(feature_description),
-    #    )
-
-    #    return all_the_same.to_result()
-
     def check_feature_type(self, ds):
         """
         Check the global attribute featureType for valid CF featureTypes
@@ -4485,31 +4434,14 @@ class CF1_6Check(CFNCCheck):
         if feature_type not in feature_list:
             return []
 
-        # TODO
-        # these need to be consolidated - no need for the mapping
-        # as the following aren't valid in CF 1.8
-        feature_type_map = {
-            "point": ["point"],
-            "timeSeries": [
-                "timeseries",
-                "multi-timeseries-orthogonal",
-                "multi-timeseries-incomplete",
-            ],
-            "trajectory": ["cf-trajectory", "single-trajectory",],
-            "profile": ["profile-orthogonal", "profile-incomplete"],
-            "timeSeriesProfile": [
-                "timeseries-profile-single-station",
-                "timeseries-profile-multi-station",
-                "timeseries-profile-single-ortho-time",
-                "timeseries-profile-multi-ortho-time",
-                "timeseries-profile-ortho-depth",
-                "timeseries-profile-incomplete",
-            ],
-            "trajectoryProfile": [
-                "trajectory-profile-orthogonal",
-                "trajectory-profile-incomplete",
-            ],
-        }
+        # If a data set is detected as a valid ragged array representation,
+        # regardless of the featureType, all geophysical variables must also
+        # be detected as valid ragged array variables.
+        if cfutil.is_dataset_valid_ragged_array_repr_featureType(ds, feature_type):
+            _feature = "ragged-array"
+        else:
+            _feature = feature_type
+
         for name in self._find_geophysical_vars(ds):
             variable_feature = cfutil.guess_feature_type(ds, name)
             # If we can't figure it out, don't check it.
@@ -4518,9 +4450,9 @@ class CF1_6Check(CFNCCheck):
             feature_types_found[variable_feature].append(name)            
             matching_feature = TestCtx(BaseCheck.MEDIUM, self.section_titles["9.1"])
             matching_feature.assert_true(
-                variable_feature in feature_type_map[feature_type],
+                variable_feature == _feature,
                 "{} is not a {}, it is detected as a {}"
-                "".format(name, feature_type, variable_feature),
+                "".format(name, _feature, variable_feature),
             )
             ret_val.append(matching_feature.to_result())
 

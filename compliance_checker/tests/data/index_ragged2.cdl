@@ -1,0 +1,19 @@
+netcdf indexed_ragged_array {
+dimensions:
+        OBSERVATION = 12 ;
+        INSTRUMENT = 3 ;
+variables:
+        double TIME(OBSERVATION) ;
+                TIME:axis = "T" ;
+        float TEMP(OBSERVATION) ;
+                TEMP:coordinates = "TIME LATITUDE LONGITUDE NOMINAL_DEPTH" ;
+        int instrument_index(OBSERVATION) ;
+                instrument_index:instance_dimension = "INSTRUMENT" ;
+                instrument_index:long_name = "which instrument this obs is for" ;
+        double LATITUDE(INSTRUMENT) ;
+                LATITUDE:axis = "Y" ;
+        double LONGITUDE(INSTRUMENT) ;
+                LONGITUDE:axis = "X" ;
+        float NOMINAL_DEPTH(INSTRUMENT) ;
+                NOMINAL_DEPTH:axis = "Z" ;
+}
