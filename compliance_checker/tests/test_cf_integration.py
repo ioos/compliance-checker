@@ -334,7 +334,7 @@ class TestCFIntegration(BaseTestCase):
             u"Attribute long_name or/and standard_name is highly recommended for variable time",
             u"Attribute long_name or/and standard_name is highly recommended for variable lon",
             u"Attribute long_name or/and standard_name is highly recommended for variable lat",
-            u"GRatitude variable 'lat' should define standard_name='latitude' or axis='Y'",
+            u"latitude variable 'lat' should define standard_name='latitude' or axis='Y'",
             u"longitude variable 'lon' should define standard_name='longitude' or axis='X'",
         ]
 
