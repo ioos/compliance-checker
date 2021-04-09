@@ -910,7 +910,7 @@ def is_dataset_valid_ragged_array_repr_featureType(
         (len(cf_role_vars)>2 and is_compound):
         return False
     cf_role_var = nc.get_variables_by_attributes(cf_role="{}_id".format(ftype))[0]
-    if cf_role_var.cf_role.split("_id")[0].lower() != ftype:
+    if cf_role_var.cf_role.split("_id")[0].lower() != ftype: #if cf_role_var returns None, this should raise an error?
         return False
 
     # now we'll check dimensions for singular feature types and/or
@@ -919,7 +919,7 @@ def is_dataset_valid_ragged_array_repr_featureType(
     if len(instance_dim) != 1:
         return False
 
-    # Wow we check for the presence of an index variable or count variable;
+    # Now we check for the presence of an index variable or count variable;
     # NOTE that if no index or count variables exist, we can't determine with
     # certainty that this is invalid, because single-instance data sets
     # are valid representations of the ragged array structures. Instead,
