@@ -96,7 +96,7 @@ class TestCFIntegration(BaseTestCase):
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
         ]
         assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
             found_msgs="\n".join(messages))
 
     @pytest.mark.slowtest
@@ -170,7 +170,7 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
             found_msgs="\n".join(messages))
 
     def test_usgs_dem_saipan(self):
@@ -184,7 +184,7 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
             found_msgs="\n".join(messages))
 
     def test_sp041(self):
@@ -222,7 +222,7 @@ class TestCFIntegration(BaseTestCase):
 
         assert scored < out_of
         assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
             found_msgs="\n".join(messages))
 
     def test_ooi_glider(self):
@@ -240,7 +240,7 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
             found_msgs="\n".join(messages))
 
     def test_swan(self):
@@ -262,7 +262,7 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
             found_msgs="\n".join(messages))
 
     def test_kibesillah(self):
@@ -339,7 +339,7 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            mult_msgs_diff.format(missing_msgs="\n".join("\n".join([m for m in expected_messages if m not in messages])),
             found_msgs="\n".join(messages))
 
     def test_glcfs(self):
@@ -401,7 +401,7 @@ class TestCFIntegration(BaseTestCase):
 
         assert scored < out_of
         assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs=[m for m in expected_messages if m not in messages],
+            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
             found_msgs="\n".join(messages))
 
     def test_no_incorrect_errors_index_ragged_array__subset_of_dimensions(self):#,wrong_msg):
