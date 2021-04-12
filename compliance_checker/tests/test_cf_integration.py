@@ -14,12 +14,12 @@ from compliance_checker.suite import CheckSuite
 from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.resources import STATIC_FILES
 
-mult_msgs_diff = 'Failed to find the following messages:\n{missing_msgs}\n\n\
+mult_msgs_diff = "Failed to find the following messages:\n{missing_msgs}\n\n\
         These were the messages captured:\n{found_msgs}\n\
-            Please check wording and section names if messages have been altered since this test was written'
+            Please check wording and section names if messages have been altered since this test was written"
+
 
 class TestCFIntegration(BaseTestCase):
-
     def setUp(self):
         """
         Initialize the dataset
@@ -91,13 +91,16 @@ class TestCFIntegration(BaseTestCase):
             u"attribute lat:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"attribute lon:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"§2.6.2 global attribute history should exist and be a non-empty string",
-            u"standard_name temperature is not defined in Standard Name Table v{}".format(self._std_names._version),
+            u"standard_name temperature is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lat, is not a variable in this dataset",
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
         ]
-        assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
-            found_msgs="\n".join(messages))
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     @pytest.mark.slowtest
     def test_ocos(self):
@@ -106,7 +109,6 @@ class TestCFIntegration(BaseTestCase):
         scored, out_of, messages = self.get_results(check_results)
 
         expected_messages = [
-
             "AKs's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
             "AKt's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
             "AKv's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
@@ -139,7 +141,7 @@ class TestCFIntegration(BaseTestCase):
             "CF recommends longitude variable 'lon_v' to use units degrees_east",
             "CF recommends longitude variable 'lon_psi' to use units degrees_east",
             "§4.3.3 The standard_name of `s_rho` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
-            "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`"
+            "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
         ]
         assert set(messages).issubset(set(expected_messages))
 
@@ -153,25 +155,38 @@ class TestCFIntegration(BaseTestCase):
         expected_messages = [
             "units for variable air_temperature_qc must be convertible to K currently they are 1",
             "units for variable wind_speed_qc must be convertible to m s-1 currently they are 1",
-            "standard_name visibility is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name visibility is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             "standard_name modifier data_quality for variable visibility_qc is not a valid modifier according to appendix C",
-            "standard_name wind_direction is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name wind_direction is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             "standard_name modifier data_quality for variable wind_direction_qc is not a valid modifier according to appendix C",
-            "standard_name wind_gust is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name wind_gust is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             "standard_name modifier data_quality for variable wind_gust_qc is not a valid modifier according to appendix C",
             "standard_name modifier data_quality for variable air_temperature_qc is not a valid modifier according to appendix C",
-            "standard_name use_wind is not defined in Standard Name Table v{}".format(self._std_names._version),
-            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name use_wind is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
+            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             "standard_name modifier data_quality for variable barometric_pressure_qc is not a valid modifier according to appendix C",
             "standard_name modifier data_quality for variable wind_speed_qc is not a valid modifier according to appendix C",
-            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             "CF recommends latitude variable 'lat' to use units degrees_north",
             "CF recommends longitude variable 'lon' to use units degrees_east",
         ]
 
-        assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
-            found_msgs="\n".join(messages))
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     def test_usgs_dem_saipan(self):
         dataset = self.load_dataset(STATIC_FILES["usgs_dem_saipan"])
@@ -183,9 +198,10 @@ class TestCFIntegration(BaseTestCase):
             '§2.6.1 Conventions global attribute does not contain "CF-1.7"'
         ]
 
-        assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
-            found_msgs="\n".join(messages))
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     def test_sp041(self):
         dataset = self.load_dataset(STATIC_FILES["sp041"])
@@ -204,7 +220,7 @@ class TestCFIntegration(BaseTestCase):
           - references is an empty string
           - comment (global attr) is an empty string
           - z:dimensions are not a proper subset of dims for variable flag, haul
-          """
+        """
 
         dataset = self.load_dataset(STATIC_FILES["3mf07"])
         check_results = self.cs.run(dataset, [], "cf")
@@ -221,9 +237,10 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert scored < out_of
-        assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
-            found_msgs="\n".join(messages))
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     def test_ooi_glider(self):
         dataset = self.load_dataset(STATIC_FILES["ooi_glider"])
@@ -239,9 +256,10 @@ class TestCFIntegration(BaseTestCase):
             u"longitude variable 'longitude' should define standard_name='longitude' or axis='X'",
         ]
 
-        assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
-            found_msgs="\n".join(messages))
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     def test_swan(self):
         dataset = self.load_dataset(STATIC_FILES["swan"])
@@ -261,9 +279,10 @@ class TestCFIntegration(BaseTestCase):
             "GRID is not a valid CF featureType. It must be one of point, timeseries, trajectory, profile, timeseriesprofile, trajectoryprofile",
         ]
 
-        assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
-            found_msgs="\n".join(messages))
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     def test_kibesillah(self):
         dataset = self.load_dataset(STATIC_FILES["kibesillah"])
@@ -298,7 +317,7 @@ class TestCFIntegration(BaseTestCase):
             "k: vertical coordinates not defining pressure must include a positive attribute that is either 'up' or 'down'",
             "grid_longitude has no coordinate associated with a variable identified as true latitude/longitude; its coordinate variable should also share a subset of grid_longitude's dimensions",
             "grid_latitude has no coordinate associated with a variable identified as true latitude/longitude; its coordinate variable should also share a subset of grid_latitude's dimensions",
-            "time_bounds might be a cell boundary variable but there are no variables that define it as a boundary using the `bounds` attribute."
+            "time_bounds might be a cell boundary variable but there are no variables that define it as a boundary using the `bounds` attribute.",
         ]
         assert set(expected_messages).issubset(messages)
 
@@ -318,8 +337,9 @@ class TestCFIntegration(BaseTestCase):
                 'are not a subset of dimensions for variable u (siglay, nele, time)"'
                 " not in messages"
             )
-        assert ('§2.6.1 Conventions global attribute does not contain "CF-1.7"'
-               ) in messages
+        assert (
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"'
+        ) in messages
 
     def test_ww3(self):
         dataset = self.load_dataset(STATIC_FILES["ww3"])
@@ -338,9 +358,12 @@ class TestCFIntegration(BaseTestCase):
             u"longitude variable 'lon' should define standard_name='longitude' or axis='X'",
         ]
 
-        assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs="\n".join("\n".join([m for m in expected_messages if m not in messages])),
-            found_msgs="\n".join(messages))
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join(
+                "\n".join([m for m in expected_messages if m not in messages])
+            ),
+            found_msgs="\n".join(messages),
+        )
 
     def test_glcfs(self):
         dataset = self.load_dataset(STATIC_FILES["glcfs"])
@@ -400,11 +423,14 @@ class TestCFIntegration(BaseTestCase):
         ]
 
         assert scored < out_of
-        assert all([m in messages for m in expected_messages]), \
-            mult_msgs_diff.format(missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
-            found_msgs="\n".join(messages))
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
-    def test_no_incorrect_errors_index_ragged_array__subset_of_dimensions(self):#,wrong_msg):
+    def test_no_incorrect_errors_index_ragged_array__subset_of_dimensions(
+        self,
+    ):  # ,wrong_msg):
         """
         From Github issue #845:\n
         CF: incorrect errors for ragged array structure\n
@@ -418,7 +444,7 @@ class TestCFIntegration(BaseTestCase):
         wrong_msg = "are not a subset of dimensions for variable"
         messages = self.get_results(check_results)[-1]
 
-        assert wrong_msg not in ''.join(messages)
+        assert wrong_msg not in "".join(messages)
 
     def test_no_incorrect_errors_index_ragged_array__unidentifiable_feature(self):
         """
@@ -433,5 +459,5 @@ class TestCFIntegration(BaseTestCase):
         check_results = self.cs.run(dataset, [], "cf")
         wrong_msg = "Unidentifiable feature for variable"
         messages = self.get_results(check_results)[-1]
-        
-        assert wrong_msg not in ''.join(messages)
+
+        assert wrong_msg not in "".join(messages)

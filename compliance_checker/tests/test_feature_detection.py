@@ -356,10 +356,7 @@ class TestFeatureDetection(TestCase):
             assert axis_map["X"] == ["lon"]
 
         with Dataset(resources.STATIC_FILES["mapping"]) as nc:
-            assert (
-                util.guess_feature_type(nc, "sea_surface_height")
-                == "timeseries"
-            )
+            assert util.guess_feature_type(nc, "sea_surface_height") == "timeseries"
 
             axis_map = util.get_axis_map(nc, "sea_surface_height")
             assert axis_map["T"] == ["time"]
@@ -412,61 +409,39 @@ class TestFeatureDetection(TestCase):
             assert axis_map["T"] == []
             assert axis_map["Z"] == ["depth"]
 
-
     def test_is_variable_valid_ragged_array_repr_featureType(self):
-        nc = MockRaggedArrayRepr(
-            "timeseries",
-            "indexed"
-        )
+        nc = MockRaggedArrayRepr("timeseries", "indexed")
 
         # add a variable that isn't recognized as geophysical
-        v = nc.createVariable(
-            "data1",
-            "d",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        v = nc.createVariable("data1", "d", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "blah")
-        self.assertFalse(util.is_variable_valid_ragged_array_repr_featureType(nc, "data1"))
+        self.assertFalse(
+            util.is_variable_valid_ragged_array_repr_featureType(nc, "data1")
+        )
 
         # add geophysical variable with correct dimension
-        nc = MockRaggedArrayRepr(
-            "timeseries",
-            "indexed"
-        )
-        v = nc.createVariable(
-            "data1",
-            "d",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        nc = MockRaggedArrayRepr("timeseries", "indexed")
+        v = nc.createVariable("data1", "d", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("standard_name", "sea_water_pressure")
         # test the variable
-        self.assertTrue(util.is_variable_valid_ragged_array_repr_featureType(nc, "data1"))
+        self.assertTrue(
+            util.is_variable_valid_ragged_array_repr_featureType(nc, "data1")
+        )
 
         # add good variable and another variable, this time with the improper dimension
-        nc = MockRaggedArrayRepr(
-            "timeseries",
-            "indexed"
-        )
-        v = nc.createVariable(
-            "data1",
-            "d",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        nc = MockRaggedArrayRepr("timeseries", "indexed")
+        v = nc.createVariable("data1", "d", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("standard_name", "sea_water_pressure")
-        v2 = nc.createVariable(
-            "data2",
-            "d",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None
-        )
+        v2 = nc.createVariable("data2", "d", ("INSTANCE_DIMENSION",), fill_value=None)
         v2.setncattr("standard_name", "sea_water_salinity")
 
         # good variable should pass, second should fail
-        self.assertTrue(util.is_variable_valid_ragged_array_repr_featureType(nc, "data1"))
-        self.assertFalse(util.is_variable_valid_ragged_array_repr_featureType(nc, "data2"))
+        self.assertTrue(
+            util.is_variable_valid_ragged_array_repr_featureType(nc, "data1")
+        )
+        self.assertFalse(
+            util.is_variable_valid_ragged_array_repr_featureType(nc, "data2")
+        )
 
     def test_is_dataset_valid_ragged_array_repr_featureType(self):
 
@@ -474,64 +449,36 @@ class TestFeatureDetection(TestCase):
 
         # ----- timeseries, indexed ----- #
 
-        nc = MockRaggedArrayRepr(
-            "timeseries",
-            "indexed"
-        )
+        nc = MockRaggedArrayRepr("timeseries", "indexed")
         self.assertTrue(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
         )
 
         # we'll add another cf_role variable
-        nc = MockRaggedArrayRepr(
-            "timeseries",
-            "indexed"
-        )
-        v = nc.createVariable(
-            "var2",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+        nc = MockRaggedArrayRepr("timeseries", "indexed")
+        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
         )
 
         # we'll add another index variable, also bad
-        nc = MockRaggedArrayRepr(
-            "timeseries",
-            "indexed"
-        )
-        v = nc.createVariable(
-            "index_var2",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None)
+        nc = MockRaggedArrayRepr("timeseries", "indexed")
+        v = nc.createVariable("index_var2", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("instance_dimension", "INSTANCE_DIMENSION")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
         )
 
-
         # ----- timeseries, contiguous ----- #
-        nc = MockRaggedArrayRepr(
-            "timeseries",
-            "contiguous"
-        )
+        nc = MockRaggedArrayRepr("timeseries", "contiguous")
         self.assertTrue(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
         )
 
         # add another cf_role var, bad
-        nc = MockRaggedArrayRepr(
-            "timeseries",
-            "contiguous"
-        )
-        v = nc.createVariable(
-            "var2",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+        nc = MockRaggedArrayRepr("timeseries", "contiguous")
+        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
@@ -539,10 +486,8 @@ class TestFeatureDetection(TestCase):
 
         # add another count variable, bad
         v = nc.createVariable(
-            "count_var2",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+            "count_var2", "i", ("INSTANCE_DIMENSION",), fill_value=None
+        )
         v.setncattr("sample_dimension", "SAMPLE_DIMENSION")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
@@ -550,156 +495,92 @@ class TestFeatureDetection(TestCase):
 
         # ----- profile, indexed ----- #
 
-        nc = MockRaggedArrayRepr(
-            "profile",
-            "indexed"
-        )
+        nc = MockRaggedArrayRepr("profile", "indexed")
         self.assertTrue(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
         )
 
         # add another cf_role var
-        nc = MockRaggedArrayRepr(
-            "profile",
-            "indexed"
-        )
-        v = nc.createVariable(
-            "var2",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+        nc = MockRaggedArrayRepr("profile", "indexed")
+        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
         )
 
         # we'll add another index variable, also bad
-        nc = MockRaggedArrayRepr(
-            "profile",
-            "indexed"
-        )
-        v = nc.createVariable(
-            "index_var2",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None)
+        nc = MockRaggedArrayRepr("profile", "indexed")
+        v = nc.createVariable("index_var2", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("instance_dimension", "INSTANCE_DIMENSION")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
         )
 
         # ----- profile, contiguous ----- #
-        nc = MockRaggedArrayRepr(
-            "profile",
-            "contiguous"
-        )
+        nc = MockRaggedArrayRepr("profile", "contiguous")
         self.assertTrue(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
         )
 
         # add another cf_role var
-        nc = MockRaggedArrayRepr(
-            "profile",
-            "contiguous"
-        )
-        v = nc.createVariable(
-            "var2",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+        nc = MockRaggedArrayRepr("profile", "contiguous")
+        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
         )
 
         # we'll add another count variable, also bad
-        nc = MockRaggedArrayRepr(
-            "profile",
-            "contiguous"
-        )
+        nc = MockRaggedArrayRepr("profile", "contiguous")
         v = nc.createVariable(
-            "index_var2",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+            "index_var2", "i", ("INSTANCE_DIMENSION",), fill_value=None
+        )
         v.setncattr("sample_dimension", "SAMPLE_DIMENSION")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
         )
 
         # ----- trajectory, indexed ----- #
-        nc = MockRaggedArrayRepr(
-            "trajectory",
-            "indexed"
-        )
+        nc = MockRaggedArrayRepr("trajectory", "indexed")
         self.assertTrue(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
         )
 
         # add another cf_role var
-        nc = MockRaggedArrayRepr(
-            "trajectory",
-            "indexed"
-        )
-        v = nc.createVariable(
-            "var2",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+        nc = MockRaggedArrayRepr("trajectory", "indexed")
+        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
         )
 
         # we'll add another index variable, also bad
-        nc = MockRaggedArrayRepr(
-            "trajectory",
-            "indexed"
-        )
-        v = nc.createVariable(
-            "index_var2",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None)
+        nc = MockRaggedArrayRepr("trajectory", "indexed")
+        v = nc.createVariable("index_var2", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("instance_dimension", "INSTANCE_DIMENSION")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
         )
 
         # ----- trajectory, contiguous ----- #
-        nc = MockRaggedArrayRepr(
-            "trajectory",
-            "contiguous"
-        )
+        nc = MockRaggedArrayRepr("trajectory", "contiguous")
         self.assertTrue(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
         )
 
         # add another cf_role var
-        nc = MockRaggedArrayRepr(
-            "trajectory",
-            "contiguous"
-        )
-        v = nc.createVariable(
-            "var2",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+        nc = MockRaggedArrayRepr("trajectory", "contiguous")
+        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
         )
 
         # we'll add another count variable, also bad
-        nc = MockRaggedArrayRepr(
-            "trajectory",
-            "contiguous"
-        )
+        nc = MockRaggedArrayRepr("trajectory", "contiguous")
         v = nc.createVariable(
-            "index_var2",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+            "index_var2", "i", ("INSTANCE_DIMENSION",), fill_value=None
+        )
         v.setncattr("sample_dimension", "SAMPLE_DIMENSION")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
@@ -708,9 +589,7 @@ class TestFeatureDetection(TestCase):
         # ----- now test compound featureType ----- #
 
         # ----- timeSeriesProfile ----- #
-        nc = MockRaggedArrayRepr(
-            "timeSeriesProfile"
-        )
+        nc = MockRaggedArrayRepr("timeSeriesProfile")
 
         # NOTE
         # has no geophysical vars, so should (?) (will) fail
@@ -719,51 +598,27 @@ class TestFeatureDetection(TestCase):
         )
 
         # add a geophysical variable and test again
-        nc = MockRaggedArrayRepr(
-            "timeSeriesProfile"
-        )
-        v1 = nc.createVariable(
-            "data1",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        nc = MockRaggedArrayRepr("timeSeriesProfile")
+        v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1.setncattr("standard_name", "pressure")
         self.assertTrue(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseriesprofile")
         )
 
-        nc = MockRaggedArrayRepr(
-            "timeSeriesProfile"
-        )
-        v1 = nc.createVariable(
-            "data1",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        nc = MockRaggedArrayRepr("timeSeriesProfile")
+        v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         # add a thid cf_role variable - this should fail
         v = nc.createVariable(
-            "cf_role_var3",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+            "cf_role_var3", "i", ("INSTANCE_DIMENSION",), fill_value=None
+        )
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseriesprofile")
         )
 
-
         # set the index variable to have an incorrect attr
-        nc = MockRaggedArrayRepr(
-            "timeSeriesProfile"
-        )
-        v1 = nc.createVariable(
-            "data1",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        nc = MockRaggedArrayRepr("timeSeriesProfile")
+        v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         nc.variables["station_index_variable"].instance_dimension = "SIKE!"
 
         self.assertFalse(
@@ -771,15 +626,8 @@ class TestFeatureDetection(TestCase):
         )
 
         # change the sample_dimension attr on the count variable, bad
-        nc = MockRaggedArrayRepr(
-            "timeSeriesProfile"
-        )
-        v1 = nc.createVariable(
-            "data1",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        nc = MockRaggedArrayRepr("timeSeriesProfile")
+        v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         nc.variables["counter_var"].sample_dimension = "SIKE!"
 
         self.assertFalse(
@@ -787,29 +635,17 @@ class TestFeatureDetection(TestCase):
         )
 
         # give another geophysical data variable a different dimension
-        nc = MockRaggedArrayRepr(
-            "timeSeriesProfile"
-        )
+        nc = MockRaggedArrayRepr("timeSeriesProfile")
+        v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1 = nc.createVariable(
-            "data1",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
-        v1 = nc.createVariable(
-            "data2",
-            "i",
-            ("STATION_DIMENSION",), # bad!
-            fill_value=None
+            "data2", "i", ("STATION_DIMENSION",), fill_value=None  # bad!
         )
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseriesprofile")
         )
 
         # ----- trajectoryProfile ----- #
-        nc = MockRaggedArrayRepr(
-            "trajectoryProfile"
-        )
+        nc = MockRaggedArrayRepr("trajectoryProfile")
 
         # NOTE
         # has no geophysical vars, so should (?) (will) fail
@@ -818,51 +654,27 @@ class TestFeatureDetection(TestCase):
         )
 
         # add a geophysical variable and test again
-        nc = MockRaggedArrayRepr(
-            "trajectoryProfile"
-        )
-        v1 = nc.createVariable(
-            "data1",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        nc = MockRaggedArrayRepr("trajectoryProfile")
+        v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1.setncattr("standard_name", "pressure")
         self.assertTrue(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectoryprofile")
         )
 
-        nc = MockRaggedArrayRepr(
-            "trajectoryProfile"
-        )
-        v1 = nc.createVariable(
-            "data1",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        nc = MockRaggedArrayRepr("trajectoryProfile")
+        v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         # add a thid cf_role variable - this should fail
         v = nc.createVariable(
-            "cf_role_var3",
-            "i",
-            ("INSTANCE_DIMENSION",),
-            fill_value=None)
+            "cf_role_var3", "i", ("INSTANCE_DIMENSION",), fill_value=None
+        )
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectoryprofile")
         )
 
-
         # set the index variable to have an incorrect attr
-        nc = MockRaggedArrayRepr(
-            "trajectoryProfile"
-        )
-        v1 = nc.createVariable(
-            "data1",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        nc = MockRaggedArrayRepr("trajectoryProfile")
+        v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         nc.variables["station_index_variable"].instance_dimension = "SIKE!"
 
         self.assertFalse(
@@ -870,15 +682,8 @@ class TestFeatureDetection(TestCase):
         )
 
         # change the sample_dimension attr on the count variable, bad
-        nc = MockRaggedArrayRepr(
-            "trajectoryProfile"
-        )
-        v1 = nc.createVariable(
-            "data1",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
+        nc = MockRaggedArrayRepr("trajectoryProfile")
+        v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         nc.variables["counter_var"].sample_dimension = "SIKE!"
 
         self.assertFalse(
@@ -886,20 +691,10 @@ class TestFeatureDetection(TestCase):
         )
 
         # give another geophysical data variable a different dimension
-        nc = MockRaggedArrayRepr(
-            "trajectoryProfile"
-        )
+        nc = MockRaggedArrayRepr("trajectoryProfile")
+        v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1 = nc.createVariable(
-            "data1",
-            "i",
-            ("SAMPLE_DIMENSION",),
-            fill_value=None
-        )
-        v1 = nc.createVariable(
-            "data2",
-            "i",
-            ("STATION_DIMENSION",), # bad!
-            fill_value=None
+            "data2", "i", ("STATION_DIMENSION",), fill_value=None  # bad!
         )
         self.assertFalse(
             util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectoryprofile")
