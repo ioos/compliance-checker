@@ -215,12 +215,7 @@ class ComplianceChecker(object):
             for ds, score_groups in score_dict.items():
                 for checker, rpair in score_groups.items():
                     groups, errors = rpair
-                    results[checker] = cs.dict_output(
-                        checker,
-                        groups,
-                        ds,
-                        limit,
-                    )
+                    results[checker] = cs.dict_output(checker, groups, ds, limit,)
         elif output_type == "json_new":
             for ds, score_groups in score_dict.items():
                 for checker, rpair in score_groups.items():

@@ -607,7 +607,7 @@ class TestFeatureDetection(TestCase):
 
         nc = MockRaggedArrayRepr("timeSeriesProfile")
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
-        # add a thid cf_role variable - this should fail
+        # add a third cf_role variable - this should fail
         v = nc.createVariable(
             "cf_role_var3", "i", ("INSTANCE_DIMENSION",), fill_value=None
         )
@@ -663,7 +663,7 @@ class TestFeatureDetection(TestCase):
 
         nc = MockRaggedArrayRepr("trajectoryProfile")
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
-        # add a thid cf_role variable - this should fail
+        # add a third cf_role variable - this should fail
         v = nc.createVariable(
             "cf_role_var3", "i", ("INSTANCE_DIMENSION",), fill_value=None
         )

@@ -14,6 +14,7 @@ from compliance_checker.suite import CheckSuite
 from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.resources import STATIC_FILES
 
+
 mult_msgs_diff = "Failed to find the following messages:\n{missing_msgs}\n\n\
         These were the messages captured:\n{found_msgs}\n\
             Please check wording and section names if messages have been altered since this test was written"

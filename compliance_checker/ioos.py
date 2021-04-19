@@ -988,12 +988,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 )
             ]
 
-        return Result(
-            BaseCheck.HIGH,
-            _val,
-            "CF DSG: featureType=timeseries",
-            msgs,
-        )
+        return Result(BaseCheck.HIGH, _val, "CF DSG: featureType=timeseries", msgs,)
 
     def _check_feattype_timeseriesprof_cf_role(self, ds):
 

@@ -83,7 +83,7 @@ class MockRaggedArrayRepr(MockNetCDF):
     Data sets which follow the contiguous ragged array structure
     have a variable called the "count variable" denoting how many
     elements are in a particular instance. This variable must have the
-    instance dimension as its dimension. The varible will have an
+    instance dimension as its dimension. The variable will have an
     attribute "sample_dimension" denoting which dimension is the
     sample dimension.
 

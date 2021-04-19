@@ -33,9 +33,9 @@ from compliance_checker.cf.util import (
 from compliance_checker.suite import CheckSuite
 from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.helpers import (
+    MockRaggedArrayRepr,
     MockTimeSeries,
     MockVariable,
-    MockRaggedArrayRepr,
 )
 from compliance_checker.tests.resources import STATIC_FILES
 
@@ -2409,7 +2409,7 @@ class TestCFUtil(BaseTestCase):
 
         nc = MockRaggedArrayRepr("timeSeriesProfile")
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
-        # add a thid cf_role variable - this should fail
+        # add a third cf_role variable - this should fail
         v = nc.createVariable(
             "cf_role_var3", "i", ("INSTANCE_DIMENSION",), fill_value=None
         )
@@ -2477,7 +2477,7 @@ class TestCFUtil(BaseTestCase):
 
         nc = MockRaggedArrayRepr("trajectoryProfile")
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
-        # add a thid cf_role variable - this should fail
+        # add a third cf_role variable - this should fail
         v = nc.createVariable(
             "cf_role_var3", "i", ("INSTANCE_DIMENSION",), fill_value=None
         )
