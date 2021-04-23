@@ -330,7 +330,7 @@ class CFBaseCheck(BaseCheck):
                 )
                 valid_grid_mapping.assert_true(
                     len(found_vars) == 1,
-                    "grid mapping {} requires exactly".format(grid_mapping_name)
+                    "grid mapping {} requires exactly ".format(grid_mapping_name)
                     + "one variable with standard_name "
                     + "{} to be defined".format(expected_std_name),
                 )
@@ -4426,7 +4426,7 @@ class CF1_6Check(CFNCCheck):
             valid_cf_role.assert_true(
                 cf_role in valid_roles,
                 "{} is not a valid cf_role value. It must be one of {}"
-                "".format(name, ", ".join(valid_roles)),
+                "".format(cf_role, ", ".join(valid_roles)),
             )
         if variable_count > 0:
             m = (
