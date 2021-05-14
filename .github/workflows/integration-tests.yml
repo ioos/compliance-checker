@@ -1,0 +1,35 @@
+name: Integration Tests
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Conda
+      uses: s-weigand/setup-conda@v1
+      with:
+        activate-conda: false
+        conda-channels: conda-forge
+
+    - name: Python ${{ matrix.python-version }}
+      shell: bash -l {0}
+      # Remove the "libnetcdf<4.8.0" pin before removing the draft in the PR!
+      run: |
+        conda create --name TEST python=${{ matrix.python-version }} python=3 pip "libnetcdf<4.8.0" --file requirements.txt --file test_requirements.txt --strict-channel-priority
+        source activate TEST
+        pip install -e . --no-deps --force-reinstall
+        conda info --all
+        conda list
+
+    - name: Integration Tests
+      shell: bash -l {0}
+      run: |
+        source activate TEST
+        pytest -m "integration" -s -rxs -v compliance_checker
