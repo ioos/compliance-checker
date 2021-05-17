@@ -3,7 +3,6 @@
 import argparse
 import sys
 import warnings
-
 from collections import defaultdict
 from textwrap import dedent
 
@@ -35,7 +34,7 @@ def parse_options(opts):
         try:
             checker_type, checker_opt = opt_str.split(":", 1)
         except ValueError:
-            warnings.warn("Could not split option {}, ignoring".format(opt_str))
+            warnings.warn(f"Could not split option {opt_str}, ignoring")
         else:
             options_dict[checker_type].add(checker_opt)
     return options_dict
@@ -110,7 +109,7 @@ def main():
                                     will skip medium and low.  "L" will show
                                     both high and medium priority issues, while
                                     skipping low priority issues.
-                                    """
+                                    """,
         ),
         action="append",
     )
@@ -166,7 +165,7 @@ def main():
                                     'cf:enable_appendix_a_checks' - Allow check
                                     results against CF Appendix A for attribute
                                     location and data types.
-                                    """
+                                    """,
         ),
     )
 
@@ -191,7 +190,10 @@ def main():
     )
 
     parser.add_argument(
-        "-l", "--list-tests", action="store_true", help="List the available tests"
+        "-l",
+        "--list-tests",
+        action="store_true",
+        help="List the available tests",
     )
 
     parser.add_argument(
@@ -276,7 +278,7 @@ def main():
         if args.format != "json":
             print(
                 "Running Compliance Checker on the datasets from: {}".format(
-                    args.dataset_location
+                    args.dataset_location,
                 ),
                 file=sys.stderr,
             )
@@ -297,7 +299,7 @@ def main():
             if args.format != "json":
                 print(
                     "Running Compliance Checker on the dataset from: {}".format(
-                        dataset
+                        dataset,
                     ),
                     file=sys.stderr,
                 )
