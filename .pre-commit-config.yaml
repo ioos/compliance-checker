@@ -19,7 +19,9 @@ repos:
   hooks:
     - id: flake8
       exclude: docs/source/conf.py
-      args: [--max-line-length=200, --ignore=E501,E251,E221,E201,E202,E203,W503]
+      args:
+        - "--max-line-length=200"
+        - "--ignore=E501,E251,E221,E201,E202,E203,W503"
 
 - repo: https://github.com/pycqa/isort
   rev: 5.8.0
