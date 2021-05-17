@@ -14,7 +14,10 @@ class BaseTestCase(unittest.TestCase):
     def __repr__(self):
         name = self.id()
         name = name.split(".")
-        return "%s ( %s )" % (name[-1], ".".join(name[:-2]) + ":" + ".".join(name[-2:]))
+        return "{} ( {} )".format(
+            name[-1],
+            ".".join(name[:-2]) + ":" + ".".join(name[-2:]),
+        )
 
     __str__ = __repr__
 

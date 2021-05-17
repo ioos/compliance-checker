@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Tests for command line output and parsing
 
@@ -9,7 +8,6 @@ import json
 import os
 import sys
 import tempfile
-
 from argparse import Namespace
 from unittest import TestCase
 
@@ -44,9 +42,9 @@ class TestCLI(TestCase):
         name = self.id()
         name = name.split(".")
         if name[0] not in ["ion", "pyon"]:
-            return "%s (%s)" % (name[-1], ".".join(name[:-1]))
+            return "{} ({})".format(name[-1], ".".join(name[:-1]))
         else:
-            return "%s ( %s )" % (
+            return "{} ( {} )".format(
                 name[-1],
                 ".".join(name[:-2]) + ":" + ".".join(name[-2:]),
             )

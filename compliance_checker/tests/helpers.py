@@ -13,8 +13,11 @@ class MockNetCDF(Dataset):
         # even though we aren't persisting data to disk, the constructor
         # requires a filename not currently in use by another Dataset object..
         tmp_filename = tempfile.NamedTemporaryFile(suffix=".nc", delete=True).name
-        super(MockNetCDF, self).__init__(
-            tmp_filename, "w", diskless=True, persist=False
+        super().__init__(
+            tmp_filename,
+            "w",
+            diskless=True,
+            persist=False,
         )
 
 
@@ -25,7 +28,7 @@ class MockTimeSeries(MockNetCDF):
     """
 
     def __init__(self, default_fill_value=None):
-        super(MockTimeSeries, self).__init__()
+        super().__init__()
         self.createDimension("time", 500)
         for v in ("time", "lon", "lat", "depth"):
             self.createVariable(v, "d", ("time",), fill_value=default_fill_value)
@@ -42,7 +45,7 @@ class MockTimeSeries(MockNetCDF):
         self.variables["depth"].positive = "down"
 
 
-class MockVariable(object):
+class MockVariable:
     """
     For mocking a dataset variable. Constructor optionally takes a NetCDF
     variable, the NetCDF attributes of which will be copied over to this

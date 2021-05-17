@@ -10,7 +10,6 @@ from functools import partial
 
 import numpy as np
 import pendulum
-
 from cftime import num2pydate
 from pygeoif import from_wkt
 
@@ -156,7 +155,7 @@ class ACDDBaseCheck(BaseCheck):
             if not check:
                 msgs.append("long_name")
             results.append(
-                Result(BaseCheck.HIGH, check, self._var_header.format(variable), msgs)
+                Result(BaseCheck.HIGH, check, self._var_header.format(variable), msgs),
             )
 
         return results
@@ -175,7 +174,7 @@ class ACDDBaseCheck(BaseCheck):
             if not check:
                 msgs.append("standard_name")
             results.append(
-                Result(BaseCheck.HIGH, check, self._var_header.format(variable), msgs)
+                Result(BaseCheck.HIGH, check, self._var_header.format(variable), msgs),
             )
 
         return results
@@ -200,8 +199,11 @@ class ACDDBaseCheck(BaseCheck):
                 msgs.append("units")
             results.append(
                 Result(
-                    BaseCheck.HIGH, unit_check, self._var_header.format(variable), msgs
-                )
+                    BaseCheck.HIGH,
+                    unit_check,
+                    self._var_header.format(variable),
+                    msgs,
+                ),
             )
 
         return results
@@ -250,7 +252,7 @@ class ACDDBaseCheck(BaseCheck):
                 "geospatial_lat_extents_match",
                 [
                     "Could not convert one of geospatial_lat_min ({}) or max ({}) to float see CF-1.6 spec chapter 4.1"
-                    "".format(ds.geospatial_lat_min, ds.geospatial_lat_max)
+                    "".format(ds.geospatial_lat_min, ds.geospatial_lat_max),
                 ],
             )
 
@@ -285,7 +287,7 @@ class ACDDBaseCheck(BaseCheck):
                 False,
                 "geospatial_lat_extents_match",
                 [
-                    "Could not find lat variable to test extent of geospatial_lat_min/max, see CF-1.6 spec chapter 4.1"
+                    "Could not find lat variable to test extent of geospatial_lat_min/max, see CF-1.6 spec chapter 4.1",
                 ],
             )
 
@@ -299,8 +301,8 @@ class ACDDBaseCheck(BaseCheck):
             var._name: np.nanmax(var) for var in final_lats if not np.isnan(var).all()
         }
 
-        min_pass = any((np.isclose(lat_min, min_val) for min_val in obs_mins.values()))
-        max_pass = any((np.isclose(lat_max, max_val) for max_val in obs_maxs.values()))
+        min_pass = any(np.isclose(lat_min, min_val) for min_val in obs_mins.values())
+        max_pass = any(np.isclose(lat_max, max_val) for max_val in obs_maxs.values())
 
         allpass = sum((min_pass, max_pass))
 
@@ -308,16 +310,19 @@ class ACDDBaseCheck(BaseCheck):
         if not min_pass:
             msgs.append(
                 "Data for possible latitude variables (%s) did not match geospatial_lat_min value (%s)"
-                % (obs_mins, lat_min)
+                % (obs_mins, lat_min),
             )
         if not max_pass:
             msgs.append(
                 "Data for possible latitude variables (%s) did not match geospatial_lat_max value (%s)"
-                % (obs_maxs, lat_max)
+                % (obs_maxs, lat_max),
             )
 
         return Result(
-            BaseCheck.MEDIUM, (allpass, 2), "geospatial_lat_extents_match", msgs
+            BaseCheck.MEDIUM,
+            (allpass, 2),
+            "geospatial_lat_extents_match",
+            msgs,
         )
 
     def check_lon_extents(self, ds):
@@ -348,7 +353,7 @@ class ACDDBaseCheck(BaseCheck):
                 "geospatial_lon_extents_match",
                 [
                     "Could not convert one of geospatial_lon_min ({}) or max ({}) to float see CF-1.6 spec chapter 4.1"
-                    "".format(ds.geospatial_lon_min, ds.geospatial_lon_max)
+                    "".format(ds.geospatial_lon_min, ds.geospatial_lon_max),
                 ],
             )
 
@@ -383,7 +388,7 @@ class ACDDBaseCheck(BaseCheck):
                 False,
                 "geospatial_lon_extents_match",
                 [
-                    "Could not find lon variable to test extent of geospatial_lon_min/max, see CF-1.6 spec chapter 4.2"
+                    "Could not find lon variable to test extent of geospatial_lon_min/max, see CF-1.6 spec chapter 4.2",
                 ],
             )
 
@@ -397,8 +402,8 @@ class ACDDBaseCheck(BaseCheck):
             var._name: np.nanmax(var) for var in final_lons if not np.isnan(var).all()
         }
 
-        min_pass = any((np.isclose(lon_min, min_val) for min_val in obs_mins.values()))
-        max_pass = any((np.isclose(lon_max, max_val) for max_val in obs_maxs.values()))
+        min_pass = any(np.isclose(lon_min, min_val) for min_val in obs_mins.values())
+        max_pass = any(np.isclose(lon_max, max_val) for max_val in obs_maxs.values())
 
         allpass = sum((min_pass, max_pass))
 
@@ -406,16 +411,19 @@ class ACDDBaseCheck(BaseCheck):
         if not min_pass:
             msgs.append(
                 "Data for possible longitude variables (%s) did not match geospatial_lon_min value (%s)"
-                % (obs_mins, lon_min)
+                % (obs_mins, lon_min),
             )
         if not max_pass:
             msgs.append(
                 "Data for possible longitude variables (%s) did not match geospatial_lon_max value (%s)"
-                % (obs_maxs, lon_max)
+                % (obs_maxs, lon_max),
             )
 
         return Result(
-            BaseCheck.MEDIUM, (allpass, 2), "geospatial_lon_extents_match", msgs
+            BaseCheck.MEDIUM,
+            (allpass, 2),
+            "geospatial_lon_extents_match",
+            msgs,
         )
 
     def verify_geospatial_bounds(self, ds):
@@ -441,7 +449,7 @@ class ACDDBaseCheck(BaseCheck):
                     (
                         "Could not parse WKT from geospatial_bounds,"
                         ' possible bad value: "{}"'.format(ds.geospatial_bounds)
-                    )
+                    ),
                 ],
                 variable_name="geospatial_bounds",
             )
@@ -470,7 +478,10 @@ class ACDDBaseCheck(BaseCheck):
             msgs.append("geospatial_vertical_max cannot be cast to float")
         if len(msgs) > 0:
             return Result(
-                BaseCheck.MEDIUM, (0, total), "geospatial_vertical_extents_match", msgs
+                BaseCheck.MEDIUM,
+                (0, total),
+                "geospatial_vertical_extents_match",
+                msgs,
             )
 
         zvalue = ds.variables[z_variable][:]
@@ -483,10 +494,13 @@ class ACDDBaseCheck(BaseCheck):
             msgs.append(
                 "Cannot compare geospatial vertical extents "
                 "against min/max of data, as non-masked data "
-                "length is zero"
+                "length is zero",
             )
             return Result(
-                BaseCheck.MEDIUM, (0, total), "geospatial_vertical_extents_match", msgs
+                BaseCheck.MEDIUM,
+                (0, total),
+                "geospatial_vertical_extents_match",
+                msgs,
             )
         else:
             zmin = zvalue.min()
@@ -494,12 +508,12 @@ class ACDDBaseCheck(BaseCheck):
             if not np.isclose(vert_min, zmin):
                 msgs.append(
                     "geospatial_vertical_min != min(%s) values, %s != %s"
-                    % (z_variable, vert_min, zmin)
+                    % (z_variable, vert_min, zmin),
                 )
             if not np.isclose(vert_max, zmax):
                 msgs.append(
                     "geospatial_vertical_max != max(%s) values, %s != %s"
-                    % (z_variable, vert_min, zmax)
+                    % (z_variable, vert_min, zmax),
                 )
 
         return Result(
@@ -526,13 +540,13 @@ class ACDDBaseCheck(BaseCheck):
         if not np.isclose(vert_min, vert_max):
             msgs.append(
                 "geospatial_vertical_min != geospatial_vertical_max for scalar depth values, %s != %s"
-                % (vert_min, vert_max)
+                % (vert_min, vert_max),
             )
 
         if not np.isclose(vert_max, zvalue):
             msgs.append(
                 "geospatial_vertical_max != %s values, %s != %s"
-                % (z_variable, vert_max, zvalue)
+                % (z_variable, vert_max, zvalue),
             )
 
         return Result(
@@ -561,7 +575,7 @@ class ACDDBaseCheck(BaseCheck):
                 False,
                 "geospatial_vertical_extents_match",
                 [
-                    "Could not find vertical variable to test extent of geospatial_vertical_min/geospatial_vertical_max, see CF-1.6 spec chapter 4.3"
+                    "Could not find vertical variable to test extent of geospatial_vertical_min/geospatial_vertical_max, see CF-1.6 spec chapter 4.3",
                 ],
             )
         if ds.variables[z_variable].dimensions == tuple():
@@ -588,7 +602,7 @@ class ACDDBaseCheck(BaseCheck):
                 False,
                 "time_coverage_extents_match",
                 [
-                    "time_coverage attributes are not formatted properly. Use the ISO 8601:2004 date format, preferably the extended format."
+                    "time_coverage attributes are not formatted properly. Use the ISO 8601:2004 date format, preferably the extended format.",
                 ],
             )
 
@@ -600,7 +614,7 @@ class ACDDBaseCheck(BaseCheck):
                 False,
                 "time_coverage_extents_match",
                 [
-                    "Could not find time variable to test extent of time_coverage_start/time_coverage_end, see CF-1.6 spec chapter 4.4"
+                    "Could not find time variable to test extent of time_coverage_start/time_coverage_end, see CF-1.6 spec chapter 4.4",
                 ],
             )
 
@@ -612,7 +626,8 @@ class ACDDBaseCheck(BaseCheck):
             # in the same time zone and cause erroneous results.
             # Pendulum uses UTC by default, but we are being explicit here
             time0 = pendulum.instance(
-                num2pydate(ds.variables[timevar][0], ds.variables[timevar].units), "UTC"
+                num2pydate(ds.variables[timevar][0], ds.variables[timevar].units),
+                "UTC",
             )
             time1 = pendulum.instance(
                 num2pydate(ds.variables[timevar][-1], ds.variables[timevar].units),
@@ -635,14 +650,14 @@ class ACDDBaseCheck(BaseCheck):
             msgs.append(
                 "Date time mismatch between time_coverage_start and actual "
                 "time values %s (time_coverage_start) != %s (time[0])"
-                % (t_min.isoformat(), time0.isoformat())
+                % (t_min.isoformat(), time0.isoformat()),
             )
             score -= 1
         if end_dt > timedelta(hours=1):
             msgs.append(
                 "Date time mismatch between time_coverage_end and actual "
                 "time values %s (time_coverage_end) != %s (time[N])"
-                % (t_max.isoformat(), time1.isoformat())
+                % (t_max.isoformat(), time1.isoformat()),
             )
             score -= 1
 
@@ -658,18 +673,20 @@ class ACDDBaseCheck(BaseCheck):
             ):
                 if convention == "ACDD-" + self._cc_spec_version:
                     return ratable_result(
-                        (2, 2), None, []
+                        (2, 2),
+                        None,
+                        [],
                     )  # name=None so grouped with Globals
 
             # if no/wrong ACDD convention, return appropriate result
             # Result will have name "Global Attributes" to group with globals
-            m = ["Conventions does not contain 'ACDD-{}'".format(self._cc_spec_version)]
+            m = [f"Conventions does not contain 'ACDD-{self._cc_spec_version}'"]
             return ratable_result((1, 2), "Global Attributes", m)
         except AttributeError:  # NetCDF attribute not found
             m = [
                 "No Conventions attribute present; must contain ACDD-{}".format(
-                    self._cc_spec_version
-                )
+                    self._cc_spec_version,
+                ),
             ]
             # Result will have name "Global Attributes" to group with globals
             return ratable_result((0, 2), "Global Attributes", m)
@@ -686,7 +703,7 @@ class ACDD1_1Check(ACDDNCCheck):
     register_checker = True
 
     def __init__(self):
-        super(ACDD1_1Check, self).__init__()
+        super().__init__()
         self.rec_atts.extend(["keywords_vocabulary"])
 
         self.sug_atts.extend(
@@ -695,7 +712,7 @@ class ACDD1_1Check(ACDDNCCheck):
                 "publisher_url",  # publisher
                 "publisher_email",  # publisher
                 "geospatial_vertical_positive",
-            ]
+            ],
         )
 
 
@@ -706,7 +723,7 @@ class ACDD1_3Check(ACDDNCCheck):
     register_checker = True
 
     def __init__(self):
-        super(ACDD1_3Check, self).__init__()
+        super().__init__()
         self.high_rec_atts.extend([("Conventions", self.verify_convention_version)])
 
         self.rec_atts.extend(
@@ -718,7 +735,7 @@ class ACDD1_3Check(ACDDNCCheck):
                 "publisher_url",  # publisher
                 "publisher_email",  # publisher
                 "source",
-            ]
+            ],
         )
 
         self.sug_atts.extend(
@@ -737,15 +754,17 @@ class ACDD1_3Check(ACDDNCCheck):
                 "date_metadata_modified",
                 "program",
                 "publisher_institution",
-            ]
+            ],
         )
 
         # override the ISO date checks in
         def _check_attr_is_iso_date(attr, ds):
-            result_name = "{}_is_iso".format(attr)
+            result_name = f"{attr}_is_iso"
             if not hasattr(ds, attr):
                 return ratable_result(
-                    (0, 2), result_name, ["Attr {} is not present".format(attr)]
+                    (0, 2),
+                    result_name,
+                    [f"Attr {attr} is not present"],
                 )
             else:
                 iso_check, msgs = datetime_is_iso(getattr(ds, attr))
@@ -757,8 +776,7 @@ class ACDD1_3Check(ACDDNCCheck):
         self.rec_atts["date_created"] = partial(_check_attr_is_iso_date, "date_created")
         self.sug_atts = kvp_convert(self.sug_atts)
         for k in (
-            "date_{}".format(suffix)
-            for suffix in ("issued", "modified", "metadata_modified")
+            f"date_{suffix}" for suffix in ("issued", "modified", "metadata_modified")
         ):
 
             self.sug_atts[k] = partial(_check_attr_is_iso_date, k)
@@ -769,7 +787,7 @@ class ACDD1_3Check(ACDDNCCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
-        if not hasattr(ds, u"metadata_link"):
+        if not hasattr(ds, "metadata_link"):
             return
         msgs = []
         meta_link = getattr(ds, "metadata_link")
@@ -784,14 +802,14 @@ class ACDD1_3Check(ACDDNCCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
-        if not hasattr(ds, u"id"):
+        if not hasattr(ds, "id"):
             return
-        if " " in getattr(ds, u"id"):
+        if " " in getattr(ds, "id"):
             return Result(
                 BaseCheck.MEDIUM,
                 False,
                 "no_blanks_in_id",
-                msgs=[u"There should be no blanks in the id field"],
+                msgs=["There should be no blanks in the id field"],
             )
         else:
             return Result(BaseCheck.MEDIUM, True, "no_blanks_in_id", msgs=[])
@@ -811,8 +829,11 @@ class ACDD1_3Check(ACDDNCCheck):
                 msgs.append("coverage_content_type")
                 results.append(
                     Result(
-                        BaseCheck.HIGH, check, self._var_header.format(variable), msgs
-                    )
+                        BaseCheck.HIGH,
+                        check,
+                        self._var_header.format(variable),
+                        msgs,
+                    ),
                 )
                 continue
 
@@ -829,7 +850,7 @@ class ACDD1_3Check(ACDDNCCheck):
             }
             if ctype not in valid_ctypes:
                 msgs.append(
-                    'coverage_content_type in "%s"' % (variable, sorted(valid_ctypes))
+                    f'coverage_content_type in "{variable}"',
                 )
                 results.append(
                     Result(
@@ -837,7 +858,7 @@ class ACDD1_3Check(ACDDNCCheck):
                         check,  # append to list
                         self._var_header.format(variable),
                         msgs,
-                    )
+                    ),
                 )
 
         return results

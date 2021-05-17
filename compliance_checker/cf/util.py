@@ -2,7 +2,6 @@ import io
 import itertools
 import os
 import sys
-
 from collections import defaultdict
 from copy import deepcopy
 from pkgutil import get_data
@@ -10,12 +9,10 @@ from urllib.parse import urljoin
 
 import lxml.html
 import requests
-
 from cf_units import Unit
 from lxml import etree
 from netCDF4 import Dimension, Variable
 from pkg_resources import resource_filename
-
 
 # copied from paegan
 # paegan may depend on these later
@@ -181,11 +178,11 @@ class DotDict(dict):
         return list(self.__dict__.keys()) + list(self.keys())
 
     def __getattr__(self, key):
-        """ Make attempts to lookup by nonexistent attributes also attempt key lookups. """
+        """Make attempts to lookup by nonexistent attributes also attempt key lookups."""
         if key in self:
             return self[key]
-        import sys
         import dis
+        import sys
 
         frame = sys._getframe(1)
         if "\x00%c" % dis.opmap["STORE_ATTR"] in frame.f_code.co_code:
@@ -236,9 +233,14 @@ def get_safe(dict_instance, keypath, default=None):
         return default
 
 
-class NCGraph(object):
+class NCGraph:
     def __init__(
-        self, ds, name, nc_object, self_reference_variables, reference_map=None
+        self,
+        ds,
+        name,
+        nc_object,
+        self_reference_variables,
+        reference_map=None,
     ):
 
         self.ds = ds
@@ -322,8 +324,8 @@ class NCGraph(object):
         return getattr(self.obj, key)
 
 
-class StandardNameTable(object):
-    class NameEntry(object):
+class StandardNameTable:
+    class NameEntry:
         def __init__(self, entrynode):
             self.canonical_units = self._get(entrynode, "canonical_units", True)
             self.grib = self._get(entrynode, "grib")
@@ -341,18 +343,20 @@ class StandardNameTable(object):
 
     def __init__(self, cached_location=None):
         if cached_location:
-            with io.open(cached_location, "r", encoding="utf-8") as fp:
+            with open(cached_location, encoding="utf-8") as fp:
                 resource_text = fp.read()
         elif os.environ.get("CF_STANDARD_NAME_TABLE") and os.path.exists(
-            os.environ["CF_STANDARD_NAME_TABLE"]
+            os.environ["CF_STANDARD_NAME_TABLE"],
         ):
-            with io.open(
-                os.environ["CF_STANDARD_NAME_TABLE"], "r", encoding="utf-8"
+            with open(
+                os.environ["CF_STANDARD_NAME_TABLE"],
+                encoding="utf-8",
             ) as fp:
                 resource_text = fp.read()
         else:
             resource_text = get_data(
-                "compliance_checker", "data/cf-standard-name-table.xml"
+                "compliance_checker",
+                "data/cf-standard-name-table.xml",
             )
 
         parser = etree.XMLParser(remove_blank_text=True)
@@ -377,7 +381,7 @@ class StandardNameTable(object):
             if len(entryids) != 1:
                 raise Exception(
                     "Inconsistency in standard name table, could not lookup alias for %s"
-                    % key
+                    % key,
                 )
 
             key = entryids[0].text
@@ -417,7 +421,8 @@ def download_cf_standard_name_table(version, location=None):
         location is None
     ):  # This case occurs when updating the packaged version from command line
         location = resource_filename(
-            "compliance_checker", "data/cf-standard-name-table.xml"
+            "compliance_checker",
+            "data/cf-standard-name-table.xml",
         )
 
     if version == "latest":
@@ -432,16 +437,17 @@ def download_cf_standard_name_table(version, location=None):
 
         url = urljoin("http://cfconventions.org", latest_vers.attrib["href"])
     else:
-        url = "http://cfconventions.org/Data/cf-standard-names/{0}/src/cf-standard-name-table.xml".format(
-            version
+        url = "http://cfconventions.org/Data/cf-standard-names/{}/src/cf-standard-name-table.xml".format(
+            version,
         )
 
     r = requests.get(url, allow_redirects=True)
     r.raise_for_status()
 
     print(
-        "Downloading cf-standard-names table version {0} from: {1}".format(
-            version, url
+        "Downloading cf-standard-names table version {} from: {}".format(
+            version,
+            url,
         ),
         file=sys.stderr,
     )
@@ -456,7 +462,8 @@ def create_cached_data_dir():
     """
     writable_directory = os.path.join(os.path.expanduser("~"), ".local", "share")
     data_directory = os.path.join(
-        os.environ.get("XDG_DATA_HOME", writable_directory), "compliance-checker"
+        os.environ.get("XDG_DATA_HOME", writable_directory),
+        "compliance-checker",
     )
     if not os.path.isdir(data_directory):
         os.makedirs(data_directory)
@@ -537,7 +544,8 @@ def is_time_variable(varname, var):
     satisfied |= getattr(var, "standard_name", "") == "time"
     satisfied |= getattr(var, "axis", "") == "T"
     satisfied |= units_convertible(
-        "seconds since 1900-01-01", getattr(var, "units", "")
+        "seconds since 1900-01-01",
+        getattr(var, "units", ""),
     )
     return satisfied
 

@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import logging
 import os
 import sqlite3
 import sys
-
 from collections import OrderedDict, defaultdict
 from functools import wraps
 from warnings import warn
@@ -12,7 +10,6 @@ from warnings import warn
 import numpy as np
 import pyproj
 import regex
-
 from cf_units import Unit
 
 from compliance_checker import cfutil
@@ -33,7 +30,6 @@ from compliance_checker.cf.appendix_f import (
     horizontal_datum_names17,
     prime_meridian_names17,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +72,7 @@ class CFBaseCheck(BaseCheck):
 
         # Each default dict is a key, value mapping from the dataset object to
         # a list of variables
-        super(CFBaseCheck, self).__init__(options)
+        super().__init__(options)
         self._coord_vars = defaultdict(list)
         self._ancillary_vars = defaultdict(list)
         self._clim_vars = defaultdict(list)
@@ -148,7 +144,7 @@ class CFBaseCheck(BaseCheck):
         self._find_cf_standard_name_table(ds)
         self._find_geophysical_vars(ds)
         coord_containing_vars = ds.get_variables_by_attributes(
-            coordinates=lambda val: isinstance(val, str)
+            coordinates=lambda val: isinstance(val, str),
         )
 
         # coordinate data variables
@@ -220,16 +216,18 @@ class CFBaseCheck(BaseCheck):
 
         # Check the grid_mapping attribute to be a non-empty string and that its reference exists
         for variable in ds.get_variables_by_attributes(
-            grid_mapping=lambda x: x is not None
+            grid_mapping=lambda x: x is not None,
         ):
             grid_mapping = getattr(variable, "grid_mapping", None)
             defines_grid_mapping = self.get_test_ctx(
-                BaseCheck.HIGH, self.section_titles["5.6"], variable.name
+                BaseCheck.HIGH,
+                self.section_titles["5.6"],
+                variable.name,
             )
             defines_grid_mapping.assert_true(
                 (isinstance(grid_mapping, str) and grid_mapping),
                 "{}'s grid_mapping attribute must be a "
-                + "space-separated non-empty string".format(variable.name),
+                + f"space-separated non-empty string",
             )
             if isinstance(grid_mapping, str):
                 # TODO (badams): refactor functionality to split functionality
@@ -237,26 +235,28 @@ class CFBaseCheck(BaseCheck):
                 if ":" in grid_mapping and self._cc_spec_version >= "1.7":
                     colon_count = grid_mapping.count(":")
                     re_all = regex.findall(
-                        r"(\w+):\s*((?:\w+\s+)*(?:\w+)(?![\w:]))", grid_mapping
+                        r"(\w+):\s*((?:\w+\s+)*(?:\w+)(?![\w:]))",
+                        grid_mapping,
                     )
                     if colon_count != len(re_all):
                         defines_grid_mapping.out_of += 1
                         defines_grid_mapping.messages.append(
-                            "Could not consume entire grid_mapping expression, please check for well-formedness"
+                            "Could not consume entire grid_mapping expression, please check for well-formedness",
                         )
                     else:
                         for grid_var_name, coord_var_str in re_all:
                             defines_grid_mapping.assert_true(
                                 grid_var_name in ds.variables,
                                 "grid mapping variable {} must exist in this dataset".format(
-                                    grid_var_name
+                                    grid_var_name,
                                 ),
                             )
                             for ref_var in coord_var_str.split():
                                 defines_grid_mapping.assert_true(
                                     ref_var in ds.variables,
                                     "Coordinate-related variable {} referenced by grid_mapping variable {} must exist in this dataset".format(
-                                        ref_var, grid_var_name
+                                        ref_var,
+                                        grid_var_name,
                                     ),
                                 )
 
@@ -265,7 +265,7 @@ class CFBaseCheck(BaseCheck):
                         defines_grid_mapping.assert_true(
                             grid_var_name in ds.variables,
                             "grid mapping variable {} must exist in this dataset".format(
-                                grid_var_name
+                                grid_var_name,
                             ),
                         )
             ret_val[variable.name] = defines_grid_mapping.to_result()
@@ -273,7 +273,9 @@ class CFBaseCheck(BaseCheck):
         # Check the grid mapping variables themselves
         for grid_var_name in grid_mapping_variables:
             valid_grid_mapping = self.get_test_ctx(
-                BaseCheck.HIGH, self.section_titles["5.6"], grid_var_name
+                BaseCheck.HIGH,
+                self.section_titles["5.6"],
+                grid_var_name,
             )
             grid_var = ds.variables[grid_var_name]
 
@@ -282,7 +284,7 @@ class CFBaseCheck(BaseCheck):
             # Grid mapping name must be in appendix F
             valid_grid_mapping.assert_true(
                 grid_mapping_name in self.grid_mapping_dict,
-                "{} is not a valid grid_mapping_name.".format(grid_mapping_name)
+                f"{grid_mapping_name} is not a valid grid_mapping_name."
                 + " See Appendix F for valid grid mappings",
             )
 
@@ -304,7 +306,8 @@ class CFBaseCheck(BaseCheck):
                 valid_grid_mapping.assert_true(
                     hasattr(grid_var, req),
                     "{} is a required attribute for grid mapping {}".format(
-                        req, grid_mapping_name
+                        req,
+                        grid_mapping_name,
                     ),
                 )
 
@@ -317,7 +320,7 @@ class CFBaseCheck(BaseCheck):
                         number_found += 1
                 valid_grid_mapping.assert_true(
                     number_found == 1,
-                    "grid mapping {}".format(grid_mapping_name)
+                    f"grid mapping {grid_mapping_name}"
                     + "must define exactly one of these attributes: "
                     + "{}".format(" or ".join(at_least_attr)),
                 )
@@ -326,13 +329,13 @@ class CFBaseCheck(BaseCheck):
             expected_std_names = grid_mapping[2]
             for expected_std_name in expected_std_names:
                 found_vars = ds.get_variables_by_attributes(
-                    standard_name=expected_std_name
+                    standard_name=expected_std_name,
                 )
                 valid_grid_mapping.assert_true(
                     len(found_vars) == 1,
-                    "grid mapping {} requires exactly".format(grid_mapping_name)
+                    f"grid mapping {grid_mapping_name} requires exactly"
                     + "one variable with standard_name "
-                    + "{} to be defined".format(expected_std_name),
+                    + f"{expected_std_name} to be defined",
                 )
 
             ret_val[grid_var_name] = valid_grid_mapping.to_result()
@@ -352,7 +355,8 @@ class CFBaseCheck(BaseCheck):
         valid = False
         reasoning = []
         correct_version_string = "{}-{}".format(
-            self._cc_spec, self._cc_spec_version
+            self._cc_spec,
+            self._cc_spec_version,
         ).upper()
         if hasattr(ds, "Conventions"):
             conventions = regex.split(r",|\s+", getattr(ds, "Conventions", ""))
@@ -363,13 +367,16 @@ class CFBaseCheck(BaseCheck):
             else:
                 reasoning = [
                     "§2.6.1 Conventions global attribute does not contain "
-                    '"{}"'.format(correct_version_string)
+                    '"{}"'.format(correct_version_string),
                 ]
         else:
             valid = False
             reasoning = ["§2.6.1 Conventions field is not present"]
         return Result(
-            BaseCheck.MEDIUM, valid, self.section_titles["2.6"], msgs=reasoning
+            BaseCheck.MEDIUM,
+            valid,
+            self.section_titles["2.6"],
+            msgs=reasoning,
         )
 
     def _check_dimensionless_vertical_coordinates(
@@ -434,15 +441,17 @@ class CFBaseCheck(BaseCheck):
         # the regex grouping always has component names in even positions and
         # the corresponding variable name in odd positions.
         matches = regex.findall(
-            r"([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)", variable.formula_terms
+            r"([A-Za-z][A-Za-z0-9_]*: )([A-Za-z][A-Za-z0-9_]*)",
+            variable.formula_terms,
         )
-        terms = set(m[0][:-2] for m in matches)
+        terms = {m[0][:-2] for m in matches}
         # get the variables named in the formula terms and check if any
         # are not present in the dataset
-        missing_vars = sorted(set(m[1] for m in matches) - set(ds.variables))
+        missing_vars = sorted({m[1] for m in matches} - set(ds.variables))
         missing_fmt = "The following variable(s) referenced in {}:formula_terms are not present in the dataset: {}"
         valid_formula_terms.assert_true(
-            len(missing_vars) == 0, missing_fmt.format(coord, ", ".join(missing_vars))
+            len(missing_vars) == 0,
+            missing_fmt.format(coord, ", ".join(missing_vars)),
         )
         # try to reconstruct formula_terms by adding space in between the regex
         # matches.  If it doesn't exactly match the original, the formatting
@@ -516,7 +525,10 @@ class CFBaseCheck(BaseCheck):
             type_match,
             "Attribute '{}' (type: {}) and parent variable '{}' (type: {}) "
             "must have equivalent datatypes".format(
-                attr_name, val_type, var.name, var.dtype.type
+                attr_name,
+                val_type,
+                var.name,
+                var.dtype.type,
             ),
         )
 
@@ -659,7 +671,7 @@ class CFBaseCheck(BaseCheck):
                     except IndexError:
                         warn(
                             "Cannot extract CF standard name version number "
-                            "from standard_name_vocabulary string"
+                            "from standard_name_vocabulary string",
                         )
                         return False
             else:
@@ -671,7 +683,7 @@ class CFBaseCheck(BaseCheck):
             warn(
                 "Cannot convert standard name table to lowercase.  This can "
                 "occur if a non-string standard_name_vocabulary global "
-                "attribute is supplied"
+                "attribute is supplied",
             )
             return False
 
@@ -681,7 +693,7 @@ class CFBaseCheck(BaseCheck):
         # If the packaged version is what we're after, then we're good
         if version == self._std_names._version:
             print(
-                "Using packaged standard name table v{0}".format(version),
+                f"Using packaged standard name table v{version}",
                 file=sys.stderr,
             )
             return False
@@ -690,19 +702,21 @@ class CFBaseCheck(BaseCheck):
         try:
             data_directory = util.create_cached_data_dir()
             location = os.path.join(
-                data_directory, "cf-standard-name-table-test-{0}.xml".format(version)
+                data_directory,
+                f"cf-standard-name-table-test-{version}.xml",
             )
             # Did we already download this before?
             if not os.path.isfile(location):
                 util.download_cf_standard_name_table(version, location)
                 print(
-                    "Using downloaded standard name table v{0}".format(version),
+                    f"Using downloaded standard name table v{version}",
                     file=sys.stderr,
                 )
             else:
                 print(
-                    "Using cached standard name table v{0} from {1}".format(
-                        version, location
+                    "Using cached standard name table v{} from {}".format(
+                        version,
+                        location,
                     ),
                     file=sys.stderr,
                 )
@@ -712,8 +726,8 @@ class CFBaseCheck(BaseCheck):
         except Exception as e:
             # There was an error downloading the CF table. That's ok, we'll just use the packaged version
             warn(
-                "Problem fetching standard name table:\n{0}\n"
-                "Using packaged v{1}".format(e, self._std_names._version)
+                "Problem fetching standard name table:\n{}\n"
+                "Using packaged v{}".format(e, self._std_names._version),
             )
             return False
 
@@ -776,7 +790,7 @@ class CFBaseCheck(BaseCheck):
         for name, var in ds.variables.items():
 
             if name in self._find_ancillary_vars(ds) or name in self._find_coord_vars(
-                ds
+                ds,
             ):
                 continue
 
@@ -927,7 +941,7 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
         for variable in ds.get_variables_by_attributes(
-            cf_role=lambda x: isinstance(x, str)
+            cf_role=lambda x: isinstance(x, str),
         ):
             if variable.ndim > 0:
                 ret_val.append(variable.dimensions[0])
@@ -967,7 +981,7 @@ class CFBaseCheck(BaseCheck):
         """
         dim_names = []
         for dim, dim_type in zip(ds.variables[name].dimensions, dim_types):
-            dim_name = "{} ({}".format(dim, dim_type)
+            dim_name = f"{dim} ({dim_type}"
             if ds.dimensions[dim].isunlimited():
                 dim_name += ", unlimited)"
             else:
@@ -1049,7 +1063,8 @@ class CFBaseCheck(BaseCheck):
             """
 
             return "{} ({})".format(
-                attr_location_ident.get(att_letter, "other"), att_letter
+                attr_location_ident.get(att_letter, "other"),
+                att_letter,
             )
 
         def _att_loc_msg(att_loc):
@@ -1074,16 +1089,17 @@ class CFBaseCheck(BaseCheck):
                 valid_loc = att_loc_print_helper(loc_sort[0])
             elif att_loc_len == 2:
                 valid_loc = "{} and {}".format(
-                    att_loc_print_helper(loc_sort[0]), att_loc_print_helper(loc_sort[1])
+                    att_loc_print_helper(loc_sort[0]),
+                    att_loc_print_helper(loc_sort[1]),
                 )
             # shouldn't be reached under normal circumstances, as any attribute
             # should be either G, C, or D but if another
             # category is added, this will be useful.
             else:
                 valid_loc = ", ".join(loc_sort[:-1]) + ", and {}".format(
-                    att_loc_print_helper(loc_sort[-1])
+                    att_loc_print_helper(loc_sort[-1]),
                 )
-            return "This attribute may only appear in {}.".format(valid_loc)
+            return f"This attribute may only appear in {valid_loc}."
 
         for global_att_name in possible_global_atts:
             global_att = ds.getncattr(global_att_name)
@@ -1094,7 +1110,8 @@ class CFBaseCheck(BaseCheck):
                 subsection_test = ".".join(att_dict["cf_section"].split(".")[:2])
 
                 section_loc = self.section_titles.get(
-                    subsection_test, att_dict["cf_section"]
+                    subsection_test,
+                    att_dict["cf_section"],
                 )
             else:
                 section_loc = None
@@ -1104,7 +1121,7 @@ class CFBaseCheck(BaseCheck):
             if "G" not in att_loc:
                 test_ctx.messages.append(
                     '[Appendix A] Attribute "{}" should not be present in global (G) '
-                    "attributes. {}".format(global_att_name, valid_loc_warn)
+                    "attributes. {}".format(global_att_name, valid_loc_warn),
                 )
             else:
                 result = self._handle_dtype_check(global_att, global_att_name, att_dict)
@@ -1126,11 +1143,12 @@ class CFBaseCheck(BaseCheck):
                     att_dict = self.appendix_a[att_name]
                     if att_dict["cf_section"] is not None:
                         subsection_test = ".".join(
-                            att_dict["cf_section"].split(".")[:2]
+                            att_dict["cf_section"].split(".")[:2],
                         )
 
                         section_loc = self.section_titles.get(
-                            subsection_test, att_dict["cf_section"]
+                            subsection_test,
+                            att_dict["cf_section"],
                         )
                     else:
                         section_loc = None
@@ -1147,7 +1165,7 @@ class CFBaseCheck(BaseCheck):
                                 att_loc_print_helper(coord_letter),
                                 var_name,
                                 valid_loc_warn,
-                            )
+                            ),
                         )
                     else:
                         result = self._handle_dtype_check(att, att_name, att_dict, var)
@@ -1180,20 +1198,20 @@ class CFBaseCheck(BaseCheck):
 
         if attr_type == "S":
             if not isinstance(attribute, str):
-                return [False, "{} must be a string".format(attr_name)]
+                return [False, f"{attr_name} must be a string"]
         else:
             # if it's not a string, it should have a numpy dtype
             underlying_dtype = getattr(attribute, "dtype", None)
 
             # TODO check for np.nan separately
             if underlying_dtype is None:
-                return [False, "{} must be a numeric type".format(attr_name)]
+                return [False, f"{attr_name} must be a numeric type"]
 
             # both D and N should be some kind of numeric value
             is_numeric = np.issubdtype(underlying_dtype, np.number)
             if attr_type == "N":
                 if not is_numeric:
-                    return [False, "{} must be a numeric type".format(attr_name)]
+                    return [False, f"{attr_name} must be a numeric type"]
             elif attr_type == "D":
                 # TODO: handle edge case where variable is unset here
                 temp_ctx = TestCtx()
@@ -1203,14 +1221,15 @@ class CFBaseCheck(BaseCheck):
                     return (
                         False,
                         "{} must be numeric and must be equivalent to {} dtype".format(
-                            attr_name, var_dtype
+                            attr_name,
+                            var_dtype,
                         ),
                     )
             else:
                 # If we reached here, we fell off with an unrecognized type
                 return (
                     False,
-                    "{} has unrecognized type '{}'".format(attr_name, attr_type),
+                    f"{attr_name} has unrecognized type '{attr_type}'",
                 )
         # pass if all other possible failure conditions have been evaluated
         return (True, None)
@@ -1231,12 +1250,12 @@ class CFBaseCheck(BaseCheck):
         attr_type = attr_dict["Type"]
         if variable is None and "G" not in attr_dict["attr_loc"]:
             raise ValueError(
-                "Non-global attributes must be associated with a " " variable"
+                "Non-global attributes must be associated with a " " variable",
             )
         attr_str = (
-            "Global attribute {}".format(attr_name)
+            f"Global attribute {attr_name}"
             if "G" in attr_dict["attr_loc"] and variable is None
-            else "Attribute {} in variable {}".format(attr_name, variable.name)
+            else f"Attribute {attr_name} in variable {variable.name}"
         )
 
         # check the type
@@ -1323,7 +1342,7 @@ class CF1_6Check(CFNCCheck):
     appendix_a = appendix_a_base
 
     def __init__(self, options=None):  # initialize with parent methods and data
-        super(CF1_6Check, self).__init__(options)
+        super().__init__(options)
 
         self.cell_methods = cell_methods16
         self.grid_mapping_dict = grid_mapping_dict16
@@ -1366,8 +1385,9 @@ class CF1_6Check(CFNCCheck):
             ):
                 fails.append(
                     "The variable {} failed because the datatype is {}".format(
-                        k, v.datatype
-                    )
+                        k,
+                        v.datatype,
+                    ),
                 )
         return Result(
             BaseCheck.HIGH,
@@ -1442,10 +1462,10 @@ class CF1_6Check(CFNCCheck):
 
         results = []
         add_offset_vars = ds.get_variables_by_attributes(
-            add_offset=lambda x: x is not None
+            add_offset=lambda x: x is not None,
         )
         scale_factor_vars = ds.get_variables_by_attributes(
-            scale_factor=lambda x: x is not None
+            scale_factor=lambda x: x is not None,
         )
 
         for _att_vars_tup in (
@@ -1456,11 +1476,12 @@ class CF1_6Check(CFNCCheck):
                 list(
                     map(
                         lambda x: self._check_scale_factor_add_offset(
-                            ds.variables[x], _att_vars_tup[0]
+                            ds.variables[x],
+                            _att_vars_tup[0],
                         ),
                         _att_vars_tup[1],
-                    )
-                )
+                    ),
+                ),
             )
 
         return results
@@ -1588,7 +1609,7 @@ class CF1_6Check(CFNCCheck):
             for dimension, count in dims.items():
                 if count > 1:
                     fails.append(
-                        "%s has two or more dimensions named %s" % (k, dimension)
+                        f"{k} has two or more dimensions named {dimension}",
                     )
 
         return Result(
@@ -1646,7 +1667,9 @@ class CF1_6Check(CFNCCheck):
                     "unlimited).".format(
                         name,
                         self._get_pretty_dimension_order_with_type(
-                            ds, name, dimension_order
+                            ds,
+                            name,
+                            dimension_order,
                         ),
                     ),
                 )
@@ -1682,7 +1705,8 @@ class CF1_6Check(CFNCCheck):
                     valid_fill_range.assert_true(
                         False,
                         "{};\n\t{}:valid_range must be a numeric type not a string".format(
-                            m, name
+                            m,
+                            name,
                         ),
                     )
                     continue
@@ -1693,15 +1717,16 @@ class CF1_6Check(CFNCCheck):
                 if isinstance(variable.valid_min, str):
                     valid_fill_range.assert_true(
                         False,
-                        "{}:valid_min must be a numeric type not a string".format(name),
+                        f"{name}:valid_min must be a numeric type not a string",
                     )
                 if isinstance(variable.valid_max, str):
                     valid_fill_range.assert_true(
                         False,
-                        "{}:valid_max must be a numeric type not a string".format(name),
+                        f"{name}:valid_max must be a numeric type not a string",
                     )
                 if isinstance(variable.valid_min, str) or isinstance(
-                    variable.valid_max, str
+                    variable.valid_max,
+                    str,
                 ):
                     continue
                 rmin = variable.valid_min
@@ -1830,8 +1855,10 @@ class CF1_6Check(CFNCCheck):
         forecast_variables = cfutil.get_forecast_metadata_variables(ds)
 
         unit_required_variables = set(
-            coordinate_variables + auxiliary_coordinates + geophysical_variables
-            + forecast_variables
+            coordinate_variables
+            + auxiliary_coordinates
+            + geophysical_variables
+            + forecast_variables,
         )
 
         for name in unit_required_variables:
@@ -1847,13 +1874,14 @@ class CF1_6Check(CFNCCheck):
                 continue
 
             # Skip labels
-            if ((hasattr(variable.dtype, "char") and variable.dtype.char == "S")
-                or variable.dtype == str):
+            if (
+                hasattr(variable.dtype, "char") and variable.dtype.char == "S"
+            ) or variable.dtype == str:
                 continue
 
             standard_name = getattr(variable, "standard_name", None)
             standard_name, standard_name_modifier = self._split_standard_name(
-                standard_name
+                standard_name,
             )
 
             units = getattr(variable, "units", None)
@@ -1861,14 +1889,14 @@ class CF1_6Check(CFNCCheck):
             valid_units = self._check_valid_cf_units(ds, name)
             ret_val.append(valid_units)
 
-            units_attr_is_string = TestCtx(BaseCheck.MEDIUM,
-                                           self.section_titles["3.1"])
+            units_attr_is_string = TestCtx(BaseCheck.MEDIUM, self.section_titles["3.1"])
 
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(
                 isinstance(units, str),
                 "units ({}) attribute of '{}' must be a string compatible with UDUNITS".format(
-                    units, variable.name
+                    units,
+                    variable.name,
                 ),
             ):
                 valid_udunits = self._check_valid_udunits(ds, name)
@@ -1899,10 +1927,11 @@ class CF1_6Check(CFNCCheck):
         units = getattr(variable, "units", None)
         standard_name_full = getattr(variable, "standard_name", None)
         standard_name, standard_name_modifier = self._split_standard_name(
-            standard_name_full
+            standard_name_full,
         )
         std_name_units_dimensionless = cfutil.is_dimensionless_standard_name(
-            self._std_names._root, standard_name
+            self._std_names._root,
+            standard_name,
         )
         # Is this even in the database? also, if there is no standard_name,
         # there's no way to know if it is dimensionless.
@@ -1918,7 +1947,7 @@ class CF1_6Check(CFNCCheck):
         valid_units.assert_true(
             should_be_dimensionless or units is not None,
             "units attribute is required for {} when variable is not a dimensionless quantity".format(
-                variable_name
+                variable_name,
             ),
         )
 
@@ -1928,13 +1957,13 @@ class CF1_6Check(CFNCCheck):
         # 2) units attribute must be a string
         valid_units.assert_true(
             should_be_dimensionless or isinstance(units, str),
-            "units attribute for {} needs to be a string".format(variable_name),
+            f"units attribute for {variable_name} needs to be a string",
         )
 
         # 3) units are not deprecated
         valid_units.assert_true(
             units not in deprecated,
-            'units for {}, "{}" are deprecated by CF 1.6'.format(variable_name, units),
+            f'units for {variable_name}, "{units}" are deprecated by CF 1.6',
         )
 
         return valid_units.to_result()
@@ -1952,7 +1981,8 @@ class CF1_6Check(CFNCCheck):
         standard_name = getattr(variable, "standard_name", None)
         standard_name, standard_name_modifier = self._split_standard_name(standard_name)
         std_name_units_dimensionless = cfutil.is_dimensionless_standard_name(
-            self._std_names._root, standard_name
+            self._std_names._root,
+            standard_name,
         )
 
         # If the variable is supposed to be dimensionless, it automatically passes
@@ -1967,7 +1997,8 @@ class CF1_6Check(CFNCCheck):
         valid_udunits.assert_true(
             should_be_dimensionless or are_udunits,
             'units for {}, "{}" are not recognized by UDUNITS'.format(
-                variable_name, units
+                variable_name,
+                units,
             ),
         )
         return valid_udunits.to_result()
@@ -1989,7 +2020,8 @@ class CF1_6Check(CFNCCheck):
 
         # If the variable is supposed to be dimensionless, it automatically passes
         std_name_units_dimensionless = cfutil.is_dimensionless_standard_name(
-            self._std_names._root, standard_name
+            self._std_names._root,
+            standard_name,
         )
 
         standard_name, standard_name_modifier = self._split_standard_name(standard_name)
@@ -2047,8 +2079,7 @@ class CF1_6Check(CFNCCheck):
             valid_standard_units.assert_true(
                 util.units_convertible(canonical_units, units),
                 "units for variable {} must be convertible to {} "
-                "currently they are {}".format(variable_name, canonical_units,
-                                               units),
+                "currently they are {}".format(variable_name, canonical_units, units),
             )
 
         return valid_standard_units.to_result()
@@ -2099,7 +2130,7 @@ class CF1_6Check(CFNCCheck):
 
             standard_name = getattr(ncvar, "standard_name", None)
             standard_name, standard_name_modifier = self._split_standard_name(
-                standard_name
+                standard_name,
             )
             long_name = getattr(ncvar, "long_name", None)
             long_or_std_name = TestCtx(BaseCheck.HIGH, self.section_titles["3.3"])
@@ -2107,7 +2138,7 @@ class CF1_6Check(CFNCCheck):
                 long_name_present = True
                 long_or_std_name.assert_true(
                     isinstance(long_name, str),
-                    "Attribute long_name for variable {} must be a string".format(name),
+                    f"Attribute long_name for variable {name} must be a string",
                 )
             else:
                 long_name_present = False
@@ -2124,14 +2155,15 @@ class CF1_6Check(CFNCCheck):
                 valid_std_name.assert_true(
                     isinstance(standard_name, str),
                     "Attribute standard_name for variable {} must be a string".format(
-                        name
+                        name,
                     ),
                 )
                 if isinstance(standard_name, str):
                     valid_std_name.assert_true(
                         standard_name in self._std_names,
                         "standard_name {} is not defined in Standard Name Table v{}".format(
-                            standard_name or "undefined", self._std_names._version
+                            standard_name or "undefined",
+                            self._std_names._version,
                         ),
                     )
 
@@ -2159,7 +2191,7 @@ class CF1_6Check(CFNCCheck):
             long_or_std_name.assert_true(
                 long_name_present or standard_name_present,
                 "Attribute long_name or/and standard_name is highly recommended for variable {}".format(
-                    name
+                    name,
                 ),
             )
             ret_val.append(long_or_std_name.to_result())
@@ -2185,7 +2217,7 @@ class CF1_6Check(CFNCCheck):
         ret_val = []
 
         for ncvar in ds.get_variables_by_attributes(
-            ancillary_variables=lambda x: x is not None
+            ancillary_variables=lambda x: x is not None,
         ):
             name = ncvar.name
             valid_ancillary = TestCtx(BaseCheck.HIGH, self.section_titles["3.4"])
@@ -2205,7 +2237,7 @@ class CF1_6Check(CFNCCheck):
             for ancillary_variable in ancillary_variables.split():
                 valid_ancillary.assert_true(
                     ancillary_variable in ds.variables,
-                    "{} is not a variable in this dataset".format(ancillary_variable),
+                    f"{ancillary_variable} is not a variable in this dataset",
                 )
 
             ret_val.append(valid_ancillary.to_result())
@@ -2256,7 +2288,7 @@ class CF1_6Check(CFNCCheck):
             # Check that the variable defines mask or values
             valid_flags_var.assert_true(
                 flag_values is not None or flag_masks is not None,
-                "{} does not define either flag_masks or flag_values".format(name),
+                f"{name} does not define either flag_masks or flag_values",
             )
             ret_val.append(valid_flags_var.to_result())
 
@@ -2275,15 +2307,15 @@ class CF1_6Check(CFNCCheck):
 
             if flag_values is not None and flag_masks is not None:
                 allv = list(
-                    map(lambda a, b: a & b == a, list(zip(flag_values, flag_masks)))
+                    map(lambda a, b: a & b == a, list(zip(flag_values, flag_masks))),
                 )
 
                 allvr = Result(BaseCheck.MEDIUM, all(allv), self.section_titles["3.5"])
                 if not allvr.value:
                     allvr.msgs = [
                         "flag masks and flag values for '{}' combined don't equal flag value".format(
-                            name
-                        )
+                            name,
+                        ),
                     ]
 
                 ret_val.append(allvr)
@@ -2313,7 +2345,8 @@ class CF1_6Check(CFNCCheck):
         valid_values.assert_true(
             isinstance(flag_values, np.ndarray),
             "{}'s flag_values must be an array of values not {}".format(
-                name, type(flag_values)
+                name,
+                type(flag_values),
             ),
         )
 
@@ -2325,7 +2358,7 @@ class CF1_6Check(CFNCCheck):
         flag_set = set(flag_values)
         valid_values.assert_true(
             len(flag_set) == len(flag_values),
-            "{}'s flag_values must be independent and can not be repeated".format(name),
+            f"{name}'s flag_values must be independent and can not be repeated",
         )
 
         # the data type for flag_values should be the same as the variable
@@ -2340,7 +2373,7 @@ class CF1_6Check(CFNCCheck):
             valid_values.assert_true(
                 len(flag_meanings) == len(flag_values),
                 "{}'s flag_meanings and flag_values should have the same number ".format(
-                    name
+                    name,
                 )
                 + "of elements.",
             )
@@ -2370,7 +2403,8 @@ class CF1_6Check(CFNCCheck):
         valid_masks.assert_true(
             isinstance(flag_masks, np.ndarray),
             "{}'s flag_masks must be an array of values not {}".format(
-                name, type(flag_masks).__name__
+                name,
+                type(flag_masks).__name__,
             ),
         )
 
@@ -2391,7 +2425,7 @@ class CF1_6Check(CFNCCheck):
 
         valid_masks.assert_true(
             type_ok,
-            "{}'s data type must be capable of bit-field expression".format(name),
+            f"{name}'s data type must be capable of bit-field expression",
         )
 
         if isinstance(flag_meanings, str):
@@ -2399,7 +2433,7 @@ class CF1_6Check(CFNCCheck):
             valid_masks.assert_true(
                 len(flag_meanings) == len(flag_masks),
                 "{} flag_meanings and flag_masks should have the same number ".format(
-                    name
+                    name,
                 )
                 + "of elements.",
             )
@@ -2424,12 +2458,12 @@ class CF1_6Check(CFNCCheck):
 
         valid_meanings.assert_true(
             flag_meanings is not None,
-            "{}'s flag_meanings attribute is required for flag variables".format(name),
+            f"{name}'s flag_meanings attribute is required for flag variables",
         )
 
         valid_meanings.assert_true(
             isinstance(flag_meanings, str),
-            "{}'s flag_meanings attribute must be a string".format(name),
+            f"{name}'s flag_meanings attribute must be a string",
         )
 
         # We can't perform any additional checks if it's not a string
@@ -2437,7 +2471,8 @@ class CF1_6Check(CFNCCheck):
             return valid_meanings.to_result()
 
         valid_meanings.assert_true(
-            len(flag_meanings) > 0, "{}'s flag_meanings can't be empty".format(name)
+            len(flag_meanings) > 0,
+            f"{name}'s flag_meanings can't be empty",
         )
 
         flag_regx = regex.compile(r"^[0-9A-Za-z_\-.+@]+$")
@@ -2447,9 +2482,9 @@ class CF1_6Check(CFNCCheck):
                 valid_meanings.assert_true(
                     False,
                     "{}'s flag_meanings attribute defined an illegal flag meaning ".format(
-                        name
+                        name,
                     )
-                    + "{}".format(meaning),
+                    + f"{meaning}",
                 )
         return valid_meanings.to_result()
 
@@ -2519,7 +2554,7 @@ class CF1_6Check(CFNCCheck):
         axis_is_string = (isinstance(axis, str),)
         valid_axis.assert_true(
             axis_is_string and len(axis) > 0,
-            "{}'s axis attribute must be a non-empty string".format(name),
+            f"{name}'s axis attribute must be a non-empty string",
         )
 
         # If axis isn't a string we can't continue any checks
@@ -2528,8 +2563,7 @@ class CF1_6Check(CFNCCheck):
 
         valid_axis.assert_true(
             axis in allowed_axis,
-            "{}'s axis attribute must be T, X, Y, or Z, ".format(name)
-            + "currently {}".format(axis),
+            f"{name}'s axis attribute must be T, X, Y, or Z, " + f"currently {axis}",
         )
 
         return valid_axis.to_result()
@@ -2589,7 +2623,7 @@ class CF1_6Check(CFNCCheck):
             valid_latitude = TestCtx(BaseCheck.HIGH, self.section_titles["4.1"])
             valid_latitude.assert_true(
                 units is not None,
-                "latitude variable '{}' must define units".format(latitude),
+                f"latitude variable '{latitude}' must define units",
             )
             ret_val.append(valid_latitude.to_result())
 
@@ -2621,7 +2655,10 @@ class CF1_6Check(CFNCCheck):
                     "".format(latitude)
                 )
                 recommended_units = Result(
-                    BaseCheck.LOW, (1, 1), self.section_titles["4.1"], [msg]
+                    BaseCheck.LOW,
+                    (1, 1),
+                    self.section_titles["4.1"],
+                    [msg],
                 )
                 ret_val.append(recommended_units)
 
@@ -2695,7 +2732,7 @@ class CF1_6Check(CFNCCheck):
             valid_longitude = TestCtx(BaseCheck.HIGH, self.section_titles["4.2"])
             valid_longitude.assert_true(
                 units is not None,
-                "longitude variable '{}' must define units".format(longitude),
+                f"longitude variable '{longitude}' must define units",
             )
             ret_val.append(valid_longitude.to_result())
 
@@ -2727,7 +2764,10 @@ class CF1_6Check(CFNCCheck):
                     "".format(longitude)
                 )
                 recommended_units = Result(
-                    BaseCheck.LOW, (1, 1), self.section_titles["4.2"], [msg]
+                    BaseCheck.LOW,
+                    (1, 1),
+                    self.section_titles["4.2"],
+                    [msg],
                 )
                 ret_val.append(recommended_units)
 
@@ -2744,7 +2784,9 @@ class CF1_6Check(CFNCCheck):
         return ret_val
 
     def check_dimensional_vertical_coordinate(
-        self, ds, dimless_vertical_coordinates=dimless_vertical_coordinates_1_6
+        self,
+        ds,
+        dimless_vertical_coordinates=dimless_vertical_coordinates_1_6,
     ):
         """
         Check units for variables defining vertical position are valid under
@@ -2808,7 +2850,12 @@ class CF1_6Check(CFNCCheck):
         return ret_val
 
     def _check_dimensionless_vertical_coordinate_1_6(
-        self, ds, vname, deprecated_units, ret_val, dim_vert_coords_dict
+        self,
+        ds,
+        vname,
+        deprecated_units,
+        ret_val,
+        dim_vert_coords_dict,
     ):
         """
         Check that a dimensionless vertical coordinate variable is valid under
@@ -2872,7 +2919,7 @@ class CF1_6Check(CFNCCheck):
                 deprecated_units,
                 self._check_dimensionless_vertical_coordinate_1_6,
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
 
         return ret_val
@@ -2931,7 +2978,10 @@ class CF1_6Check(CFNCCheck):
             if not correct_units:
                 reasoning = ["%s does not have correct time units" % name]
             result = Result(
-                BaseCheck.HIGH, correct_units, self.section_titles["4.4"], reasoning
+                BaseCheck.HIGH,
+                correct_units,
+                self.section_titles["4.4"],
+                reasoning,
             )
             ret_val.append(result)
 
@@ -2997,7 +3047,7 @@ class CF1_6Check(CFNCCheck):
         # if has a calendar, check that it is within the valid values
         # otherwise no calendar is valid
         for time_var in ds.get_variables_by_attributes(
-            calendar=lambda c: c is not None
+            calendar=lambda c: c is not None,
         ):
             reasoning = None
             valid_calendar = time_var.calendar in valid_calendars
@@ -3005,14 +3055,17 @@ class CF1_6Check(CFNCCheck):
             if not valid_calendar:
                 reasoning = [
                     "§4.4.1 Variable %s should have a valid calendar: '%s' is not a valid calendar"
-                    % (time_var.name, time_var.calendar)
+                    % (time_var.name, time_var.calendar),
                 ]
 
             # passes if the calendar is valid, otherwise notify of invalid
             # calendar
 
             result = Result(
-                BaseCheck.LOW, valid_calendar, self.section_titles["4.4"], reasoning
+                BaseCheck.LOW,
+                valid_calendar,
+                self.section_titles["4.4"],
+                reasoning,
             )
             ret_val.append(result)
 
@@ -3077,7 +3130,10 @@ class CF1_6Check(CFNCCheck):
                     "dimensions for auxiliary coordinate variable {} ({}) "
                     "are not a subset of dimensions for variable {} ({})"
                     "".format(
-                        aux_coord, ", ".join(aux_coord_dims), name, ", ".join(dim_set)
+                        aux_coord,
+                        ", ".join(aux_coord_dims),
+                        name,
+                        ", ".join(dim_set),
                     ),
                 )
             ret_val.append(valid_aux_coords.to_result())
@@ -3120,7 +3176,9 @@ class CF1_6Check(CFNCCheck):
                 no_duplicates.assert_true(
                     len(coords) <= 1,
                     "'{}' has duplicate axis {} defined by [{}]".format(
-                        name, axis, ", ".join(sorted(coords))
+                        name,
+                        axis,
+                        ", ".join(sorted(coords)),
                     ),
                 )
 
@@ -3291,11 +3349,11 @@ class CF1_6Check(CFNCCheck):
             # Make sure it's associated with valid lat and valid lon
             valid_rgrid.assert_true(
                 len(coord_set.intersection(lons)) > 0,
-                "{} must be associated with a valid longitude coordinate".format(name),
+                f"{name} must be associated with a valid longitude coordinate",
             )
             valid_rgrid.assert_true(
                 len(coord_set.intersection(lats)) > 0,
-                "{} must be associated with a valid latitude coordinate".format(name),
+                f"{name} must be associated with a valid latitude coordinate",
             )
             valid_rgrid.assert_true(
                 len(axis_map["C"]) == 1,
@@ -3360,7 +3418,7 @@ class CF1_6Check(CFNCCheck):
 
         else:
             raise NotImplementedError(
-                "Evaluation for {} not yet implemented".format(attr_name)
+                f"Evaluation for {attr_name} not yet implemented",
             )
 
     def _evaluate_latitude_of_projection_origin(self, val):
@@ -3495,76 +3553,78 @@ class CF1_6Check(CFNCCheck):
         :return: List of results
         """
         ret_val = []
-        region_list = [  # TODO maybe move this (and other info like it) into a config file?
-            "africa",
-            "antarctica",
-            "arabian_sea",
-            "aral_sea",
-            "arctic_ocean",
-            "asia",
-            "atlantic_ocean",
-            "australia",
-            "baltic_sea",
-            "barents_opening",
-            "barents_sea",
-            "beaufort_sea",
-            "bellingshausen_sea",
-            "bering_sea",
-            "bering_strait",
-            "black_sea",
-            "canadian_archipelago",
-            "caribbean_sea",
-            "caspian_sea",
-            "central_america",
-            "chukchi_sea",
-            "contiguous_united_states",
-            "denmark_strait",
-            "drake_passage",
-            "east_china_sea",
-            "english_channel",
-            "eurasia",
-            "europe",
-            "faroe_scotland_channel",
-            "florida_bahamas_strait",
-            "fram_strait",
-            "global",
-            "global_land",
-            "global_ocean",
-            "great_lakes",
-            "greenland",
-            "gulf_of_alaska",
-            "gulf_of_mexico",
-            "hudson_bay",
-            "iceland_faroe_channel",
-            "indian_ocean",
-            "indonesian_throughflow",
-            "indo_pacific_ocean",
-            "irish_sea",
-            "lake_baykal",
-            "lake_chad",
-            "lake_malawi",
-            "lake_tanganyika",
-            "lake_victoria",
-            "mediterranean_sea",
-            "mozambique_channel",
-            "north_america",
-            "north_sea",
-            "norwegian_sea",
-            "pacific_equatorial_undercurrent",
-            "pacific_ocean",
-            "persian_gulf",
-            "red_sea",
-            "ross_sea",
-            "sea_of_japan",
-            "sea_of_okhotsk",
-            "south_america",
-            "south_china_sea",
-            "southern_ocean",
-            "taiwan_luzon_straits",
-            "weddell_sea",
-            "windward_passage",
-            "yellow_sea",
-        ]
+        region_list = (
+            [  # TODO maybe move this (and other info like it) into a config file?
+                "africa",
+                "antarctica",
+                "arabian_sea",
+                "aral_sea",
+                "arctic_ocean",
+                "asia",
+                "atlantic_ocean",
+                "australia",
+                "baltic_sea",
+                "barents_opening",
+                "barents_sea",
+                "beaufort_sea",
+                "bellingshausen_sea",
+                "bering_sea",
+                "bering_strait",
+                "black_sea",
+                "canadian_archipelago",
+                "caribbean_sea",
+                "caspian_sea",
+                "central_america",
+                "chukchi_sea",
+                "contiguous_united_states",
+                "denmark_strait",
+                "drake_passage",
+                "east_china_sea",
+                "english_channel",
+                "eurasia",
+                "europe",
+                "faroe_scotland_channel",
+                "florida_bahamas_strait",
+                "fram_strait",
+                "global",
+                "global_land",
+                "global_ocean",
+                "great_lakes",
+                "greenland",
+                "gulf_of_alaska",
+                "gulf_of_mexico",
+                "hudson_bay",
+                "iceland_faroe_channel",
+                "indian_ocean",
+                "indonesian_throughflow",
+                "indo_pacific_ocean",
+                "irish_sea",
+                "lake_baykal",
+                "lake_chad",
+                "lake_malawi",
+                "lake_tanganyika",
+                "lake_victoria",
+                "mediterranean_sea",
+                "mozambique_channel",
+                "north_america",
+                "north_sea",
+                "norwegian_sea",
+                "pacific_equatorial_undercurrent",
+                "pacific_ocean",
+                "persian_gulf",
+                "red_sea",
+                "ross_sea",
+                "sea_of_japan",
+                "sea_of_okhotsk",
+                "south_america",
+                "south_china_sea",
+                "southern_ocean",
+                "taiwan_luzon_straits",
+                "weddell_sea",
+                "windward_passage",
+                "yellow_sea",
+            ]
+        )
 
         for var in ds.get_variables_by_attributes(standard_name="region"):
             valid_region = TestCtx(BaseCheck.MEDIUM, self.section_titles["6.1"])
@@ -3574,7 +3634,8 @@ class CF1_6Check(CFNCCheck):
             valid_region.assert_true(
                 "".join(region.astype(str)).lower() in region_list,
                 "6.1.1 '{}' specified by '{}' is not a valid region".format(
-                    "".join(region.astype(str)), var.name
+                    "".join(region.astype(str)),
+                    var.name,
                 ),
             )
             ret_val.append(valid_region.to_result())
@@ -3629,7 +3690,7 @@ class CF1_6Check(CFNCCheck):
         ret_val = []
         reasoning = []
         for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(
-            ds
+            ds,
         ).items():
             variable = ds.variables[variable_name]
             valid = True
@@ -3638,9 +3699,10 @@ class CF1_6Check(CFNCCheck):
                 valid = False
                 reasoning.append(
                     "Boundary variable {} referenced by {} not ".format(
-                        boundary_variable_name, variable.name
+                        boundary_variable_name,
+                        variable.name,
                     )
-                    + "found in dataset variables"
+                    + "found in dataset variables",
                 )
             else:
                 boundary_variable = ds.variables[boundary_variable_name]
@@ -3650,10 +3712,11 @@ class CF1_6Check(CFNCCheck):
                 valid = False
                 reasoning.append(
                     "Boundary variable {} specified by {}".format(
-                        boundary_variable.name, variable.name
+                        boundary_variable.name,
+                        variable.name,
                     )
                     + " should have at least two dimensions to enclose the base "
-                    + "case of a one dimensionsal variable"
+                    + "case of a one dimensionsal variable",
                 )
             if boundary_variable.ndim != variable.ndim + 1:
                 valid = False
@@ -3667,13 +3730,13 @@ class CF1_6Check(CFNCCheck):
                         boundary_variable.name,
                         boundary_variable.ndim,
                         variable.ndim + 1,
-                    )
+                    ),
                 )
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
                     "Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
-                    "".format(variable.name, boundary_variable.dimensions)
+                    "".format(variable.name, boundary_variable.dimensions),
                 )
 
             # ensure p vertices form a valid simplex given previous a...n
@@ -3689,10 +3752,13 @@ class CF1_6Check(CFNCCheck):
                         variable.name,
                         len(variable.dimensions) + 1,
                         boundary_variable.dimensions[:-1],
-                    )
+                    ),
                 )
             result = Result(
-                BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning
+                BaseCheck.MEDIUM,
+                valid,
+                self.section_titles["7.1"],
+                reasoning,
             )
             ret_val.append(result)
         return ret_val
@@ -3721,7 +3787,7 @@ class CF1_6Check(CFNCCheck):
         ret_val = []
         reasoning = []
         variables = ds.get_variables_by_attributes(
-            cell_measures=lambda c: c is not None
+            cell_measures=lambda c: c is not None,
         )
         for var in variables:
             search_str = r"^(?:area|volume): (\w+)$"
@@ -3733,7 +3799,7 @@ class CF1_6Check(CFNCCheck):
                     "is formatted incorrectly.  It should take the"
                     " form of either 'area: cell_var' or "
                     "'volume: cell_var' where cell_var is the "
-                    "variable describing the cell measures".format(var.name)
+                    "variable describing the cell measures".format(var.name),
                 )
             else:
                 valid = True
@@ -3744,8 +3810,9 @@ class CF1_6Check(CFNCCheck):
                     reasoning.append(
                         "Cell measure variable {} referred to by "
                         "{} is not present in dataset variables".format(
-                            cell_meas_var_name, var.name
-                        )
+                            cell_meas_var_name,
+                            var.name,
+                        ),
                     )
                 else:
                     cell_meas_var = ds.variables[cell_meas_var_name]
@@ -3754,8 +3821,8 @@ class CF1_6Check(CFNCCheck):
                         reasoning.append(
                             "Cell measure variable {} is required "
                             "to have units attribute defined.".format(
-                                cell_meas_var_name
-                            )
+                                cell_meas_var_name,
+                            ),
                         )
                     if not set(cell_meas_var.dimensions).issubset(var.dimensions):
                         valid = False
@@ -3763,12 +3830,16 @@ class CF1_6Check(CFNCCheck):
                             "Cell measure variable {} must have "
                             "dimensions which are a subset of "
                             "those defined in variable {}.".format(
-                                cell_meas_var_name, var.name
-                            )
+                                cell_meas_var_name,
+                                var.name,
+                            ),
                         )
 
             result = Result(
-                BaseCheck.MEDIUM, valid, (self.section_titles["7.2"]), reasoning
+                BaseCheck.MEDIUM,
+                valid,
+                (self.section_titles["7.2"]),
+                reasoning,
             )
             ret_val.append(result)
 
@@ -3801,7 +3872,7 @@ class CF1_6Check(CFNCCheck):
         ret_val = []
         psep = regex.compile(
             r"(?P<vars>\w+: )+(?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) "
-            r"?(?P<over>over (?P<otypevar>\w+))?| ?)(?:\((?P<paren_contents>[^)]*)\))?"
+            r"?(?P<over>over (?P<otypevar>\w+))?| ?)(?:\((?P<paren_contents>[^)]*)\))?",
         )
 
         for var in ds.get_variables_by_attributes(cell_methods=lambda x: x is not None):
@@ -3811,7 +3882,8 @@ class CF1_6Check(CFNCCheck):
             method = getattr(var, "cell_methods", "")
 
             valid_attribute = TestCtx(
-                BaseCheck.HIGH, self.section_titles["7.3"]
+                BaseCheck.HIGH,
+                self.section_titles["7.3"],
             )  # changed from 7.1 to 7.3
             valid_attribute.assert_true(
                 regex.match(psep, method) is not None,
@@ -3866,8 +3938,9 @@ class CF1_6Check(CFNCCheck):
                     # not sure what to do if a comment contains a colon!
                     ret_val.append(
                         self._check_cell_methods_paren_info(
-                            match.group("paren_contents"), var
-                        ).to_result()
+                            match.group("paren_contents"),
+                            var,
+                        ).to_result(),
                     )
 
         return ret_val
@@ -3897,14 +3970,16 @@ class CF1_6Check(CFNCCheck):
             if keyword == "interval:":
                 valid_info.out_of += 2
                 interval_matches = regex.match(
-                    r"^\s*(?P<interval_number>\S+)\s+(?P<interval_units>\S+)\s*$", val
+                    r"^\s*(?P<interval_number>\S+)\s+(?P<interval_units>\S+)\s*$",
+                    val,
                 )
                 # attempt to get the number for the interval
                 if not interval_matches:
                     valid_info.messages.append(
                         '§7.3.3 {}:cell_methods contains an interval specification that does not parse: "{}". Should be in format "interval: <number> <units>"'.format(
-                            var.name, val
-                        )
+                            var.name,
+                            val,
+                        ),
                     )
                 else:
                     try:
@@ -3912,8 +3987,9 @@ class CF1_6Check(CFNCCheck):
                     except ValueError:
                         valid_info.messages.append(
                             '§7.3.3 {}:cell_methods contains an interval value that does not parse as a numeric value: "{}".'.format(
-                                var.name, interval_matches.group("interval_number")
-                            )
+                                var.name,
+                                interval_matches.group("interval_number"),
+                            ),
                         )
                     else:
                         valid_info.score += 1
@@ -3924,8 +4000,9 @@ class CF1_6Check(CFNCCheck):
                     except ValueError:
                         valid_info.messages.append(
                             '§7.3.3 {}:cell_methods interval units "{}" is not parsable by UDUNITS.'.format(
-                                var.name, interval_matches.group("interval_units")
-                            )
+                                var.name,
+                                interval_matches.group("interval_units"),
+                            ),
                         )
                     else:
                         valid_info.score += 1
@@ -3938,16 +4015,16 @@ class CF1_6Check(CFNCCheck):
                 if len(pmatches) == 1:
                     valid_info.messages.append(
                         "§7.3.3 If there is no standardized information, the keyword comment: should be omitted for variable {}".format(
-                            var.name
-                        )
+                            var.name,
+                        ),
                     )
                 # otherwise check that the comment is the last
                 # item in the parentheses
                 elif i != len(pmatches) - 1:
                     valid_info.messages.append(
                         '§7.3.3 The non-standard "comment:" element must come after any standard elements in cell_methods for variable {}'.format(
-                            var.name
-                        )
+                            var.name,
+                        ),
                     )
                 #
                 else:
@@ -3956,8 +4033,9 @@ class CF1_6Check(CFNCCheck):
                 valid_info.out_of += 1
                 valid_info.messages.append(
                     '§7.3.3 Invalid cell_methods keyword "{}" for variable {}. Must be one of [interval, comment]'.format(
-                        keyword, var.name
-                    )
+                        keyword,
+                        var.name,
+                    ),
                 )
 
         # Ensure concatenated reconstructed matches are the same as the
@@ -3965,7 +4043,8 @@ class CF1_6Check(CFNCCheck):
         valid_info.assert_true(
             "".join(m.group(0) for m in pmatches) == paren_contents,
             "§7.3.3 Parenthetical content inside {}:cell_methods is not well formed: {}".format(
-                var.name, paren_contents
+                var.name,
+                paren_contents,
             ),
         )
 
@@ -4016,7 +4095,7 @@ class CF1_6Check(CFNCCheck):
         # find any climatology axies variables; any variables which contain climatological stats will use
         # these variables as coordinates
         clim_time_coord_vars = ds.get_variables_by_attributes(
-            climatology=lambda s: s is not None
+            climatology=lambda s: s is not None,
         )
 
         # first, to determine whether or not we have a valid climatological time
@@ -4026,11 +4105,14 @@ class CF1_6Check(CFNCCheck):
             if hasattr(clim_coord_var, "bounds"):
                 reasoning.append(
                     "Variable {} has a climatology attribute and cannot also have a bounds attribute.".format(
-                        clim_coord_var.name
-                    )
+                        clim_coord_var.name,
+                    ),
                 )
                 result = Result(
-                    BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
+                    BaseCheck.MEDIUM,
+                    False,
+                    (self.section_titles["7.4"]),
+                    reasoning,
                 )
                 ret_val.append(result)
                 return ret_val
@@ -4039,11 +4121,14 @@ class CF1_6Check(CFNCCheck):
             elif clim_coord_var.climatology not in ds.variables:
                 reasoning.append(
                     "Variable {} referenced in time's climatology attribute does not exist".format(
-                        ds.variables["time"].climatology
-                    )
+                        ds.variables["time"].climatology,
+                    ),
                 )
                 result = Result(
-                    BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
+                    BaseCheck.MEDIUM,
+                    False,
+                    (self.section_titles["7.4"]),
+                    reasoning,
                 )
                 ret_val.append(result)
                 return ret_val
@@ -4058,8 +4143,8 @@ class CF1_6Check(CFNCCheck):
             ):
                 reasoning.append(
                     "Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
-                        ds.variables[clim_coord_var.climatology].dimensions
-                    )
+                        ds.variables[clim_coord_var.climatology].dimensions,
+                    ),
                 )
                 return ret_val
 
@@ -4071,8 +4156,8 @@ class CF1_6Check(CFNCCheck):
             ):
                 reasoning.append(
                     "Climatology dimension {} should only contain two elements".format(
-                        boundary_variable.dimensions
-                    )
+                        boundary_variable.dimensions,
+                    ),
                 )
 
             # passed all these checks, so we can add this clim_coord_var to our total list
@@ -4088,7 +4173,7 @@ class CF1_6Check(CFNCCheck):
         # "time: method1 within years time: method2 over years (sidereal years)"
 
         meth_regex = "(?:{})".format(
-            "|".join(methods)
+            "|".join(methods),
         )  # "or" comparison for the methods
         re_string = (
             r"^time: {0} within (years|days)"  # regex string to test
@@ -4098,17 +4183,17 @@ class CF1_6Check(CFNCCheck):
 
         # find any variables with a valid climatological cell_methods
         for cell_method_var in ds.get_variables_by_attributes(
-            cell_methods=lambda s: s is not None
+            cell_methods=lambda s: s is not None,
         ):
             if any(
-                [dim in all_clim_coord_var_names for dim in cell_method_var.dimensions]
+                [dim in all_clim_coord_var_names for dim in cell_method_var.dimensions],
             ):
                 total_climate_count += 1
                 if not regex.search(re_string, cell_method_var.cell_methods):
                     reasoning.append(
                         'The "time: method within years/days over years/days" format is not correct in variable {}.'.format(
-                            cell_method_var.name
-                        )
+                            cell_method_var.name,
+                        ),
                     )
                 else:
                     valid_climate_count += 1
@@ -4170,14 +4255,14 @@ class CF1_6Check(CFNCCheck):
             if type(add_offset) != type(scale_factor):
                 valid = False
                 reasoning.append(
-                    "Attributes add_offset and scale_factor have different data type."
+                    "Attributes add_offset and scale_factor have different data type.",
                 )
             elif type(scale_factor) != var.dtype.type:
                 # Check both attributes are type float or double
                 if not isinstance(scale_factor, (float, np.floating)):
                     valid = False
                     reasoning.append(
-                        "Attributes add_offset and scale_factor are not of type float or double."
+                        "Attributes add_offset and scale_factor are not of type float or double.",
                     )
                 else:
                     # Check variable type is byte, short or int
@@ -4192,7 +4277,10 @@ class CF1_6Check(CFNCCheck):
                         reasoning.append("Variable is not of type byte, short, or int.")
 
             result = Result(
-                BaseCheck.MEDIUM, valid, self.section_titles["8.1"], reasoning
+                BaseCheck.MEDIUM,
+                valid,
+                self.section_titles["8.1"],
+                reasoning,
             )
             ret_val.append(result)
             reasoning = []
@@ -4204,32 +4292,35 @@ class CF1_6Check(CFNCCheck):
                     valid = False
                     reasoning.append(
                         "Type of %s:_FillValue attribute (%s) does not match variable type (%s)"
-                        % (name, var._FillValue.dtype.name, var.dtype.name)
+                        % (name, var._FillValue.dtype.name, var.dtype.name),
                     )
             if hasattr(var, "valid_min"):
                 if var.valid_min.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append(
                         "Type of %svalid_min attribute (%s) does not match variable type (%s)"
-                        % (name, var.valid_min.dtype.name, var.dtype.name)
+                        % (name, var.valid_min.dtype.name, var.dtype.name),
                     )
             if hasattr(var, "valid_max"):
                 if var.valid_max.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append(
                         "Type of %s:valid_max attribute (%s) does not match variable type (%s)"
-                        % (name, var.valid_max.dtype.name, var.dtype.name)
+                        % (name, var.valid_max.dtype.name, var.dtype.name),
                     )
             if hasattr(var, "valid_range"):
                 if var.valid_range.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append(
                         "Type of %s:valid_range attribute (%s) does not match variable type (%s)"
-                        % (name, var.valid_range.dtype.name, var.dtype.name)
+                        % (name, var.valid_range.dtype.name, var.dtype.name),
                     )
 
             result = Result(
-                BaseCheck.MEDIUM, valid, self.section_titles["8.1"], reasoning
+                BaseCheck.MEDIUM,
+                valid,
+                self.section_titles["8.1"],
+                reasoning,
             )
             ret_val.append(result)
 
@@ -4275,7 +4366,7 @@ class CF1_6Check(CFNCCheck):
         """
         ret_val = []
         for compress_var in ds.get_variables_by_attributes(
-            compress=lambda s: s is not None
+            compress=lambda s: s is not None,
         ):
             valid = True
             reasoning = []
@@ -4285,8 +4376,8 @@ class CF1_6Check(CFNCCheck):
                 valid = False
                 reasoning.append(
                     "Compression variable {} may only have one dimension".format(
-                        compress_var.name
-                    )
+                        compress_var.name,
+                    ),
                 )
             # ensure compression variable is a proper index, and thus is an
             # signed or unsigned integer type of some sort
@@ -4296,8 +4387,8 @@ class CF1_6Check(CFNCCheck):
                 valid = False
                 reasoning.append(
                     "Compression variable {} must be an integer type to form a proper array index".format(
-                        compress_var.name
-                    )
+                        compress_var.name,
+                    ),
                 )
             # make sure all the variables referred to are contained by the
             # variables.
@@ -4306,12 +4397,16 @@ class CF1_6Check(CFNCCheck):
                 valid = False
                 reasoning.append(
                     "The following dimensions referenced by the compress attribute of variable {} do not exist: {}".format(
-                        compress_var.name, not_in_dims
-                    )
+                        compress_var.name,
+                        not_in_dims,
+                    ),
                 )
 
             result = Result(
-                BaseCheck.MEDIUM, valid, self.section_titles["8.2"], reasoning
+                BaseCheck.MEDIUM,
+                valid,
+                self.section_titles["8.2"],
+                reasoning,
             )
             ret_val.append(result)
 
@@ -4355,13 +4450,14 @@ class CF1_6Check(CFNCCheck):
                 feature_types_found[feature].append(name)
                 found = True
             all_the_same.assert_true(
-                found, "Unidentifiable feature for variable {}" "".format(name)
+                found,
+                "Unidentifiable feature for variable {}" "".format(name),
             )
         feature_description = ", ".join(
             [
                 "{} ({})".format(ftr, ", ".join(vrs))
                 for ftr, vrs in feature_types_found.items()
-            ]
+            ],
         )
 
         all_the_same.assert_true(
@@ -4397,7 +4493,8 @@ class CF1_6Check(CFNCCheck):
 
         feature_type = getattr(ds, "featureType", None)
         valid_feature_type = TestCtx(
-            BaseCheck.HIGH, "§9.1 Dataset contains a valid featureType"
+            BaseCheck.HIGH,
+            "§9.1 Dataset contains a valid featureType",
         )
         valid_feature_type.assert_true(
             feature_type is None or feature_type.lower() in feature_list,
@@ -4465,7 +4562,10 @@ class CF1_6Check(CFNCCheck):
                 "multi-timeseries-orthogonal",
                 "multi-timeseries-incomplete",
             ],
-            "trajectory": ["cf-trajectory", "single-trajectory",],
+            "trajectory": [
+                "cf-trajectory",
+                "single-trajectory",
+            ],
             "profile": ["profile-orthogonal", "profile-incomplete"],
             "timeSeriesProfile": [
                 "timeseries-profile-single-station",
@@ -4564,11 +4664,11 @@ class CF1_7Check(CF1_6Check):
                 "cf_section": "2.5.1",
             },
             "scale_factor": {"Type": "N", "attr_loc": {"D", "C"}, "cf_section": "8.1"},
-        }
+        },
     )
 
     def __init__(self, options=None):
-        super(CF1_7Check, self).__init__(options)
+        super().__init__(options)
 
         self.cell_methods = cell_methods17
         self.grid_mapping_dict = grid_mapping_dict17
@@ -4611,7 +4711,7 @@ class CF1_7Check(CF1_6Check):
                         len(variable.actual_range) != 2
                     ):  # TODO is the attr also a numpy array? if so, .size
                         msgs.append(
-                            "actual_range of '{}' must be 2 elements".format(name)
+                            f"actual_range of '{name}' must be 2 elements",
                         )
                         ret_val.append(
                             Result(  # putting result into list
@@ -4619,20 +4719,20 @@ class CF1_7Check(CF1_6Check):
                                 (score, out_of),
                                 self.section_titles["2.5"],
                                 msgs,
-                            )
+                            ),
                         )
                         continue  # no need to keep checking if already completely wrong
                     else:
                         score += 1
                 except TypeError:  # in case it's just a single number
-                    msgs.append("actual_range of '{}' must be 2 elements".format(name))
+                    msgs.append(f"actual_range of '{name}' must be 2 elements")
                     ret_val.append(
                         Result(  # putting result into list
                             BaseCheck.HIGH,
                             (score, out_of),
                             self.section_titles["2.5"],
                             msgs,
-                        )
+                        ),
                     )
                     continue
 
@@ -4644,8 +4744,8 @@ class CF1_7Check(CF1_6Check):
                 ):
                     msgs.append(
                         "actual_range elements of '{}' inconsistent with its min/max values".format(
-                            name
-                        )
+                            name,
+                        ),
                     )
                 else:
                     score += 1
@@ -4658,8 +4758,8 @@ class CF1_7Check(CF1_6Check):
                     ):
                         msgs.append(
                             '"{}"\'s actual_range must be within valid_range'.format(
-                                name
-                            )
+                                name,
+                            ),
                         )
                 else:
                     score += 1
@@ -4671,8 +4771,9 @@ class CF1_7Check(CF1_6Check):
                     if variable.actual_range[0] < variable.valid_min:
                         msgs.append(
                             '"{}"\'s actual_range first element must be >= valid_min ({})'.format(
-                                name, variable.valid_min
-                            )
+                                name,
+                                variable.valid_min,
+                            ),
                         )
                     else:
                         score += 1
@@ -4680,16 +4781,20 @@ class CF1_7Check(CF1_6Check):
                     if variable.actual_range[1] > variable.valid_max:
                         msgs.append(
                             '"{}"\'s actual_range second element must be <= valid_max ({})'.format(
-                                name, variable.valid_max
-                            )
+                                name,
+                                variable.valid_max,
+                            ),
                         )
                     else:
                         score += 1
 
             ret_val.append(
                 Result(  # putting result into list
-                    BaseCheck.HIGH, (score, out_of), self.section_titles["2.5"], msgs
-                )
+                    BaseCheck.HIGH,
+                    (score, out_of),
+                    self.section_titles["2.5"],
+                    msgs,
+                ),
             )
         return ret_val
 
@@ -4712,7 +4817,7 @@ class CF1_7Check(CF1_6Check):
         ret_val = []
         reasoning = []
         for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(
-            ds
+            ds,
         ).items():
             variable = ds.variables[variable_name]
             valid = True
@@ -4721,9 +4826,10 @@ class CF1_7Check(CF1_6Check):
                 valid = False
                 reasoning.append(
                     "Boundary variable {} referenced by {} not ".format(
-                        boundary_variable_name, variable.name
+                        boundary_variable_name,
+                        variable.name,
                     )
-                    + "found in dataset variables"
+                    + "found in dataset variables",
                 )
             else:
                 boundary_variable = ds.variables[boundary_variable_name]
@@ -4733,10 +4839,11 @@ class CF1_7Check(CF1_6Check):
                 valid = False
                 reasoning.append(
                     "Boundary variable {} specified by {}".format(
-                        boundary_variable.name, variable.name
+                        boundary_variable.name,
+                        variable.name,
                     )
                     + " should have at least two dimensions to enclose the base "
-                    + "case of a one dimensionsal variable"
+                    + "case of a one dimensionsal variable",
                 )
             if boundary_variable.ndim != variable.ndim + 1:
                 valid = False
@@ -4750,13 +4857,13 @@ class CF1_7Check(CF1_6Check):
                         boundary_variable.name,
                         boundary_variable.ndim,
                         variable.ndim + 1,
-                    )
+                    ),
                 )
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
                     "Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
-                    "".format(variable.name, boundary_variable.dimensions)
+                    "".format(variable.name, boundary_variable.dimensions),
                 )
 
             # ensure p vertices form a valid simplex given previous a...n
@@ -4772,7 +4879,7 @@ class CF1_7Check(CF1_6Check):
                         variable.name,
                         len(variable.dimensions) + 1,
                         boundary_variable.dimensions[:-1],
-                    )
+                    ),
                 )
 
             # check if formula_terms is present in the var; if so,
@@ -4782,12 +4889,16 @@ class CF1_7Check(CF1_6Check):
                     valid = False
                     reasoning.append(
                         "'{}' has 'formula_terms' attr, bounds variable '{}' must also have 'formula_terms'".format(
-                            variable_name, boundary_variable_name
-                        )
+                            variable_name,
+                            boundary_variable_name,
+                        ),
                     )
 
             result = Result(
-                BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning
+                BaseCheck.MEDIUM,
+                valid,
+                self.section_titles["7.1"],
+                reasoning,
             )
             ret_val.append(result)
         return ret_val
@@ -4821,7 +4932,7 @@ class CF1_7Check(CF1_6Check):
         ret_val = []
         reasoning = []
         variables = ds.get_variables_by_attributes(
-            cell_measures=lambda c: c is not None
+            cell_measures=lambda c: c is not None,
         )
         for var in variables:
             search_str = r"^(?:area|volume): (\w+)$"
@@ -4833,7 +4944,7 @@ class CF1_7Check(CF1_6Check):
                     "is formatted incorrectly.  It should take the"
                     " form of either 'area: cell_var' or "
                     "'volume: cell_var' where cell_var is the "
-                    "variable describing the cell measures".format(var.name)
+                    "variable describing the cell measures".format(var.name),
                 )
             else:
                 valid = True
@@ -4850,15 +4961,19 @@ class CF1_7Check(CF1_6Check):
                         valid = False
                         reasoning.append(
                             "Cell measure variable {} referred to by {} is not present in dataset variables".format(
-                                cell_meas_var_name, var.name
-                            )
+                                cell_meas_var_name,
+                                var.name,
+                            ),
                         )
                     else:
                         valid = True
 
                     # make Result
                     result = Result(
-                        BaseCheck.MEDIUM, valid, (self.section_titles["7.2"]), reasoning
+                        BaseCheck.MEDIUM,
+                        valid,
+                        (self.section_titles["7.2"]),
+                        reasoning,
                     )
                     ret_val.append(result)
                     continue  # can't test anything on an external var
@@ -4870,8 +4985,8 @@ class CF1_7Check(CF1_6Check):
                         reasoning.append(
                             "Cell measure variable {} is required "
                             "to have units attribute defined.".format(
-                                cell_meas_var_name
-                            )
+                                cell_meas_var_name,
+                            ),
                         )
                     if not set(cell_meas_var.dimensions).issubset(var.dimensions):
                         valid = False
@@ -4879,12 +4994,16 @@ class CF1_7Check(CF1_6Check):
                             "Cell measure variable {} must have "
                             "dimensions which are a subset of "
                             "those defined in variable {}.".format(
-                                cell_meas_var_name, var.name
-                            )
+                                cell_meas_var_name,
+                                var.name,
+                            ),
                         )
 
             result = Result(
-                BaseCheck.MEDIUM, valid, (self.section_titles["7.2"]), reasoning
+                BaseCheck.MEDIUM,
+                valid,
+                (self.section_titles["7.2"]),
+                reasoning,
             )
             ret_val.append(result)
 
@@ -4926,8 +5045,9 @@ class CF1_7Check(CF1_6Check):
             return self._evaluate_towgs84(attr)
 
         else:  # invoke method from 1.6, as these names are all still valid
-            return super(CF1_7Check, self)._check_grid_mapping_attr_condition(
-                attr, attr_name
+            return super()._check_grid_mapping_attr_condition(
+                attr,
+                attr_name,
             )
 
     def _check_gmattr_existence_condition_geoid_name_geoptl_datum_name(self, var):
@@ -4976,15 +5096,13 @@ class CF1_7Check(CF1_6Check):
                     "prime_meridian_name",
                     "horizontal_datum_name",
                 ]
-            ]
+            ],
         ) and (
-            not set(
-                [
-                    "reference_ellipsoid_name",
-                    "prime_meridian_name",
-                    "horizontal_datum_name",
-                ]
-            ).issubset(_ncattrs)
+            not {
+                "reference_ellipsoid_name",
+                "prime_meridian_name",
+                "horizontal_datum_name",
+            }.issubset(_ncattrs)
         ):
             return (False, msg)
 
@@ -5196,14 +5314,16 @@ class CF1_7Check(CF1_6Check):
             return (True, msg)
 
     def check_grid_mapping(self, ds):
-        __doc__ = super(CF1_7Check, self).check_grid_mapping.__doc__
-        prev_return = super(CF1_7Check, self).check_grid_mapping(ds)
+        __doc__ = super().check_grid_mapping.__doc__
+        prev_return = super().check_grid_mapping(ds)
         ret_val = []
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
         for var_name in sorted(grid_mapping_variables):
             var = ds.variables[var_name]
             test_ctx = self.get_test_ctx(
-                BaseCheck.HIGH, self.section_titles["5.6"], var.name
+                BaseCheck.HIGH,
+                self.section_titles["5.6"],
+                var.name,
             )
 
             # TODO: check cases where crs_wkt provides part of a necessary
@@ -5221,16 +5341,16 @@ class CF1_7Check(CF1_6Check):
                     except pyproj.exceptions.CRSError as crs_error:
                         test_ctx.messages.append(
                             "Cannot parse crs_wkt attribute to CRS using Proj4. Proj4 error: {}".format(
-                                str(crs_error)
-                            )
+                                str(crs_error),
+                            ),
                         )
                     else:
                         test_ctx.score += 1
                     test_ctx.out_of += 1
 
             # existence_conditions
-            exist_cond_1 = self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(
-                var
+            exist_cond_1 = (
+                self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(var)
             )
             test_ctx.assert_true(exist_cond_1[0], exist_cond_1[1])
             exist_cond_2 = self._check_gmattr_existence_condition_ell_pmerid_hdatum(var)
@@ -5248,7 +5368,7 @@ class CF1_7Check(CF1_6Check):
                 test_ctx.messages.append(
                     "Cannot have both 'geoid_name' and "
                     "'geopotential_datum_name' attributes in "
-                    "grid mapping variable '{}'".format(var.name)
+                    "grid mapping variable '{}'".format(var.name),
                 )
             elif len_vdatum_name_attrs == 1:
                 # should be one or zero attrs
@@ -5258,14 +5378,17 @@ class CF1_7Check(CF1_6Check):
                         v_datum_attr = next(iter(vert_datum_attrs))
                         v_datum_value = getattr(var, v_datum_attr)
                         v_datum_str_valid = self._process_v_datum_str(
-                            v_datum_value, conn
+                            v_datum_value,
+                            conn,
                         )
 
                         invalid_msg = (
                             "Vertical datum value '{}' for "
                             "attribute '{}' in grid mapping "
                             "variable '{}' is not valid".format(
-                                v_datum_value, v_datum_attr, var.name
+                                v_datum_value,
+                                v_datum_attr,
+                                var.name,
                             )
                         )
                         test_ctx.assert_true(v_datum_str_valid, invalid_msg)
@@ -5273,7 +5396,7 @@ class CF1_7Check(CF1_6Check):
                     # if we hit an error, skip the check
                     warn(
                         "Error occurred while trying to query "
-                        "Proj4 SQLite database at {}: {}".format(proj_db_path, str(e))
+                        "Proj4 SQLite database at {}: {}".format(proj_db_path, str(e)),
                     )
             prev_return[var.name] = test_ctx.to_result()
 
@@ -5291,7 +5414,12 @@ class CF1_7Check(CF1_6Check):
         return len(res_set.fetchall()) > 0
 
     def _check_dimensionless_vertical_coordinate_1_7(
-        self, ds, vname, deprecated_units, ret_val, dim_vert_coords_dict
+        self,
+        ds,
+        vname,
+        deprecated_units,
+        ret_val,
+        dim_vert_coords_dict,
     ):
         """
         Check that a dimensionless vertical coordinate variable is valid under
@@ -5312,13 +5440,15 @@ class CF1_7Check(CF1_6Check):
 
         # assert that the computed_standard_name is maps to the standard_name correctly
         correct_computed_std_name_ctx = TestCtx(
-            BaseCheck.MEDIUM, self.section_titles["4.3"]
+            BaseCheck.MEDIUM,
+            self.section_titles["4.3"],
         )
         _comp_std_name = dim_vert_coords_dict[standard_name][1]
         correct_computed_std_name_ctx.assert_true(
             getattr(variable, "computed_standard_name", None) in _comp_std_name,
             "§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`".format(
-                vname, sorted(_comp_std_name)
+                vname,
+                sorted(_comp_std_name),
             ),
         )
         ret_val.append(correct_computed_std_name_ctx.to_result())
@@ -5358,7 +5488,7 @@ class CF1_7Check(CF1_6Check):
                 deprecated_units,
                 self._check_dimensionless_vertical_coordinate_1_6,
                 dimless_vertical_coordinates_1_7,
-            )
+            ),
         )
 
         ret_val.extend(
@@ -5367,7 +5497,7 @@ class CF1_7Check(CF1_6Check):
                 deprecated_units,
                 self._check_dimensionless_vertical_coordinate_1_7,
                 dimless_vertical_coordinates_1_7,
-            )
+            ),
         )
 
         return ret_val

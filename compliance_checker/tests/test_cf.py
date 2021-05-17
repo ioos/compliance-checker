@@ -1,16 +1,13 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import copy
 import os
 import sqlite3
-
 from itertools import chain
 from tempfile import gettempdir
 
 import numpy as np
 import pytest
-
 from netCDF4 import Dataset
 
 from compliance_checker import cfutil
@@ -79,7 +76,7 @@ class TestCF1_6(BaseTestCase):
         """
         nc_file_path = os.path.join(gettempdir(), "example.nc")
         if os.path.exists(nc_file_path):
-            raise IOError("File Exists: %s" % nc_file_path)
+            raise OSError("File Exists: %s" % nc_file_path)
         nc = Dataset(nc_file_path, "w")
         self.addCleanup(os.remove, nc_file_path)
         self.addCleanup(nc.close)
@@ -137,7 +134,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["string"])
         if dataset.file_format != "NETCDF4":
             raise RuntimeError(
-                "netCDF file of wrong format (not netCDF4) was created for checking"
+                "netCDF file of wrong format (not netCDF4) was created for checking",
             )
         result = self.cf.check_data_types(dataset)
         assert result.value[0] == result.value[1]
@@ -161,12 +158,14 @@ class TestCF1_6(BaseTestCase):
         # create dataset using MockDataset (default constructor gives it time dimension)
         ds = MockTimeSeries()
         ds.createVariable(
-            "temp", np.float64, dimensions=("time")
+            "temp",
+            np.float64,
+            dimensions=("time"),
         )  # add variable "temp" with dimension "time"
 
         # check where no special data attrs are present, should result good
         result = self.cf.check_child_attr_data_types(
-            ds
+            ds,
         )  # checks all special attrs for all variables
         self.assert_result_is_good(result)
 
@@ -264,7 +263,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 3
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u"§2.3 Naming Conventions" for r in results)
+        assert all(r.name == "§2.3 Naming Conventions" for r in results)
 
         # another non-compliant dataset
         dataset = self.load_dataset(STATIC_FILES["chap2"])
@@ -273,7 +272,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 3
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u"§2.3 Naming Conventions" for r in results)
+        assert all(r.name == "§2.3 Naming Conventions" for r in results)
 
     def test_check_names_unique(self):
         """
@@ -292,7 +291,7 @@ class TestCF1_6(BaseTestCase):
         assert result.value == (6, 7)
         assert (
             result.msgs[0]
-            == u"Variables are not case sensitive. Duplicate variables named: not_unique"
+            == "Variables are not case sensitive. Duplicate variables named: not_unique"
         )
 
     def test_check_dimension_names(self):
@@ -306,7 +305,7 @@ class TestCF1_6(BaseTestCase):
 
         dataset = self.load_dataset(STATIC_FILES["chap2"])
         result = self.cf.check_dimension_names(dataset)
-        assert result.msgs[0] == u"no_reason has two or more dimensions named time"
+        assert result.msgs[0] == "no_reason has two or more dimensions named time"
 
     def test_check_dimension_order(self):
         """
@@ -319,7 +318,7 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_dimension_order(dataset)
         assert result.value == (5, 6)
         assert result.msgs[0] == (
-            u"really_bad's spatio-temporal dimensions are not in the "
+            "really_bad's spatio-temporal dimensions are not in the "
             "recommended order T, Z, Y, X and/or further dimensions are not "
             "located left of T, Z, Y, X. The dimensions (and their guessed "
             "types) are latitude (Y), power (U) (with U: other/unknown; L: "
@@ -339,7 +338,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_fill_value_outside_valid_range(dataset)
         assert result.msgs[0] == (
-            u"salinity:_FillValue (1.0) should be outside the "
+            "salinity:_FillValue (1.0) should be outside the "
             "range specified by valid_min/valid_max (-10, 10)"
         )
 
@@ -347,7 +346,7 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_fill_value_outside_valid_range(dataset)
         assert result.value == (1, 2)
         assert result.msgs[0] == (
-            u"wind_speed:_FillValue (12.0) should be outside the "
+            "wind_speed:_FillValue (12.0) should be outside the "
             "range specified by valid_min/valid_max (0.0, 20.0)"
         )
 
@@ -371,7 +370,7 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_conventions_version(dataset)
         self.assertFalse(result.value)
         assert result.msgs[0] == (
-            u"§2.6.1 Conventions global attribute does not contain " '"CF-1.6"'
+            "§2.6.1 Conventions global attribute does not contain " '"CF-1.6"'
         )
 
     def test_check_convention_globals(self):
@@ -391,7 +390,7 @@ class TestCF1_6(BaseTestCase):
         assert result.value[0] != result.value[1]
         assert (
             result.msgs[0]
-            == u"§2.6.2 global attribute title should exist and be a non-empty string"
+            == "§2.6.2 global attribute title should exist and be a non-empty string"
         )
 
     def test_check_convention_possibly_var_attrs(self):
@@ -419,7 +418,7 @@ class TestCF1_6(BaseTestCase):
         assert result.value[0] != result.value[1]
         assert (
             result.msgs[0]
-            == u"§2.6.2 references global attribute should be a non-empty string"
+            == "§2.6.2 references global attribute should be a non-empty string"
         )
 
         # load bad_data_type.nc
@@ -433,8 +432,7 @@ class TestCF1_6(BaseTestCase):
 
         assert result.value[0] != result.value[1]
         assert (
-            result.msgs[0]
-            == u"§2.6.2 salinity:institution should be a non-empty string"
+            result.msgs[0] == "§2.6.2 salinity:institution should be a non-empty string"
         )
 
     def test_check_standard_name(self):
@@ -456,7 +454,7 @@ class TestCF1_6(BaseTestCase):
         # 9 vars checked, 8 fail
         assert len(results) == 9
         assert score < out_of
-        assert all(r.name == u"§3.3 Standard Name" for r in results)
+        assert all(r.name == "§3.3 Standard Name" for r in results)
 
         # load different ds --  ll vars pass this check
         dataset = self.load_dataset(STATIC_FILES["reduced_horizontal_grid"])
@@ -512,7 +510,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_cell_measure2"])
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
-        message = u"Cell measure variable box_area referred to by PS is not present in dataset variables"
+        message = "Cell measure variable box_area referred to by PS is not present in dataset variables"
         assert message in messages
 
     def test_climatology_cell_methods(self):
@@ -526,7 +524,7 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         self.assertEqual(score, out_of)
         temp_var = dataset.variables["temperature"] = MockVariable(
-            dataset.variables["temperature"]
+            dataset.variables["temperature"],
         )
         temp_var.cell_methods = "INVALID"
         results = self.cf.check_climatological_statistics(dataset)
@@ -568,15 +566,15 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
         results = self.cf.check_ancillary_variables(dataset)
         result_dict = {result.name: result for result in results}
-        result = result_dict[u"§3.4 Ancillary Data"]
+        result = result_dict["§3.4 Ancillary Data"]
         assert result.value == (2, 2)
 
         dataset = self.load_dataset(STATIC_FILES["bad_reference"])
         results = self.cf.check_ancillary_variables(dataset)
         result_dict = {result.name: result for result in results}
-        result = result_dict[u"§3.4 Ancillary Data"]
+        result = result_dict["§3.4 Ancillary Data"]
         assert result.value == (1, 2)
-        assert u"temp_qc is not a variable in this dataset" == result.msgs[0]
+        assert "temp_qc is not a variable in this dataset" == result.msgs[0]
 
     def test_download_standard_name_table(self):
         """
@@ -586,7 +584,8 @@ class TestCF1_6(BaseTestCase):
 
         data_directory = create_cached_data_dir()
         location = os.path.join(
-            data_directory, "cf-standard-name-table-test-{0}.xml".format(version)
+            data_directory,
+            f"cf-standard-name-table-test-{version}.xml",
         )
         download_cf_standard_name_table(version, location)
 
@@ -661,7 +660,7 @@ class TestCF1_6(BaseTestCase):
         results_list = list(chain(*(r.msgs for r in all_results if r.msgs)))
 
         # check the results only have '§3.1 Units' as the header
-        assert all(r.name == u"§3.1 Units" for r in all_results)
+        assert all(r.name == "§3.1 Units" for r in all_results)
 
         # check that all the expected variables have been hit
         assert all(
@@ -685,7 +684,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 12
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
-        assert (r.name == u"§4.1 Latitude Coordinate" for r in results)
+        assert (r.name == "§4.1 Latitude Coordinate" for r in results)
 
         # check with another ds -- all 6 vars checked pass
         dataset = self.load_dataset(STATIC_FILES["rotated_pole_grid"])
@@ -693,7 +692,7 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
         assert len(results) == 6
         assert scored == out_of
-        assert (r.name == u"§4.1 Latitude Coordinate" for r in results)
+        assert (r.name == "§4.1 Latitude Coordinate" for r in results)
 
         # hack to avoid writing to read-only file
         dataset.variables["rlat"] = MockVariable(dataset.variables["rlat"])
@@ -703,7 +702,7 @@ class TestCF1_6(BaseTestCase):
         rlat.units = "degrees_north"
         results = self.cf.check_latitude(dataset)
         scored, out_of, messages = get_results(results)
-        wrong_format = u"Grid latitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
+        wrong_format = "Grid latitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
         self.assertTrue(wrong_format.format(rlat.name, rlat.units) in messages)
         rlat.units = "radians"
         results = self.cf.check_latitude(dataset)
@@ -727,7 +726,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 12
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
-        assert all(r.name == u"§4.2 Longitude Coordinate" for r in results)
+        assert all(r.name == "§4.2 Longitude Coordinate" for r in results)
 
         # check different dataset # TODO can be improved for check_latitude too
         dataset = self.load_dataset(STATIC_FILES["rotated_pole_grid"])
@@ -742,7 +741,7 @@ class TestCF1_6(BaseTestCase):
         rlon.units = "degrees_east"
         results = self.cf.check_longitude(dataset)
         scored, out_of, messages = get_results(results)
-        wrong_format = u"Grid longitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
+        wrong_format = "Grid longitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
         self.assertTrue(wrong_format.format(rlon.name, rlon.units) in messages)
         rlon.units = "radians"
         results = self.cf.check_longitude(dataset)
@@ -788,14 +787,14 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["example-grid"])
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
         assert len(results) == 1
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
         # non-compliance -- one check fails
         dataset = self.load_dataset(STATIC_FILES["illegal-vertical"])
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
         scored, out_of, messages = get_results(results)
         assert len(results) == 1
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
         assert scored < out_of
 
     def test_appendix_d(self):
@@ -823,21 +822,21 @@ class TestCF1_6(BaseTestCase):
                 "atmosphere_ln_pressure_coordinate",
                 {"p0", "lev"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         self.assertTrue(
             no_missing_terms(
                 "atmosphere_sigma_coordinate",
                 {"sigma", "ps", "ptop"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         self.assertTrue(
             no_missing_terms(
                 "atmosphere_hybrid_sigma_pressure_coordinate",
                 {"a", "b", "ps"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         # test alternative terms for
         # 'atmosphere_hybrid_sigma_pressure_coordinate'
@@ -846,7 +845,7 @@ class TestCF1_6(BaseTestCase):
                 "atmosphere_hybrid_sigma_pressure_coordinate",
                 {"ap", "b", "ps"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         # check that an invalid set of terms fails
         self.assertFalse(
@@ -854,14 +853,14 @@ class TestCF1_6(BaseTestCase):
                 "atmosphere_hybrid_sigma_pressure_coordinate",
                 {"a", "b", "p"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         self.assertTrue(
             no_missing_terms(
                 "atmosphere_hybrid_height_coordinate",
                 {"a", "b", "orog"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         # missing terms should cause failure
         self.assertFalse(
@@ -869,7 +868,7 @@ class TestCF1_6(BaseTestCase):
                 "atmosphere_hybrid_height_coordinate",
                 {"a", "b"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         # excess terms should cause failure
         self.assertFalse(
@@ -877,42 +876,42 @@ class TestCF1_6(BaseTestCase):
                 "atmosphere_hybrid_height_coordinate",
                 {"a", "b", "c", "orog"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         self.assertTrue(
             no_missing_terms(
                 "atmosphere_sleve_coordinate",
                 {"a", "b1", "b2", "ztop", "zsurf1", "zsurf2"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         self.assertTrue(
             no_missing_terms(
                 "ocean_sigma_coordinate",
                 {"sigma", "eta", "depth"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         self.assertTrue(
             no_missing_terms(
                 "ocean_s_coordinate",
                 {"s", "eta", "depth", "a", "b", "depth_c"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         self.assertTrue(
             no_missing_terms(
                 "ocean_sigma_z_coordinate",
                 {"sigma", "eta", "depth", "depth_c", "nsigma", "zlev"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
         self.assertTrue(
             no_missing_terms(
                 "ocean_double_sigma_coordinate",
                 {"sigma", "depth", "z1", "z2", "a", "href", "k_c"},
                 dimless_vertical_coordinates_1_6,
-            )
+            ),
         )
 
     def test_dimensionless_vertical(self):
@@ -927,7 +926,7 @@ class TestCF1_6(BaseTestCase):
         # all variables checked (2) pass
         assert len(results) == 2
         assert scored == out_of
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
         # Check negative compliance -- 3 out of 4 pass
 
@@ -937,7 +936,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 4
         assert scored <= out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
         # test with an invalid formula_terms
         dataset.variables["lev2"] = MockVariable(dataset.variables["lev2"])
@@ -952,7 +951,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 4
         assert scored <= out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
     def test_is_time_variable(self):
         var1 = MockVariable()
@@ -978,20 +977,23 @@ class TestCF1_6(BaseTestCase):
         # canonical_units are K, should be False
         self.assertFalse(
             cfutil.is_dimensionless_standard_name(
-                std_names_xml_root, "sea_water_temperature"
-            )
+                std_names_xml_root,
+                "sea_water_temperature",
+            ),
         )
         # canonical_units are 1, should be True
         self.assertTrue(
             cfutil.is_dimensionless_standard_name(
-                std_names_xml_root, "sea_water_practical_salinity"
-            )
+                std_names_xml_root,
+                "sea_water_practical_salinity",
+            ),
         )
         # canonical_units are 1e-3, should be True
         self.assertTrue(
             cfutil.is_dimensionless_standard_name(
-                std_names_xml_root, "sea_water_salinity"
-            )
+                std_names_xml_root,
+                "sea_water_salinity",
+            ),
         )
 
     def test_check_time_coordinate(self):
@@ -1005,7 +1007,7 @@ class TestCF1_6(BaseTestCase):
 
         scored, out_of, messages = get_results(results)
 
-        assert u"time does not have correct time units" in messages
+        assert "time does not have correct time units" in messages
         assert (scored, out_of) == (1, 2)
 
     def test_check_calendar(self):
@@ -1022,7 +1024,7 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
 
         assert (
-            u"§4.4.1 Variable time should have a valid calendar: 'nope' is not a valid calendar"
+            "§4.4.1 Variable time should have a valid calendar: 'nope' is not a valid calendar"
             in messages
         )
 
@@ -1030,7 +1032,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["illegal-aux-coords"])
         results = self.cf.check_aux_coordinates(dataset)
         result_dict = {result.name: result for result in results}
-        result = result_dict[u"§5 Coordinate Systems"]
+        result = result_dict["§5 Coordinate Systems"]
         assert result.msgs == []  # shouldn't have any messages
         assert result.value == (4, 4)
 
@@ -1041,7 +1043,7 @@ class TestCF1_6(BaseTestCase):
 
         result_dict = {result.name: result for result in results}
         result = result_dict[
-            u"§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
+            "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
         ]
         assert result.value == (2, 2)
         assert (scored, out_of) == (2, 2)
@@ -1061,7 +1063,7 @@ class TestCF1_6(BaseTestCase):
         assert scored < out_of
         assert all(
             r.name
-            == u"§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
+            == "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
             for r in results
         )
 
@@ -1071,7 +1073,7 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
         assert scored == out_of
         assert len(results) == 1
-        assert all(r.name == u"§5.3 Reduced Horizontal Grid" for r in results)
+        assert all(r.name == "§5.3 Reduced Horizontal Grid" for r in results)
 
         # load failing ds -- one variable has failing check
         dataset = self.load_dataset(STATIC_FILES["bad-rhgrid"])
@@ -1080,16 +1082,17 @@ class TestCF1_6(BaseTestCase):
         assert scored != out_of
         assert len(results) == 2
         assert len([r for r in results if r.value[0] < r.value[1]]) == 1
-        assert all(r.name == u"§5.3 Reduced Horizontal Grid" for r in results)
+        assert all(r.name == "§5.3 Reduced Horizontal Grid" for r in results)
 
     def test_check_grid_mapping(self):
         dataset = self.load_dataset(STATIC_FILES["mapping"])
         results = self.cf.check_grid_mapping(dataset)
 
         assert len(results) == 6
-        assert len([r.value for r in results.values()
-                    if r.value[0] < r.value[1]]) == 0
-        expected_name = '§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections'
+        assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 0
+        expected_name = (
+            "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
+        )
         assert all(r.name == expected_name for r in results.values())
 
     def test_is_geophysical(self):
@@ -1099,7 +1102,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["string"])
         if dataset.file_format != "NETCDF4":
             raise RuntimeError(
-                "netCDF file of wrong format (not netCDF4) was created for checking"
+                "netCDF file of wrong format (not netCDF4) was created for checking",
             )
         try:
             result = cfutil.is_geophysical(dataset, "j")
@@ -1107,7 +1110,7 @@ class TestCF1_6(BaseTestCase):
             pytest.fail(
                 "Test probably fails because var.dtype.kind or var.dtype.char "
                 "was tested on string-type variable. Consider checking for "
-                "`var.dtype is str`"
+                "`var.dtype is str`",
             )
         assert not result
         # assert False
@@ -1174,7 +1177,8 @@ class TestCF1_6(BaseTestCase):
         res = self.cf._check_attr_type(att_name, att_type, att, _var)
         self.assertFalse(res[0])
         self.assertEqual(
-            res[1], "test_att must be numeric and must be equivalent to float64 dtype"
+            res[1],
+            "test_att must be numeric and must be equivalent to float64 dtype",
         )
 
     def test_check_grid_mapping_attr_condition(self):
@@ -1227,7 +1231,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 2
         assert scored < out_of
         assert (
-            u"6.1.1 'Neverland' specified by 'neverland' is not a valid region"
+            "6.1.1 'Neverland' specified by 'neverland' is not a valid region"
             in messages
         )
 
@@ -1237,10 +1241,10 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
 
         msgs = [
-            u"Type of tempvalid_min attribute (int32) does not match variable type (int64)",
-            u"Type of temp:valid_max attribute (int32) does not match variable type (int64)",
-            u"Type of salinityvalid_min attribute (int32) does not match variable type (float64)",
-            u"Type of salinity:valid_max attribute (int32) does not match variable type (float64)",
+            "Type of tempvalid_min attribute (int32) does not match variable type (int64)",
+            "Type of temp:valid_max attribute (int32) does not match variable type (int64)",
+            "Type of salinityvalid_min attribute (int32) does not match variable type (float64)",
+            "Type of salinity:valid_max attribute (int32) does not match variable type (float64)",
         ]
 
         self.assertEqual(len(results), 4)
@@ -1322,7 +1326,7 @@ class TestCF1_6(BaseTestCase):
 
         # only one check run here, so we can directly compare all the values
         assert scored != out_of
-        assert messages[0] == u"'temp' has duplicate axis X defined by [lon_rho, lon_u]"
+        assert messages[0] == "'temp' has duplicate axis X defined by [lon_rho, lon_u]"
 
     def test_check_multi_dimensional_coords(self):
         """
@@ -1336,7 +1340,7 @@ class TestCF1_6(BaseTestCase):
         # 4 variables were checked in this ds, 2 of which passed
         assert len(results) == 4
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u"§5 Coordinate Systems" for r in results)
+        assert all(r.name == "§5 Coordinate Systems" for r in results)
 
     def test_64bit(self):
         dataset = self.load_dataset(STATIC_FILES["ints64"])
@@ -1353,7 +1357,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 1
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 1
-        assert all(r.name == u"§9.1 Features and feature types" for r in results)
+        assert all(r.name == "§9.1 Features and feature types" for r in results)
 
         # compliant dataset
         dataset = self.load_dataset(STATIC_FILES["trajectory-complete"])
@@ -1381,8 +1385,8 @@ class TestCF1_6(BaseTestCase):
         results_list = list(chain(*(r.msgs for r in results if r.msgs)))
 
         # check the results only have expected headers
-        assert set([r.name for r in results]).issubset(
-            set([u"§7.1 Cell Boundaries", u"§7.3 Cell Methods"])
+        assert {r.name for r in results}.issubset(
+            {"§7.1 Cell Boundaries", "§7.3 Cell Methods"},
         )
 
         # check that all the expected variables have been hit
@@ -1414,8 +1418,8 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
 
         self.assertTrue(
-            u'§7.3.3 The non-standard "comment:" element must come after any standard elements in cell_methods for variable temperature'
-            in messages
+            '§7.3.3 The non-standard "comment:" element must come after any standard elements in cell_methods for variable temperature'
+            in messages,
         )
 
         # standalone comments require no keyword
@@ -1431,8 +1435,8 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_cell_methods(nc_obj)
         scored, out_of, messages = get_results(results)
         self.assertTrue(
-            u'§7.3.3 Invalid cell_methods keyword "invalid_keyword:" for variable temperature. Must be one of [interval, comment]'
-            in messages
+            '§7.3.3 Invalid cell_methods keyword "invalid_keyword:" for variable temperature. Must be one of [interval, comment]'
+            in messages,
         )
 
         # check that "parenthetical elements" are well-formed (they should not be)
@@ -1442,7 +1446,7 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_cell_methods(nc_obj)
         scored, out_of, messages = get_results(results)
         assert (
-            u"§7.3.3 Parenthetical content inside temperature:cell_methods is not well formed: interval 0.2 m interval: 0.01 degrees"
+            "§7.3.3 Parenthetical content inside temperature:cell_methods is not well formed: interval 0.2 m interval: 0.01 degrees"
             in messages
         )
 
@@ -1491,7 +1495,7 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 1
-        assert messages[0] == u"actual_range of 'a' must be 2 elements"
+        assert messages[0] == "actual_range of 'a' must be 2 elements"
         dataset.close()
 
         dataset = MockTimeSeries()
@@ -1647,7 +1651,7 @@ class TestCF1_7(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_cell_measure2"])
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
-        message = u"Cell measure variable box_area referred to by PS is not present in dataset variables"
+        message = "Cell measure variable box_area referred to by PS is not present in dataset variables"
         assert message in messages
 
     def test_process_vdatum(self):
@@ -1670,7 +1674,7 @@ class TestCF1_7(BaseTestCase):
             alt_name TEXT NOT NULL CHECK (length(alt_name) >= 2),
             source TEXT
         );
-        """
+        """,
         )
         cur.execute(
             """
@@ -1685,18 +1689,18 @@ class TestCF1_7(BaseTestCase):
             deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
             CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code)
         );
-        """
+        """,
         )
         cur.execute(
             """INSERT INTO alias_name VALUES
                        ('vertical_datum', 'EPSG', '5103', 'NAVD88', 'EPSG');
-                    """
+                    """,
         )
 
         cur.execute(
             """INSERT INTO vertical_datum VALUES
                     ('EPSG', '5101', 'Ordnance Datum Newlyn', NULL, NULL,
-                     'EPSG', '2792', '0')"""
+                     'EPSG', '2792', '0')""",
         )
 
         cur.close()
@@ -1750,7 +1754,7 @@ class TestCF1_7(BaseTestCase):
                 for m in messages
                 if m
                 != "false_easting is a required attribute for grid mapping stereographic"
-            ]
+            ],
         )
         self.assertEqual(msg_len, 0)
 
@@ -1849,14 +1853,14 @@ class TestCF1_7(BaseTestCase):
                 "ocean_s_coordinate_g1",
                 {"s", "C", "eta", "depth", "depth_c"},
                 dimless_vertical_coordinates_1_7,
-            )
+            ),
         )
         self.assertTrue(
             no_missing_terms(
                 "ocean_s_coordinate_g2",
                 {"s", "C", "eta", "depth", "depth_c"},
                 dimless_vertical_coordinates_1_7,
-            )
+            ),
         )
 
     def test_check_dimensionless_vertical_coordinate_1_7(self):
@@ -1871,10 +1875,12 @@ class TestCF1_7(BaseTestCase):
         with MockTimeSeries() as dataset:
             dataset.createVariable("lev", "d")  # dtype=double, dims=1
             dataset.variables["lev"].setncattr(
-                "standard_name", "atmosphere_sigma_coordinate"
+                "standard_name",
+                "atmosphere_sigma_coordinate",
             )
             dataset.variables["lev"].setncattr(
-                "formula_terms", "sigma: lev ps: PS ptop: PTOP"
+                "formula_terms",
+                "sigma: lev ps: PS ptop: PTOP",
             )
 
             dataset.createVariable("PS", "d", ("time",))  # dtype=double, dims=time
@@ -1926,7 +1932,7 @@ class TestCF1_7(BaseTestCase):
         # all variables checked (2) pass
         assert len(results) == 3
         assert scored == out_of
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
         # make one variable's computed_standard_name incorrect, one should fail
         dataset.variables["lev"].computed_standard_name = "definitely_not_right"
@@ -1935,11 +1941,11 @@ class TestCF1_7(BaseTestCase):
 
         assert len(results) == 3
         assert scored < out_of
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
     def test_check_attr_type(self):
         """
-         Ensure the _check_attr_type method works as expected.
+        Ensure the _check_attr_type method works as expected.
         """
 
         # create a temporary variable and test this only
@@ -2098,7 +2104,7 @@ class TestCF1_7(BaseTestCase):
         dataset.createVariable("lev", "d")  # dtype=double, dims=1
         dataset.variables["lev"].setncattr("geoid_name", "blah")
         res = self.cf._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(
-            dataset.variables["lev"]
+            dataset.variables["lev"],
         )
         self.assertTrue(res[0])
         dataset.close()
@@ -2107,7 +2113,7 @@ class TestCF1_7(BaseTestCase):
         dataset.createVariable("lev", "d")  # dtype=double, dims=1
         dataset.variables["lev"].setncattr("geopotential_datum_name", "blah")
         res = self.cf._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(
-            dataset.variables["lev"]
+            dataset.variables["lev"],
         )
         self.assertTrue(res[0])
         dataset.close()
@@ -2118,7 +2124,7 @@ class TestCF1_7(BaseTestCase):
         dataset.variables["lev"].setncattr("geopotential_datum_name", "blah")
         dataset.variables["lev"].setncattr("geoid_name", "blah")
         res = self.cf._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(
-            dataset.variables["lev"]
+            dataset.variables["lev"],
         )
         self.assertFalse(res[0])
         dataset.close()
@@ -2132,7 +2138,7 @@ class TestCF1_7(BaseTestCase):
         dataset.variables["lev"].setncattr("prime_meridian_name", "blah")
         dataset.variables["lev"].setncattr("horizontal_datum_name", "blah")
         res = self.cf._check_gmattr_existence_condition_ell_pmerid_hdatum(
-            dataset.variables["lev"]
+            dataset.variables["lev"],
         )
         self.assertTrue(res[0])
         dataset.close()
@@ -2142,7 +2148,7 @@ class TestCF1_7(BaseTestCase):
         dataset.createVariable("lev", "d")  # dtype=double, dims=1
         dataset.variables["lev"].setncattr("reference_ellipsoid_name", "blah")
         res = self.cf._check_gmattr_existence_condition_ell_pmerid_hdatum(
-            dataset.variables["lev"]
+            dataset.variables["lev"],
         )
         self.assertFalse(res[0])
         dataset.close()
@@ -2153,7 +2159,7 @@ class TestCF1_7(BaseTestCase):
         dataset.variables["lev"].setncattr("reference_ellipsoid_name", "blah")
         dataset.variables["lev"].setncattr("prime_meridian_name", "blah")
         res = self.cf._check_gmattr_existence_condition_ell_pmerid_hdatum(
-            dataset.variables["lev"]
+            dataset.variables["lev"],
         )
         self.assertFalse(res[0])
         dataset.close()

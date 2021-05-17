@@ -1,18 +1,15 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 compliance_checker/cfutil.py
 """
 import csv
 import re
 import warnings
-
 from collections import defaultdict
 from functools import lru_cache, partial
 
 from cf_units import Unit
 from pkg_resources import resource_filename
-
 
 _UNITLESS_DB = None
 _SEA_NAMES = None
@@ -71,7 +68,7 @@ def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x)
     if not isinstance(attr_val, attr_type):
         warnings.warn(
             "Attribute is of type {}, {} expected. "
-            "Attempting to cast to expected type.".format(type(attr_val), attr_type)
+            "Attempting to cast to expected type.".format(type(attr_val), attr_type),
         )
         try:
             # if the expected type is str, try casting to unicode type
@@ -82,7 +79,7 @@ def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x)
                 new_attr_val = attr_type(attr_val)
         # catch casting errors
         except (ValueError, UnicodeEncodeError) as e:
-            warnings.warn("Could not cast to type {}".format(attr_type))
+            warnings.warn(f"Could not cast to type {attr_type}")
             return False
     else:
         new_attr_val = attr_val
@@ -92,7 +89,7 @@ def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x)
     except Exception as e:
         warnings.warn(
             "Could not apply modifier function {} to value: "
-            " {}".format(modifier_fn, e.msg)
+            " {}".format(modifier_fn, e.msg),
         )
         return False
 
@@ -110,7 +107,7 @@ def is_dimensionless_standard_name(xml_tree, standard_name):
     # standard_name must be string, so if it is not, it is *wrong* by default
     if not isinstance(standard_name, str):
         return False
-    found_standard_name = xml_tree.find(".//entry[@id='{}']".format(standard_name))
+    found_standard_name = xml_tree.find(f".//entry[@id='{standard_name}']")
     if found_standard_name is not None:
         canonical_units = found_standard_name.find("canonical_units")
         # so far, standard name XML table includes
@@ -134,7 +131,7 @@ def get_sea_names():
     if _SEA_NAMES is None:
         buf = {}
         with open(
-            resource_filename("compliance_checker", "data/seanames.csv"), "r"
+            resource_filename("compliance_checker", "data/seanames.csv"),
         ) as f:
             reader = csv.reader(f)
             for code, sea_name in reader:
@@ -179,14 +176,14 @@ def is_geophysical(ds, variable):
     if not isinstance(standard_name_test, str):
         warnings.warn(
             "Variable {} has non string standard name, "
-            "Attempting cast to string".format(variable)
+            "Attempting cast to string".format(variable),
         )
         try:
             standard_name = str(standard_name_test)
         except ValueError:
             warnings.warn(
                 "Unable to cast standard name to string, excluding "
-                "from geophysical variables"
+                "from geophysical variables",
             )
     else:
         standard_name = standard_name_test
@@ -284,7 +281,7 @@ def get_auxiliary_coordinate_variables(ds):
     aux_vars = []
     # get any variables referecned by the coordinates attribute
     for ncvar in ds.get_variables_by_attributes(
-        coordinates=lambda x: isinstance(x, str)
+        coordinates=lambda x: isinstance(x, str),
     ):
         # split the coordinates into individual variable names
         referenced_variables = ncvar.coordinates.split(" ")
@@ -314,7 +311,7 @@ def get_auxiliary_coordinate_variables(ds):
 
     # Some datasets like ROMS use multiple variables to define coordinates
     for ncvar in ds.get_variables_by_attributes(
-        standard_name=lambda x: x in coordinate_standard_names
+        standard_name=lambda x: x in coordinate_standard_names,
     ):
         if ncvar.name not in aux_vars:
             aux_vars.append(ncvar.name)
@@ -502,7 +499,9 @@ def get_latitude_variables(nc):
             latitude_variables.append(variable.name)
 
     check_fn = partial(
-        attr_membership, value_set=VALID_LAT_UNITS, modifier_fn=lambda s: s.lower()
+        attr_membership,
+        value_set=VALID_LAT_UNITS,
+        modifier_fn=lambda s: s.lower(),
     )
     for variable in nc.get_variables_by_attributes(units=check_fn):
         if variable.name not in latitude_variables:
@@ -567,7 +566,9 @@ def get_longitude_variables(nc):
             longitude_variables.append(variable.name)
 
     check_fn = partial(
-        attr_membership, value_set=VALID_LON_UNITS, modifier_fn=lambda s: s.lower()
+        attr_membership,
+        value_set=VALID_LON_UNITS,
+        modifier_fn=lambda s: s.lower(),
     )
     for variable in nc.get_variables_by_attributes(units=check_fn):
         if variable.name not in longitude_variables:
