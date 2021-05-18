@@ -1,0 +1,43 @@
+name: UGRID Plugin Tests
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Conda
+      uses: s-weigand/setup-conda@v1
+      with:
+        activate-conda: false
+        conda-channels: conda-forge
+
+    - name: Python ${{ matrix.python-version }}
+      shell: bash -l {0}
+      run: |
+        conda create --name TEST python=${{ matrix.python-version }} python=3 pip --file requirements.txt --file test_requirements.txt --strict-channel-priority
+        source activate TEST
+        pip install -e . --no-deps --force-reinstall
+
+    - name: Conda Info
+      shell: bash -l {0}
+      run: |
+        source activate TEST
+        conda info --all
+        conda list
+
+    - name: cc-plugin-glider tests
+      shell: bash -l {0}
+      run: |
+        source activate TEST
+        git clone https://github.com/ioos/cc-checker-ugrid.git
+        cd cc-checker-ugrid
+        pip install -e . --no-deps --force-reinstall
+        conda install --file requirements.txt --file requirements-dev.txt ;
+        pytest -s -rxs -v cc_plugin_ugrid
