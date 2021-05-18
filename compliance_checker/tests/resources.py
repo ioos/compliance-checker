@@ -16,7 +16,7 @@ def get_filename(path):
 
 
 def generate_dataset(cdl_path, nc_path):
-    subprocess.call(["ncgen", "-4", "-o", nc_path, cdl_path])
+    subprocess.call(["ncgen", "-o", nc_path, cdl_path])
 
 
 STATIC_FILES = {
