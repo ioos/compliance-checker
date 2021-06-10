@@ -6,28 +6,28 @@ matrix:
   fast_finish: true
   include:
     - name: "default-python3"
-      env: TEST_TARGET=default PY=3.8
+      env: TEST_TARGET=default PY=3
     - name: "integration-python3"
-      env: TEST_TARGET=integration PY=3.8
+      env: TEST_TARGET=integration PY=3
     - name: "glider plugin"
-      env: TEST_TARGET=cc-plugin-glider PY=3.8
+      env: TEST_TARGET=cc-plugin-glider PY=3
     - name: "ncei plugin"
-      env: TEST_TARGET=cc-plugin-ncei PY=3.8
+      env: TEST_TARGET=cc-plugin-ncei PY=3
     - name: "sgrid plugin"
-      env: TEST_TARGET=cc-plugin-sgrid PY=3.8
+      env: TEST_TARGET=cc-plugin-sgrid PY=3
     - name: "ugrid plugin"
-      env: TEST_TARGET=cc-checker-ugrid PY=3.8
+      env: TEST_TARGET=cc-checker-ugrid PY=3
   allow_failures:
     - name: "integration-python3"
-      env: TEST_TARGET=integration PY=3.8
+      env: TEST_TARGET=integration PY=3
     - name: "glider plugin"
-      env: TEST_TARGET=cc-plugin-glider PY=3.8
+      env: TEST_TARGET=cc-plugin-glider PY=3
     - name: "ncei plugin"
-      env: TEST_TARGET=cc-plugin-ncei PY=3.8
+      env: TEST_TARGET=cc-plugin-ncei PY=3
     - name: "sgrid plugin"
-      env: TEST_TARGET=cc-plugin-sgrid PY=3.8
+      env: TEST_TARGET=cc-plugin-sgrid PY=3
     - name: "ugrid plugin"
-      env: TEST_TARGET=cc-checker-ugrid PY=3.8
+      env: TEST_TARGET=cc-checker-ugrid PY=3
 
 before_install:
   # Install miniconda and create TEST env.
