@@ -528,7 +528,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
             ]
         )
-        
+
         self.required_atts = [
             ("Conventions", IOOS1_2_ConventionsValidator()),
             "creator_country",
@@ -915,7 +915,7 @@ class IOOS1_2Check(IOOSNCCheck):
                         f"Invalid featureType '{fType}'; please see the "
                         "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
                     )
-                ]
+                ],
             )
         featType = fType.lower()
 
@@ -1035,12 +1035,10 @@ class IOOS1_2Check(IOOSNCCheck):
             # timeseries_id must be == 1, profile >= 1
             _val = _ts_id_dimsize == 1 and _pf_id_dimsize >= 1
             msgs = [
-                       ts_prof_msg.format(
-                           cf_role="timeseries_id",
-                           dim_type="station",
-                           dim_len=_ts_id_dimsize
-                       )
-                   ]
+                ts_prof_msg.format(
+                    cf_role="timeseries_id", dim_type="station", dim_len=_ts_id_dimsize
+                )
+            ]
 
         return Result(
             BaseCheck.HIGH, _val, "CF DSG: featureType=timeSeriesProfile", msgs
@@ -1123,12 +1121,10 @@ class IOOS1_2Check(IOOSNCCheck):
             # trajectory dim must be == 1, profile must be >= 1
             _val = _trj_id_dimsize == 1 and _prf_id_dimsize >= 1
             msgs = [
-                       trj_prof_msg.format(
-                           cf_role="trajectory_id",
-                           dim_type="station",
-                           dim_len=_trj_id_dimsize
-                        )
-                   ]
+                trj_prof_msg.format(
+                    cf_role="trajectory_id", dim_type="station", dim_len=_trj_id_dimsize
+                )
+            ]
 
         return Result(
             BaseCheck.HIGH, _val, "CF DSG: featureType=trajectoryProfile", msgs

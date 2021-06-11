@@ -181,11 +181,11 @@ class DotDict(dict):
         return list(self.__dict__.keys()) + list(self.keys())
 
     def __getattr__(self, key):
-        """ Make attempts to lookup by nonexistent attributes also attempt key lookups. """
+        """Make attempts to lookup by nonexistent attributes also attempt key lookups."""
         if key in self:
             return self[key]
-        import sys
         import dis
+        import sys
 
         frame = sys._getframe(1)
         if "\x00%c" % dis.opmap["STORE_ATTR"] in frame.f_code.co_code:

@@ -87,7 +87,9 @@ class TestCFIntegration(BaseTestCase):
             u"attribute lat:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"attribute lon:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"§2.6.2 global attribute history should exist and be a non-empty string",
-            u"standard_name temperature is not defined in Standard Name Table v{}".format(self._std_names._version),
+            u"standard_name temperature is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lat, is not a variable in this dataset",
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
         ]
@@ -100,7 +102,6 @@ class TestCFIntegration(BaseTestCase):
         scored, out_of, messages = self.get_results(check_results)
 
         expected_messages = [
-
             "AKs's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
             "AKt's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
             "AKv's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
@@ -147,7 +148,7 @@ class TestCFIntegration(BaseTestCase):
             "Unidentifiable feature for variable Cs_w",
             "Unidentifiable feature for variable user",
             "§4.3.3 The standard_name of `s_rho` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
-            "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`"
+            "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
         ]
         assert set(messages).issubset(set(expected_messages))
 
@@ -161,18 +162,30 @@ class TestCFIntegration(BaseTestCase):
         expected_messages = [
             "units for variable air_temperature_qc must be convertible to K currently they are 1",
             "units for variable wind_speed_qc must be convertible to m s-1 currently they are 1",
-            "standard_name visibility is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name visibility is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             "standard_name modifier data_quality for variable visibility_qc is not a valid modifier according to appendix C",
-            "standard_name wind_direction is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name wind_direction is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             "standard_name modifier data_quality for variable wind_direction_qc is not a valid modifier according to appendix C",
-            "standard_name wind_gust is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name wind_gust is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             "standard_name modifier data_quality for variable wind_gust_qc is not a valid modifier according to appendix C",
             "standard_name modifier data_quality for variable air_temperature_qc is not a valid modifier according to appendix C",
-            "standard_name use_wind is not defined in Standard Name Table v{}".format(self._std_names._version),
-            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name use_wind is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
+            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             "standard_name modifier data_quality for variable barometric_pressure_qc is not a valid modifier according to appendix C",
             "standard_name modifier data_quality for variable wind_speed_qc is not a valid modifier according to appendix C",
-            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(self._std_names._version),
+            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(
+                self._std_names._version
+            ),
             "CF recommends latitude variable 'lat' to use units degrees_north",
             "CF recommends longitude variable 'lon' to use units degrees_east",
         ]
@@ -328,8 +341,9 @@ class TestCFIntegration(BaseTestCase):
                 " not in messages"
             )
         assert (u"Unidentifiable feature for variable x") in messages
-        assert ('§2.6.1 Conventions global attribute does not contain "CF-1.7"'
-               ) in messages
+        assert (
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"'
+        ) in messages
 
     def test_ww3(self):
         dataset = self.load_dataset(STATIC_FILES["ww3"])

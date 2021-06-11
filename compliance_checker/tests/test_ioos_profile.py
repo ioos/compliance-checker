@@ -956,7 +956,7 @@ class TestIOOS1_2(BaseTestCase):
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
-        
+
     def test_check_feattype_timeseries_cf_role(self):
 
         ### featureType: timeseries and timeseries - msingle station require same tests ###

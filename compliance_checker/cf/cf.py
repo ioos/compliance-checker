@@ -1830,7 +1830,9 @@ class CF1_6Check(CFNCCheck):
         forecast_variables = cfutil.get_forecast_metadata_variables(ds)
 
         unit_required_variables = set(
-            coordinate_variables + auxiliary_coordinates + geophysical_variables
+            coordinate_variables
+            + auxiliary_coordinates
+            + geophysical_variables
             + forecast_variables
         )
 
@@ -1847,8 +1849,9 @@ class CF1_6Check(CFNCCheck):
                 continue
 
             # Skip labels
-            if ((hasattr(variable.dtype, "char") and variable.dtype.char == "S")
-                or variable.dtype == str):
+            if (
+                hasattr(variable.dtype, "char") and variable.dtype.char == "S"
+            ) or variable.dtype == str:
                 continue
 
             standard_name = getattr(variable, "standard_name", None)
@@ -1861,8 +1864,7 @@ class CF1_6Check(CFNCCheck):
             valid_units = self._check_valid_cf_units(ds, name)
             ret_val.append(valid_units)
 
-            units_attr_is_string = TestCtx(BaseCheck.MEDIUM,
-                                           self.section_titles["3.1"])
+            units_attr_is_string = TestCtx(BaseCheck.MEDIUM, self.section_titles["3.1"])
 
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(
@@ -2047,8 +2049,7 @@ class CF1_6Check(CFNCCheck):
             valid_standard_units.assert_true(
                 util.units_convertible(canonical_units, units),
                 "units for variable {} must be convertible to {} "
-                "currently they are {}".format(variable_name, canonical_units,
-                                               units),
+                "currently they are {}".format(variable_name, canonical_units, units),
             )
 
         return valid_standard_units.to_result()
@@ -3495,76 +3496,78 @@ class CF1_6Check(CFNCCheck):
         :return: List of results
         """
         ret_val = []
-        region_list = [  # TODO maybe move this (and other info like it) into a config file?
-            "africa",
-            "antarctica",
-            "arabian_sea",
-            "aral_sea",
-            "arctic_ocean",
-            "asia",
-            "atlantic_ocean",
-            "australia",
-            "baltic_sea",
-            "barents_opening",
-            "barents_sea",
-            "beaufort_sea",
-            "bellingshausen_sea",
-            "bering_sea",
-            "bering_strait",
-            "black_sea",
-            "canadian_archipelago",
-            "caribbean_sea",
-            "caspian_sea",
-            "central_america",
-            "chukchi_sea",
-            "contiguous_united_states",
-            "denmark_strait",
-            "drake_passage",
-            "east_china_sea",
-            "english_channel",
-            "eurasia",
-            "europe",
-            "faroe_scotland_channel",
-            "florida_bahamas_strait",
-            "fram_strait",
-            "global",
-            "global_land",
-            "global_ocean",
-            "great_lakes",
-            "greenland",
-            "gulf_of_alaska",
-            "gulf_of_mexico",
-            "hudson_bay",
-            "iceland_faroe_channel",
-            "indian_ocean",
-            "indonesian_throughflow",
-            "indo_pacific_ocean",
-            "irish_sea",
-            "lake_baykal",
-            "lake_chad",
-            "lake_malawi",
-            "lake_tanganyika",
-            "lake_victoria",
-            "mediterranean_sea",
-            "mozambique_channel",
-            "north_america",
-            "north_sea",
-            "norwegian_sea",
-            "pacific_equatorial_undercurrent",
-            "pacific_ocean",
-            "persian_gulf",
-            "red_sea",
-            "ross_sea",
-            "sea_of_japan",
-            "sea_of_okhotsk",
-            "south_america",
-            "south_china_sea",
-            "southern_ocean",
-            "taiwan_luzon_straits",
-            "weddell_sea",
-            "windward_passage",
-            "yellow_sea",
-        ]
+        region_list = (
+            [  # TODO maybe move this (and other info like it) into a config file?
+                "africa",
+                "antarctica",
+                "arabian_sea",
+                "aral_sea",
+                "arctic_ocean",
+                "asia",
+                "atlantic_ocean",
+                "australia",
+                "baltic_sea",
+                "barents_opening",
+                "barents_sea",
+                "beaufort_sea",
+                "bellingshausen_sea",
+                "bering_sea",
+                "bering_strait",
+                "black_sea",
+                "canadian_archipelago",
+                "caribbean_sea",
+                "caspian_sea",
+                "central_america",
+                "chukchi_sea",
+                "contiguous_united_states",
+                "denmark_strait",
+                "drake_passage",
+                "east_china_sea",
+                "english_channel",
+                "eurasia",
+                "europe",
+                "faroe_scotland_channel",
+                "florida_bahamas_strait",
+                "fram_strait",
+                "global",
+                "global_land",
+                "global_ocean",
+                "great_lakes",
+                "greenland",
+                "gulf_of_alaska",
+                "gulf_of_mexico",
+                "hudson_bay",
+                "iceland_faroe_channel",
+                "indian_ocean",
+                "indonesian_throughflow",
+                "indo_pacific_ocean",
+                "irish_sea",
+                "lake_baykal",
+                "lake_chad",
+                "lake_malawi",
+                "lake_tanganyika",
+                "lake_victoria",
+                "mediterranean_sea",
+                "mozambique_channel",
+                "north_america",
+                "north_sea",
+                "norwegian_sea",
+                "pacific_equatorial_undercurrent",
+                "pacific_ocean",
+                "persian_gulf",
+                "red_sea",
+                "ross_sea",
+                "sea_of_japan",
+                "sea_of_okhotsk",
+                "south_america",
+                "south_china_sea",
+                "southern_ocean",
+                "taiwan_luzon_straits",
+                "weddell_sea",
+                "windward_passage",
+                "yellow_sea",
+            ]
+        )
 
         for var in ds.get_variables_by_attributes(standard_name="region"):
             valid_region = TestCtx(BaseCheck.MEDIUM, self.section_titles["6.1"])
@@ -4465,7 +4468,10 @@ class CF1_6Check(CFNCCheck):
                 "multi-timeseries-orthogonal",
                 "multi-timeseries-incomplete",
             ],
-            "trajectory": ["cf-trajectory", "single-trajectory",],
+            "trajectory": [
+                "cf-trajectory",
+                "single-trajectory",
+            ],
             "profile": ["profile-orthogonal", "profile-incomplete"],
             "timeSeriesProfile": [
                 "timeseries-profile-single-station",
@@ -5229,8 +5235,8 @@ class CF1_7Check(CF1_6Check):
                     test_ctx.out_of += 1
 
             # existence_conditions
-            exist_cond_1 = self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(
-                var
+            exist_cond_1 = (
+                self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(var)
             )
             test_ctx.assert_true(exist_cond_1[0], exist_cond_1[1])
             exist_cond_2 = self._check_gmattr_existence_condition_ell_pmerid_hdatum(var)
