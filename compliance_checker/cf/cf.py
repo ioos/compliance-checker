@@ -110,8 +110,8 @@ class CFBaseCheck(BaseCheck):
             "5.3": "§5.3 Reduced Horizontal Grid",
             "5.4": "§5.4 Timeseries of Station Data",
             "5.5": "§5.5 Trajectories",
-            "5.6": "§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections",
-            "5.7": "§5.7 Scalar Coorindate Variables",
+            "5.6": "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections",
+            "5.7": "§5.7 Scalar Coordinate Variables",
             "6.1": "§6.1 Labels",
             "6.2": "§6.2 Alternative Coordinates",
             "7.1": "§7.1 Cell Boundaries",
@@ -506,7 +506,7 @@ class CFBaseCheck(BaseCheck):
         attr_val = var.getncattr(attr_name)
 
         if isinstance(attr_val, (str, bytes)):
-            type_match = var.dtype.kind == "S"
+            type_match = (var.dtype is str) or (var.dtype.kind == "S")
             val_type = type(attr_val)
         else:
             val_type = attr_val.dtype.type
@@ -871,7 +871,9 @@ class CFBaseCheck(BaseCheck):
         for coord_name in self._find_aux_coord_vars(ds):
             coord_var = ds.variables[coord_name]
             # Skip label auxiliary coordinates
-            if coord_var.dtype.char == "S":
+            if hasattr(coord_var.dtype, "char") and coord_var.dtype.char == "S":
+                continue
+            elif coord_var.dtype == str:
                 continue
             for dimension in coord_var.dimensions:
                 if dimension not in coord_axis_map:
@@ -947,6 +949,29 @@ class CFBaseCheck(BaseCheck):
             dim_name = dim
             if ds.dimensions[dim].isunlimited():
                 dim_name += " (Unlimited)"
+            dim_names.append(dim_name)
+        return ", ".join(dim_names)
+
+    def _get_pretty_dimension_order_with_type(self, ds, name, dim_types):
+        """
+        Returns a comma separated string of the dimensions for a specified
+        variable of format "DIMENSIONS_NAME (DIMENSION_TYPE[, unlimited])"
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param str name: A string with a valid NetCDF variable name for the
+                         dataset
+        :param list dim_types: A list of strings returned by
+                               _get_dimension_order for the same "name"
+        :rtype: str
+        :return: A comma separated string of the variable's dimensions
+        """
+        dim_names = []
+        for dim, dim_type in zip(ds.variables[name].dimensions, dim_types):
+            dim_name = "{} ({}".format(dim, dim_type)
+            if ds.dimensions[dim].isunlimited():
+                dim_name += ", unlimited)"
+            else:
+                dim_name += ")"
             dim_names.append(dim_name)
         return ", ".join(dim_names)
 
@@ -1323,16 +1348,20 @@ class CF1_6Check(CFNCCheck):
         total = len(ds.variables)
 
         for k, v in ds.variables.items():
-            if v.dtype.kind != "S" and all(
-                v.dtype.type != t
-                for t in (
-                    np.character,
-                    np.dtype("|S1"),
-                    np.dtype("b"),
-                    np.dtype("i2"),
-                    np.dtype("i4"),
-                    np.float32,
-                    np.double,
+            if (
+                v.dtype is not str
+                and v.dtype.kind != "S"
+                and all(
+                    v.dtype.type != t
+                    for t in (
+                        np.character,
+                        np.dtype("|S1"),
+                        np.dtype("b"),
+                        np.dtype("i2"),
+                        np.dtype("i4"),
+                        np.float32,
+                        np.double,
+                    )
                 )
             ):
                 fails.append(
@@ -1370,8 +1399,6 @@ class CF1_6Check(CFNCCheck):
             "valid_min",
             "valid_max",
             "valid_range",
-            "scale_factor",
-            "add_offset",
             "_FillValue",
         }
 
@@ -1379,6 +1406,64 @@ class CF1_6Check(CFNCCheck):
             for att_name in special_attrs.intersection(var.ncattrs()):
                 self._parent_var_attr_type_check(att_name, var, ctx)
         return ctx.to_result()
+
+    def _check_add_offset_scale_factor_type(self, variable, attr_name):
+        """
+        Reusable function for checking both add_offset and scale_factor.
+        """
+
+        msg = (
+            f"Variable {variable.name} and {attr_name} must be quivalent "
+            "data types or {variable.name} must be of type byte, short, or int "
+            "and {attr_name} must be float or double"
+        )
+
+        att = getattr(variable, attr_name, None)
+        if not (isinstance(att, (np.number, float))):  # can't compare dtypes
+            val = False
+
+        else:
+            val = (
+                att.dtype == variable.dtype
+            ) or (  # will short-circuit or if first condition is true
+                isinstance(att.dtype, (np.float, np.double, float))
+                and isinstance(variable.dtype, (np.byte, np.short, np.int, int))
+            )
+
+        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"], [msg])
+
+    def check_add_offset_scale_factor_type(self, ds):
+        """
+        If a variable has the attributes add_offset and scale_factor,
+        check that the variables and attributes are of the same type
+        OR that the variable is of type byte, short or int and the
+        attributes are of type float or double.
+        """
+
+        results = []
+        add_offset_vars = ds.get_variables_by_attributes(
+            add_offset=lambda x: x is not None
+        )
+        scale_factor_vars = ds.get_variables_by_attributes(
+            scale_factor=lambda x: x is not None
+        )
+
+        for _att_vars_tup in (
+            ("add_offset", add_offset_vars),
+            ("scale_factor", scale_factor_vars),
+        ):
+            results.extend(
+                list(
+                    map(
+                        lambda x: self._check_scale_factor_add_offset(
+                            ds.variables[x], _att_vars_tup[0]
+                        ),
+                        _att_vars_tup[1],
+                    )
+                )
+            )
+
+        return results
 
     def check_naming_conventions(self, ds):
         """
@@ -1554,9 +1639,16 @@ class CF1_6Check(CFNCCheck):
                 dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
                 valid_dimension_order.assert_true(
                     self._dims_in_order(dimension_order),
-                    "{}'s dimensions are not in the recommended order "
-                    "T, Z, Y, X. They are {}"
-                    "".format(name, self._get_pretty_dimension_order(ds, name)),
+                    "{}'s spatio-temporal dimensions are not in the "
+                    "recommended order T, Z, Y, X and/or further dimensions "
+                    "are not located left of T, Z, Y, X. The dimensions (and "
+                    "their guessed types) are {} (with U: other/unknown; L: "
+                    "unlimited).".format(
+                        name,
+                        self._get_pretty_dimension_order_with_type(
+                            ds, name, dimension_order
+                        ),
+                    ),
                 )
         return valid_dimension_order.to_result()
 
@@ -1735,11 +1827,16 @@ class CF1_6Check(CFNCCheck):
         coordinate_variables = self._find_coord_vars(ds)
         auxiliary_coordinates = self._find_aux_coord_vars(ds)
         geophysical_variables = self._find_geophysical_vars(ds)
-        unit_required_variables = (
-            coordinate_variables + auxiliary_coordinates + geophysical_variables
+        forecast_variables = cfutil.get_forecast_metadata_variables(ds)
+
+        unit_required_variables = set(
+            coordinate_variables
+            + auxiliary_coordinates
+            + geophysical_variables
+            + forecast_variables
         )
 
-        for name in set(unit_required_variables):
+        for name in unit_required_variables:
             # For reduced horizontal grids, the compression index variable does
             # not require units.
             if cfutil.is_compression_coordinate(ds, name):
@@ -1752,7 +1849,9 @@ class CF1_6Check(CFNCCheck):
                 continue
 
             # Skip labels
-            if variable.dtype.char == "S":
+            if (
+                hasattr(variable.dtype, "char") and variable.dtype.char == "S"
+            ) or variable.dtype == str:
                 continue
 
             standard_name = getattr(variable, "standard_name", None)
@@ -1810,7 +1909,8 @@ class CF1_6Check(CFNCCheck):
         # Is this even in the database? also, if there is no standard_name,
         # there's no way to know if it is dimensionless.
         should_be_dimensionless = (
-            variable.dtype.char == "S"
+            variable.dtype is str
+            or (hasattr(variable.dtype, "char") and variable.dtype.char == "S")
             or std_name_units_dimensionless
             or standard_name is None
         )
@@ -1859,7 +1959,9 @@ class CF1_6Check(CFNCCheck):
 
         # If the variable is supposed to be dimensionless, it automatically passes
         should_be_dimensionless = (
-            variable.dtype.char == "S" or std_name_units_dimensionless
+            variable.dtype is str
+            or (hasattr(variable.dtype, "char") and variable.dtype.char == "S")
+            or std_name_units_dimensionless
         )
 
         valid_udunits = TestCtx(BaseCheck.HIGH, self.section_titles["3.1"])
@@ -1991,7 +2093,9 @@ class CF1_6Check(CFNCCheck):
 
             # Unfortunately, §6.1 allows for string types to be listed as
             # coordinates.
-            if ncvar.dtype.char == "S":
+            if hasattr(ncvar.dtype, "char") and ncvar.dtype.char == "S":
+                continue
+            elif ncvar.dtype == str:
                 continue
 
             standard_name = getattr(ncvar, "standard_name", None)
@@ -2386,7 +2490,9 @@ class CF1_6Check(CFNCCheck):
             # §6.1 allows for labels to be referenced as auxiliary coordinate
             # variables, which should not be checked like the rest of the
             # coordinates.
-            if variable.dtype.char == "S":
+            if hasattr(variable.dtype, "char") and variable.dtype.char == "S":
+                continue
+            elif variable.dtype == str:
                 continue
 
             axis = getattr(variable, "axis", None)
@@ -2958,7 +3064,12 @@ class CF1_6Check(CFNCCheck):
                     continue
 
                 # §6.1 Allows for "labels" to be referenced as coordinates
-                if ds.variables[aux_coord].dtype.char == "S":
+                if (
+                    hasattr(ds.variables[aux_coord].dtype, "char")
+                    and ds.variables[aux_coord].dtype.char == "S"
+                ):
+                    continue
+                elif ds.variables[aux_coord].dtype == str:
                     continue
 
                 aux_coord_dims = set(ds.variables[aux_coord].dimensions)
@@ -3385,76 +3496,78 @@ class CF1_6Check(CFNCCheck):
         :return: List of results
         """
         ret_val = []
-        region_list = [  # TODO maybe move this (and other info like it) into a config file?
-            "africa",
-            "antarctica",
-            "arabian_sea",
-            "aral_sea",
-            "arctic_ocean",
-            "asia",
-            "atlantic_ocean",
-            "australia",
-            "baltic_sea",
-            "barents_opening",
-            "barents_sea",
-            "beaufort_sea",
-            "bellingshausen_sea",
-            "bering_sea",
-            "bering_strait",
-            "black_sea",
-            "canadian_archipelago",
-            "caribbean_sea",
-            "caspian_sea",
-            "central_america",
-            "chukchi_sea",
-            "contiguous_united_states",
-            "denmark_strait",
-            "drake_passage",
-            "east_china_sea",
-            "english_channel",
-            "eurasia",
-            "europe",
-            "faroe_scotland_channel",
-            "florida_bahamas_strait",
-            "fram_strait",
-            "global",
-            "global_land",
-            "global_ocean",
-            "great_lakes",
-            "greenland",
-            "gulf_of_alaska",
-            "gulf_of_mexico",
-            "hudson_bay",
-            "iceland_faroe_channel",
-            "indian_ocean",
-            "indonesian_throughflow",
-            "indo_pacific_ocean",
-            "irish_sea",
-            "lake_baykal",
-            "lake_chad",
-            "lake_malawi",
-            "lake_tanganyika",
-            "lake_victoria",
-            "mediterranean_sea",
-            "mozambique_channel",
-            "north_america",
-            "north_sea",
-            "norwegian_sea",
-            "pacific_equatorial_undercurrent",
-            "pacific_ocean",
-            "persian_gulf",
-            "red_sea",
-            "ross_sea",
-            "sea_of_japan",
-            "sea_of_okhotsk",
-            "south_america",
-            "south_china_sea",
-            "southern_ocean",
-            "taiwan_luzon_straits",
-            "weddell_sea",
-            "windward_passage",
-            "yellow_sea",
-        ]
+        region_list = (
+            [  # TODO maybe move this (and other info like it) into a config file?
+                "africa",
+                "antarctica",
+                "arabian_sea",
+                "aral_sea",
+                "arctic_ocean",
+                "asia",
+                "atlantic_ocean",
+                "australia",
+                "baltic_sea",
+                "barents_opening",
+                "barents_sea",
+                "beaufort_sea",
+                "bellingshausen_sea",
+                "bering_sea",
+                "bering_strait",
+                "black_sea",
+                "canadian_archipelago",
+                "caribbean_sea",
+                "caspian_sea",
+                "central_america",
+                "chukchi_sea",
+                "contiguous_united_states",
+                "denmark_strait",
+                "drake_passage",
+                "east_china_sea",
+                "english_channel",
+                "eurasia",
+                "europe",
+                "faroe_scotland_channel",
+                "florida_bahamas_strait",
+                "fram_strait",
+                "global",
+                "global_land",
+                "global_ocean",
+                "great_lakes",
+                "greenland",
+                "gulf_of_alaska",
+                "gulf_of_mexico",
+                "hudson_bay",
+                "iceland_faroe_channel",
+                "indian_ocean",
+                "indonesian_throughflow",
+                "indo_pacific_ocean",
+                "irish_sea",
+                "lake_baykal",
+                "lake_chad",
+                "lake_malawi",
+                "lake_tanganyika",
+                "lake_victoria",
+                "mediterranean_sea",
+                "mozambique_channel",
+                "north_america",
+                "north_sea",
+                "norwegian_sea",
+                "pacific_equatorial_undercurrent",
+                "pacific_ocean",
+                "persian_gulf",
+                "red_sea",
+                "ross_sea",
+                "sea_of_japan",
+                "sea_of_okhotsk",
+                "south_america",
+                "south_china_sea",
+                "southern_ocean",
+                "taiwan_luzon_straits",
+                "weddell_sea",
+                "windward_passage",
+                "yellow_sea",
+            ]
+        )
 
         for var in ds.get_variables_by_attributes(standard_name="region"):
             valid_region = TestCtx(BaseCheck.MEDIUM, self.section_titles["6.1"])
@@ -3562,7 +3675,7 @@ class CF1_6Check(CFNCCheck):
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
-                    u"Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
+                    "Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
                     "".format(variable.name, boundary_variable.dimensions)
                 )
 
@@ -3947,7 +4060,7 @@ class CF1_6Check(CFNCCheck):
                 ]
             ):
                 reasoning.append(
-                    u"Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
+                    "Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
                         ds.variables[clim_coord_var.climatology].dimensions
                     )
                 )
@@ -3960,7 +4073,7 @@ class CF1_6Check(CFNCCheck):
                 != 2
             ):
                 reasoning.append(
-                    u"Climatology dimension {} should only contain two elements".format(
+                    "Climatology dimension {} should only contain two elements".format(
                         boundary_variable.dimensions
                     )
                 )
@@ -4180,7 +4293,9 @@ class CF1_6Check(CFNCCheck):
                 )
             # ensure compression variable is a proper index, and thus is an
             # signed or unsigned integer type of some sort
-            if compress_var.dtype.kind not in {"i", "u"}:
+            if (compress_var.dtype is str) or (
+                compress_var.dtype.kind not in {"i", "u"}
+            ):
                 valid = False
                 reasoning.append(
                     "Compression variable {} must be an integer type to form a proper array index".format(
@@ -4226,7 +4341,12 @@ class CF1_6Check(CFNCCheck):
         """
         all_the_same = TestCtx(BaseCheck.HIGH, self.section_titles["9.1"])
         feature_types_found = defaultdict(list)
-        for name in self._find_geophysical_vars(ds):
+        # iterate all geophysical variables with at least one dimension
+        for name in (
+            name
+            for name in self._find_geophysical_vars(ds)
+            if ds.variables[name].ndim > 0
+        ):
             feature = cfutil.guess_feature_type(ds, name)
             # If we can't figure out the feature type, penalize. Originally,
             # it was not penalized. However, this led to the issue that the
@@ -4348,7 +4468,10 @@ class CF1_6Check(CFNCCheck):
                 "multi-timeseries-orthogonal",
                 "multi-timeseries-incomplete",
             ],
-            "trajectory": ["cf-trajectory", "single-trajectory",],
+            "trajectory": [
+                "cf-trajectory",
+                "single-trajectory",
+            ],
             "profile": ["profile-orthogonal", "profile-incomplete"],
             "timeSeriesProfile": [
                 "timeseries-profile-single-station",
@@ -4638,7 +4761,7 @@ class CF1_7Check(CF1_6Check):
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
-                    u"Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
+                    "Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
                     "".format(variable.name, boundary_variable.dimensions)
                 )
 
@@ -5112,8 +5235,8 @@ class CF1_7Check(CF1_6Check):
                     test_ctx.out_of += 1
 
             # existence_conditions
-            exist_cond_1 = self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(
-                var
+            exist_cond_1 = (
+                self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(var)
             )
             test_ctx.assert_true(exist_cond_1[0], exist_cond_1[1])
             exist_cond_2 = self._check_gmattr_existence_condition_ell_pmerid_hdatum(var)
@@ -5201,7 +5324,7 @@ class CF1_7Check(CF1_6Check):
         correct_computed_std_name_ctx.assert_true(
             getattr(variable, "computed_standard_name", None) in _comp_std_name,
             "§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`".format(
-                vname, _comp_std_name
+                vname, sorted(_comp_std_name)
             ),
         )
         ret_val.append(correct_computed_std_name_ctx.to_result())

@@ -83,39 +83,24 @@ grid_mapping_attr_types17.update(
 
 grid_mapping_dict16 = {
     "albers_conical_equal_area": [
-        (
-            "longitude_of_central_meridian",
-            "latitude_of_projection_origin",
-            "false_easting",
-            "false_northing",
-        ),
-        (),
+        ("longitude_of_central_meridian", "latitude_of_projection_origin"),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
     ],
     "azimuthal_equidistant": [
-        (
-            "longitude_of_projection_origin",
-            "latitude_of_projection_origin",
-            "false_easting",
-            "false_northing",
-        ),
-        (),
+        ("longitude_of_projection_origin", "latitude_of_projection_origin"),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
     ],
     "lambert_cylindrical_equal_area": [
-        ("longitude_of_central_meridian", "false_easting", "false_northing"),
-        (),
+        ("longitude_of_central_meridian"),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
         ("standard_parallel", "scale_factor_at_projection_origin"),
     ],
     "lambert_azimuthal_equal_area": [
-        (
-            "longitude_of_projection_origin",
-            "latitude_of_projection_origin",
-            "false_easting",
-            "false_northing",
-        ),
-        (),
+        ("longitude_of_projection_origin", "latitude_of_projection_origin"),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
     ],
     "lambert_conformal_conic": [
@@ -123,37 +108,25 @@ grid_mapping_dict16 = {
             "standard_parallel",
             "longitude_of_central_meridian",
             "latitude_of_projection_origin",
-            "false_easting",
-            "false_northing",
         ),
-        (),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
     ],
     "latitude_longitude": [(), (), ("longitude", "latitude")],
     "mercator": [
-        ("longitude_of_projection_origin", "false_easting", "false_northing"),
-        (),
+        ("longitude_of_projection_origin"),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
         ("standard_parallel", "scale_factor_at_projection_origin"),
     ],
     "orthographic": [
-        (
-            "longitude_of_projection_origin",
-            "latitude_of_projection_origin",
-            "false_easting",
-            "false_northing",
-        ),
-        (),
+        ("longitude_of_projection_origin", "latitude_of_projection_origin"),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
     ],
     "polar_stereographic": [
-        (
-            "straight_vertical_longitude_from_pole",
-            "latitude_of_projection_origin",
-            "false_easting",
-            "false_northing",
-        ),
-        (),
+        ("straight_vertical_longitude_from_pole", "latitude_of_projection_origin"),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
         ("standard_parallel", "scale_factor_at_projection_origin"),
     ],
@@ -167,10 +140,8 @@ grid_mapping_dict16 = {
             "longitude_of_projection_origin",
             "latitude_of_projection_origin",
             "scale_factor_at_projection_origin",
-            "false_easting",
-            "false_northing",
         ),
-        (),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
     ],
     "transverse_mercator": [
@@ -178,10 +149,8 @@ grid_mapping_dict16 = {
             "scale_factor_at_central_meridian",
             "longitude_of_central_meridian",
             "latitude_of_projection_origin",
-            "false_easting",
-            "false_northing",
         ),
-        (),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
     ],
     "vertical_perspective": [
@@ -189,10 +158,8 @@ grid_mapping_dict16 = {
             "longitude_of_projection_origin",
             "latitude_of_projection_origin",
             "perspective_point_height",
-            "false_easting",
-            "false_northing",
         ),
-        (),
+        ("false_easting", "false_northing"),
         ("projection_x_coordinate", "projection_y_coordinate"),
     ],
 }
@@ -207,9 +174,9 @@ grid_mapping_dict17.update(
                 "latitude_of_projection_origin",
                 "longitude_of_projection_origin",
                 "perspective_point_height",
-                "false_easting",
-                "false_northing",
-            )
+            ),
+            ("false_easting", "false_northing"),
+            ("projection_x_coordinate", "projection_y_coordinate"),
         ],
         "oblique_mercator": [
             (
@@ -217,12 +184,14 @@ grid_mapping_dict17.update(
                 "latitude_of_projection_origin",
                 "longitude_of_projection_origin",
                 "scale_factor_at_projection_origin",
-                "false_easting",
-                "false_northing",
-            )
+            ),
+            ("false_easting", "false_northing"),
+            ("projection_x_coordinate", "projection_y_coordinate"),
         ],
         "sinusoidal": [
-            ("longitude_of_projection_origin", "false_easting", "false_northing")
+            ("longitude_of_projection_origin"),
+            ("false_easting", "false_northing"),
+            ("projection_x_coordinate", "projection_y_coordinate"),
         ],
     }
 )

@@ -391,7 +391,7 @@ class CheckSuite(object):
             groups = self.scores(vals)
 
             # invoke finalizer explicitly
-            checker.__del__()
+            del checker
 
             ret_val[checker_name] = groups, errs
 
@@ -829,7 +829,7 @@ class CheckSuite(object):
         # Issue GET instead if we reach here and can't get the response
         response = requests.get(ds_str, allow_redirects=True, timeout=60)
         content_type = response.headers.get("content-type")
-        if content_type == "text/xml":
+        if content_type.startswith("text/xml"):
             return self.process_doc(response.content)
         else:
             raise ValueError(

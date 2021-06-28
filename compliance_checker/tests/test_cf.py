@@ -123,14 +123,26 @@ class TestCF1_6(BaseTestCase):
     def test_check_data_types(self):
         """
         Invoke check_data_types() and loop through all variables to check data
-        types. Pertains to 2.2 The netCDF data types char, byte, short, int,
-        float or real, and double are all acceptable.
+        types. Pertains to 2.2. The netCDF data types char, byte, short, int,
+        float or real, and double are all acceptable. NetCDF4 allows string as
+        data type, which is also acceptable.
         """
 
+        # check default netCDF data types
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
         result = self.cf.check_data_types(dataset)
         assert result.value[0] == result.value[1]
 
+        # check if variables of type `string` is properly processed
+        dataset = self.load_dataset(STATIC_FILES["string"])
+        if dataset.file_format != "NETCDF4":
+            raise RuntimeError(
+                "netCDF file of wrong format (not netCDF4) was created for checking"
+            )
+        result = self.cf.check_data_types(dataset)
+        assert result.value[0] == result.value[1]
+
+        # check bad data types
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_data_types(dataset)
 
@@ -307,8 +319,11 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_dimension_order(dataset)
         assert result.value == (5, 6)
         assert result.msgs[0] == (
-            u"really_bad's dimensions are not in the recommended order "
-            "T, Z, Y, X. They are latitude, power"
+            u"really_bad's spatio-temporal dimensions are not in the "
+            "recommended order T, Z, Y, X and/or further dimensions are not "
+            "located left of T, Z, Y, X. The dimensions (and their guessed "
+            "types) are latitude (Y), power (U) (with U: other/unknown; L: "
+            "unlimited)."
         )
 
         dataset = self.load_dataset(STATIC_FILES["dimension_order"])
@@ -1026,7 +1041,7 @@ class TestCF1_6(BaseTestCase):
 
         result_dict = {result.name: result for result in results}
         result = result_dict[
-            u"§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections"
+            u"§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
         ]
         assert result.value == (2, 2)
         assert (scored, out_of) == (2, 2)
@@ -1046,7 +1061,7 @@ class TestCF1_6(BaseTestCase):
         assert scored < out_of
         assert all(
             r.name
-            == u"§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections"
+            == u"§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
             for r in results
         )
 
@@ -1072,11 +1087,31 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_grid_mapping(dataset)
 
         assert len(results) == 6
-        assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 1
+        assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 0
         expected_name = (
-            u"§5.6 Horizontal Coorindate Reference Systems, Grid Mappings, Projections"
+            "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
         )
         assert all(r.name == expected_name for r in results.values())
+
+    def test_is_geophysical(self):
+
+        # check whether string type variable, which are not `cf_role`, are
+        # properly processed
+        dataset = self.load_dataset(STATIC_FILES["string"])
+        if dataset.file_format != "NETCDF4":
+            raise RuntimeError(
+                "netCDF file of wrong format (not netCDF4) was created for checking"
+            )
+        try:
+            result = cfutil.is_geophysical(dataset, "j")
+        except AttributeError:
+            pytest.fail(
+                "Test probably fails because var.dtype.kind or var.dtype.char "
+                "was tested on string-type variable. Consider checking for "
+                "`var.dtype is str`"
+            )
+        assert not result
+        # assert False
 
     # TODO: overhaul to use netCDF global attributes or mocks and variable
     #       attributes
@@ -1203,7 +1238,6 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
 
         msgs = [
-            u"Attributes add_offset and scale_factor have different data type.",
             u"Type of tempvalid_min attribute (int32) does not match variable type (int64)",
             u"Type of temp:valid_max attribute (int32) does not match variable type (int64)",
             u"Type of salinityvalid_min attribute (int32) does not match variable type (float64)",
@@ -1906,7 +1940,7 @@ class TestCF1_7(BaseTestCase):
 
     def test_check_attr_type(self):
         """
-         Ensure the _check_attr_type method works as expected.
+        Ensure the _check_attr_type method works as expected.
         """
 
         # create a temporary variable and test this only
@@ -2124,3 +2158,41 @@ class TestCF1_7(BaseTestCase):
         )
         self.assertFalse(res[0])
         dataset.close()
+
+    def test_check_add_offset_scale_factor_type(self):
+        dataset = MockTimeSeries()  # time lat lon depth
+        temp = dataset.createVariable("temp", "d", dimensions=("time",))
+
+        # set att bad (str)
+        temp.setncattr("add_offset", "foo")
+        r = self.cf._check_add_offset_scale_factor_type(temp, "add_offset")
+        self.assertFalse(r.value)
+
+        temp.setncattr("scale_factor", "foo")
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertFalse(r.value)
+
+        # set bad np val
+        temp.setncattr("scale_factor", np.float32(5))
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertFalse(r.value)
+
+        temp.setncattr("scale_factor", np.uint(5))
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertFalse(r.value)
+
+        # set good
+        temp.setncattr("scale_factor", np.float(5))
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertTrue(r.value)
+
+        temp.setncattr("scale_factor", np.double(5))
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertTrue(r.value)
+
+        # set same dtype
+        dataset = MockTimeSeries()  # time lat lon depth
+        temp = dataset.createVariable("temp", np.int, dimensions=("time",))
+        temp.setncattr("scale_factor", np.int(5))
+        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
+        self.assertTrue(r.value)
