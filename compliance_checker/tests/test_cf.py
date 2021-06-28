@@ -1087,9 +1087,10 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_grid_mapping(dataset)
 
         assert len(results) == 6
-        assert len([r.value for r in results.values()
-                    if r.value[0] < r.value[1]]) == 0
-        expected_name = '§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections'
+        assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 0
+        expected_name = (
+            "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
+        )
         assert all(r.name == expected_name for r in results.values())
 
     def test_is_geophysical(self):
@@ -1939,7 +1940,7 @@ class TestCF1_7(BaseTestCase):
 
     def test_check_attr_type(self):
         """
-         Ensure the _check_attr_type method works as expected.
+        Ensure the _check_attr_type method works as expected.
         """
 
         # create a temporary variable and test this only
