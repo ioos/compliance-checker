@@ -345,7 +345,44 @@ class TestIOOS1_2(BaseTestCase):
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
-    def test_check_accuracy(self):
+    def test_check_accuracy_precision_resolution(self):
+        # doesn't have accuracy, precision, resolution, should fail
+
+        ds = MockTimeSeries()  # time, lat, lon, depth
+        temp = ds.createVariable(
+            "temp", np.float64, dimensions=("time",), fill_value=9999999999.0
+        )  # _FillValue
+        temp.setncattr("standard_name", "sea_water_temperature")
+        results = self.ioos.check_accuracy(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # add non-numeric vals for accuracy
+        # no gts_ingest attr, so only existence tested
+        temp.setncattr("accuracy", "bad")
+        results = self.ioos.check_accuracy(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+        # add gts_ingest, accuracy should be numeric
+        temp.setncattr("gts_ingest", "true")
+        temp.setncattr("standard_name", "sea_water_practical_salinity")
+        temp.setncattr("accuracy", "45")
+        results = self.ioos.check_accuracy(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # add numeric for accuracy
+        temp.setncattr("gts_ingest", "true")
+        temp.setncattr("standard_name", "sea_water_practical_salinity")
+        temp.setncattr("accuracy", 45)
+        results = self.ioos.check_accuracy(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertEqual(scored, out_of)
+
+    def test_check_geospatial_vars_have_attrs(self):
+
+        # create geophysical variable
         ds = MockTimeSeries()  # time, lat, lon, depth
         temp = ds.createVariable(
             "temp", np.float64, dimensions=("time",), fill_value=9999999999.0
@@ -956,7 +993,7 @@ class TestIOOS1_2(BaseTestCase):
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
-        
+
     def test_check_feattype_timeseries_cf_role(self):
 
         ### featureType: timeseries and timeseries - msingle station require same tests ###
@@ -1199,9 +1236,7 @@ class TestIOOS1_2(BaseTestCase):
         # make an instrument variable
         temp = ds.createVariable("temperature", "d", dimensions=("time",))
         temp.setncattr("instrument", "inst")
-        inst = ds.createVariable(
-            "inst", "d", dimensions=()
-        )  # no make_model or calibration_date
+        inst = ds.createVariable("inst", "d", dimensions=()) # no make_model or calibration_date
         results = self.ioos.check_instrument_make_model_calib_date(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
@@ -1213,12 +1248,12 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
         # add calibration_date
-        inst.setncattr("calibration_date", "2020-08-19")  # not ISO, fail
+        inst.setncattr("calibration_date", "2020-08-19") # not ISO, fail
         results = self.ioos.check_instrument_make_model_calib_date(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
 
-        inst.setncattr("calibration_date", "2020-08-19T00:00:00")  # ISO, pass
+        inst.setncattr("calibration_date", "2020-08-19T00:00:00") # ISO, pass
         results = self.ioos.check_instrument_make_model_calib_date(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
