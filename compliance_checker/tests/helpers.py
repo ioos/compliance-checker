@@ -64,3 +64,174 @@ class MockVariable(object):
             for att in vars(self)
             if att not in {"ndim", "name", "dtype", "dimensions"}
         ]
+
+class MockRaggedArrayRepr(MockNetCDF):
+    """
+    Class to construct a fake NetCDF dataset using the ragged
+    array structure. User must specify whether the structure should
+    be contiguous ragged array or incomplete ragged array.
+    The user must also specify the featureType of the data set;
+    compound featureTypes are acceptable, and all are case-insensitive.
+
+    Users should note that if a compound featureType is given,
+    only the valid-CF representation is available. This means
+    profiles are organized by contiguous ragged array and an index
+    variable is present to denote which "station" the profile belongs
+    to.
+
+    Data sets which follow the contiguous ragged array structure
+    have a variable called the "count variable" denoting how many
+    elements are in a particular instance. This variable must have the
+    instance dimension as its dimension. The varible will have an
+    attribute "sample_dimension" denoting which dimension is the
+    sample dimension.
+
+    Data sets which follow the indexed ragged array structure have
+    a variable called the "index variable" denoting which instance
+    a particular element belongs to. This variable will have an
+    attribute "instance_dimension" denoting the sample dimension.
+    The variable's dimension is the sample dimension.
+
+    The netCDF4.Dataset interface available to the user will contain
+    a very simple representation of the data model, yielding no
+    extraneous dimensions/variables.
+
+    Parameters
+    ----------
+    feature_type: str (
+        profile, timeseries, trajectory,
+        timeseriesprofile, trajectoryprofile)
+
+    structure: str (contiguous|indexed)
+    """
+
+    def __init__(self, feature_type: str, structure="contiguous"):
+        super(MockRaggedArrayRepr, self).__init__()
+
+        if structure.lower() not in ("contiguous", "indexed"):
+            raise ValueError("Must initialize MockRaggedArray as contiguous or indexed")
+        
+        if feature_type.lower() not in {
+            "point",
+            "profile",
+            "timeseries",
+            "trajectory",
+            "timeseriesprofile",
+            "trajectoryprofile"
+        }:
+            raise ValueError("Must initialize MockRaggedArray with valid featureType")
+
+        is_compound = False
+        if feature_type.lower() in {"timeseriesprofile", "trajectoryprofile"}:
+            is_compound = True
+
+        # the data will have 10 instances of whatever and 100
+        # total elements
+        self.createDimension("INSTANCE_DIMENSION", 10)
+        self.createDimension("SAMPLE_DIMENSION", 100)
+
+        # create a variable as the cf_role variable; if a compound
+        # featureType is given, multiple variables are created
+        if is_compound:
+            # compound, need another dimension as well; this will
+            # become the "station dimension"
+            self.createDimension("STATION_DIMENSION", 5)
+
+            # one variable for "timeseries" or "trajectory" which
+            # has the station dimension and cf_role
+            _var_name = feature_type.lower().split("profile")[0]
+            self.createVariable(
+                "{}_id_variable".format(_var_name),
+                str,
+                ("STATION_DIMENSION",),
+                fill_value=None
+            )
+
+            # set the cf_role
+            self.variables["{}_id_variable".format(_var_name)].setncattr(
+                "cf_role", 
+                "{}_id".format(_var_name)
+            )
+
+            # there will be one for the profile
+            self.createVariable(
+                "profile_id_variable",
+                str,
+                ("INSTANCE_DIMENSION",),
+                fill_value=None
+            )
+            self.variables["profile_id_variable"].setncattr(
+                "cf_role", 
+                "profile_id"
+            )
+
+            # will need a station index variable
+            self.createVariable(
+                "station_index_variable",
+                int,
+                ("INSTANCE_DIMENSION",),
+                fill_value=None
+            )
+
+            self.variables["station_index_variable"].setncattr(
+                "instance_dimension", 
+                "STATION_DIMENSION"
+            )
+
+            # also need counter variable, as compound featureTypes
+            # are represented by having a contiguous repr for the
+            # profiles and the indexed repr for the timeseries/trajectory
+            # organization
+            self.createVariable(
+                "counter_var",
+                "i", # integer type
+                ("INSTANCE_DIMENSION",),
+                fill_value=None
+            )
+
+            self.variables["counter_var"].setncattr(
+                "sample_dimension",
+                "SAMPLE_DIMENSION"
+            )
+            
+        else: # just a single featureType
+            self.createVariable(
+                "{}_id_variable".format(feature_type),
+                str,
+                ("INSTANCE_DIMENSION",),
+                fill_value=None
+            )
+
+            self.variables["{}_id_variable".format(feature_type)].setncattr(
+                "cf_role",
+                "{}_id".format(feature_type)
+            )
+
+            if structure == "contiguous":
+
+                # create count variable
+                self.createVariable(
+                    "counter_var",
+                    "i", # integer type
+                    ("INSTANCE_DIMENSION",),
+                    fill_value=None
+                )
+
+                self.variables["counter_var"].setncattr(
+                    "sample_dimension",
+                    "SAMPLE_DIMENSION"
+                )
+
+            else:
+
+                # create index variable
+                self.createVariable(
+                    "index_var",
+                    "i", # integer type
+                    ("SAMPLE_DIMENSION",),
+                    fill_value=None
+                )
+                self.variables["index_var"].setncattr(
+                    "instance_dimension",
+                    "INSTANCE_DIMENSION"
+                )

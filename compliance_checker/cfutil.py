@@ -240,8 +240,8 @@ def is_geophysical(ds, variable):
     if variable in get_platform_variables(ds):
         return False
 
-    # Skip count variables too
-    if hasattr(ncvar, "sample_dimension"):
+    # Skip count/index variables too
+    if hasattr(ncvar, "sample_dimension") or hasattr(ncvar, "instance_dimension"):
         return False
 
     return True
@@ -882,6 +882,161 @@ def coordinate_dimension_matrix(nc):
     return retval
 
 
+def is_dataset_valid_ragged_array_repr_featureType(
+    nc,
+    feature_type: str
+):
+    """
+    Check if a data set is a valid representation of a ragged
+    array structure. See inline comments.
+    """
+
+    is_compound = False
+    if feature_type.lower() in {'timeseriesprofile', 'trajectoryprofile'}:
+        is_compound = True
+        ftype = feature_type.lower().split("profile")[0]
+    else:
+        ftype = feature_type.lower()
+
+
+    # regardless of if compound type or not, must have a cf_role
+    # variable; if compound, this will be the first part of the
+    # feature_type as we'll have to search for one with profile_id
+    # regardless; if single feature type, cf_role must match that
+    # featureType
+    cf_role_vars = nc.get_variables_by_attributes(cf_role=lambda x: x is not None)
+    if not cf_role_vars or \
+        (len(cf_role_vars)>1 and not is_compound) or \
+        (len(cf_role_vars)>2 and is_compound):
+        return False
+    cf_role_var = nc.get_variables_by_attributes(cf_role="{}_id".format(ftype))[0]
+    if cf_role_var.cf_role.split("_id")[0].lower() != ftype:
+        return False
+
+    # now we'll check dimensions for singular feature types and/or
+    # the first half of the compound featureType
+    instance_dim = cf_role_var.dimensions
+    if len(instance_dim) != 1:
+        return False
+
+    # Wow we check for the presence of an index variable or count variable;
+    # NOTE that if no index or count variables exist, we can't determine with
+    # certainty that this is invalid, because single-instance data sets
+    # are valid representations of the ragged array structures. Instead,
+    # if the index/count variable is present, we check that only one of
+    # each is present and that their dimensions are correct
+    index_vars = nc.get_variables_by_attributes(instance_dimension=lambda x: x is not None)
+    count_vars = nc.get_variables_by_attributes(sample_dimension=lambda x: x is not None)
+
+    # if the featureType isn't compound, shouldn't have both count and index
+    if (index_vars and count_vars and not is_compound):
+        return False
+
+    # single featureType, checking for valid index variable
+    elif index_vars and not is_compound:
+        if len(index_vars) > 1:
+            return False
+        # the index variable's attr 'instance_dimension'
+        # must be the same as the actual instance dimension,
+        # which we get from the cf_role variable
+        if index_vars[0].instance_dimension != instance_dim[0]:
+            return False
+
+    # single featureType, checking for valid count variable
+    elif count_vars and not is_compound:
+        if len(count_vars) > 1:
+            return False
+        # the count variable must have the same dimensions
+        # as the instance variable, which has the instance
+        # dimension as its dimension
+        if count_vars[0].dimensions != instance_dim:
+            return False
+
+
+    # Now, if the featureType is compound, an index variable
+    # must be present for the profile variable. To verify this, we will
+    # check that the dimension of the index variable is the same dimension
+    # that is present on the variable which has the attribute cf_role=profile_id.
+    # The attribute of the index variable 'instance_dimension' should point to the
+    # name of the dimension of the cf_role variable for either timeSeries or trajectory.
+    # A count variable must also be present, and should have the same dimension,
+    # but its attribute 'sample_dimension' must refer to the dimension, which is
+    # DIFFERENT than the variable with the attribute cf_role=ftype, where ftype is the
+    # first half of the compound featureType (so either timeseries or trajectory).
+    # Thus, the dimension of the count variable must be the same dimension as the
+    # dimension that all the other geophysical variables have.
+    elif (index_vars and count_vars and is_compound):
+        if len(index_vars) > 1 or len(count_vars) > 1:
+            return False
+
+        profile_cf_role_vars = nc.get_variables_by_attributes(cf_role="profile_id")
+        if len(profile_cf_role_vars) > 1:
+            return False
+        profile_cf_role_var = profile_cf_role_vars[0]
+
+        # we first check the dimension of the index variable
+        if index_vars[0].dimensions != profile_cf_role_var.dimensions:
+            return False
+
+        # the attribute 'instance_dimension' must point to the dimension
+        # of the timeseries or trajectory cf_role var
+        if index_vars[0].instance_dimension != cf_role_var.dimensions[0]:
+            return False
+
+        # get all geophysical dims
+        geophysical_dims = [nc[v].dimensions for v in get_geophysical_variables(nc)]
+        if len(set(geophysical_dims)) != 1:
+            return False
+
+        # check the dimension of the count var is the same and that the
+        # sample_dimension attribute points to the same dimension that
+        # the geophysical variables have
+        if count_vars[0].dimensions != profile_cf_role_var.dimensions or \
+           (count_vars[0].sample_dimension,) != geophysical_dims[0]:
+            return False
+
+    else:
+        return False
+
+    return True
+
+
+def is_variable_valid_ragged_array_repr_featureType(
+    nc,
+    variable: str) -> bool:
+    """
+    This method returns a boolean indicating whether the variable
+    is a valid member of a contiguous ragged array representation
+    or indexed ragged array representation of any of the three singular
+    CF featureType types.
+
+    For any ragged array representation, any DATA VARIABLE must have
+    the sample dimension as its sole dimension. Additionally, for any
+    featureType or compound featureType (e.g. timeSeriesProfile), the
+    data variable must have the sample dimension as its dimension.
+    """
+
+    # Get all geophysical variables; should have only one
+    # dimension in the set, and the dimension of the variable
+    # should be equal.
+    geo_vars = get_geophysical_variables(nc)
+    dim_tuples = [nc.variables[v].dimensions for v in geo_vars]
+    if len(set(dim_tuples)) < 1:
+        return False
+
+    # NOTE
+    # Each dimension tuple - there should be only one - should only
+    # have the sample dimension as its sole value. If there are more
+    # than one, we assume the sample dimension is the first. Is this
+    # an appropriate assumption?
+    dim = dim_tuples[0]
+    if len(dim) != 1:
+        return False
+
+    # this is the only thing we have to work with
+    return nc.variables[variable].dimensions == dim
+
+
 def is_point(nc, variable):
     """
     Returns true if the variable is a point feature type
@@ -1037,6 +1192,22 @@ def is_multi_timeseries_incomplete(nc, variable):
         return True
     return False
 
+def isTimeSeries(nc, variable):
+    """
+    Attempt to consolidate all of the disparate timeseries checks.
+    Is this being pragmatic or lazy? I'll argue pragmatic.
+    Confidently pragmatic.
+    """
+
+    # first three check if variable is a valid multidimensional
+    # representation, the last checks if it's a valid ragged array
+    if is_timeseries(nc, variable) or \
+        is_multi_timeseries_orthogonal(nc, variable) or \
+        is_multi_timeseries_incomplete(nc, variable):
+        return True
+
+    return False
+
 
 def is_cf_trajectory(nc, variable):
     """
@@ -1099,6 +1270,17 @@ def is_single_trajectory(nc, variable):
         return False
     return True
 
+def isTrajectory(nc, variable):
+    """
+    Wrapper method for checking if a variable is detected as
+    a trajectory featureType.
+    """
+
+    if is_cf_trajectory(nc, variable) or \
+        is_single_trajectory(nc, variable):
+        return True
+
+    return False
 
 def is_profile_orthogonal(nc, variable):
     """
@@ -1167,6 +1349,40 @@ def is_profile_incomplete(nc, variable):
         return True
     return False
 
+def isProfile(nc, variable: str):
+    """
+    Per Ch 9 of the CF spec, profiles are a part of the CF Discrete
+    Sampling Geometries. Profile data can be logically represented
+    in a file one of four ways: orthogonal multidimensional array,
+    incomplete multidimensional array, contiguous ragged array,
+    and indexed ragged array. If the variable is found to be any
+    valid for any one of these representations, return "profile"
+    else return None.
+
+    The very first part of this function attempts to use legacy code
+    to test if the variable is a profile in the orthogonal multidimensional
+    array representation or the incomplete multidimensional array
+    representation. If neither of these are true, it moves on to testing
+    for the contiguous ragged array and indexed ragged array representations.
+
+    Parameters
+    ----------
+    nc      : netCDF4 Dataset
+    variable: str name of variable
+
+    Returns
+    -------
+    str or None
+    """
+
+    # NOTE
+    # TODO
+    # Does this take into account a single profile? This is a valid profile.
+
+    # first check for orthogonal, incomplete
+    if is_profile_orthogonal(nc, variable) or \
+        is_profile_incomplete(nc, variable):
+        return True
 
 def is_timeseries_profile_single_station(nc, variable):
     """
@@ -1397,6 +1613,26 @@ def is_timeseries_profile_incomplete(nc, variable):
         return True
     return False
 
+def isTimeSeriesProfile(nc, variable):
+    """
+    Wrapper method.
+    Verify if a variable matches with the timeSeriesProfile
+    featureType. According to the CF specification, a data set
+    with timeSeriesProfile features has two cf_role variables:
+    one for the "station" (cf_role=timeseries_id) and one for the
+    "profile" (cf_role=profile_id).
+    """
+
+    if is_timeseries_profile_single_station(nc, variable) or \
+       is_timeseries_profile_multi_station(nc, variable) or \
+       is_timeseries_profile_single_ortho_time(nc, variable) or \
+       is_timeseries_profile_multi_ortho_time(nc, variable) or \
+       is_timeseries_profile_ortho_depth(nc, variable) or \
+       is_timeseries_profile_incomplete(nc, variable):
+        return True
+
+    return False
+
 
 def is_trajectory_profile_orthogonal(nc, variable):
     """
@@ -1473,6 +1709,19 @@ def is_trajectory_profile_incomplete(nc, variable):
         return True
     return False
 
+
+def isTrajectoryProfile(nc, variable):
+    """
+    Wrapper method
+    """
+
+    # NOTE
+    # does this take into account single trajectory profile?
+    if is_trajectory_profile_orthogonal(nc, variable) or \
+        is_trajectory_profile_incomplete(nc, variable):
+        return True
+
+    return False
 
 def is_2d_regular_grid(nc, variable):
     """
@@ -1721,36 +1970,19 @@ def guess_feature_type(nc, variable):
     """
     if is_point(nc, variable):
         return "point"
-    if is_timeseries(nc, variable):
+    if isProfile(nc, variable):
+        return "profile"
+    if isTimeSeries(nc, variable):
         return "timeseries"
-    if is_multi_timeseries_orthogonal(nc, variable):
-        return "multi-timeseries-orthogonal"
-    if is_multi_timeseries_incomplete(nc, variable):
-        return "multi-timeseries-incomplete"
-    if is_cf_trajectory(nc, variable):
-        return "cf-trajectory"
-    if is_single_trajectory(nc, variable):
-        return "single-trajectory"
-    if is_profile_orthogonal(nc, variable):
-        return "profile-orthogonal"
-    if is_profile_incomplete(nc, variable):
-        return "profile-incomplete"
-    if is_timeseries_profile_single_station(nc, variable):
-        return "timeseries-profile-single-station"
-    if is_timeseries_profile_multi_station(nc, variable):
-        return "timeseries-profile-multi-station"
-    if is_timeseries_profile_single_ortho_time(nc, variable):
-        return "timeseries-profile-single-ortho-time"
-    if is_timeseries_profile_multi_ortho_time(nc, variable):
-        return "timeseries-profile-multi-ortho-time"
-    if is_timeseries_profile_ortho_depth(nc, variable):
-        return "timeseries-profile-ortho-depth"
-    if is_timeseries_profile_incomplete(nc, variable):
-        return "timeseries-profile-incomplete"
-    if is_trajectory_profile_orthogonal(nc, variable):
-        return "trajectory-profile-orthogonal"
-    if is_trajectory_profile_incomplete(nc, variable):
-        return "trajectory-profile-incomplete"
+    if isTrajectory(nc, variable):
+        return "trajectory"
+    if isTimeSeriesProfile(nc, variable):
+        return "timeseriesprofile"
+    if isTrajectoryProfile(nc, variable):
+        return "trajectoryprofile"
+
+    # TODO
+    # consolidate below into "isGrid" ?
     if is_2d_regular_grid(nc, variable):
         return "2d-regular-grid"
     if is_2d_static_grid(nc, variable):
@@ -1764,6 +1996,13 @@ def guess_feature_type(nc, variable):
     if is_reduced_grid(nc, variable):
         return "reduced-grid"
 
+    # regardless of the declared featureType, a variable can be a valid
+    # ragged array variable if it has a single dimension and if that
+    # dimension is equal to the sample dimension; this information will
+    # be used later to determine if the variable's "feature" matches
+    # the dataset's declared featureType
+    if is_variable_valid_ragged_array_repr_featureType(nc, variable):
+        return "ragged-array"
 
 def units_convertible(units1, units2, reftimeistime=True):
     """
