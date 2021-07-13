@@ -1258,11 +1258,12 @@ class CFNCCheck(BaseNCCheck, CFBaseCheck):
 
     pass
 
-
+# non-commented exceptions to rule:
+# scale_factor, add_offset: These attributes should be numeric, but do not
+# need to match the parent variable type
 appendix_a_base = {
     "Conventions": {"Type": "S", "attr_loc": {"G"}, "cf_section": None},
     "_FillValue": {"Type": "D", "attr_loc": {"D", "C"}, "cf_section": None},
-    "add_offset": {"Type": "N", "attr_loc": {"D"}, "cf_section": "8.1"},
     "ancillary_variables": {"Type": "S", "attr_loc": {"D"}, "cf_section": "3.4"},
     "axis": {"Type": "S", "attr_loc": {"C"}, "cf_section": "4"},
     "bounds": {"Type": "S", "attr_loc": {"C"}, "cf_section": "7.1"},
@@ -1295,7 +1296,6 @@ appendix_a_base = {
     "positive": {"Type": "S", "attr_loc": {"C"}, "cf_section": None},
     "references": {"Type": "S", "attr_loc": {"G", "D"}, "cf_section": "2.6.2"},
     #'sample_dimension': {'Type': 'N', 'attr_loc': {'D'}, 'cf_section': '9.3'},
-    "scale_factor": {"Type": "N", "attr_loc": {"D"}, "cf_section": "8.1"},
     "source": {"Type": "S", "attr_loc": {"G", "D"}, "cf_section": "2.6.2"},
     "standard_error_multiplier": {"Type": "N", "attr_loc": {"D"}, "cf_section": None},
     "standard_name": {"Type": "S", "attr_loc": {"D", "C"}, "cf_section": "3.3"},
@@ -1379,10 +1379,9 @@ class CF1_6Check(CFNCCheck):
     def check_child_attr_data_types(self, ds):
         """
         For any variables which contain any of the following attributes:
+            - actual_range
             - valid_min/valid_max
             - valid_range
-            - scale_factor
-            - add_offset
             - _FillValue
         the data type of the attribute must match the type of its parent variable as specified in the
         NetCDF User Guide (NUG) https://www.unidata.ucar.edu/software/netcdf/docs/attribute_conventions.html,
@@ -4450,7 +4449,7 @@ class CF1_6Check(CFNCCheck):
             # If we can't figure it out, don't check it.
             if variable_feature is None:
                 continue
-            feature_types_found[variable_feature].append(name)            
+            feature_types_found[variable_feature].append(name)
             matching_feature = TestCtx(BaseCheck.MEDIUM, self.section_titles["9.1"])
             matching_feature.assert_true(
                 variable_feature == _feature,
@@ -4621,8 +4620,8 @@ class CF1_7Check(CF1_6Check):
                 # check equality to existing min/max values
                 # NOTE this is a data check
                 out_of += 1
-                if ( 
-                    not np.isclose( variable.actual_range[0],variable[:].min() ) 
+                if (
+                    not np.isclose( variable.actual_range[0],variable[:].min() )
                     ) or (
                     not np.isclose( variable.actual_range[1],variable[:].max() )
                 ):
@@ -5298,11 +5297,16 @@ class CF1_7Check(CF1_6Check):
         correct_computed_std_name_ctx = TestCtx(
             BaseCheck.MEDIUM, self.section_titles["4.3"]
         )
-        _comp_std_name = dim_vert_coords_dict[standard_name][1]
-        correct_computed_std_name_ctx.assert_true(
-            getattr(variable, "computed_standard_name", None) in _comp_std_name,
-            "§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`".format(
-                vname, sorted(_comp_std_name)
+        _comp_std_names = dim_vert_coords_dict[standard_name][1]
+        comp_std_name_attr_val =  getattr(variable, "computed_standard_name",
+                                          None)
+        # having a computed standard name is optional, but if it is present,
+        # it should correspond to the standard_name desired
+        if comp_std_name_attr_val is not None:
+            correct_computed_std_name_ctx.assert_true(
+                comp_std_name_attr_val in _comp_std_names,
+                "§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`".format(
+                    vname, sorted(_comp_std_name)
             ),
         )
         ret_val.append(correct_computed_std_name_ctx.to_result())
