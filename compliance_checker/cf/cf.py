@@ -5297,16 +5297,11 @@ class CF1_7Check(CF1_6Check):
         correct_computed_std_name_ctx = TestCtx(
             BaseCheck.MEDIUM, self.section_titles["4.3"]
         )
-        _comp_std_names = dim_vert_coords_dict[standard_name][1]
-        comp_std_name_attr_val =  getattr(variable, "computed_standard_name",
-                                          None)
-        # having a computed standard name is optional, but if it is present,
-        # it should correspond to the standard_name desired
-        if comp_std_name_attr_val is not None:
-            correct_computed_std_name_ctx.assert_true(
-                comp_std_name_attr_val in _comp_std_names,
-                "§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`".format(
-                    vname, sorted(_comp_std_names)
+        _comp_std_name = dim_vert_coords_dict[standard_name][1]
+        correct_computed_std_name_ctx.assert_true(
+            getattr(variable, "computed_standard_name", None) in _comp_std_name,
+            "§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`".format(
+                vname, sorted(_comp_std_name)
             ),
         )
         ret_val.append(correct_computed_std_name_ctx.to_result())
