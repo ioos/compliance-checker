@@ -829,7 +829,11 @@ class CheckSuite(object):
         # Issue GET instead if we reach here and can't get the response
         response = requests.get(ds_str, allow_redirects=True, timeout=60)
         content_type = response.headers.get("content-type")
+<<<<<<< HEAD
         if content_type.split(";")[0] == "text/xml":
+=======
+        if content_type.startswith("text/xml"):
+>>>>>>> d6f61c6dab00ed58cc9e94135602c31a81318656
             return self.process_doc(response.content)
         else:
             raise ValueError(

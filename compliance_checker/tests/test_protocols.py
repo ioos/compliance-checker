@@ -57,7 +57,7 @@ class TestProtocols(TestCase):
         """
         Tests that a connection can be made to an SOS endpoint
         """
-        url = "http://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml"
+        url = "https://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml"
         cs = CheckSuite()
         ds = cs.load_dataset(url)
         assert ds is not None
