@@ -486,7 +486,7 @@ class IOOS1_2Check(IOOSNCCheck):
                     # ( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest()
                     # ("accuracy", BaseCheck.MEDIUM), see check_accuracy
                     ("precision", BaseCheck.MEDIUM),
-                    ("resolution", BaseCheck.MEDIUM)
+                    ("resolution", BaseCheck.MEDIUM),
                 ]
             )
         )
@@ -596,7 +596,7 @@ class IOOS1_2Check(IOOSNCCheck):
             # checked in check_creator_and_publisher_type
             #'publisher_type',
             "references",
-            "instrument_vocabulary"
+            "instrument_vocabulary",
         ]
 
     def setup(self, ds):
@@ -829,20 +829,19 @@ class IOOS1_2Check(IOOSNCCheck):
 
         results = []
         msg = (
-                   "Variable '{v}' attribute 'accuracy' should have the "
-                   "same units as '{v}'"
-              )
+            "Variable '{v}' attribute 'accuracy' should have the " "same units as '{v}'"
+        )
         for v in get_geophysical_variables(ds):
             _v = ds.variables[v]
             std_name = getattr(_v, "standard_name", None)
             gts_ingest = getattr(_v, "gts_ingest", None)
-            if (std_name=="sea_water_practical_salinity") and (gts_ingest=="true"):
+            if (std_name == "sea_water_practical_salinity") and (gts_ingest == "true"):
                 msg = (
-                           "Variable '{v}' should have an 'accuracy' attribute "
-                           "that is numeric and of the same units as '{v}'"
-                      )
+                    "Variable '{v}' should have an 'accuracy' attribute "
+                    "that is numeric and of the same units as '{v}'"
+                )
                 r = isinstance(getattr(_v, "accuracy", None), Number)
-            else: # only test if exists
+            else:  # only test if exists
                 r = getattr(_v, "accuracy", None) is not None
 
             results.append(
@@ -857,20 +856,20 @@ class IOOS1_2Check(IOOSNCCheck):
         return results
 
     def check_geospatial_vars_have_attrs(self, ds):
-        """                                                                                                                                                                                                                                   
-        All geospatial variables must have certain attributes.                                                                                                                                                                                
-                                                                                                                                                                                                                                              
-        Parameters                                                                                                                                                                                                                            
-        ----------                                                                                                                                                                                                                            
-        ds: netCDF4.Dataset                                                                                                                                                                                                                   
-                                                                                                                                                                                                                                              
-        Returns                                                                                                                                                                                                                               
-        -------                                                                                                                                                                                                                               
-        list: list of Result objects                                                                                                                                                                                                          
-        """                                                                                                                                                                                                                                   
-                                                                                                                                                                                                                                              
-        return self._check_vars_have_attrs(                                                                                                                                                                                                   
-            ds, get_coordinate_variables(ds), self.geospat_check_var_attrs                                                                                                                                                                    
+        """
+        All geospatial variables must have certain attributes.
+
+        Parameters
+        ----------
+        ds: netCDF4.Dataset
+
+        Returns
+        -------
+        list: list of Result objects
+        """
+
+        return self._check_vars_have_attrs(
+            ds, get_coordinate_variables(ds), self.geospat_check_var_attrs
         )
 
     def _check_vars_have_attrs(self, ds, vars_to_check, atts_to_check):
@@ -1010,7 +1009,12 @@ class IOOS1_2Check(IOOSNCCheck):
                 )
             ]
 
-        return Result(BaseCheck.HIGH, _val, "CF DSG: featureType=timeseries", msgs,)
+        return Result(
+            BaseCheck.HIGH,
+            _val,
+            "CF DSG: featureType=timeseries",
+            msgs,
+        )
 
     def _check_feattype_timeseriesprof_cf_role(self, ds):
 
@@ -1755,20 +1759,31 @@ class IOOS1_2Check(IOOSNCCheck):
                     BaseCheck.MEDIUM,
                     valid,
                     "instrument_variable:make_model",
-                    None if valid else [f"Attribute {v}:make_model ({mm}) should be a string"]
+                    None
+                    if valid
+                    else [f"Attribute {v}:make_model ({mm}) should be a string"],
                 )
             )
 
             # calibration_date
             cd = getattr(_v, "calibration_date", "")
             # thanks folks https://stackoverflow.com/questions/41129921/validate-an-iso-8601-datetime-string-in-python
-            valid = bool(re.match(r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$', cd))
+            valid = bool(
+                re.match(
+                    r"^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$",
+                    cd,
+                )
+            )
             results.append(
                 Result(
                     BaseCheck.MEDIUM,
                     valid,
                     "instrument_variable:calibration_date",
-                    None if valid else [f"Attribute {v}:calibration_date ({cd}) should be an ISO-8601 string"]
+                    None
+                    if valid
+                    else [
+                        f"Attribute {v}:calibration_date ({cd}) should be an ISO-8601 string"
+                    ],
                 )
             )
 

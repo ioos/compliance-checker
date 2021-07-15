@@ -4525,7 +4525,7 @@ class CF1_7Check(CF1_6Check):
     appendix_a = appendix_a_base.copy()
     appendix_a.update(
         {
-              "actual_range": {
+            "actual_range": {
                 "Type": "N",
                 "attr_loc": {"D", "C"},
                 "cf_section": "2.5.1",
@@ -4621,10 +4621,8 @@ class CF1_7Check(CF1_6Check):
                 # check equality to existing min/max values
                 # NOTE this is a data check
                 out_of += 1
-                if ( 
-                    not np.isclose( variable.actual_range[0],variable[:].min() ) 
-                    ) or (
-                    not np.isclose( variable.actual_range[1],variable[:].max() )
+                if (not np.isclose(variable.actual_range[0], variable[:].min())) or (
+                    not np.isclose(variable.actual_range[1], variable[:].max())
                 ):
                     msgs.append(
                         "actual_range elements of '{}' inconsistent with its min/max values".format(
