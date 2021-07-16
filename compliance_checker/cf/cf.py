@@ -3043,17 +3043,17 @@ class CF1_6Check(CFNCCheck):
         ret_val = []
 
         # for contiguous ragged array/indexed ragged array representations,
-        # coodinates are not required to adhere to the same principles;
+        # coordinates are not required to adhere to the same principles;
         # these representaitions can be identified by two attributes:
 
         # required for contiguous
         count_vars = ds.get_variables_by_attributes(
-            sample_dimension= lambda x: x is not None
+            sample_dimension=lambda x: x is not None
         )
 
         # required for indexed
         index_vars = ds.get_variables_by_attributes(
-            instance_dimension= lambda x: x is not None
+            instance_dimension=lambda x: x is not None
         )
 
         # if these attributes exist, we don't need to test
@@ -3184,7 +3184,7 @@ class CF1_6Check(CFNCCheck):
     # IS THIS EVEN NEEDED ANYMORE?
     # ***************
     def check_grid_coordinates(self, ds):
-    #def _check_grid_coordinates(self, ds):
+        # def _check_grid_coordinates(self, ds):
         """
         5.6 When the coordinate variables for a horizontal grid are not
         longitude and latitude, it is required that the true latitude and
@@ -4450,7 +4450,7 @@ class CF1_6Check(CFNCCheck):
             # If we can't figure it out, don't check it.
             if variable_feature is None:
                 continue
-            feature_types_found[variable_feature].append(name)            
+            feature_types_found[variable_feature].append(name)
             matching_feature = TestCtx(BaseCheck.MEDIUM, self.section_titles["9.1"])
             matching_feature.assert_true(
                 variable_feature == _feature,
@@ -4525,7 +4525,7 @@ class CF1_7Check(CF1_6Check):
     appendix_a = appendix_a_base.copy()
     appendix_a.update(
         {
-              "actual_range": {
+            "actual_range": {
                 "Type": "N",
                 "attr_loc": {"D", "C"},
                 "cf_section": "2.5.1",
@@ -4621,10 +4621,8 @@ class CF1_7Check(CF1_6Check):
                 # check equality to existing min/max values
                 # NOTE this is a data check
                 out_of += 1
-                if ( 
-                    not np.isclose( variable.actual_range[0],variable[:].min() ) 
-                    ) or (
-                    not np.isclose( variable.actual_range[1],variable[:].max() )
+                if (not np.isclose(variable.actual_range[0], variable[:].min())) or (
+                    not np.isclose(variable.actual_range[1], variable[:].max())
                 ):
                     msgs.append(
                         "actual_range elements of '{}' inconsistent with its min/max values".format(

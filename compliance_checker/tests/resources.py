@@ -74,6 +74,7 @@ STATIC_FILES = {
     "illegal-vertical": get_filename("tests/data/illegal-vertical.cdl"),
     "illegal-aux-coords": get_filename("tests/data/illegal-aux-coords.cdl"),
     "index_ragged": get_filename("tests/data/index_ragged.cdl"),
+    "index_ragged2": get_filename("tests/data/index_ragged2.cdl"),
     "ints64": get_filename("tests/data/ints64.cdl"),
     "ioos_gold_1_1": get_filename("tests/data/ioos_1_1.cdl"),
     "kibesillah": get_filename("tests/data/examples/kibesillah.cdl"),

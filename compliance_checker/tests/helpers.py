@@ -65,6 +65,7 @@ class MockVariable(object):
             if att not in {"ndim", "name", "dtype", "dimensions"}
         ]
 
+
 class MockRaggedArrayRepr(MockNetCDF):
     """
     Class to construct a fake NetCDF dataset using the ragged
@@ -82,7 +83,7 @@ class MockRaggedArrayRepr(MockNetCDF):
     Data sets which follow the contiguous ragged array structure
     have a variable called the "count variable" denoting how many
     elements are in a particular instance. This variable must have the
-    instance dimension as its dimension. The varible will have an
+    instance dimension as its dimension. The variable will have an
     attribute "sample_dimension" denoting which dimension is the
     sample dimension.
 
@@ -110,14 +111,14 @@ class MockRaggedArrayRepr(MockNetCDF):
 
         if structure.lower() not in ("contiguous", "indexed"):
             raise ValueError("Must initialize MockRaggedArray as contiguous or indexed")
-        
+
         if feature_type.lower() not in {
             "point",
             "profile",
             "timeseries",
             "trajectory",
             "timeseriesprofile",
-            "trajectoryprofile"
+            "trajectoryprofile",
         }:
             raise ValueError("Must initialize MockRaggedArray with valid featureType")
 
@@ -144,38 +145,27 @@ class MockRaggedArrayRepr(MockNetCDF):
                 "{}_id_variable".format(_var_name),
                 str,
                 ("STATION_DIMENSION",),
-                fill_value=None
+                fill_value=None,
             )
 
             # set the cf_role
             self.variables["{}_id_variable".format(_var_name)].setncattr(
-                "cf_role", 
-                "{}_id".format(_var_name)
+                "cf_role", "{}_id".format(_var_name)
             )
 
             # there will be one for the profile
             self.createVariable(
-                "profile_id_variable",
-                str,
-                ("INSTANCE_DIMENSION",),
-                fill_value=None
+                "profile_id_variable", str, ("INSTANCE_DIMENSION",), fill_value=None
             )
-            self.variables["profile_id_variable"].setncattr(
-                "cf_role", 
-                "profile_id"
-            )
+            self.variables["profile_id_variable"].setncattr("cf_role", "profile_id")
 
             # will need a station index variable
             self.createVariable(
-                "station_index_variable",
-                int,
-                ("INSTANCE_DIMENSION",),
-                fill_value=None
+                "station_index_variable", int, ("INSTANCE_DIMENSION",), fill_value=None
             )
 
             self.variables["station_index_variable"].setncattr(
-                "instance_dimension", 
-                "STATION_DIMENSION"
+                "instance_dimension", "STATION_DIMENSION"
             )
 
             # also need counter variable, as compound featureTypes
@@ -184,27 +174,25 @@ class MockRaggedArrayRepr(MockNetCDF):
             # organization
             self.createVariable(
                 "counter_var",
-                "i", # integer type
+                "i",  # integer type
                 ("INSTANCE_DIMENSION",),
-                fill_value=None
+                fill_value=None,
             )
 
             self.variables["counter_var"].setncattr(
-                "sample_dimension",
-                "SAMPLE_DIMENSION"
+                "sample_dimension", "SAMPLE_DIMENSION"
             )
-            
-        else: # just a single featureType
+
+        else:  # just a single featureType
             self.createVariable(
                 "{}_id_variable".format(feature_type),
                 str,
                 ("INSTANCE_DIMENSION",),
-                fill_value=None
+                fill_value=None,
             )
 
             self.variables["{}_id_variable".format(feature_type)].setncattr(
-                "cf_role",
-                "{}_id".format(feature_type)
+                "cf_role", "{}_id".format(feature_type)
             )
 
             if structure == "contiguous":
@@ -212,14 +200,13 @@ class MockRaggedArrayRepr(MockNetCDF):
                 # create count variable
                 self.createVariable(
                     "counter_var",
-                    "i", # integer type
+                    "i",  # integer type
                     ("INSTANCE_DIMENSION",),
-                    fill_value=None
+                    fill_value=None,
                 )
 
                 self.variables["counter_var"].setncattr(
-                    "sample_dimension",
-                    "SAMPLE_DIMENSION"
+                    "sample_dimension", "SAMPLE_DIMENSION"
                 )
 
             else:
@@ -227,11 +214,10 @@ class MockRaggedArrayRepr(MockNetCDF):
                 # create index variable
                 self.createVariable(
                     "index_var",
-                    "i", # integer type
+                    "i",  # integer type
                     ("SAMPLE_DIMENSION",),
-                    fill_value=None
+                    fill_value=None,
                 )
                 self.variables["index_var"].setncattr(
-                    "instance_dimension",
-                    "INSTANCE_DIMENSION"
+                    "instance_dimension", "INSTANCE_DIMENSION"
                 )

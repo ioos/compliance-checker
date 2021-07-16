@@ -15,6 +15,11 @@ from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.resources import STATIC_FILES
 
 
+mult_msgs_diff = "Failed to find the following messages:\n{missing_msgs}\n\n\
+        These were the messages captured:\n{found_msgs}\n\
+            Please check wording and section names if messages have been altered since this test was written"
+
+
 class TestCFIntegration(BaseTestCase):
     def setUp(self):
         """
@@ -93,7 +98,10 @@ class TestCFIntegration(BaseTestCase):
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lat, is not a variable in this dataset",
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
         ]
-        assert all(m in messages for m in expected_messages)
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     @pytest.mark.slowtest
     def test_ocos(self):
@@ -133,20 +141,6 @@ class TestCFIntegration(BaseTestCase):
             "CF recommends longitude variable 'lon_u' to use units degrees_east",
             "CF recommends longitude variable 'lon_v' to use units degrees_east",
             "CF recommends longitude variable 'lon_psi' to use units degrees_east",
-            "Unidentifiable feature for variable nl_tnu2",
-            "Unidentifiable feature for variable Akt_bak",
-            "Unidentifiable feature for variable Tnudg",
-            "Unidentifiable feature for variable FSobc_in",
-            "Unidentifiable feature for variable FSobc_out",
-            "Unidentifiable feature for variable M2obc_in",
-            "Unidentifiable feature for variable M2obc_out",
-            "Unidentifiable feature for variable Tobc_in",
-            "Unidentifiable feature for variable Tobc_out",
-            "Unidentifiable feature for variable M3obc_in",
-            "Unidentifiable feature for variable M3obc_out",
-            "Unidentifiable feature for variable Cs_r",
-            "Unidentifiable feature for variable Cs_w",
-            "Unidentifiable feature for variable user",
             "§4.3.3 The standard_name of `s_rho` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
             "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
         ]
@@ -190,7 +184,10 @@ class TestCFIntegration(BaseTestCase):
             "CF recommends longitude variable 'lon' to use units degrees_east",
         ]
 
-        assert all(m in messages for m in expected_messages)
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     def test_usgs_dem_saipan(self):
         dataset = self.load_dataset(STATIC_FILES["usgs_dem_saipan"])
@@ -202,7 +199,10 @@ class TestCFIntegration(BaseTestCase):
             '§2.6.1 Conventions global attribute does not contain "CF-1.7"'
         ]
 
-        assert all(m in messages for m in expected_messages)
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     def test_sp041(self):
         dataset = self.load_dataset(STATIC_FILES["sp041"])
@@ -210,13 +210,6 @@ class TestCFIntegration(BaseTestCase):
         scored, out_of, messages = self.get_results(check_results)
         assert scored < out_of
         assert (u"lat_qc is not a variable in this dataset") in messages
-        for i, msg in enumerate(messages):
-            if msg.startswith("Different feature types"):
-                break
-        else:
-            assert (
-                False
-            ), "'Different feature types discovered' was not found in the checker messages"
 
     def test_3mf07(self):
         """Load the 3mf07.nc file and run the CF check suite on it. There should be
@@ -228,7 +221,7 @@ class TestCFIntegration(BaseTestCase):
           - references is an empty string
           - comment (global attr) is an empty string
           - z:dimensions are not a proper subset of dims for variable flag, haul
-          - variable flag/haul has an unidentifiable feature"""
+        """
 
         dataset = self.load_dataset(STATIC_FILES["3mf07"])
         check_results = self.cs.run(dataset, [], "cf")
@@ -242,12 +235,13 @@ class TestCFIntegration(BaseTestCase):
             u"§2.6.2 comment global attribute should be a non-empty string",
             u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for variable flag (profile)",
             u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for variable haul (profile)",
-            u"Unidentifiable feature for variable flag",
-            u"Unidentifiable feature for variable haul",
         ]
 
         assert scored < out_of
-        assert all(m in messages for m in expected_messages)
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     def test_ooi_glider(self):
         dataset = self.load_dataset(STATIC_FILES["ooi_glider"])
@@ -263,7 +257,10 @@ class TestCFIntegration(BaseTestCase):
             u"longitude variable 'longitude' should define standard_name='longitude' or axis='X'",
         ]
 
-        assert all(m in messages for m in expected_messages)
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     def test_swan(self):
         dataset = self.load_dataset(STATIC_FILES["swan"])
@@ -283,7 +280,10 @@ class TestCFIntegration(BaseTestCase):
             "GRID is not a valid CF featureType. It must be one of point, timeseries, trajectory, profile, timeseriesprofile, trajectoryprofile",
         ]
 
-        assert all(m in messages for m in expected_messages)
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
 
     def test_kibesillah(self):
         dataset = self.load_dataset(STATIC_FILES["kibesillah"])
@@ -319,8 +319,6 @@ class TestCFIntegration(BaseTestCase):
             "grid_longitude has no coordinate associated with a variable identified as true latitude/longitude; its coordinate variable should also share a subset of grid_longitude's dimensions",
             "grid_latitude has no coordinate associated with a variable identified as true latitude/longitude; its coordinate variable should also share a subset of grid_latitude's dimensions",
             "time_bounds might be a cell boundary variable but there are no variables that define it as a boundary using the `bounds` attribute.",
-            "Unidentifiable feature for variable time_bounds",
-            "Unidentifiable feature for variable grid_depth",
         ]
         assert set(expected_messages).issubset(messages)
 
@@ -340,7 +338,6 @@ class TestCFIntegration(BaseTestCase):
                 'are not a subset of dimensions for variable u (siglay, nele, time)"'
                 " not in messages"
             )
-        assert (u"Unidentifiable feature for variable x") in messages
         assert (
             '§2.6.1 Conventions global attribute does not contain "CF-1.7"'
         ) in messages
@@ -362,7 +359,12 @@ class TestCFIntegration(BaseTestCase):
             u"longitude variable 'lon' should define standard_name='longitude' or axis='X'",
         ]
 
-        assert all(m in messages for m in expected_messages)
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join(
+                "\n".join([m for m in expected_messages if m not in messages])
+            ),
+            found_msgs="\n".join(messages),
+        )
 
     def test_glcfs(self):
         dataset = self.load_dataset(STATIC_FILES["glcfs"])
@@ -418,9 +420,45 @@ class TestCFIntegration(BaseTestCase):
             u"§2.6.2 global attribute title should exist and be a non-empty string",
             u"§2.6.2 global attribute history should exist and be a non-empty string",
             u"§2.6.1 Conventions field is not present",
-            u"Unidentifiable feature for variable T",
             u"§9.5 The only acceptable values of cf_role for Discrete Geometry CF data sets are timeseries_id, profile_id, and trajectory_id",
         ]
 
         assert scored < out_of
-        assert all(m in messages for m in expected_messages)
+        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+            missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
+            found_msgs="\n".join(messages),
+        )
+
+    def test_no_incorrect_errors_index_ragged_array__subset_of_dimensions(
+        self,
+    ):  # ,wrong_msg):
+        """
+        From Github issue #845:\n
+        CF: incorrect errors for ragged array structure\n
+        \n
+        Structure needs to be correctly identified\n
+        http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#_indexed_ragged_array_representation\n
+        https://github.com/ioos/compliance-checker/issues/845
+        """
+        dataset = self.load_dataset(STATIC_FILES["index_ragged2"])
+        check_results = self.cs.run(dataset, [], "cf")
+        wrong_msg = "are not a subset of dimensions for variable"
+        messages = self.get_results(check_results)[-1]
+
+        assert wrong_msg not in "".join(messages)
+
+    def test_no_incorrect_errors_index_ragged_array__unidentifiable_feature(self):
+        """
+        From Github issue #845:\n
+        CF: incorrect errors for ragged array structure\n
+        \n
+        Structure needs to be correctly identified\n
+        http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#_indexed_ragged_array_representation\n
+        https://github.com/ioos/compliance-checker/issues/845
+        """
+        dataset = self.load_dataset(STATIC_FILES["index_ragged2"])
+        check_results = self.cs.run(dataset, [], "cf")
+        wrong_msg = "Unidentifiable feature for variable"
+        messages = self.get_results(check_results)[-1]
+
+        assert wrong_msg not in "".join(messages)
