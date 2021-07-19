@@ -1527,6 +1527,22 @@ class TestCF1_7(BaseTestCase):
         )
         dataset.close()
 
+        # check that scale_factor operates properly to min and max values
+        dataset = MockTimeSeries()
+        dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2
+        dataset.variables["a"].add_offset = 2.0
+        dataset.variables["a"].scale_factor = 10
+        # Check against set _FillValue to ensure it's not accidentally slipping
+        # by.
+        dataset.variables["a"].setncattr("actual_range", [12, 22])
+        result = self.cf.check_actual_range(dataset)
+        score, out_of, messages = get_results(result)
+        assert score == out_of
+        assert len(messages) == 0
+        dataset.close()
+
         # check equality to valid_range attr
         dataset = MockTimeSeries()
         dataset.createVariable("a", "d", ("time",))

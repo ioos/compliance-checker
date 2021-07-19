@@ -4584,9 +4584,6 @@ class CF1_7Check(CF1_6Check):
                 continue  # having this attr is only suggested, no Result needed
             else:
 
-                if variable.mask:  # remove mask
-                    variable.set_auto_mask(False)
-
                 out_of += 1
                 try:
                     if (
@@ -4620,10 +4617,12 @@ class CF1_7Check(CF1_6Check):
 
                 # check equality to existing min/max values
                 # NOTE this is a data check
+
                 out_of += 1
-                if (not np.isclose(variable.actual_range[0], variable[:].min())) or (
-                    not np.isclose(variable.actual_range[1], variable[:].max())
-                ):
+                if not (np.isclose(variable.actual_range[0], variable[:].min())
+                        and
+                        np.isclose(variable.actual_range[1],variable[:].max())
+                       ):
                     msgs.append(
                         "actual_range elements of '{}' inconsistent with its min/max values".format(
                             name
@@ -4648,8 +4647,8 @@ class CF1_7Check(CF1_6Check):
 
                 # check the elements of the actual range have the appropriate
                 # relationship to the valid_min and valid_max
-                out_of += 2
                 if hasattr(variable, "valid_min"):
+                    out_of += 1
                     if variable.actual_range[0] < variable.valid_min:
                         msgs.append(
                             '"{}"\'s actual_range first element must be >= valid_min ({})'.format(
@@ -4659,6 +4658,7 @@ class CF1_7Check(CF1_6Check):
                     else:
                         score += 1
                 if hasattr(variable, "valid_max"):
+                    out_of += 1
                     if variable.actual_range[1] > variable.valid_max:
                         msgs.append(
                             '"{}"\'s actual_range second element must be <= valid_max ({})'.format(
