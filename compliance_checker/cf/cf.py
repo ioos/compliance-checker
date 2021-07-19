@@ -4617,12 +4617,10 @@ class CF1_7Check(CF1_6Check):
 
                 # check equality to existing min/max values
                 # NOTE this is a data check
-
                 out_of += 1
-                if not (np.isclose(variable.actual_range[0], variable[:].min())
-                        and
-                        np.isclose(variable.actual_range[1],variable[:].max())
-                       ):
+                if (not np.isclose(variable.actual_range[0], variable[:].min())) or (
+                    not np.isclose(variable.actual_range[1], variable[:].max())
+                ):
                     msgs.append(
                         "actual_range elements of '{}' inconsistent with its min/max values".format(
                             name
