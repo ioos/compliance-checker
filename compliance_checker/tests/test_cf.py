@@ -1527,7 +1527,6 @@ class TestCF1_7(BaseTestCase):
         )
         dataset.close()
 
-        # check that scale_factor operates properly to min and max values
         # case If the data is packed and valid_range is defined
         dataset = MockTimeSeries()
         dataset.createVariable("a", "d", ("time",))
@@ -1535,8 +1534,6 @@ class TestCF1_7(BaseTestCase):
         dataset.variables["a"][1] = 2
         dataset.variables["a"].add_offset = 2.0
         dataset.variables["a"].scale_factor = 10
-        # Check against set _FillValue to ensure it's not accidentally slipping
-        # by.
         dataset.variables["a"].setncattr("actual_range", [12, 22])
         dataset.variables["a"].setncattr("valid_range", [0, 100])
         result = self.cf.check_actual_range(dataset)
