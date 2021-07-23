@@ -4637,8 +4637,8 @@ class CF1_7Check(CF1_6Check):
                         score += 1
 
                 # check that the actual range is within the valid range
-                out_of += 1
                 if hasattr(variable, "valid_range"):  # check within valid_range
+                    out_of += 1
                     if (variable.actual_range[0] < variable.valid_range[0]) or (
                         variable.actual_range[1] > variable.valid_range[1]
                     ):
@@ -4647,8 +4647,8 @@ class CF1_7Check(CF1_6Check):
                                 name
                             )
                         )
-                else:
-                    score += 1
+                    else:
+                        score += 1
 
                 # check the elements of the actual range have the appropriate
                 # relationship to the valid_min and valid_max
