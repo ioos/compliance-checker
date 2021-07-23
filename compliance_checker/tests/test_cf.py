@@ -1527,11 +1527,6 @@ class TestCF1_7(BaseTestCase):
         )
         dataset.close()
 
-
-
-
-
-
         # check that scale_factor operates properly to min and max values
         # case If the data is packed and valid_range is defined
         dataset = MockTimeSeries()
@@ -1551,7 +1546,7 @@ class TestCF1_7(BaseTestCase):
         dataset.close()
 
         # check that scale_factor operates properly to min and max values
-        # case If _FillValues is used        
+        # case If _FillValues is used
         dataset = MockTimeSeries()
         dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
         dataset.variables["a"][0] = 1

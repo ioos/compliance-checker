@@ -4619,15 +4619,13 @@ class CF1_7Check(CF1_6Check):
                 # NOTE this is a data check
                 # If every value is masked, a data check of actual_range isn't
                 # appropriate, so skip.
-                if not (hasattr(variable[:], "mask") and
-                        variable[:].mask.all()):
+                if not (hasattr(variable[:], "mask") and variable[:].mask.all()):
                     # if min/max values aren't close to actual_range bounds,
                     # fail.
                     out_of += 1
-                    if (not np.isclose(variable.actual_range[0], variable[:].min())
-                        or
-                        not np.isclose(variable.actual_range[1], variable[:].max())
-                        ):
+                    if not np.isclose(
+                        variable.actual_range[0], variable[:].min()
+                    ) or not np.isclose(variable.actual_range[1], variable[:].max()):
                         msgs.append(
                             "actual_range elements of '{}' inconsistent with its min/max values".format(
                                 name
