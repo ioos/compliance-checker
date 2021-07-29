@@ -4619,15 +4619,13 @@ class CF1_7Check(CF1_6Check):
                 # NOTE this is a data check
                 # If every value is masked, a data check of actual_range isn't
                 # appropriate, so skip.
-                if not (hasattr(variable[:], "mask") and
-                        variable[:].mask.all()):
+                if not (hasattr(variable[:], "mask") and variable[:].mask.all()):
                     # if min/max values aren't close to actual_range bounds,
                     # fail.
                     out_of += 1
-                    if (not np.isclose(variable.actual_range[0], variable[:].min())
-                        or
-                        not np.isclose(variable.actual_range[1], variable[:].max())
-                        ):
+                    if not np.isclose(
+                        variable.actual_range[0], variable[:].min()
+                    ) or not np.isclose(variable.actual_range[1], variable[:].max()):
                         msgs.append(
                             "actual_range elements of '{}' inconsistent with its min/max values".format(
                                 name
@@ -4637,8 +4635,8 @@ class CF1_7Check(CF1_6Check):
                         score += 1
 
                 # check that the actual range is within the valid range
-                out_of += 1
                 if hasattr(variable, "valid_range"):  # check within valid_range
+                    out_of += 1
                     if (variable.actual_range[0] < variable.valid_range[0]) or (
                         variable.actual_range[1] > variable.valid_range[1]
                     ):
@@ -4647,8 +4645,8 @@ class CF1_7Check(CF1_6Check):
                                 name
                             )
                         )
-                else:
-                    score += 1
+                    else:
+                        score += 1
 
                 # check the elements of the actual range have the appropriate
                 # relationship to the valid_min and valid_max
