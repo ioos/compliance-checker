@@ -4423,18 +4423,19 @@ class CF1_6Check(CFNCCheck):
         """
         feature_types_found = defaultdict(list)
         ret_val = []
-        feature_list = [
+        feature_list = {
             "point",
-            "timeSeries",
+            "timeseries",
             "trajectory",
             "profile",
-            "timeSeriesProfile",
-            "trajectoryProfile",
-        ]
+            "timeseriesprofile",
+            "trajectoryprofile",
+        }
         # Don't bother checking if it's not a legal featureType
         # if the featureType attribute doesn't exist
         feature_type = getattr(ds, "featureType", None)
-        if feature_type not in feature_list:
+        if (feature_type is not None and
+            feature_type.lower() not in feature_list):
             return []
 
         # If a data set is detected as a valid ragged array representation,
@@ -4443,7 +4444,7 @@ class CF1_6Check(CFNCCheck):
         if cfutil.is_dataset_valid_ragged_array_repr_featureType(ds, feature_type):
             _feature = "ragged-array"
         else:
-            _feature = feature_type
+            _feature = feature_type.lower()
 
         for name in self._find_geophysical_vars(ds):
             variable_feature = cfutil.guess_feature_type(ds, name)
@@ -4451,9 +4452,10 @@ class CF1_6Check(CFNCCheck):
             if variable_feature is None:
                 continue
             feature_types_found[variable_feature].append(name)
-            matching_feature = TestCtx(BaseCheck.MEDIUM, self.section_titles["9.1"])
+            matching_feature = TestCtx(BaseCheck.MEDIUM,
+                                       self.section_titles["9.1"])
             matching_feature.assert_true(
-                variable_feature == _feature,
+                lower(variable_feature) == _feature,
                 "{} is not a {}, it is detected as a {}"
                 "".format(name, _feature, variable_feature),
             )
