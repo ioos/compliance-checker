@@ -4455,7 +4455,7 @@ class CF1_6Check(CFNCCheck):
             matching_feature = TestCtx(BaseCheck.MEDIUM,
                                        self.section_titles["9.1"])
             matching_feature.assert_true(
-                lower(variable_feature) == _feature,
+                variable_feature.lower() == _feature,
                 "{} is not a {}, it is detected as a {}"
                 "".format(name, _feature, variable_feature),
             )
