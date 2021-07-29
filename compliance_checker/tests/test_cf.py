@@ -1464,7 +1464,18 @@ class TestCF1_6(BaseTestCase):
         self.assertFalse(units_temporal("hours"))
         self.assertFalse(units_temporal("days since the big bang"))
 
+@pytest.fixture()
+def timeseries_ds():
+    #setup
+    dataset = MockTimeSeries()
+    dataset.createVariable("a", "d", ("time",))  # dtype=double, dims=time
 
+    yield dataset #this is where the magic happens
+
+    #teardown
+    # using a with block closes the ds; for checks operating on the data, we need
+    # to initialize and then manually close
+    dataset.close()
 class TestCF1_7(BaseTestCase):
     """Extends the CF 1.6 tests. Most of the tests remain the same."""
 
@@ -1473,51 +1484,36 @@ class TestCF1_7(BaseTestCase):
 
         self.cf = CF1_7Check()
 
-    def test_check_actual_range(self):
+    def test_check_actual_range(self,timeseries_ds):
         """Test the check_actual_range method works as expected"""
-
-        # using a with block closes the ds; for checks operating on the data, we need
-        # to initialize and then manually close
-
-        dataset = MockTimeSeries()
-        dataset.createVariable("a", "d", ("time",))  # dtype=double, dims=time
         # test that if the variable doesn't have an actual_range attr, no score
-        result = self.cf.check_actual_range(dataset)
+        result = self.cf.check_actual_range(timeseries_ds)
         assert result == []
-        dataset.close()
-
+    def test_check_actual_range1(self,timeseries_ds):
         # NOTE this is a data check
-        # if variable values are equal, actual_range should not exist
-        dataset = MockTimeSeries()
-        dataset.createVariable("a", "d", ("time",))  # dtype=double, dims=time
-        dataset.variables["a"][0:500] = 0  # set all 500 vals to 0
-        dataset.variables["a"].setncattr("actual_range", [1])
-        result = self.cf.check_actual_range(dataset)
+        # if variable values are equal, actual_range should not exist        
+        timeseries_ds.variables["a"][0:500] = 0  # set all 500 vals to 0
+        timeseries_ds.variables["a"].setncattr("actual_range", [1])
+        result = self.cf.check_actual_range(timeseries_ds)
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 1
         assert messages[0] == u"actual_range of 'a' must be 2 elements"
-        dataset.close()
-
-        dataset = MockTimeSeries()
-        dataset.createVariable("a", "d", ("time",))  # dtype=double, dims=time
-        dataset.variables["a"][0] = 0  # set some arbitrary val so not all equal
-        dataset.variables["a"].setncattr("actual_range", [1])
-        result = self.cf.check_actual_range(dataset)
+    def test_check_actual_range2(self,timeseries_ds):
+        timeseries_ds.variables["a"][0] = 0  # set some arbitrary val so not all equal
+        timeseries_ds.variables["a"].setncattr("actual_range", [1])
+        result = self.cf.check_actual_range(timeseries_ds)
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 1
         assert messages[0] == "actual_range of 'a' must be 2 elements"
-        dataset.close()
-
+    def test_check_actual_range3(self,timeseries_ds):
         # NOTE this is a data check
-        # check equality to min and max values
-        dataset = MockTimeSeries()
-        dataset.createVariable("a", "d", ("time",))
-        dataset.variables["a"][0] = -299  # set some arbitrary minimum
-        dataset.variables["a"][1] = 10e36  # set some arbitrary max > _FillValue default
-        dataset.variables["a"].setncattr("actual_range", [0, 0])  # should fail
-        result = self.cf.check_actual_range(dataset)
+        # check equality to min and max values        
+        timeseries_ds.variables["a"][0] = -299  # set some arbitrary minimum
+        timeseries_ds.variables["a"][1] = 10e36  # set some arbitrary max > _FillValue default
+        timeseries_ds.variables["a"].setncattr("actual_range", [0, 0])  # should fail
+        result = self.cf.check_actual_range(timeseries_ds)
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 1
@@ -1525,31 +1521,51 @@ class TestCF1_7(BaseTestCase):
             messages[0]
             == "actual_range elements of 'a' inconsistent with its min/max values"
         )
-        dataset.close()
-
+    def test_check_actual_range_fillvals(self,timeseries_ds):
+        # check that scale_factor operates properly to min and max values
+        # case If _FillValues is used        
+        timeseries_ds.createVariable("a", "d", ("time",), fill_value=9999.9)
+        timeseries_ds.variables["a"][0] = 1
+        timeseries_ds.variables["a"][1] = 2
+        timeseries_ds.variables["a"].setncattr("actual_range", [1, 2])
+        result = self.cf.check_actual_range(timeseries_ds)
+        score, out_of, messages = get_results(result)
+        assert score == out_of
+        assert len(messages) == 0
+    def test_check_actual_range_packed_validrange(self,timeseries_ds):
+        # check that scale_factor operates properly to min and max values
+        # case If the data is packed and valid_range is defined
+        timeseries_ds.variables["a"][0] = 1
+        timeseries_ds.variables["a"][1] = 2
+        timeseries_ds.variables["a"].add_offset = 2.0
+        timeseries_ds.variables["a"].scale_factor = 10
+        # Check against set _FillValue to ensure it's not accidentally slipping
+        # by.
+        timeseries_ds.variables["a"].setncattr("valid_range", [0, 100])
+        timeseries_ds.variables["a"].setncattr("actual_range", [12, 22])
+        result = self.cf.check_actual_range(timeseries_ds)
+        score, out_of, messages = get_results(result)
+        assert score == out_of
+        assert len(messages) == 0
+    def test_check_actual_range6(self,timeseries_ds):
         # check equality to valid_range attr
-        dataset = MockTimeSeries()
-        dataset.createVariable("a", "d", ("time",))
-        dataset.variables["a"][0] = -299  # set some arbitrary val to not all equal
-        dataset.variables["a"][1] = 10e36  # set some arbitrary max > _FillValue default
-        dataset.variables["a"].setncattr("valid_range", [1, 3])  # should conflict
-        dataset.variables["a"].setncattr("actual_range", [-299, 10e36])
-        result = self.cf.check_actual_range(dataset)
+        timeseries_ds.variables["a"][0] = -299  # set some arbitrary val to not all equal
+        timeseries_ds.variables["a"][1] = 10e36  # set some arbitrary max > _FillValue default
+        timeseries_ds.variables["a"].setncattr("valid_range", [1, 3])  # should conflict
+        timeseries_ds.variables["a"].setncattr("actual_range", [-299, 10e36])
+        result = self.cf.check_actual_range(timeseries_ds)
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 1
         assert messages[0] == '"a"\'s actual_range must be within valid_range'
-        dataset.close()
-
+    def test_check_actual_range7(self,timeseries_ds):
         # check equality to valid_min and valid_max values
-        dataset = MockTimeSeries()
-        dataset.createVariable("a", "d", ("time",))
-        dataset.variables["a"][0] = -299  # set some arbitrary minimum
-        dataset.variables["a"][1] = 10e36  # set some arbitrary max > _FillValue default
-        dataset.variables["a"].setncattr("valid_min", 42)  # conflicting valid_min/max
-        dataset.variables["a"].setncattr("valid_max", 45)
-        dataset.variables["a"].setncattr("actual_range", [-299, 10e36])
-        result = self.cf.check_actual_range(dataset)
+        timeseries_ds.variables["a"][0] = -299  # set some arbitrary minimum
+        timeseries_ds.variables["a"][1] = 10e36  # set some arbitrary max > _FillValue default
+        timeseries_ds.variables["a"].setncattr("valid_min", 42)  # conflicting valid_min/max
+        timeseries_ds.variables["a"].setncattr("valid_max", 45)
+        timeseries_ds.variables["a"].setncattr("actual_range", [-299, 10e36])
+        result = self.cf.check_actual_range(timeseries_ds)
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 2
@@ -1560,7 +1576,6 @@ class TestCF1_7(BaseTestCase):
             messages[1]
             == '"a"\'s actual_range second element must be <= valid_max (45)'
         )
-        dataset.close()
 
     def test_check_cell_boundaries(self):
         """Check our over-ridden check_cell_boundaries emthod behaves as expected"""

@@ -3,7 +3,7 @@ import unittest
 from netCDF4 import Dataset
 
 
-class BaseTestCase(unittest.TestCase):
+class BaseTestCase():
     """
     Base test case compliance checker unit tests
     """
