@@ -1655,6 +1655,18 @@ class TestCF1_7(BaseTestCase):
         message = u"Cell measure variable box_area referred to by PS is not present in dataset variables"
         assert message in messages
 
+    def test_variable_features(self):
+        with MockTimeSeries() as dataset:
+            # I hope to never see an attribute value like this, but since
+            # it's case insensitive, it still should work
+            dataset.featureType = "tImEsERiEs"
+            # dimensionless variable for cf_role
+            station = dataset.createVariable("station", "i", ())
+            station.cf_role = "timeseries_id"
+            results = self.cf.check_variable_features(dataset)
+            score, out_of, messages = get_results(results)
+            assert score == out_of and score > 0
+
     def test_process_vdatum(self):
         # first, we set up a mock SQLite database
         conn_str = ":memory:"
