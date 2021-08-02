@@ -4433,7 +4433,7 @@ class CF1_6Check(CFNCCheck):
         }
         # Don't bother checking if it's not a legal featureType
         # if the featureType attribute doesn't exist
-        feature_type = getattr(ds, "featureType", None)
+        feature_type = getattr(ds, "featureType", "")
         if (feature_type is not None and
             feature_type.lower() not in feature_list):
             return []
