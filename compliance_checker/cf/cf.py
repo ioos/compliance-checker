@@ -4438,13 +4438,7 @@ class CF1_6Check(CFNCCheck):
             feature_type.lower() not in feature_list):
             return []
 
-        # If a data set is detected as a valid ragged array representation,
-        # regardless of the featureType, all geophysical variables must also
-        # be detected as valid ragged array variables.
-        if cfutil.is_dataset_valid_ragged_array_repr_featureType(ds, feature_type):
-            _feature = "ragged-array"
-        else:
-            _feature = feature_type.lower()
+        _feature = feature_type.lower()
 
         for name in self._find_geophysical_vars(ds):
             variable_feature = cfutil.guess_feature_type(ds, name)

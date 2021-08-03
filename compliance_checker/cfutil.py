@@ -2009,13 +2009,6 @@ def guess_feature_type(nc, variable):
     if is_reduced_grid(nc, variable):
         return "reduced-grid"
 
-    # regardless of the declared featureType, a variable can be a valid
-    # ragged array variable if it has a single dimension and if that
-    # dimension is equal to the sample dimension; this information will
-    # be used later to determine if the variable's "feature" matches
-    # the dataset's declared featureType
-    if is_variable_valid_ragged_array_repr_featureType(nc, variable):
-        return "ragged-array"
 
 
 def units_convertible(units1, units2, reftimeistime=True):
