@@ -4423,27 +4423,22 @@ class CF1_6Check(CFNCCheck):
         """
         feature_types_found = defaultdict(list)
         ret_val = []
-        feature_list = [
+        feature_list = {
             "point",
-            "timeSeries",
+            "timeseries",
             "trajectory",
             "profile",
-            "timeSeriesProfile",
-            "trajectoryProfile",
-        ]
+            "timeseriesprofile",
+            "trajectoryprofile",
+        }
         # Don't bother checking if it's not a legal featureType
         # if the featureType attribute doesn't exist
-        feature_type = getattr(ds, "featureType", None)
-        if feature_type not in feature_list:
+        feature_type = getattr(ds, "featureType", "")
+        if (feature_type is not None and
+            feature_type.lower() not in feature_list):
             return []
 
-        # If a data set is detected as a valid ragged array representation,
-        # regardless of the featureType, all geophysical variables must also
-        # be detected as valid ragged array variables.
-        if cfutil.is_dataset_valid_ragged_array_repr_featureType(ds, feature_type):
-            _feature = "ragged-array"
-        else:
-            _feature = feature_type
+        _feature = feature_type.lower()
 
         for name in self._find_geophysical_vars(ds):
             variable_feature = cfutil.guess_feature_type(ds, name)
@@ -4451,9 +4446,10 @@ class CF1_6Check(CFNCCheck):
             if variable_feature is None:
                 continue
             feature_types_found[variable_feature].append(name)
-            matching_feature = TestCtx(BaseCheck.MEDIUM, self.section_titles["9.1"])
+            matching_feature = TestCtx(BaseCheck.MEDIUM,
+                                       self.section_titles["9.1"])
             matching_feature.assert_true(
-                variable_feature == _feature,
+                variable_feature.lower() == _feature,
                 "{} is not a {}, it is detected as a {}"
                 "".format(name, _feature, variable_feature),
             )
@@ -4584,9 +4580,6 @@ class CF1_7Check(CF1_6Check):
                 continue  # having this attr is only suggested, no Result needed
             else:
 
-                if variable.mask:  # remove mask
-                    variable.set_auto_mask(False)
-
                 out_of += 1
                 try:
                     if (
@@ -4620,21 +4613,26 @@ class CF1_7Check(CF1_6Check):
 
                 # check equality to existing min/max values
                 # NOTE this is a data check
-                out_of += 1
-                if (not np.isclose(variable.actual_range[0], variable[:].min())) or (
-                    not np.isclose(variable.actual_range[1], variable[:].max())
-                ):
-                    msgs.append(
-                        "actual_range elements of '{}' inconsistent with its min/max values".format(
-                            name
+                # If every value is masked, a data check of actual_range isn't
+                # appropriate, so skip.
+                if not (hasattr(variable[:], "mask") and variable[:].mask.all()):
+                    # if min/max values aren't close to actual_range bounds,
+                    # fail.
+                    out_of += 1
+                    if not np.isclose(
+                        variable.actual_range[0], variable[:].min()
+                    ) or not np.isclose(variable.actual_range[1], variable[:].max()):
+                        msgs.append(
+                            "actual_range elements of '{}' inconsistent with its min/max values".format(
+                                name
+                            )
                         )
-                    )
-                else:
-                    score += 1
+                    else:
+                        score += 1
 
                 # check that the actual range is within the valid range
-                out_of += 1
                 if hasattr(variable, "valid_range"):  # check within valid_range
+                    out_of += 1
                     if (variable.actual_range[0] < variable.valid_range[0]) or (
                         variable.actual_range[1] > variable.valid_range[1]
                     ):
@@ -4643,13 +4641,13 @@ class CF1_7Check(CF1_6Check):
                                 name
                             )
                         )
-                else:
-                    score += 1
+                    else:
+                        score += 1
 
                 # check the elements of the actual range have the appropriate
                 # relationship to the valid_min and valid_max
-                out_of += 2
                 if hasattr(variable, "valid_min"):
+                    out_of += 1
                     if variable.actual_range[0] < variable.valid_min:
                         msgs.append(
                             '"{}"\'s actual_range first element must be >= valid_min ({})'.format(
@@ -4659,6 +4657,7 @@ class CF1_7Check(CF1_6Check):
                     else:
                         score += 1
                 if hasattr(variable, "valid_max"):
+                    out_of += 1
                     if variable.actual_range[1] > variable.valid_max:
                         msgs.append(
                             '"{}"\'s actual_range second element must be <= valid_max ({})'.format(

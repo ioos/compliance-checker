@@ -1521,6 +1521,7 @@ class TestCF1_7(BaseTestCase):
             messages[0]
             == "actual_range elements of 'a' inconsistent with its min/max values"
         )
+<<<<<<< HEAD
     def test_check_actual_range_fillvals(self,timeseries_ds):
         # check that scale_factor operates properly to min and max values
         # case If _FillValues is used        
@@ -1548,6 +1549,42 @@ class TestCF1_7(BaseTestCase):
         assert score == out_of
         assert len(messages) == 0
     def test_check_actual_range6(self,timeseries_ds):
+=======
+        dataset.close()
+
+        # case If the data is packed and valid_range is defined
+        dataset = MockTimeSeries()
+        dataset.createVariable("a", "d", ("time",))
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2
+        dataset.variables["a"].add_offset = 2.0
+        dataset.variables["a"].scale_factor = 10
+        dataset.variables["a"].setncattr("actual_range", [12, 22])
+        dataset.variables["a"].setncattr("valid_range", [0, 100])
+        result = self.cf.check_actual_range(dataset)
+        score, out_of, messages = get_results(result)
+        assert score == out_of
+        assert len(messages) == 0
+        dataset.close()
+
+        # check that scale_factor operates properly to min and max values
+        # case If _FillValues is used
+        dataset = MockTimeSeries()
+        dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2
+        dataset.variables["a"].add_offset = 2.0
+        dataset.variables["a"].scale_factor = 10
+        # Check against set _FillValue to ensure it's not accidentally slipping
+        # by.
+        dataset.variables["a"].setncattr("actual_range", [12, 22])
+        result = self.cf.check_actual_range(dataset)
+        score, out_of, messages = get_results(result)
+        assert score == out_of
+        assert len(messages) == 0
+        dataset.close()
+
+>>>>>>> 62a35aac791ad6ce3beb682cef1f1bf3dfc67c35
         # check equality to valid_range attr
         timeseries_ds.variables["a"][0] = -299  # set some arbitrary val to not all equal
         timeseries_ds.variables["a"][1] = 10e36  # set some arbitrary max > _FillValue default
@@ -1669,6 +1706,18 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(results)
         message = u"Cell measure variable box_area referred to by PS is not present in dataset variables"
         assert message in messages
+
+    def test_variable_features(self):
+        with MockTimeSeries() as dataset:
+            # I hope to never see an attribute value like this, but since
+            # it's case insensitive, it still should work
+            dataset.featureType = "tImEsERiEs"
+            # dimensionless variable for cf_role
+            station = dataset.createVariable("station", "i", ())
+            station.cf_role = "timeseries_id"
+            results = self.cf.check_variable_features(dataset)
+            score, out_of, messages = get_results(results)
+            assert score == out_of and score > 0
 
     def test_process_vdatum(self):
         # first, we set up a mock SQLite database
