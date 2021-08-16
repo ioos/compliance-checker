@@ -4434,8 +4434,7 @@ class CF1_6Check(CFNCCheck):
         # Don't bother checking if it's not a legal featureType
         # if the featureType attribute doesn't exist
         feature_type = getattr(ds, "featureType", "")
-        if (feature_type is not None and
-            feature_type.lower() not in feature_list):
+        if feature_type is not None and feature_type.lower() not in feature_list:
             return []
 
         _feature = feature_type.lower()
@@ -4446,8 +4445,7 @@ class CF1_6Check(CFNCCheck):
             if variable_feature is None:
                 continue
             feature_types_found[variable_feature].append(name)
-            matching_feature = TestCtx(BaseCheck.MEDIUM,
-                                       self.section_titles["9.1"])
+            matching_feature = TestCtx(BaseCheck.MEDIUM, self.section_titles["9.1"])
             matching_feature.assert_true(
                 variable_feature.lower() == _feature,
                 "{} is not a {}, it is detected as a {}"
