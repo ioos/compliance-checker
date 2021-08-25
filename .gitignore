@@ -104,3 +104,5 @@ ENV/
 conda-requirements.txt
 
 compliance_checker/_version.py
+.venv
+activate

@@ -16,7 +16,11 @@ def pip_requirements(fname="requirements.txt"):
             if not line or line.startswith("#"):
                 continue
             reqs.append(line)
-    return reqs
+
+    dbg_req = 'python3-debug-utils @ '
+    'git+https://github.com/asascience-open/python3-debug-utils@v1.0.0#egg=python3-debug-utils'
+
+    return reqs + [ dbg_req ]
 
 
 setup(
