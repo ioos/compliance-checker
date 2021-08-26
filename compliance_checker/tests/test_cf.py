@@ -66,13 +66,17 @@ def get_results(results):
 
     return scored, out_of, messages
 
+@pytest.fixture
+def cf1_6():
+    return CF1_6Check()
+
+@pytest.fixture
+def cf1_7():
+    return CF1_7Check()
+
+
 
 class TestCF1_6(BaseTestCase):
-    def setUp(self):
-        """Initialize a CF1_6Check object."""
-
-        self.cf = CF1_6Check()
-
     # --------------------------------------------------------------------------------
     # Helper Methods
     # --------------------------------------------------------------------------------
@@ -102,12 +106,12 @@ class TestCF1_6(BaseTestCase):
         )
         temp.coordinates = "sigma noexist"
         ds.createVariable("sigma", np.float64, dimensions=("siglev",))
-        self.cf.setup(ds)
+        cf1_6.setup(ds)
         # time is a NUG coordinate variable, sigma is not, but is referred to in
         # variables, so both should show up in cf_coord_data_vars.
         # noexist does not exist in the dataset's variables, so it is not
         # present in coord_data_vars
-        self.assertEqual(self.cf.coord_data_vars, {"time", "sigma"})
+        assert self.cf.coord_data_vars == {"time", "sigma"}
 
     def load_dataset(self, nc_dataset):
         """
