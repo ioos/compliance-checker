@@ -2010,7 +2010,6 @@ def guess_feature_type(nc, variable):
         return "reduced-grid"
 
 
-
 def units_convertible(units1, units2, reftimeistime=True):
     """
     Return True if a Unit representing the string units1 can be converted

@@ -2,6 +2,7 @@ import unittest
 
 from netCDF4 import Dataset
 
+
 class BaseTestCase(unittest.TestCase):
     """
     Base test case compliance checker unit tests
@@ -40,8 +41,10 @@ class BaseTestCase(unittest.TestCase):
         else:
             assert result.value[0] != result.value[1]
 
-class pytestBaseTest():
-    '''Base test case for migrating tests away from unittest and towards pytest only'''
+
+class pytestBaseTest:
+    """Base test case for migrating tests away from unittest and towards pytest only"""
+
     def shortDescription(self):
         return None
 
@@ -62,4 +65,4 @@ class pytestBaseTest():
         if isinstance(result.value, bool):
             assert result.value is False
         else:
-            assert result.value[0] != result.value[1]   
+            assert result.value[0] != result.value[1]

@@ -5,8 +5,7 @@ import numpy as np
 from netCDF4 import Dataset
 
 from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check
-from compliance_checker.tests import BaseTestCase
-from compliance_checker.tests import pytestBaseTest
+from compliance_checker.tests import BaseTestCase, pytestBaseTest
 from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
 from compliance_checker.tests.resources import STATIC_FILES
 
