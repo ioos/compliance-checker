@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-
-from tempfile import gettempdir
-
 import pytest
 
 from netCDF4 import Dataset
 
 from compliance_checker.cf import util
-from compliance_checker.suite import CheckSuite
 from compliance_checker.tests import pytestBaseTest
 
 # get current std names table version (it changes)
 std_names = util.StandardNameTable()
 
-
-dataset_stem__expected_messages = [ #the meat and potatoes of most integration tests lies here
+# The meat and potatoes of most integration tests lies here
+# To add a new integration test, simply add a new .CDL dataset somewhere in tests/data, 
+# and append this list with another tuple in the form:
+# (file stem to test dataset in tests/data or subfolder : str, [expected messages]: list of strs )
+# Note that this will also assert there was a missed compliance check with your dataset:
+# assert scored < out_of
+dataset_stem__expected_messages = [ 
         ('sldmb_43093_agg', [
             u"attribute time:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             u"attribute lat:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",

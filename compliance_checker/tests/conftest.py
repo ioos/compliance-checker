@@ -4,6 +4,10 @@ from netCDF4 import Dataset
 
 from compliance_checker.cf import util
 from compliance_checker.suite import CheckSuite
+from compliance_checker.cf import (
+    CF1_6Check,
+    CF1_7Check
+)
 
 import os
 import subprocess
@@ -42,6 +46,8 @@ def static_files(cdl_stem):
 
 #---------Fixtures-----------
 
+#class scope:
+
 @pytest.fixture
 def cs(scope='class'):
     """
@@ -56,6 +62,8 @@ def std_names(scope='class'):
     '''get current std names table version (it changes)'''
     _std_names = util.StandardNameTable()
     return _std_names
+
+#func scope:
 
 @pytest.fixture
 def loaded_dataset(request):
