@@ -6,7 +6,6 @@ import pytest
 from netCDF4 import Dataset
 
 from compliance_checker.cf import util
-from compliance_checker.tests import pytestBaseTest
 
 
 # get current std names table version (it changes)
@@ -33,44 +32,9 @@ dataset_stem__expected_messages = [
             u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
         ],
     ),
-    pytest.param(
-        "ocos",
-        [
-            "AKs's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "AKt's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "AKv's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "latent's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "lwrad's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "salt's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "sensible's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "shflux's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "swrad's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "temp's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "tke's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "u's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_u (A), xi_u (A) (with U: other/unknown; L: unlimited).",
-            "ubar's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_u (A), xi_u (A) (with U: other/unknown; L: unlimited).",
-            "v's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_v (A), xi_v (A) (with U: other/unknown; L: unlimited).",
-            "vbar's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_v (A), xi_v (A) (with U: other/unknown; L: unlimited).",
-            "w's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            "zeta's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            '§2.6.1 Conventions global attribute does not contain "CF-1.7"',
-            "units (None) attribute of 's_w' must be a string compatible with UDUNITS",
-            "units (None) attribute of 's_rho' must be a string compatible with UDUNITS",
-            "units (None) attribute of 'Cs_w' must be a string compatible with UDUNITS",
-            "units (None) attribute of 'user' must be a string compatible with UDUNITS",
-            "units (None) attribute of 'Cs_r' must be a string compatible with UDUNITS",
-            "CF recommends latitude variable 'lat_rho' to use units degrees_north",
-            "CF recommends latitude variable 'lat_u' to use units degrees_north",
-            "CF recommends latitude variable 'lat_v' to use units degrees_north",
-            "CF recommends latitude variable 'lat_psi' to use units degrees_north",
-            "CF recommends longitude variable 'lon_rho' to use units degrees_east",
-            "CF recommends longitude variable 'lon_u' to use units degrees_east",
-            "CF recommends longitude variable 'lon_v' to use units degrees_east",
-            "CF recommends longitude variable 'lon_psi' to use units degrees_east",
-            "§4.3.3 The standard_name of `s_rho` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
-            "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
-        ],
-        marks=pytest.mark.slowtest,
+    (
+        "usgs_dem_saipan",
+        ['§2.6.1 Conventions global attribute does not contain "CF-1.7"'],
     ),
     (
         "l01-met",
@@ -104,10 +68,6 @@ dataset_stem__expected_messages = [
             "CF recommends latitude variable 'lat' to use units degrees_north",
             "CF recommends longitude variable 'lon' to use units degrees_east",
         ],
-    ),
-    (
-        "usgs_dem_saipan",
-        ['§2.6.1 Conventions global attribute does not contain "CF-1.7"'],
     ),
     ("sp041", ["lat_qc is not a variable in this dataset"]),
     (
@@ -217,16 +177,53 @@ dataset_stem__expected_messages = [
             u"§9.5 The only acceptable values of cf_role for Discrete Geometry CF data sets are timeseries_id, profile_id, and trajectory_id",
         ],
     ),
+    pytest.param(
+        "ocos",
+        [
+            "AKs's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "AKt's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "AKv's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "latent's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "lwrad's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "salt's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "sensible's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "shflux's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "swrad's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "temp's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "tke's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "u's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_u (A), xi_u (A) (with U: other/unknown; L: unlimited).",
+            "ubar's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_u (A), xi_u (A) (with U: other/unknown; L: unlimited).",
+            "v's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_rho (Z), eta_v (A), xi_v (A) (with U: other/unknown; L: unlimited).",
+            "vbar's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_v (A), xi_v (A) (with U: other/unknown; L: unlimited).",
+            "w's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            "zeta's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"',
+            "units (None) attribute of 's_w' must be a string compatible with UDUNITS",
+            "units (None) attribute of 's_rho' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'Cs_w' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'user' must be a string compatible with UDUNITS",
+            "units (None) attribute of 'Cs_r' must be a string compatible with UDUNITS",
+            "CF recommends latitude variable 'lat_rho' to use units degrees_north",
+            "CF recommends latitude variable 'lat_u' to use units degrees_north",
+            "CF recommends latitude variable 'lat_v' to use units degrees_north",
+            "CF recommends latitude variable 'lat_psi' to use units degrees_north",
+            "CF recommends longitude variable 'lon_rho' to use units degrees_east",
+            "CF recommends longitude variable 'lon_u' to use units degrees_east",
+            "CF recommends longitude variable 'lon_v' to use units degrees_east",
+            "CF recommends longitude variable 'lon_psi' to use units degrees_east",
+            "§4.3.3 The standard_name of `s_rho` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
+            "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
+        ],
+        marks=pytest.mark.slowtest,
+    ),
 ]
 
 mult_msgs_diff = "Failed to find the following messages:\n{missing_msgs}\n\n\
         These were the messages captured:\n{found_msgs}\n\
             Please check wording and section names if messages have been altered since this test was written"
 
-# @pytest.mark.usefixtures('loaded_dataset','cs','std_names')
 
-
-class TestCFIntegration(pytestBaseTest):
+class TestCFIntegration:
 
     # --------------------------------------------------------------------------------
     # Helper Methods
@@ -264,7 +261,9 @@ class TestCFIntegration(pytestBaseTest):
     @pytest.mark.parametrize(
         "loaded_dataset,expected_messages",
         dataset_stem__expected_messages,
-        indirect=["loaded_dataset"],
+        indirect=[
+            "loaded_dataset"
+        ],  # must be specified to load this param at runtime, instead of at collection
     )
     def test_cf_integration(self, loaded_dataset, expected_messages, cs):
         check_results = cs.run(loaded_dataset, [], "cf")
@@ -292,14 +291,6 @@ class TestCFIntegration(pytestBaseTest):
         indirect=["loaded_dataset"],
     )
     def test_no_incorrect_errors(self, cs, loaded_dataset, wrong_message):
-        """
-        From Github issue #845:\n
-        CF: incorrect errors for ragged array structure\n
-        \n
-        Structure needs to be correctly identified\n
-        http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#_indexed_ragged_array_representation\n
-        https://github.com/ioos/compliance-checker/issues/845
-        """
         check_results = cs.run(loaded_dataset, [], "cf")
         messages = self.get_results(check_results, cs)[-1]
 

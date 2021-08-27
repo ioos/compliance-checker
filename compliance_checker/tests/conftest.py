@@ -20,7 +20,7 @@ def flatten_list(listOfLists):
 
 
 def glob_down(pth, suffix, lvls):
-    """globs "recursively" down (lvls: int) levels\n
+    """globs down up to (lvls: int) levels of subfolders\n
     suffix in the form ".ipynb"\n
     pth: Path"""
     return flatten_list([list(pth.glob(f'*{"/*"*lvl}{suffix}')) for lvl in range(lvls)])
@@ -35,11 +35,18 @@ def static_files(cdl_stem):
     Returns the Path to a valid nc dataset\n
     replaces the old STATIC_FILES dict
     """
-    datadir = Path(resource_filename("compliance_checker", "tests/data"))
+    datadir = Path(resource_filename("compliance_checker", "tests/data")).resolve()
     assert datadir.exists(), f"{datadir} not found"
 
-    cdl_path = glob_down(datadir, f"{cdl_stem}.cdl", 3)[0].resolve()
-    # PurePath object
+    cdl_paths = glob_down(datadir, f"{cdl_stem}.cdl", 3)
+    assert (
+        len(cdl_paths) > 0
+    ), f"No file named {cdl_stem}.cdl found in {datadir} or its subfolders"
+    assert (
+        len(cdl_paths) == 1
+    ), f"Multiple candidates found with the name {cdl_stem}.cdl:\n{cdl_paths}\nPlease reconcile naming conflict"
+    cdl_path = cdl_paths[0]  # PurePath object
+
     nc_path = cdl_path.parent / f"{cdl_path.stem}.nc"
     if not nc_path.exists():
         generate_dataset(cdl_path, nc_path)
