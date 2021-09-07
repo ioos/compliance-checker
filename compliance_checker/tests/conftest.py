@@ -1,8 +1,7 @@
 import os
 import subprocess
 
-from functools import reduce
-from operator import iconcat
+from itertools import chain
 from pathlib import Path
 
 import pytest
@@ -14,16 +13,11 @@ from compliance_checker.cf import CF1_6Check, CF1_7Check, util
 from compliance_checker.suite import CheckSuite
 
 
-def flatten_list(listOfLists):
-    """or list of tups"""
-    return reduce(iconcat, listOfLists, [])
-
-
 def glob_down(pth, suffix, lvls):
     """globs down up to (lvls: int) levels of subfolders\n
     suffix in the form ".ipynb"\n
     pth: Path"""
-    return flatten_list([list(pth.glob(f'*{"/*"*lvl}{suffix}')) for lvl in range(lvls)])
+    return list(chain(*[pth.glob(f'*{"/*"*lvl}{suffix}') for lvl in range(lvls)]))
 
 
 def generate_dataset(cdl_path, nc_path):
