@@ -17,8 +17,7 @@ def pip_requirements(fname="requirements.txt"):
                 continue
             reqs.append(line)
 
-    dbg_req = 'python3-debug-utils @ '
-    'git+https://github.com/asascience-open/python3-debug-utils@v1.0.0#egg=python3-debug-utils'
+    dbg_req = 'python3-debug-utils@git+https://github.com/asascience-open/python3-debug-utils@v1.0.0#egg=python3-debug-utils'
 
     return reqs + [ dbg_req ]
 
@@ -60,6 +59,7 @@ setup(
         "compliance_checker.suites": [
             "cf-1.6 = compliance_checker.cf.cf:CF1_6Check",
             "cf-1.7 = compliance_checker.cf.cf:CF1_7Check",
+            "cf-1.8 = compliance_checker.cf.cf_18:CF1_8Check",
             "acdd-1.1 = compliance_checker.acdd:ACDD1_1Check",
             "acdd-1.3 = compliance_checker.acdd:ACDD1_3Check",
             "ioos_sos = compliance_checker.ioos:IOOSBaseSOSCheck",
