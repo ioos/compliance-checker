@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+from pathlib import Path
 
 from netCDF4 import Dataset
 
 from compliance_checker.cf import util
-
+from pkg_resources import resource_filename
 
 # get current std names table version (it changes)
 std_names = util.StandardNameTable()
@@ -222,6 +223,7 @@ mult_msgs_diff = "Failed to find the following messages:\n{missing_msgs}\n\n\
         These were the messages captured:\n{found_msgs}\n\
             Please check wording and section names if messages have been altered since this test was written"
 
+Path(resource_filename("compliance_checker", "tests/data")).resolve()
 
 class TestCFIntegration:
 
@@ -316,6 +318,7 @@ class TestCFIntegration:
             '§2.6.1 Conventions global attribute does not contain "CF-1.7"'
         ) in messages
 
+
     @pytest.mark.parametrize(
         "loaded_dataset",
         ["NCEI_profile_template_v2.0_2016-09-22_181835.151325"],
@@ -329,3 +332,15 @@ class TestCFIntegration:
         check_results = cs.run(loaded_dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results, cs)
         assert scored < out_of
+
+    def test_load_zarr(self,cs):
+        """
+        """
+        datadir = Path(resource_filename("compliance_checker", "tests/data")).resolve()
+        assert datadir.exists(), f"{datadir} not found"
+
+        with Dataset(str(datadir/'trajectory.zarr'), "r") as zr:
+            
+            check_results = cs.run(zr, [], "cf")
+            scored, out_of, messages = self.get_results(check_results, cs)
+            assert scored < out_of

@@ -845,7 +845,7 @@ class CheckSuite(object):
         if cdl.is_cdl(ds_str):
             ds_str = self.generate_dataset(ds_str)
 
-        if netcdf.is_netcdf(ds_str):
+        if netcdf.is_netcdf_or_zarr(ds_str):
             return MemoizedDataset(ds_str)
 
         # Assume this is just a Generic File if it exists
