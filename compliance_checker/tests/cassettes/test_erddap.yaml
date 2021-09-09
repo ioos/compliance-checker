@@ -9,243 +9,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.27.1
-    method: HEAD
-    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom
-  response:
-    body:
-      string: ''
-    headers:
-      Connection:
-      - close
-      Content-Type:
-      - text/plain; charset=UTF-8
-      Date:
-      - Tue, 24 May 2022 11:35:37 GMT
-      Last-Modified:
-      - Tue, 24 May 2022 11:35:37 GMT
-      Location:
-      - https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom.html
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
-      - chunked
-      erddap-server:
-      - '2.18'
-      xdods-server:
-      - dods/3.7
-    status:
-      code: 302
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, br
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.27.1
-    method: HEAD
-    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom.html
-  response:
-    body:
-      string: ''
-    headers:
-      Connection:
-      - close
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - text/html;charset=UTF-8
-      Date:
-      - Tue, 24 May 2022 11:35:48 GMT
-      Last-Modified:
-      - Tue, 24 May 2022 11:35:48 GMT
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
-      - chunked
-      erddap-server:
-      - '2.18'
-      xdods-server:
-      - dods/3.7
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, br
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.27.1
-    method: HEAD
-    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom
-  response:
-    body:
-      string: ''
-    headers:
-      Connection:
-      - close
-      Content-Type:
-      - text/plain; charset=UTF-8
-      Date:
-      - Tue, 24 May 2022 11:35:59 GMT
-      Last-Modified:
-      - Tue, 24 May 2022 11:35:59 GMT
-      Location:
-      - https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom.html
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
-      - chunked
-      erddap-server:
-      - '2.18'
-      xdods-server:
-      - dods/3.7
-    status:
-      code: 302
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, br
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.27.1
-    method: HEAD
-    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom.html
-  response:
-    body:
-      string: ''
-    headers:
-      Connection:
-      - close
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - text/html;charset=UTF-8
-      Date:
-      - Tue, 24 May 2022 11:36:10 GMT
-      Last-Modified:
-      - Tue, 24 May 2022 11:36:10 GMT
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
-      - chunked
-      erddap-server:
-      - '2.18'
-      xdods-server:
-      - dods/3.7
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, br
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.27.1
-    method: GET
-    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom.das
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAAMVY227bSBJ991cU/JRgKOriWyYBFquRldiBYxuWvJnJC9EiW2RjSLamuylbWOTf
-        91STkiyZ9mQRLBZILF6qq6tOVZ2q5tA5o2aVk5b+fUDkVCH9BdEEL8qUopHWJlGlcHL4qOx0tZB0
-        OIXY4Qcv9jHXwp0ek4hdJfLIiDKV1A97g9Ozs7NT+cuvAe6OT4+OTk7f4e7DU90CCqHscOeh0tpG
-        MbZLtVntbNUI5LpMo1IUsu2ldaJMhEkaAfdMgJ9E2qhUlXTY63c+D687/V/PetTrvff/dsWrUjnY
-        aGWsy8SSVWUM9yDfwdpef7pe9c0v+47/InfKVcmPwHghVZq53Q2fCH5T9lZb5dQSstXiNcB7YS/g
-        Py3wfmvWXZbuaEBzg3VKl1ECBOBZ7zXsrzSuIfwi/sPG112BxXOj26MjWpc3kBcbRHPxw4heCfca
-        TIMB43TSbwXqj10zYlZvV3iRSp0aschU/CqUxz8F5ZVoh1KVLrILEfPdoVzK8lVE81YtDaKJTI2U
-        Niq1cdkWXdjww/BuHGiFt9M/OmGAO/3eSSvEv/9/IV57+pMYt6vZA1kK6zYYx1kuIlHqQuSrBmYP
-        IFyMPqo8/5fIK8+a8pejXdyivc1BQ7EsnfGeRnoeQbU2epGt8jxSZWSliB4AiVlvtxevWEP8N2G+
-        ICBFVVB/QxrPJFTpJTr9fV7Zw/0mlqKkES97EfrR1koa7hi2V/QpFZ2jDW7Xo+jT1c1vw6vd3IyT
-        IkqEE5HzWfnJqGQ/sUqHzMG+RqiU7pRVsqQ3sfEX/4y1sKE2sL8EvE6GMqne7moY6RJ5wCDDqtHH
-        Tj88DWh0M7w7nwQ0HJ2f48nR3qZGCqdNJAuhckTqlc3aFzZQPTG5Xa72eiGNfVaOY2SdNGWhrYv4
-        mpc9rca1HOoNCe8USheUERXi8QkrviSEjskE+qqQkVbnFePG7WhwsuPAnuyLtNSuHfnOdv6dOywG
-        S2suelXsh22F7EvV3ap8KY1TMS7Y3mcF1iqoymftu03u5dbaJr3TSTeSmbLOF+6gNxh0eiedwfG0
-        339/9O79YPCNMucW9n23q7mqwSRxFi7mMg1LLUSY6mXXZUYmie0mOrGjrkVG57lysnszue8yz3F5
-        H7yoGpq5IFybZmmSRCy6KcqZf7WtRo2+MBF2b0os5/reoMzWSpW2Nmyrte7o8mYy6Z7ruCpQ0bZ7
-        W81yZTOZRHdygZyz3brYovvJ11FnIlxnlKsClZbrdBWddN51+sfhIpnvG2C51frsObzxW+IV9qT7
-        EgEyiNMexf0pVw/c7zD31AwYkPirEvjrUK+LTBoVB2gVskCAzIovN6SJG0aNf/JcpjKoaTogKVA0
-        AeoePzSJ4Qbm03+Q52S7vqDRWimejJ5qnSuZJzZATqTQUuhE4caHvvlptvHX/Mo7GtC2dAKy9a54
-        6zEPqAptGDCjNzAE9CDZdv5b+7HXJxRamuVxPpPEvE6FWNFMUmVlQmh/2C5h8/1BJaG5NpgMpCTc
-        EsaKUuOndLJMZHLAL4GQyHl10AzsynmVvi2g0jDVxHGF2UJJG9K1VA7gk2t2PwD313ux5+O784Cu
-        b4bDAPvUQggwm+GjbemTXjLjIrVqCVGuDvScBZUhWSxyvQJjADm/PQ802gCrQvyJpxCmB2EwPjFM
-        8nEBYFn2QGGhkkkAW+O8ShimRk6xsjkV0sQZbsVMofxWHqa5ciWvZwzEwUIwDVS5MLSoDJhDcvxI
-        WItCqLeugcrVWsm88bCBZxUcxBqGSGALvX45UJ1XeXPLbiIAXIym8CNJuMeK10zq647kb9iVZxP4
-        wuikil3kM4YrCgK7SWLkXBqfZ3RY1yv6cfgFicae34bTkCWrGX7WlNQ5R0ktEaltPQO898RpNhK5
-        gtGlEjSqDBQ7uhIGM+wXge0kjWONwdTJIsQooNFrhafdy6bqpYfKF9d6cN3uC0MQMU6t4RKjgJjl
-        knSZs1rh6H9MWM+ZyurKxHJDlj9N7nsRnuiqJcLbQWFtRdOcnjTdQ991qe6pr4zc0RKT/YwTecWz
-        GBeef0nXPDBNPb7Ls718QZIXfsGUM9RWHBfk6+jiaugzZjKZUryFzT9bT+ieg5qURKEY8EKTSXOj
-        C7xWTN6wvr8xnx537wP6cnN+OaEhGH5305pyUTiCyXDZEE9LPk58/tGbweCaOiiZ64D6JydfcY0J
-        6OvbTbH2+52V5CKHjTqhzxU8GPR6A7w0ukozPEHmDXr9o5BT38ragQ336xmT4to51sh0h7QHUX/l
-        HKGvTNz+nu5kitCBNK41TowPcgaCl0ztAAmIoTyZsyvrz3yAPeYnXDlHj0c4eT+eeBzOHs+I2zzF
-        yC/KVjO+LkDy6FVzlWOE9Z9qZJyV6q9Kst0I4uYeVMgkV0GT0yTncxlzdcInZG8Fvi+1gptg+prT
-        t97SQ6aQLZjQfSfgXeYYqivjCTFB8BwP79wjCi41ECx0pv4YAGcysCfFYtFIZ1IkOS6sB5abYpX7
-        kXvHFeCxawJjBcNKYkoQBm+4e4GhMRRL75KoB9I6qbY55iHziYq0EWkt608FyAKcJQs0mAzqCuk3
-        591qy3AqtD5q8SrO2XiHwQHe7Ghv28zHxxu8yZIZO+K8m15HwT77BPQfDy1i13SoJ9bY2isALjvo
-        S6hbOMzIcr9jLsDoIXPukFbVpxYoEP7ex2CRVz7ihjJhoFjFlt5gBkAylHGz33X3TV0Jb9GwO/3g
-        +MP64MeQYQTKHTZCZbwL6PPtzduQaIwzHj2g/ftEeZaAvI5foAyRDICvxr0xbz+3Av+EJykf0UwX
-        OkXf1LC89Cm2XlQzQ5MN8BYQ16kDdJF5T1CJNZJb8XzlGsbwsZCPTVVhI071VYgSZdVokmgmJBZ+
-        ePCbWebI1+rwb6svQEZYnGZnPIzNwFgBB9P5hG+3dFabMceclcPEhvr5qtC67g+8fGfNmjJyzRNM
-        LYgUeTPhtvNI0pHIQ45eH9GbjkcXb+vA1QZTjGltPgcxABRZpi7zKdELt/m8+YqIBN55vv6c014q
-        22rFiYqnKfeUKTcV/hIUTNL/RanVKNTJKOrEBXB7mR/SpZ97txSFeGAIlnWKTC+QXZP7y+mYbj7S
-        +XA6pNu7m/P70XRCeHNx+eni6g8a/347vrv8Mr6eDq/8Ptwl0Tpj1/ART9PefD/fOwWXSC5FXvk5
-        j1HEuMrFjpkM6VOPTY2sdTbcbcf+s7tvd+CtCMr5+Nk/5TNi/3TvK/oLi8AExvGyHo6WZ68uc+D4
-        Q8ws1PLd6WlnDurWdj8JfMfssEkBnY9v78aj4XR8vjfqsPDzryvr7wzfD74f/AdvBHMrTxkAAA==
-    headers:
-      Connection:
-      - close
-      Content-Description:
-      - dods-das
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - text/plain;charset=ISO-8859-1
-      Date:
-      - Tue, 24 May 2022 11:38:22 GMT
-      Last-Modified:
-      - Tue, 24 May 2022 11:38:22 GMT
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
-      - chunked
-      erddap-server:
-      - '2.18'
-      xdods-server:
-      - dods/3.7
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, br
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.31.0
+      - python-requests/2.32.1
     method: HEAD
     uri: https://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest
   response:
@@ -257,21 +21,21 @@ interactions:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 7efe624eb969a4c9-GRU
+      - 887715c77a01b500-OSL
       Connection:
       - keep-alive
       Content-Type:
       - text/plain
       Date:
-      - Tue, 01 Aug 2023 13:21:24 GMT
+      - Tue, 21 May 2024 19:48:37 GMT
       Last-Modified:
-      - Tue, 01 Aug 2023 13:21:24 GMT
+      - Tue, 21 May 2024 19:48:37 GMT
       Location:
       - http://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest.html
       NEL:
       - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
       Report-To:
-      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=viFC4Bf5eGlUkkeMsFQWDFwYf5ZHPxQk%2BosYpxTON6ysF7qwAvm48YPwpGBfcdwFtB10N5RtEvlB%2FMR3JMGTzwGub%2Fxz1BVqAMrzYtXCIPX7aAgm7NIYWtxS%2FCd4JOf5vEg%3D"}],"group":"cf-nel","max_age":604800}'
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v4?s=gsFx%2BIw8kcnFCTBprj8%2BzrlEU6V7MMkKKj%2FUrRhn2euFM9FC5nSBX0Sz9Ub8IrGvibt76QX5HfwTifnprK4cSPDUWpUHNi7abHtBTYCeXhT1Q4X%2FvuQnHvCm06WFwgwqfk8%3D"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
       erddap-server:
@@ -291,7 +55,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.31.0
+      - python-requests/2.32.1
     method: HEAD
     uri: http://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest.html
   response:
@@ -303,7 +67,7 @@ interactions:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 7efe6250bfeba6a0-GRU
+      - 887715c98dabb50b-OSL
       Connection:
       - keep-alive
       Content-Encoding:
@@ -311,13 +75,13 @@ interactions:
       Content-Type:
       - text/html;charset=UTF-8
       Date:
-      - Tue, 01 Aug 2023 13:21:24 GMT
+      - Tue, 21 May 2024 19:48:38 GMT
       Last-Modified:
-      - Tue, 01 Aug 2023 13:21:24 GMT
+      - Tue, 21 May 2024 19:48:38 GMT
       NEL:
       - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
       Report-To:
-      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=Q00158RZNE%2BKAQjfwcwy2tfC2LjllIghoAsK3G4CUs896HjG6euAyLq6IjMCA2hWGT6zvvxcSJkeOyXscutlR99zZ3ocSALXeNYjddkQlW597IEYvCvIdkP8az8o%2F7BdKSU%3D"}],"group":"cf-nel","max_age":604800}'
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v4?s=yY6fyC7W%2BWp8b5cWZMJhQ2PLXFKHzoEYl1a95dbUpF2i4njc65%2FCsFvPZ1rNYeIbI86lTt%2BHM%2BoGVtRcrT0yrELZ%2Bd8mxD6iGRhkKC%2FEdrUba04rZ%2FYlrXvozIizYK6FAUs%3D"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
       erddap-server:
@@ -337,7 +101,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.31.0
+      - python-requests/2.32.1
     method: HEAD
     uri: https://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest
   response:
@@ -349,21 +113,21 @@ interactions:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 7efe62530ea2a507-GRU
+      - 887715cbab550b59-OSL
       Connection:
       - keep-alive
       Content-Type:
       - text/plain
       Date:
-      - Tue, 01 Aug 2023 13:21:25 GMT
+      - Tue, 21 May 2024 19:48:38 GMT
       Last-Modified:
-      - Tue, 01 Aug 2023 13:21:25 GMT
+      - Tue, 21 May 2024 19:48:38 GMT
       Location:
       - http://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest.html
       NEL:
       - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
       Report-To:
-      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=hmDpyHvmx5hrFB01AslIWEzp3Hl%2FubqT8Dr%2FoRriX9%2FkBnjpjEXWFvrlKPRoNNqJtNRMZku7TZrfY6XehkaqgfLfZHXf5exSFwOy7RKPQ%2FCwGMLgC2atVzMLfkdKKUd2A0s%3D"}],"group":"cf-nel","max_age":604800}'
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v4?s=LoRmxf3MYrvBFHRmUXc1T7RvgBB7UjVT8ZwdHNzHW1dn9jW2ucglxETNkojUqvHhLwwFk0V8lVDZo1cmRVpJbGXw7aXgDc1ptApsDTaYUP66wRbjdYUSBoJKsMNpJFzGG88%3D"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
       erddap-server:
@@ -383,7 +147,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.31.0
+      - python-requests/2.32.1
     method: HEAD
     uri: http://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest.html
   response:
@@ -395,7 +159,7 @@ interactions:
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 7efe6254ea801ac9-GRU
+      - 887715cccbd00afe-OSL
       Connection:
       - keep-alive
       Content-Encoding:
@@ -403,13 +167,13 @@ interactions:
       Content-Type:
       - text/html;charset=UTF-8
       Date:
-      - Tue, 01 Aug 2023 13:21:25 GMT
+      - Tue, 21 May 2024 19:48:38 GMT
       Last-Modified:
-      - Tue, 01 Aug 2023 13:21:25 GMT
+      - Tue, 21 May 2024 19:48:38 GMT
       NEL:
       - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
       Report-To:
-      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=DQoHrp0kk2O6M%2BjNZy8EjrWe631YF8jIZJSXighA8gBWEnVLfcBQcZoLKCVDueG%2B08qYO4KL1rsEWsQP5tm04Xa%2Fd%2FvPf4jTjCFFmij2FNzNF6h3gEalkcC8SaAE48jHr5A%3D"}],"group":"cf-nel","max_age":604800}'
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v4?s=kqPPIUoB2ZotzkmI%2BAGfFx2RkXdqOcVmq%2Fn8wgd5JLCBAH5Co6zBy2OoS%2Fi8SCMr3UqtBHlQai65ROKcdAkkFsICWykYd91FAEE8zX%2Fy9MSGvU949JtGHGpTXhfcsmVcfLI%3D"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
       erddap-server:
@@ -429,57 +193,57 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.31.0
+      - python-requests/2.32.1
     method: GET
     uri: https://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest.das
   response:
     body:
       string: !!binary |
-        g5UHAMQvm/Xe53J6xclBxI2s4+b8M9UfNUyXQRpLzQSHo3FUiIztIpgvXmq7O3MgGr07JyBJ0Yhw
-        yUaon8rbGlrXvjYkiLjozCsm7oc6Vf68yhH/zgCVkV8vBHjWIK5Hc+x9sOJI+XAt8WWzYCQvMnLy
-        C+lLzgZPursNanWioVk068JltrO9tV1X+/xzbX4zw+7uzi7/XP/Cf0ZaS0TykvwhUryPjYzq5gTR
-        XAfv+sbRyASQM3HWWyNVRm6ivq2PpCjTq8O7tKz3ChTFwRciSdLJiUYkE6p7REzhv2hZ7xVpUaZF
-        +VKktPm0pcf8/wwYSEUnq8oW35DeblkVWWmws5OVYnHNGfwjGCyRIVl7djeSEjmmNFj8QCjUgvP8
-        u8dmQnpJA23jXX+HMmZ/vl1ab2WlQbqzkxX1p8LbpcRVYpwfQHSCitRJDiiplwimqDfbed0S2fwL
-        WxWaMxmGNxomRlpnda0EiFXwUY4o3NJaxmlEWWQFlY44vAltU8bw8J6n0FHLeKclRxXM9yy9k05a
-        cko9Glyw9HNNQxlIF5GpCbEyQrOiJTcjqqpr5jyEqhxGe2l9XC0UlG+5oyWdexf474lduxFQI5rb
-        SnCva93ThSOKr2VbuwXZf/OCyxbGR4yZQZt7rj56oL6xqVUDD200TIhwN//PgLvj5vzm/ujwxmvM
-        09qxsaTUaE3v4jyILSJ5x0Sv06l4F5Ec3x8+nTwbHJ+lZbZr8OrEkhJOSCmy4kRidI+hNliWGUBD
-        gAw3H2ro8R6CuFYWNODSLTmq9KQ+fEl+PwkZmhTj8MAhCLM6whQGJHPVxUGer1ar7Lv4rG+zlvI8
-        QFlKiyR+mG70UZtTiiquhyowgB/s2ccFqdDQDKTNSGt4zxGhizhPkPOzR+CBf51RZJWpUCxzht45
-        EMLFO0nzLncu3gnO8Dvn3PNCcjO9Q4jFqgMjTv/NSKqi2kqL/bQoX8qtg6o8qHY+4YfBtzSgk4Hj
-        jzMyudz36zhQ633MfOhzDtbSIu+DfO/z/r5V5G917ClqM5By1MwSAA0lrvOv1qRwJlOERhUtwZmT
-        I7adDxZtykT3LZPzgWko3Nr2L96sfLARiSUlg1rsZ2CBYRqDUwo6x5F5CG0Zv7O0jz9wfGkJfocX
-        yBseDICGe14w2/xEFARcezPu2MWgRBIa+JbJfRsnGkSmewKvs/Eq2REq8FXRwBEdwiD6KbScGcQF
-        szVwBvhDXKxoydHc81sJopYLNK3yJEjOj29PlGJ3TUXYAYyrjoPkZc6AtMQjbfCdEf5pBHIWgcPw
-        XDFbdD6gC8z4PikkwnmFOGVn2c46HzBwTwOmyKYZ6iLKdonWOyVxEBe1+OatcMxwx6JzDnuwm86S
-        0uzYu6b+xj4YnD6dGNzdHx4aOE9IhBwb7llJOaK7wh87ktvMDulFAwlY43Qc5ggfRMgaqFUfokHQ
-        rIHkNljt3WwH3RjELbpL+DCTcTEI2//MELSJhSN8h66bHGXpBuQsOlHHccHY/jRbRDOKnAYKGEg9
-        wMAHHDoJsXmuLPdBGNl1uRQq8t+YWXcoxHGMLBJMkbtp+NXwHXQuER2kIrIqHnLLSh4unz0ZoKO6
-        YgfwKewXzYjr2/7cohm8qLhGccQx+bpIngTOSqtAtfGhjs/SsmpC+Ezj+Pd5jy7v8f6Oy8tL3GDg
-        PDjzgVuKGj2jDfCRqBCs18X8+LrUc8POIqmKcj8tKyQuVHWicpIQYmjBgwXLtKrbUgcWFZwUDPEv
-        PHp28GXB/8/+nxkD
+        H4sIAAAAAAAAAL1XUW/bNhB+9684+GnDZNmyEy9OgQKOvWTZnKSo03krBgiMdJaJSqRGUnGMIf99
+        R0p2bEd2UxRYkUqkeHe8++7uIz00RvGHwqCGfxsAhmfoBgBTWhAJhCMpVcwFMzh84vp+lSM070ms
+        +c6JXaaSmf4JsMgULA0VEwlC4J+e9E4G3TP8aeCVs37/tE+zd9u2GRkkY82dj1xKHUa0XSLVamer
+        SiCVIgkFy7BuURsmYqbiSsC8ErBfQql4wgU0O0Hrt+FtKxj83IFO59z97YoXghvyUWMkRaxBcxFR
+        eCTfIt1OcL/W+uzUnul/ygw3RfwWGCfMHEOx2/EDD05P/aAGtb+OojaRNOZSHERuUnl5FL20VqiC
+        JMZEIepQSGUWL9HTFm8Of+NfbfitQc/G3yIAOoPtfyc1cPz5nXCs3T6OR73UHiDItNngsdAVEC7E
+        XhfCS56mf7C0sAH6g8EuAJFMpbpg6oaiyooMgo7fOSDBhZPYCNRHPi3UnFHJztgj6oPhT3ki+JxH
+        TBgnCb8iTxbmKBgaWahL6+GSdEL9YiRc1OhXMGUbbPQyfxM43xPZKy/nCv8pUESr+j7fOBdzdcy5
+        weBgYqrU9fr/T+7GMqO+WiduzBVGr0v9a7kzMozrNXeKOzSqwA1Et6PwanJ3MZzs9noUZ2HMDAuN
+        6/IrxeNdkyMpHlHYrcjw6G74cTz1YHTZCvy+B58Et8owpodGQwHpSD4i4fEY+HvkHClkRqoqqA/0
+        LeI5S+Ga7GvDE7v4d/P9WPkwo9xxlsEHVIpjvZlCpdBcGJOft9vL5dJ/4NJPIj9i7T2a+oU6HJXI
+        pDahHVsjB2lqrZSg1DmxEPEb8WqYsactaj8kRIeUPQWOCinUMi0snFRQ3Z3I9iQPMne9bSmcl98U
+        mdUhpx13H5V6o9ckeYheN/ILro1rmG6ne9LqnLa6wX0wOD85O++dfYYfUiL/FOY8Rf1jo1ZkK+cC
+        FYuoDX2pkjaqOGZ5O6EKtu/ZrOfSPZL0sIBSkfkx22tNLuby014lbVvdl9b2jHU4NC8wntMxSfVb
+        fkSQc7iLkAmZKJYv9jjrC66WJG6xoWbxYNPBNKxIwaNapSTDNOJoby7vS3N6PSi5hWYHToA36zud
+        aY4Yt8cvbmzI1oNFZc9lwwNptauX9oAIyT2+dqLUCG1TFy2/qNBEFipCnwbWMXqVepsBWAO0u32V
+        T12PcPhIXj8UKbNVdjW6GW8A+b2S2KNnHqHQ9oK6QHB0lrEVPCAUGmMgKgaFMVVtefWOgbJusUKg
+        KdB1Rkh6CYMixrhhF1NMqIZJ26uuoNw4k3QrNYz6jZIdRQUVGUftwy1ys0AFptq9QYxb7iUVZfTj
+        2IPbu+HQo31KISJd68bU2JqGK8u3IkMLoZVgYtWgQiRBOhMxy1O5okYEWrHb06ZkllDM2Bf6SsKE
+        pKIrnKGs41NOjW5lG5wUuc0C+Z8WsYWpkuPW2BwyVNGCpuyBp9ysHExzboTVtxiwRk61yCObBsgL
+        lUsLh13QusiqrUugiOorI/MqwgqeldeIJDmChC3ZdeqE6rxIq6kNkxJgm1hl7s7o76b2Bg1zp9v3
+        n2JrZry1PLw+T9zEbvTq3l9Ws6OWHU7bszaVRY21l1Ok7kawU982hu7e9aHIMrd2cX0HsxlcX1/D
+        xPEfXErqPeJD7U5FcNxY84vLRc8SDKmmLVEHZ7SJ/QEVdLd/QB1QImeVWasFre7gsJpJ8RvdXAM3
+        w5pTfX2OPTeeG/8BmV+hEywPAAA=
     headers:
       Access-Control-Allow-Origin:
       - '*'
       CF-Cache-Status:
       - DYNAMIC
       CF-RAY:
-      - 7efe62577bcc011e-GRU
+      - 887715cf1d1856a9-OSL
       Connection:
       - keep-alive
       Content-Encoding:
-      - br
+      - gzip
       Content-Type:
       - text/plain;charset=ISO-8859-1
       Date:
-      - Tue, 01 Aug 2023 13:21:25 GMT
+      - Tue, 21 May 2024 19:48:39 GMT
       Last-Modified:
-      - Tue, 01 Aug 2023 13:21:25 GMT
+      - Tue, 21 May 2024 19:48:38 GMT
       NEL:
       - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
       Report-To:
-      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=d1lok8SZWJNI1nACRaycX0%2B1YmNtOjflDeTI2QaKJx2Fj2dgrCIzgLl9tG%2B0hQzTS7p43sjGBPgPtyDVLG4Iaw37wW8GyZU5f70NwBVA0dew%2BEQRdM0nNMNpJYOfXx9BJ6U%3D"}],"group":"cf-nel","max_age":604800}'
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v4?s=FloI5Itdy2UvPGtUkGn7GgbB05F0hPG8w0ax%2B8gQK1CXkDCklut%2Br7gea%2BbDyDjLhOYKRJ6cf3RkdO5iMw3b3t0Flovj7PXW9oVk4zG1y0tGXJSlQIPBb3%2BcSJYRJG1BXRI%3D"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
       Transfer-Encoding:

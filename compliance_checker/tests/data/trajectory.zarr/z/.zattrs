@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "z"
+    ],
+    "long_name": "Depth below surface",
+    "positive": "down",
+    "standard_name": "depth",
+    "units": "m"
+}
