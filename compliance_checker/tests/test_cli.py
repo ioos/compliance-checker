@@ -8,7 +8,6 @@ import io
 import json
 import os
 import sys
-import tempfile
 
 from argparse import Namespace
 
