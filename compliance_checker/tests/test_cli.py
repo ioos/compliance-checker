@@ -14,7 +14,9 @@ from argparse import Namespace
 import pytest
 
 from compliance_checker.runner import CheckSuite, ComplianceChecker
+
 from .conftest import static_files
+
 
 @pytest.mark.usefixtures("checksuite_setup")
 class TestCLI:
@@ -25,7 +27,7 @@ class TestCLI:
     def shortDescription(self):
         return None
 
-    def test_unicode_acdd_html(self,tmp_txt_file):
+    def test_unicode_acdd_html(self, tmp_txt_file):
         """
         Tests that the checker is capable of producing HTML with unicode characters
         """
@@ -40,7 +42,7 @@ class TestCLI:
 
         assert os.stat(tmp_txt_file).st_size > 0
 
-    def test_unicode_cf_html(self,tmp_txt_file):
+    def test_unicode_cf_html(self, tmp_txt_file):
         """
         Tests that the CF checker can produce HTML output with unicode characters
         """
@@ -55,7 +57,7 @@ class TestCLI:
 
         assert os.stat(tmp_txt_file).st_size > 0
 
-    def test_single_json_output(self,tmp_txt_file):
+    def test_single_json_output(self, tmp_txt_file):
         """
         Tests that a suite can produce JSON output to a file
         """
@@ -106,7 +108,7 @@ class TestCLI:
             sys.stdout = saved
             fake_stdout.close()
 
-    def test_multiple_json_output(self,tmp_txt_file):
+    def test_multiple_json_output(self, tmp_txt_file):
         """
         Tests that a suite can produce JSON output to a file
         """
@@ -170,7 +172,7 @@ class TestCLI:
             sys.stdout = saved
             fake_stdout.close()
 
-    def test_text_output(self,tmp_txt_file):
+    def test_text_output(self, tmp_txt_file):
         """
         Tests that the 'text' output can be redirected to file with arguments
         to the command line
@@ -186,7 +188,7 @@ class TestCLI:
 
         assert os.stat(tmp_txt_file).st_size > 0
 
-    def test_multi_checker_return_value(self,tmp_txt_file):
+    def test_multi_checker_return_value(self, tmp_txt_file):
         """
         Tests that any failure for multiple checkers results in a failure return
         status

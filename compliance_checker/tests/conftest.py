@@ -99,16 +99,18 @@ def new_nc_file(tmpdir):
     # no need for cleanup, built-in tmpdir fixture will handle it
     return nc
 
+
 @pytest.fixture
 def tmp_txt_file(tmpdir):
     file_path = os.path.join(tmpdir, "output.txt")
     if os.path.exists(file_path):
         raise IOError("File Exists: %s" % file_path)
-    
+
     return file_path
+
 
 @pytest.fixture
 def checksuite_setup():
-    '''For test_cli'''
+    """For test_cli"""
     CheckSuite.checkers.clear()
     CheckSuite.load_all_available_checkers()
