@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from compliance_checker.runner import ComplianceChecker
 import pytest
 from pathlib import Path
 
@@ -223,8 +224,6 @@ mult_msgs_diff = "Failed to find the following messages:\n{missing_msgs}\n\n\
         These were the messages captured:\n{found_msgs}\n\
             Please check wording and section names if messages have been altered since this test was written"
 
-Path(resource_filename("compliance_checker", "tests/data")).resolve()
-
 class TestCFIntegration:
 
     # --------------------------------------------------------------------------------
@@ -339,6 +338,14 @@ class TestCFIntegration:
         datadir = Path(resource_filename("compliance_checker", "tests/data")).resolve()
         assert datadir.exists(), f"{datadir} not found"
 
+        ComplianceChecker.run_checker(str(datadir/'trajectory.zarr'),
+        checker_names,
+        verbose,
+        criteria,
+        skip_checks=None,
+        output_filename="-",
+        output_format=["text"],
+        options=None,
         with Dataset(str(datadir/'trajectory.zarr'), "r") as zr:
             
             check_results = cs.run(zr, [], "cf")

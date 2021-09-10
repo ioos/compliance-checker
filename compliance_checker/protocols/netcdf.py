@@ -5,13 +5,14 @@ compliance_checker/protocols/netcdf.py
 Functions to assist in determining if the URL points to a netCDF file
 """
 
+import logging
 import zipfile
 import requests
 
 from pathlib import Path
 
 
-def is_netcdf_or_zarr(url):
+def is_netcdf(url):
     """
     Returns True if the URL points to a valid local netCDF file
 
@@ -25,22 +26,24 @@ def is_netcdf_or_zarr(url):
     if url.endswith("nc"):
         return True
 
-    if url.endswith("zarr") or zipfile.is_zipfile(url) or Path(url).is_dir(): 
-        # if it's a folder or zip, assume it is a zarr and don't try to open it as a single file
-        return True
+    try:
+        # Brute force
+        with open(url, "rb") as f:
+            magic_number = f.read(4)
+            if len(magic_number) < 4:
+                return False
+            if is_classic_netcdf(magic_number):
+                return True
+            elif is_hdf5(magic_number):
+                return True
+    except Exception as e:
+        # open will fail for both a directory or a local url, either of which may be pointing to a Zarr dataset
+        if not is_zarr():
+            logger = logging.getLogger(__name__)
+            logger.error(e)
+            raise
 
-
-    # Brute force
-    with open(url, "rb") as f:
-        magic_number = f.read(4)
-        if len(magic_number) < 4:
-            return False
-        if is_classic_netcdf(magic_number):
-            return True
-        elif is_hdf5(magic_number):
-            return True
-
-        return False
+    return False
 
 
 def is_classic_netcdf(file_buffer):
