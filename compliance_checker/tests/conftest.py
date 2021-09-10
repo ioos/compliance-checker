@@ -98,8 +98,3 @@ def new_nc_file(tmpdir):
     nc = Dataset(nc_file_path, "w")
     # no need for cleanup, built-in tmpdir fixture will handle it
     return nc
-
-self.fid, self.path = tempfile.mkstemp()
-    # why is the class being written to
-    CheckSuite.checkers.clear()
-    CheckSuite.load_all_available_checkers()

@@ -19,7 +19,7 @@ from compliance_checker.runner import CheckSuite, ComplianceChecker
 from compliance_checker.tests.resources import STATIC_FILES
 
 
-class TestCLI:
+class TestCLI(TestCase):
     """
     Tests various functions and aspects of the command line tool and runner
     """
