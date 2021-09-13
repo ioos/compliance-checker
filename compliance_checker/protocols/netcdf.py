@@ -38,10 +38,10 @@ def is_netcdf(url):
                 return True
     except Exception as e:
         # open will fail for both a directory or a local url, either of which may be pointing to a Zarr dataset
-        if not is_zarr():
-            logger = logging.getLogger(__name__)
-            logger.error(e)
-            raise
+        logger = logging.getLogger(__name__)
+        logger.error(e)
+        logger.error('WARNING: your path may be pointing to a zarr dataset. ')
+        raise
 
     return False
 

@@ -4,15 +4,14 @@ compliance_checker/tests/test_protocols.py
 
 Unit tests that ensure the compliance checker can successfully identify protocol endpoints
 """
-from unittest import TestCase
-
 import pytest
 
 from compliance_checker.suite import CheckSuite
 
 
 @pytest.mark.integration
-class TestProtocols(TestCase):
+class TestProtocols():
+    
     def test_netcdf_content_type(self):
         """
         Check that urls with Content-Type header of "application/x-netcdf" can

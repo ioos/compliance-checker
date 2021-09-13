@@ -23,15 +23,14 @@ def glob_down(pth, suffix, lvls):
 def generate_dataset(cdl_path, nc_path):
     subprocess.call(["ncgen", "-o", str(nc_path), str(cdl_path)])
 
+datadir = Path(resource_filename("compliance_checker", "tests/data")).resolve()
+assert datadir.exists(), f"{datadir} not found"
 
 def static_files(cdl_stem):
     """
     Returns the Path to a valid nc dataset\n
     replaces the old STATIC_FILES dict
     """
-    datadir = Path(resource_filename("compliance_checker", "tests/data")).resolve()
-    assert datadir.exists(), f"{datadir} not found"
-
     cdl_paths = glob_down(datadir, f"{cdl_stem}.cdl", 3)
     assert (
         len(cdl_paths) > 0
