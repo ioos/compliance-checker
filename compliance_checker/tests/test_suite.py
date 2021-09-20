@@ -78,7 +78,7 @@ class TestSuite(unittest.TestCase):
 
     def test_generate_dataset_netCDF4(self):
         """
-        Tests that suite.generate_datasetworks with cdl file with netCDF4
+        Tests that suite.generate_dataset works with cdl file with netCDF4
         features.
         """
         # create netCDF4 file
