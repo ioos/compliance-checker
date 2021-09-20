@@ -7,8 +7,9 @@ import numpy as np
 from pkg_resources import resource_filename
 
 from compliance_checker.base import BaseCheck, GenericFile, Result
-from compliance_checker.suite import CheckSuite
 from compliance_checker.runner import ComplianceChecker
+from compliance_checker.suite import CheckSuite
+
 
 static_files = {
     "2dim": resource_filename("compliance_checker", "tests/data/2dim-grid.nc"),

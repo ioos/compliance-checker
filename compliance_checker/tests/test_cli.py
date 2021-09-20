@@ -7,6 +7,7 @@ Tests for command line output and parsing
 import io
 import json
 import os
+import platform
 import sys
 
 from argparse import Namespace
@@ -15,7 +16,7 @@ import pytest
 
 from compliance_checker.runner import CheckSuite, ComplianceChecker
 
-from .conftest import static_files,datadir
+from .conftest import datadir, static_files
 
 
 @pytest.mark.usefixtures("checksuite_setup")
@@ -216,17 +217,23 @@ class TestCLI:
         )
         assert not return_value
 
-    #TODO uncomment the third parameter once S3 support is working
-    @pytest.mark.parametrize('zarr_url',[
-        f"{(datadir/'trajectory.zarr').as_uri()}#mode=nczarr,file",
-        str(datadir/'zip.zarr'),
-        # "s3://hrrrzarr/sfc/20210408/20210408_10z_anl.zarr#mode=nczarr,s3"
+    # TODO uncomment the third parameter once S3 support is working
+    @pytest.mark.skipif(
+        platform.system() in ("Windows", "OSX"),
+        reason=f"NCZarr is not officially supported for your OS as of when this API was written",
+    )
+    @pytest.mark.parametrize(
+        "zarr_url",
+        [
+            f"{(datadir/'trajectory.zarr').as_uri()}#mode=nczarr,file",
+            str(datadir / "zip.zarr"),
+            # "s3://hrrrzarr/sfc/20210408/20210408_10z_anl.zarr#mode=nczarr,s3"
         ],
-        ids=['local_file','zip_file'#,'s3_url'
-        ])
-    def test_nczarr_pass_through(self,zarr_url):
-        '''Test that the url's with #mode=nczarr option pass through to ncgen\n
-        https://www.unidata.ucar.edu/blogs/developer/entry/overview-of-zarr-support-in'''
+        ids=["local_file", "zip_file"],  # ,'s3_url'
+    )
+    def test_nczarr_pass_through(self, zarr_url):
+        """Test that the url's with #mode=nczarr option pass through to ncgen\n
+        https://www.unidata.ucar.edu/blogs/developer/entry/overview-of-zarr-support-in"""
 
         return_value, errors = ComplianceChecker.run_checker(
             ds_loc=zarr_url,

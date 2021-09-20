@@ -2,27 +2,24 @@
 Compliance Checker suite runner
 """
 
-from urllib.parse import urlparse, urljoin
-from urllib.request import url2pathname
-from pathlib import Path
-
 import codecs
 import inspect
 import itertools
 import os
+import platform
 import re
 import subprocess
 import sys
 import textwrap
 import warnings
-            
-import platform
 
 from collections import defaultdict
 from datetime import datetime, timezone
 from distutils.version import StrictVersion
 from operator import itemgetter
-from urllib.parse import urlparse
+from pathlib import Path
+from urllib.parse import urljoin, urlparse
+from urllib.request import url2pathname
 
 import requests
 
@@ -852,8 +849,10 @@ class CheckSuite(object):
             ds_str = self.generate_dataset(ds_str)
 
         if zarr.is_zarr(ds_str):
-            if platform.system() in ('Windows','OSX'):
-                print(f'WARNING: {platform.system()} OS detected. NCZarr is not officially supported for your OS as of when this API was written. Your mileage may vary.')
+            if platform.system() in ("Windows", "OSX"):
+                print(
+                    f"WARNING: {platform.system()} OS detected. NCZarr is not officially supported for your OS as of when this API was written. Your mileage may vary."
+                )
             return MemoizedDataset(zarr.as_zarr(ds_str))
 
         if netcdf.is_netcdf(ds_str):

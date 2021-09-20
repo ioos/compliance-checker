@@ -7,9 +7,10 @@ Functions to assist in determining if the URL points to a netCDF file
 
 import logging
 import zipfile
-import requests
 
 from pathlib import Path
+
+import requests
 
 
 def is_netcdf(url):

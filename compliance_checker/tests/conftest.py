@@ -23,8 +23,10 @@ def glob_down(pth, suffix, lvls):
 def generate_dataset(cdl_path, nc_path):
     subprocess.call(["ncgen", "-o", str(nc_path), str(cdl_path)])
 
+
 datadir = Path(resource_filename("compliance_checker", "tests/data")).resolve()
 assert datadir.exists(), f"{datadir} not found"
+
 
 def static_files(cdl_stem):
     """

@@ -55,7 +55,7 @@ def is_opendap(url):
         das_url = url.replace("#fillmismatch", ".das")
     else:
         das_url = url + ".das"
-    
+
     try:
         response = requests.get(das_url, allow_redirects=True)
         if "xdods-server" in response.headers:
@@ -68,5 +68,5 @@ def is_opendap(url):
         ):
             return True
     except:
-        pass # not opendap if url + ".das" isn't found
+        pass  # not opendap if url + ".das" isn't found
     return False
