@@ -882,7 +882,7 @@ class CheckSuite(object):
         if zarr.is_zarr(ds_str):
             if platform.system() in ('Windows','OSX'):
                 print(f'WARNING: {platform.system()} OS detected. NCZarr is not officially supported for your OS as of when this API was written. Your mileage may vary.')
-            ds_str = self.generate_dataset_from_zarr(zarr.as_zarr(ds_str))
+            return MemoizedDataset(zarr.as_zarr(ds_str))
 
         if netcdf.is_netcdf(ds_str):
             return MemoizedDataset(ds_str)
