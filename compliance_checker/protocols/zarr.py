@@ -39,10 +39,11 @@ def as_zarr(url):
     Distinct from is_cdl etc in that it will return the appropriate URI \n\n
     
     A valid Zarr dataset could be provided in any of the following forms:\n
-    "http://s3.amazonaws.com/bucket/dataset.zarr"
-
-    "/home/path/to/dataset.zarr"
-    "file:///home/path/to/dataset.zarr"
+    "http://s3.amazonaws.com/bucket/dataset.zarr"\n
+    "http://s3.amazonaws.com/bucket/dataset.zarr"#mode=nczarr,s3\n
+    "/home/path/to/dataset.zarr"\n
+    Path('/home/path/to/dataset.zarr')\n
+    "file:///home/path/to/dataset.zarr"\n
     "file:///home/path/to/dataset.randomExt#mode=nczarr,file"
     "file:///home/path/to/dataset.zarr#mode=nczarr,zip"
     '''

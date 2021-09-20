@@ -36,10 +36,10 @@ class TestProtocols():
         assert ds is not None
 
     # test that as_zurl can transform pointers to zarr datasets to valid nczarr urls
-    str_dir = str(datadir).replace('\\','/')
-    file_url = 'file:///'+str_dir+'/trajectory.zarr#mode=nczarr,file'
+    str_dir = str(datadir.resolve()).replace('\\','/')
+    file_url = 'file://'+str_dir+'/trajectory.zarr#mode=nczarr,file'
     s3_url = "s3://hrrrzarr/sfc/20210408/20210408_10z_anl.zarr#mode=nczarr,s3"
-    zip_url = 'file:///'+str_dir+'/zip.zarr#mode=nczarr,zip'
+    zip_url = 'file://'+str_dir+'/zip.zarr#mode=nczarr,zip'
     #replace slashes for windows compatibility
     url_io = [
         ("s3://hrrrzarr/sfc/20210408/20210408_10z_anl.zarr",
@@ -50,7 +50,7 @@ class TestProtocols():
 
         (datadir/'trajectory.zarr',file_url),
 
-        ('file:///'+str_dir+'/trajectory.zarr',
+        ('file://'+str_dir+'/trajectory.zarr',
         file_url
         ),
         
@@ -58,7 +58,7 @@ class TestProtocols():
 
         (datadir/'zip.zarr',zip_url),
 
-        ('file:///'+str_dir+'/zip.zarr',zip_url),
+        ('file://'+str_dir+'/zip.zarr',zip_url),
 
         (zip_url,zip_url)
     ]

@@ -728,33 +728,7 @@ class CheckSuite(object):
             raise ValueError("Unrecognized XML root element: {}".format(xml_doc.tag))
         return ds
 
-    def _generate_dataset(self,output_path,input_path):
-        '''generate netCDF-4 file from CDL or Zarr\n
-        input and output_path may be Path or str'''
-        iostat = subprocess.run(
-            ["ncgen", "-k", "nc4", "-o", str(output_path), str(input_path)], stderr=subprocess.PIPE
-        )
-        if iostat.returncode != 0:
-            # if not successful, create netCDF classic file
-            print(
-                f"netCDF-4 file could not be generated from {Path(input_path).suffix} file with " + "message:"
-            )
-            print(iostat.stderr.decode())
-            print("Trying to create netCDF Classic file instead.")
-            iostat = subprocess.run(
-                ["ncgen", "-k", "nc3", "-o", str(output_path), str(input_path)], stderr=subprocess.PIPE
-            )
-            if iostat.returncode != 0:
-                # Exit program if neither a netCDF Classic nor a netCDF-4 file
-                # could be created.
-                print(
-                    f"netCDF Classic file could not be generated from {Path(input_path).suffix} file "
-                    + "with message:"
-                )
-                print(iostat.stderr.decode())
-                sys.exit(1)
-
-    def generate_dataset_from_cdl(self, cdl_path):
+    def generate_dataset(self, cdl_path):
         """
         Use ncgen to generate a netCDF file from a .cdl file
         Returns the path to the generated netcdf file. If ncgen fails, uses
@@ -769,33 +743,31 @@ class CheckSuite(object):
             ds_str = cdl_path.replace(".cdl", ".nc")
         else:
             ds_str = cdl_path + ".nc"
-        self._generate_dataset(ds_str,cdl_path)
 
-    
-    def generate_dataset_from_zarr(self, zarr_url):
-        """
-        Use ncgen to generate a netCDF file from a .zarr file
-        Returns the path to the generated netcdf file. If ncgen fails, uses
-        sys.exit(1) to terminate program so a long stack trace is not reported
-        to the user.
-
-        :param str zarr_url: Absolute uri to zarr file that is used to generate netCDF file\n
-        with #mode=nczarr|zarr|s3|file|zip\n
-        https://www.unidata.ucar.edu/blogs/developer/entry/overview-of-zarr-support-in
-        """
-        pr = urlparse(zarr_url)
-        if pr.scheme=='file':
-            pr_path = url2pathname(pr.path) #necessary to avoid urlparse bug in windows
-            if pr_path.endswith(".zarr"):
-                # it's possible the filename doesn't have the .zarr extension
-                ds_str = pr_path.replace(".zarr", ".nc")
-            else:
-                ds_str = f"{pr_path}.nc"
-        else: #not local url
-            ds_str = Path().resolve()/f'{Path(pr.path).stem}.nc'
-            #TODO Is there a better place to put it?
-            
-        self._generate_dataset(ds_str,zarr_url)#
+        # generate netCDF-4 file
+        iostat = subprocess.run(
+            ["ncgen", "-k", "nc4", "-o", ds_str, cdl_path], stderr=subprocess.PIPE
+        )
+        if iostat.returncode != 0:
+            # if not successful, create netCDF classic file
+            print(
+                "netCDF-4 file could not be generated from cdl file with " + "message:"
+            )
+            print(iostat.stderr.decode())
+            print("Trying to create netCDF Classic file instead.")
+            iostat = subprocess.run(
+                ["ncgen", "-k", "nc3", "-o", ds_str, cdl_path], stderr=subprocess.PIPE
+            )
+            if iostat.returncode != 0:
+                # Exit program if neither a netCDF Classic nor a netCDF-4 file
+                # could be created.
+                print(
+                    "netCDF Classic file could not be generated from cdl file"
+                    + "with message:"
+                )
+                print(iostat.stderr.decode())
+                sys.exit(1)
+        return ds_str
 
     def load_dataset(self, ds_str):
         """
@@ -877,7 +849,7 @@ class CheckSuite(object):
         :param ds_str: Path to the resource
         """
         if cdl.is_cdl(ds_str):
-            ds_str = self.generate_dataset_from_cdl(ds_str)
+            ds_str = self.generate_dataset(ds_str)
 
         if zarr.is_zarr(ds_str):
             if platform.system() in ('Windows','OSX'):

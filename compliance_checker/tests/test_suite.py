@@ -75,13 +75,13 @@ class TestSuite(unittest.TestCase):
             # This asserts that print is able to generate all of the unicode output
             self.cs.standard_output_generation(groups, limit, points, out_of, checker)
 
-    def test_generate_dataset_from_cdl_netCDF4(self):
+    def test_generate_dataset_netCDF4(self):
         """
-        Tests that suite.generate_dataset_from_cdl works with cdl file with netCDF4
+        Tests that suite.generate_datasetworks with cdl file with netCDF4
         features.
         """
         # create netCDF4 file
-        ds_name = self.cs.generate_dataset_from_cdl(static_files["netCDF4"])
+        ds_name = self.cs.generate_dataset(static_files["netCDF4"])
         # check if correct name is return
         assert ds_name == static_files["netCDF4"].replace(".cdl", ".nc")
         # check if netCDF4 file was created
