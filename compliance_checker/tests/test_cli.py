@@ -242,5 +242,4 @@ class TestCLI:
             checker_names=["cf:1.6"],
             output_format="text",
         )
-        # print('errs',errors)
         assert not errors

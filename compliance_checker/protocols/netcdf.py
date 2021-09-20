@@ -5,7 +5,6 @@ compliance_checker/protocols/netcdf.py
 Functions to assist in determining if the URL points to a netCDF file
 """
 
-import logging
 import zipfile
 
 from pathlib import Path
@@ -37,13 +36,13 @@ def is_netcdf(url):
                 return True
             elif is_hdf5(magic_number):
                 return True
-    except Exception as e:
+    except PermissionError:
         # open will fail for both a directory or a local url, either of which may be pointing to a Zarr dataset
+        # directory
         return False
-        # logger = logging.getLogger(__name__)
-        # logger.error(e)
-        # logger.error('WARNING: your path may be pointing to a zarr dataset. ')
-        # raise
+    except OSError:
+        # local file url
+        return False
 
     return False
 

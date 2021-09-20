@@ -4,6 +4,8 @@ compliance_checker/tests/test_protocols.py
 
 Unit tests that ensure the compliance checker can successfully identify protocol endpoints
 """
+import platform
+
 import pytest
 
 from compliance_checker.protocols import zarr
@@ -53,6 +55,10 @@ class TestProtocols:
         (zip_url, zip_url),
     ]
 
+    @pytest.mark.skipif(
+        platform.system() in ("Windows", "OSX"),
+        reason=f"NCZarr is not officially supported for your OS as of when this API was written",
+    )
     @pytest.mark.parametrize("url_in,url_out", url_io)
     def test_as_zarr(self, url_in, url_out):
         assert zarr.as_zarr(url_in) == url_out

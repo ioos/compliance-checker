@@ -41,6 +41,8 @@ def as_zarr(url):
     url: str or Path to valid zarr dataset\n
     Distinct from is_cdl etc in that it will return the appropriate URI \n\n
 
+    Not tested on Windows paths at the moment, as NCZarr is not supported in Windows\n
+
     A valid Zarr dataset could be provided in any of the following forms:\n
     "http://s3.amazonaws.com/bucket/dataset.zarr"\n
     "http://s3.amazonaws.com/bucket/dataset.zarr"#mode=nczarr,s3\n
