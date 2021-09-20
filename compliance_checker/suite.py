@@ -15,6 +15,8 @@ import subprocess
 import sys
 import textwrap
 import warnings
+            
+import platform
 
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -877,8 +879,10 @@ class CheckSuite(object):
         if cdl.is_cdl(ds_str):
             ds_str = self.generate_dataset_from_cdl(ds_str)
 
-        if 'mode=nczarr' in ds_str:
-            ds_str = self.generate_dataset_from_zarr(ds_str)
+        if zarr.is_zarr(ds_str):
+            if platform.system() in ('Windows','OSX'):
+                print(f'WARNING: {platform.system()} OS detected. NCZarr is not officially supported for your OS as of when this API was written. Your mileage may vary.')
+            ds_str = self.generate_dataset_from_zarr(zarr.as_zarr(ds_str))
 
         if netcdf.is_netcdf(ds_str):
             return MemoizedDataset(ds_str)

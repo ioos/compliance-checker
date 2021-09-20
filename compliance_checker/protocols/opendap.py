@@ -55,14 +55,18 @@ def is_opendap(url):
         das_url = url.replace("#fillmismatch", ".das")
     else:
         das_url = url + ".das"
-    response = requests.get(das_url, allow_redirects=True)
-    if "xdods-server" in response.headers:
-        return True
-    # Check if it is an access restricted ESGF thredds service
-    if (
-        response.status_code == 401
-        and "text/html" in response.headers["content-type"]
-        and "The following URL requires authentication:" in response.text
-    ):
-        return True
+    
+    try:
+        response = requests.get(das_url, allow_redirects=True)
+        if "xdods-server" in response.headers:
+            return True
+        # Check if it is an access restricted ESGF thredds service
+        if (
+            response.status_code == 401
+            and "text/html" in response.headers["content-type"]
+            and "The following URL requires authentication:" in response.text
+        ):
+            return True
+    except:
+        pass # not opendap if url + ".das" isn't found
     return False

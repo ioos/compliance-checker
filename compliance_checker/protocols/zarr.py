@@ -1,4 +1,6 @@
+from compliance_checker.protocols import netcdf
 import zipfile
+from zipfile import ZipFile
 from urllib.parse import urlparse
 from urllib.request import url2pathname
 from pathlib import Path
@@ -7,33 +9,36 @@ from pathlib import Path
 
 
 def is_zarr(url):
-    '''This check is only to be used once other protocols (is_netcdf) have come up empty\n
     '''
-    if url.endswith("zarr"):
+    '''
+
+    if netcdf.is_netcdf(url):
+        return False
+
+    if '.zarr' in url:
         return True
 
-    if url.startswith('file:/'):
-        return True
-    
-    if url.lower().startswith('s3:/'):
+    if urlparse(url).scheme in ('https','s3','file'):
         return True
     
     if zipfile.is_zipfile(url):
-        # if it's a folder or zip, assume it is a zarr
-        return True
+        if '.zmetadata' in ZipFile(url).namelist():
+            return True
     
     if Path(url).is_dir():
-        return True
+        if (Path(url)/'.zmetadata').exists():
+            return True
 
     return False
 
 def as_zarr(url):
     '''
-    https://www.unidata.ucar.edu/blogs/developer/entry/overview-of-zarr-support-in
-
+    Transform pointers to zarr datasets to valid nczarr urls, as described in
+    https://www.unidata.ucar.edu/blogs/developer/entry/overview-of-zarr-support-in\n
+    url: str or Path to valid zarr dataset\n
     Distinct from is_cdl etc in that it will return the appropriate URI \n\n
     
-    a valid Zarr dataset could be provided in any of the following forms:\n
+    A valid Zarr dataset could be provided in any of the following forms:\n
     "http://s3.amazonaws.com/bucket/dataset.zarr"
 
     "/home/path/to/dataset.zarr"
@@ -44,7 +49,7 @@ def as_zarr(url):
 
     pr = urlparse(str(url))
 
-    if '#mode=nczarr' in pr.fragment:
+    if 'mode=nczarr' in pr.fragment:
         if pr.netloc:
             return str(url) #already valid nczarr url
         elif pr.scheme == 'file':
@@ -61,5 +66,8 @@ def as_zarr(url):
     else:
         raise ValueError(f'Could not identify {url},\nif #mode=nczarr,zarr, please pass this explicitly\nValid url options are described here\nhttps://www.unidata.ucar.edu/blogs/developer/entry/overview-of-zarr-support-in')
 
-    zarr_url = f'{zarr_url.as_uri()}#mode=nczarr,{mode}'
+    url_base = url if mode=='s3' else zarr_url.as_uri()
+
+    zarr_url = f'{url_base}#mode=nczarr,{mode}'
     return zarr_url
+
