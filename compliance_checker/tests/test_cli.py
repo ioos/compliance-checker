@@ -219,7 +219,7 @@ class TestCLI:
 
     # TODO uncomment the third parameter once S3 support is working
     @pytest.mark.skipif(
-        platform.system() in ("Windows", "OSX"),
+        platform.system() != "Linux",
         reason=f"NCZarr is not officially supported for your OS as of when this API was written",
     )
     @pytest.mark.parametrize(

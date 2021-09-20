@@ -56,7 +56,7 @@ class TestProtocols:
     ]
 
     @pytest.mark.skipif(
-        platform.system() in ("Windows", "OSX"),
+        platform.system() != "Linux",
         reason=f"NCZarr is not officially supported for your OS as of when this API was written",
     )
     @pytest.mark.parametrize("url_in,url_out", url_io)

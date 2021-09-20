@@ -849,7 +849,7 @@ class CheckSuite(object):
             ds_str = self.generate_dataset(ds_str)
 
         if zarr.is_zarr(ds_str):
-            if platform.system() in ("Windows", "OSX"):
+            if platform.system() != "Linux":
                 print(
                     f"WARNING: {platform.system()} OS detected. NCZarr is not officially supported for your OS as of when this API was written. Your mileage may vary."
                 )
