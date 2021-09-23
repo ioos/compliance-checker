@@ -219,9 +219,9 @@ class TestCLI:
         assert not return_value
 
     def _check_libnetcdf_version():
-        try:
-            print("trying")
-            v = (
+        if platform.system() == "Linux":
+            # nc-config doesn't work on windows... and neither does NCZarr so this skipif is mutually exclusive to the OS check skipif
+            return (
                 float(
                     subprocess.check_output(
                         ["nc-config", "--version"], encoding="UTF-8"
@@ -229,10 +229,7 @@ class TestCLI:
                 )
                 < 8.0
             )
-            print(v)
-            return v
-        except FileNotFoundError as e:
-            print(f"WARNING: {e}\nSkipping NCZarr tests")
+        else:
             return True
 
     # TODO uncomment the third parameter once S3 support is working
