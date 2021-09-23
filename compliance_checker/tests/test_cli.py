@@ -8,6 +8,7 @@ import io
 import json
 import os
 import platform
+import subprocess
 import sys
 
 from argparse import Namespace
@@ -217,10 +218,27 @@ class TestCLI:
         )
         assert not return_value
 
+    def _check_libnetcdf_version():
+        try:
+            return (
+                float(
+                    subprocess.check_output(
+                        ["nc-config", "--version"], encoding="UTF-8"
+                    )[9:12]
+                )
+                < 8.0
+            )
+        except:
+            return True
+
     # TODO uncomment the third parameter once S3 support is working
     @pytest.mark.skipif(
         platform.system() != "Linux",
         reason=f"NCZarr is not officially supported for your OS as of when this API was written",
+    )
+    @pytest.mark.skipif(
+        _check_libnetcdf_version(),
+        reason=f"NCZarr support was not available until netCDF version 4.8.0. Please upgrade to the latest libnetcdf version to test this functionality",
     )
     @pytest.mark.parametrize(
         "zarr_url",
