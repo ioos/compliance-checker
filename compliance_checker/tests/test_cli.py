@@ -220,7 +220,8 @@ class TestCLI:
 
     def _check_libnetcdf_version():
         try:
-            return (
+            print("trying")
+            v = (
                 float(
                     subprocess.check_output(
                         ["nc-config", "--version"], encoding="UTF-8"
@@ -228,17 +229,20 @@ class TestCLI:
                 )
                 < 8.0
             )
-        except:
+            print(v)
+            return v
+        except FileNotFoundError as e:
+            print(f"WARNING: {e}\nSkipping NCZarr tests")
             return True
 
     # TODO uncomment the third parameter once S3 support is working
     @pytest.mark.skipif(
-        platform.system() != "Linux",
-        reason=f"NCZarr is not officially supported for your OS as of when this API was written",
-    )
-    @pytest.mark.skipif(
         _check_libnetcdf_version(),
         reason=f"NCZarr support was not available until netCDF version 4.8.0. Please upgrade to the latest libnetcdf version to test this functionality",
+    )
+    @pytest.mark.skipif(
+        platform.system() != "Linux",
+        reason=f"NCZarr is not officially supported for your OS as of when this API was written",
     )
     @pytest.mark.parametrize(
         "zarr_url",
