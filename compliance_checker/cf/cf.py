@@ -119,7 +119,6 @@ class CFBaseCheck(BaseCheck):
             "7.2": "§7.2 Cell Measures",
             "7.3": "§7.3 Cell Methods",
             "7.4": "§7.4 Climatological Statistics",
-            "7.5": "§7.5 Geometries",
             "8.1": "§8.1 Packed Data",
             "8.2": "§8.2 Compression by Gathering",
             "9.1": "§9.1 Features and feature types",

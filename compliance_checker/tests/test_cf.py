@@ -20,6 +20,7 @@ from compliance_checker.cf import (
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
+from compliance_checker.cf.cf_18 import CF1_8Check
 from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.util import (
     StandardNameTable,
@@ -109,16 +110,6 @@ class TestCF1_6(BaseTestCase):
         # present in coord_data_vars
         self.assertEqual(self.cf.coord_data_vars, {"time", "sigma"})
 
-    def load_dataset(self, nc_dataset):
-        """
-        Return a loaded NC Dataset for the given path
-        """
-        if not isinstance(nc_dataset, str):
-            raise ValueError("nc_dataset should be a string")
-
-        nc_dataset = Dataset(nc_dataset, "r")
-        self.addCleanup(nc_dataset.close)
-        return nc_dataset
 
     # --------------------------------------------------------------------------------
     # Compliance Tests
@@ -2246,6 +2237,64 @@ class TestCF1_7(BaseTestCase):
         self.assertTrue(r.value)
 
 
+class TestCF1_8(BaseTestCase):
+
+    def setUp(self):
+        self.cf = CF1_8Check()
+
+    def test_point_geometry_simple(self):
+        dataset = MockTimeSeries()
+        fake_data = dataset.createVariable("someData", "f8", ("time",))
+        fake_data.geometry = "geometry"
+        x = dataset.createVariable("x", "f8", ())
+        y = dataset.createVariable("y", "f8", ())
+        geom_var = dataset.createVariable("geometry", "i4", ())
+        geom_var.geometry_type = "point"
+        geom_var.node_coordinates = "x y"
+        x[:] = 1
+        y[:] = 1
+        self.cf.check_geometry(dataset)
+
+    def test_point_geometry_multiple(self):
+        dataset = MockTimeSeries()
+        point_count = dataset.createDimension("point_count", 3)
+        fake_data = dataset.createVariable("someData", "f8", ("time",))
+        fake_data.geometry = "geometry"
+        x = dataset.createVariable("x", "f8", ("point_count",))
+        y = dataset.createVariable("y", "f8", ("point_count",))
+        geom_var = dataset.createVariable("geometry", "i4", ())
+        geom_var.geometry_type = "point"
+        geom_var.node_coordinates = "x y"
+        x[:] = np.array([10, 20, 30])
+        y[:] = np.array([30, 35, 21])
+        results = self.cf.check_geometry(dataset)
+        assert results[0].value[0] == results[0].value[1]
+        point_count_2 = dataset.createDimension("point_count_2", 2)
+        # can't recreate y, even with del issued first
+        y2 = dataset.createVariable("y2", "f8", ("point_count_2",))
+        geom_var.node_coordinates = "x y2"
+        y2[:] = np.array([30, 35])
+        results = self.cf.check_geometry(dataset)
+        assert results[0].value[0] < results[0].value[1]
+
+
+    def test_line_geometry(self):
+        dataset = self.load_dataset(STATIC_FILES["line_geometry"])
+        self.cf.check_geometry(dataset)
+
+    def test_polygon_geometry(self):
+        dataset = self.load_dataset(STATIC_FILES["polygon_geometry"])
+        self.cf.check_geometry(dataset)
+        dataset.variables["interior_ring"] = (
+                MockVariable(dataset.variables["interior_ring"]))
+        # Flip sign indicator for interior rings.  Should cause failure
+        flip_ring_bits = (dataset.variables["interior_ring"][:]
+                          == 0).astype(int)
+        dataset.variables["interior_ring"][:] = flip_ring_bits
+        messages = self.cf.check_geometry(dataset)
+        # There should be messages regarding improper polygon order
+        assert messages
+
 class TestCFUtil(BaseTestCase):
     """
     Class to test the cfutil module.
@@ -2320,7 +2369,8 @@ class TestCFUtil(BaseTestCase):
 
         # add another cf_role var, bad
         nc = MockRaggedArrayRepr("timeseries", "contiguous")
-        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
+        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",),
+                              fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
