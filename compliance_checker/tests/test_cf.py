@@ -20,7 +20,6 @@ from compliance_checker.cf import (
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
-
 from compliance_checker.cf.cf_18 import CF1_8Check
 from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.util import (
@@ -114,16 +113,6 @@ class TestCF1_6(BaseTestCase):
         # present in coord_data_vars
         self.assertEqual(self.cf.coord_data_vars, {"time", "sigma"})
 
-    def load_dataset(self, nc_dataset):
-        """
-        Return a loaded NC Dataset for the given path
-        """
-        if not isinstance(nc_dataset, str):
-            raise ValueError("nc_dataset should be a string")
-
-        nc_dataset = Dataset(nc_dataset, "r")
-        self.addCleanup(nc_dataset.close)
-        return nc_dataset
 
     # --------------------------------------------------------------------------------
     # Compliance Tests
@@ -2543,7 +2532,8 @@ class TestCFUtil(BaseTestCase):
 
         # add another cf_role var, bad
         nc = MockRaggedArrayRepr("timeseries", "contiguous")
-        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
+        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",),
+                              fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
