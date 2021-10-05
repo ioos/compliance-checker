@@ -93,7 +93,9 @@ def main():
         action="store_true",
     )
 
-    parser.add_argument(
+    include_exclude = parser.add_mutually_exclusive_group()
+
+    include_exclude.add_argument(
         "--skip-checks",
         "-s",
         help=dedent(
@@ -110,6 +112,26 @@ def main():
                                     will skip medium and low.  "L" will show
                                     both high and medium priority issues, while
                                     skipping low priority issues.
+                                    """
+        ),
+        action="append",
+    )
+
+    include_exclude.add_argument(
+        "--include-checks",
+        "-i",
+        help=dedent(
+            """
+                                    Specifies tests to include. Can only take the form
+                                    of either `<check_name>` or
+                                    `<check_name>:<skip_level>`.  The first
+                                    form skips any checks matching the name.
+                                    In the second form <skip_level> may be
+                                    specified as "H", "M", or "L".  "H" includes
+                                    only high prioity. "M" will show high and
+                                    medium priority output from the given check
+                                    and will skip low.  "L" will show
+                                    both all issues..
                                     """
         ),
         action="append",
@@ -286,6 +308,7 @@ def main():
             args.verbose,
             args.criteria,
             args.skip_checks,
+            args.include_checks,
             args.output[0],
             args.format or ["text"],
             options=options_dict,
@@ -307,6 +330,7 @@ def main():
                 args.verbose,
                 args.criteria,
                 args.skip_checks,
+                args.include_checks,
                 output,
                 args.format or ["text"],
                 options=options_dict,

@@ -107,7 +107,8 @@ class CheckSuite(object):
         :type checker_obj: subclass of compliance_checker.base.BaseChecker
         """
 
-        check_functions = self._get_checks(checker_obj, defaultdict(lambda: None))
+        check_functions = self._get_checks(checker_obj,
+                                           defaultdict(lambda: None))
         for c, _ in check_functions:
             print("- {}".format(c.__name__))
             if c.__doc__ is not None:
@@ -181,7 +182,8 @@ class CheckSuite(object):
                 print("Could not load", c, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
-        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":" in c])
+        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":"
+                               in c])
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
             version_nums = [v[-1] for v in versions]
             try:
@@ -194,7 +196,7 @@ class CheckSuite(object):
                 ":".join((spec, latest_version))
             ]
 
-    def _get_checks(self, checkclass, skip_checks):
+    def _get_checks(self, checkclass, skip_checks, skip_flag=None):
         """
         Helper method to retrieve check methods from a Checker class.  Excludes
         any checks in `skip_checks`.
@@ -205,9 +207,15 @@ class CheckSuite(object):
         meths = inspect.getmembers(checkclass, inspect.isroutine)
         # return all check methods not among the skipped checks
         returned_checks = []
-        for fn_name, fn_obj in meths:
-            if fn_name.startswith("check_") and skip_checks[fn_name] != BaseCheck.HIGH:
-                returned_checks.append((fn_obj, skip_checks[fn_name]))
+        if skip_flag:
+            for fn_name, fn_obj in meths:
+                if (fn_name.startswith("check_") and
+                    skip_checks[fn_name] != BaseCheck.HIGH):
+                   returned_checks.append((fn_obj, skip_checks[fn_name]))
+        else:
+            for fn_name, fn_obj in meths:
+                if fn_name in skip_checks:
+                   returned_checks.append((fn_obj, skip_checks[fn_name]))
 
         return returned_checks
 
@@ -307,7 +315,7 @@ class CheckSuite(object):
         return valid
 
     @classmethod
-    def _process_skip_checks(cls, skip_checks):
+    def _process_skip_checks(cls, skip_checks, skip_flag):
         """
         Processes an iterable of skip_checks with strings and returns a dict
         with <check_name>: <max_skip_level> pairs
@@ -315,30 +323,36 @@ class CheckSuite(object):
 
         check_dict = defaultdict(lambda: None)
         # A is for "all", "M" is for medium, "L" is for low
-        check_lookup = {"A": BaseCheck.HIGH, "M": BaseCheck.MEDIUM, "L": BaseCheck.LOW}
+        check_lookup = {"A": BaseCheck.HIGH, "M": BaseCheck.MEDIUM,
+                        "L": BaseCheck.LOW}
 
-        for skip_check_spec in skip_checks:
-            split_check_spec = skip_check_spec.split(":")
-            check_name = split_check_spec[0]
-            if len(split_check_spec) < 2:
-                check_max_level = BaseCheck.HIGH
-            else:
-                try:
-                    check_max_level = check_lookup[split_check_spec[1]]
-                except KeyError:
-                    warnings.warn(
-                        "Skip specifier '{}' on check '{}' not found,"
-                        " defaulting to skip entire check".format(
-                            split_check_spec[1], check_name
-                        )
-                    )
+        if skip_flag:
+            for skip_check_spec in skip_checks:
+                split_check_spec = skip_check_spec.split(":")
+                check_name = split_check_spec[0]
+                if len(split_check_spec) < 2:
                     check_max_level = BaseCheck.HIGH
+                else:
+                    try:
+                        check_max_level = check_lookup[split_check_spec[1]]
+                    except KeyError:
+                        warnings.warn(
+                            "Skip specifier '{}' on check '{}' not found,"
+                            " defaulting to skip entire check".format(
+                                split_check_spec[1], check_name
+                            )
+                        )
+                        check_max_level = BaseCheck.HIGH
 
-            check_dict[check_name] = check_max_level
+                check_dict[check_name] = check_max_level
+        else:
+            for check_name in skip_checks:
+                # always process
+                check_dict[check_name] = 0
 
         return check_dict
 
-    def run(self, ds, skip_checks, *checker_names):
+    def run(self, ds, skip_checks, skip_flag, *checker_names):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
@@ -349,7 +363,8 @@ class CheckSuite(object):
         checkers = self._get_valid_checkers(ds, checker_names)
 
         if skip_checks is not None:
-            skip_check_dict = CheckSuite._process_skip_checks(skip_checks)
+            skip_check_dict = CheckSuite._process_skip_checks(skip_checks,
+                                                              skip_flag)
         else:
             skip_check_dict = defaultdict(lambda: None)
 
@@ -377,7 +392,7 @@ class CheckSuite(object):
             # setup method to prep
             checker.setup(ds)
 
-            checks = self._get_checks(checker, skip_check_dict)
+            checks = self._get_checks(checker, skip_check_dict, skip_flag)
             vals = []
             errs = {}  # check method name -> (exc, traceback)
 

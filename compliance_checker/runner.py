@@ -40,6 +40,7 @@ class ComplianceChecker(object):
         verbose,
         criteria,
         skip_checks=None,
+        include_checks=None,
         output_filename="-",
         output_format=["text"],
         options=None,
@@ -53,6 +54,7 @@ class ComplianceChecker(object):
         @param  criteria        Determines failure (lenient, normal, strict)
         @param  output_filename Path to the file for output
         @param  skip_checks     Names of checks to skip
+        @param  include_checks  Names of checks to include
         @param  output_format   Format of the output(s)
 
         @returns                If the tests failed (based on the criteria)
@@ -74,8 +76,14 @@ class ComplianceChecker(object):
 
         for loc in locs:  # loop through each dataset and run specified checks
             ds = cs.load_dataset(loc)
+            if include_checks:
+                skip_flag = False
+                checks_to_run = include_checks
+            else:
+                skip_flag = True
+                checks_to_run = skip_checks
 
-            score_groups = cs.run(ds, skip_checks, *checker_names)
+            score_groups = cs.run(ds, checks_to_run, skip_flag, *checker_names)
             for group in score_groups.values():
                 all_groups.append(group[0])
             # TODO: consider wrapping in a proper context manager instead
@@ -128,7 +136,8 @@ class ComplianceChecker(object):
                     output_filename = "{}.json".format(
                         os.path.splitext(output_filename)[0]
                     )
-                cls.json_output(cs, score_dict, output_filename, ds_loc, limit, out_fmt)
+                cls.json_output(cs, score_dict, output_filename, ds_loc, limit,
+                                out_fmt)
 
             else:
                 raise TypeError("Invalid format %s" % out_fmt)
