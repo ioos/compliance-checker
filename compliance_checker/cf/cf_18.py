@@ -3,8 +3,7 @@ from compliance_checker import MemoizedDataset
 from compliance_checker.cf.cf import CF1_7Check
 from netCDF4 import Dataset
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
-from shapely.geometry import (MultiPoint, LineString, MultiLineString, Polygon,
-                              MultiPolygon)
+from shapely.geometry import Polygon
 import numpy as np
 from compliance_checker.cf.util import reference_attr_variables
 import itertools
@@ -139,7 +138,6 @@ class CF1_8Check(CF1_7Check):
                 geometry_var = ds.variables[geometry_var_name]
 
             geometry_type = getattr(geometry_var, "geometry_type")
-            valid_geometry_types = {"point", "line", "polygon"}
             try:
                 node_coord_var_names = geometry_var.node_coordinates
             except AttributeError as e:
@@ -170,7 +168,6 @@ class CF1_8Check(CF1_7Check):
                                   f'{not_found_node_vars}')
                 results.append(geom_valid.to_result())
                 continue
-                return error_msgs
 
             node_count = reference_attr_variables(ds,
                                getattr(geometry_var, "node_count", None))
@@ -236,11 +233,6 @@ class PointGeometry(GeometryStorage):
 
     def check_geometry(self):
         super().check_geometry()
-        # non-multipoint should have exactly one feature
-        if self.node_count is None:
-            expected_node_count = 1
-        else:
-            expected_node_count = self.node_count
 
         if all(len(cv.dimensions) != 0 for cv in self.coord_vars):
             same_dim_group = itertools.groupby(self.coord_vars,
@@ -339,13 +331,12 @@ class PolygonGeometry(LineGeometry):
                 ring_orientation = self.interior_ring[:].astype(bool)
             else:
                 ring_orientation = np.zeros(len(self.part_count), dtype=bool)
-            current_node_count = self.node_count[:].copy()
             node_indexer_len = len(self.part_node_count)
         else:
             extents = np.concatenate([np.array([0]),
                                      self.node_count[:].cumsum()])
             node_indexer_len = len(self.node_count)
-            ring_orientation = np.zeros(node_indexer, dtype=bool)
+            ring_orientation = np.zeros(node_indexer_len, dtype=bool)
         # TODO: is it necessary to check whether part_node_count "consumes"
         #       node_count in the polygon, i.e. first (3, 3, 3) will consume
         #       a node part of 9, follow by next 3 will consume a node part of

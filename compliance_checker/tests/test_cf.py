@@ -2257,7 +2257,7 @@ class TestCF1_8(BaseTestCase):
 
     def test_point_geometry_multiple(self):
         dataset = MockTimeSeries()
-        point_count = dataset.createDimension("point_count", 3)
+        dataset.createDimension("point_count", 3)
         fake_data = dataset.createVariable("someData", "f8", ("time",))
         fake_data.geometry = "geometry"
         x = dataset.createVariable("x", "f8", ("point_count",))
@@ -2269,7 +2269,7 @@ class TestCF1_8(BaseTestCase):
         y[:] = np.array([30, 35, 21])
         results = self.cf.check_geometry(dataset)
         assert results[0].value[0] == results[0].value[1]
-        point_count_2 = dataset.createDimension("point_count_2", 2)
+        dataset.createDimension("point_count_2", 2)
         # can't recreate y, even with del issued first
         y2 = dataset.createVariable("y2", "f8", ("point_count_2",))
         geom_var.node_coordinates = "x y2"
