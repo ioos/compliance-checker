@@ -116,6 +116,7 @@ class TestSuite(unittest.TestCase):
                 "check_convention_possibly_var_attrs:M",
                 "check_standard_name:L",
             ],
+            True,
             "cf",
         )
 
@@ -145,7 +146,7 @@ class TestSuite(unittest.TestCase):
         # This is checking for issue #183, where group_func results in
         # IndexError: list index out of range
         ds = self.cs.load_dataset(static_files["bad_data_type"])
-        score_groups = self.cs.run(ds, True, "cf")
+        score_groups = self.cs.run(ds, [], True, "cf")
 
         limit = 2
         for checker, rpair in score_groups.items():
@@ -177,7 +178,7 @@ class TestSuite(unittest.TestCase):
         # Testing whether you can run compliance checker on a .cdl file
         # Load the cdl file
         ds = self.cs.load_dataset(static_files["test_cdl"])
-        vals = self.cs.run(ds, True, "cf")
+        vals = self.cs.run(ds, [], True, "cf")
 
         limit = 2
         for checker, rpair in vals.items():
@@ -193,7 +194,7 @@ class TestSuite(unittest.TestCase):
 
         # Ok now load the nc file that it came from
         ds = self.cs.load_dataset(static_files["test_cdl_nc"])
-        vals = self.cs.run(ds, True, "cf")
+        vals = self.cs.run(ds, [], True, "cf")
 
         limit = 2
         for checker, rpair in vals.items():
