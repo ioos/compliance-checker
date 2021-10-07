@@ -91,7 +91,8 @@ class CheckSuite(object):
         :type verbose: int
         """
         for checker in sorted(self.checkers.keys()):
-            version = getattr(self.checkers[checker], "_cc_checker_version", "???")
+            version = getattr(self.checkers[checker], "_cc_checker_version",
+                              "???")
             if verbose > 0:
                 print(" - {} (v{})".format(checker, version))
             elif ":" in checker and not checker.endswith(
@@ -196,13 +197,20 @@ class CheckSuite(object):
                 ":".join((spec, latest_version))
             ]
 
-    def _get_checks(self, checkclass, skip_checks, skip_flag=None):
+    def _get_checks(self, checkclass, skip_checks, skip_flag=True):
         """
         Helper method to retrieve check methods from a Checker class.  Excludes
         any checks in `skip_checks`.
 
         The name of the methods in the Checker class should start with "check_"
         for this method to find them.
+        :param checkclass BaseCheck: The checker class being considered
+        :param skip_checks list: A list of strings with the names of the check
+                                 methods to skip or include, depending on the
+                                 value of `skip_flag`.
+        :param skip_flag bool: A boolean parameter to determine whether to
+                               skip over checks specified (True) or only
+                               include the checks specified (False).
         """
         meths = inspect.getmembers(checkclass, inspect.isroutine)
         # return all check methods not among the skipped checks

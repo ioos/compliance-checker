@@ -87,11 +87,20 @@ class TestSuite(unittest.TestCase):
         # check if netCDF4 file was created
         assert os.path.isfile(static_files["netCDF4"].replace(".cdl", ".nc"))
 
+    def test_include_checks(self):
+        ds = self.cs.load_dataset(static_files["bad_data_type"])
+        score_groups = self.cs.run(ds, ["check_standard_name"], False, "cf:1.7")
+        checks_run = score_groups["cf:1.7"][0]
+        assert len(checks_run) == 1
+        first_check = checks_run[0]
+        assert first_check.name == "§3.3 Standard Name"
+        assert first_check.value[0] < first_check.value[1]
+
     def test_skip_checks(self):
         """Tests that checks are properly skipped when specified"""
         ds = self.cs.load_dataset(static_files["2dim"])
         # exclude title from the check attributes
-        score_groups = self.cs.run(ds, ["check_high"], "acdd")
+        score_groups = self.cs.run(ds, ["check_high"], True, "acdd")
         assert all(
             sg.name not in {"Conventions", "title", "keywords", "summary"}
             for sg in score_groups["acdd"][0]

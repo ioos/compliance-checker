@@ -111,7 +111,8 @@ def main():
                                     priority output from the given check and
                                     will skip medium and low.  "L" will show
                                     both high and medium priority issues, while
-                                    skipping low priority issues.
+                                    skipping low priority issues.  Cannot be
+                                    used with `-i`/`--include` option.
                                     """
         ),
         action="append",
@@ -122,16 +123,9 @@ def main():
         "-i",
         help=dedent(
             """
-                                    Specifies tests to include. Can only take the form
-                                    of either `<check_name>` or
-                                    `<check_name>:<skip_level>`.  The first
-                                    form skips any checks matching the name.
-                                    In the second form <skip_level> may be
-                                    specified as "H", "M", or "L".  "H" includes
-                                    only high prioity. "M" will show high and
-                                    medium priority output from the given check
-                                    and will skip low.  "L" will show
-                                    both all issues..
+                                    Specifies checks to include. Can only take the form
+                                    of `<check_name>`.  Cannot be specified along with
+                                    `-s`/`skip_checks`.
                                     """
         ),
         action="append",
