@@ -60,11 +60,11 @@ class TestSuite(unittest.TestCase):
         # BWA: what's the purpose of this test?  Just to see if the suite
         # runs without errors?
         ds = self.cs.load_dataset(static_files["2dim"])
-        self.cs.run(ds, "acdd")
+        self.cs.run(ds, True, "acdd")
 
     def test_unicode_formatting(self):
         ds = self.cs.load_dataset(static_files["bad_region"])
-        score_groups = self.cs.run(ds, "cf")
+        score_groups = self.cs.run(ds, True, "cf")
 
         limit = 2
         for checker, rpair in score_groups.items():
@@ -145,7 +145,7 @@ class TestSuite(unittest.TestCase):
         # This is checking for issue #183, where group_func results in
         # IndexError: list index out of range
         ds = self.cs.load_dataset(static_files["bad_data_type"])
-        score_groups = self.cs.run(ds, "cf")
+        score_groups = self.cs.run(ds, True, "cf")
 
         limit = 2
         for checker, rpair in score_groups.items():
@@ -177,7 +177,7 @@ class TestSuite(unittest.TestCase):
         # Testing whether you can run compliance checker on a .cdl file
         # Load the cdl file
         ds = self.cs.load_dataset(static_files["test_cdl"])
-        vals = self.cs.run(ds, "cf")
+        vals = self.cs.run(ds, True, "cf")
 
         limit = 2
         for checker, rpair in vals.items():
@@ -193,7 +193,7 @@ class TestSuite(unittest.TestCase):
 
         # Ok now load the nc file that it came from
         ds = self.cs.load_dataset(static_files["test_cdl_nc"])
-        vals = self.cs.run(ds, "cf")
+        vals = self.cs.run(ds, True, "cf")
 
         limit = 2
         for checker, rpair in vals.items():
@@ -224,7 +224,7 @@ class TestSuite(unittest.TestCase):
         of potential issues, rather than the weighted score
         """
         ds = self.cs.load_dataset(static_files["bad_region"])
-        score_groups = self.cs.run(ds, [], "cf")
+        score_groups = self.cs.run(ds, [], True, "cf")
         limit = 2
         groups, errors = score_groups["cf"]
         score_list, all_passed, out_of = self.cs.standard_output(
