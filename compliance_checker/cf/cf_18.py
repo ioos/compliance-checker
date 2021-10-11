@@ -1,4 +1,5 @@
 
+from compliance_checker.base import BaseCheck, TestCtx, Result
 from compliance_checker import MemoizedDataset
 from compliance_checker.cf.cf import CF1_7Check
 from netCDF4 import Dataset
@@ -26,6 +27,9 @@ class CF1_8Check(CF1_7Check):
     # things that are specific to 1.8
     _cc_spec_version = "1.8"
     _cc_url = "http://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html"
+
+    ROOT_GROUP_ONLY_ATTRS = ['Conventions', 'external_variables']
+    NON_ROOT_GROUP_OPT = ['title', 'history']
 
     def __init__(self, options=None):
         super(CF1_8Check, self).__init__(options)
@@ -65,34 +69,49 @@ class CF1_8Check(CF1_7Check):
         applies for the child and all of its descendants.
         '''
 
-        # TODO make sure `Conventions` & `external_variables` attributes are only present in the
+        results = []
+
+        ctx_hi = TestCtx(BaseCheck.HIGH, self.section_titles["2.7"])
+        ctx_lo = TestCtx(BaseCheck.LOW, self.section_titles["2.7"])
+
+        # Make sure `Conventions` & `external_variables` attributes are only present in the
         # root group.
+        for gname in ds.groups:
+            ginstance = ds.createGroup(gname) # returns existing Group; doesn't create a new one
 
-        print("GROUPS")
-        for g in ds.groups:
-            print(g)
-        print()
+            for attr in ginstance.ncattrs():
+                if attr in CF1_8Check.ROOT_GROUP_ONLY_ATTRS:
 
-        print("DIMENSIONS")
-        for d in ds.dimensions:
-            print(d)
-        print()
+                    ctx_hi.messages.append(
+                        f'§2.7.2 Attribute "{ attr }" MAY ONLY be used in the root group '
+                        'and SHALL NOT be duplicated or overridden in child groups.'
+                    )
 
-        print("VARIABLES")
-        for v in ds.variables:
-            print(v)
-        print()
+                    results.append(ctx_hi.to_result())
+
+                elif attr in CF1_8Check.NON_ROOT_GROUP_OPT:
+
+                    ctx_lo.messages.append(
+    f"§2.7.2 Note: attribute '{ attr }' found on non-root group '{ gname }'. "
+    "This is optional for non-root groups. It is allowed in order to provide additional "
+    "provenance and description of the subsidiary data. It does not override "
+    "attributes from parent groups."
+                    )
+                    results.append(ctx_lo.to_result())
+
+        return results
+
 
     def check_taxa(self, ds: MemoizedDataset):
         '''
         6.1.2. Taxon Names and Identifiers
 
         A taxon is a named level within a biological classification, such as a class, genus and
-        species. Quantities dependent on taxa have generic standard names containing the phrase
-        "organisms_in_taxon", and the taxa are identified by auxiliary coordinate variables.
+        species. QUANTITIES DEPENDENT ON TAXA HAVE GENERIC STANDARD NAMES CONTAINING THE PHRASE
+        "organisms_in_taxon", AND THE TAXA ARE IDENTIFIED BY AUXILIARY COORDINATE VARIABLES.
 
         The taxon auxiliary coordinate variables are string-valued. The plain-language name of the
-        taxon must be contained in a variable with standard_name of biological_taxon_name. A Life
+        taxon MUST be contained in a variable with standard_name of 'biological_taxon_name'. A Life
         Science Identifier (LSID) may be contained in a variable with standard_name of
         biological_taxon_lsid. This is a URN with the syntax
         "urn:lsid:<Authority>:<Namespace>:<ObjectID>[:<Version>]". This includes the reference
@@ -106,7 +125,7 @@ class CF1_8Check(CF1_7Check):
         "urn:lsid:itis.gov:itis_tsn:180543".
 
         The biological_taxon_name auxiliary coordinate variable included for human readability is
-        mandatory. The biological_taxon_lsid auxliary coordinate variable included for software
+        MANDATORY. The biological_taxon_lsid auxliary coordinate variable included for software
         agent readability is optional, but strongly recommended. If both are present then each
         biological_taxon_name coordinate must exactly match the name resolved from the
         biological_taxon_lsid coordinate. If LSIDs are available for some taxa in a dataset then
@@ -359,19 +378,28 @@ class PolygonGeometry(LineGeometry):
         return messages
 
 
-if __name__ == "__main__":
+        ## TODO
+        # find standard names contains 'organisms_in_taxon'
+        # find aux. coord. vars with standard_name='biological_taxon_name'
+        # LSID,'biological_taxon_lsid' = "urn:lsid:<Authority>:<Namespace>:<ObjectID>[:<Version>]"
 
-    import os
-    checker = CF1_8Check()
+        results = []
 
-    _dir = '/Users/ben/Downloads/netcdf/examples/'
-    ncfs = [ f for f in os.listdir(_dir) if f.endswith('.nc') ]
+        ctx_hi = TestCtx(BaseCheck.HIGH, self.section_titles["6.1"])
+        ctx_med = TestCtx(BaseCheck.MEDIUM, self.section_titles["6.1"])
+        ctx_lo = TestCtx(BaseCheck.LOW, self.section_titles["6.1"])
 
-    for ncf in ncfs:
-        ds = Dataset(_dir + ncf)
+        for var in [ds[name] for name in ds.variables]:
+            if 'organisms_in_taxon' in var.standard_name:
 
-        print('-' * 210)
-        print(ncf)
-        print()
+                # taxa identified by aux. coordinate vars
+                for aux_var in [ds[name] for name in var.coordinates.split()]:
+                    print(ds[aux_var.name])
 
-        checker.check_groups(ds)
+
+
+class LSID():
+    PRE = 'urn:lsid'
+    OCEAN = ':'.join([PRE, 'marinespecies.org', 'taxname'])
+    TERRA = ':'.join([PRE, 'itis.gov', 'itis_tsn'])
+
