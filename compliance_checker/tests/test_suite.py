@@ -64,7 +64,7 @@ class TestSuite(unittest.TestCase):
 
     def test_unicode_formatting(self):
         ds = self.cs.load_dataset(static_files["bad_region"])
-        score_groups = self.cs.run(ds, [], True, "cf")
+        score_groups = self.cs.run(ds, True, "cf")
 
         limit = 2
         for checker, rpair in score_groups.items():
