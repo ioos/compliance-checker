@@ -60,7 +60,7 @@ class TestSuite(unittest.TestCase):
         # BWA: what's the purpose of this test?  Just to see if the suite
         # runs without errors?
         ds = self.cs.load_dataset(static_files["2dim"])
-        self.cs.run(ds, [], True, "acdd")
+        self.cs.run(ds, True, "acdd")
 
     def test_unicode_formatting(self):
         ds = self.cs.load_dataset(static_files["bad_region"])
