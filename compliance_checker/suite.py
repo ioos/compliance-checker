@@ -197,7 +197,7 @@ class CheckSuite(object):
                 ":".join((spec, latest_version))
             ]
 
-    def _get_checks(self, checkclass, skip_checks, skip_flag=True):
+    def _get_checks(self, checkclass, include_checks, skip_checks):
         """
         Helper method to retrieve check methods from a Checker class.  Excludes
         any checks in `skip_checks`.
@@ -215,14 +215,14 @@ class CheckSuite(object):
         meths = inspect.getmembers(checkclass, inspect.isroutine)
         # return all check methods not among the skipped checks
         returned_checks = []
-        if skip_flag:
+        if skip_checks:
             for fn_name, fn_obj in meths:
                 if (fn_name.startswith("check_") and
                     skip_checks[fn_name] != BaseCheck.HIGH):
                    returned_checks.append((fn_obj, skip_checks[fn_name]))
         else:
             for fn_name, fn_obj in meths:
-                if fn_name in skip_checks:
+                if fn_name in include_checks:
                    returned_checks.append((fn_obj, skip_checks[fn_name]))
 
         return returned_checks
@@ -360,7 +360,11 @@ class CheckSuite(object):
 
         return check_dict
 
-    def run(self, ds, skip_checks, skip_flag, *checker_names):
+    def run(self, ds, skip_checks, *checker_names):
+        warnings.warn("suite.run is deprecated, use suite.run2 in calls instead")
+        self.run2(ds, checker_names, skip_checks=skip_checks)
+
+    def run2(self, ds, checkers_names, include_checks=None, skip_checks=None):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
@@ -400,7 +404,7 @@ class CheckSuite(object):
             # setup method to prep
             checker.setup(ds)
 
-            checks = self._get_checks(checker, skip_check_dict, skip_flag)
+            checks = self._get_checks(checker, include_checks, skip_check_dict)
             vals = []
             errs = {}  # check method name -> (exc, traceback)
 
