@@ -12,4 +12,3 @@ regex>=2017.07.28
 requests>=2.2.1
 setuptools>=15.0
 validators>=0.14.2
-shapely>=1.7.1
