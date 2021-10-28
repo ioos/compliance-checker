@@ -28,7 +28,7 @@ jobs:
       run: |
         conda create --name TEST python=${{ matrix.python-version }} pip "libnetcdf<4.8.0" --file requirements.txt --file test_requirements.txt --strict-channel-priority
         source activate TEST
-        pip install -e . --no-deps --force-reinstall
+        pip install --user -e . --no-deps --force-reinstall
 
     - name: Conda Info
       shell: bash -l {0}
