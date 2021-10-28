@@ -22,20 +22,20 @@ jobs:
       shell: bash -l {0}
       run: |
         conda create --name TEST python=${{ matrix.python-version }} python=3 pip --file requirements.txt --file test_requirements.txt --strict-channel-priority
-        source activate TEST
+        conda activate TEST
         pip install -e . --no-deps --force-reinstall
 
     - name: Conda Info
       shell: bash -l {0}
       run: |
-        source activate TEST
+        conda activate TEST
         conda info --all
         conda list
 
     - name: cc-plugin-glider tests
       shell: bash -l {0}
       run: |
-        source activate TEST
+        conda activate TEST
         git clone https://github.com/ioos/cc-plugin-glider.git
         cd cc-plugin-glider
         conda install --file requirements.txt --file requirements-dev.txt ;
