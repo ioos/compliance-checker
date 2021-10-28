@@ -215,14 +215,14 @@ class CheckSuite(object):
         meths = inspect.getmembers(checkclass, inspect.isroutine)
         # return all check methods not among the skipped checks
         returned_checks = []
-        if skip_checks:
+        if include_checks:
             for fn_name, fn_obj in meths:
-                if (fn_name.startswith("check_") and
-                    skip_checks[fn_name] != BaseCheck.HIGH):
+                if fn_name in include_checks:
                    returned_checks.append((fn_obj, skip_checks[fn_name]))
         else:
             for fn_name, fn_obj in meths:
-                if fn_name in include_checks:
+                if (fn_name.startswith("check_") and
+                    skip_checks[fn_name] != BaseCheck.HIGH):
                    returned_checks.append((fn_obj, skip_checks[fn_name]))
 
         return returned_checks
@@ -323,7 +323,7 @@ class CheckSuite(object):
         return valid
 
     @classmethod
-    def _process_skip_checks(cls, skip_checks, skip_flag):
+    def _process_skip_checks(cls, skip_checks):
         """
         Processes an iterable of skip_checks with strings and returns a dict
         with <check_name>: <max_skip_level> pairs
@@ -334,11 +334,21 @@ class CheckSuite(object):
         check_lookup = {"A": BaseCheck.HIGH, "M": BaseCheck.MEDIUM,
                         "L": BaseCheck.LOW}
 
-        if skip_flag:
-            for skip_check_spec in skip_checks:
-                split_check_spec = skip_check_spec.split(":")
-                check_name = split_check_spec[0]
-                if len(split_check_spec) < 2:
+        for skip_check_spec in skip_checks:
+            split_check_spec = skip_check_spec.split(":")
+            check_name = split_check_spec[0]
+            if len(split_check_spec) < 2:
+                check_max_level = BaseCheck.HIGH
+            else:
+                try:
+                    check_max_level = check_lookup[split_check_spec[1]]
+                except KeyError:
+                    warnings.warn(
+                        "Skip specifier '{}' on check '{}' not found,"
+                        " defaulting to skip entire check".format(
+                            split_check_spec[1], check_name
+                        )
+                    )
                     check_max_level = BaseCheck.HIGH
                 else:
                     try:
@@ -361,10 +371,11 @@ class CheckSuite(object):
         return check_dict
 
     def run(self, ds, skip_checks, *checker_names):
-        warnings.warn("suite.run is deprecated, use suite.run2 in calls instead")
-        self.run2(ds, checker_names, skip_checks=skip_checks)
+        warnings.warn("suite.run is deprecated, use suite.run_all in calls "
+                      "instead")
+        return self.run_all(ds, checker_names, skip_checks=skip_checks)
 
-    def run2(self, ds, checkers_names, include_checks=None, skip_checks=None):
+    def run_all(self, ds, checker_names, include_checks=None, skip_checks=None):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
@@ -375,10 +386,14 @@ class CheckSuite(object):
         checkers = self._get_valid_checkers(ds, checker_names)
 
         if skip_checks is not None:
-            skip_check_dict = CheckSuite._process_skip_checks(skip_checks,
-                                                              skip_flag)
+            skip_check_dict = CheckSuite._process_skip_checks(skip_checks)
         else:
             skip_check_dict = defaultdict(lambda: None)
+
+        if include_checks:
+            include_dict = {check_name: 0 for check_name in include_checks}
+        else:
+            include_dict = {}
 
         if len(checkers) == 0:
             print(
@@ -404,7 +419,7 @@ class CheckSuite(object):
             # setup method to prep
             checker.setup(ds)
 
-            checks = self._get_checks(checker, include_checks, skip_check_dict)
+            checks = self._get_checks(checker, include_dict, skip_check_dict)
             vals = []
             errs = {}  # check method name -> (exc, traceback)
 

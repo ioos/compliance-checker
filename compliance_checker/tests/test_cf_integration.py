@@ -266,7 +266,7 @@ class TestCFIntegration:
         ],  # must be specified to load this param at runtime, instead of at collection
     )
     def test_cf_integration(self, loaded_dataset, expected_messages, cs):
-        check_results = cs.run(loaded_dataset, [], True, "cf")
+        check_results = cs.run(loaded_dataset, [], "cf")
         scored, out_of, messages = self.get_results(check_results, cs)
 
         assert scored < out_of

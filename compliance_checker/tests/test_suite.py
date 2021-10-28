@@ -60,11 +60,11 @@ class TestSuite(unittest.TestCase):
         # BWA: what's the purpose of this test?  Just to see if the suite
         # runs without errors?
         ds = self.cs.load_dataset(static_files["2dim"])
-        self.cs.run(ds, True, "acdd")
+        self.cs.run(ds, [], "acdd")
 
     def test_unicode_formatting(self):
         ds = self.cs.load_dataset(static_files["bad_region"])
-        score_groups = self.cs.run(ds, True, "cf")
+        score_groups = self.cs.run(ds, [], "cf")
 
         limit = 2
         for checker, rpair in score_groups.items():
@@ -89,7 +89,7 @@ class TestSuite(unittest.TestCase):
 
     def test_include_checks(self):
         ds = self.cs.load_dataset(static_files["bad_data_type"])
-        score_groups = self.cs.run(ds, ["check_standard_name"], False, "cf:1.7")
+        score_groups = self.cs.run_all(ds, ["cf:1.7"], ["check_standard_name"])
         checks_run = score_groups["cf:1.7"][0]
         assert len(checks_run) == 1
         first_check = checks_run[0]
@@ -100,7 +100,7 @@ class TestSuite(unittest.TestCase):
         """Tests that checks are properly skipped when specified"""
         ds = self.cs.load_dataset(static_files["2dim"])
         # exclude title from the check attributes
-        score_groups = self.cs.run(ds, ["check_high"], True, "acdd")
+        score_groups = self.cs.run_all(ds, ["acdd"], skip_checks=["check_high"])
         assert all(
             sg.name not in {"Conventions", "title", "keywords", "summary"}
             for sg in score_groups["acdd"][0]
@@ -145,7 +145,7 @@ class TestSuite(unittest.TestCase):
         # This is checking for issue #183, where group_func results in
         # IndexError: list index out of range
         ds = self.cs.load_dataset(static_files["bad_data_type"])
-        score_groups = self.cs.run(ds, True, "cf")
+        score_groups = self.cs.run(ds, [], "cf")
 
         limit = 2
         for checker, rpair in score_groups.items():
@@ -177,7 +177,7 @@ class TestSuite(unittest.TestCase):
         # Testing whether you can run compliance checker on a .cdl file
         # Load the cdl file
         ds = self.cs.load_dataset(static_files["test_cdl"])
-        vals = self.cs.run(ds, True, "cf")
+        vals = self.cs.run(ds, [], "cf")
 
         limit = 2
         for checker, rpair in vals.items():
@@ -193,7 +193,7 @@ class TestSuite(unittest.TestCase):
 
         # Ok now load the nc file that it came from
         ds = self.cs.load_dataset(static_files["test_cdl_nc"])
-        vals = self.cs.run(ds, True, "cf")
+        vals = self.cs.run(ds, [], "cf")
 
         limit = 2
         for checker, rpair in vals.items():
@@ -224,7 +224,7 @@ class TestSuite(unittest.TestCase):
         of potential issues, rather than the weighted score
         """
         ds = self.cs.load_dataset(static_files["bad_region"])
-        score_groups = self.cs.run(ds, [], True, "cf")
+        score_groups = self.cs.run(ds, [], "cf")
         limit = 2
         groups, errors = score_groups["cf"]
         score_list, all_passed, out_of = self.cs.standard_output(
