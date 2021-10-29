@@ -22,18 +22,18 @@ jobs:
       shell: bash -l {0}
       run: |
         conda create --name TEST python=${{ matrix.python-version }} python=3 pip --file requirements.txt --file test_requirements.txt --strict-channel-priority
-        conda activate TEST
+        source activate TEST
         pip install -e . --no-deps --force-reinstall
 
     - name: Conda Info
       shell: bash -l {0}
       run: |
-        conda activate TEST
+        source activate TEST
         conda info --all
         conda list
 
     - name: Integration Tests
       shell: bash -l {0}
       run: |
-        conda activate TEST
+        source activate TEST
         pytest -m "integration" -s -rxs -v compliance_checker
