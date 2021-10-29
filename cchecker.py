@@ -93,7 +93,9 @@ def main():
         action="store_true",
     )
 
-    parser.add_argument(
+    include_exclude = parser.add_mutually_exclusive_group()
+
+    include_exclude.add_argument(
         "--skip-checks",
         "-s",
         help=dedent(
@@ -109,7 +111,21 @@ def main():
                                     priority output from the given check and
                                     will skip medium and low.  "L" will show
                                     both high and medium priority issues, while
-                                    skipping low priority issues.
+                                    skipping low priority issues.  Cannot be
+                                    used with `-i`/`--include` option.
+                                    """
+        ),
+        action="append",
+    )
+
+    include_exclude.add_argument(
+        "--include-checks",
+        "-i",
+        help=dedent(
+            """
+                                    Specifies checks to include. Can only take the form
+                                    of `<check_name>`.  Cannot be specified along with
+                                    `-s`/`skip_checks`.
                                     """
         ),
         action="append",
@@ -286,6 +302,7 @@ def main():
             args.verbose,
             args.criteria,
             args.skip_checks,
+            args.include_checks,
             args.output[0],
             args.format or ["text"],
             options=options_dict,
@@ -307,6 +324,7 @@ def main():
                 args.verbose,
                 args.criteria,
                 args.skip_checks,
+                args.include_checks,
                 output,
                 args.format or ["text"],
                 options=options_dict,

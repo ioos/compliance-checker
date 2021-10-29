@@ -91,7 +91,8 @@ class CheckSuite(object):
         :type verbose: int
         """
         for checker in sorted(self.checkers.keys()):
-            version = getattr(self.checkers[checker], "_cc_checker_version", "???")
+            version = getattr(self.checkers[checker], "_cc_checker_version",
+                              "???")
             if verbose > 0:
                 print(" - {} (v{})".format(checker, version))
             elif ":" in checker and not checker.endswith(
@@ -107,7 +108,8 @@ class CheckSuite(object):
         :type checker_obj: subclass of compliance_checker.base.BaseChecker
         """
 
-        check_functions = self._get_checks(checker_obj, defaultdict(lambda: None))
+        check_functions = self._get_checks(checker_obj,
+                                           defaultdict(lambda: None))
         for c, _ in check_functions:
             print("- {}".format(c.__name__))
             if c.__doc__ is not None:
@@ -181,7 +183,8 @@ class CheckSuite(object):
                 print("Could not load", c, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
-        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":" in c])
+        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":"
+                               in c])
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
             version_nums = [v[-1] for v in versions]
             try:
@@ -194,20 +197,33 @@ class CheckSuite(object):
                 ":".join((spec, latest_version))
             ]
 
-    def _get_checks(self, checkclass, skip_checks):
+    def _get_checks(self, checkclass, include_checks, skip_checks):
         """
         Helper method to retrieve check methods from a Checker class.  Excludes
         any checks in `skip_checks`.
 
         The name of the methods in the Checker class should start with "check_"
         for this method to find them.
+        :param checkclass BaseCheck: The checker class being considered
+        :param skip_checks list: A list of strings with the names of the check
+                                 methods to skip or include, depending on the
+                                 value of `skip_flag`.
+        :param skip_flag bool: A boolean parameter to determine whether to
+                               skip over checks specified (True) or only
+                               include the checks specified (False).
         """
         meths = inspect.getmembers(checkclass, inspect.isroutine)
         # return all check methods not among the skipped checks
         returned_checks = []
-        for fn_name, fn_obj in meths:
-            if fn_name.startswith("check_") and skip_checks[fn_name] != BaseCheck.HIGH:
-                returned_checks.append((fn_obj, skip_checks[fn_name]))
+        if include_checks:
+            for fn_name, fn_obj in meths:
+                if fn_name in include_checks:
+                   returned_checks.append((fn_obj, skip_checks[fn_name]))
+        else:
+            for fn_name, fn_obj in meths:
+                if (fn_name.startswith("check_") and
+                    skip_checks[fn_name] != BaseCheck.HIGH):
+                   returned_checks.append((fn_obj, skip_checks[fn_name]))
 
         return returned_checks
 
@@ -315,7 +331,8 @@ class CheckSuite(object):
 
         check_dict = defaultdict(lambda: None)
         # A is for "all", "M" is for medium, "L" is for low
-        check_lookup = {"A": BaseCheck.HIGH, "M": BaseCheck.MEDIUM, "L": BaseCheck.LOW}
+        check_lookup = {"A": BaseCheck.HIGH, "M": BaseCheck.MEDIUM,
+                        "L": BaseCheck.LOW}
 
         for skip_check_spec in skip_checks:
             split_check_spec = skip_check_spec.split(":")
@@ -333,12 +350,32 @@ class CheckSuite(object):
                         )
                     )
                     check_max_level = BaseCheck.HIGH
+                else:
+                    try:
+                        check_max_level = check_lookup[split_check_spec[1]]
+                    except KeyError:
+                        warnings.warn(
+                            "Skip specifier '{}' on check '{}' not found,"
+                            " defaulting to skip entire check".format(
+                                split_check_spec[1], check_name
+                            )
+                        )
+                        check_max_level = BaseCheck.HIGH
 
-            check_dict[check_name] = check_max_level
+                check_dict[check_name] = check_max_level
+        else:
+            for check_name in skip_checks:
+                # always process
+                check_dict[check_name] = 0
 
         return check_dict
 
     def run(self, ds, skip_checks, *checker_names):
+        warnings.warn("suite.run is deprecated, use suite.run_all in calls "
+                      "instead")
+        return self.run_all(ds, checker_names, skip_checks=skip_checks)
+
+    def run_all(self, ds, checker_names, include_checks=None, skip_checks=None):
         """
         Runs this CheckSuite on the dataset with all the passed Checker instances.
 
@@ -352,6 +389,11 @@ class CheckSuite(object):
             skip_check_dict = CheckSuite._process_skip_checks(skip_checks)
         else:
             skip_check_dict = defaultdict(lambda: None)
+
+        if include_checks:
+            include_dict = {check_name: 0 for check_name in include_checks}
+        else:
+            include_dict = {}
 
         if len(checkers) == 0:
             print(
@@ -377,7 +419,7 @@ class CheckSuite(object):
             # setup method to prep
             checker.setup(ds)
 
-            checks = self._get_checks(checker, skip_check_dict)
+            checks = self._get_checks(checker, include_dict, skip_check_dict)
             vals = []
             errs = {}  # check method name -> (exc, traceback)
 
