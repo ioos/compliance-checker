@@ -31,8 +31,6 @@ from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_v
 from compliance_checker.cf.cf import CFBaseCheck
 from compliance_checker.protocols import cdl, erddap, netcdf, opendap
 
-from funcinternals.txt import debug_text as dbg
-
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter("utf8")(sys.stdout)
