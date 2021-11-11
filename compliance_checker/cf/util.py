@@ -573,6 +573,16 @@ def is_vertical_coordinate(var_name, var):
         satisfied |= getattr(var, "positive", "").lower() in ("up", "down")
     return satisfied
 
+def string_from_var_type(variable):
+    if variable.dtype == str:
+        return variable[:]
+    elif variable.dtype.kind == 'S':
+        strip_char = variable.fill_value or b"\x00"
+        return variable.tobytes().rstrip(strip_char).decode("utf-8")
+    else:
+        raise TypeError(f"Variable '{variable.name} has non-string/character' "
+                        f"dtype {variable.dtype}")
+
 def reference_attr_variables(dataset: Dataset, attributes_string: str,
                              split_by: str = None):
     """

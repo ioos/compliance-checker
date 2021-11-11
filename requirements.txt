@@ -13,3 +13,4 @@ requests>=2.2.1
 setuptools>=15.0
 validators>=0.14.2
 shapely>=1.7.1
+git+git://github.com/iobis/pyworms@0.2.0#egg=pyworms
