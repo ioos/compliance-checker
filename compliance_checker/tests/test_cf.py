@@ -38,6 +38,9 @@ from compliance_checker.tests.helpers import (
     MockTimeSeries,
     MockVariable,
 )
+import requests_mock
+import json
+import re
 from compliance_checker.tests.resources import STATIC_FILES
 
 
@@ -2294,6 +2297,45 @@ class TestCF1_8(BaseTestCase):
         messages = self.cf.check_geometry(dataset)
         # There should be messages regarding improper polygon order
         assert messages
+
+    def test_taxonomy_data_worms_valid(self):
+        """
+        Tests taxonomy data with a mocked pyworms call
+        """
+        with requests_mock.Mocker() as m:
+            # assume LSID lookups for WoRMS return valid HTTP status code
+            m.get(re.compile(r"^http://www.lsid.info/urn:lsid:marinespecies.org:taxname:\d+$"))
+            response_1 = json.dumps({'AphiaID': 104464, 'url':
+                                    'http://www.marinespecies.org/aphia.php?p=taxdetails&id=104464',
+                                    'scientificname': 'Calanus finmarchicus', 'authority': '(Gunnerus, 1770)',
+                                    'status': 'accepted', 'unacceptreason': None, 'taxonRankID': 220, 'rank':
+                                    'Species', 'valid_AphiaID': 104464, 'valid_name': 'Calanus finmarchicus',
+                                    'valid_authority': '(Gunnerus, 1770)', 'parentNameUsageID': 104152, 'kingdom':
+                                    'Animalia', 'phylum': 'Arthropoda', 'class': 'Hexanauplia', 'order':
+                                    'Calanoida', 'family': 'Calanidae', 'genus': 'Calanus', 'citation': 'Walter, T.C.; Boxshall, G. (2021). World of Copepods Database. Calanus finmarchicus (Gunnerus, 1770). Accessed through: World Register of Marine Species at: http://www.marinespecies.org/aphia.php?p=taxdetails&id=104464 on 2021-11-11',
+                                    'lsid': 'urn:lsid:marinespecies.org:taxname:104464', 'isMarine': 1,
+                                    'isBrackish': 0, 'isFreshwater': 0, 'isTerrestrial': 0, 'isExtinct': None,
+                                    'match_type': 'exact', 'modified': '2020-10-06T15:25:25.040Z'})
+            m.get("http://www.marinespecies.org/rest/AphiaRecordByAphiaID/104464",
+                  text=response_1)
+            response_2 = json.dumps({'AphiaID': 104466, 'url': 'http://www.marinespecies.org/aphia.php?p=taxdetails&id=104466',
+                                     'scientificname': 'Calanus helgolandicus', 'authority': '(Claus, 1863)',
+                                     'status': 'accepted', 'unacceptreason': None, 'taxonRankID': 220, 'rank':
+                                     'Species', 'valid_AphiaID': 104466, 'valid_name': 'Calanus helgolandicus',
+                                     'valid_authority': '(Claus, 1863)', 'parentNameUsageID': 104152, 'kingdom':
+                                     'Animalia', 'phylum': 'Arthropoda', 'class': 'Hexanauplia', 'order':
+                                     'Calanoida', 'family': 'Calanidae', 'genus': 'Calanus', 'citation': 'Walter, T.C.; Boxshall, G. (2021). World of Copepods Database. Calanus helgolandicus (Claus, 1863). Accessed through: World Register of Marine Species at: http://www.marinespecies.org/aphia.php?p=taxdetails&id=104466 on 2021-11-11',
+                                     'lsid': 'urn:lsid:marinespecies.org:taxname:104466', 'isMarine': 1,
+                                     'isBrackish': 0, 'isFreshwater': 0, 'isTerrestrial': 0, 'isExtinct': None,
+                                     'match_type': 'exact', 'modified': '2004-12-21T15:54:05Z'})
+            m.get("http://www.marinespecies.org/rest/AphiaRecordByAphiaID/104466",
+                  text=response_2)
+            dataset = self.load_dataset(STATIC_FILES["taxonomy_example"])
+
+            results = self.cf.check_taxa(dataset)
+            assert len(results) == 1
+            assert results[0].score == results[0].out_of
+
 
 class TestCFUtil(BaseTestCase):
     """
