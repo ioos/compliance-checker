@@ -11,7 +11,7 @@ from tempfile import gettempdir
 import numpy as np
 import pytest
 
-from netCDF4 import Dataset
+from netCDF4 import Dataset, stringtoarr
 
 from compliance_checker import cfutil
 from compliance_checker.cf import (
@@ -2335,6 +2335,51 @@ class TestCF1_8(BaseTestCase):
             results = self.cf.check_taxa(dataset)
             assert len(results) == 1
             assert results[0].score == results[0].out_of
+
+    def test_taxonomy_skip_lsid(self):
+
+        """
+        Tests that nodata/unset LSID values are skipped for validation
+        """
+        dataset = MockTimeSeries()
+        # TODO: handle scalar dimension
+        dataset.createDimension("taxon", 1)
+        abundance = dataset.createVariable('abundance', "f8", ('time',))
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
+        abundance.units = "m-3"
+        abundance.coordinates = "taxon_name taxon_lsid"
+        taxon_name = dataset.createVariable('taxon_name', str, ("taxon",))
+        taxon_name.standard_name = "biological_taxon_name"
+        taxon_lsid = dataset.createVariable('taxon_lsid', str, ("taxon",))
+        taxon_lsid.standard_name = "biological_taxon_lsid"
+        # This would fail if checked against an LSID or even for binomial
+        # nomenclature, obviously.
+        taxon_name[0] = "No check"
+        results = self.cf.check_taxa(dataset)
+        assert len(results[0].msgs) == 0
+        assert results[0].value[0] == results[0].value[1]
+
+        dataset = MockTimeSeries()
+        # TODO: handle scalar dimension?
+        dataset.createDimension("string80", 80)
+        dataset.createDimension("taxon", 1)
+        abundance = dataset.createVariable('abundance', "f8", ('time',))
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
+        abundance.units = "m-3"
+        abundance.coordinates = "taxon_name taxon_lsid"
+        taxon_name = dataset.createVariable('taxon_name', "S1", ("taxon",
+                                                                "string80"))
+        taxon_name.standard_name = "biological_taxon_name"
+        taxon_lsid = dataset.createVariable('taxon_lsid', "S1", ("taxon",
+                                                                "string80"))
+        taxon_lsid.standard_name = "biological_taxon_lsid"
+        fake_str = "No check"
+        taxon_name[0] = stringtoarr(fake_str, 80)
+        results = self.cf.check_taxa(dataset)
+        assert len(results[0].msgs) == 0
+        assert results[0].value[0] == results[0].value[1]
+
+
 
 
 class TestCFUtil(BaseTestCase):

@@ -574,7 +574,7 @@ def is_vertical_coordinate(var_name, var):
     return satisfied
 
 def string_from_var_type(variable):
-    if variable.dtype == str:
+    if isinstance(variable, str):
         return variable[:]
     elif variable.dtype.kind == 'S':
         strip_char = variable.fill_value or b"\x00"

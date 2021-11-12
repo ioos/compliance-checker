@@ -239,6 +239,9 @@ class CF1_8Check(CF1_7Check):
             #       if the species is not present in the database desired.
             taxon_name_str = string_from_var_type(taxon_name)
             lsid_str = string_from_var_type(taxon_lsid)
+            # if nodata/empty string for LSID, skip validity check
+            if lsid_str == '':
+                continue
             taxon_match = re.fullmatch(match_str, lsid_str)
             if not taxon_match:
                 messages += ("Taxon id must match one of the following forms:\n"
