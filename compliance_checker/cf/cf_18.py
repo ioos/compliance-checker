@@ -152,9 +152,10 @@ class CF1_8Check(CF1_7Check):
             Match variables which are standard_names related to taxa, but
             are not the taxon identifiers or LSIDs themselves.
             """
-            return ("taxon" in standard_name_string and
+            return (standard_name_string is not None and
+                    "taxon" in standard_name_string and
                     # exclude the identifiers we just looked at
-                    standard_name_string not in {"biological_taxon_identifier",
+                    standard_name_string not in {"biological_taxon_lsid",
                                                  "biological_taxon_name"} and
                     standard_name_string in self._std_names)
 
