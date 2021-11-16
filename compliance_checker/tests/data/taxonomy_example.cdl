@@ -1,0 +1,28 @@
+netcdf taxonomy_example {
+dimensions:
+  time = 100 ;
+  string80 = 80 ;
+  taxon = 2 ;
+variables:
+  float time(time);
+    time:standard_name = "time" ;
+    time:units = "days since 2019-01-01" ;
+  float abundance(time,taxon) ;
+    /// below appears to not be a valid standard name
+    //abundance:standard_name = "number_concentration_of_organisms_in_taxon_in_sea_water" ;
+    abundance:standard_name = "number_concentration_of_biological_taxon_in_sea_water" ;
+    // units were also not specified in example CDL in CF Conventions document,
+    // include them here
+    abundance:standard_name = "number_concentration_of_biological_taxon_in_sea_water" ;
+    abundance:units = "m-3" ;
+    abundance:coordinates = "taxon_lsid taxon_name" ;
+  char taxon_name(taxon,string80) ;
+    taxon_name:standard_name = "biological_taxon_name" ;
+  char taxon_lsid(taxon,string80) ;
+    taxon_lsid:standard_name = "biological_taxon_lsid" ;
+data:
+  //time = // 100 values ;
+  //abundance = // 200 values ;
+  taxon_name = "Calanus finmarchicus", "Calanus helgolandicus" ;
+  taxon_lsid = "urn:lsid:marinespecies.org:taxname:104464", "urn:lsid:marinespecies.org:taxname:104466" ;
+}
