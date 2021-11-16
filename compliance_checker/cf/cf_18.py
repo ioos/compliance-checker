@@ -7,7 +7,6 @@ from netCDF4 import Dataset
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 import requests
 from lxml import etree
-import pyworms
 from shapely.geometry import Polygon
 import numpy as np
 import re
@@ -277,16 +276,31 @@ class CF1_8Check(CF1_7Check):
             # WoRMS -- marine bio data
             if (taxon_match["authority"] == "marinespecies.org" and
                 taxon_match["namespace"] == "taxname"):
-                record = pyworms.aphiaRecordByAphiaID(taxon_match["object_id"])
-                if record is None:
-                    messages.append("Aphia ID {taxon_match['object_id'] not "
-                                    "found in WoRMS database")
+                try:
+                    response = requests.get(f"http://www.marinespecies.org/rest/AphiaRecordByAphiaID/{taxon_match['object_id']}",
+                                            timeout=15)
+                    response.raise_for_status()
+                except requests.exceptions.RequestException as e:
+                    messages.append("Aphia ID {taxon_match['object_id'] returned "
+                                    "other error: {str(e)}")
+                # record not found in database
+                if response.status_code == '204':
+                    messages.append("Aphia ID {taxon_match['object_id'] "
+                                    "not found in WoRMS database")
+                # good case, parse JSON
+                elif response.status_code == '200':
+                    valid_name = response.json["valid_name"]
+                    if valid_name != taxon_name_str:
+                        messages.append("Supplied taxon name and WoRMS valid name do not match. "
+                                        "Supplied taxon name is '{taxon_name_str}', WoRMS valid name "
+                                        "is '{valid_name}.'")
+                # Misc non-error code.  Should not reach here.
+                else:
+                    messages.append("Aphia ID {taxon_match['object_id'] "
+                                    "returned an unhandled HTTP status "
+                                    "code {response.status_code}")
                     continue
 
-                elif record["valid_name"] != taxon_name_str:
-                    messages.append("Supplied taxon name and WoRMS valid name do not agree. "
-                                    "Supplied taxon name is '{taxon_name_str}', WoRMS valid name "
-                                    "is '{record['valid_name']}'.")
 
             # ITIS -- freshwater bio data
             elif (taxon_match["authority"] == "itis.gov" and
