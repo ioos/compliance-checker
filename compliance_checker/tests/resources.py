@@ -114,7 +114,7 @@ STATIC_FILES = {
     "string": get_filename("tests/data/string_type_variable.cdl"),
     "swan": get_filename("tests/data/examples/swan.cdl"),
     "sp041": get_filename("tests/data/examples/sp041.cdl"),
-    "taxonomy_example": get_filename("tests/data/taxonomy_example.cdl"),
+    "bio_data": get_filename("tests/data/bio_data.cdl"),
     "timeseries": get_filename("tests/data/timeseries.cdl"),
     "timeseries-profile-single-station": get_filename(
         "tests/data/timeseries-profile-single-station.cdl"

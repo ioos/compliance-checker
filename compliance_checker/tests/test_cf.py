@@ -2330,7 +2330,7 @@ class TestCF1_8(BaseTestCase):
                                      'match_type': 'exact', 'modified': '2004-12-21T15:54:05Z'})
             m.get("http://www.marinespecies.org/rest/AphiaRecordByAphiaID/104466",
                   text=response_2)
-            dataset = self.load_dataset(STATIC_FILES["taxonomy_example"])
+            dataset = self.load_dataset(STATIC_FILES["bio_data"])
 
             results = self.cf.check_taxa(dataset)
             assert len(results) == 1
