@@ -11,8 +11,7 @@ import pyworms
 from shapely.geometry import Polygon
 import numpy as np
 import re
-from compliance_checker.cf.util import (reference_attr_variables,
-                                        VariableReferenceError)
+from compliance_checker.cf.util import reference_attr_variables
 import itertools
 
 '''
@@ -109,7 +108,6 @@ class CF1_8Check(CF1_7Check):
 
         return results
 
-
     def check_taxa(self, ds: Dataset):
         '''
         6.1.2. Taxon Names and Identifiers
@@ -176,7 +174,6 @@ class CF1_8Check(CF1_7Check):
                 valid_taxa.add_failure(f"{taxon_quantifier_variable.name} must have a string valued \"coordinates\" attribute")
                 continue
 
-            #coord_var_names = taxon_quantifier_variable.coordinates.split(" ")
             coordinate_var_names = (taxon_quantifier_variable.coordinates
                                     .split(" "))
             invalid_coord_vars = set(coordinate_var_names) - ds.variables.keys()
@@ -185,7 +182,7 @@ class CF1_8Check(CF1_7Check):
                                        f"{invalid_coord_vars}")
 
             if len(coordinate_var_names) > 2:
-                valid_taxa.add_failure("coordinates attribute for taxon data must either reference one or two varaible name")
+                valid_taxa.add_failure("coordinates attribute for taxon data must either reference one or two variable names")
                 continue
 
             coordinate_vars = [ds.variables[var_name] for var_name in
@@ -195,7 +192,6 @@ class CF1_8Check(CF1_7Check):
             coord_var_standard_names = {var:
                                         getattr(var, 'standard_name', None)
                                         for var in coordinate_vars}
-            #coord_vars = reference_attr_variables(ds, "coordinates", " ")
             # if we have no authority, we can't check validity of the name -- assume it's OK
             standard_name_set = set(coord_var_standard_names.values())
             if set(coord_var_standard_names.keys()) == {"biological_taxon_name"}:
