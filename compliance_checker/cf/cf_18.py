@@ -245,16 +245,16 @@ class CF1_8Check(CF1_7Check):
             taxon_match = re.fullmatch(match_str, lsid_str)
             if not taxon_match:
                 messages += ("Taxon id must match one of the following forms:\n"
-                            "- urn:lsid:<authority>:<namespace>:<object_id>\n"
-                            "- urn:lsid:<authority>:<namespace>:<object_id>:<version>\n"
-                            "- www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
-                            "- www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
-                            "- lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
-                            "- lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
-                            "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
-                            "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
-                            "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
-                            "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n")
+                             "- urn:lsid:<authority>:<namespace>:<object_id>\n"
+                             "- urn:lsid:<authority>:<namespace>:<object_id>:<version>\n"
+                             "- www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                             "- www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
+                             "- lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                             "- lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
+                             "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                             "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
+                             "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                             "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n")
                 continue
             if lsid_str.startswith("urn"):
                 lsid_url = f"http://www.lsid.info/{lsid_str}"
@@ -298,7 +298,7 @@ class CF1_8Check(CF1_7Check):
                 itis_url = f"https://www.itis.gov/ITISWebService/jsonservice/getFullRecordFromTSN?tsn={taxon_match['object_id']}"
                 try:
                     itis_response = requests.get(itis_url, timeout=15)
-                    itis_response.raise_from_status()
+                    itis_response.raise_for_status()
                 except requests.exceptions.RequestException as e:
                     if status_code == "404":
                         messages += ("itis.gov TSN "
@@ -308,14 +308,13 @@ class CF1_8Check(CF1_7Check):
                         messages += ("itis.gov identifier returned other "
                                      f"error: {str(e)}")
                         continue
-                json_contents = response.json()
-                accepted_name_set = {name_info["acceptedName"] for name_info
-                                        in json_contents["acceptedNameList"]["acceptedNames"]}
+                json_contents = itis_response.json()
+                combined_name = json_contents["scientificName"]["combinedName"]
 
-                if taxon_name_str not in accepted_name_set:
-                    messages.append("Supplied taxon name and ITIS valid names do not agree. "
-                                    "Supplied taxon name is '{taxon_name_str}', ITIS valid names "
-                                    "are {valid_name_set}.")
+                if taxon_name_str != combined_name:
+                    messages.append("Supplied taxon name and ITIS scientific name do not agree. "
+                                    "Supplied taxon name is '{taxon_name_str}', ITIS scientific name "
+                                    "for TSN {taxon_match['identifier']} is {combined_name}.")
 
             else:
                 warnings.warn("Compliance checker only supports checking valid "
