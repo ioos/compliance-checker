@@ -2,7 +2,6 @@
 from compliance_checker.base import BaseCheck, TestCtx, Result
 from compliance_checker import MemoizedDataset
 from compliance_checker.cf.cf import CF1_7Check
-from cf.util import reference_attr_variables, string_from_var_type
 from netCDF4 import Dataset
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 import requests
@@ -10,7 +9,8 @@ from lxml import etree
 from shapely.geometry import Polygon
 import numpy as np
 import re
-from compliance_checker.cf.util import reference_attr_variables
+from compliance_checker.cf.util import (reference_attr_variables,
+                                        string_from_var_type)
 import itertools
 
 '''
