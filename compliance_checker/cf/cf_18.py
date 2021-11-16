@@ -298,7 +298,7 @@ class CF1_8Check(CF1_7Check):
                 except requests.exceptions.RequestException as e:
                     if status_code == "404":
                         messages += ("itis.gov TSN "
-                                     f"{taxon_match['identifier']} not found.")
+                                     f"{taxon_match['object_id']} not found.")
                         continue
                     else:
                         messages += ("itis.gov identifier returned other "
@@ -308,9 +308,9 @@ class CF1_8Check(CF1_7Check):
                 combined_name = json_contents["scientificName"]["combinedName"]
 
                 if taxon_name_str != combined_name:
-                    messages.append("Supplied taxon name and ITIS scientific name do not agree. "
-                                    "Supplied taxon name is '{taxon_name_str}', ITIS scientific name "
-                                    "for TSN {taxon_match['identifier']} is {combined_name}.")
+                    messages.append("Supplied taxon name and ITIS scientific name do not match. "
+                                    f"Supplied taxon name is '{taxon_name_str}', ITIS scientific name "
+                                    f"for TSN {taxon_match['object_id']} is '{combined_name}.'")
 
             else:
                 warnings.warn("Compliance checker only supports checking valid "

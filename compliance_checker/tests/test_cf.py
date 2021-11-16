@@ -2365,8 +2365,16 @@ class TestCF1_8(BaseTestCase):
             assert len(results) == 1
             assert results[0].value[0] == results[0].value[1]
 
-    def test_taxonomy_skip_lsid(self):
+            # try non-matching name
+            taxon_name[0] = "Morone saxitilis"
+            results = self.cf.check_taxa(dataset)
+            result = results[0]
+            assert (result.msgs ==
+                    ["Supplied taxon name and ITIS scientific name do not match. "
+                     "Supplied taxon name is 'Morone saxitilis', ITIS scientific name "
+                     "for TSN 162139 is 'Esox lucius.'"])
 
+    def test_taxonomy_skip_lsid(self):
         """
         Tests that nodata/unset LSID values are skipped for validation
         """
