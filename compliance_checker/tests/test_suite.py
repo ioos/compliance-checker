@@ -109,14 +109,14 @@ class TestSuite(unittest.TestCase):
     def test_skip_check_level(self):
         """Checks level limited skip checks"""
         ds = self.cs.load_dataset(static_files["ru07"])
-        score_groups = self.cs.run(
+        score_groups = self.cs.run_all(
             ds,
-            [
+            ["cf"],
+            skip_checks=[
                 "check_flags:A",
                 "check_convention_possibly_var_attrs:M",
                 "check_standard_name:L",
             ],
-            "cf",
         )
 
         name_set = {sg.name for sg in score_groups["cf"][0]}

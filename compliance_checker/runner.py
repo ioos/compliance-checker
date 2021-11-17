@@ -76,14 +76,9 @@ class ComplianceChecker(object):
 
         for loc in locs:  # loop through each dataset and run specified checks
             ds = cs.load_dataset(loc)
-            if include_checks:
-                skip_flag = False
-                checks_to_run = include_checks
-            else:
-                skip_flag = True
-                checks_to_run = skip_checks
 
-            score_groups = cs.run(ds, checks_to_run, skip_flag, *checker_names)
+            score_groups = cs.run_all(ds, checker_names, include_checks,
+                                      skip_checks)
             for group in score_groups.values():
                 all_groups.append(group[0])
             # TODO: consider wrapping in a proper context manager instead
