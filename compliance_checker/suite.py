@@ -222,7 +222,8 @@ class CheckSuite(object):
         else:
             for fn_name, fn_obj in meths:
                 if (fn_name.startswith("check_") and
-                    skip_checks[fn_name] != BaseCheck.HIGH):
+                    (skip_checks[fn_name] is None or
+                    skip_checks[fn_name] == BaseCheck.HIGH)):
                    returned_checks.append((fn_obj, skip_checks[fn_name]))
 
         return returned_checks
