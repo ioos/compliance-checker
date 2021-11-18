@@ -2298,6 +2298,39 @@ class TestCF1_8(BaseTestCase):
         # There should be messages regarding improper polygon order
         assert messages
 
+    def test_bad_lsid(self):
+        """
+        Tests malformed and nonexistent LSIDs
+        """
+        dataset = MockTimeSeries()
+        # TODO: handle scalar dimension
+        dataset.createDimension("taxon", 1)
+        abundance = dataset.createVariable('abundance', "f8", ('time',))
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
+        abundance.units = "m-3"
+        abundance.coordinates = "taxon_name taxon_lsid"
+        taxon_name = dataset.createVariable('taxon_name', str, ("taxon",))
+        taxon_name.standard_name = "biological_taxon_name"
+        taxon_lsid = dataset.createVariable('taxon_lsid', str, ("taxon",))
+        taxon_lsid.standard_name = "biological_taxon_lsid"
+        taxon_name[0] = "Esox lucius"
+        taxon_lsid[0] = "urn:lsid:itis.gov:itis_tsn:99999999999"
+        with requests_mock.Mocker() as m:
+            # bad ID
+            taxon_lsid[0] = "99999999999"
+            m.get("http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999",
+                  status_code=400,
+                  text="<html><head><title>400 Bad Request</head><body><h1>Bad Request</h1><p>Unknown LSID</p></body></html>")
+            results = self.cf.check_taxa(dataset)
+            assert len(results) == 1
+            messages = results[0].msgs
+            assert results[0].value[0] < results[0].value[1]
+            assert len(messages) == 1
+            taxon_lsid[0] = "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999"
+            results = self.cf.check_taxa(dataset)
+            assert messages[0].startswith("Taxon id must match one of the following forms:")
+            assert results[0].value[0] < results[0].value[1]
+
     def test_taxonomy_data_worms_valid(self):
         """
         Tests taxonomy data with a mocked pyworms call
