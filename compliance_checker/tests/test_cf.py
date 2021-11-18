@@ -2416,9 +2416,6 @@ class TestCF1_8(BaseTestCase):
         assert len(results[0].msgs) == 0
         assert results[0].value[0] == results[0].value[1]
 
-
-
-
 class TestCFUtil(BaseTestCase):
     """
     Class to test the cfutil module.

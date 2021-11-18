@@ -215,8 +215,6 @@ class CF1_8Check(CF1_7Check):
 
         return ret_val
 
-
-
     def handle_lsid(self, taxon_lsid_variable, taxon_name_variable):
         """
         Checks if LSID is well formed and present in the LSID database,
@@ -239,7 +237,7 @@ class CF1_8Check(CF1_7Check):
                 continue
             taxon_match = re.fullmatch(match_str, lsid_str)
             if not taxon_match:
-                messages += ("Taxon id must match one of the following forms:\n"
+                messages.append("Taxon id must match one of the following forms:\n"
                              "- urn:lsid:<authority>:<namespace>:<object_id>\n"
                              "- urn:lsid:<authority>:<namespace>:<object_id>:<version>\n"
                              "- www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
@@ -249,7 +247,7 @@ class CF1_8Check(CF1_7Check):
                              "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
                              "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
                              "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
-                             "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n")
+                             "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>")
                 continue
             if lsid_str.startswith("urn"):
                 lsid_url = f"http://www.lsid.info/{lsid_str}"
@@ -265,11 +263,11 @@ class CF1_8Check(CF1_7Check):
                 if response.status_code == '400':
                     tree = etree.HTML(response.text)
                     problem_text = tree.find("./body/p").text
-                    messages += ("http://lsid.info returned an error message "
+                    messages.append("http://lsid.info returned an error message "
                                  f"for submitted LSID string '{lsid_str}': "
                                  f"{problem_text}")
                 else:
-                    messages += ("Error occurred attempting to check LSID "
+                    messages.append("Error occurred attempting to check LSID "
                                 f"'{lsid_str}': {str(e)}")
                 continue
 
@@ -311,11 +309,11 @@ class CF1_8Check(CF1_7Check):
                     itis_response.raise_for_status()
                 except requests.exceptions.RequestException as e:
                     if status_code == "404":
-                        messages += ("itis.gov TSN "
+                        messages.append("itis.gov TSN "
                                      f"{taxon_match['object_id']} not found.")
                         continue
                     else:
-                        messages += ("itis.gov identifier returned other "
+                        messages.append("itis.gov identifier returned other "
                                      f"error: {str(e)}")
                         continue
                 json_contents = itis_response.json()
@@ -333,7 +331,7 @@ class CF1_8Check(CF1_7Check):
                               "'urn:lsid:itis.gov:itis_tsn:<TSN>'.  Assuming "
                               "pass condition")
 
-            return messages
+        return messages
 
 
 
@@ -599,10 +597,4 @@ class PolygonGeometry(LineGeometry):
                 for aux_var in [ds[name] for name in var.coordinates.split()]:
                     print(ds[aux_var.name])
 
-
-
-class LSID():
-    PRE = 'urn:lsid'
-    OCEAN = ':'.join([PRE, 'marinespecies.org', 'taxname'])
-    TERRA = ':'.join([PRE, 'itis.gov', 'itis_tsn'])
 
