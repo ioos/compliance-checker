@@ -209,7 +209,7 @@ class CF1_8Check(CF1_7Check):
                 else:
                     valid_taxa.score += 1
             else:
-                valid_taxa.add_failure('coordinates attribute for variable {taxon_quantifier_variable} must consist of '
+                valid_taxa.add_failure(f'coordinates attribute for variable {taxon_quantifier_variable} must consist of '
                                         'variables containing standard names of either just "biological_taxon_name", or "biological_taxon_name" and "biological_taxon_identifier"')
             ret_val.append(valid_taxa.to_result())
 
@@ -260,7 +260,7 @@ class CF1_8Check(CF1_7Check):
             except requests.exceptions.RequestException as e:
                 # 400 error code indicates something is malformed on client's
                 # end
-                if response.status_code == '400':
+                if response.status_code == 400:
                     tree = etree.HTML(response.text)
                     problem_text = tree.find("./body/p").text
                     messages.append("http://lsid.info returned an error message "
@@ -268,7 +268,7 @@ class CF1_8Check(CF1_7Check):
                                  f"{problem_text}")
                 else:
                     messages.append("Error occurred attempting to check LSID "
-                                f"'{lsid_str}': {str(e)}")
+                                    f"'{lsid_str}': {str(e)}")
                 continue
 
             # WoRMS -- marine bio data
@@ -282,21 +282,21 @@ class CF1_8Check(CF1_7Check):
                     messages.append("Aphia ID {taxon_match['object_id'] returned "
                                     "other error: {str(e)}")
                 # record not found in database
-                if response.status_code == '204':
+                if response.status_code == 204:
                     messages.append("Aphia ID {taxon_match['object_id'] "
                                     "not found in WoRMS database")
                 # good case, parse JSON
-                elif response.status_code == '200':
-                    valid_name = response.json["valid_name"]
+                elif response.status_code == 200:
+                    valid_name = response.json()["valid_name"]
                     if valid_name != taxon_name_str:
                         messages.append("Supplied taxon name and WoRMS valid name do not match. "
-                                        "Supplied taxon name is '{taxon_name_str}', WoRMS valid name "
-                                        "is '{valid_name}.'")
+                                        f"Supplied taxon name is '{taxon_name_str}', WoRMS valid name "
+                                        f"is '{valid_name}.'")
                 # Misc non-error code.  Should not reach here.
                 else:
-                    messages.append("Aphia ID {taxon_match['object_id'] "
+                    messages.append(f"Aphia ID {taxon_match['object_id']}"
                                     "returned an unhandled HTTP status "
-                                    "code {response.status_code}")
+                                    f"code {response.status_code}")
                     continue
 
 
@@ -308,7 +308,7 @@ class CF1_8Check(CF1_7Check):
                     itis_response = requests.get(itis_url, timeout=15)
                     itis_response.raise_for_status()
                 except requests.exceptions.RequestException as e:
-                    if status_code == "404":
+                    if itis_response.status_code == 404:
                         messages.append("itis.gov TSN "
                                      f"{taxon_match['object_id']} not found.")
                         continue
