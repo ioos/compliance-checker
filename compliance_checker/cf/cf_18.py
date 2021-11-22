@@ -12,6 +12,7 @@ import re
 from compliance_checker.cf.util import (reference_attr_variables,
                                         string_from_var_type)
 import itertools
+import warnings
 
 '''
 What's new in CF-1.8
