@@ -4,10 +4,15 @@ from compliance_checker import MemoizedDataset
 from compliance_checker.cf.cf import CF1_7Check
 from netCDF4 import Dataset
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
+import requests
+from lxml import etree
 from shapely.geometry import Polygon
 import numpy as np
-from compliance_checker.cf.util import reference_attr_variables
+import re
+from compliance_checker.cf.util import (reference_attr_variables,
+                                        string_from_var_type)
 import itertools
+import warnings
 
 '''
 What's new in CF-1.8
@@ -33,7 +38,9 @@ class CF1_8Check(CF1_7Check):
 
     def __init__(self, options=None):
         super(CF1_8Check, self).__init__(options)
-        self.section_titles.update({"7.5": "§7.5 Geometries"})
+        self.section_titles.update({"6.1.2":
+                                    "§6.1.2 Taxon Names and Identifiers",
+                                    "7.5": "§7.5 Geometries"})
 
     def check_groups(self, ds: MemoizedDataset):
         '''
@@ -101,8 +108,7 @@ class CF1_8Check(CF1_7Check):
 
         return results
 
-
-    def check_taxa(self, ds: MemoizedDataset):
+    def check_taxa(self, ds: Dataset):
         '''
         6.1.2. Taxon Names and Identifiers
 
@@ -120,7 +126,7 @@ class CF1_8Check(CF1_7Check):
         Species (WoRMS) for oceanographic data and Integrated Taxonomic Information System (ITIS)
         for freshwater and terrestrial data. WoRMS LSIDs are built from the WoRMS AphiaID taxon
         identifier such as "urn:lsid:marinespecies.org:taxname:104464" for AphiaID 104464. This may
-        be converted to a URL by adding prefixes such as ​http://www.lsid.info/. ITIS LSIDs are
+        be converted to a URL by adding prefixes such as http://www.lsid.info/. ITIS LSIDs are
         built from the ITIS Taxonomic Serial Number (TSN), such as
         "urn:lsid:itis.gov:itis_tsn:180543".
 
@@ -132,7 +138,203 @@ class CF1_8Check(CF1_7Check):
         the biological_taxon_lsid auxiliary coordinate variable should be included and missing data
         given for those taxa that do not have an identifier.
         '''
-        pass
+        ret_val = []
+        # taxa identification variables
+        taxa_name_variables = ds.get_variables_by_attributes(
+                                                          standard_name="biological_taxon_name")
+        taxa_lsid_variables = ds.get_variables_by_attributes(
+                                                          standard_name="biological_taxon_identifier")
+
+        def match_taxa_standard_names(standard_name_string):
+            """
+            Match variables which are standard_names related to taxa, but
+            are not the taxon identifiers or LSIDs themselves.
+            """
+            return (standard_name_string is not None and
+                    "taxon" in standard_name_string and
+                    # exclude the identifiers we just looked at
+                    standard_name_string not in {"biological_taxon_lsid",
+                                                 "biological_taxon_name"} and
+                    standard_name_string in self._std_names)
+
+
+        taxa_quantifier_variables = ds.get_variables_by_attributes(
+                                                standard_name=match_taxa_standard_names)
+        # If there are no matches, there either are no taxa variables
+        # or the standard names are not appropriate, which will be picked up
+        # by the standard_name check
+        if not taxa_quantifier_variables:
+            return
+
+
+        for taxon_quantifier_variable in taxa_quantifier_variables:
+            valid_taxa = TestCtx(BaseCheck.HIGH, self.section_titles["6.1.2"])
+            if not isinstance(getattr(taxon_quantifier_variable,
+                                      "coordinates", None), str):
+                valid_taxa.add_failure(f"{taxon_quantifier_variable.name} must have a string valued \"coordinates\" attribute")
+                continue
+
+            coordinate_var_names = (taxon_quantifier_variable.coordinates
+                                    .split(" "))
+            invalid_coord_vars = set(coordinate_var_names) - ds.variables.keys()
+            if invalid_coord_vars:
+                valid_taxa.add_failure("The following values for \"coordinates\" attributes were not found in the dataset's variables "
+                                       f"{invalid_coord_vars}")
+
+            if len(coordinate_var_names) > 2:
+                valid_taxa.add_failure("coordinates attribute for taxon data must either reference one or two variable names")
+                continue
+
+            coordinate_vars = [ds.variables[var_name] for var_name in
+                                coordinate_var_names]
+
+
+            coord_var_standard_names = {var:
+                                        getattr(var, 'standard_name', None)
+                                        for var in coordinate_vars}
+            # if we have no authority, we can't check validity of the name -- assume it's OK
+            standard_name_set = set(coord_var_standard_names.values())
+            if set(coord_var_standard_names.keys()) == {"biological_taxon_name"}:
+                # TODO: Check for at least binomial nomenclature?
+                continue
+            # check against WoRMS or ITIS if applicable
+            elif (standard_name_set == {"biological_taxon_name",
+                                        "biological_taxon_lsid"}):
+                inverted_dict = {v: k for k, v in coord_var_standard_names.items()}
+                taxon_lsid_var = inverted_dict["biological_taxon_lsid"]
+                taxon_name_var = inverted_dict["biological_taxon_name"]
+                lsid_messages = self.handle_lsid(taxon_lsid_var, taxon_name_var)
+                valid_taxa.out_of += 1
+                if lsid_messages:
+                    valid_taxa.messages.extend(lsid_messages)
+                else:
+                    valid_taxa.score += 1
+            else:
+                valid_taxa.add_failure(f'coordinates attribute for variable {taxon_quantifier_variable} must consist of '
+                                        'variables containing standard names of either just "biological_taxon_name", or "biological_taxon_name" and "biological_taxon_identifier"')
+            ret_val.append(valid_taxa.to_result())
+
+        return ret_val
+
+    def handle_lsid(self, taxon_lsid_variable, taxon_name_variable):
+        """
+        Checks if LSID is well formed and present in the LSID database,
+        and then attempts to delegate to WoRMS or ITIS, the LSID is applicable.
+        If the LSID does not check the above authorities, it is not
+        currently checked for correctness.
+        """
+        messages = []
+        match_str = (r"(?:http://(?:www\.)?lsid.info/)?urn:lsid:"
+                     r"(?P<authority>[^:]+):(?P<namespace>[^:]+):"
+                     r"(?P<object_id>\w+)(?::(?P<version>\w+))?")
+        for taxon_lsid, taxon_name in zip(taxon_lsid_variable[:],
+                                          taxon_name_variable[:]):
+            # TODO: handle case where LSID is not present.  This can happen
+            #       if the species is not present in the database desired.
+            taxon_name_str = string_from_var_type(taxon_name)
+            lsid_str = string_from_var_type(taxon_lsid)
+            # if nodata/empty string for LSID, skip validity check
+            if lsid_str == '':
+                continue
+            taxon_match = re.fullmatch(match_str, lsid_str)
+            if not taxon_match:
+                messages.append("Taxon id must match one of the following forms:\n"
+                             "- urn:lsid:<authority>:<namespace>:<object_id>\n"
+                             "- urn:lsid:<authority>:<namespace>:<object_id>:<version>\n"
+                             "- www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                             "- www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
+                             "- lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                             "- lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
+                             "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                             "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
+                             "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                             "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>")
+                continue
+            if lsid_str.startswith("urn"):
+                lsid_url = f"http://www.lsid.info/{lsid_str}"
+            else:
+                lsid_url = lsid_str
+
+            try:
+                response = requests.get(lsid_url, timeout=10)
+                response.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                # 400 error code indicates something is malformed on client's
+                # end
+                if response.status_code == 400:
+                    tree = etree.HTML(response.text)
+                    problem_text = tree.find("./body/p").text
+                    messages.append("http://lsid.info returned an error message "
+                                 f"for submitted LSID string '{lsid_str}': "
+                                 f"{problem_text}")
+                else:
+                    messages.append("Error occurred attempting to check LSID "
+                                    f"'{lsid_str}': {str(e)}")
+                continue
+
+            # WoRMS -- marine bio data
+            if (taxon_match["authority"] == "marinespecies.org" and
+                taxon_match["namespace"] == "taxname"):
+                try:
+                    response = requests.get(f"http://www.marinespecies.org/rest/AphiaRecordByAphiaID/{taxon_match['object_id']}",
+                                            timeout=15)
+                    response.raise_for_status()
+                except requests.exceptions.RequestException as e:
+                    messages.append("Aphia ID {taxon_match['object_id'] returned "
+                                    "other error: {str(e)}")
+                # record not found in database
+                if response.status_code == 204:
+                    messages.append("Aphia ID {taxon_match['object_id'] "
+                                    "not found in WoRMS database")
+                # good case, parse JSON
+                elif response.status_code == 200:
+                    valid_name = response.json()["valid_name"]
+                    if valid_name != taxon_name_str:
+                        messages.append("Supplied taxon name and WoRMS valid name do not match. "
+                                        f"Supplied taxon name is '{taxon_name_str}', WoRMS valid name "
+                                        f"is '{valid_name}.'")
+                # Misc non-error code.  Should not reach here.
+                else:
+                    messages.append(f"Aphia ID {taxon_match['object_id']}"
+                                    "returned an unhandled HTTP status "
+                                    f"code {response.status_code}")
+                    continue
+
+
+            # ITIS -- freshwater bio data
+            elif (taxon_match["authority"] == "itis.gov" and
+                  taxon_match["namespace"] == "itis_tsn"):
+                itis_url = f"https://www.itis.gov/ITISWebService/jsonservice/getFullRecordFromTSN?tsn={taxon_match['object_id']}"
+                try:
+                    itis_response = requests.get(itis_url, timeout=15)
+                    itis_response.raise_for_status()
+                except requests.exceptions.RequestException as e:
+                    if itis_response.status_code == 404:
+                        messages.append("itis.gov TSN "
+                                     f"{taxon_match['object_id']} not found.")
+                        continue
+                    else:
+                        messages.append("itis.gov identifier returned other "
+                                     f"error: {str(e)}")
+                        continue
+                json_contents = itis_response.json()
+                combined_name = json_contents["scientificName"]["combinedName"]
+
+                if taxon_name_str != combined_name:
+                    messages.append("Supplied taxon name and ITIS scientific name do not match. "
+                                    f"Supplied taxon name is '{taxon_name_str}', ITIS scientific name "
+                                    f"for TSN {taxon_match['object_id']} is '{combined_name}.'")
+
+            else:
+                warnings.warn("Compliance checker only supports checking valid "
+                              "LSID URNs of the form "
+                              "'urn:lsid:marinespecies.org:taxname:<AphiaID>' or "
+                              "'urn:lsid:itis.gov:itis_tsn:<TSN>'.  Assuming "
+                              "pass condition")
+
+        return messages
+
+
 
     def check_geometry(self, ds: Dataset):
         """Runs any necessary checks for geometry well-formedness
@@ -396,10 +598,4 @@ class PolygonGeometry(LineGeometry):
                 for aux_var in [ds[name] for name in var.coordinates.split()]:
                     print(ds[aux_var.name])
 
-
-
-class LSID():
-    PRE = 'urn:lsid'
-    OCEAN = ':'.join([PRE, 'marinespecies.org', 'taxname'])
-    TERRA = ':'.join([PRE, 'itis.gov', 'itis_tsn'])
 

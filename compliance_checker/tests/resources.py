@@ -20,6 +20,7 @@ def generate_dataset(cdl_path, nc_path):
 
 
 STATIC_FILES = {
+    # TODO: add defaulltdict implementation for default files, etc
     "bad": get_filename("tests/data/non-comp/bad.cdl"),
     "badname": get_filename("tests/data/non-comp/badname.netcdf"),
     "bad-instance": get_filename("tests/data/bad-instance.cdl"),
@@ -113,6 +114,7 @@ STATIC_FILES = {
     "string": get_filename("tests/data/string_type_variable.cdl"),
     "swan": get_filename("tests/data/examples/swan.cdl"),
     "sp041": get_filename("tests/data/examples/sp041.cdl"),
+    "taxonomy_example": get_filename("tests/data/taxonomy_example.cdl"),
     "timeseries": get_filename("tests/data/timeseries.cdl"),
     "timeseries-profile-single-station": get_filename(
         "tests/data/timeseries-profile-single-station.cdl"

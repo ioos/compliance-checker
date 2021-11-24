@@ -1,0 +1,22 @@
+netcdf {
+    dimensions:
+        time = 5 ;
+        string80 = 80 ;
+        taxon = 2 ;
+    variables:
+        float time(time);
+            time:standard_name = "time" ;
+            time:units = "days since 2019-01-01" ;
+        float abundance(time,taxon) ;
+            abundance:standard_name = "number_concentration_of_organisms_in_taxon_in_sea_water" ;
+            abundance:coordinates = "taxon_lsid taxon_name" ;
+        char taxon_name(taxon,string80) ;
+            taxon_name:standard_name = "biological_taxon_name" ;
+        char taxon_lsid(taxon,string80) ;
+            taxon_lsid:standard_name = "biological_taxon_lsid" ;
+    data:
+        time = 1., 2., 3., 4., 5. ;
+        abundance = 1., 2., 3., 4., 5., 6., 7., 8., 9., 10. ;
+        taxon_name = "Calanus finmarchicus", "Calanus helgolandicus" ;
+        taxon_lsid = "urn:lsid:marinespecies.org:taxname:104464", "urn:lsid:marinespecies.org:taxname:104466" ;
+}
