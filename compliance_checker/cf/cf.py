@@ -1407,13 +1407,15 @@ class CF1_6Check(CFNCCheck):
                 self._parent_var_attr_type_check(att_name, var, ctx)
         return ctx.to_result()
 
+    # TODO: consider renaming to avoid confusion with non-underscore
+    #       primary function version
     def _check_add_offset_scale_factor_type(self, variable, attr_name):
         """
         Reusable function for checking both add_offset and scale_factor.
         """
 
         msg = (
-            f"Variable {variable.name} and {attr_name} must be quivalent "
+            f"Variable {variable.name} and {attr_name} must be equivalent "
             "data types or {variable.name} must be of type byte, short, or int "
             "and {attr_name} must be float or double"
         )
@@ -1455,7 +1457,7 @@ class CF1_6Check(CFNCCheck):
             results.extend(
                 list(
                     map(
-                        lambda x: self._check_scale_factor_add_offset(
+                        lambda x: self._check_add_offset_scale_factor(
                             ds.variables[x], _att_vars_tup[0]
                         ),
                         _att_vars_tup[1],
