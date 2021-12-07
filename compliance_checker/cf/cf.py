@@ -1414,10 +1414,11 @@ class CF1_6Check(CFNCCheck):
         Reusable function for checking both add_offset and scale_factor.
         """
 
-        msg = (
+        msgs = []
+        error_msg = (
             f"Variable {variable.name} and {attr_name} must be equivalent "
-            "data types or {variable.name} must be of type byte, short, or int "
-            "and {attr_name} must be float or double"
+            f"data types or {variable.name} must be of type byte, short, or int "
+            f"and {attr_name} must be float or double"
         )
 
         att = getattr(variable, attr_name, None)
@@ -1431,8 +1432,11 @@ class CF1_6Check(CFNCCheck):
                 isinstance(att.dtype, (np.float, np.double, float))
                 and isinstance(variable.dtype, (np.byte, np.short, np.int, int))
             )
+        if not val:
+            msgs.append(error_msg)
 
-        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"], [msg])
+        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"],
+                      msgs)
 
     def check_add_offset_scale_factor_type(self, ds):
         """
