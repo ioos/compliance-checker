@@ -1457,7 +1457,7 @@ class CF1_6Check(CFNCCheck):
             results.extend(
                 list(
                     map(
-                        lambda x: self._check_add_offset_scale_factor(
+                        lambda x: self._check_add_offset_scale_factor_type(
                             ds.variables[x], _att_vars_tup[0]
                         ),
                         _att_vars_tup[1],
