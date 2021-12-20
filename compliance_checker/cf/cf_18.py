@@ -362,7 +362,7 @@ class CF1_8Check(CF1_7Check):
             try:
                 node_coord_var_names = geometry_var.node_coordinates
             except AttributeError as e:
-                geom_valid.messsages.append('Could not find required attribute '
+                geom_valid.messages.append('Could not find required attribute '
                                             '"node_coordinates" in geometry '
                                             f'variable "{geometry_var_name}"')
                 results.append(geom_valid.to_result())
