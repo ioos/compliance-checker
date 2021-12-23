@@ -21,6 +21,7 @@ from compliance_checker.cf import (
     dimless_vertical_coordinates_1_7,
 )
 from compliance_checker.cf.cf_18 import CF1_8Check
+from compliance_checker.cf.cf_19 import CF1_9Check
 from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.util import (
     StandardNameTable,
@@ -187,7 +188,8 @@ class TestCF1_6(BaseTestCase):
         # dimensions would probably not be time for platform,
         # but this makes for an easy sanity check against string-like
         # variables and attributes
-        var = ds.createVariable("platform", "S1", dimensions=("time",), fill_value="")
+        var = ds.createVariable("platform", "S1", dimensions=("time",),
+                                fill_value="")
 
         # this probably doesn't make much sense -- more for _FillValue,
         # but _FillVaue data type checks are done at variable creation time?
@@ -203,7 +205,8 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_good(result)
 
-        # now give invalid integer for valid_min; above two should still check out, this one should fail
+        # now give invalid integer for valid_min; above two should still check
+        # out, this one should fail
         ds.variables["temp"].setncattr("valid_min", 45)
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_bad(result)
@@ -2294,6 +2297,49 @@ class TestCF1_8(BaseTestCase):
         messages = self.cf.check_geometry(dataset)
         # There should be messages regarding improper polygon order
         assert messages
+
+
+class TestCF1_9(BaseTestCase):
+    def setUp(self):
+        self.cf = CF1_9Check()
+
+    def test_domain(self):
+        dataset = MockTimeSeries()
+        domain_var = dataset.createVariable("domain", "c", ())
+        domain_var.long_name = "Domain variable"
+        domain_var.coordinates = "lon lat depth"
+        results = self.cf.check_domain_variables(dataset)
+        self.assertEqual(results[0].value[0], results[0].value[1])
+        self.assertFalse(results[0].msgs)
+
+        # missing long_name attribute
+        del domain_var.long_name
+        results = self.cf.check_domain_variables(dataset)
+        self.assertNotEqual(results[0].value[0], results[0].value[1])
+        self.assertTrue(results[0].msgs)
+        self.assertTrue(results[0].msgs[0] ==
+                        "For domain variable domain it is recommended that attribute long_name be present and a string")
+
+        # bad coordinates variable
+        domain_var.coordinates = "lon lat depth xyxz abc"
+        domain_var.long_name = "Domain variable"
+        results = self.cf.check_domain_variables(dataset)
+        self.assertNotEqual(results[0].value[0], results[0].value[1])
+        self.assertTrue(results[0].msgs[0] ==
+                        "Could not find the following variables referenced in "
+                        "coordinates attribute from domain variable domain: "
+                        "xyxz, abc")
+
+        del dataset
+        dataset = MockTimeSeries()
+        # domain should be dimensionless -- currently not an error in
+        # compliance checker, but not detected as a domain variable either
+        domain_var = dataset.createVariable("domain", "c", ("time",))
+        domain_var.long_name = "Domain variable"
+        domain_var.coordinates = "lon lat depth"
+        results = self.cf.check_domain_variables(dataset)
+        assert len(results) == 0
+
 
 class TestCFUtil(BaseTestCase):
     """

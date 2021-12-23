@@ -1,4 +1,3 @@
-
 from compliance_checker.base import BaseCheck, TestCtx, Result
 from compliance_checker import MemoizedDataset
 from compliance_checker.cf.cf import CF1_7Check
