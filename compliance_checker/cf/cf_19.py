@@ -1,5 +1,6 @@
 from compliance_checker.base import BaseCheck, TestCtx, Result
 from netCDF4 import Dataset
+import numpy as np
 from compliance_checker import MemoizedDataset
 from compliance_checker.cf.cf_18 import CF1_8Check
 from compliance_checker.cf.util import (reference_attr_variables,
@@ -12,6 +13,22 @@ class CF1_9Check(CF1_8Check):
     def __init__(self, options=None):
         super(CF1_9Check, self).__init__(options)
         self.section_titles.update({"5.8": "§5.8 Domain Variables"})
+        self.cf_data_types |= {np.ubyte, np.ushort, np.uint32, np.uint64,
+                               np.int64}
+
+    def check_data_types(self, ds):
+        """
+        Checks the data type of all netCDF variables to ensure they are valid
+        data types under CF.
+
+        CF §2.2 Data variables must be one of the following data types: string,
+        char, byte, unsigned byte, short, unsigned short, int, unsigned int,
+        int64, unsigned int64, float or real, and double
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: compliance_checker.base.Result
+        """
+        return super().check_data_types(ds)
 
     def check_domain_variables(self, ds: Dataset):
         # Domain variables should have coordinates attribute, but should have

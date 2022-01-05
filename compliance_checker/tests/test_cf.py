@@ -2303,6 +2303,16 @@ class TestCF1_9(BaseTestCase):
     def setUp(self):
         self.cf = CF1_9Check()
 
+    def test_check_data_types(self):
+        dataset = MockTimeSeries()
+        dataset.createVariable("ubyte", "u1", ())
+        dataset.createVariable("ushort", "u2", ())
+        dataset.createVariable("uint", "u4", ())
+        dataset.createVariable("int64", "i8", ())
+        dataset.createVariable("uint64", "u8", ())
+        result = self.cf.check_data_types(dataset)
+        assert result.value[0] == result.value[1]
+
     def test_domain(self):
         dataset = MockTimeSeries()
         domain_var = dataset.createVariable("domain", "c", ())

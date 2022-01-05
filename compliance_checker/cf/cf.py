@@ -1323,9 +1323,13 @@ class CF1_6Check(CFNCCheck):
     _cc_display_headers = {3: "Errors", 2: "Warnings", 1: "Info"}
     appendix_a = appendix_a_base
 
+
     def __init__(self, options=None):  # initialize with parent methods and data
         super(CF1_6Check, self).__init__(options)
 
+        self.cf_data_types = {np.character, np.dtype("|S1"), np.dtype("b"),
+                              np.dtype("i2"), np.dtype("i4"), np.float32,
+                              np.double}
         self.cell_methods = cell_methods16
         self.grid_mapping_dict = grid_mapping_dict16
         self.grid_mapping_attr_types = grid_mapping_attr_types16
@@ -1349,22 +1353,9 @@ class CF1_6Check(CFNCCheck):
         total = len(ds.variables)
 
         for k, v in ds.variables.items():
-            if (
-                v.dtype is not str
+            if (v.dtype is not str
                 and v.dtype.kind != "S"
-                and all(
-                    v.dtype.type != t
-                    for t in (
-                        np.character,
-                        np.dtype("|S1"),
-                        np.dtype("b"),
-                        np.dtype("i2"),
-                        np.dtype("i4"),
-                        np.float32,
-                        np.double,
-                    )
-                )
-            ):
+                and all(v.dtype.type != t for t in self.cf_data_types)):
                 fails.append(
                     "The variable {} failed because the datatype is {}".format(
                         k, v.datatype
