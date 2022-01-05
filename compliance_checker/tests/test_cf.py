@@ -11,7 +11,7 @@ from tempfile import gettempdir
 import numpy as np
 import pytest
 
-from netCDF4 import Dataset
+from netCDF4 import Dataset, stringtoarr
 
 from compliance_checker import cfutil
 from compliance_checker.cf import (
@@ -39,6 +39,9 @@ from compliance_checker.tests.helpers import (
     MockTimeSeries,
     MockVariable,
 )
+import requests_mock
+import json
+import re
 from compliance_checker.tests.resources import STATIC_FILES
 
 
@@ -2298,7 +2301,158 @@ class TestCF1_8(BaseTestCase):
         # There should be messages regarding improper polygon order
         assert messages
 
+    def test_bad_lsid(self):
+        """
+        Tests malformed and nonexistent LSIDs
+        """
+        dataset = MockTimeSeries()
+        # TODO: handle scalar dimension
+        dataset.createDimension("taxon", 1)
+        abundance = dataset.createVariable('abundance', "f8", ('time',))
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
+        abundance.units = "m-3"
+        abundance.coordinates = "taxon_name taxon_lsid"
+        taxon_name = dataset.createVariable('taxon_name', str, ("taxon",))
+        taxon_name.standard_name = "biological_taxon_name"
+        taxon_lsid = dataset.createVariable('taxon_lsid', str, ("taxon",))
+        taxon_lsid.standard_name = "biological_taxon_lsid"
+        taxon_name[0] = "Esox lucius"
+        taxon_lsid[0] = "urn:lsid:itis.gov:itis_tsn:99999999999"
+        with requests_mock.Mocker() as m:
+            # bad ID
+            taxon_lsid[0] = "99999999999"
+            m.get("http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999",
+                  status_code=400,
+                  text="<html><head><title>400 Bad Request</head><body><h1>Bad Request</h1><p>Unknown LSID</p></body></html>")
+            results = self.cf.check_taxa(dataset)
+            assert len(results) == 1
+            messages = results[0].msgs
+            assert results[0].value[0] < results[0].value[1]
+            assert len(messages) == 1
+            taxon_lsid[0] = "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999"
+            results = self.cf.check_taxa(dataset)
+            assert messages[0].startswith("Taxon id must match one of the following forms:")
+            assert results[0].value[0] < results[0].value[1]
 
+    def test_taxonomy_data_worms_valid(self):
+        """
+        Tests taxonomy data with a mocked pyworms call
+        """
+        with requests_mock.Mocker() as m:
+            # assume LSID lookups for WoRMS return valid HTTP status code
+            m.get(re.compile(r"^http://www.lsid.info/urn:lsid:marinespecies.org:taxname:\d+$"))
+            response_1 = json.dumps({'AphiaID': 104464, 'url':
+                                    'http://www.marinespecies.org/aphia.php?p=taxdetails&id=104464',
+                                    'scientificname': 'Calanus finmarchicus', 'authority': '(Gunnerus, 1770)',
+                                    'status': 'accepted', 'unacceptreason': None, 'taxonRankID': 220, 'rank':
+                                    'Species', 'valid_AphiaID': 104464, 'valid_name': 'Calanus finmarchicus',
+                                    'valid_authority': '(Gunnerus, 1770)', 'parentNameUsageID': 104152, 'kingdom':
+                                    'Animalia', 'phylum': 'Arthropoda', 'class': 'Hexanauplia', 'order':
+                                    'Calanoida', 'family': 'Calanidae', 'genus': 'Calanus', 'citation': 'Walter, T.C.; Boxshall, G. (2021). World of Copepods Database. Calanus finmarchicus (Gunnerus, 1770). Accessed through: World Register of Marine Species at: http://www.marinespecies.org/aphia.php?p=taxdetails&id=104464 on 2021-11-11',
+                                    'lsid': 'urn:lsid:marinespecies.org:taxname:104464', 'isMarine': 1,
+                                    'isBrackish': 0, 'isFreshwater': 0, 'isTerrestrial': 0, 'isExtinct': None,
+                                    'match_type': 'exact', 'modified': '2020-10-06T15:25:25.040Z'})
+            m.get("http://www.marinespecies.org/rest/AphiaRecordByAphiaID/104464",
+                  text=response_1)
+            response_2 = json.dumps({'AphiaID': 104466, 'url': 'http://www.marinespecies.org/aphia.php?p=taxdetails&id=104466',
+                                     'scientificname': 'Calanus helgolandicus', 'authority': '(Claus, 1863)',
+                                     'status': 'accepted', 'unacceptreason': None, 'taxonRankID': 220, 'rank':
+                                     'Species', 'valid_AphiaID': 104466, 'valid_name': 'Calanus helgolandicus',
+                                     'valid_authority': '(Claus, 1863)', 'parentNameUsageID': 104152, 'kingdom':
+                                     'Animalia', 'phylum': 'Arthropoda', 'class': 'Hexanauplia', 'order':
+                                     'Calanoida', 'family': 'Calanidae', 'genus': 'Calanus', 'citation': 'Walter, T.C.; Boxshall, G. (2021). World of Copepods Database. Calanus helgolandicus (Claus, 1863). Accessed through: World Register of Marine Species at: http://www.marinespecies.org/aphia.php?p=taxdetails&id=104466 on 2021-11-11',
+                                     'lsid': 'urn:lsid:marinespecies.org:taxname:104466', 'isMarine': 1,
+                                     'isBrackish': 0, 'isFreshwater': 0, 'isTerrestrial': 0, 'isExtinct': None,
+                                     'match_type': 'exact', 'modified': '2004-12-21T15:54:05Z'})
+            m.get("http://www.marinespecies.org/rest/AphiaRecordByAphiaID/104466",
+                  text=response_2)
+            dataset = self.load_dataset(STATIC_FILES["taxonomy_example"])
+
+            results = self.cf.check_taxa(dataset)
+            assert len(results) == 1
+            assert results[0].value[0] == results[0].value[1]
+
+    def test_taxonomy_data_itis_valid(self):
+        """
+        Tests taxonomy data with a mocked ITIS call
+        """
+        dataset = MockTimeSeries()
+        # TODO: handle scalar dimension
+        dataset.createDimension("taxon", 1)
+        abundance = dataset.createVariable('abundance', "f8", ('time',))
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
+        abundance.units = "m-3"
+        abundance.coordinates = "taxon_name taxon_lsid"
+        taxon_name = dataset.createVariable('taxon_name', str, ("taxon",))
+        taxon_name.standard_name = "biological_taxon_name"
+        taxon_lsid = dataset.createVariable('taxon_lsid', str, ("taxon",))
+        taxon_lsid.standard_name = "biological_taxon_lsid"
+        taxon_name[0] = "Esox lucius"
+        taxon_lsid[0] = "urn:lsid:itis.gov:itis_tsn:162139"
+
+        with requests_mock.Mocker() as m:
+            m.get(re.compile(r"^http://www.lsid.info/urn:lsid:itis.gov:itis_tsn:\d+$"))
+            response = r"""{"acceptedNameList":{"acceptedNames":[null],"class":"gov.usgs.itis.itis_service.data.SvcAcceptedNameList","tsn":"162139"},"class":"gov.usgs.itis.itis_service.data.SvcFullRecord","commentList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonCommentList","comments":[null],"tsn":"162139"},"commonNameList":{"class":"gov.usgs.itis.itis_service.data.SvcCommonNameList","commonNames":[{"class":"gov.usgs.itis.itis_service.data.SvcCommonName","commonName":"northern pike","language":"English","tsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcCommonName","commonName":"grand brochet","language":"French","tsn":"162139"}],"tsn":"162139"},"completenessRating":{"class":"gov.usgs.itis.itis_service.data.SvcGlobalSpeciesCompleteness","completeness":"","rankId":220,"tsn":"162139"},"coreMetadata":{"class":"gov.usgs.itis.itis_service.data.SvcCoreMetadata","credRating":"TWG standards met","rankId":220,"taxonCoverage":"","taxonCurrency":"","taxonUsageRating":"valid","tsn":"162139","unacceptReason":""},"credibilityRating":{"class":"gov.usgs.itis.itis_service.data.SvcCredibilityData","credRating":"TWG standards met","tsn":"162139"},"currencyRating":{"class":"gov.usgs.itis.itis_service.data.SvcCurrencyData","rankId":220,"taxonCurrency":"","tsn":"162139"},"dateData":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonDateData","initialTimeStamp":"1996-06-13 14:51:08.0","tsn":"162139","updateDate":"2004-01-22"},"expertList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonExpertList","experts":[{"class":"gov.usgs.itis.itis_service.data.SvcTaxonExpert","comment":"Research Curator of Fishes, North Carolina State Museum of Natural Sciences, Research Laboratory, 4301 Reedy Creek Rd., Raleigh, NC, 27607, USA","expert":"Wayne C. Starnes","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"updateDate":"2004-02-23"}],"tsn":"162139"},"geographicDivisionList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonGeoDivisionList","geoDivisions":[{"class":"gov.usgs.itis.itis_service.data.SvcTaxonGeoDivision","geographicValue":"North America","updateDate":"1998-09-14"}],"tsn":"162139"},"hierarchyUp":{"author":null,"class":"gov.usgs.itis.itis_service.data.SvcHierarchyRecord","parentName":"Esox","parentTsn":"162138","rankName":"Species","taxonName":"Esox lucius","tsn":"162139"},"jurisdictionalOriginList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOriginList","jurisdictionalOrigins":[{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOrigin","jurisdictionValue":"Alaska","origin":"Native","updateDate":"2004-01-22"},{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOrigin","jurisdictionValue":"Canada","origin":"Native","updateDate":"2004-01-22"},{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOrigin","jurisdictionValue":"Continental US","origin":"Native & Introduced","updateDate":"2004-01-22"}],"tsn":"162139"},"kingdom":{"class":"gov.usgs.itis.itis_service.data.SvcKingdomInfo","kingdomId":"5","kingdomName":"Animalia  ","tsn":"162139"},"otherSourceList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSourceList","otherSources":[{"acquisitionDate":"2003-03-17","class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSource","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"source":"Catalog of Fishes, 17-Mar-2003","sourceComment":"http://www.calacademy.org/research/ichthyology/catalog/","sourceType":"website","updateDate":"2004-02-11","version":"13-Mar-03"},{"acquisitionDate":"1996-07-29","class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSource","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"source":"NODC Taxonomic Code","sourceComment":"","sourceType":"database","updateDate":"2010-01-14","version":"8.0"},{"acquisitionDate":"2003-05-06","class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSource","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"northern pike","refLanguage":"English","referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"grand brochet","refLanguage":"French","referredTsn":"162139"}],"source":"<a href=\"http://www.menv.gouv.qc.ca/biodiversite/centre.htm\">CDP","sourceComment":"","sourceType":"database","updateDate":"2003-05-08","version":"1999"}],"tsn":"162139"},"parentTSN":{"class":"gov.usgs.itis.itis_service.data.SvcParentTsn","parentTsn":"162138","tsn":"162139"},"publicationList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonPublicationList","publications":[{"actualPubDate":"2004-07-01","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"1-888569-61-1","issn":"0097-0638","listedPubDate":"2004-01-01","pages":"ix + 386","pubComment":"Full author list: Nelson, Joseph S., Edwin J. Crossman, H�ctor Espinosa-P�rez, Lloyd T. Findley, Carter R. Gilbert, Robert N. Lea, and James D. Williams","pubName":"American Fisheries Society Special Publication, no. 29","pubPlace":"Bethesda, Maryland, USA","publisher":"American Fisheries Society","referenceAuthor":"Nelson, Joseph S., Edwin J. Crossman, H. Espinosa-P�rez, L. T. Findley, C. R. Gilbert, et al., eds.","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"grand brochet","refLanguage":"French","referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"northern pike","refLanguage":"English","referredTsn":"162139"}],"title":"Common and scientific names of fishes from the United States, Canada, and Mexico, Sixth Edition","updateDate":"2021-10-27"},{"actualPubDate":"2003-12-31","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"","issn":"","listedPubDate":"2003-12-31","pages":"","pubComment":"As-yet (2003) unpublished manuscript from 1998","pubName":"Checklist of Vertebrates of the United States, the U.S. Territories, and Canada","pubPlace":"","publisher":"","referenceAuthor":"Banks, R. C., R. W. McDiarmid, A. L. Gardner, and W. C. Starnes","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"title":"","updateDate":"2021-08-26"},{"actualPubDate":"1980-01-01","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"","issn":"0097-0638","listedPubDate":"1980-01-01","pages":"174","pubComment":"","pubName":"American Fisheries Society Special Publication, no. 12","pubPlace":"Bethesda, Maryland, USA","publisher":"American Fisheries Society","referenceAuthor":"Robins, Richard C., Reeve M. Bailey, Carl E. Bond, James R. Brooker, Ernest A. Lachner, et al.","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"northern pike","refLanguage":"English","referredTsn":"162139"}],"title":"A List of Common and Scientific Names of Fishes from the United States and Canada, Fourth Edition","updateDate":"2021-10-27"},{"actualPubDate":"1991-01-01","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"0-913235-70-9","issn":"0097-0638","listedPubDate":"1991-01-01","pages":"183","pubComment":"","pubName":"American Fisheries Society Special Publication, no. 20","pubPlace":"Bethesda, Maryland, USA","publisher":"American Fisheries Society","referenceAuthor":"Robins, Richard C., Reeve M. Bailey, Carl E. Bond, James R. Brooker, Ernest A. Lachner, et al.","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"title":"Common and Scientific Names of Fishes from the United States and Canada, Fifth Edition","updateDate":"2021-10-27"}],"tsn":"162139"},"scientificName":{"author":"Linnaeus, 1758","class":"gov.usgs.itis.itis_service.data.SvcScientificName","combinedName":"Esox lucius","kingdom":null,"tsn":"162139","unitInd1":null,"unitInd2":null,"unitInd3":null,"unitInd4":null,"unitName1":"Esox                               ","unitName2":"lucius","unitName3":null,"unitName4":null},"synonymList":{"class":"gov.usgs.itis.itis_service.data.SvcSynonymNameList","synonyms":[null],"tsn":"162139"},"taxRank":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonRankInfo","kingdomId":"5","kingdomName":"Animalia  ","rankId":"220","rankName":"Species        ","tsn":"162139"},"taxonAuthor":{"authorship":"Linnaeus, 1758","class":"gov.usgs.itis.itis_service.data.SvcTaxonAuthorship","tsn":"162139","updateDate":"2004-04-09"},"tsn":"162139","unacceptReason":{"class":"gov.usgs.itis.itis_service.data.SvcUnacceptData","tsn":"162139","unacceptReason":null},"usage":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonUsageData","taxonUsageRating":"valid","tsn":"162139"}}"""
+            m.get("https://www.itis.gov/ITISWebService/jsonservice/getFullRecordFromTSN?tsn=162139",
+                  text=response)
+
+            results = self.cf.check_taxa(dataset)
+
+            assert len(results) == 1
+            assert results[0].value[0] == results[0].value[1]
+
+            # try non-matching name
+            taxon_name[0] = "Morone saxitilis"
+            results = self.cf.check_taxa(dataset)
+            result = results[0]
+            assert (result.msgs ==
+                    ["Supplied taxon name and ITIS scientific name do not match. "
+                     "Supplied taxon name is 'Morone saxitilis', ITIS scientific name "
+                     "for TSN 162139 is 'Esox lucius.'"])
+
+    def test_taxonomy_skip_lsid(self):
+        """
+        Tests that nodata/unset LSID values are skipped for validation
+        """
+        dataset = MockTimeSeries()
+        # TODO: handle scalar dimension
+        dataset.createDimension("taxon", 1)
+        abundance = dataset.createVariable('abundance', "f8", ('time',))
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
+        abundance.units = "m-3"
+        abundance.coordinates = "taxon_name taxon_lsid"
+        taxon_name = dataset.createVariable('taxon_name', str, ("taxon",))
+        taxon_name.standard_name = "biological_taxon_name"
+        taxon_lsid = dataset.createVariable('taxon_lsid', str, ("taxon",))
+        taxon_lsid.standard_name = "biological_taxon_lsid"
+        # This would fail if checked against an LSID or even for binomial
+        # nomenclature, obviously.
+        taxon_name[0] = "No check"
+        results = self.cf.check_taxa(dataset)
+        assert len(results[0].msgs) == 0
+        assert results[0].value[0] == results[0].value[1]
+
+        dataset = MockTimeSeries()
+        # TODO: handle scalar dimension?
+        dataset.createDimension("string80", 80)
+        dataset.createDimension("taxon", 1)
+        abundance = dataset.createVariable('abundance', "f8", ('time',))
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
+        abundance.units = "m-3"
+        abundance.coordinates = "taxon_name taxon_lsid"
+        taxon_name = dataset.createVariable('taxon_name', "S1", ("taxon",
+                                                                "string80"))
+        taxon_name.standard_name = "biological_taxon_name"
+        taxon_lsid = dataset.createVariable('taxon_lsid', "S1", ("taxon",
+                                                                "string80"))
+        taxon_lsid.standard_name = "biological_taxon_lsid"
+        fake_str = "No check"
+        taxon_name[0] = stringtoarr(fake_str, 80)
+        results = self.cf.check_taxa(dataset)
+        assert len(results[0].msgs) == 0
+        assert results[0].value[0] == results[0].value[1]
+
+        
 class TestCF1_9(BaseTestCase):
     def setUp(self):
         self.cf = CF1_9Check()
