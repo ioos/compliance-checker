@@ -2466,6 +2466,15 @@ class TestCF1_9(BaseTestCase):
         dataset.createVariable("uint64", "u8", ())
         result = self.cf.check_data_types(dataset)
         assert result.value[0] == result.value[1]
+        complex_dtype = np.dtype([("real_part", np.float64),
+                                  ("imag_part", np.float64)])
+        complex_netcdf_vartype = dataset.createCompoundType(complex_dtype,
+                                                            "complex")
+        dataset.createVariable("complex_number", complex_netcdf_vartype, ())
+        result = self.cf.check_data_types(dataset)
+        assert result.value[0] != result.value[1]
+        assert (result.msgs[0] == "The variable complex_number failed because "
+                                 f"the datatype is {complex_netcdf_vartype}")
 
     def test_domain(self):
         dataset = MockTimeSeries()
