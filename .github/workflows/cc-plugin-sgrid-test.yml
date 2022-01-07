@@ -12,7 +12,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install necessary Python packages
-      # TODO: reference action
       uses: ./.github/actions/python-package-setup
       with:
         python-version: {{ matrix.python-version }}
