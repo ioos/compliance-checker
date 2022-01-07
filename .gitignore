@@ -109,3 +109,4 @@ activate
 
 # coverage output
 coverage/
+coverage.xml
