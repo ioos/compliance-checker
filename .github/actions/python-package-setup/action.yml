@@ -1,0 +1,29 @@
+name: Install common Python packages
+inputs:
+  python_version:
+    description: Python version to use
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Conda
+      uses: s-weigand/setup-conda@v1
+      with:
+        activate-conda: false
+        conda-channels: conda-forge
+
+    - name: Python ${{ python-version }}
+      shell: bash -l {0}
+      run: |
+        conda create --name TEST python=${{ python-version }} pip --file requirements.txt --file test_requirements.txt --strict-channel-priority
+        source activate TEST
+        pip install -e . --no-deps --force-reinstall
+
+    - name: Conda Info
+      shell: bash -l {0}
+      run: |
+        source activate TEST
+        conda info --all
+        conda list

@@ -10,27 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup Conda
-      uses: s-weigand/setup-conda@v1
+    - name: Install necessary Python packages
+      # TODO: reference action
+      uses: ./.github/actions/python-package-setup
       with:
-        activate-conda: false
-        conda-channels: conda-forge
-
-    - name: Python ${{ matrix.python-version }}
-      shell: bash -l {0}
-      run: |
-        conda create --name TEST python=${{ matrix.python-version }} python=3 pip --file requirements.txt --file test_requirements.txt --strict-channel-priority
-        source activate TEST
-        pip install -e . --no-deps --force-reinstall
-
-    - name: Conda Info
-      shell: bash -l {0}
-      run: |
-        source activate TEST
-        conda info --all
-        conda list
+        python-version: {{ matrix.python-version }}
 
     - name: Integration Tests
       shell: bash -l {0}
