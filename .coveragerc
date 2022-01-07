@@ -1,0 +1,4 @@
+[run]
+source=compliance_checker
+branch=True
+omit=compliance_checker/tests/*
