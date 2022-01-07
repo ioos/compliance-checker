@@ -6,8 +6,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v2
-
     - name: Setup Conda
       uses: s-weigand/setup-conda@v1
       with:
