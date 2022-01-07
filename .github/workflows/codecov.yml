@@ -44,6 +44,10 @@ jobs:
       run: |
         source activate TEST
         pytest --cov=compliance_checker --cov-report=xml compliance_checker/tests
+      # pass this step even if there are individual test failures, we are
+      # interested in the overall level of coverage and other checks can
+      # report on test failures.
+      continue-on-error: true
 
     - name: Upload to codecov
       uses: codecov/codecov-action@v2
