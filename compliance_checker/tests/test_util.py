@@ -51,4 +51,4 @@ class TestUtils(unittest.TestCase):
         self.assertFalse(util.datetime_is_iso(bad_datetime)[0])
 
         bad_date = "09192017"
-        self.assertFalse(util.datetime_is_iso(bad_datetime)[0])
+        self.assertFalse(util.datetime_is_iso(bad_date)[0])
