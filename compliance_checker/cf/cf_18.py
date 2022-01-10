@@ -140,13 +140,6 @@ class CF1_8Check(CF1_7Check):
         given for those taxa that do not have an identifier.
         """
         ret_val = []
-        # taxa identification variables
-        taxa_name_variables = ds.get_variables_by_attributes(
-            standard_name="biological_taxon_name"
-        )
-        taxa_lsid_variables = ds.get_variables_by_attributes(
-            standard_name="biological_taxon_identifier"
-        )
 
         def match_taxa_standard_names(standard_name_string):
             """
@@ -278,7 +271,7 @@ class CF1_8Check(CF1_7Check):
             try:
                 response = requests.get(lsid_url, timeout=10)
                 response.raise_for_status()
-            except requests.exceptions.RequestException as e:
+            except requests.exceptions.RequestException:
                 # 400 error code indicates something is malformed on client's
                 # end
                 if response.status_code == 400:
@@ -307,7 +300,7 @@ class CF1_8Check(CF1_7Check):
                         timeout=15,
                     )
                     response.raise_for_status()
-                except requests.exceptions.RequestException as e:
+                except requests.exceptions.RequestException:
                     messages.append(
                         "Aphia ID {taxon_match['object_id'] returned "
                         "other error: {str(e)}"
@@ -345,7 +338,7 @@ class CF1_8Check(CF1_7Check):
                 try:
                     itis_response = requests.get(itis_url, timeout=15)
                     itis_response.raise_for_status()
-                except requests.exceptions.RequestException as e:
+                except requests.exceptions.RequestException:
                     if itis_response.status_code == 404:
                         messages.append(
                             "itis.gov TSN " f"{taxon_match['object_id']} not found."
