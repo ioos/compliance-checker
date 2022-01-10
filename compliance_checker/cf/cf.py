@@ -4099,7 +4099,7 @@ class CF1_6Check(CFNCCheck):
             ):
                 reasoning.append(
                     "Climatology dimension {} should only contain two elements".format(
-                        boundary_variable.dimensions
+                        ds.variables[clim_coord_var.climatology].name
                     )
                 )
 

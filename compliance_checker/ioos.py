@@ -935,29 +935,33 @@ class IOOS1_2Check(IOOSNCCheck):
                 [
                     (
                         f"Invalid featureType '{feature_type_attr}'; please see the "
-                        "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
+                         "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
                     )
                 ],
             )
-        featType = fType.lower()
 
-        if featType == "timeseries":
+        feature_type = feature_type_attr.lower()
+
+        if feature_type == "timeseries":
             return self._check_feattype_timeseries_cf_role(ds)
 
-        elif featType == "timeseriesprofile":
+        elif feature_type == "timeseriesprofile":
             return self._check_feattype_timeseriesprof_cf_role(ds)
 
-        elif featType == "trajectory":
+        elif feature_type == "trajectory":
             return self._check_feattype_trajectory_cf_role(ds)
 
-        elif featType == "trajectoryprofile":
-            return self._check_feattype_trajprof_cf_role(ds)
+        elif feature_type == "trajectoryprofile":
+            return self._check_feattype_trajectoryprof_cf_role(ds)
 
-        elif featType == "profile":
+        elif feature_type == "profile":
             return self._check_feattype_profile_cf_role(ds)
 
-        elif featType == "point":
-            return good_result  # can't do anything
+        elif feature_type == "point":
+            return Result(
+                BaseCheck.MEDIUM,
+                True,
+                "CF DSG: featureType=trajectoryProfile")
 
         else:
             return Result(
@@ -966,8 +970,9 @@ class IOOS1_2Check(IOOSNCCheck):
                 "CF DSG: Unknown featureType",
                 [
                     (
-                        f"Invalid featureType '{featType}'; please see the "
-                        "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
+                        f"Invalid featureType '{feature_type_attr}'; "
+                          "please see the IOOS 1.2 Profile and CF-1.7 "
+                          "Conformance documents for valid featureType"
                     )
                 ],
             )
