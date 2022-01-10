@@ -17,9 +17,9 @@ def pip_requirements(fname="requirements.txt"):
                 continue
             reqs.append(line)
 
-    dbg_req = 'python3-debug-utils@git+https://github.com/asascience-open/python3-debug-utils@v1.0.0#egg=python3-debug-utils'
+    dbg_req = "python3-debug-utils@git+https://github.com/asascience-open/python3-debug-utils@v1.0.0#egg=python3-debug-utils"
 
-    return reqs + [ dbg_req ]
+    return reqs + [dbg_req]
 
 
 setup(

@@ -65,7 +65,6 @@ class MockVariable(object):
     def __getitem__(self, index):
         return self._array_contents[index]
 
-
     def ncattrs(self):
         return [
             att
