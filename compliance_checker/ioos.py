@@ -925,15 +925,16 @@ class IOOS1_2Check(IOOSNCCheck):
         https://github.com/ioos/compliance-checker/issues/828
         """
 
-        fType = getattr(ds, "featureType", None)
-        if (not fType) or (not isinstance(fType, str)):  # can't do anything, pass
+        feature_type_attr = getattr(ds, "featureType", None)
+        # can't do anything, pass
+        if not feature_type_attr or not isinstance(feature_type_attr, str):
             return Result(
                 BaseCheck.MEDIUM,
                 False,
                 "CF DSG: Invalid featureType",
                 [
                     (
-                        f"Invalid featureType '{fType}'; please see the "
+                        f"Invalid featureType '{feature_type_attr}'; please see the "
                         "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
                     )
                 ],

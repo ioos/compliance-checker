@@ -634,8 +634,10 @@ class CheckSuite(object):
                                 print out the appropriate header string
         """
 
-        sort_fn = lambda x: x.weight
-        groups_sorted = sorted(groups, key=sort_fn, reverse=True)
+        def weight_sort(result):
+            return result.weight
+
+        groups_sorted = sorted(groups, key=weight_sort, reverse=True)
 
         # create dict of the groups -> {level: [reasons]}
         result = {

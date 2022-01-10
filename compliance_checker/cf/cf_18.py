@@ -643,21 +643,3 @@ class PolygonGeometry(LineGeometry):
                 )
                 messages.append(message)
         return messages
-
-        ## TODO
-        # find standard names contains 'organisms_in_taxon'
-        # find aux. coord. vars with standard_name='biological_taxon_name'
-        # LSID,'biological_taxon_lsid' = "urn:lsid:<Authority>:<Namespace>:<ObjectID>[:<Version>]"
-
-        results = []
-
-        ctx_hi = TestCtx(BaseCheck.HIGH, self.section_titles["6.1"])
-        ctx_med = TestCtx(BaseCheck.MEDIUM, self.section_titles["6.1"])
-        ctx_lo = TestCtx(BaseCheck.LOW, self.section_titles["6.1"])
-
-        for var in [ds[name] for name in ds.variables]:
-            if "organisms_in_taxon" in var.standard_name:
-
-                # taxa identified by aux. coordinate vars
-                for aux_var in [ds[name] for name in var.coordinates.split()]:
-                    print(ds[aux_var.name])
