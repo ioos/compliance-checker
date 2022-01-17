@@ -16,7 +16,7 @@ def get_filename(path):
 
 
 def generate_dataset(cdl_path, nc_path):
-    subprocess.call(["ncgen", "-4", "-o", nc_path, cdl_path])
+    subprocess.call(["ncgen", "-o", nc_path, cdl_path])
 
 
 STATIC_FILES = {
@@ -79,7 +79,6 @@ STATIC_FILES = {
     "ioos_gold_1_1": get_filename("tests/data/ioos_1_1.cdl"),
     "kibesillah": get_filename("tests/data/examples/kibesillah.cdl"),
     "l01-met": get_filename("tests/data/examples/l01-met.cdl"),
-    "line_geometry": get_filename("tests/data/line_geometry.cdl"),
     "mapping": get_filename("tests/data/mapping.cdl"),
     "multi-dim-coordinates": get_filename("tests/data/multi-dim-coordinates.cdl"),
     "multi-timeseries-orthogonal": get_filename(
@@ -96,7 +95,6 @@ STATIC_FILES = {
     "ocos": get_filename("tests/data/examples/ocos.cdl"),
     "ooi_glider": get_filename("tests/data/examples/ooi_glider.cdl"),
     "point": get_filename("tests/data/point.cdl"),
-    "polygon_geometry": get_filename("tests/data/polygon_geometry.cdl"),
     "profile-orthogonal": get_filename("tests/data/profile-orthogonal.cdl"),
     "profile-incomplete": get_filename("tests/data/profile-incomplete.cdl"),
     "pr_inundation": get_filename("tests/data/examples/pr_inundation.cdl"),
