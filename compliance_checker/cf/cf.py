@@ -93,6 +93,7 @@ class CFBaseCheck(BaseCheck):
             "2.4": "§2.4 Dimensions",
             "2.5": "§2.5 Variables",
             "2.6": "§2.6 Attributes",
+            "2.7": "§2.7 Groups",
             "3.1": "§3.1 Units",
             "3.2": "§3.2 Long Name",
             "3.3": "§3.3 Standard Name",
