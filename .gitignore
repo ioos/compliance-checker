@@ -89,7 +89,6 @@ ENV/
 # IDE project settings
 .spyderproject
 .vscode
-pyrightconfig.json
 
 # Rope project settings
 .ropeproject
@@ -105,5 +104,3 @@ pyrightconfig.json
 conda-requirements.txt
 
 compliance_checker/_version.py
-.venv
-activate

@@ -13,7 +13,7 @@ import requests
 
 from cf_units import Unit
 from lxml import etree
-from netCDF4 import Dataset, Dimension, Variable
+from netCDF4 import Dimension, Variable
 from pkg_resources import resource_filename
 
 
@@ -235,16 +235,6 @@ def get_safe(dict_instance, keypath, default=None):
     except Exception:
         return default
 
-
-class VariableReferenceError(Exception):
-    """A variable to assign bad variable references to"""
-    def __init__(self, name: str, dataset: Dataset=None):
-        self.name = name
-        self.dataset_path = dataset.filepath() if dataset is not None else None
-
-    def __str__(self):
-        return (f'Cannot find variable named {self.name} in dataset '
-                f'{self}.dataset_path')
 
 class NCGraph(object):
     def __init__(
@@ -572,20 +562,3 @@ def is_vertical_coordinate(var_name, var):
     if not is_pressure:
         satisfied |= getattr(var, "positive", "").lower() in ("up", "down")
     return satisfied
-
-def reference_attr_variables(dataset: Dataset, attributes_string: str,
-                             split_by: str = None):
-    """
-    Attempts to reference variables in the string, optionally splitting by
-    a string
-    """
-    if attributes_string is None:
-        return None
-    elif split_by is None:
-        return dataset.variables.get(attributes_string,
-                                     VariableReferenceError(attributes_string))
-    else:
-        string_proc = attributes_string.split(split_by)
-        return [dataset.variables.get(var_name,
-                                      VariableReferenceError(var_name))
-                for var_name in string_proc]

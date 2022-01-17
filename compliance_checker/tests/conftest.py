@@ -21,7 +21,7 @@ def glob_down(pth, suffix, lvls):
 
 
 def generate_dataset(cdl_path, nc_path):
-    subprocess.call(["ncgen", "-4", "-o", str(nc_path), str(cdl_path)])
+    subprocess.call(["ncgen", "-o", str(nc_path), str(cdl_path)])
 
 
 def static_files(cdl_stem):
