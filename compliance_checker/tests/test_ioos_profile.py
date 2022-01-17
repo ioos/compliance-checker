@@ -12,7 +12,8 @@ from compliance_checker.ioos import (
     NamingAuthorityValidator,
 )
 from compliance_checker.tests import BaseTestCase
-from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
+from compliance_checker.tests.helpers import (MockTimeSeries, MockVariable,
+                                              MockNetCDF)
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests.test_cf import get_results
 
@@ -1221,6 +1222,16 @@ class TestIOOS1_2(BaseTestCase):
         prf.setncattr("cf_role", "profile_id")
         result = self.ioos._check_feattype_profile_cf_role(ds)
         self.assertTrue(result.value)
+
+    def test_feattype_point(self):
+        ds = MockNetCDF()
+        ds.createDimension("obs", 1)
+        ds.createVariable("lon", "f8", ("obs",))
+        ds.createVariable("lat", "f8", ("obs",))
+        ds.createVariable("temp", "f8", ("obs",))
+        ds.setncattr("featureType", "point")
+        result = self.ioos.check_cf_role_variables(ds)
+        assert result.value
 
     def test_check_instrument_make_model_calib_date(self):
         """

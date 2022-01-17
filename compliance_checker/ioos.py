@@ -1112,7 +1112,7 @@ class IOOS1_2Check(IOOSNCCheck):
         trj_prof_msg = (
             "Dimension length of non-platform variable with cf_role={cf_role} "
             "(the '{dim_type}' dimension) is {dim_len}. "
-            "The IOOS profile restricts trjectory and trajectoryProfile "
+            "The IOOS profile restricts trajectory and trajectoryProfile "
             "datasets to a single platform (ie. trajectory) per dataset "
             "(the profile dimension is permitted to be >= 1)."
         )
