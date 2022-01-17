@@ -33,11 +33,8 @@ from compliance_checker.cf.util import (
 )
 from compliance_checker.suite import CheckSuite
 from compliance_checker.tests import BaseTestCase
-from compliance_checker.tests.helpers import (
-    MockRaggedArrayRepr,
-    MockTimeSeries,
-    MockVariable,
-)
+from compliance_checker.tests.helpers import (MockRaggedArrayRepr,
+                                              MockTimeSeries, MockVariable)
 import requests_mock
 import json
 import re
@@ -556,6 +553,17 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_climatological_statistics(dataset)
         score, out_of, messages = get_results(results)
         self.assertEqual(score, out_of)
+
+        bad_dim_ds = MockTimeSeries()
+        bad_dim_ds.createDimension("clim_bounds", 3)
+
+        temp = bad_dim_ds.createVariable("temperature", "f8", ("time",))
+        bad_dim_ds.createVariable("clim_bounds", "f8", ("time"))
+        temp.climatology = "clim_bounds"
+        results = self.cf.check_climatological_statistics(bad_dim_ds)
+        assert results[0].value[0] < results[0].value[1]
+        assert (results[0].msgs[0] == 'Climatology dimension "clim_bounds" '
+                "should only contain two elements")
 
     def test_check_ancillary_variables(self):
         """

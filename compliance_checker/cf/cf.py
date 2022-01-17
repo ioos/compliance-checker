@@ -4059,7 +4059,6 @@ class CF1_6Check(CFNCCheck):
                     BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
                 )
                 ret_val.append(result)
-                return ret_val
 
             # make sure the climatology variable referenced actually exists
             elif clim_coord_var.climatology not in ds.variables:
@@ -4072,7 +4071,6 @@ class CF1_6Check(CFNCCheck):
                     BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
                 )
                 ret_val.append(result)
-                return ret_val
 
             # check that coordinate bounds are in the proper order.
             # make sure last elements are boundary variable specific dimensions
@@ -4082,24 +4080,36 @@ class CF1_6Check(CFNCCheck):
                     : clim_coord_var.ndim
                 ]
             ):
+                total_climate_count += 1
                 reasoning.append(
                     "Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
                         ds.variables[clim_coord_var.climatology].dimensions
                     )
                 )
-                return ret_val
+                result = Result(
+                    BaseCheck.MEDIUM,
+                    (valid_climate_count, total_climate_count),
+                    (self.section_titles["7.4"]),
+                    reasoning,
+                )
+                ret_val.append(result)
 
-            elif (
-                ds.dimensions[
+            elif (ds.dimensions[
                     ds.variables[clim_coord_var.climatology].dimensions[-1]
-                ].size
-                != 2
-            ):
+                ].size != 2):
                 reasoning.append(
-                    "Climatology dimension {} should only contain two elements".format(
+                    "Climatology dimension \"{}\" should only contain two elements".format(
                         ds.variables[clim_coord_var.climatology].name
                     )
                 )
+                total_climate_count += 1
+                result = Result(
+                    BaseCheck.MEDIUM,
+                    (valid_climate_count, total_climate_count),
+                    (self.section_titles["7.4"]),
+                    reasoning,
+                )
+                ret_val.append(result)
 
             # passed all these checks, so we can add this clim_coord_var to our total list
             all_clim_coord_var_names.append(clim_coord_var.name)
