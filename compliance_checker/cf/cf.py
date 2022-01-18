@@ -93,7 +93,6 @@ class CFBaseCheck(BaseCheck):
             "2.4": "§2.4 Dimensions",
             "2.5": "§2.5 Variables",
             "2.6": "§2.6 Attributes",
-            "2.7": "§2.7 Groups",
             "3.1": "§3.1 Units",
             "3.2": "§3.2 Long Name",
             "3.3": "§3.3 Standard Name",
@@ -1408,15 +1407,18 @@ class CF1_6Check(CFNCCheck):
                 self._parent_var_attr_type_check(att_name, var, ctx)
         return ctx.to_result()
 
+    # TODO: consider renaming to avoid confusion with non-underscore
+    #       primary function version
     def _check_add_offset_scale_factor_type(self, variable, attr_name):
         """
         Reusable function for checking both add_offset and scale_factor.
         """
 
-        msg = (
-            f"Variable {variable.name} and {attr_name} must be quivalent "
-            "data types or {variable.name} must be of type byte, short, or int "
-            "and {attr_name} must be float or double"
+        msgs = []
+        error_msg = (
+            f"Variable {variable.name} and {attr_name} must be equivalent "
+            f"data types or {variable.name} must be of type byte, short, or int "
+            f"and {attr_name} must be float or double"
         )
 
         att = getattr(variable, attr_name, None)
@@ -1430,8 +1432,11 @@ class CF1_6Check(CFNCCheck):
                 isinstance(att.dtype, (np.float, np.double, float))
                 and isinstance(variable.dtype, (np.byte, np.short, np.int, int))
             )
+        if not val:
+            msgs.append(error_msg)
 
-        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"], [msg])
+        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"],
+                      msgs)
 
     def check_add_offset_scale_factor_type(self, ds):
         """
@@ -1456,8 +1461,8 @@ class CF1_6Check(CFNCCheck):
             results.extend(
                 list(
                     map(
-                        lambda x: self._check_scale_factor_add_offset(
-                            ds.variables[x], _att_vars_tup[0]
+                        lambda var: self._check_add_offset_scale_factor_type(
+                            var, _att_vars_tup[0]
                         ),
                         _att_vars_tup[1],
                     )

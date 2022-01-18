@@ -34,7 +34,7 @@ dataset_stem__expected_messages = [
     ),
     (
         "usgs_dem_saipan",
-        ['§2.6.1 Conventions global attribute does not contain "CF-1.8"'],
+        ['§2.6.1 Conventions global attribute does not contain "CF-1.7"'],
     ),
     (
         "l01-met",
@@ -97,7 +97,7 @@ dataset_stem__expected_messages = [
         "swan",
         [
             "global attribute _CoordSysBuilder should begin with a letter and be composed of letters, digits, and underscores",
-            '§2.6.1 Conventions global attribute does not contain "CF-1.8"',
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"',
             "units for variable time_offset must be convertible to s currently they are hours since 2013-02-18T00:00:00Z",
             "units for variable time_run must be convertible to s currently they are hours since 2013-02-18 00:00:00.000 UTC",
             "lon's axis attribute must be T, X, Y, or Z, currently x",
@@ -197,7 +197,7 @@ dataset_stem__expected_messages = [
             "vbar's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_v (A), xi_v (A) (with U: other/unknown; L: unlimited).",
             "w's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
             "zeta's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
-            '§2.6.1 Conventions global attribute does not contain "CF-1.8"',
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"',
             "units (None) attribute of 's_w' must be a string compatible with UDUNITS",
             "units (None) attribute of 's_rho' must be a string compatible with UDUNITS",
             "units (None) attribute of 'Cs_w' must be a string compatible with UDUNITS",
@@ -291,14 +291,14 @@ class TestCFIntegration:
         indirect=["loaded_dataset"],
     )
     def test_no_incorrect_errors(self, cs, loaded_dataset, wrong_message):
-        check_results = cs.run(loaded_dataset, [], "cf")
+        check_results = cs.run(loaded_dataset, [], True, "cf")
         messages = self.get_results(check_results, cs)[-1]
 
         assert wrong_message not in "".join(messages)
 
     @pytest.mark.parametrize("loaded_dataset", ["fvcom"], indirect=True)
     def test_fvcom(self, cs, loaded_dataset):
-        check_results = cs.run(loaded_dataset, [], "cf")
+        check_results = cs.run(loaded_dataset, [], True, "cf")
         scored, out_of, messages = self.get_results(check_results, cs)
         assert scored < out_of
 
@@ -313,7 +313,7 @@ class TestCFIntegration:
                 " not in messages"
             )
         assert (
-            '§2.6.1 Conventions global attribute does not contain "CF-1.8"'
+            '§2.6.1 Conventions global attribute does not contain "CF-1.7"'
         ) in messages
 
     @pytest.mark.parametrize(

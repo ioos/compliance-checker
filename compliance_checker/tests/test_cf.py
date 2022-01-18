@@ -20,7 +20,6 @@ from compliance_checker.cf import (
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
-from compliance_checker.cf.cf_18 import CF1_8Check
 from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.util import (
     StandardNameTable,
@@ -113,6 +112,16 @@ class TestCF1_6(BaseTestCase):
         # present in coord_data_vars
         self.assertEqual(self.cf.coord_data_vars, {"time", "sigma"})
 
+    def load_dataset(self, nc_dataset):
+        """
+        Return a loaded NC Dataset for the given path
+        """
+        if not isinstance(nc_dataset, str):
+            raise ValueError("nc_dataset should be a string")
+
+        nc_dataset = Dataset(nc_dataset, "r")
+        self.addCleanup(nc_dataset.close)
+        return nc_dataset
 
     # --------------------------------------------------------------------------------
     # Compliance Tests
@@ -2207,37 +2216,46 @@ class TestCF1_7(BaseTestCase):
 
         # set att bad (str)
         temp.setncattr("add_offset", "foo")
-        r = self.cf._check_add_offset_scale_factor_type(temp, "add_offset")
-        self.assertFalse(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertFalse(r[0].value)
+        # messages should be non-empty for improper type
+        self.assertTrue(r[0].msgs)
+        del temp.add_offset
 
         temp.setncattr("scale_factor", "foo")
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertFalse(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertFalse(r[0].value)
+        self.assertTrue(r[0].msgs)
 
         # set bad np val
         temp.setncattr("scale_factor", np.float32(5))
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertFalse(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertFalse(r[0].value)
+        self.assertTrue(r[0].msgs)
 
         temp.setncattr("scale_factor", np.uint(5))
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertFalse(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertFalse(r[0].value)
+        self.assertTrue(r[0].msgs)
 
         # set good
         temp.setncattr("scale_factor", np.float(5))
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertTrue(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertTrue(r[0].value)
+        self.assertFalse(r[0].msgs)
 
         temp.setncattr("scale_factor", np.double(5))
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertTrue(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertTrue(r[0].value)
+        self.assertFalse(r[0].msgs)
 
         # set same dtype
         dataset = MockTimeSeries()  # time lat lon depth
         temp = dataset.createVariable("temp", np.int, dimensions=("time",))
         temp.setncattr("scale_factor", np.int(5))
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertTrue(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertTrue(r[0].value)
+        self.assertFalse(r[0].msgs)
 
 
 class TestCF1_8(BaseTestCase):
@@ -2523,8 +2541,7 @@ class TestCFUtil(BaseTestCase):
 
         # add another cf_role var, bad
         nc = MockRaggedArrayRepr("timeseries", "contiguous")
-        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",),
-                              fill_value=None)
+        v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
             cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")

@@ -13,7 +13,7 @@ import requests
 
 from cf_units import Unit
 from lxml import etree
-from netCDF4 import Dataset, Dimension, Variable
+from netCDF4 import Dimension, Variable
 from pkg_resources import resource_filename
 
 
@@ -235,16 +235,6 @@ def get_safe(dict_instance, keypath, default=None):
     except Exception:
         return default
 
-
-class VariableReferenceError(Exception):
-    """A variable to assign bad variable references to"""
-    def __init__(self, name: str, dataset: Dataset=None):
-        self.name = name
-        self.dataset_path = dataset.filepath() if dataset is not None else None
-
-    def __str__(self):
-        return (f'Cannot find variable named {self.name} in dataset '
-                f'{self}.dataset_path')
 
 class NCGraph(object):
     def __init__(
