@@ -13,7 +13,7 @@ import requests
 
 from cf_units import Unit
 from lxml import etree
-from netCDF4 import Dimension, Variable
+from netCDF4 import Dataset, Dimension, Variable
 from pkg_resources import resource_filename
 
 
