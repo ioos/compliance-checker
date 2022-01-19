@@ -2303,9 +2303,10 @@ class TestCF1_8(BaseTestCase):
         flip_ring_bits = (dataset.variables["interior_ring"][:]
                           == 0).astype(int)
         dataset.variables["interior_ring"][:] = flip_ring_bits
-        messages = self.cf.check_geometry(dataset)
+        results = self.cf.check_geometry(dataset)
         # There should be messages regarding improper polygon order
-        assert messages
+        assert results[0].value[0] < results[0].value[1]
+        assert results[0].msgs
 
     def test_bad_lsid(self):
         """

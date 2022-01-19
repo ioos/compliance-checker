@@ -195,11 +195,14 @@ class CF1_8Check(CF1_7Check):
                 results.append(geom_valid.to_result())
                 continue
             # check geometry
-            geometry.check_geometry()
-            if not geometry.errors: #geom_valid.messages:
+            messages = geometry.check_geometry()
+            if not messages:
                 geom_valid.score += 1
+            else:
+                geom_valid.messages.extend(messages)
             results.append(geom_valid.to_result())
         return results
+
     def check_taxa(self, ds: Dataset):
         '''
         6.1.2. Taxon Names and Identifiers
