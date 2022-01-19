@@ -62,8 +62,10 @@ class MockVariable(object):
     def __getitem__(self, idx):
         return self._arr[idx]
 
+
     def __setitem__(self, idx, val):
         self._arr[idx] = val
+
 
     def ncattrs(self):
         return [

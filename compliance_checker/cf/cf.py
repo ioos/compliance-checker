@@ -43,7 +43,7 @@ def print_exceptions(f):
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
-        except Exception as e:
+        except:
             from traceback import print_exc
 
             print_exc()
@@ -2870,7 +2870,6 @@ class CF1_6Check(CFNCCheck):
         """
         ret_val = []
 
-        z_variables = cfutil.get_z_variables(ds)
         deprecated_units = ["level", "layer", "sigma_level"]
 
         ret_val.extend(
@@ -3136,7 +3135,6 @@ class CF1_6Check(CFNCCheck):
         for name in geophysical_variables:
             no_duplicates = TestCtx(BaseCheck.HIGH, self.section_titles["5"])
             axis_map = cfutil.get_axis_map(ds, name)
-            axes = []
             # For every coordinate associated with this variable, keep track of
             # which coordinates define an axis and assert that there are no
             # duplicate axis attributes defined in the set of associated
@@ -4066,7 +4064,6 @@ class CF1_6Check(CFNCCheck):
                     BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
                 )
                 ret_val.append(result)
-                return ret_val
 
             # make sure the climatology variable referenced actually exists
             elif clim_coord_var.climatology not in ds.variables:
@@ -4079,7 +4076,6 @@ class CF1_6Check(CFNCCheck):
                     BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
                 )
                 ret_val.append(result)
-                return ret_val
 
             # check that coordinate bounds are in the proper order.
             # make sure last elements are boundary variable specific dimensions
@@ -4089,24 +4085,36 @@ class CF1_6Check(CFNCCheck):
                     : clim_coord_var.ndim
                 ]
             ):
+                total_climate_count += 1
                 reasoning.append(
                     "Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
                         ds.variables[clim_coord_var.climatology].dimensions
                     )
                 )
-                return ret_val
+                result = Result(
+                    BaseCheck.MEDIUM,
+                    (valid_climate_count, total_climate_count),
+                    (self.section_titles["7.4"]),
+                    reasoning,
+                )
+                ret_val.append(result)
 
-            elif (
-                ds.dimensions[
+            elif (ds.dimensions[
                     ds.variables[clim_coord_var.climatology].dimensions[-1]
-                ].size
-                != 2
-            ):
+                ].size != 2):
                 reasoning.append(
-                    "Climatology dimension {} should only contain two elements".format(
-                        boundary_variable.dimensions
+                    "Climatology dimension \"{}\" should only contain two elements".format(
+                        ds.variables[clim_coord_var.climatology].name
                     )
                 )
+                total_climate_count += 1
+                result = Result(
+                    BaseCheck.MEDIUM,
+                    (valid_climate_count, total_climate_count),
+                    (self.section_titles["7.4"]),
+                    reasoning,
+                )
+                ret_val.append(result)
 
             # passed all these checks, so we can add this clim_coord_var to our total list
             all_clim_coord_var_names.append(clim_coord_var.name)
@@ -4400,10 +4408,9 @@ class CF1_6Check(CFNCCheck):
         """
         valid_roles = ["timeseries_id", "profile_id", "trajectory_id"]
         variable_count = 0
+        valid_cf_role = TestCtx(BaseCheck.HIGH, self.section_titles["9.5"])
         for variable in ds.get_variables_by_attributes(cf_role=lambda x: x is not None):
             variable_count += 1
-            name = variable.name
-            valid_cf_role = TestCtx(BaseCheck.HIGH, self.section_titles["9.5"])
             cf_role = variable.cf_role
             valid_cf_role.assert_true(
                 cf_role in valid_roles,
@@ -5183,7 +5190,6 @@ class CF1_7Check(CF1_6Check):
     def check_grid_mapping(self, ds):
         __doc__ = super(CF1_7Check, self).check_grid_mapping.__doc__
         prev_return = super(CF1_7Check, self).check_grid_mapping(ds)
-        ret_val = []
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
         for var_name in sorted(grid_mapping_variables):
             var = ds.variables[var_name]
@@ -5237,7 +5243,8 @@ class CF1_7Check(CF1_6Check):
                 )
             elif len_vdatum_name_attrs == 1:
                 # should be one or zero attrs
-                proj_db_path = os.path.join(pyproj.datadir.get_data_dir(), "proj.db")
+                proj_db_path = os.path.join(pyproj.datadir.get_data_dir(),
+                                            "proj.db")
                 try:
                     with sqlite3.connect(proj_db_path) as conn:
                         v_datum_attr = next(iter(vert_datum_attrs))
@@ -5289,7 +5296,6 @@ class CF1_7Check(CF1_6Check):
         """
         variable = ds.variables[vname]
         standard_name = getattr(variable, "standard_name", None)
-        units = getattr(variable, "units", None)
         formula_terms = getattr(variable, "formula_terms", None)
         # Skip the variable if it's dimensional
         if formula_terms is None and standard_name not in dim_vert_coords_dict:
@@ -5332,7 +5338,6 @@ class CF1_7Check(CF1_6Check):
         """
         ret_val = []
 
-        z_variables = cfutil.get_z_variables(ds)
         deprecated_units = ["level", "layer", "sigma_level"]
 
         # compose this function to use the results from the CF-1.6 check

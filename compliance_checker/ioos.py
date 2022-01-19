@@ -925,38 +925,43 @@ class IOOS1_2Check(IOOSNCCheck):
         https://github.com/ioos/compliance-checker/issues/828
         """
 
-        fType = getattr(ds, "featureType", None)
-        if (not fType) or (not isinstance(fType, str)):  # can't do anything, pass
+        feature_type_attr = getattr(ds, "featureType", None)
+        # can't do anything, pass
+        if not feature_type_attr or not isinstance(feature_type_attr, str):
             return Result(
                 BaseCheck.MEDIUM,
                 False,
                 "CF DSG: Invalid featureType",
                 [
                     (
-                        f"Invalid featureType '{fType}'; please see the "
-                        "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
+                        f"Invalid featureType '{feature_type_attr}'; please see the "
+                         "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
                     )
                 ],
             )
-        featType = fType.lower()
 
-        if featType == "timeseries":
+        feature_type = feature_type_attr.lower()
+
+        if feature_type == "timeseries":
             return self._check_feattype_timeseries_cf_role(ds)
 
-        elif featType == "timeseriesprofile":
+        elif feature_type == "timeseriesprofile":
             return self._check_feattype_timeseriesprof_cf_role(ds)
 
-        elif featType == "trajectory":
+        elif feature_type == "trajectory":
             return self._check_feattype_trajectory_cf_role(ds)
 
-        elif featType == "trajectoryprofile":
-            return self._check_feattype_trajprof_cf_role(ds)
+        elif feature_type == "trajectoryprofile":
+            return self._check_feattype_trajectoryprof_cf_role(ds)
 
-        elif featType == "profile":
+        elif feature_type == "profile":
             return self._check_feattype_profile_cf_role(ds)
 
-        elif featType == "point":
-            return good_result  # can't do anything
+        elif feature_type == "point":
+            return Result(
+                BaseCheck.MEDIUM,
+                True,
+                "CF DSG: featureType=trajectoryProfile")
 
         else:
             return Result(
@@ -965,8 +970,9 @@ class IOOS1_2Check(IOOSNCCheck):
                 "CF DSG: Unknown featureType",
                 [
                     (
-                        f"Invalid featureType '{featType}'; please see the "
-                        "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
+                        f"Invalid featureType '{feature_type_attr}'; "
+                          "please see the IOOS 1.2 Profile and CF-1.7 "
+                          "Conformance documents for valid featureType"
                     )
                 ],
             )
@@ -1106,7 +1112,7 @@ class IOOS1_2Check(IOOSNCCheck):
         trj_prof_msg = (
             "Dimension length of non-platform variable with cf_role={cf_role} "
             "(the '{dim_type}' dimension) is {dim_len}. "
-            "The IOOS profile restricts trjectory and trajectoryProfile "
+            "The IOOS profile restricts trajectory and trajectoryProfile "
             "datasets to a single platform (ie. trajectory) per dataset "
             "(the profile dimension is permitted to be >= 1)."
         )

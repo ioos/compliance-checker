@@ -16,7 +16,9 @@ def pip_requirements(fname="requirements.txt"):
             if not line or line.startswith("#"):
                 continue
             reqs.append(line)
+
     return reqs
+
 
 
 setup(

@@ -81,7 +81,7 @@ def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x)
             else:
                 new_attr_val = attr_type(attr_val)
         # catch casting errors
-        except (ValueError, UnicodeEncodeError) as e:
+        except (ValueError, UnicodeEncodeError):
             warnings.warn("Could not cast to type {}".format(attr_type))
             return False
     else:

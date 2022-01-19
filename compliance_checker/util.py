@@ -11,9 +11,9 @@ def datetime_is_iso(date_str):
     """Attempts to parse a date formatted in ISO 8601 format"""
     try:
         if len(date_str) > 10:
-            dt = isodate.parse_datetime(date_str)
+            isodate.parse_datetime(date_str)
         else:
-            dt = isodate.parse_date(date_str)
+            isodate.parse_date(date_str)
         return True, []
     except:  # Any error qualifies as not ISO format
         return False, ["Datetime provided is not in a valid ISO 8601 format"]
