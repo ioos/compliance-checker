@@ -20,6 +20,8 @@ from compliance_checker.cf import (
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
+
+from compliance_checker.cf.cf_18 import CF1_8Check
 from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.util import (
     StandardNameTable,
