@@ -235,7 +235,6 @@ def get_safe(dict_instance, keypath, default=None):
     except Exception:
         return default
 
-
 class VariableReferenceError(Exception):
     """A variable to assign bad variable references to"""
 

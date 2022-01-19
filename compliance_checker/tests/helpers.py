@@ -55,15 +55,17 @@ class MockVariable(object):
             self.dtype = copy_var.dtype
             self.dimensions = copy_var.dimensions
             self.ndim = copy_var.ndim
-            self._array_contents = copy_var[:]
+            self._arr = copy_var[:]
             for att in copy_var.ncattrs():
                 setattr(self, att, getattr(copy_var, att))
 
-    def __setitem__(self, index, value):
-        self._array_contents[index] = value
+    def __getitem__(self, idx):
+        return self._arr[idx]
 
-    def __getitem__(self, index):
-        return self._array_contents[index]
+
+    def __setitem__(self, idx, val):
+        self._arr[idx] = val
+
 
     def ncattrs(self):
         return [

@@ -2214,37 +2214,46 @@ class TestCF1_7(BaseTestCase):
 
         # set att bad (str)
         temp.setncattr("add_offset", "foo")
-        r = self.cf._check_add_offset_scale_factor_type(temp, "add_offset")
-        self.assertFalse(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertFalse(r[0].value)
+        # messages should be non-empty for improper type
+        self.assertTrue(r[0].msgs)
+        del temp.add_offset
 
         temp.setncattr("scale_factor", "foo")
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertFalse(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertFalse(r[0].value)
+        self.assertTrue(r[0].msgs)
 
         # set bad np val
         temp.setncattr("scale_factor", np.float32(5))
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertFalse(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertFalse(r[0].value)
+        self.assertTrue(r[0].msgs)
 
         temp.setncattr("scale_factor", np.uint(5))
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertFalse(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertFalse(r[0].value)
+        self.assertTrue(r[0].msgs)
 
         # set good
         temp.setncattr("scale_factor", np.float(5))
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertTrue(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertTrue(r[0].value)
+        self.assertFalse(r[0].msgs)
 
         temp.setncattr("scale_factor", np.double(5))
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertTrue(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertTrue(r[0].value)
+        self.assertFalse(r[0].msgs)
 
         # set same dtype
         dataset = MockTimeSeries()  # time lat lon depth
         temp = dataset.createVariable("temp", np.int, dimensions=("time",))
         temp.setncattr("scale_factor", np.int(5))
-        r = self.cf._check_add_offset_scale_factor_type(temp, "scale_factor")
-        self.assertTrue(r.value)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        self.assertTrue(r[0].value)
+        self.assertFalse(r[0].msgs)
 
 
 class TestCF1_8(BaseTestCase):
@@ -2299,9 +2308,10 @@ class TestCF1_8(BaseTestCase):
         # Flip sign indicator for interior rings.  Should cause failure
         flip_ring_bits = (dataset.variables["interior_ring"][:] == 0).astype(int)
         dataset.variables["interior_ring"][:] = flip_ring_bits
-        messages = self.cf.check_geometry(dataset)
+        results = self.cf.check_geometry(dataset)
         # There should be messages regarding improper polygon order
-        assert messages
+        assert results[0].value[0] < results[0].value[1]
+        assert results[0].msgs
 
     def test_bad_lsid(self):
         """

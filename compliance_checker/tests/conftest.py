@@ -21,7 +21,7 @@ def glob_down(pth, suffix, lvls):
 
 
 def generate_dataset(cdl_path, nc_path):
-    subprocess.call(["ncgen", "-4", "-o", str(nc_path), str(cdl_path)])
+    subprocess.call(["ncgen", "-o", str(nc_path), str(cdl_path)])
 
 
 def static_files(cdl_stem):
@@ -47,7 +47,7 @@ def static_files(cdl_stem):
         assert (
             nc_path.exists()
         ), f"ncgen CLI utility failed to produce {nc_path} from {cdl_path}"
-    return nc_path
+    return str(nc_path)
 
 
 # ---------Fixtures-----------
@@ -98,3 +98,19 @@ def new_nc_file(tmpdir):
     nc = Dataset(nc_file_path, "w")
     # no need for cleanup, built-in tmpdir fixture will handle it
     return nc
+
+
+@pytest.fixture
+def tmp_txt_file(tmpdir):
+    file_path = os.path.join(tmpdir, "output.txt")
+    if os.path.exists(file_path):
+        raise IOError("File Exists: %s" % file_path)
+
+    return file_path
+
+
+@pytest.fixture
+def checksuite_setup():
+    """For test_cli"""
+    CheckSuite.checkers.clear()
+    CheckSuite.load_all_available_checkers()
