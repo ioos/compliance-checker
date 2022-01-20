@@ -1,6 +1,6 @@
 from compliance_checker.base import BaseCheck, TestCtx, Result
 from compliance_checker import MemoizedDataset
-from compliance_checker.cf.cf import CF1_7Check
+from compliance_checker.cf.cf_1_7 import CF1_7Check
 from netCDF4 import Dataset
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 import requests

@@ -14,13 +14,13 @@ import pytest
 from netCDF4 import Dataset, stringtoarr
 
 from compliance_checker import cfutil
-from compliance_checker.cf import (
+from compliance_checker.cf.cf import (
     CF1_6Check,
     CF1_7Check,
+    CF1_8Check,
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
-from compliance_checker.cf.cf_18 import CF1_8Check
 from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.util import (
     StandardNameTable,

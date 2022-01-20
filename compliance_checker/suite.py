@@ -28,7 +28,7 @@ from pkg_resources import working_set
 
 from compliance_checker import MemoizedDataset, __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
-from compliance_checker.cf.cf import CFBaseCheck
+from compliance_checker.cf.cf_base import CFBaseCheck
 from compliance_checker.protocols import cdl, erddap, netcdf, opendap
 
 
