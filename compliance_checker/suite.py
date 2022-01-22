@@ -6,6 +6,7 @@ import codecs
 import inspect
 import itertools
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -16,7 +17,9 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from distutils.version import StrictVersion
 from operator import itemgetter
-from urllib.parse import urlparse
+from pathlib import Path
+from urllib.parse import urljoin, urlparse
+from urllib.request import url2pathname
 
 import requests
 
@@ -29,7 +32,7 @@ from pkg_resources import working_set
 from compliance_checker import MemoizedDataset, __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.cf.cf import CFBaseCheck
-from compliance_checker.protocols import cdl, erddap, netcdf, opendap
+from compliance_checker.protocols import cdl, erddap, netcdf, opendap, zarr
 
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
@@ -886,6 +889,13 @@ class CheckSuite(object):
         """
         if cdl.is_cdl(ds_str):
             ds_str = self.generate_dataset(ds_str)
+
+        if zarr.is_zarr(ds_str):
+            if platform.system() != "Linux":
+                print(
+                    f"WARNING: {platform.system()} OS detected. NCZarr is not officially supported for your OS as of when this API was written. Your mileage may vary."
+                )
+            return MemoizedDataset(zarr.as_zarr(ds_str))
 
         if netcdf.is_netcdf(ds_str):
             return MemoizedDataset(ds_str)

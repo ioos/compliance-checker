@@ -1,0 +1,11 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "trajectory",
+        "obs",
+        "z"
+    ],
+    "coordinates": "time lat lon z",
+    "long_name": "Seawater Temperature",
+    "standard_name": "sea_water_temperature",
+    "units": "deg_C"
+}

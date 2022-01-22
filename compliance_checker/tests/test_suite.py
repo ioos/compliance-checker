@@ -7,6 +7,7 @@ import numpy as np
 from pkg_resources import resource_filename
 
 from compliance_checker.base import BaseCheck, GenericFile, Result
+from compliance_checker.runner import ComplianceChecker
 from compliance_checker.suite import CheckSuite
 
 
