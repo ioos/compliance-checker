@@ -371,7 +371,7 @@ class CF1_8Check(CF1_7Check):
             try:
                 response = requests.get(lsid_url, timeout=10)
                 response.raise_for_status()
-            except requests.exceptions.RequestException:
+            except requests.exceptions.RequestException as e:
                 # 400 error code indicates something is malformed on client's
                 # end
                 if response.status_code == 400:
@@ -400,7 +400,7 @@ class CF1_8Check(CF1_7Check):
                         timeout=15,
                     )
                     response.raise_for_status()
-                except requests.exceptions.RequestException:
+                except requests.exceptions.RequestException as e:
                     messages.append(
                         "Aphia ID {taxon_match['object_id'] returned "
                         "other error: {str(e)}"
@@ -438,7 +438,7 @@ class CF1_8Check(CF1_7Check):
                 try:
                     itis_response = requests.get(itis_url, timeout=15)
                     itis_response.raise_for_status()
-                except requests.exceptions.RequestException:
+                except requests.exceptions.RequestException as e:
                     if itis_response.status_code == 404:
                         messages.append(
                             "itis.gov TSN " f"{taxon_match['object_id']} not found."
@@ -602,7 +602,7 @@ class PolygonGeometry(LineGeometry):
             extents = np.concatenate([np.array([0]),
                                      self.node_count[:].cumsum()])
             node_indexer_len = len(self.node_count)
-            ring_orientation = np.zeros(node_indexer, dtype=bool)
+            ring_orientation = np.zeros(node_indexer_len, dtype=bool)
         # TODO: is it necessary to check whether part_node_count "consumes"
         #       node_count in the polygon, i.e. first (3, 3, 3) will consume
         #       a node part of 9, follow by next 3 will consume a node part of
