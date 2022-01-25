@@ -12,6 +12,7 @@ from tempfile import gettempdir
 import numpy as np
 import pytest
 import requests_mock
+
 from netCDF4 import Dataset, stringtoarr
 
 from compliance_checker import cfutil
@@ -2756,7 +2757,7 @@ class TestCF1_8(BaseTestCase):
         dataset = MockTimeSeries()
         # TEST CONFORMANCE 2.7 REQUIRED 1/4
         nonroot_group = dataset.createGroup("nonroot")
-        dummy = nonroot_group.createVariable("dummy")
+        dummy = nonroot_group.createVariable("dummy", "i2", ())
         dummy.Conventions = "CF-1.8"
         dummy.external_variables = "ext1"
         results = self.cf.check_groups(dataset)
