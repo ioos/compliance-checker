@@ -440,4 +440,7 @@ The objective of the IOOS Compliance Checker is to check your file against our i
 
 ## Miscellaneous/Acknowledgements
 
+### Contributors
+![GitHub Contributors Image](https://contrib.rocks/image?repo=ioos/compliance-checker)
+
 Portions of the CF checker are based on Michael Decker's work, http://repositories.iek.fz-juelich.de/hg/CFchecker/
