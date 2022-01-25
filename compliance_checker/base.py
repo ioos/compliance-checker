@@ -359,6 +359,20 @@ class TestCtx(object):
 
         return test
 
+    def add_failure(self, message):
+        """
+        Adds a failure along with a message
+        :rtype: None
+        """
+        self.assert_true(False, message)
+
+    def add_pass(self):
+        """
+        Adds a pass condition
+        :rtype: None
+        """
+        self.assert_true(True, None)
+
 
 def std_check_in(base_context, name, allowed_vals):
     """

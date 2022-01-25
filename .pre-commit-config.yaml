@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.0.1
+  rev: v4.1.0
   hooks:
     - id: trailing-whitespace
       exclude: compliance_checker/tests/data
@@ -14,15 +14,15 @@ repos:
     - id: file-contents-sorter
       files: test_requirements.txt
 
-# - repo: https://gitlab.com/pycqa/flake8
-#   rev: 3.9.2
-#   hooks:
-#     - id: flake8
-#       exclude: docs/source/conf.py
-#       args: [--max-line-length=200, "--ignore=E203,E501,W503", "--select=select=C,E,F,W,B,B950"]
+- repo: https://gitlab.com/pycqa/flake8
+  rev: 3.9.2
+  hooks:
+    - id: flake8
+      exclude: docs/source/conf.py
+      args: [--max-line-length=200, "--ignore=E203,E501,W503", "--select=select=C,E,F,W,B,B950"]
 
 - repo: https://github.com/pre-commit/mirrors-isort
-  rev: v5.9.3
+  rev: v5.10.1
   hooks:
   - id: isort
     additional_dependencies: [toml]
@@ -34,7 +34,7 @@ repos:
     - id: seed-isort-config
 
 - repo: https://github.com/psf/black
-  rev: 21.9b0
+  rev: 21.12b0
   hooks:
   - id: black
     language_version: python3

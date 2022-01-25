@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ioos/compliance-checker.svg)](https://travis-ci.org/ioos/compliance-checker)
 [![Build status](https://ci.appveyor.com/api/projects/status/lcc9co38pi6o45ho/branch/master?svg=true)](https://ci.appveyor.com/project/ocefpaf/compliance-checker/branch/master)
+[![codecov](https://codecov.io/gh/ioos/compliance-checker/branch/master/graph/badge.svg)](https://codecov.io/gh/ioos/compliance-checker)
 
 The IOOS Compliance Checker is a python based tool for data providers to check
 for completeness and community standard compliance of local or remote
@@ -22,6 +23,7 @@ It currently supports the following sources and standards:
 | Standard                                                                                                                            | Source                                                            | .nc/OPeNDAP/.cdl | SOS                             |
 | ----------------------------------------------------------------------------------------------------                                | -----------                                                       | ------           | ------------------------------- |
 | [ACDD (1.1, 1.3)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3)                                    | Built-in                                                          | X                | -                               |
+| [CF (1.8)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html)                                     | Built-in                                                          | X                | -                               |
 | [CF (1.7)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html)                                     | Built-in                                                          | X                | -                               |
 | [CF (1.6)](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html)                                                      | Built-in                                                          | X                | -                               |
 | IOOS SOS                                                                                                                            | Built-in                                                          | -                | GetCapabilities, DescribeSensor |

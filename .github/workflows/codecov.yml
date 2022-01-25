@@ -1,17 +1,19 @@
-name: Default Tests
+name: Code coverage report
 
 on:
   pull_request:
   push:
-    branches: [master]
+    branches:
+    - master
+    - develop
 
 jobs:
   run:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        python-version: ["3.10"]
+        os: [ubuntu-latest]
       fail-fast: false
 
     steps:
@@ -37,8 +39,17 @@ jobs:
         conda info --all
         conda list
 
-    - name: Default Tests
+    - name: Run tests with coverage
       shell: bash -l {0}
       run: |
         source activate TEST
-        pytest -s -rxs -v -k "not integration" compliance_checker
+        pytest --cov=compliance_checker --cov-report=xml compliance_checker/tests
+      # pass this step even if there are individual test failures, we are
+      # interested in the overall level of coverage and other checks can
+      # report on test failures.
+      continue-on-error: true
+
+    - name: Upload to codecov
+      uses: codecov/codecov-action@v2
+      with:
+        files: coverage.xml

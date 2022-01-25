@@ -4,3 +4,6 @@ httpretty
 mypy
 pre-commit
 pytest>=2.9.0
+requests-mock>=1.7.0
+codecov
+pytest-cov

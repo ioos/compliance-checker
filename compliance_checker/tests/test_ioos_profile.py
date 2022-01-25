@@ -12,7 +12,8 @@ from compliance_checker.ioos import (
     NamingAuthorityValidator,
 )
 from compliance_checker.tests import BaseTestCase
-from compliance_checker.tests.helpers import MockTimeSeries, MockVariable
+from compliance_checker.tests.helpers import (MockTimeSeries, MockVariable,
+                                              MockNetCDF)
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests.test_cf import get_results
 
@@ -761,7 +762,7 @@ class TestIOOS1_2(BaseTestCase):
         # global platform, one platform variable, pass
         temp = ds.createVariable("temp", "d", ("time"))
         temp.setncattr("platform", "platform_var")
-        plat = ds.createVariable("platform_var", np.byte)
+        ds.createVariable("platform_var", np.byte)
         result = self.ioos.check_single_platform(ds)
         self.assertTrue(result.value)
         self.assertEqual(result.msgs, [])
@@ -769,7 +770,7 @@ class TestIOOS1_2(BaseTestCase):
         # two platform variables, fail
         temp2 = ds.createVariable("temp2", "d", ("time"))
         temp2.setncattr("platform", "platform_var2")
-        plat = ds.createVariable("platform_var2", np.byte)
+        ds.createVariable("platform_var2", np.byte)
         result = self.ioos.check_single_platform(ds)
         self.assertFalse(result.value)
 
@@ -777,7 +778,7 @@ class TestIOOS1_2(BaseTestCase):
         ds = MockTimeSeries()  # time, lat, lon, depth
         temp = ds.createVariable("temp", "d", ("time"))
         temp.setncattr("platform", "platform_var")
-        plat = ds.createVariable("platform_var", np.byte)
+        ds.createVariable("platform_var", np.byte)
         result = self.ioos.check_single_platform(ds)
         self.assertFalse(result.value)
 
@@ -1002,7 +1003,7 @@ class TestIOOS1_2(BaseTestCase):
         ftype = "timeseries"
         ds = MockTimeSeries()  # time, lat, lon, depth
         ds.setncattr("featureType", ftype)
-        temp = ds.createVariable("temp", "d", ("time"))
+        ds.createVariable("temp", "d", ("time"))
 
         # no platform variables or geophys vars with cf_role=timeseries_id, fail
         result = self.ioos._check_feattype_timeseries_cf_role(ds)
@@ -1045,7 +1046,7 @@ class TestIOOS1_2(BaseTestCase):
         ds = MockTimeSeries()  # time, lat, lon, depth
         ds.createDimension("station_dim", 21)
         ds.setncattr("featureType", "timeseries")
-        temp = ds.createVariable("temp", "d", ("time"))
+        ds.createVariable("temp", "d", ("time"))
         plat = ds.createVariable("station", "|S1", dimensions=("station_dim"))
         plat.setncattr("cf_role", "timeseries_id")
         result = self.ioos._check_feattype_timeseries_cf_role(ds)
@@ -1056,7 +1057,7 @@ class TestIOOS1_2(BaseTestCase):
         ds = MockTimeSeries()  # time, lat, lon, depth
         ds.setncattr("featureType", ftype)
         ds.createDimension("station_dim", 1)
-        temp = ds.createVariable("temp", "d", ("time"))
+        ds.createVariable("temp", "d", ("time"))
 
         # no platform variables or geophys vars with cf_role=timeseries_id, fail
         result = self.ioos._check_feattype_timeseriesprof_cf_role(ds)
@@ -1088,7 +1089,7 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("featureType", ftype)
         ds.createDimension("station_dim", 1)
         ds.createDimension("profile_dim", 1)
-        temp = ds.createVariable("temp", "d", ("time"))
+        ds.createVariable("temp", "d", ("time"))
         plat = ds.createVariable("station", "|S1", ("station_dim"))
         plat.setncattr("cf_role", "timeseries_id")
         pf = ds.createVariable("profile", "|S1", ("profile_dim"))
@@ -1101,7 +1102,7 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("featureType", ftype)
         ds.createDimension("station_dim", 1)
         ds.createDimension("profile_dim", 21)
-        temp = ds.createVariable("temp", "d", ("time"))
+        ds.createVariable("temp", "d", ("time"))
         plat = ds.createVariable("station", "|S1", ("station_dim"))
         plat.setncattr("cf_role", "timeseries_id")
         pf = ds.createVariable("profile", "|S1", ("profile_dim"))
@@ -1172,7 +1173,7 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("featureType", "trajectoryprofile")
         ds.createDimension("trajectory_dim", 1)
         ds.createDimension("profile_dim", 1)
-        temp = ds.createVariable("temp", "d", ("time"))
+        ds.createVariable("temp", "d", ("time"))
         trj = ds.createVariable("trajectory", "|S1", ("trajectory_dim"))
         trj.setncattr("cf_role", "trajectory_id")
         pf = ds.createVariable("profile", "|S1", ("profile_dim"))
@@ -1185,7 +1186,7 @@ class TestIOOS1_2(BaseTestCase):
         ds.setncattr("featureType", "trajectoryprofile")
         ds.createDimension("trajectory_dim", 1)
         ds.createDimension("profile_dim", 21)
-        temp = ds.createVariable("temp", "d", ("time"))
+        ds.createVariable("temp", "d", ("time"))
         trj = ds.createVariable("trajectory", "|S1", ("trajectory_dim"))
         trj.setncattr("cf_role", "trajectory_id")
         pf = ds.createVariable("profile", "|S1", ("profile_dim"))
@@ -1221,6 +1222,16 @@ class TestIOOS1_2(BaseTestCase):
         prf.setncattr("cf_role", "profile_id")
         result = self.ioos._check_feattype_profile_cf_role(ds)
         self.assertTrue(result.value)
+
+    def test_feattype_point(self):
+        ds = MockNetCDF()
+        ds.createDimension("obs", 1)
+        ds.createVariable("lon", "f8", ("obs",))
+        ds.createVariable("lat", "f8", ("obs",))
+        ds.createVariable("temp", "f8", ("obs",))
+        ds.setncattr("featureType", "point")
+        result = self.ioos.check_cf_role_variables(ds)
+        assert result.value
 
     def test_check_instrument_make_model_calib_date(self):
         """

@@ -28,7 +28,7 @@ from pkg_resources import working_set
 
 from compliance_checker import MemoizedDataset, __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
-from compliance_checker.cf.cf import CFBaseCheck
+from compliance_checker.cf.cf_base import CFBaseCheck
 from compliance_checker.protocols import cdl, erddap, netcdf, opendap
 
 
@@ -677,13 +677,16 @@ class CheckSuite(object):
                                 print out the appropriate header string
         """
 
-        sort_fn = lambda x: x.weight
-        groups_sorted = sorted(groups, key=sort_fn, reverse=True)
+        def weight_sort(result):
+            return result.weight
+
+        groups_sorted = sorted(groups, key=weight_sort, reverse=True)
 
         # create dict of the groups -> {level: [reasons]}
         result = {
             key: [v for v in valuesiter if v.value[0] != v.value[1]]
-            for key, valuesiter in itertools.groupby(groups_sorted, key=sort_fn)
+            for key, valuesiter in itertools.groupby(groups_sorted,
+                                                     key=weight_sort)
         }
         priorities = self.checkers[check]._cc_display_headers
 
@@ -728,7 +731,8 @@ class CheckSuite(object):
                     print("{:^{width}}".format(level_name, width=width))
                     print("-" * width)
 
-                data_issues = [process_table(res, check) for res in result[level]]
+                data_issues = [process_table(res, check) for res in
+                               result[level]]
 
                 has_printed = False
                 for issue, reasons in data_issues:
@@ -738,7 +742,8 @@ class CheckSuite(object):
                         print("")
                     # join alphabetized reasons together
                     reason_str = "\n".join(
-                        "* {}".format(r) for r in sorted(reasons, key=lambda x: x[0])
+                        "* {}".format(r) for r in sorted(reasons,
+                                                         key=lambda x: x[0])
                     )
                     proc_str = "{}\n{}".format(issue, reason_str)
                     print(proc_str)
@@ -827,7 +832,7 @@ class CheckSuite(object):
                 return MemoizedDataset(
                     urlparse(response.url).path, memory=response.content
                 )
-            except OSError as e:
+            except OSError:
                 # handle case when netCDF C libs weren't compiled with
                 # in-memory support by using tempfile
                 with tempnc(response.content) as _nc:

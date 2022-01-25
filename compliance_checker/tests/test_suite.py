@@ -72,8 +72,10 @@ class TestSuite(unittest.TestCase):
             score_list, points, out_of = self.cs.standard_output(
                 ds.filepath(), limit, checker, groups
             )
-            # This asserts that print is able to generate all of the unicode output
-            self.cs.standard_output_generation(groups, limit, points, out_of, checker)
+            # This asserts that print is able to generate all of the unicode
+            # output
+            self.cs.standard_output_generation(groups, limit, points, out_of,
+                                               checker)
 
     def test_generate_dataset_netCDF4(self):
         """
