@@ -2255,15 +2255,17 @@ class TestCF1_7(BaseTestCase):
         self.assertTrue(r[0].value)
         self.assertFalse(r[0].msgs)
 
-        # mixed variable type (short) against floating point add_offset/
-        # scale_factor
-        coarse_temp = dataset.createVariable("coarse_temp", "i2",
-                                             dimensions=("time",))
-        coarse_temp.setncattr("scale_factor", np.float(23.0))
-        coarse_temp.setncattr("add_offset", np.float(-2.1))
-        r = self.cf.check_add_offset_scale_factor_type(dataset)
-        self.assertTrue(r[0].value)
-        self.assertFalse(r[0].msgs)
+        # integer variable type (int8, int16, int32) compared against
+        #floating point add_offset/scale_factor
+        for var_bytes in ("1", "2", "4"):
+            coarse_temp = dataset.createVariable(f"coarse_temp_{var_bytes}",
+                                                 f"i{var_bytes}",
+                                                 dimensions=("time",))
+            coarse_temp.setncattr("scale_factor", np.float(23.0))
+            coarse_temp.setncattr("add_offset", np.float(-2.1))
+            r = self.cf.check_add_offset_scale_factor_type(dataset)
+            self.assertTrue(r[0].value)
+            self.assertFalse(r[0].msgs)
 
 
 class TestCF1_8(BaseTestCase):
