@@ -145,9 +145,8 @@ class CF1_6Check(CFNCCheck):
             val = (
                 att.dtype == variable.dtype
             ) or (  # will short-circuit or if first condition is true
-                isinstance(att.dtype, (np.float, np.double, float))
-                and isinstance(variable.dtype, (np.byte, np.short, np.int, int))
-            )
+                isinstance(att, (np.float, np.double, float))
+                and variable.dtype in (np.byte, np.short, np.int, int))
         if not val:
             msgs.append(error_msg)
 
