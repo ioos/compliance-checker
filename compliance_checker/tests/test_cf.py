@@ -2261,8 +2261,8 @@ class TestCF1_7(BaseTestCase):
             coarse_temp = dataset.createVariable(f"coarse_temp_{var_bytes}",
                                                  f"i{var_bytes}",
                                                  dimensions=("time",))
-            coarse_temp.setncattr("scale_factor", np.float(23.0))
-            coarse_temp.setncattr("add_offset", np.float(-2.1))
+            coarse_temp.setncattr("scale_factor", np.float32(23.0))
+            coarse_temp.setncattr("add_offset", np.double(-2.1))
             r = self.cf.check_add_offset_scale_factor_type(dataset)
             self.assertTrue(r[0].value)
             self.assertFalse(r[0].msgs)
