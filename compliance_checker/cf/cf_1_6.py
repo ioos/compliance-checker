@@ -170,6 +170,18 @@ class CF1_6Check(CFNCCheck):
             scale_factor=lambda x: x is not None
         )
 
+        _attr_vars_tup = []
+        both = set(add_offset_vars).intersection(scale_factor_vars)
+        both_msgs = []
+        for both_var in sorted(both, key=lambda var: var.name):
+            if (both_var.scale_factor.dtype !=
+                both_var.add_offset.dtype):
+                both_msgs.append("When both scale_factor and add_offset "
+                                 f"are supplied for variable {both_var.name}, "
+                                 "they must have the same type")
+        results.append(Result(BaseCheck.MEDIUM, not bool(both_msgs),
+                       self.section_titles["8.1"], both_msgs))
+
         for _att_vars_tup in (
             ("add_offset", add_offset_vars),
             ("scale_factor", scale_factor_vars),
