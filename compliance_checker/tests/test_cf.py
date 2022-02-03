@@ -2215,45 +2215,67 @@ class TestCF1_7(BaseTestCase):
         # set att bad (str)
         temp.setncattr("add_offset", "foo")
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        self.assertFalse(r[0].value)
+        self.assertFalse(r[1].value)
         # messages should be non-empty for improper type
-        self.assertTrue(r[0].msgs)
+        self.assertTrue(r[1].msgs)
         del temp.add_offset
 
         temp.setncattr("scale_factor", "foo")
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        self.assertFalse(r[0].value)
-        self.assertTrue(r[0].msgs)
+        self.assertFalse(r[1].value)
+        self.assertTrue(r[1].msgs)
 
         # set bad np val
         temp.setncattr("scale_factor", np.float32(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        self.assertFalse(r[0].value)
-        self.assertTrue(r[0].msgs)
+        self.assertFalse(r[1].value)
+        self.assertTrue(r[1].msgs)
 
         temp.setncattr("scale_factor", np.uint(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        self.assertFalse(r[0].value)
-        self.assertTrue(r[0].msgs)
+        self.assertFalse(r[1].value)
+        self.assertTrue(r[1].msgs)
 
         # set good
         temp.setncattr("scale_factor", np.float(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        self.assertTrue(r[0].value)
-        self.assertFalse(r[0].msgs)
+        self.assertTrue(r[1].value)
+        self.assertFalse(r[1].msgs)
 
         temp.setncattr("scale_factor", np.double(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        self.assertTrue(r[0].value)
-        self.assertFalse(r[0].msgs)
+        self.assertTrue(r[1].value)
+        self.assertFalse(r[1].msgs)
 
         # set same dtype
         dataset = MockTimeSeries()  # time lat lon depth
         temp = dataset.createVariable("temp", np.int, dimensions=("time",))
         temp.setncattr("scale_factor", np.int(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        self.assertTrue(r[0].value)
-        self.assertFalse(r[0].msgs)
+        self.assertTrue(r[1].value)
+        self.assertFalse(r[1].msgs)
+
+        # integer variable type (int8, int16, int32) compared against
+        #floating point add_offset/scale_factor
+        for var_bytes in ("1", "2", "4"):
+            coarse_temp = dataset.createVariable(f"coarse_temp_{var_bytes}",
+                                                 f"i{var_bytes}",
+                                                 dimensions=("time",))
+            coarse_temp.setncattr("scale_factor", np.float32(23.0))
+            coarse_temp.setncattr("add_offset", np.double(-2.1))
+            r = self.cf.check_add_offset_scale_factor_type(dataset)
+            # First value which checks if add_offset and scale_factor
+            # are same type should be false
+            self.assertFalse(r[0].value)
+            self.assertEqual(r[0].msgs[0],
+                   "When both scale_factor and add_offset are supplied for "
+                   f"variable coarse_temp_{var_bytes}, they must have the "
+                   "same type")
+            # Individual checks for scale_factor/add_offset should be OK,
+            # however
+            self.assertTrue(r[-1].value)
+            self.assertFalse(r[-1].msgs)
+            del dataset.variables[f"coarse_temp_{var_bytes}"]
 
 
 class TestCF1_8(BaseTestCase):
