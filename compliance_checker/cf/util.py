@@ -575,6 +575,36 @@ def is_vertical_coordinate(var_name, var):
         satisfied |= getattr(var, "positive", "").lower() in ("up", "down")
     return satisfied
 
+def compare_unit_types(specified, reference):
+    """
+    Compares two unit strings via UDUnits
+
+    :param str specified: The specified unit
+    :param str reference: The reference unit which to compare agains
+
+    """
+    msgs = []
+    err_flag = False
+    try:
+        specified_unit = Unit(specified)
+    except ValueError:
+        msgs.append(f"Specified conversion unit f{specified} may not be valid UDUnits")
+        err_flag = True
+
+    try:
+        reference_unit = Unit(reference)
+    except ValueError:
+        msgs.append(f"Specified conversion unit f{reference} may not be valid UDUnits")
+        err_flag = True
+
+    if err_flag:
+        return msgs
+
+    unit_convertible = specified_unit.is_convertible(reference_unit)
+    fail_msg = [f'Units "{specified}" are not convertible to "{reference}"']
+    return msgs if unit_convertible else fail_msg
+
+
 
 def string_from_var_type(variable):
     if isinstance(variable, str):
