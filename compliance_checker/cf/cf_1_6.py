@@ -14,6 +14,7 @@ from cf_units import Unit
 from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf import util
+from compliance_checker.cf.appendix_c import valid_modifiers
 from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates_1_6,
                                               no_missing_terms)
 from compliance_checker.cf.appendix_e import cell_methods16
@@ -561,6 +562,7 @@ class CF1_6Check(CFNCCheck):
         coordinate_variables = self._find_coord_vars(ds)
         auxiliary_coordinates = self._find_aux_coord_vars(ds)
         geophysical_variables = self._find_geophysical_vars(ds)
+        modifier_variables = cfutil._find_standard_name_modifier_variables(ds)
         forecast_variables = cfutil.get_forecast_metadata_variables(ds)
 
         unit_required_variables = set(
@@ -661,6 +663,7 @@ class CF1_6Check(CFNCCheck):
         # Don't bother checking the rest
         if units is None and not should_be_dimensionless:
             return valid_units.to_result()
+
         # 2) units attribute must be a string
         valid_units.assert_true(
             should_be_dimensionless or isinstance(units, str),
@@ -672,6 +675,51 @@ class CF1_6Check(CFNCCheck):
             units not in deprecated,
             'units for {}, "{}" are deprecated by CF 1.6'.format(variable_name, units),
         )
+        # 4/5) Modifiers, if present, have the approriate units, or none for
+        #    status_flag
+        if standard_name_modifier is not None:
+            if standard_name_modifier not in valid_modifiers:
+                valid_units.out_of += 1
+                message = (f"Standard name modifier {standard_name_modifier} is not one of "
+                           f"{valid_modifiers.keys()}")
+                valid_units.msgs.append(message)
+            else:
+                unit_type = valid_modifiers[standard_name_modifier]
+        # no modifiers, just check against standard name canonical_units
+        else:
+            unit_type = "u"
+
+        if unit_type == "u":
+            try:
+                reference = (self._std_names[standard_name].
+                             canonical_units)
+            # if standard name isn't found, there won't be an associated units
+            # but a standard name error will be raised elsewhere
+            except KeyError:
+                return valid_units.to_result()
+        elif unit_type == "1":
+                reference = "1"
+        elif unit_type is None:
+            valid_units.assert_true(units is None,
+                                    f"units attribute for variable {variable_name} must be unset "
+                                    "when status_flag standard name modifier is set")
+            return valid_units.to_result()
+
+        try:
+            units_conv = Unit(units)
+        except ValueError:
+            valid_units.messages.append(f'Unit string "{units}" is not recognized by UDUnits')
+            valid_units.out_of += 1
+            return valid_units
+        else:
+            valid_units.score += 1
+            valid_units.out_of += 1
+
+        # time has special unit handling rules
+        if standard_name != "time":
+            valid_units.assert_true(units_conv.is_convertible(Unit(reference)),
+                                    f'Units "{units}" must be convertible to canonical units '
+                                    f'"{reference}"')
 
         return valid_units.to_result()
 
@@ -875,16 +923,10 @@ class CF1_6Check(CFNCCheck):
                 # 2) optional - if modifiers, should be in table
                 if standard_name_modifier is not None:
                     valid_modifier = TestCtx(BaseCheck.HIGH, self.section_titles["3.3"])
-                    allowed = [
-                        "detection_minimum",
-                        "number_of_observations",
-                        "standard_error",
-                        "status_flag",
-                    ]
                     valid_modifier.assert_true(
-                        standard_name_modifier in allowed,
-                        "standard_name modifier {} for variable {} is not a valid modifier "
-                        "according to appendix C".format(standard_name_modifier, name),
+                        standard_name_modifier in valid_modifiers,
+                        'Standard name modifier "{}" for variable {} is not a valid modifier '
+                        "according to CF Appendix C".format(standard_name_modifier, name),
                     )
 
                     ret_val.append(valid_modifier.to_result())

@@ -1243,10 +1243,10 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
 
         msgs = [
-            u"Type of tempvalid_min attribute (int32) does not match variable type (int64)",
-            u"Type of temp:valid_max attribute (int32) does not match variable type (int64)",
-            u"Type of salinityvalid_min attribute (int32) does not match variable type (float64)",
-            u"Type of salinity:valid_max attribute (int32) does not match variable type (float64)",
+            "Type of tempvalid_min attribute (int32) does not match variable type (int64)",
+            "Type of temp:valid_max attribute (int32) does not match variable type (int64)",
+            "Type of salinityvalid_min attribute (int32) does not match variable type (float64)",
+            "Type of salinity:valid_max attribute (int32) does not match variable type (float64)",
         ]
 
         self.assertEqual(len(results), 4)
@@ -1311,8 +1311,7 @@ class TestCF1_6(BaseTestCase):
         #                 furthermore is fragile and breaks tests when check
         #                 definitions change
         scored, out_of, messages = get_results(results)
-        assert scored == 24
-        assert out_of == 24
+        assert scored == out_of
         assert messages == []
 
     def test_check_duplicates(self):
