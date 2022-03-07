@@ -458,6 +458,21 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         assert score == out_of
 
+        dataset = MockTimeSeries()
+        temperature = dataset.createVariable("temperature", "f8", ("time",))
+        temperature.ancillary_variables = "temperature_flag"
+
+        temperature_flag = dataset.createVariable("temperature_flag", "i2", ("time",))
+        # bad modifier
+        temperature_flag.standard_name = "sea_water_temperature status flag"
+        _, _, messages = get_results(self.cf.check_standard_name(dataset))
+        assert ('Standard name modifier "status flag" for variable temperature_flag is not a valid modifier according to CF Appendix C'
+                in messages)
+        # proper name, units supplied
+        temperature_flag.standard_name = "sea_water_temperature status_flag"
+        temperature_flag.units = "1"
+        _, _, messages = get_results(self.cf.check_standard_name(dataset))
+
     def test_cell_bounds(self):
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
         results = self.cf.check_cell_boundaries(dataset)
