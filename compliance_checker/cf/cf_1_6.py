@@ -558,6 +558,7 @@ class CF1_6Check(CFNCCheck):
             + auxiliary_coordinates
             + geophysical_variables
             + forecast_variables
+            + modifier_variables # standard names with modifiers require proper units, *except* for flags, where they should not be present
         )
 
         for name in unit_required_variables:
@@ -588,11 +589,12 @@ class CF1_6Check(CFNCCheck):
             valid_units = self._check_valid_cf_units(ds, name)
             ret_val.append(valid_units)
 
-            units_attr_is_string = TestCtx(BaseCheck.MEDIUM, self.section_titles["3.1"])
+            units_attr_is_string = TestCtx(BaseCheck.MEDIUM,
+                                           self.section_titles["3.1"])
 
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(
-                isinstance(units, str),
+                isinstance(units, str) or units is None,
                 "units ({}) attribute of '{}' must be a string compatible with UDUNITS".format(
                     units, variable.name
                 ),
@@ -622,6 +624,7 @@ class CF1_6Check(CFNCCheck):
         deprecated = ["level", "layer", "sigma_level"]
         variable = ds.variables[variable_name]
 
+        valid_units = TestCtx(BaseCheck.HIGH, self.section_titles["3.1"])
         units = getattr(variable, "units", None)
         standard_name_full = getattr(variable, "standard_name", None)
         standard_name, standard_name_modifier = self._split_standard_name(
@@ -629,33 +632,6 @@ class CF1_6Check(CFNCCheck):
         )
         std_name_units_dimensionless = cfutil.is_dimensionless_standard_name(
             self._std_names._root, standard_name
-        )
-        # Is this even in the database? also, if there is no standard_name,
-        # there's no way to know if it is dimensionless.
-        should_be_dimensionless = (
-            variable.dtype is str
-            or (hasattr(variable.dtype, "char") and variable.dtype.char == "S")
-            or std_name_units_dimensionless
-            or standard_name is None
-        )
-
-        # 1) Units must exist
-        valid_units = TestCtx(BaseCheck.HIGH, self.section_titles["3.1"])
-        valid_units.assert_true(
-            should_be_dimensionless or units is not None,
-            "units attribute is required for {} when variable is not a dimensionless quantity".format(
-                variable_name
-            ),
-        )
-
-        # Don't bother checking the rest
-        if units is None and not should_be_dimensionless:
-            return valid_units.to_result()
-
-        # 2) units attribute must be a string
-        valid_units.assert_true(
-            should_be_dimensionless or isinstance(units, str),
-            "units attribute for {} needs to be a string".format(variable_name),
         )
 
         # 3) units are not deprecated
@@ -692,6 +668,33 @@ class CF1_6Check(CFNCCheck):
                                     f"units attribute for variable {variable_name} must be unset "
                                     "when status_flag standard name modifier is set")
             return valid_units.to_result()
+
+        # Is this even in the database? also, if there is no standard_name,
+        # there's no way to know if it is dimensionless.
+        should_be_dimensionless = (
+            variable.dtype is str
+            or (hasattr(variable.dtype, "char") and variable.dtype.char == "S")
+            or std_name_units_dimensionless
+            or standard_name is None
+        )
+
+        # 1) Units must exist
+        valid_units.assert_true(
+            should_be_dimensionless or units is not None,
+            "units attribute is required for {} when variable is not a dimensionless quantity".format(
+                variable_name
+            ),
+        )
+
+        # Don't bother checking the rest
+        if units is None and not should_be_dimensionless:
+            return valid_units.to_result()
+
+        # 2) units attribute must be a string
+        valid_units.assert_true(
+            should_be_dimensionless or isinstance(units, str),
+            "units attribute for {} needs to be a string".format(variable_name),
+        )
 
         try:
             units_conv = Unit(units)
@@ -737,7 +740,7 @@ class CF1_6Check(CFNCCheck):
         valid_udunits = TestCtx(BaseCheck.HIGH, self.section_titles["3.1"])
         are_udunits = units is not None and util.units_known(units)
         valid_udunits.assert_true(
-            should_be_dimensionless or are_udunits,
+            should_be_dimensionless or are_udunits or units is None,
             'units for {}, "{}" are not recognized by UDUNITS'.format(
                 variable_name, units
             ),
@@ -776,15 +779,27 @@ class CF1_6Check(CFNCCheck):
         # Other standard_name modifiers have the same units as the
         # unmodified standard name or are not checked for units.
 
+        # number_of_observations is a special case which always must be units
+        # of "1"
         if standard_name_modifier == "number_of_observations":
-            canonical_units = "1"
+            valid_standard_units.out_of += 1
+            if units != "1":
+                err_msg = (f"When variable {variable_name} has a "
+                           "standard name modifier of number_of_observations, "
+                           "the specified units must be 1")
+                valid_standard_units.messages.append(err_msg)
+            else:
+                valid_standard_units.score += 1
+            # number_of_observations should short circuit and not continue
+            # on to further units checks
+            return valid_standard_units.to_result()
 
         # This section represents the different cases where simple udunits
         # comparison isn't comprehensive enough to determine if the units are
         # appropriate under CF
 
         # UDUnits accepts "s" as a unit of time but it should be <unit> since <epoch>
-        if standard_name == "time":
+        elif standard_name == "time":
             valid_standard_units.assert_true(
                 util.units_convertible(units, "seconds since 1970-01-01"),
                 "time must be in a valid units format <unit> since <epoch> "
@@ -810,16 +825,6 @@ class CF1_6Check(CFNCCheck):
                 'variables defining longitude ("{}") must use degrees_east '
                 "or degrees if defining a transformed grid. Currently "
                 "{}".format(variable_name, units),
-            )
-        # Standard Name table agrees the unit should be dimensionless
-        elif std_name_units_dimensionless:
-            valid_standard_units.assert_true(True, "")
-
-        elif canonical_units is not None:
-            valid_standard_units.assert_true(
-                util.units_convertible(canonical_units, units),
-                "units for variable {} must be convertible to {} "
-                "currently they are {}".format(variable_name, canonical_units, units),
             )
 
         return valid_standard_units.to_result()
