@@ -727,13 +727,20 @@ def get_climatology_variable(ds):
     return None
 
 
-def _find_standard_name_modifier_variables(ds):
+@lru_cache(128)
+def _find_standard_name_modifier_variables(ds, return_deprecated=False):
     def match_modifier_variables(standard_name_str):
         if standard_name_str is None:
             return False
-        matches = re.search(r"^\w+ +\w+", standard_name_str)
+        if not return_deprecated:
+            matches = re.search(r"^\w+ +\w+", standard_name_str)
+        else:
+            print(standard_name_str)
+            matches = re.search(r"^\w+ +(?:status_flag|number_of_observations)$", standard_name_str)
         return bool(matches)
-    return ds.get_variables_by_attributes(standard_name=match_modifier_variables)
+    return [var.name for var in
+            ds.get_variables_by_attributes(standard_name=
+                                           match_modifier_variables)]
 
 def get_flag_variables(ds):
     """
