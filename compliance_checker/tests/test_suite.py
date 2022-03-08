@@ -2,6 +2,8 @@
 import os
 import unittest
 
+from pathlib import Path
+
 import numpy as np
 
 from pkg_resources import resource_filename
@@ -61,6 +63,13 @@ class TestSuite(unittest.TestCase):
         # runs without errors?
         ds = self.cs.load_dataset(static_files["2dim"])
         self.cs.run(ds, [], "acdd")
+
+
+    def test_suite_pathlib(self):
+        path_obj = Path(static_files["2dim"])
+        ds = self.cs.load_dataset(path_obj)
+        self.cs.run(ds, [], "acdd")
+
 
     def test_unicode_formatting(self):
         ds = self.cs.load_dataset(static_files["bad_region"])

@@ -16,6 +16,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from distutils.version import StrictVersion
 from operator import itemgetter
+from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
@@ -817,6 +818,9 @@ class CheckSuite(object):
 
         :param str ds_str: URL of the resource to load
         """
+        if isinstance(ds_str, Path):
+            ds_str = str(ds_str)
+
         # If it's a remote URL load it as a remote resource, otherwise treat it
         # as a local resource.
         pr = urlparse(ds_str)
