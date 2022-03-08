@@ -1329,6 +1329,35 @@ class TestCF1_6(BaseTestCase):
         assert scored == out_of
         assert messages == []
 
+    def test_check_standard_name_modifier_units(self):
+        """Test that standard name modifiers are properly processed"""
+        dataset = MockTimeSeries()
+
+        temp = dataset.createVariable("temperature", "f8", ("time",))
+        temp.standard_name = "sea_water_temperature"
+        temp.units = "degree_C"
+
+        temp_flag = dataset.createVariable("temp_flag", "i1", ("time",))
+        temp_flag.standard_name = "sea_water_temperature status_flag"
+        # units should not exist for
+        temp_flag.units = "1"
+
+        temp.ancillary_variables = "temp_flag"
+        scored, out_of, messages = get_results(self.cf.check_units(dataset))
+        assert scored != out_of
+        assert ("units attribute for variable temperature_flag must be unset "
+                "when status_flag modifier is set")
+
+        del temp_flag.units
+        scored, out_of, messages = get_results(self.cf.check_units(dataset))
+        assert scored == out_of
+
+        temp_counts = dataset.createVariable("temp_counts", "i1", ("time",))
+        temp.ancillary_variables += " temp_counts"
+
+
+
+
     def test_check_duplicates(self):
         """
         Test to verify that the check identifies duplicate axes. Load the
