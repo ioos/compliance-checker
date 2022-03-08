@@ -783,6 +783,16 @@ class CF1_7Check(CF1_6Check):
 
         return prev_return
 
+    def check_standard_name_deprecated_modifiers(self, ds):
+        """
+        Not a standard check in that it won't raise pass/fail values,
+        but instead warns upon finding deprecated CF standard name modifiers.
+        :param netCDF4.Dataset ds: netCDF dataset
+        """
+        deprecated_var_names = cfutil._find_standard_name_modifier_variables(ds, True)
+        if deprecated_var_names:
+            warn(f"Deprecated standard_name modifiers found on variables {deprecated_var_names}")
+
     def _process_v_datum_str(self, v_datum_str, conn):
         vdatum_query = """SELECT 1 FROM alias_name WHERE
                             table_name = 'vertical_datum' AND

@@ -1926,6 +1926,18 @@ class TestCF1_7(BaseTestCase):
             result = self.cf.check_conventions_version(dataset)
             self.assertTrue(result.value)
 
+    def test_warn_on_deprecated_standard_name_modifiers(self):
+        ds = MockTimeSeries()
+        # normally, you'd set up a parent physical variable with
+        # ancillary_variables, but we only want to check bad standard name
+        # modifiers here
+        temp_counts = ds.createVariable("temp_counts", "i4", ("time",))
+        temp_counts.standard_name = "sea_water_temperature number_of_observations"
+        temp_flag = ds.createVariable("temp_flag", "i1", ("time",))
+        temp_flag.standard_name = "sea_water_temperature status_flag"
+        with pytest.warns(UserWarning):
+            self.cf.check_standard_name_deprecated_modifiers(ds)
+
     def test_appendix_d(self):
         """
         CF 1.7
