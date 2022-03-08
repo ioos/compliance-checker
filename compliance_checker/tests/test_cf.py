@@ -458,6 +458,21 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         assert score == out_of
 
+        dataset = MockTimeSeries()
+        temperature = dataset.createVariable("temperature", "f8", ("time",))
+        temperature.ancillary_variables = "temperature_flag"
+
+        temperature_flag = dataset.createVariable("temperature_flag", "i2", ("time",))
+        # bad modifier
+        temperature_flag.standard_name = "sea_water_temperature status flag"
+        _, _, messages = get_results(self.cf.check_standard_name(dataset))
+        assert ('Standard name modifier "status flag" for variable temperature_flag is not a valid modifier according to CF Appendix C'
+                in messages)
+        # proper name, units supplied
+        temperature_flag.standard_name = "sea_water_temperature status_flag"
+        temperature_flag.units = "1"
+        _, _, messages = get_results(self.cf.check_standard_name(dataset))
+
     def test_cell_bounds(self):
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
         results = self.cf.check_cell_boundaries(dataset)
@@ -1243,10 +1258,10 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
 
         msgs = [
-            u"Type of tempvalid_min attribute (int32) does not match variable type (int64)",
-            u"Type of temp:valid_max attribute (int32) does not match variable type (int64)",
-            u"Type of salinityvalid_min attribute (int32) does not match variable type (float64)",
-            u"Type of salinity:valid_max attribute (int32) does not match variable type (float64)",
+            "Type of tempvalid_min attribute (int32) does not match variable type (int64)",
+            "Type of temp:valid_max attribute (int32) does not match variable type (int64)",
+            "Type of salinityvalid_min attribute (int32) does not match variable type (float64)",
+            "Type of salinity:valid_max attribute (int32) does not match variable type (float64)",
         ]
 
         self.assertEqual(len(results), 4)
@@ -1311,9 +1326,37 @@ class TestCF1_6(BaseTestCase):
         #                 furthermore is fragile and breaks tests when check
         #                 definitions change
         scored, out_of, messages = get_results(results)
-        assert scored == 24
-        assert out_of == 24
+        assert scored == out_of
         assert messages == []
+
+    def test_check_standard_name_modifier_units(self):
+        """Test that standard name modifiers are properly processed"""
+        dataset = MockTimeSeries()
+
+        temp = dataset.createVariable("temperature", "f8", ("time",))
+        temp.standard_name = "sea_water_temperature"
+        temp.units = "degree_C"
+
+        temp_flag = dataset.createVariable("temp_flag", "i1", ("time",))
+        temp_flag.standard_name = "sea_water_temperature status_flag"
+        # units should not exist for
+        temp_flag.units = "1"
+
+        temp.ancillary_variables = "temp_flag"
+        scored, out_of, messages = get_results(self.cf.check_units(dataset))
+        assert scored != out_of
+        assert ("units attribute for variable temperature_flag must be unset "
+                "when status_flag modifier is set")
+
+        del temp_flag.units
+        scored, out_of, messages = get_results(self.cf.check_units(dataset))
+        assert scored == out_of
+
+        temp_counts = dataset.createVariable("temp_counts", "i1", ("time",))
+        temp.ancillary_variables += " temp_counts"
+
+
+
 
     def test_check_duplicates(self):
         """
@@ -1882,6 +1925,18 @@ class TestCF1_7(BaseTestCase):
             dataset.setncattr("Conventions", "CF-1.7, ACDD-1.3")
             result = self.cf.check_conventions_version(dataset)
             self.assertTrue(result.value)
+
+    def test_warn_on_deprecated_standard_name_modifiers(self):
+        ds = MockTimeSeries()
+        # normally, you'd set up a parent physical variable with
+        # ancillary_variables, but we only want to check bad standard name
+        # modifiers here
+        temp_counts = ds.createVariable("temp_counts", "i4", ("time",))
+        temp_counts.standard_name = "sea_water_temperature number_of_observations"
+        temp_flag = ds.createVariable("temp_flag", "i1", ("time",))
+        temp_flag.standard_name = "sea_water_temperature status_flag"
+        with pytest.warns(UserWarning):
+            self.cf.check_standard_name_deprecated_modifiers(ds)
 
     def test_appendix_d(self):
         """
