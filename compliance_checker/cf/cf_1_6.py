@@ -701,7 +701,6 @@ class CF1_6Check(CFNCCheck):
         # Don't bother checking the rest
         if units is None and not should_be_dimensionless:
             return valid_units.to_result()
-
         # 2) units attribute must be a string
         valid_units.assert_true(
             should_be_dimensionless or isinstance(units, str),

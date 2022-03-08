@@ -605,7 +605,6 @@ def compare_unit_types(specified, reference):
     return msgs if unit_convertible else fail_msg
 
 
-
 def string_from_var_type(variable):
     if isinstance(variable, str):
         return variable[:]
