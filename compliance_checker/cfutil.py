@@ -735,7 +735,6 @@ def _find_standard_name_modifier_variables(ds, return_deprecated=False):
         if not return_deprecated:
             matches = re.search(r"^\w+ +\w+", standard_name_str)
         else:
-            print(standard_name_str)
             matches = re.search(r"^\w+ +(?:status_flag|number_of_observations)$", standard_name_str)
         return bool(matches)
     return [var.name for var in
