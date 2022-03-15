@@ -606,7 +606,7 @@ class CF1_6Check(CFNCCheck):
 
             # side effects, but better than teasing out the individual result
             if units_attr_is_string.assert_true(
-                isinstance(units, str) or units is None,
+                isinstance(units, str),
                 "units ({}) attribute of '{}' must be a string compatible with UDUNITS".format(
                     units, variable.name
                 ),
@@ -655,10 +655,7 @@ class CF1_6Check(CFNCCheck):
         #    status_flag
         if standard_name_modifier is not None:
             if standard_name_modifier not in valid_modifiers:
-                valid_units.out_of += 1
-                message = (f"Standard name modifier {standard_name_modifier} is not one of "
-                           f"{valid_modifiers.keys()}")
-                valid_units.messages.append(message)
+                # standard name modifier warning given elsewhere
                 return valid_units.to_result()
             else:
                 unit_type = valid_modifiers[standard_name_modifier]
