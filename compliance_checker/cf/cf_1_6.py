@@ -820,7 +820,7 @@ class CF1_6Check(CFNCCheck):
             # degrees is allowed if using a transformed grid
             allowed_units = cfutil.VALID_LAT_UNITS | {"degrees"}
             valid_standard_units.assert_true(
-                units.lower() if units is not None else None in allowed_units,
+                (units.lower() if units is not None else None) in allowed_units,
                 'variables defining latitude ("{}") must use degrees_north '
                 "or degrees if defining a transformed grid. Currently "
                 "{}".format(variable_name, units),
@@ -830,7 +830,7 @@ class CF1_6Check(CFNCCheck):
             # degrees is allowed if using a transformed grid
             allowed_units = cfutil.VALID_LON_UNITS | {"degrees"}
             valid_standard_units.assert_true(
-                units.lower() if units is not None else None in allowed_units,
+                (units.lower() if units is not None else None) in allowed_units,
                 'variables defining longitude ("{}") must use degrees_east '
                 "or degrees if defining a transformed grid. Currently "
                 "{}".format(variable_name, units),
