@@ -715,11 +715,14 @@ class CF1_6Check(CFNCCheck):
             valid_units.score += 1
             valid_units.out_of += 1
 
-        # time has special unit handling rules
-        if standard_name != "time":
+        # time and forecast_reference time have special unit handling rules
+        # that use time relative to a reference point, despite canonical units
+        # being expressed as "s"/seconds
+        if standard_name not in {"time", "forecast_reference_time"}:
             valid_units.assert_true(units_conv.is_convertible(Unit(reference)),
-                                    f'Units "{units}" must be convertible to canonical units '
-                                    f'"{reference}"')
+                                    f'Units "{units}" for variable '
+                                    f"{variable_name} must be convertible to "
+                                    f'canonical units "{reference}"')
 
         return valid_units.to_result()
 
