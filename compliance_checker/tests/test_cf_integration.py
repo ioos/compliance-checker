@@ -39,29 +39,37 @@ dataset_stem__expected_messages = [
     (
         "l01-met",
         [
-            "units for variable air_temperature_qc must be convertible to K currently they are 1",
-            "units for variable wind_speed_qc must be convertible to m s-1 currently they are 1",
+            "Attribute 'valid_range' (type: <class 'numpy.int16'>) and parent variable 'air_temperature_qc' (type: <class 'numpy.int8'>) must have equivalent datatypes",
+            "Attribute 'valid_range' (type: <class 'numpy.int16'>) and parent variable 'barometric_pressure_qc' (type: <class 'numpy.int8'>) must have equivalent datatypes",
+            "Attribute 'valid_range' (type: <class 'numpy.float64'>) and parent variable 'wind_gust' (type: <class 'numpy.float32'>) must have equivalent datatypes",
+            "Attribute 'valid_range' (type: <class 'numpy.int16'>) and parent variable 'wind_gust_qc' (type: <class 'numpy.int8'>) must have equivalent datatypes",
+            "Attribute 'valid_range' (type: <class 'numpy.float64'>) and parent variable 'wind_speed' (type: <class 'numpy.float32'>) must have equivalent datatypes",
+            "Attribute 'valid_range' (type: <class 'numpy.int16'>) and parent variable 'wind_speed_qc' (type: <class 'numpy.int8'>) must have equivalent datatypes",
+            "Attribute 'valid_range' (type: <class 'numpy.float64'>) and parent variable 'wind_direction' (type: <class 'numpy.float32'>) must have equivalent datatypes",
+            "Attribute 'valid_range' (type: <class 'numpy.int16'>) and parent variable 'wind_direction_qc' (type: <class 'numpy.int8'>) must have equivalent datatypes",
+            "Attribute 'valid_range' (type: <class 'numpy.int16'>) and parent variable 'visibility_qc' (type: <class 'numpy.int8'>) must have equivalent datatypes",
+            '§2.6.1 Conventions global attribute does not contain "CF-1.8"',
             "standard_name visibility is not defined in Standard Name Table v{}".format(
                 std_names._version
             ),
-            "standard_name modifier data_quality for variable visibility_qc is not a valid modifier according to appendix C",
+            "Standard name modifier \"data_quality\" for variable visibility_qc is not a valid modifier according to CF Appendix C",
             "standard_name wind_direction is not defined in Standard Name Table v{}".format(
                 std_names._version
             ),
-            "standard_name modifier data_quality for variable wind_direction_qc is not a valid modifier according to appendix C",
+            "Standard name modifier \"data_quality\" for variable wind_direction_qc is not a valid modifier according to CF Appendix C",
             "standard_name wind_gust is not defined in Standard Name Table v{}".format(
                 std_names._version
             ),
-            "standard_name modifier data_quality for variable wind_gust_qc is not a valid modifier according to appendix C",
-            "standard_name modifier data_quality for variable air_temperature_qc is not a valid modifier according to appendix C",
+            "Standard name modifier \"data_quality\" for variable wind_gust_qc is not a valid modifier according to CF Appendix C",
+            "Standard name modifier \"data_quality\" for variable air_temperature_qc is not a valid modifier according to CF Appendix C",
             "standard_name use_wind is not defined in Standard Name Table v{}".format(
                 std_names._version
             ),
             "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(
                 std_names._version
             ),
-            "standard_name modifier data_quality for variable barometric_pressure_qc is not a valid modifier according to appendix C",
-            "standard_name modifier data_quality for variable wind_speed_qc is not a valid modifier according to appendix C",
+            "Standard name modifier \"data_quality\" for variable barometric_pressure_qc is not a valid modifier according to CF Appendix C",
+            "Standard name modifier \"data_quality\" for variable wind_speed_qc is not a valid modifier according to CF Appendix C",
             "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(
                 std_names._version
             ),
@@ -98,8 +106,7 @@ dataset_stem__expected_messages = [
         [
             "global attribute _CoordSysBuilder should begin with a letter and be composed of letters, digits, and underscores",
             '§2.6.1 Conventions global attribute does not contain "CF-1.8"',
-            "units for variable time_offset must be convertible to s currently they are hours since 2013-02-18T00:00:00Z",
-            "units for variable time_run must be convertible to s currently they are hours since 2013-02-18 00:00:00.000 UTC",
+            'Units "hours since 2013-02-18T00:00:00Z" for variable time_offset must be convertible to canonical units "s"',
             "lon's axis attribute must be T, X, Y, or Z, currently x",
             "lat's axis attribute must be T, X, Y, or Z, currently y",
             "z's axis attribute must be T, X, Y, or Z, currently z",
@@ -126,7 +133,7 @@ dataset_stem__expected_messages = [
             "units (None) attribute of 'LayerInterf' must be a string compatible with UDUNITS",
             "units (None) attribute of 'time_bounds' must be a string compatible with UDUNITS",
             "units (None) attribute of 'Layer' must be a string compatible with UDUNITS",
-            "units for variable area must be convertible to m2 currently they are degrees2",
+            'Units "degrees2" for variable area must be convertible to canonical units "m2"',
             "k: vertical coordinates not defining pressure must include a positive attribute that is either 'up' or 'down'",
             "grid_longitude has no coordinate associated with a variable identified as true latitude/longitude; its coordinate variable should also share a subset of grid_longitude's dimensions",
             "grid_latitude has no coordinate associated with a variable identified as true latitude/longitude; its coordinate variable should also share a subset of grid_latitude's dimensions",
@@ -150,7 +157,7 @@ dataset_stem__expected_messages = [
         "glcfs",
         [
             # TODO: referenced/relative time is treated like time units
-            "units for variable time_offset must be convertible to s currently they are hours since 2016-01-01T12:00:00Z",
+            'Units "hours since 2016-01-01T12:00:00Z" for variable time_offset must be convertible to canonical units "s"',
             "standard_name cloud_cover is not defined in Standard Name Table v{}".format(
                 std_names._version
             ),
