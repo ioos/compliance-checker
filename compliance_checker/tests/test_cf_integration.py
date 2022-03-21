@@ -95,7 +95,6 @@ dataset_stem__expected_messages = [
         "ooi_glider",
         [
             u"§2.6.2 comment global attribute should be a non-empty string",
-            u"units (None) attribute of 'deployment' must be a string compatible with UDUNITS",
             u"Attribute long_name or/and standard_name is highly recommended for variable deployment",
             u"latitude variable 'latitude' should define standard_name='latitude' or axis='Y'",
             u"longitude variable 'longitude' should define standard_name='longitude' or axis='X'",
@@ -130,9 +129,6 @@ dataset_stem__expected_messages = [
             "§2.6.2 depth:comment should be a non-empty string",
             "§2.6.2 institution global attribute should be a non-empty string",
             "§2.6.2 comment global attribute should be a non-empty string",
-            "units (None) attribute of 'LayerInterf' must be a string compatible with UDUNITS",
-            "units (None) attribute of 'time_bounds' must be a string compatible with UDUNITS",
-            "units (None) attribute of 'Layer' must be a string compatible with UDUNITS",
             'Units "degrees2" for variable area must be convertible to canonical units "m2"',
             "k: vertical coordinates not defining pressure must include a positive attribute that is either 'up' or 'down'",
             "grid_longitude has no coordinate associated with a variable identified as true latitude/longitude; its coordinate variable should also share a subset of grid_longitude's dimensions",
