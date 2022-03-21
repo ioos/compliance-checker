@@ -605,7 +605,7 @@ class CF1_6Check(CFNCCheck):
                                            self.section_titles["3.1"])
 
             # side effects, but better than teasing out the individual result
-            if units_attr_is_string.assert_true(
+            if units is not None and units_attr_is_string.assert_true(
                 isinstance(units, str),
                 "units ({}) attribute of '{}' must be a string compatible with UDUNITS".format(
                     units, variable.name
