@@ -36,7 +36,7 @@ class TestProtocols(TestCase):
         """
         Tests that a connection can be made to Hyrax
         """
-        url = "http://ingria.coas.oregonstate.edu/opendap/hyrax/aggregated/ocean_time_aggregation.ncml"
+        url = "http://test.opendap.org:8080/opendap/ioos/mday_joinExist.ncml"
         cs = CheckSuite()
         ds = cs.load_dataset(url)
         assert ds is not None
@@ -57,7 +57,7 @@ class TestProtocols(TestCase):
         """
         Tests that a connection can be made to an SOS endpoint
         """
-        url = "https://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml"
+        url = "https://thredds.aoos.org/thredds/sos/aoos/cruises/ecofoci/2dy12.nc"
         cs = CheckSuite()
         ds = cs.load_dataset(url)
         assert ds is not None
