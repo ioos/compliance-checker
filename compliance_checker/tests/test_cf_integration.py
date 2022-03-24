@@ -120,6 +120,7 @@ dataset_stem__expected_messages = [
     (
         "pr_inundation",
         [
+            'Units "degrees2" for variable area must be convertible to canonical units "m2"',
             "waterlevel's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are time (T), m (A), n (A) (with U: other/unknown; L: unlimited).",
             "velocity_x's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are time (T), Layer (Z), m (A), n (A) (with U: other/unknown; L: unlimited).",
             "velocity_y's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are time (T), Layer (Z), m (A), n (A) (with U: other/unknown; L: unlimited).",
@@ -201,11 +202,6 @@ dataset_stem__expected_messages = [
             "w's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), s_w (Z), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
             "zeta's spatio-temporal dimensions are not in the recommended order T, Z, Y, X and/or further dimensions are not located left of T, Z, Y, X. The dimensions (and their guessed types) are ocean_time (T), eta_rho (A), xi_rho (A) (with U: other/unknown; L: unlimited).",
             '§2.6.1 Conventions global attribute does not contain "CF-1.8"',
-            "units (None) attribute of 's_w' must be a string compatible with UDUNITS",
-            "units (None) attribute of 's_rho' must be a string compatible with UDUNITS",
-            "units (None) attribute of 'Cs_w' must be a string compatible with UDUNITS",
-            "units (None) attribute of 'user' must be a string compatible with UDUNITS",
-            "units (None) attribute of 'Cs_r' must be a string compatible with UDUNITS",
             "CF recommends latitude variable 'lat_rho' to use units degrees_north",
             "CF recommends latitude variable 'lat_u' to use units degrees_north",
             "CF recommends latitude variable 'lat_v' to use units degrees_north",
