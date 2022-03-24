@@ -38,6 +38,7 @@ class CF1_6Check(CFNCCheck):
     _cc_url = "http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html"
     _cc_display_headers = {3: "Errors", 2: "Warnings", 1: "Info"}
     appendix_a = appendix_a_base
+    appendix_d_parametric_coords = dimless_vertical_coordinates_1_6
 
     def __init__(self, options=None):  # initialize with parent methods and data
         super(CF1_6Check, self).__init__(options)
@@ -565,13 +566,18 @@ class CF1_6Check(CFNCCheck):
         modifier_variables = cfutil._find_standard_name_modifier_variables(ds)
         forecast_variables = cfutil.get_forecast_metadata_variables(ds)
 
-        unit_required_variables = set(
+        dimless_vert = {var.name for var in
+                        ds.get_variables_by_attributes(standard_name=lambda s: s in self.appendix_d_parametric_coords)
+                        if not hasattr(var, "units")}
+        # check anything remaining that has units
+        #unit_containing =
+        unit_required_variables = (set(
             coordinate_variables
             + auxiliary_coordinates
             + geophysical_variables
             + forecast_variables
-            + modifier_variables # standard names with modifiers require proper units, *except* for flags, where they should not be present
-        )
+            + modifier_variables) # standard names with modifiers require proper units, *except* for flags, where they should not be present
+            - dimless_vert)
 
         for name in unit_required_variables:
             # For reduced horizontal grids, the compression index variable does
