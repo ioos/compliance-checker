@@ -500,6 +500,12 @@ def units_temporal(units):
         u = Unit(units)
     except ValueError:
         return False
+    # IMPLEMENTATION CONFORMANCE REQUIRED 4.4 1/3
+    # time units of a time_coordinate variable must contain a reference
+    # time/date
+    # IMPLEMENTATION CONFORMANCE REQUIRED 4.4 3/3
+    # check that reference time seconds is not greater than or
+    # equal to 60  -- implicit in check
     return u.is_time_reference()
 
 

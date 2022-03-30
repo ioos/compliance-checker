@@ -131,6 +131,8 @@ class TestCF1_6(BaseTestCase):
         data type, which is also acceptable.
         """
 
+        # TEST CONFORMANCE 2.2 REQUIRED
+
         # check default netCDF data types
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
         result = self.cf.check_data_types(dataset)
@@ -254,6 +256,7 @@ class TestCF1_6(BaseTestCase):
         Variable, dimension and attr names should begin with a letter and be composed of letters, digits, and underscores.
         """
 
+        # TEST REQD CONFORMANCE 2.3
         # compliant dataset
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
         results = self.cf.check_naming_conventions(dataset)
@@ -282,6 +285,7 @@ class TestCF1_6(BaseTestCase):
         """
         2.3 names should not be distinguished purely by case, i.e., if case is disregarded, no two names should be the same.
         """
+        # TEST CONFORMANCE 2.3 Recommended
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
         result = self.cf.check_names_unique(dataset)
 
@@ -303,6 +307,8 @@ class TestCF1_6(BaseTestCase):
         2.4 A variable may have any number of dimensions, including zero, and the dimensions must all have different names.
         """
 
+        # TEST CONFORMANCE 2.4 REQUIRED
+
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_dimension_names(dataset)
         assert result.value == (6, 7)
@@ -318,6 +324,7 @@ class TestCF1_6(BaseTestCase):
         then X in the CDL definition corresponding to the file. All other dimensions should, whenever possible, be placed to the
         left of the spatiotemporal dimensions.
         """
+        # TEST CONFORMANCE 2.4 RECOMMENDED
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_dimension_order(dataset)
         assert result.value == (5, 6)
@@ -338,7 +345,7 @@ class TestCF1_6(BaseTestCase):
         """
         2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
         """
-
+        # TEST CONFORMANCE 2.5.1 REQUIRED
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_fill_value_outside_valid_range(dataset)
         assert result.msgs[0] == (
@@ -359,6 +366,8 @@ class TestCF1_6(BaseTestCase):
         §2.6.1 the NUG defined global attribute Conventions to the string value
         "CF-1.6"
         """
+        # CONFORMANCE 2.6.1 REQUIRED
+        # Note: conformance doc for 1.6 mentions CF-1.5
         # :Conventions = "CF-1.6"
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
         result = self.cf.check_conventions_version(dataset)
@@ -383,6 +392,7 @@ class TestCF1_6(BaseTestCase):
         properly (§2.6.2).
         """
 
+        # CONFORMANCE 2.6.2
         # check for pass
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
         result = self.cf.check_convention_globals(dataset)
@@ -1984,6 +1994,7 @@ class TestCF1_7(BaseTestCase):
         """
         Unit test for _check_dimensionless_vertical_coordinate_1_7 method.
         """
+        # IMPLEMENTATION CONFORMANCE 3.1 Recommended
         deprecated_units = ["level", "layer", "sigma_level"]
 
         ret_val = []
@@ -2015,9 +2026,10 @@ class TestCF1_7(BaseTestCase):
             assert score == 0
             assert out_of == 1
 
-            # this time, assign compufted_standard_name
+            # this time, assign computed_standard_name
             ret_val = []
-            dataset.variables["lev"].setncattr("computed_standard_name", "air_pressure")
+            dataset.variables["lev"].setncattr("computed_standard_name",
+                                               "air_pressure")
 
             # run the check
             self.cf._check_dimensionless_vertical_coordinate_1_7(
@@ -2338,6 +2350,7 @@ class TestCF1_7(BaseTestCase):
             # First value which checks if add_offset and scale_factor
             # are same type should be false
             self.assertFalse(r[0].value)
+            # TEST CONFORMANCE 8.1 REQUIRED 1/3
             self.assertEqual(r[0].msgs[0],
                    "When both scale_factor and add_offset are supplied for "
                    f"variable coarse_temp_{var_bytes}, they must have the "
