@@ -1893,7 +1893,6 @@ class CF1_6Check(CFNCCheck):
     def check_duplicate_axis(self, ds):
         """
         Checks that no variable contains two coordinates defining the same
-        axis.
 
         Chapter 5 paragraph 6
 
@@ -2860,6 +2859,33 @@ class CF1_6Check(CFNCCheck):
                     BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
                 )
                 ret_val.append(result)
+            else:
+                # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 4/6
+                clim_var = ds.variables[clim_coord_var.climatology]
+                if clim.var.dtype is str or np.issubdtype(clim_var, np.number):
+                    result.out_of += 1
+                    reasoning.append(
+                        f"Climatology variable {clim_var.name} is not a numeric type"
+                        )
+                # IMPLEMENTATION CONFORMANCE REQUIRED 6/6
+                if (hasattr(clim_var, "_FillValue") or
+                    hasattr(clim_var, "missing_value")):
+                    result.out_of += 1
+                    reasoning.append(
+                        f"Climatology variable {clim_var.name} may not contain"
+                        "attributes _FillValue or missing_value"
+                        )
+
+                # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 5/6
+                for same_attr in ("units", "standard_name", "calendar"):
+                    if hasattr(clim_var, same_attr):
+                        result.assert_true(getattr(clim_var, same_attr) ==
+                                          getattr(clim_coord_var, same_attr,
+                                                  None),
+                                          f"Attribute {same_attr} must have the same value in both "
+                                           "variables {clim_var.name} and {clim_coord_var.name}")
+
+
 
             # check that coordinate bounds are in the proper order.
             # make sure last elements are boundary variable specific dimensions
@@ -3316,4 +3342,3 @@ class CF1_6Check(CFNCCheck):
                 ret_val.append(result)
 
         return ret_val
-
