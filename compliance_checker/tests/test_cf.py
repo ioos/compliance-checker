@@ -658,6 +658,14 @@ class TestCF1_6(BaseTestCase):
         assert scored > 0
         assert scored == out_of
 
+        dataset = MockTimeSeries()
+        flags_var = dataset.createVariable("flags", "f8", ("time",))
+        flags_var.standard_name = "quality_flag"
+        flags_var.flag_meanings = "LAND"
+        flags_var.flag_masks = np.array([1], dtype="i2")
+        results = self.cf.check_flags(dataset)
+        assert scored > 0 and scored == out_of
+
     def test_check_bad_units(self):
         """Load a dataset with units that are expected to fail (bad_units.nc).
         There are 6 variables in this dataset, three of which should give
