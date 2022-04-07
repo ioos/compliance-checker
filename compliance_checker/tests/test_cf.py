@@ -671,7 +671,6 @@ class TestCF1_6(BaseTestCase):
         There are 6 variables in this dataset, three of which should give
         an error:
             - time, with units "s" (should be <units> since <epoch>)
-            - lat, with units "degrees_E" (should be degrees)
             - lev, with units "level" (deprecated)"""
 
         dataset = self.load_dataset(STATIC_FILES["2dim"])
@@ -693,7 +692,7 @@ class TestCF1_6(BaseTestCase):
 
         # check that all the expected variables have been hit
         assert all(
-            any(s in msg for msg in results_list) for s in ["time", "lat", "lev"]
+            any(s in msg for msg in results_list) for s in ["time", "lev"]
         )
 
     def test_latitude(self):

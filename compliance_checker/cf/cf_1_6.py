@@ -1118,12 +1118,9 @@ class CF1_6Check(CFNCCheck):
         if isinstance(flag_meanings, str):
             flag_meanings = flag_meanings.split()
             valid_values.assert_true(
-                len(flag_meanings) == np.array(flag_values).size
-                "{}'s flag_meanings and flag_values should have the same number ".format(
-                    name
-                )
-                + "of elements.",
-            )
+                len(flag_meanings) == np.array(flag_values).size,
+                f"{name}'s flag_meanings and flag_values should have the same "
+                 "number of elements.")
 
         return valid_values.to_result()
 
