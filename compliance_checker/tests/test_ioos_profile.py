@@ -809,7 +809,9 @@ class TestIOOS1_2(BaseTestCase):
         # QARTOD variable with flag meanings, without flag_meanings
         qr.setncattr("flag_values", np.array([0, 1, 2], dtype=np.byte))
         results = self.ioos.check_qartod_variables_flags(ds)
-        self.assertEqual(results[0].value[0], results[0].value[1])  # should pass
+        self.assertIn("Variable depth_qc must have attribute flag_meanings defined when flag_values attribute is present",
+                      results[0].msgs)
+        self.assertNotEqual(results[0].value[0], results[0].value[1])  # should fail
         self.assertFalse(results[1].value)  # still fail
 
         # QARTOD variable with flag meanings, flag_values
