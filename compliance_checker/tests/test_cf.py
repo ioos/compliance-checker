@@ -1994,7 +1994,7 @@ class TestCF1_7(BaseTestCase):
         """
         Unit test for _check_dimensionless_vertical_coordinate_1_7 method.
         """
-        # IMPLEMENTATION CONFORMANCE 3.1 Recommended
+        # IMPLEMENTATION 3.1 Recommended
         deprecated_units = ["level", "layer", "sigma_level"]
 
         ret_val = []
