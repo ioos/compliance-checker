@@ -90,6 +90,15 @@ class TestCF1_6(BaseTestCase):
         self.addCleanup(nc.close)
         return nc
 
+    def test_extension(self):
+        # TEST CONFORMANCE 2.1
+        ds = MockTimeSeries()
+        result = self.cf.check_filename(ds)
+        assert result.value[0] == result.value[1]
+        ds = MockTimeSeries("filename.notncending")
+        result = self.cf.check_filename(ds)
+        assert result.value[0] != result.value[1]
+
     def test_coord_data_vars(self):
         """Check that coordinate data variables are properly handled"""
         ds = MockTimeSeries()

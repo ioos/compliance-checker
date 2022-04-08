@@ -8,13 +8,16 @@ class MockNetCDF(Dataset):
     Wrapper object around NetCDF Dataset to write data only to memory.
     """
 
-    def __init__(self):
+    def __init__(self, filename=None):
         # taken from test/tst_diskless.py NetCDF library
         # even though we aren't persisting data to disk, the constructor
         # requires a filename not currently in use by another Dataset object..
-        tmp_filename = tempfile.NamedTemporaryFile(suffix=".nc", delete=True).name
+        if filename is None:
+            temp_filename = tempfile.NamedTemporaryFile(suffix=".nc", delete=True).name
+        else:
+            temp_filename = filename
         super(MockNetCDF, self).__init__(
-            tmp_filename, "w", diskless=True, persist=False
+            temp_filename, "w", diskless=True, persist=False
         )
 
 
@@ -24,11 +27,12 @@ class MockTimeSeries(MockNetCDF):
     variables defined
     """
 
-    def __init__(self, default_fill_value=None):
-        super(MockTimeSeries, self).__init__()
+    def __init__(self, filename=None, default_fill_value=None):
+        super(MockTimeSeries, self).__init__(filename)
         self.createDimension("time", 500)
         for v in ("time", "lon", "lat", "depth"):
-            self.createVariable(v, "d", ("time",), fill_value=default_fill_value)
+            self.createVariable(v, "d", ("time",),
+                                fill_value=default_fill_value)
 
         # give some applicable units
         self.variables["time"].units = "seconds since 2019-04-11T00:00:00"

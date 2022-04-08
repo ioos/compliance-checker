@@ -49,6 +49,13 @@ class CF1_6Check(CFNCCheck):
     ###############################################################################
     # Chapter 2: NetCDF Files and Components
     ###############################################################################
+    def check_filename(self, ds):
+        """Checks that the filename ends with .nc"""
+        # IMPLEMENTS CONFORMANCE 2.1
+        filename_suffix = TestCtx(BaseCheck.HIGH, self.section_titles["2.1"])
+        filename_suffix.assert_true(ds.filepath().endswith("nc"),
+                        f'Dataset path {ds.filepath} must end with ".nc"')
+        return filename_suffix.to_result()
 
     def check_data_types(self, ds):
         """
