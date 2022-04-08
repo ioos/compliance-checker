@@ -1091,25 +1091,21 @@ class CF1_6Check(CFNCCheck):
         flag_meanings = getattr(variable, "flag_meanings", None)
         valid_values = TestCtx(BaseCheck.HIGH, self.section_titles["3.5"])
 
-        # flag_values must be a list of values, not a string or anything else
-        valid_values.assert_true(
-            isinstance(flag_values, np.ndarray),
-            "{}'s flag_values must be an array of values not {}".format(
-                name, type(flag_values)
-            ),
+        # IMPLEMENTATION CONFORMANCE 3.5 REQUIRED 2/8
+        valid_values.assert_true(hasattr(variable, "flag_meanings"),
+            f"Variable {variable.name} must have attribute flag_meanings "
+            "defined when flag_values attribute is present"
         )
 
-        # We can't perform any more checks
-        if not isinstance(flag_values, np.ndarray):
-            return valid_values.to_result()
 
         # the flag values must be independent, no repeating values
         flag_set = set(flag_values)
         valid_values.assert_true(
-            len(flag_set) == len(flag_values),
+            len(flag_set) == np.array(flag_values).size,
             "{}'s flag_values must be independent and can not be repeated".format(name),
         )
 
+        # IMPLEMENTATION CONFORMANCE 3.5 REQUIRED 1/8
         # the data type for flag_values should be the same as the variable
         valid_values.assert_true(
             variable.dtype.type == flag_values.dtype.type,
@@ -1117,15 +1113,13 @@ class CF1_6Check(CFNCCheck):
             "".format(flag_values.dtype.type, name, variable.dtype.type),
         )
 
+        # IMPLEMENTATION CONFORMANCE 3.5 REQUIRED 4/8
         if isinstance(flag_meanings, str):
             flag_meanings = flag_meanings.split()
             valid_values.assert_true(
-                len(flag_meanings) == len(flag_values),
-                "{}'s flag_meanings and flag_values should have the same number ".format(
-                    name
-                )
-                + "of elements.",
-            )
+                len(flag_meanings) == np.array(flag_values).size,
+                f"{name}'s flag_meanings and flag_values should have the same "
+                 "number of elements.")
 
         return valid_values.to_result()
 
@@ -1145,19 +1139,9 @@ class CF1_6Check(CFNCCheck):
         variable = ds.variables[name]
 
         flag_masks = variable.flag_masks
-        flag_meanings = getattr(ds, "flag_meanings", None)
+        flag_meanings = getattr(variable, "flag_meanings", None)
 
         valid_masks = TestCtx(BaseCheck.HIGH, self.section_titles["3.5"])
-
-        valid_masks.assert_true(
-            isinstance(flag_masks, np.ndarray),
-            "{}'s flag_masks must be an array of values not {}".format(
-                name, type(flag_masks).__name__
-            ),
-        )
-
-        if not isinstance(flag_masks, np.ndarray):
-            return valid_masks.to_result()
 
         valid_masks.assert_true(
             variable.dtype.type == flag_masks.dtype.type,
@@ -1179,11 +1163,11 @@ class CF1_6Check(CFNCCheck):
         if isinstance(flag_meanings, str):
             flag_meanings = flag_meanings.split()
             valid_masks.assert_true(
-                len(flag_meanings) == len(flag_masks),
-                "{} flag_meanings and flag_masks should have the same number ".format(
-                    name
-                )
-                + "of elements.",
+                # cast to array here as single element arrays are returned as
+                # scalars from netCDF4 Python
+                len(flag_meanings) == np.array(flag_masks).size,
+                f"{name} flag_meanings and flag_masks should have the same "
+                "number of elements."
             )
 
         return valid_masks.to_result()
@@ -1222,6 +1206,7 @@ class CF1_6Check(CFNCCheck):
             len(flag_meanings) > 0, "{}'s flag_meanings can't be empty".format(name)
         )
 
+        # IMPLEMENTATION CONFORMANCE REQUIRED 3.5 3/8
         flag_regx = regex.compile(r"^[0-9A-Za-z_\-.+@]+$")
         meanings = flag_meanings.split()
         for meaning in meanings:
