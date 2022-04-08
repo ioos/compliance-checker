@@ -820,11 +820,23 @@ class TestCF1_6(BaseTestCase):
         units_set.units = "dbar"
         self.assertTrue(is_vertical_coordinate("not_known", units_set))
 
+        # TEST CONFORMANCE 4.3.2
         # Proper units/positive
         positive = mock_variable()
         positive.units = "m"
         positive.positive = "up"
         self.assertTrue(is_vertical_coordinate("not_known", positive))
+
+        # Proper units/negative
+        negative = mock_variable()
+        negative.units = "m"
+        negative.positive = "down"
+        self.assertTrue(is_vertical_coordinate("not_known", negative))
+
+        wrong = mock_variable()
+        wrong.units = "m"
+        wrong.positive = "left"
+        self.assertFalse(is_vertical_coordinate("not_known", wrong))
 
     def test_vertical_dimension(self):
         """
