@@ -233,6 +233,7 @@ class CF1_6Check(CFNCCheck):
 
         rname = regex.compile("^[A-Za-z][A-Za-z0-9_]*$")
 
+        # IMPLEMENTATION CONFORMANCE 2.3 REQUIRED
         for name, variable in ds.variables.items():
             variable_naming.assert_true(
                 rname.match(name) is not None,
@@ -295,6 +296,7 @@ class CF1_6Check(CFNCCheck):
         total = len(ds.variables)
         names = defaultdict(int)
 
+        # IMPLEMENTATION CONFORMANCE 2.3 RECOMMENDED
         for k in ds.variables:
             names[k.lower()] += 1
 
@@ -328,6 +330,7 @@ class CF1_6Check(CFNCCheck):
             for d in v.dimensions:
                 dims[d] += 1
 
+            # IMPLEMENTATION CONFORMANCE 2.4 REQUIRED
             for dimension, count in dims.items():
                 if count > 1:
                     fails.append(
@@ -917,6 +920,7 @@ class CF1_6Check(CFNCCheck):
 
             # If standard_name is not defined but long_name is, don't continue
             # the check for this variable
+            # IMPLEMENTATION CONFORMANCE 3.3 REQUIRED 1, 2, 3 / 3
             if standard_name is not None:
                 standard_name_present = True
                 valid_std_name = TestCtx(BaseCheck.HIGH, self.section_titles["3.3"])
@@ -1565,7 +1569,8 @@ class CF1_6Check(CFNCCheck):
             ):
                 continue
 
-            valid_vertical_coord = TestCtx(BaseCheck.HIGH, self.section_titles["4.3"])
+            valid_vertical_coord = TestCtx(BaseCheck.HIGH,
+                                           self.section_titles["4.3"])
             valid_vertical_coord.assert_true(
                 isinstance(units, str) and units,
                 "§4.3.1 {}'s units must be defined for vertical coordinates, "
@@ -2528,6 +2533,7 @@ class CF1_6Check(CFNCCheck):
             cell_measures=lambda c: c is not None
         )
         for var in variables:
+            # IMPLEMENTATION CONFORMANCE REQUIRED 1/2
             search_str = r"^(?:area|volume): (\w+)$"
             search_res = regex.search(search_str, var.cell_measures)
             if not search_res:
@@ -3044,7 +3050,8 @@ class CF1_6Check(CFNCCheck):
                     ]:
                         valid = False
                         # IMPLEMENTATION CONFORMANCE REQUIRED 3/3
-                        reasoning.append("Variable is not of type byte, short, or int.")
+                        # IMPLEMENTATION CONFORMANCE REQUIRED 3/3
+                        reasoning.append("Variable is not of type byte, short, or int as required for different type add_offset/scale_factor.")
 
             result = Result(
                 BaseCheck.MEDIUM, valid, self.section_titles["8.1"], reasoning
