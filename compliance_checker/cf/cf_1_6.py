@@ -69,6 +69,7 @@ class CF1_6Check(CFNCCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: compliance_checker.base.Result
         """
+        # IMPLEMENTS CONFORMANCE 2.2
         fails = []
         total = len(ds.variables)
 
@@ -233,6 +234,7 @@ class CF1_6Check(CFNCCheck):
 
         rname = regex.compile("^[A-Za-z][A-Za-z0-9_]*$")
 
+        # IMPLEMENTATION CONFORMANCE 2.3 REQUIRED
         for name, variable in ds.variables.items():
             variable_naming.assert_true(
                 rname.match(name) is not None,
@@ -295,6 +297,7 @@ class CF1_6Check(CFNCCheck):
         total = len(ds.variables)
         names = defaultdict(int)
 
+        # IMPLEMENTATION CONFORMANCE 2.3 RECOMMENDED
         for k in ds.variables:
             names[k.lower()] += 1
 
@@ -328,6 +331,7 @@ class CF1_6Check(CFNCCheck):
             for d in v.dimensions:
                 dims[d] += 1
 
+            # IMPLEMENTATION CONFORMANCE 2.4 REQUIRED
             for dimension, count in dims.items():
                 if count > 1:
                     fails.append(
@@ -629,6 +633,7 @@ class CF1_6Check(CFNCCheck):
             ret_val.append(units_attr_is_string.to_result())
 
             if isinstance(standard_name, str):
+                # CONFORMANCE 3.1 REQUIRED
                 valid_standard_units = self._check_valid_standard_units(ds, name)
                 ret_val.append(valid_standard_units)
 
@@ -824,6 +829,8 @@ class CF1_6Check(CFNCCheck):
         # appropriate under CF
 
         # UDUnits accepts "s" as a unit of time but it should be <unit> since <epoch>
+        # TODO: forecast_reference_time.  Include upcoming merge.
+        # IMPLEMENTATION CONFORMANCE 4.4 REQUIRED 1/2
         elif standard_name == "time":
             valid_standard_units.assert_true(
                 util.units_convertible(units, "seconds since 1970-01-01"),
@@ -919,6 +926,7 @@ class CF1_6Check(CFNCCheck):
 
             # If standard_name is not defined but long_name is, don't continue
             # the check for this variable
+            # IMPLEMENTATION CONFORMANCE 3.3 REQUIRED 1, 2, 3 / 3
             if standard_name is not None:
                 standard_name_present = True
                 valid_std_name = TestCtx(BaseCheck.HIGH, self.section_titles["3.3"])
@@ -951,6 +959,7 @@ class CF1_6Check(CFNCCheck):
             else:
                 standard_name_present = False
 
+            # IMPLEMENTATION CONFORMANCE 3 RECOMMENDED
             long_or_std_name.assert_true(
                 long_name_present or standard_name_present,
                 "Attribute long_name or/and standard_name is highly recommended for variable {}".format(
@@ -1566,7 +1575,8 @@ class CF1_6Check(CFNCCheck):
             ):
                 continue
 
-            valid_vertical_coord = TestCtx(BaseCheck.HIGH, self.section_titles["4.3"])
+            valid_vertical_coord = TestCtx(BaseCheck.HIGH,
+                                           self.section_titles["4.3"])
             valid_vertical_coord.assert_true(
                 isinstance(units, str) and units,
                 "§4.3.1 {}'s units must be defined for vertical coordinates, "
@@ -1703,6 +1713,7 @@ class CF1_6Check(CFNCCheck):
                 ret_val.append(result)
                 continue
             # Correct and identifiable units
+            # TODO: year zero climatological time warning
             result = Result(BaseCheck.HIGH, True, self.section_titles["4.4"])
             ret_val.append(result)
             correct_units = util.units_temporal(variable.units)
@@ -1861,6 +1872,7 @@ class CF1_6Check(CFNCCheck):
                 if aux_coord not in ds.variables:
                     continue
 
+                # TODO CONFORMANCE: Partial implementation of labels
                 # §6.1 Allows for "labels" to be referenced as coordinates
                 if (
                     hasattr(ds.variables[aux_coord].dtype, "char")
@@ -1885,7 +1897,6 @@ class CF1_6Check(CFNCCheck):
     def check_duplicate_axis(self, ds):
         """
         Checks that no variable contains two coordinates defining the same
-        axis.
 
         Chapter 5 paragraph 6
 
@@ -2528,6 +2539,7 @@ class CF1_6Check(CFNCCheck):
             cell_measures=lambda c: c is not None
         )
         for var in variables:
+            # IMPLEMENTATION CONFORMANCE REQUIRED 1/2
             search_str = r"^(?:area|volume): (\w+)$"
             search_res = regex.search(search_str, var.cell_measures)
             if not search_res:
@@ -2603,6 +2615,7 @@ class CF1_6Check(CFNCCheck):
         """
 
         ret_val = []
+        # CONFORMANCE IMPLEMENTATION 7.3 1/3
         psep = regex.compile(
             r"(?P<vars>\w+: )+(?P<method>\w+) ?(?P<where>where (?P<wtypevar>\w+) "
             r"?(?P<over>over (?P<otypevar>\w+))?| ?)(?:\((?P<paren_contents>[^)]*)\))?"
@@ -2681,6 +2694,7 @@ class CF1_6Check(CFNCCheck):
         Checks that the spacing and/or comment info contained inside the
         parentheses in cell_methods is well-formed
         """
+        # IMPLEMENTATION CONFORMANCE REQUIRED 3/3 - comment/paren contents
         valid_info = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.3"])
         # if there are no colons, this is a simple comment
         # TODO: are empty comments considered valid?
@@ -2817,7 +2831,7 @@ class CF1_6Check(CFNCCheck):
             "median",
         ]
 
-        # find any climatology axies variables; any variables which contain climatological stats will use
+        # find any climatology axis variables; any variables which contain climatological stats will use
         # these variables as coordinates
         clim_time_coord_vars = ds.get_variables_by_attributes(
             climatology=lambda s: s is not None
@@ -2838,6 +2852,7 @@ class CF1_6Check(CFNCCheck):
                 )
                 ret_val.append(result)
 
+            # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 2/6
             # make sure the climatology variable referenced actually exists
             elif clim_coord_var.climatology not in ds.variables:
                 reasoning.append(
@@ -2849,9 +2864,37 @@ class CF1_6Check(CFNCCheck):
                     BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
                 )
                 ret_val.append(result)
+            else:
+                # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 4/6
+                clim_var = ds.variables[clim_coord_var.climatology]
+                if clim.var.dtype is str or np.issubdtype(clim_var, np.number):
+                    result.out_of += 1
+                    reasoning.append(
+                        f"Climatology variable {clim_var.name} is not a numeric type"
+                        )
+                # IMPLEMENTATION CONFORMANCE REQUIRED 6/6
+                if (hasattr(clim_var, "_FillValue") or
+                    hasattr(clim_var, "missing_value")):
+                    result.out_of += 1
+                    reasoning.append(
+                        f"Climatology variable {clim_var.name} may not contain"
+                        "attributes _FillValue or missing_value"
+                        )
+
+                # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 5/6
+                for same_attr in ("units", "standard_name", "calendar"):
+                    if hasattr(clim_var, same_attr):
+                        result.assert_true(getattr(clim_var, same_attr) ==
+                                          getattr(clim_coord_var, same_attr,
+                                                  None),
+                                          f"Attribute {same_attr} must have the same value in both "
+                                           "variables {clim_var.name} and {clim_coord_var.name}")
+
+
 
             # check that coordinate bounds are in the proper order.
             # make sure last elements are boundary variable specific dimensions
+            # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 3/6
             if (
                 clim_coord_var.dimensions[:]
                 != ds.variables[clim_coord_var.climatology].dimensions[
@@ -2872,6 +2915,8 @@ class CF1_6Check(CFNCCheck):
                 )
                 ret_val.append(result)
 
+            # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 3/6 - dim size of 2 for
+            # climatology-specific dimension
             elif (ds.dimensions[
                     ds.variables[clim_coord_var.climatology].dimensions[-1]
                 ].size != 2):
@@ -2981,11 +3026,18 @@ class CF1_6Check(CFNCCheck):
             if not scale_factor:
                 scale_factor = add_offset
 
+            # IMPLEMENTATION CONFORMANCE 8.1 REQUIRED 1/3
+            # scale_factor and add_offset same type
             if type(add_offset) != type(scale_factor):
                 valid = False
                 reasoning.append(
                     "Attributes add_offset and scale_factor have different data type."
                 )
+            # IMPLEMENTATION CONFORMANCE 8.1 REQUIRED 2/3
+            # scale_factor and add_offset must be floating point or double
+            # if not the same type
+            # FIXME: Check add_offset too.
+
             elif type(scale_factor) != var.dtype.type:
                 # Check both attributes are type float or double
                 if not isinstance(scale_factor, (float, np.floating)):
@@ -3003,7 +3055,9 @@ class CF1_6Check(CFNCCheck):
                         np.int64,
                     ]:
                         valid = False
-                        reasoning.append("Variable is not of type byte, short, or int.")
+                        # IMPLEMENTATION CONFORMANCE REQUIRED 3/3
+                        # IMPLEMENTATION CONFORMANCE REQUIRED 3/3
+                        reasoning.append("Variable is not of type byte, short, or int as required for different type add_offset/scale_factor.")
 
             result = Result(
                 BaseCheck.MEDIUM, valid, self.section_titles["8.1"], reasoning
@@ -3102,6 +3156,7 @@ class CF1_6Check(CFNCCheck):
                         compress_var.name
                     )
                 )
+            # IMPLEMENTATION CONFORMANCE 8.2 REQUIRED 1/3
             # ensure compression variable is a proper index, and thus is an
             # signed or unsigned integer type of some sort
             if (compress_var.dtype is str) or (
@@ -3113,6 +3168,7 @@ class CF1_6Check(CFNCCheck):
                         compress_var.name
                     )
                 )
+            # IMPLEMENTATION CONFORMANCE 8.2 REQUIRED 2/3
             # make sure all the variables referred to are contained by the
             # variables.
             if not compress_set.issubset(ds.dimensions):
@@ -3292,4 +3348,3 @@ class CF1_6Check(CFNCCheck):
                 ret_val.append(result)
 
         return ret_val
-
