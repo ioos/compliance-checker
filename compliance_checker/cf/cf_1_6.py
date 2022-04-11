@@ -38,6 +38,7 @@ class CF1_6Check(CFNCCheck):
     _cc_url = "http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html"
     _cc_display_headers = {3: "Errors", 2: "Warnings", 1: "Info"}
     appendix_a = appendix_a_base
+    appendix_d_parametric_coords = dimless_vertical_coordinates_1_6
 
     def __init__(self, options=None):  # initialize with parent methods and data
         super(CF1_6Check, self).__init__(options)
@@ -572,13 +573,18 @@ class CF1_6Check(CFNCCheck):
         modifier_variables = cfutil._find_standard_name_modifier_variables(ds)
         forecast_variables = cfutil.get_forecast_metadata_variables(ds)
 
-        unit_required_variables = set(
+        dimless_vert = {var.name for var in
+                        ds.get_variables_by_attributes(standard_name=lambda s: s in self.appendix_d_parametric_coords)
+                        if not hasattr(var, "units")}
+        # check anything remaining that has units
+        #unit_containing =
+        unit_required_variables = (set(
             coordinate_variables
             + auxiliary_coordinates
             + geophysical_variables
             + forecast_variables
-            + modifier_variables # standard names with modifiers require proper units, *except* for flags, where they should not be present
-        )
+            + modifier_variables) # standard names with modifiers require proper units, *except* for flags, where they should not be present
+            - dimless_vert)
 
         for name in unit_required_variables:
             # For reduced horizontal grids, the compression index variable does
@@ -612,8 +618,8 @@ class CF1_6Check(CFNCCheck):
                                            self.section_titles["3.1"])
 
             # side effects, but better than teasing out the individual result
-            if units_attr_is_string.assert_true(
-                isinstance(units, str) or units is None,
+            if units is not None and units_attr_is_string.assert_true(
+                isinstance(units, str),
                 "units ({}) attribute of '{}' must be a string compatible with UDUNITS".format(
                     units, variable.name
                 ),
@@ -662,10 +668,7 @@ class CF1_6Check(CFNCCheck):
         #    status_flag
         if standard_name_modifier is not None:
             if standard_name_modifier not in valid_modifiers:
-                valid_units.out_of += 1
-                message = (f"Standard name modifier {standard_name_modifier} is not one of "
-                           f"{valid_modifiers.keys()}")
-                valid_units.messages.append(message)
+                # standard name modifier warning given elsewhere
                 return valid_units.to_result()
             else:
                 unit_type = valid_modifiers[standard_name_modifier]
@@ -725,11 +728,14 @@ class CF1_6Check(CFNCCheck):
             valid_units.score += 1
             valid_units.out_of += 1
 
-        # time has special unit handling rules
-        if standard_name != "time":
+        # time and forecast_reference time have special unit handling rules
+        # that use time relative to a reference point, despite canonical units
+        # being expressed as "s"/seconds
+        if standard_name not in {"time", "forecast_reference_time"}:
             valid_units.assert_true(units_conv.is_convertible(Unit(reference)),
-                                    f'Units "{units}" must be convertible to canonical units '
-                                    f'"{reference}"')
+                                    f'Units "{units}" for variable '
+                                    f"{variable_name} must be convertible to "
+                                    f'canonical units "{reference}"')
 
         return valid_units.to_result()
 
@@ -830,7 +836,7 @@ class CF1_6Check(CFNCCheck):
             # degrees is allowed if using a transformed grid
             allowed_units = cfutil.VALID_LAT_UNITS | {"degrees"}
             valid_standard_units.assert_true(
-                units.lower() if units is not None else None in allowed_units,
+                (units.lower() if units is not None else None) in allowed_units,
                 'variables defining latitude ("{}") must use degrees_north '
                 "or degrees if defining a transformed grid. Currently "
                 "{}".format(variable_name, units),
@@ -840,7 +846,7 @@ class CF1_6Check(CFNCCheck):
             # degrees is allowed if using a transformed grid
             allowed_units = cfutil.VALID_LON_UNITS | {"degrees"}
             valid_standard_units.assert_true(
-                units.lower() if units is not None else None in allowed_units,
+                (units.lower() if units is not None else None) in allowed_units,
                 'variables defining longitude ("{}") must use degrees_east '
                 "or degrees if defining a transformed grid. Currently "
                 "{}".format(variable_name, units),

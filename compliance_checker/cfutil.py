@@ -374,6 +374,13 @@ def get_cell_boundary_variables(ds):
             boundary_variables.append(var.bounds)
     return boundary_variables
 
+@lru_cache(128)
+def get_bounds_variables(ds):
+    contains_bounds = ds.get_variables_by_attributes(bounds=
+                                                     lambda s: s in ds.variables)
+    return {ds.variables[parent_var.bounds] for parent_var in contains_bounds}
+
+
 
 @lru_cache(128)
 def get_geophysical_variables(ds):
@@ -383,10 +390,10 @@ def get_geophysical_variables(ds):
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     """
-
     parameters = []
     for variable in ds.variables:
-        if is_geophysical(ds, variable):
+        if (is_geophysical(ds, variable) and
+            variable not in get_bounds_variables(ds)):
             parameters.append(variable)
     return parameters
 
