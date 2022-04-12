@@ -1770,7 +1770,7 @@ class CF1_6Check(CFNCCheck):
         :rtype: list
         :return: List of results
         """
-        valid_calendars = [
+        valid_calendars = {
             "gregorian",
             "standard",
             "proleptic_gregorian",
@@ -1780,8 +1780,7 @@ class CF1_6Check(CFNCCheck):
             "366_day",
             "360_day",
             "julian",
-            "none",
-        ]
+            "none"}
 
         ret_val = []
 
@@ -1791,23 +1790,68 @@ class CF1_6Check(CFNCCheck):
             calendar=lambda c: c is not None
         ):
             reasoning = None
-            valid_calendar = time_var.calendar in valid_calendars
+            standard_calendar = time_var.calendar in valid_calendars
 
-            if not valid_calendar:
-                reasoning = [
-                    "§4.4.1 Variable %s should have a valid calendar: '%s' is not a valid calendar"
-                    % (time_var.name, time_var.calendar)
-                ]
-
+            # if a nonstandard calendar, then leap_years and leap_months must
+            # must be present
+            if not standard_calendar:
+                result = self._check_leap_time(time_var)
             # passes if the calendar is valid, otherwise notify of invalid
             # calendar
+            else:
+                result = Result(BaseCheck.LOW, True, self.section_titles["4.4"],
+                                reasoning)
 
-            result = Result(
-                BaseCheck.LOW, valid_calendar, self.section_titles["4.4"], reasoning
-            )
             ret_val.append(result)
 
         return ret_val
+
+    def _check_leap_time(self, time_variable):
+        """
+        Helper method to handle checking custom calendar leap time specifiations
+        """
+        leap_time = TestCtx(BaseCheck.HIGH, self.section_titles["4.4"])
+        leap_time.out_of = 1
+        # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 2, 3 / 5
+        if (not hasattr(time_variable, "month_lengths") or not
+            (hasattr(time_variable.month_lengths, "dtype") and
+             np.issubdtype(time_variable.month_lengths.dtype, np.integer) and
+             time_variable.month_lengths.size == 12)):
+            leap_time.messages.append(
+                f"For nonstandard calendar on variable {time_variable.name}, "
+                "attribute month_lengths must be supplied as a 12-element "
+                "integer array")
+            return leap_time.to_result()
+        # If leap years are included, then attributes leap_month and
+        # leap_year must be included.
+        has_leap_year = hasattr(time_variable, "leap_year")
+        # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 4,5/5
+        if hasattr(time_variable, "leap_month"):
+            leap_time.assert_true(
+                (np.isscalar(time_variable.leap_month) and
+                 hasattr(time_variable.leap_month, "dtype") and
+                 np.issubdtype(time_variable.leap_month.dtype, np.integer) and
+                1 <= time_variable.leap_month <= 12),
+                    "When attribute leap_month is supplied for variable "
+                    f"{time_variable.name}, the value must be a scalar integer "
+                    "between 1 and 12")
+            # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED 1/2
+            if not has_leap_year:
+                leap_time.out_of += 1
+                fail_message = (f"For time variable {time_variable.name}, "
+                                 "attribute leap_year must be present if "
+                                 "leap_month attribute is defined")
+                leap_time.messages.append(fail_message)
+
+        # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 5/5
+        if has_leap_year:
+            leap_time.assert_true(np.isscalar(time_variable.leap_year) and
+                    hasattr(time_variable.leap_year, "dtype"),
+                    "When attribute leap_year is supplied for variable "
+                    f"{time_variable.name}, the value must be a scalar "
+                    "integer")
+        return leap_time.to_result()
+
 
     ###############################################################################
     # Chapter 5: Coordinate Systems
