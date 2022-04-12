@@ -1123,10 +1123,12 @@ class TestCF1_6(BaseTestCase):
                          "time, the value must be a scalar integer")
 
         dataset.variables["time"].leap_year = ["2.18"]
+        results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
         assert leap_year_msg in messages
 
         dataset.variables["time"].leap_year = 4
+        results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
         assert leap_year_msg not in messages
 
