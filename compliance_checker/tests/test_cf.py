@@ -595,8 +595,8 @@ class TestCF1_6(BaseTestCase):
         bad_dim_ds.createVariable("clim_bounds", "f8", ("time"))
         temp.climatology = "clim_bounds"
         results = self.cf.check_climatological_statistics(bad_dim_ds)
-        assert results[0].value[0] < results[0].value[1]
-        assert (results[0].msgs[0] == 'Climatology dimension "clim_bounds" '
+        assert results[1].value[0] < results[1].value[1]
+        assert (results[1].msgs[0] == 'Climatology dimension "clim_bounds" '
                 "should only contain two elements")
 
     def test_check_ancillary_variables(self):
@@ -1115,7 +1115,7 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
         assert leap_month_msg not in messages
         # TEST CONFORMANCE 4.4.1 RECOMMENDED 1/2
-        assert ("For time variable time, attribute leap_year must be present " 
+        assert ("For time variable time, attribute leap_year must be present "
                 "if leap_month attribute is defined" in messages)
 
         # TEST CONFORMANCE 4.4.1 REQUIRED 5/5
