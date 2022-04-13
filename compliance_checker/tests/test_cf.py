@@ -2378,6 +2378,23 @@ class TestCF1_8(BaseTestCase):
     def setUp(self):
         self.cf = CF1_8Check()
 
+    def test_groups(self):
+        dataset = MockTimeSeries()
+        # TEST CONFORMANCE 2.7 REQUIRED 1/4
+        nonroot_group = dataset.createGroup("nonroot")
+        dummy = nonroot_group.createVariable("dummy")
+        dummy.Conventions = "CF-1.8"
+        dummy.external_variables = "ext1"
+        results = self.cf.check_groups(dataset)
+        bad_msg_template = ("§2.7.2 Note: attribute '{}' found on non-root "
+                            "group 'nonroot'. It is allowed in order to provide "
+                            "additional provenance and description of the "
+                            "subsidiary data. It does not override "
+                            "attributes from the parent groups.")
+        bad_messages = {bad_msg_template.format(attr_name) for attr_name in
+                        ["Conventions", "external_variables"]}
+        assert bad_messages == set(results[0].msgs)
+
     def test_point_geometry_simple(self):
         dataset = MockTimeSeries()
         fake_data = dataset.createVariable("someData", "f8", ("time",))
