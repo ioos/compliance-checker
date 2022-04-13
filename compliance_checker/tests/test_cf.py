@@ -1557,6 +1557,10 @@ class TestCF1_7(BaseTestCase):
 
     def test_check_external_variables(self):
         dataset = MockTimeSeries()
+        # bad type should be ignored here and instead handled by CF Appendix A
+        dataset.external_variables = 1
+        result = self.cf.check_external_variables(dataset)
+        assert result.value[0] == result.value[1] == 0
         dataset.external_variables = "ext1 ext2 ext3"
         result = self.cf.check_external_variables(dataset)
         assert result.value[0] == result.value[1]
