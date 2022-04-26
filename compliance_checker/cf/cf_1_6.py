@@ -1769,7 +1769,7 @@ class CF1_6Check(CFNCCheck):
         :rtype: list
         :return: List of results
         """
-        valid_calendars = [
+        valid_calendars = {
             "gregorian",
             "standard",
             "proleptic_gregorian",
@@ -1779,8 +1779,7 @@ class CF1_6Check(CFNCCheck):
             "366_day",
             "360_day",
             "julian",
-            "none",
-        ]
+            "none"}
 
         ret_val = []
 
@@ -1790,23 +1789,68 @@ class CF1_6Check(CFNCCheck):
             calendar=lambda c: c is not None
         ):
             reasoning = None
-            valid_calendar = time_var.calendar in valid_calendars
+            standard_calendar = time_var.calendar in valid_calendars
 
-            if not valid_calendar:
-                reasoning = [
-                    "§4.4.1 Variable %s should have a valid calendar: '%s' is not a valid calendar"
-                    % (time_var.name, time_var.calendar)
-                ]
-
+            # if a nonstandard calendar, then leap_years and leap_months must
+            # must be present
+            if not standard_calendar:
+                result = self._check_leap_time(time_var)
             # passes if the calendar is valid, otherwise notify of invalid
             # calendar
+            else:
+                result = Result(BaseCheck.LOW, True, self.section_titles["4.4"],
+                                reasoning)
 
-            result = Result(
-                BaseCheck.LOW, valid_calendar, self.section_titles["4.4"], reasoning
-            )
             ret_val.append(result)
 
         return ret_val
+
+    def _check_leap_time(self, time_variable):
+        """
+        Helper method to handle checking custom calendar leap time specifiations
+        """
+        leap_time = TestCtx(BaseCheck.HIGH, self.section_titles["4.4"])
+        leap_time.out_of = 1
+        # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 2, 3 / 5
+        if (not hasattr(time_variable, "month_lengths") or not
+            (hasattr(time_variable.month_lengths, "dtype") and
+             np.issubdtype(time_variable.month_lengths.dtype, np.integer) and
+             time_variable.month_lengths.size == 12)):
+            leap_time.messages.append(
+                f"For nonstandard calendar on variable {time_variable.name}, "
+                "attribute month_lengths must be supplied as a 12-element "
+                "integer array")
+            return leap_time.to_result()
+        # If leap years are included, then attributes leap_month and
+        # leap_year must be included.
+        has_leap_year = hasattr(time_variable, "leap_year")
+        # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 4,5/5
+        if hasattr(time_variable, "leap_month"):
+            leap_time.assert_true(
+                (np.isscalar(time_variable.leap_month) and
+                 hasattr(time_variable.leap_month, "dtype") and
+                 np.issubdtype(time_variable.leap_month.dtype, np.integer) and
+                1 <= time_variable.leap_month <= 12),
+                    "When attribute leap_month is supplied for variable "
+                    f"{time_variable.name}, the value must be a scalar integer "
+                    "between 1 and 12")
+            # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED 1/2
+            if not has_leap_year:
+                leap_time.out_of += 1
+                fail_message = (f"For time variable {time_variable.name}, "
+                                 "attribute leap_year must be present if "
+                                 "leap_month attribute is defined")
+                leap_time.messages.append(fail_message)
+
+        # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 5/5
+        if has_leap_year:
+            leap_time.assert_true(np.isscalar(time_variable.leap_year) and
+                    hasattr(time_variable.leap_year, "dtype"),
+                    "When attribute leap_year is supplied for variable "
+                    f"{time_variable.name}, the value must be a scalar "
+                    "integer")
+        return leap_time.to_result()
+
 
     ###############################################################################
     # Chapter 5: Coordinate Systems
@@ -2840,43 +2884,43 @@ class CF1_6Check(CFNCCheck):
         # first, to determine whether or not we have a valid climatological time
         # coordinate variable, we need to make sure it has the attribute "climatology",
         # but not the attribute "bounds"
+
         for clim_coord_var in clim_time_coord_vars:
+            climatology_ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.3"])
             if hasattr(clim_coord_var, "bounds"):
-                reasoning.append(
-                    "Variable {} has a climatology attribute and cannot also have a bounds attribute.".format(
-                        clim_coord_var.name
+                climatology_result.out_of += 1
+                climatology_ctx.messages.append(
+                       f"Variable {clim_coord_var.name} has a climatology "
+                        "attribute and cannot also have a bounds attribute."
                     )
-                )
                 result = Result(
-                    BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
+                    BaseCheck.MEDIUM, False, (self.section_titles["7.4"]),
+                    reasoning
                 )
-                ret_val.append(result)
 
             # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 2/6
             # make sure the climatology variable referenced actually exists
             elif clim_coord_var.climatology not in ds.variables:
-                reasoning.append(
+                climatology_ctx.out_of += 1
+                climatology_ctx.messages.append(
                     "Variable {} referenced in time's climatology attribute does not exist".format(
                         ds.variables["time"].climatology
                     )
                 )
-                result = Result(
-                    BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
-                )
-                ret_val.append(result)
             else:
                 # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 4/6
                 clim_var = ds.variables[clim_coord_var.climatology]
-                if clim.var.dtype is str or np.issubdtype(clim_var, np.number):
-                    result.out_of += 1
-                    reasoning.append(
+                if clim_var.dtype is str or not np.issubdtype(clim_var,
+                                                              np.number):
+                    climatology_ctx.out_of += 1
+                    climatology_ctx.messages.append(
                         f"Climatology variable {clim_var.name} is not a numeric type"
                         )
                 # IMPLEMENTATION CONFORMANCE REQUIRED 6/6
                 if (hasattr(clim_var, "_FillValue") or
                     hasattr(clim_var, "missing_value")):
-                    result.out_of += 1
-                    reasoning.append(
+                    climatology_ctx.out_of += 1
+                    climatology_ctx.messages.append(
                         f"Climatology variable {clim_var.name} may not contain"
                         "attributes _FillValue or missing_value"
                         )
@@ -2884,11 +2928,12 @@ class CF1_6Check(CFNCCheck):
                 # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 5/6
                 for same_attr in ("units", "standard_name", "calendar"):
                     if hasattr(clim_var, same_attr):
-                        result.assert_true(getattr(clim_var, same_attr) ==
+                        climatology_ctx.assert_true(getattr(clim_var, same_attr) ==
                                           getattr(clim_coord_var, same_attr,
                                                   None),
                                           f"Attribute {same_attr} must have the same value in both "
                                            "variables {clim_var.name} and {clim_coord_var.name}")
+            ret_val.append(climatology_ctx.to_result())
 
 
 

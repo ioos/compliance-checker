@@ -595,8 +595,8 @@ class TestCF1_6(BaseTestCase):
         bad_dim_ds.createVariable("clim_bounds", "f8", ("time"))
         temp.climatology = "clim_bounds"
         results = self.cf.check_climatological_statistics(bad_dim_ds)
-        assert results[0].value[0] < results[0].value[1]
-        assert (results[0].msgs[0] == 'Climatology dimension "clim_bounds" '
+        assert results[1].value[0] < results[1].value[1]
+        assert (results[1].msgs[0] == 'Climatology dimension "clim_bounds" '
                 "should only contain two elements")
 
     def test_check_ancillary_variables(self):
@@ -1078,11 +1078,59 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad"])
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
+        # TEST CONFORMANCE 4.4.1 REQUIRED 2, 3 / 5
+        bad_month_msg = ("For nonstandard calendar on variable time, attribute "
+                         "month_lengths must be supplied as a 12-element integer array")
 
-        assert (
-            u"§4.4.1 Variable time should have a valid calendar: 'nope' is not a valid calendar"
-            in messages
-        )
+        assert bad_month_msg in messages
+
+        dataset = MockTimeSeries()
+        time = dataset.variables["time"]
+        dataset.variables["time"].calendar = "custom"
+        dataset.variables["time"].month_lengths = np.array([30.3],
+                                                           dtype=np.double)
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert bad_month_msg in messages
+
+        dataset.variables["time"].month_lengths = np.array([31, 29, 31, 30, 31,
+                                                            30, 31, 31, 30, 31,
+                                                            30, 31],
+                                                            dtype=np.int)
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert bad_month_msg not in messages
+
+        # TEST CONFORMANCE 4.4.1 REQUIRED 4,5/5
+        leap_month_msg = ("When attribute leap_month is supplied for variable "
+                          "time, the value must be a scalar integer between 1 "
+                          "and 12")
+        dataset.variables["time"].leap_month = np.array([0], dtype=np.uint8)
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert leap_month_msg in messages
+
+        dataset.variables["time"].leap_month = 2
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert leap_month_msg not in messages
+        # TEST CONFORMANCE 4.4.1 RECOMMENDED 1/2
+        assert ("For time variable time, attribute leap_year must be present "
+                "if leap_month attribute is defined" in messages)
+
+        # TEST CONFORMANCE 4.4.1 REQUIRED 5/5
+        leap_year_msg = ("When attribute leap_year is supplied for variable "
+                         "time, the value must be a scalar integer")
+
+        dataset.variables["time"].leap_year = ["2.18"]
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert leap_year_msg in messages
+
+        dataset.variables["time"].leap_year = 4
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert leap_year_msg not in messages
 
     def test_check_aux_coordinates(self):
         dataset = self.load_dataset(STATIC_FILES["illegal-aux-coords"])
@@ -1677,7 +1725,9 @@ class TestCF1_7(BaseTestCase):
         dataset.close()
 
     def test_check_cell_boundaries(self):
-        """Check our over-ridden check_cell_boundaries emthod behaves as expected"""
+        """
+        Check our over-ridden check_cell_boundaries method behaves as expected
+        """
 
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
         results = self.cf.check_cell_boundaries(dataset)
