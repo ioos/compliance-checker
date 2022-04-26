@@ -75,8 +75,47 @@ class CF1_7Check(CF1_6Check):
         self.grid_mapping_dict = grid_mapping_dict17
         self.grid_mapping_attr_types = grid_mapping_attr_types17
 
+    def check_external_variables(self, ds):
+        """
+        The global external_variables attribute is a blank-separated list of the
+        names of variables which are named by attributes in the file but which
+        are not present in the file. These variables are to be found in other
+        files (called "external files") but CF does not provide conventions for
+        identifying the files concerned. The only attribute for which CF
+        standardises the use of external variables is cell_measures.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: compliance_checker.base.Result
+        """
+        external_vars_ctx = TestCtx(
+            BaseCheck.MEDIUM, self.section_titles["2.6.3"]
+        )
+        # IMPLEMENTATION CONFORMANCE 2.6.3 REQUIRED 2/2
+        try:
+            external_var_names = set(ds.external_variables.strip().split())
+
+            bad_external_var_names = (external_var_names.intersection(ds.variables))
+
+            if bad_external_var_names:
+                external_vars_ctx.out_of += 1
+                bad_msg = ("Global attribute external_variables should not "
+                           "have any variable names which are present in the dataset. "
+                           "Currently, the following names appear in both external_variables "
+                           f"and the dataset's variables: {bad_external_var_names}")
+                external_vars_ctx.messages.append(bad_msg)
+
+        # string/global attributes are handled in Appendix A checks
+        except (AttributeError, ValueError):
+            pass
+
+        return external_vars_ctx.to_result()
+
+
+
+
     def check_actual_range(self, ds):
-        """Check the actual_range attribute of variables. As stated in
+        """
+        Check the actual_range attribute of variables. As stated in
         section 2.5.1 of version 1.7, this convention defines a two-element
         vector attribute designed to describe the actual minimum and actual
         maximum values of variables containing numeric data. Conditions:

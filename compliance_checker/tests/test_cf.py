@@ -1603,6 +1603,26 @@ class TestCF1_7(BaseTestCase):
 
         self.cf = CF1_7Check()
 
+    def test_check_external_variables(self):
+        dataset = MockTimeSeries()
+        # bad type should be ignored here and instead handled by CF Appendix A
+        dataset.external_variables = 1
+        result = self.cf.check_external_variables(dataset)
+        assert result.value[0] == result.value[1] == 0
+        dataset.external_variables = "ext1 ext2 ext3"
+        result = self.cf.check_external_variables(dataset)
+        assert result.value[0] == result.value[1]
+        # TEST CONFORMANCE 2.6.3 REQUIRED 2/2
+        # dataset should not contain any external variables which are present in
+        # the dataset's variables
+        dataset.createVariable("ext3", "i4", ())
+        result = self.cf.check_external_variables(dataset)
+        assert result.value[0] < result.value[1]
+        assert ("Global attribute external_variables should not have any "
+                "variable names which are present in the dataset. Currently, "
+                "the following names appear in both external_variables "
+                "and the dataset's variables: {'ext3'}" in result.msgs)
+
     def test_check_actual_range(self):
         """Test the check_actual_range method works as expected"""
 
