@@ -480,6 +480,7 @@ class TestCF1_6(BaseTestCase):
 
         dataset = MockTimeSeries()
         temperature = dataset.createVariable("temperature", "f8", ("time",))
+        temperature.standard_name = "sea_water_temperature"
         temperature.ancillary_variables = "temperature_flag"
 
         temperature_flag = dataset.createVariable("temperature_flag", "i2", ("time",))
@@ -492,6 +493,13 @@ class TestCF1_6(BaseTestCase):
         temperature_flag.standard_name = "sea_water_temperature status_flag"
         temperature_flag.units = "1"
         _, _, messages = get_results(self.cf.check_standard_name(dataset))
+
+        # TEST CONFORMANCE 3 RECOMMENDED
+        # long_name or standard_name present
+        del temperature.standard_name
+        _, _, messages = get_results(self.cf.check_standard_name(dataset))
+        assert ("Attribute long_name or/and standard_name is highly "
+                "recommended for variable temperature" in messages)
 
     def test_cell_bounds(self):
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
