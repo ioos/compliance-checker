@@ -132,6 +132,7 @@ class TestCF1_6(BaseTestCase):
         """
 
         # TEST CONFORMANCE 2.2 REQUIRED
+        # TODO: Check 1D char array
 
         # check default netCDF data types
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
@@ -366,7 +367,7 @@ class TestCF1_6(BaseTestCase):
         §2.6.1 the NUG defined global attribute Conventions to the string value
         "CF-1.6"
         """
-        # CONFORMANCE 2.6.1 REQUIRED
+        # TEST CONFORMANCE 2.6.1 REQUIRED
         # Note: conformance doc for 1.6 mentions CF-1.5
         # :Conventions = "CF-1.6"
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
