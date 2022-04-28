@@ -690,9 +690,15 @@ class TestCF1_6(BaseTestCase):
         flags_var = dataset.createVariable("flags", "f8", ("time",))
         flags_var.standard_name = "quality_flag"
         flags_var.flag_meanings = "LAND"
+        # test single element
         flags_var.flag_masks = np.array([1], dtype="i2")
         results = self.cf.check_flags(dataset)
         assert scored > 0 and scored == out_of
+        # TEST CONFORMANCE 3.5 REQUIRED 7/8
+        flags_var.flag_masks = np.array([0, 1], dtype="i2")
+        results = self.cf.check_flags(dataset)
+        assert ("flag_masks for variable flags must not contain zero as an "
+                "element" in results[-1].msgs)
 
     def test_check_bad_units(self):
         """Load a dataset with units that are expected to fail (bad_units.nc).
