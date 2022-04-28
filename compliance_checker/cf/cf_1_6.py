@@ -1167,7 +1167,7 @@ class CF1_6Check(CFNCCheck):
 
         valid_masks.assert_true(
             variable.dtype.type == flag_masks.dtype.type,
-            "flag_masks ({}) mustbe the same data type as {} ({})"
+            "flag_masks ({}) must be the same data type as {} ({})"
             "".format(flag_masks.dtype.type, name, variable.dtype.type),
         )
 
@@ -1176,6 +1176,11 @@ class CF1_6Check(CFNCCheck):
             or np.issubdtype(variable.dtype, "S")
             or np.issubdtype(variable.dtype, "b")
         )
+
+        valid_masks.assert_true(0 not in np.array(flag_masks),
+                                f"flag_masks for variable {variable.name} must "
+                                 "not contain zero as an element")
+
 
         valid_masks.assert_true(
             type_ok,
