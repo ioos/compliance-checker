@@ -483,7 +483,8 @@ class TestCF1_6(BaseTestCase):
         temperature.standard_name = "sea_water_temperature"
         temperature.ancillary_variables = "temperature_flag"
 
-        temperature_flag = dataset.createVariable("temperature_flag", "i2", ("time",))
+        temperature_flag = dataset.createVariable("temperature_flag", "i2",
+                                                  ("time",))
         # bad modifier
         temperature_flag.standard_name = "sea_water_temperature status flag"
         _, _, messages = get_results(self.cf.check_standard_name(dataset))
@@ -677,6 +678,10 @@ class TestCF1_6(BaseTestCase):
         # only 4 variables in this dataset do not have perfect scores
         imperfect = [r.value for r in results if r.value[0] < r.value[1]]
         assert len(imperfect) == 4
+        dataset.variables["conductivity_qc"] = MockVariable(dataset.variables["conductivity_qc"])
+        # Test with single element.  Will fail, but should not throw exception.
+        dataset.variables["conductivity_qc"].flag_values = np.array([1], dtype=np.int8)
+        results = self.cf.check_flags(dataset)
 
     def test_check_flag_masks(self):
         dataset = self.load_dataset(STATIC_FILES["ghrsst"])
@@ -690,6 +695,7 @@ class TestCF1_6(BaseTestCase):
         flags_var = dataset.createVariable("flags", "f8", ("time",))
         flags_var.standard_name = "quality_flag"
         flags_var.flag_meanings = "LAND"
+        flags_var.flag_values = [1]
         # test single element
         flags_var.flag_masks = np.array([1], dtype="i2")
         results = self.cf.check_flags(dataset)
@@ -697,8 +703,16 @@ class TestCF1_6(BaseTestCase):
         # TEST CONFORMANCE 3.5 REQUIRED 7/8
         flags_var.flag_masks = np.array([0, 1], dtype="i2")
         results = self.cf.check_flags(dataset)
+        score, out_of, messages = get_results(results)
         assert ("flag_masks for variable flags must not contain zero as an "
-                "element" in results[-1].msgs)
+                "element" in messages)
+        # IMPLEMENTATION 3.5 REQUIRED 1/1
+        flags_var.flag_masks = np.array([1], dtype="i2")
+        flags_var.flag_values = np.array([2], dtype="i2")
+        results = self.cf.check_flags(dataset)
+        score, out_of, messages = get_results(results)
+        assert ("flag masks and flag values for 'flags' combined don't equal "
+                "flag values" in messages)
 
     def test_check_bad_units(self):
         """Load a dataset with units that are expected to fail (bad_units.nc).
