@@ -1078,14 +1078,21 @@ class CF1_6Check(CFNCCheck):
                 ret_val.append(valid_masks)
 
             if flag_values is not None and flag_masks is not None:
-                allv = list(
-                    map(lambda a, b: a & b == a, list(zip(flag_values, flag_masks)))
-                )
+                vals_arr = np.array(flag_values, ndmin=1)
+                masks_arr = np.array(flag_masks, ndmin=1)
+                # IMPLEMENTATION CONFORMANCE 3.5 RECOMMENDED 1/1
+                # If shapes aren't equal, we can't do proper elementwise
+                # comparison
+                if vals_arr.size != masks_arr.size:
+                    allv = False
+                else:
+                    allv = np.all(vals_arr & masks_arr == vals_arr)
 
-                allvr = Result(BaseCheck.MEDIUM, all(allv), self.section_titles["3.5"])
+                allvr = Result(BaseCheck.MEDIUM, allv,
+                               self.section_titles["3.5"])
                 if not allvr.value:
                     allvr.msgs = [
-                        "flag masks and flag values for '{}' combined don't equal flag value".format(
+                        "flag masks and flag values for '{}' combined don't equal flag values".format(
                             name
                         )
                     ]
@@ -1121,9 +1128,9 @@ class CF1_6Check(CFNCCheck):
 
 
         # the flag values must be independent, no repeating values
-        flag_set = set(flag_values)
+        flag_set = np.unique(flag_values)
         valid_values.assert_true(
-            len(flag_set) == np.array(flag_values).size,
+            flag_set.size == np.array(flag_values).size,
             "{}'s flag_values must be independent and can not be repeated".format(name),
         )
 
@@ -1167,7 +1174,7 @@ class CF1_6Check(CFNCCheck):
 
         valid_masks.assert_true(
             variable.dtype.type == flag_masks.dtype.type,
-            "flag_masks ({}) mustbe the same data type as {} ({})"
+            "flag_masks ({}) must be the same data type as {} ({})"
             "".format(flag_masks.dtype.type, name, variable.dtype.type),
         )
 
@@ -1176,6 +1183,11 @@ class CF1_6Check(CFNCCheck):
             or np.issubdtype(variable.dtype, "S")
             or np.issubdtype(variable.dtype, "b")
         )
+
+        valid_masks.assert_true(0 not in np.array(flag_masks),
+                                f"flag_masks for variable {variable.name} must "
+                                 "not contain zero as an element")
+
 
         valid_masks.assert_true(
             type_ok,
