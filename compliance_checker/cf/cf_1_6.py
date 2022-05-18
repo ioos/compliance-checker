@@ -22,6 +22,8 @@ from compliance_checker.cf.appendix_f import (grid_mapping_attr_types16,
                                               grid_mapping_dict16)
 
 from compliance_checker.cf.cf_base import CFNCCheck, appendix_a_base
+import difflib
+
 logger = logging.getLogger(__name__)
 
 class CF1_6Check(CFNCCheck):
@@ -936,13 +938,23 @@ class CF1_6Check(CFNCCheck):
                         name
                     ),
                 )
-                if isinstance(standard_name, str):
-                    valid_std_name.assert_true(
-                        standard_name in self._std_names,
-                        "standard_name {} is not defined in Standard Name Table v{}".format(
-                            standard_name or "undefined", self._std_names._version
-                        ),
-                    )
+                if (isinstance(standard_name, str) and
+                    standard_name not in self._std_names):
+                    valid_std_name.out_of += 1
+                    err_msg = (
+                        "standard_name {} is not defined in Standard Name Table v{}."
+                        .format(
+                            standard_name or "undefined",
+                            self._std_names._version))
+                    close_matches = difflib.get_close_matches(standard_name,
+                                                              self._std_names)
+                    if close_matches:
+                        if len(close_matches) == 1:
+                            err_msg += f" Possible close match: {close_matches}"
+                        else:
+                            err_msg += f" Possible close matches: {close_matches}"
+                    valid_std_name.messages.append(err_msg)
+
 
                 ret_val.append(valid_std_name.to_result())
 
