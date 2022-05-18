@@ -30,9 +30,15 @@ class MockTimeSeries(MockNetCDF):
     def __init__(self, filename=None, default_fill_value=None):
         super(MockTimeSeries, self).__init__(filename)
         self.createDimension("time", 500)
-        for v in ("time", "lon", "lat", "depth"):
-            self.createVariable(v, "d", ("time",),
-                                fill_value=default_fill_value)
+        for name, std_name, units in (
+                  ("time", "time", "seconds since 1970-01-01"),
+                  ("lon", "longitude", "degrees_east"),
+                  ("lat", "latitude", "degrees_north"),
+                  ("depth", "depth", "m")):
+            var = self.createVariable(name, "d", ("time",),
+                                 fill_value=default_fill_value)
+            var.standard_name = std_name
+            var.units = units
 
         # give some applicable units
         self.variables["time"].units = "seconds since 2019-04-11T00:00:00"
