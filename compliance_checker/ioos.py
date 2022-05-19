@@ -20,7 +20,6 @@ from compliance_checker.base import (
     BaseSOSGCCheck,
     Result,
     TestCtx,
-    attr_check,
     check_has,
 )
 from compliance_checker.cf import util as cf_util  # not to be confused with cfutil.py
@@ -734,7 +733,7 @@ class IOOS1_2Check(IOOSNCCheck):
                             None if role_val else [role_msg.format(_role)],
                         )
                     )
-            except TypeError as e:
+            except TypeError:
                 role_results.append(
                     Result(
                         BaseCheck.MEDIUM,
@@ -767,7 +766,7 @@ class IOOS1_2Check(IOOSNCCheck):
                             None if vocb_val else [vocb_msg.format(_vocb)],
                         )
                     )
-            except TypeError as e:
+            except TypeError:
                 vocb_results.append(
                     Result(
                         BaseCheck.MEDIUM,
@@ -1442,7 +1441,6 @@ class IOOS1_2Check(IOOSNCCheck):
         bool
         """
 
-        val = False
 
         # should have an ancillary variable with standard_name aggregate_quality_flag
         avar_val = False
@@ -1504,7 +1502,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         # is dataset properly flagged for ingest?
-        glb_gts_attr = getattr(ds, "gts_ingest", None)
+        getattr(ds, "gts_ingest", None)
 
         # check variables
         all_passed_ingest_reqs = True  # default

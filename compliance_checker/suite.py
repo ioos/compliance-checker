@@ -29,8 +29,7 @@ from pkg_resources import working_set
 
 from compliance_checker import MemoizedDataset, __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
-from compliance_checker.cf.cf_base import CFBaseCheck
-from compliance_checker.protocols import cdl, erddap, netcdf, opendap
+from compliance_checker.protocols import cdl, netcdf, opendap
 
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped

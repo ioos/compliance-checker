@@ -1,24 +1,18 @@
 import logging
 import os
 import sqlite3
-import sys
 
-from collections import OrderedDict, defaultdict
-from functools import wraps
 from warnings import warn
 
 import numpy as np
 import pyproj
 import regex
 
-from cf_units import Unit
 
 from compliance_checker import cfutil
-from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
-from compliance_checker.cf import util
+from compliance_checker.base import BaseCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import (
     dimless_vertical_coordinates_1_7,
-    no_missing_terms,
 )
 from compliance_checker.cf.appendix_e import cell_methods17
 from compliance_checker.cf.appendix_f import (
