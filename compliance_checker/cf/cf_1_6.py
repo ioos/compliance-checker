@@ -819,6 +819,9 @@ class CF1_6Check(CFNCCheck):
             self._std_names._root, standard_name
         )
 
+        if std_name_units_dimensionless:
+            return valid_standard_units.to_result()
+
         standard_name, standard_name_modifier = self._split_standard_name(standard_name)
 
         # Other standard_name modifiers have the same units as the
@@ -2935,7 +2938,7 @@ class CF1_6Check(CFNCCheck):
         for clim_coord_var in clim_time_coord_vars:
             climatology_ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.3"])
             if hasattr(clim_coord_var, "bounds"):
-                climatology_result.out_of += 1
+                climatology_ctx.out_of += 1
                 climatology_ctx.messages.append(
                     f"Variable {clim_coord_var.name} has a climatology "
                     "attribute and cannot also have a bounds attribute."
