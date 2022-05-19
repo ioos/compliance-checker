@@ -671,7 +671,7 @@ class CF1_6Check(CFNCCheck):
             units not in deprecated,
             'units for {}, "{}" are deprecated by CF 1.6'.format(variable_name, units),
         )
-        # 4/5) Modifiers, if present, have the approriate units, or none for
+        # 4/5) Modifiers, if present, have the appropriate units, or none for
         #    status_flag
         if standard_name_modifier is not None:
             if standard_name_modifier not in valid_modifiers:
