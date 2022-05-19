@@ -660,12 +660,11 @@ class TestIOOS1_2(BaseTestCase):
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
-        # all standard names except for temperature
-        ds.createVariable("temperature", "f8", ("time",))
+        # all standard names except for depth
+        del ds.variables["depth"].standard_name
         results = self.ioos.check_standard_name(ds)
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
-        del ds.variables["temperature"]
 
 
         # have to recreate here or temperature gives KeyError despite appearing
