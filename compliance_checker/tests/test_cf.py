@@ -483,7 +483,7 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         # only check for recommendation substring as recommendations might
         # vary with differing standard name tables
-        assert " Possible close matches:" in messages[-1]
+        assert " Possible close match(es):" in messages[-1]
 
         # load different ds --  ll vars pass this check
         dataset = self.load_dataset(STATIC_FILES["reduced_horizontal_grid"])
