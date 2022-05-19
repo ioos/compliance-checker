@@ -7,7 +7,6 @@ import csv
 import itertools
 import pprint
 import re
-import sys
 import warnings
 
 from collections import defaultdict
@@ -159,7 +158,6 @@ class BaseCheck(object):
 
         Automatically run when running a CheckSuite. Define this method in your Checker class.
         """
-        pass
 
     def __init__(self, options=None):
         self._defined_results = defaultdict(lambda: defaultdict(dict))

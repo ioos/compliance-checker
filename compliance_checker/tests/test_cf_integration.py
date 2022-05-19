@@ -3,7 +3,6 @@
 
 import pytest
 
-from netCDF4 import Dataset
 
 from compliance_checker.cf import util
 

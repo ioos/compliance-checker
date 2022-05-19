@@ -10,25 +10,12 @@ from warnings import warn
 import numpy as np
 import regex
 
-from cf_units import Unit
 
 from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf import util
 from compliance_checker.cf.appendix_d import (
-    dimless_vertical_coordinates_1_6,
-    dimless_vertical_coordinates_1_7,
     no_missing_terms,
-)
-from compliance_checker.cf.appendix_e import cell_methods16, cell_methods17
-from compliance_checker.cf.appendix_f import (
-    ellipsoid_names17,
-    grid_mapping_attr_types16,
-    grid_mapping_attr_types17,
-    grid_mapping_dict16,
-    grid_mapping_dict17,
-    horizontal_datum_names17,
-    prime_meridian_names17,
 )
 
 logger = logging.getLogger(__name__)
@@ -1228,7 +1215,6 @@ class CFNCCheck(BaseNCCheck, CFBaseCheck):
     attributes from BaseNCCheck (like supported_ds) will not be passed to
     CFNCCheck."""
 
-    pass
 
 
 appendix_a_base = {

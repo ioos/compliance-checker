@@ -1138,7 +1138,7 @@ class TestCF1_6(BaseTestCase):
         assert bad_month_msg in messages
 
         dataset = MockTimeSeries()
-        time = dataset.variables["time"]
+        dataset.variables["time"]
         dataset.variables["time"].calendar = "custom"
         dataset.variables["time"].month_lengths = np.array([30.3], dtype=np.double)
         results = self.cf.check_calendar(dataset)
@@ -1497,7 +1497,7 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(self.cf.check_units(dataset))
         assert scored == out_of
 
-        temp_counts = dataset.createVariable("temp_counts", "i1", ("time",))
+        dataset.createVariable("temp_counts", "i1", ("time",))
         temp.ancillary_variables += " temp_counts"
 
     def test_check_duplicates(self):

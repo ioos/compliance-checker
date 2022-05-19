@@ -1,10 +1,6 @@
 import logging
-import os
-import sys
 
-from collections import OrderedDict, defaultdict
-from functools import wraps
-from warnings import warn
+from collections import defaultdict
 
 import numpy as np
 import regex
@@ -12,12 +8,11 @@ import regex
 from cf_units import Unit
 
 from compliance_checker import cfutil
-from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
+from compliance_checker.base import BaseCheck, Result, TestCtx
 from compliance_checker.cf import util
 from compliance_checker.cf.appendix_c import valid_modifiers
 from compliance_checker.cf.appendix_d import (
     dimless_vertical_coordinates_1_6,
-    no_missing_terms,
 )
 from compliance_checker.cf.appendix_e import cell_methods16
 from compliance_checker.cf.appendix_f import (
@@ -189,7 +184,6 @@ class CF1_6Check(CFNCCheck):
             scale_factor=lambda x: x is not None
         )
 
-        _attr_vars_tup = []
         both = set(add_offset_vars).intersection(scale_factor_vars)
         both_msgs = []
         for both_var in sorted(both, key=lambda var: var.name):
@@ -825,13 +819,6 @@ class CF1_6Check(CFNCCheck):
         )
 
         standard_name, standard_name_modifier = self._split_standard_name(standard_name)
-
-        standard_entry = self._std_names.get(standard_name, None)
-        if standard_entry is not None:
-            canonical_units = standard_entry.canonical_units
-        else:
-            # Any unit comparisons with None returns False
-            canonical_units = None
 
         # Other standard_name modifiers have the same units as the
         # unmodified standard name or are not checked for units.

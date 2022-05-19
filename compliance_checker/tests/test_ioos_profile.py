@@ -12,7 +12,7 @@ from compliance_checker.ioos import (
     NamingAuthorityValidator,
 )
 from compliance_checker.tests import BaseTestCase
-from compliance_checker.tests.helpers import MockTimeSeries, MockVariable, MockNetCDF
+from compliance_checker.tests.helpers import MockNetCDF, MockTimeSeries
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests.test_cf import get_results
 
