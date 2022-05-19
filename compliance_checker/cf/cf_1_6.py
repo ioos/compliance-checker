@@ -948,10 +948,7 @@ class CF1_6Check(CFNCCheck):
                     close_matches = difflib.get_close_matches(standard_name,
                                                               self._std_names)
                     if close_matches:
-                        if len(close_matches) == 1:
-                            err_msg += f" Possible close match: {close_matches}"
-                        else:
-                            err_msg += f" Possible close matches: {close_matches}"
+                        err_msg += f" Possible close match(es): {close_matches}"
                     valid_std_name.messages.append(err_msg)
                 else:
                     valid_std_name.score += 1
