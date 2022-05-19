@@ -12,8 +12,7 @@ from compliance_checker.ioos import (
     NamingAuthorityValidator,
 )
 from compliance_checker.tests import BaseTestCase
-from compliance_checker.tests.helpers import (MockTimeSeries, MockVariable,
-                                              MockNetCDF)
+from compliance_checker.tests.helpers import MockTimeSeries, MockVariable, MockNetCDF
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests.test_cf import get_results
 
@@ -666,7 +665,6 @@ class TestIOOS1_2(BaseTestCase):
         scored, out_of, messages = get_results(results)
         self.assertLess(scored, out_of)
 
-
         # have to recreate here or temperature gives KeyError despite appearing
         # deleted -- why?
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -809,8 +807,10 @@ class TestIOOS1_2(BaseTestCase):
         # QARTOD variable with flag meanings, without flag_meanings
         qr.setncattr("flag_values", np.array([0, 1, 2], dtype=np.byte))
         results = self.ioos.check_qartod_variables_flags(ds)
-        self.assertIn("Variable depth_qc must have attribute flag_meanings defined when flag_values attribute is present",
-                      results[0].msgs)
+        self.assertIn(
+            "Variable depth_qc must have attribute flag_meanings defined when flag_values attribute is present",
+            results[0].msgs,
+        )
         self.assertNotEqual(results[0].value[0], results[0].value[1])  # should fail
         self.assertFalse(results[1].value)  # still fail
 

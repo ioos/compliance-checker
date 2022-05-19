@@ -15,16 +15,21 @@ from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf import util
 from compliance_checker.cf.appendix_c import valid_modifiers
-from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates_1_6,
-                                              no_missing_terms)
+from compliance_checker.cf.appendix_d import (
+    dimless_vertical_coordinates_1_6,
+    no_missing_terms,
+)
 from compliance_checker.cf.appendix_e import cell_methods16
-from compliance_checker.cf.appendix_f import (grid_mapping_attr_types16,
-                                              grid_mapping_dict16)
+from compliance_checker.cf.appendix_f import (
+    grid_mapping_attr_types16,
+    grid_mapping_dict16,
+)
 
 from compliance_checker.cf.cf_base import CFNCCheck, appendix_a_base
 import difflib
 
 logger = logging.getLogger(__name__)
+
 
 class CF1_6Check(CFNCCheck):
     """CF-1.6-specific implementation of CFBaseCheck; supports checking
@@ -56,8 +61,10 @@ class CF1_6Check(CFNCCheck):
         """Checks that the filename ends with .nc"""
         # IMPLEMENTS CONFORMANCE 2.1
         filename_suffix = TestCtx(BaseCheck.HIGH, self.section_titles["2.1"])
-        filename_suffix.assert_true(ds.filepath().endswith("nc"),
-                        f'Dataset path {ds.filepath} must end with ".nc"')
+        filename_suffix.assert_true(
+            ds.filepath().endswith("nc"),
+            f'Dataset path {ds.filepath} must end with ".nc"',
+        )
         return filename_suffix.to_result()
 
     def check_data_types(self, ds):
@@ -158,13 +165,13 @@ class CF1_6Check(CFNCCheck):
                 att.dtype == variable.dtype
             ) or (  # will short-circuit or if first condition is true
                 isinstance(att, (np.float32, np.float64, float))
-                and variable.dtype in (np.byte, np.short, np.int16, np.int,
-                                       np.int32, int))
+                and variable.dtype
+                in (np.byte, np.short, np.int16, np.int, np.int32, int)
+            )
         if not val:
             msgs.append(error_msg)
 
-        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"],
-                      msgs)
+        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"], msgs)
 
     def check_add_offset_scale_factor_type(self, ds):
         """
@@ -186,13 +193,20 @@ class CF1_6Check(CFNCCheck):
         both = set(add_offset_vars).intersection(scale_factor_vars)
         both_msgs = []
         for both_var in sorted(both, key=lambda var: var.name):
-            if (both_var.scale_factor.dtype !=
-                both_var.add_offset.dtype):
-                both_msgs.append("When both scale_factor and add_offset "
-                                 f"are supplied for variable {both_var.name}, "
-                                 "they must have the same type")
-        results.append(Result(BaseCheck.MEDIUM, not bool(both_msgs),
-                       self.section_titles["8.1"], both_msgs))
+            if both_var.scale_factor.dtype != both_var.add_offset.dtype:
+                both_msgs.append(
+                    "When both scale_factor and add_offset "
+                    f"are supplied for variable {both_var.name}, "
+                    "they must have the same type"
+                )
+        results.append(
+            Result(
+                BaseCheck.MEDIUM,
+                not bool(both_msgs),
+                self.section_titles["8.1"],
+                both_msgs,
+            )
+        )
 
         for _att_vars_tup in (
             ("add_offset", add_offset_vars),
@@ -579,18 +593,25 @@ class CF1_6Check(CFNCCheck):
         modifier_variables = cfutil._find_standard_name_modifier_variables(ds)
         forecast_variables = cfutil.get_forecast_metadata_variables(ds)
 
-        dimless_vert = {var.name for var in
-                        ds.get_variables_by_attributes(standard_name=lambda s: s in self.appendix_d_parametric_coords)
-                        if not hasattr(var, "units")}
+        dimless_vert = {
+            var.name
+            for var in ds.get_variables_by_attributes(
+                standard_name=lambda s: s in self.appendix_d_parametric_coords
+            )
+            if not hasattr(var, "units")
+        }
         # check anything remaining that has units
-        #unit_containing =
-        unit_required_variables = (set(
-            coordinate_variables
-            + auxiliary_coordinates
-            + geophysical_variables
-            + forecast_variables
-            + modifier_variables) # standard names with modifiers require proper units, *except* for flags, where they should not be present
-            - dimless_vert)
+        # unit_containing =
+        unit_required_variables = (
+            set(
+                coordinate_variables
+                + auxiliary_coordinates
+                + geophysical_variables
+                + forecast_variables
+                + modifier_variables
+            )  # standard names with modifiers require proper units, *except* for flags, where they should not be present
+            - dimless_vert
+        )
 
         for name in unit_required_variables:
             # For reduced horizontal grids, the compression index variable does
@@ -620,8 +641,7 @@ class CF1_6Check(CFNCCheck):
             valid_units = self._check_valid_cf_units(ds, name)
             ret_val.append(valid_units)
 
-            units_attr_is_string = TestCtx(BaseCheck.MEDIUM,
-                                           self.section_titles["3.1"])
+            units_attr_is_string = TestCtx(BaseCheck.MEDIUM, self.section_titles["3.1"])
 
             # side effects, but better than teasing out the individual result
             if units is not None and units_attr_is_string.assert_true(
@@ -685,18 +705,19 @@ class CF1_6Check(CFNCCheck):
 
         if unit_type == "u":
             try:
-                reference = (self._std_names[standard_name].
-                             canonical_units)
+                reference = self._std_names[standard_name].canonical_units
             # if standard name isn't found, there won't be an associated units
             # but a standard name error will be raised elsewhere
             except KeyError:
                 return valid_units.to_result()
         elif unit_type == "1":
-                reference = "1"
+            reference = "1"
         elif unit_type is None:
-            valid_units.assert_true(units is None,
-                                    f"units attribute for variable {variable_name} must be unset "
-                                    "when status_flag standard name modifier is set")
+            valid_units.assert_true(
+                units is None,
+                f"units attribute for variable {variable_name} must be unset "
+                "when status_flag standard name modifier is set",
+            )
             return valid_units.to_result()
 
         # Is this even in the database? also, if there is no standard_name,
@@ -728,7 +749,9 @@ class CF1_6Check(CFNCCheck):
         try:
             units_conv = Unit(units)
         except ValueError:
-            valid_units.messages.append(f'Unit string "{units}" is not recognized by UDUnits')
+            valid_units.messages.append(
+                f'Unit string "{units}" is not recognized by UDUnits'
+            )
             valid_units.out_of += 1
             return valid_units
         else:
@@ -739,10 +762,12 @@ class CF1_6Check(CFNCCheck):
         # that use time relative to a reference point, despite canonical units
         # being expressed as "s"/seconds
         if standard_name not in {"time", "forecast_reference_time"}:
-            valid_units.assert_true(units_conv.is_convertible(Unit(reference)),
-                                    f'Units "{units}" for variable '
-                                    f"{variable_name} must be convertible to "
-                                    f'canonical units "{reference}"')
+            valid_units.assert_true(
+                units_conv.is_convertible(Unit(reference)),
+                f'Units "{units}" for variable '
+                f"{variable_name} must be convertible to "
+                f'canonical units "{reference}"',
+            )
 
         return valid_units.to_result()
 
@@ -816,9 +841,11 @@ class CF1_6Check(CFNCCheck):
         if standard_name_modifier == "number_of_observations":
             valid_standard_units.out_of += 1
             if units != "1":
-                err_msg = (f"When variable {variable_name} has a "
-                           "standard name modifier of number_of_observations, "
-                           "the specified units must be 1")
+                err_msg = (
+                    f"When variable {variable_name} has a "
+                    "standard name modifier of number_of_observations, "
+                    "the specified units must be 1"
+                )
                 valid_standard_units.messages.append(err_msg)
             else:
                 valid_standard_units.score += 1
@@ -939,20 +966,18 @@ class CF1_6Check(CFNCCheck):
                     ),
                 )
                 valid_std_name.out_of += 1
-                if (standard_name not in self._std_names):
-                    err_msg = (
-                        "standard_name {} is not defined in Standard Name Table v{}."
-                        .format(
-                            standard_name or "undefined",
-                            self._std_names._version))
-                    close_matches = difflib.get_close_matches(standard_name,
-                                                              self._std_names)
+                if standard_name not in self._std_names:
+                    err_msg = "standard_name {} is not defined in Standard Name Table v{}.".format(
+                        standard_name or "undefined", self._std_names._version
+                    )
+                    close_matches = difflib.get_close_matches(
+                        standard_name, self._std_names
+                    )
                     if close_matches:
                         err_msg += f" Possible close match(es): {close_matches}"
                     valid_std_name.messages.append(err_msg)
                 else:
                     valid_std_name.score += 1
-
 
                 ret_val.append(valid_std_name.to_result())
 
@@ -962,7 +987,9 @@ class CF1_6Check(CFNCCheck):
                     valid_modifier.assert_true(
                         standard_name_modifier in valid_modifiers,
                         'Standard name modifier "{}" for variable {} is not a valid modifier '
-                        "according to CF Appendix C".format(standard_name_modifier, name),
+                        "according to CF Appendix C".format(
+                            standard_name_modifier, name
+                        ),
                     )
 
                     ret_val.append(valid_modifier.to_result())
@@ -1098,8 +1125,7 @@ class CF1_6Check(CFNCCheck):
                 else:
                     allv = np.all(vals_arr & masks_arr == vals_arr)
 
-                allvr = Result(BaseCheck.MEDIUM, allv,
-                               self.section_titles["3.5"])
+                allvr = Result(BaseCheck.MEDIUM, allv, self.section_titles["3.5"])
                 if not allvr.value:
                     allvr.msgs = [
                         "flag masks and flag values for '{}' combined don't equal flag values".format(
@@ -1131,11 +1157,11 @@ class CF1_6Check(CFNCCheck):
         valid_values = TestCtx(BaseCheck.HIGH, self.section_titles["3.5"])
 
         # IMPLEMENTATION CONFORMANCE 3.5 REQUIRED 2/8
-        valid_values.assert_true(hasattr(variable, "flag_meanings"),
+        valid_values.assert_true(
+            hasattr(variable, "flag_meanings"),
             f"Variable {variable.name} must have attribute flag_meanings "
-            "defined when flag_values attribute is present"
+            "defined when flag_values attribute is present",
         )
-
 
         # the flag values must be independent, no repeating values
         flag_set = np.unique(flag_values)
@@ -1158,7 +1184,8 @@ class CF1_6Check(CFNCCheck):
             valid_values.assert_true(
                 len(flag_meanings) == np.array(flag_values).size,
                 f"{name}'s flag_meanings and flag_values should have the same "
-                 "number of elements.")
+                "number of elements.",
+            )
 
         return valid_values.to_result()
 
@@ -1194,10 +1221,11 @@ class CF1_6Check(CFNCCheck):
             or np.issubdtype(variable.dtype, "b")
         )
 
-        valid_masks.assert_true(0 not in np.array(flag_masks),
-                                f"flag_masks for variable {variable.name} must "
-                                 "not contain zero as an element")
-
+        valid_masks.assert_true(
+            0 not in np.array(flag_masks),
+            f"flag_masks for variable {variable.name} must "
+            "not contain zero as an element",
+        )
 
         valid_masks.assert_true(
             type_ok,
@@ -1211,7 +1239,7 @@ class CF1_6Check(CFNCCheck):
                 # scalars from netCDF4 Python
                 len(flag_meanings) == np.array(flag_masks).size,
                 f"{name} flag_meanings and flag_masks should have the same "
-                "number of elements."
+                "number of elements.",
             )
 
         return valid_masks.to_result()
@@ -1597,8 +1625,7 @@ class CF1_6Check(CFNCCheck):
             ):
                 continue
 
-            valid_vertical_coord = TestCtx(BaseCheck.HIGH,
-                                           self.section_titles["4.3"])
+            valid_vertical_coord = TestCtx(BaseCheck.HIGH, self.section_titles["4.3"])
             valid_vertical_coord.assert_true(
                 isinstance(units, str) and units,
                 "§4.3.1 {}'s units must be defined for vertical coordinates, "
@@ -1801,7 +1828,8 @@ class CF1_6Check(CFNCCheck):
             "366_day",
             "360_day",
             "julian",
-            "none"}
+            "none",
+        }
 
         ret_val = []
 
@@ -1820,8 +1848,9 @@ class CF1_6Check(CFNCCheck):
             # passes if the calendar is valid, otherwise notify of invalid
             # calendar
             else:
-                result = Result(BaseCheck.LOW, True, self.section_titles["4.4"],
-                                reasoning)
+                result = Result(
+                    BaseCheck.LOW, True, self.section_titles["4.4"], reasoning
+                )
 
             ret_val.append(result)
 
@@ -1834,14 +1863,16 @@ class CF1_6Check(CFNCCheck):
         leap_time = TestCtx(BaseCheck.HIGH, self.section_titles["4.4"])
         leap_time.out_of = 1
         # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 2, 3 / 5
-        if (not hasattr(time_variable, "month_lengths") or not
-            (hasattr(time_variable.month_lengths, "dtype") and
-             np.issubdtype(time_variable.month_lengths.dtype, np.integer) and
-             time_variable.month_lengths.size == 12)):
+        if not hasattr(time_variable, "month_lengths") or not (
+            hasattr(time_variable.month_lengths, "dtype")
+            and np.issubdtype(time_variable.month_lengths.dtype, np.integer)
+            and time_variable.month_lengths.size == 12
+        ):
             leap_time.messages.append(
                 f"For nonstandard calendar on variable {time_variable.name}, "
                 "attribute month_lengths must be supplied as a 12-element "
-                "integer array")
+                "integer array"
+            )
             return leap_time.to_result()
         # If leap years are included, then attributes leap_month and
         # leap_year must be included.
@@ -1849,30 +1880,36 @@ class CF1_6Check(CFNCCheck):
         # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 4,5/5
         if hasattr(time_variable, "leap_month"):
             leap_time.assert_true(
-                (np.isscalar(time_variable.leap_month) and
-                 hasattr(time_variable.leap_month, "dtype") and
-                 np.issubdtype(time_variable.leap_month.dtype, np.integer) and
-                1 <= time_variable.leap_month <= 12),
-                    "When attribute leap_month is supplied for variable "
-                    f"{time_variable.name}, the value must be a scalar integer "
-                    "between 1 and 12")
+                (
+                    np.isscalar(time_variable.leap_month)
+                    and hasattr(time_variable.leap_month, "dtype")
+                    and np.issubdtype(time_variable.leap_month.dtype, np.integer)
+                    and 1 <= time_variable.leap_month <= 12
+                ),
+                "When attribute leap_month is supplied for variable "
+                f"{time_variable.name}, the value must be a scalar integer "
+                "between 1 and 12",
+            )
             # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED 1/2
             if not has_leap_year:
                 leap_time.out_of += 1
-                fail_message = (f"For time variable {time_variable.name}, "
-                                 "attribute leap_year must be present if "
-                                 "leap_month attribute is defined")
+                fail_message = (
+                    f"For time variable {time_variable.name}, "
+                    "attribute leap_year must be present if "
+                    "leap_month attribute is defined"
+                )
                 leap_time.messages.append(fail_message)
 
         # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 5/5
         if has_leap_year:
-            leap_time.assert_true(np.isscalar(time_variable.leap_year) and
-                    hasattr(time_variable.leap_year, "dtype"),
-                    "When attribute leap_year is supplied for variable "
-                    f"{time_variable.name}, the value must be a scalar "
-                    "integer")
+            leap_time.assert_true(
+                np.isscalar(time_variable.leap_year)
+                and hasattr(time_variable.leap_year, "dtype"),
+                "When attribute leap_year is supplied for variable "
+                f"{time_variable.name}, the value must be a scalar "
+                "integer",
+            )
         return leap_time.to_result()
-
 
     ###############################################################################
     # Chapter 5: Coordinate Systems
@@ -2912,12 +2949,11 @@ class CF1_6Check(CFNCCheck):
             if hasattr(clim_coord_var, "bounds"):
                 climatology_result.out_of += 1
                 climatology_ctx.messages.append(
-                       f"Variable {clim_coord_var.name} has a climatology "
-                        "attribute and cannot also have a bounds attribute."
-                    )
+                    f"Variable {clim_coord_var.name} has a climatology "
+                    "attribute and cannot also have a bounds attribute."
+                )
                 result = Result(
-                    BaseCheck.MEDIUM, False, (self.section_titles["7.4"]),
-                    reasoning
+                    BaseCheck.MEDIUM, False, (self.section_titles["7.4"]), reasoning
                 )
 
             # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 2/6
@@ -2932,32 +2968,31 @@ class CF1_6Check(CFNCCheck):
             else:
                 # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 4/6
                 clim_var = ds.variables[clim_coord_var.climatology]
-                if clim_var.dtype is str or not np.issubdtype(clim_var,
-                                                              np.number):
+                if clim_var.dtype is str or not np.issubdtype(clim_var, np.number):
                     climatology_ctx.out_of += 1
                     climatology_ctx.messages.append(
                         f"Climatology variable {clim_var.name} is not a numeric type"
-                        )
+                    )
                 # IMPLEMENTATION CONFORMANCE REQUIRED 6/6
-                if (hasattr(clim_var, "_FillValue") or
-                    hasattr(clim_var, "missing_value")):
+                if hasattr(clim_var, "_FillValue") or hasattr(
+                    clim_var, "missing_value"
+                ):
                     climatology_ctx.out_of += 1
                     climatology_ctx.messages.append(
                         f"Climatology variable {clim_var.name} may not contain"
                         "attributes _FillValue or missing_value"
-                        )
+                    )
 
                 # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 5/6
                 for same_attr in ("units", "standard_name", "calendar"):
                     if hasattr(clim_var, same_attr):
-                        climatology_ctx.assert_true(getattr(clim_var, same_attr) ==
-                                          getattr(clim_coord_var, same_attr,
-                                                  None),
-                                          f"Attribute {same_attr} must have the same value in both "
-                                           "variables {clim_var.name} and {clim_coord_var.name}")
+                        climatology_ctx.assert_true(
+                            getattr(clim_var, same_attr)
+                            == getattr(clim_coord_var, same_attr, None),
+                            f"Attribute {same_attr} must have the same value in both "
+                            "variables {clim_var.name} and {clim_coord_var.name}",
+                        )
             ret_val.append(climatology_ctx.to_result())
-
-
 
             # check that coordinate bounds are in the proper order.
             # make sure last elements are boundary variable specific dimensions
@@ -2984,11 +3019,14 @@ class CF1_6Check(CFNCCheck):
 
             # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 3/6 - dim size of 2 for
             # climatology-specific dimension
-            elif (ds.dimensions[
+            elif (
+                ds.dimensions[
                     ds.variables[clim_coord_var.climatology].dimensions[-1]
-                ].size != 2):
+                ].size
+                != 2
+            ):
                 reasoning.append(
-                    "Climatology dimension \"{}\" should only contain two elements".format(
+                    'Climatology dimension "{}" should only contain two elements'.format(
                         ds.variables[clim_coord_var.climatology].name
                     )
                 )
@@ -3124,7 +3162,9 @@ class CF1_6Check(CFNCCheck):
                         valid = False
                         # IMPLEMENTATION CONFORMANCE REQUIRED 3/3
                         # IMPLEMENTATION CONFORMANCE REQUIRED 3/3
-                        reasoning.append("Variable is not of type byte, short, or int as required for different type add_offset/scale_factor.")
+                        reasoning.append(
+                            "Variable is not of type byte, short, or int as required for different type add_offset/scale_factor."
+                        )
 
             result = Result(
                 BaseCheck.MEDIUM, valid, self.section_titles["8.1"], reasoning

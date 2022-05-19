@@ -64,12 +64,10 @@ class TestSuite(unittest.TestCase):
         ds = self.cs.load_dataset(static_files["2dim"])
         self.cs.run(ds, [], "acdd")
 
-
     def test_suite_pathlib(self):
         path_obj = Path(static_files["2dim"])
         ds = self.cs.load_dataset(path_obj)
         self.cs.run(ds, [], "acdd")
-
 
     def test_unicode_formatting(self):
         ds = self.cs.load_dataset(static_files["bad_region"])
@@ -83,8 +81,7 @@ class TestSuite(unittest.TestCase):
             )
             # This asserts that print is able to generate all of the unicode
             # output
-            self.cs.standard_output_generation(groups, limit, points, out_of,
-                                               checker)
+            self.cs.standard_output_generation(groups, limit, points, out_of, checker)
 
     def test_generate_dataset_netCDF4(self):
         """
@@ -135,21 +132,21 @@ class TestSuite(unittest.TestCase):
         msg_set = {msg for sg in score_groups["cf"][0] for msg in sg.msgs}
 
         expected_excluded_names = {
-            u"§3.5 flag_meanings for lat",
-            u"§3.5 flag_meanings for lon",
-            u"§3.5 lat is a valid flags variable",
-            u"§3.5 lat is a valid flags variable",
-            u"§3.5 lon is a valid flags variable",
+            "§3.5 flag_meanings for lat",
+            "§3.5 flag_meanings for lon",
+            "§3.5 lat is a valid flags variable",
+            "§3.5 lat is a valid flags variable",
+            "§3.5 lon is a valid flags variable",
         }
 
         self.assertTrue(len(expected_excluded_names & name_set) == 0)
 
         # should skip references
-        ref_msg = u"references global attribute should be a non-empty string"
+        ref_msg = "references global attribute should be a non-empty string"
         self.assertTrue(ref_msg not in msg_set)
         # check_standard_name is high priority, but we requested only low,
         # so the standard_name check should still exist
-        standard_name_hdr = u"§3.3 Standard Name"
+        standard_name_hdr = "§3.3 Standard Name"
         self.assertTrue(standard_name_hdr in name_set)
 
     def test_group_func(self):

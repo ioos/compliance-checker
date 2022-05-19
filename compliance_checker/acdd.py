@@ -769,7 +769,7 @@ class ACDD1_3Check(ACDDNCCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
-        if not hasattr(ds, u"metadata_link"):
+        if not hasattr(ds, "metadata_link"):
             return
         msgs = []
         meta_link = getattr(ds, "metadata_link")
@@ -784,14 +784,14 @@ class ACDD1_3Check(ACDDNCCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
-        if not hasattr(ds, u"id"):
+        if not hasattr(ds, "id"):
             return
-        if " " in getattr(ds, u"id"):
+        if " " in getattr(ds, "id"):
             return Result(
                 BaseCheck.MEDIUM,
                 False,
                 "no_blanks_in_id",
-                msgs=[u"There should be no blanks in the id field"],
+                msgs=["There should be no blanks in the id field"],
             )
         else:
             return Result(BaseCheck.MEDIUM, True, "no_blanks_in_id", msgs=[])
