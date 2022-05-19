@@ -935,7 +935,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 [
                     (
                         f"Invalid featureType '{feature_type_attr}'; please see the "
-                         "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
+                        "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
                     )
                 ],
             )
@@ -959,9 +959,8 @@ class IOOS1_2Check(IOOSNCCheck):
 
         elif feature_type == "point":
             return Result(
-                BaseCheck.MEDIUM,
-                True,
-                "CF DSG: featureType=trajectoryProfile")
+                BaseCheck.MEDIUM, True, "CF DSG: featureType=trajectoryProfile"
+            )
 
         else:
             return Result(
@@ -971,8 +970,8 @@ class IOOS1_2Check(IOOSNCCheck):
                 [
                     (
                         f"Invalid featureType '{feature_type_attr}'; "
-                          "please see the IOOS 1.2 Profile and CF-1.7 "
-                          "Conformance documents for valid featureType"
+                        "please see the IOOS 1.2 Profile and CF-1.7 "
+                        "Conformance documents for valid featureType"
                     )
                 ],
             )

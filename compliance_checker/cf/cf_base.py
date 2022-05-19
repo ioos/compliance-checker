@@ -33,6 +33,7 @@ from compliance_checker.cf.appendix_f import (
 
 logger = logging.getLogger(__name__)
 
+
 class CFBaseCheck(BaseCheck):
     """
     CF Convention Checker Base
@@ -1276,6 +1277,7 @@ appendix_a_base = {
     "valid_min": {"Type": "N", "attr_loc": {"D", "C"}, "cf_section": None},
     "valid_range": {"Type": "N", "attr_loc": {"D", "C"}, "cf_section": None},
 }
+
 
 class CFNCCheck(BaseNCCheck, CFBaseCheck):
     @classmethod
