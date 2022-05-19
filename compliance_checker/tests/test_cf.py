@@ -467,10 +467,23 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_standard_name(dataset)
         score, out_of, messages = get_results(results)
 
+
+
         # 9 vars checked, 8 fail
         assert len(results) == 9
         assert score < out_of
         assert all(r.name == u"§3.3 Standard Name" for r in results)
+
+        # check recommendations with a misspelled standard name
+        dataset = MockTimeSeries()
+        temperature = dataset.createVariable("temperature", "f8", ("time",))
+        temperature.units = "degree_C"
+        temperature.standard_name = "sea_water_temperatrue"
+        results = self.cf.check_standard_name(dataset)
+        score, out_of, messages = get_results(results)
+        # only check for recommendation substring as recommendations might
+        # vary with differing standard name tables
+        assert " Possible close match(es):" in messages[-1]
 
         # load different ds --  ll vars pass this check
         dataset = self.load_dataset(STATIC_FILES["reduced_horizontal_grid"])
