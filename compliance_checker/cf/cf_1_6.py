@@ -938,9 +938,8 @@ class CF1_6Check(CFNCCheck):
                         name
                     ),
                 )
-                if (isinstance(standard_name, str) and
-                    standard_name not in self._std_names):
-                    valid_std_name.out_of += 1
+                valid_std_name.out_of += 1
+                if (standard_name not in self._std_names):
                     err_msg = (
                         "standard_name {} is not defined in Standard Name Table v{}."
                         .format(
@@ -954,6 +953,8 @@ class CF1_6Check(CFNCCheck):
                         else:
                             err_msg += f" Possible close matches: {close_matches}"
                     valid_std_name.messages.append(err_msg)
+                else:
+                    valid_std_name.score += 1
 
 
                 ret_val.append(valid_std_name.to_result())

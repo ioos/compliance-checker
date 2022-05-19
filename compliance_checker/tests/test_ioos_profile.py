@@ -655,21 +655,22 @@ class TestIOOS1_2(BaseTestCase):
 
     def test_check_standard_name(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
-
-        # no standard names
-        results = self.ioos.check_standard_name(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
-
-        # give standard names to all variables
-        ds.variables["time"].setncattr("standard_name", "time")
-        ds.variables["lon"].setncattr("standard_name", "longitude")
-        ds.variables["lat"].setncattr("standard_name", "latitude")
-        ds.variables["depth"].setncattr("standard_name", "depth")
+        # all standard names on variables
         results = self.ioos.check_standard_name(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
+        # all standard names except for temperature
+        ds.createVariable("temperature", "f8", ("time",))
+        results = self.ioos.check_standard_name(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+        del ds.variables["temperature"]
+
+
+        # have to recreate here or temperature gives KeyError despite appearing
+        # deleted -- why?
+        ds = MockTimeSeries()  # time, lat, lon, depth
         # add a QARTOD variable, no standard name - should fail
         qr = ds.createVariable("depth_qc", np.byte)
         qr.setncattr("flag_meanings", "blah")
