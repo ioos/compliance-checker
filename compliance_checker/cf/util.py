@@ -586,7 +586,7 @@ def compare_unit_types(specified, reference):
     Compares two unit strings via UDUnits
 
     :param str specified: The specified unit
-    :param str reference: The reference unit which to compare agains
+    :param str reference: The reference unit which to compare against
 
     """
     msgs = []
