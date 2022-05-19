@@ -10,12 +10,12 @@ from compliance_checker.tests.helpers import MockTimeSeries
 from compliance_checker.tests.resources import STATIC_FILES
 
 
-def to_singleton_var(l):
+def to_singleton_var(item):
     """
     Get the first value of a list if this implements iterator protocol and is
     not a string
     """
-    return [x[0] if hasattr(x, "__iter__") and not isinstance(x, str) else x for x in l]
+    return [x[0] if hasattr(x, "__iter__") and not isinstance(x, str) else x for x in item]
 
 
 def check_varset_nonintersect(group0, group1):

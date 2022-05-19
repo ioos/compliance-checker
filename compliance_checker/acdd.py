@@ -829,7 +829,7 @@ class ACDD1_3Check(ACDDNCCheck):
             }
             if ctype not in valid_ctypes:
                 msgs.append(
-                    'coverage_content_type in "%s"' % (variable, sorted(valid_ctypes))
+                    'coverage_content_type "%s" not in %s' % (variable, sorted(valid_ctypes))
                 )
                 results.append(
                     Result(

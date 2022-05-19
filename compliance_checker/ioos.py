@@ -553,7 +553,7 @@ class IOOS1_2Check(IOOSNCCheck):
             ("infoUrl", base.UrlValidator()),
             "license",
             ("naming_authority", NamingAuthorityValidator()),
-            #'platform', # checked in check_platform_global
+            #'platform', # checked in check_platform_global # noqa
             "platform_name",
             "publisher_country",
             ("publisher_email", base.EmailValidator()),
@@ -579,11 +579,11 @@ class IOOS1_2Check(IOOSNCCheck):
             "creator_postalcode",
             "creator_state",
             # checked in check_creator_and_publisher_type
-            #'creator_type',
+            #'creator_type', # noqa
             "institution",
             "instrument",
             # checked in check_ioos_ingest
-            #'ioos_ingest',
+            #'ioos_ingest', # noqa
             "keywords",
             ("platform_id", IOOS1_2_PlatformIDValidator()),  # alphanumeric only
             "publisher_address",
@@ -593,7 +593,7 @@ class IOOS1_2Check(IOOSNCCheck):
             "publisher_postalcode",
             "publisher_state",
             # checked in check_creator_and_publisher_type
-            #'publisher_type',
+            #'publisher_type', # noqa
             "references",
             "instrument_vocabulary",
         ]
@@ -1440,7 +1440,6 @@ class IOOS1_2Check(IOOSNCCheck):
         -------
         bool
         """
-
 
         # should have an ancillary variable with standard_name aggregate_quality_flag
         avar_val = False

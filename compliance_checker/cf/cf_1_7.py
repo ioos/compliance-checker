@@ -54,11 +54,6 @@ class CF1_7Check(CF1_6Check):
                 "attr_loc": {"G"},
                 "cf_section": "2.6.3",
             },
-            "actual_range": {
-                "Type": "N",
-                "attr_loc": {"D", "C"},
-                "cf_section": "2.5.1",
-            },
             "scale_factor": {"Type": "N", "attr_loc": {"D", "C"}, "cf_section": "8.1"},
         }
     )
@@ -731,7 +726,7 @@ class CF1_7Check(CF1_6Check):
             return (True, msg)
 
     def check_grid_mapping(self, ds):
-        __doc__ = super(CF1_7Check, self).check_grid_mapping.__doc__
+        super(CF1_7Check, self).check_grid_mapping.__doc__
         prev_return = super(CF1_7Check, self).check_grid_mapping(ds)
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
         for var_name in sorted(grid_mapping_variables):

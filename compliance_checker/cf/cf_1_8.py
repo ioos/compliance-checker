@@ -2,7 +2,6 @@ from compliance_checker.base import BaseCheck, TestCtx
 from compliance_checker import MemoizedDataset
 from compliance_checker.cf.cf_1_7 import CF1_7Check
 from netCDF4 import Dataset
-from compliance_checker.base import BaseCheck, TestCtx
 import requests
 from lxml import etree
 from shapely.geometry import Polygon
@@ -11,14 +10,6 @@ import re
 from compliance_checker.cf.util import reference_attr_variables, string_from_var_type
 import itertools
 import warnings
-from shapely.geometry import (
-    MultiPoint,
-    LineString,
-    MultiLineString,
-    Polygon,
-    MultiPolygon,
-)
-from compliance_checker.cf.util import reference_attr_variables
 
 """
 What's new in CF-1.8
@@ -145,10 +136,9 @@ class CF1_8Check(CF1_7Check):
                 geometry_var = ds.variables[geometry_var_name]
 
             geometry_type = getattr(geometry_var, "geometry_type")
-            valid_geometry_types = {"point", "line", "polygon"}
             try:
                 node_coord_var_names = geometry_var.node_coordinates
-            except AttributeError as e:
+            except AttributeError:
                 geom_valid.messages.append(
                     "Could not find required attribute "
                     '"node_coordinates" in geometry '
@@ -180,7 +170,6 @@ class CF1_8Check(CF1_7Check):
                 )
                 results.append(geom_valid.to_result())
                 continue
-                return error_msgs
 
             node_count = reference_attr_variables(
                 ds, getattr(geometry_var, "node_count", None)
@@ -251,13 +240,6 @@ class CF1_8Check(CF1_7Check):
         given for those taxa that do not have an identifier.
         """
         ret_val = []
-        # taxa identification variables
-        taxa_name_variables = ds.get_variables_by_attributes(
-            standard_name="biological_taxon_name"
-        )
-        taxa_lsid_variables = ds.get_variables_by_attributes(
-            standard_name="biological_taxon_identifier"
-        )
 
         def match_taxa_standard_names(standard_name_string):
             """
@@ -512,9 +494,9 @@ class PointGeometry(GeometryStorage):
         super().check_geometry()
         # non-multipoint should have exactly one feature
         if self.node_count is None:
-            expected_node_count = 1
+            pass
         else:
-            expected_node_count = self.node_count
+            self.node_count
 
         if all(len(cv.dimensions) != 0 for cv in self.coord_vars):
             same_dim_group = itertools.groupby(self.coord_vars, lambda x: x.dimensions)
@@ -623,7 +605,6 @@ class PolygonGeometry(LineGeometry):
                 ring_orientation = self.interior_ring[:].astype(bool)
             else:
                 ring_orientation = np.zeros(len(self.part_count), dtype=bool)
-            current_node_count = self.node_count[:].copy()
             node_indexer_len = len(self.part_node_count)
         else:
             extents = np.concatenate([np.array([0]), self.node_count[:].cumsum()])

@@ -415,60 +415,6 @@ class TestIOOS1_2(BaseTestCase):
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
-    def test_check_contributor_role_and_vocabulary(self):
-        ds = MockTimeSeries()  # time, lat, lon, depth
-
-        # no contributor_role or vocab, fail both
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertFalse(all(r.value for r in results))
-
-        # bad contributor_role and vocab
-        ds.setncattr("contributor_role", "bad")
-        ds.setncattr("contributor_role_vocabulary", "bad")
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertFalse(all(r.value for r in results))
-
-        # good role, bad vocab
-        ds.setncattr("contributor_role", "contributor")
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertTrue(results[0].value)
-        self.assertEqual(results[0].msgs, [])
-        self.assertFalse(results[1].value)
-
-        # bad role, good vocab
-        ds.setncattr("contributor_role", "bad")
-        ds.setncattr(
-            "contributor_role_vocabulary",
-            "http://vocab.nerc.ac.uk/collection/G04/current/",
-        )
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertFalse(results[0].value)
-        self.assertTrue(results[1].value)
-        self.assertEqual(results[1].msgs, [])
-
-        # good role, good vocab
-        ds.setncattr("contributor_role", "contributor")
-        ds.setncattr(
-            "contributor_role_vocabulary",
-            "http://vocab.nerc.ac.uk/collection/G04/current/",
-        )
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertTrue(results[0].value)
-        self.assertEqual(results[0].msgs, [])
-        self.assertTrue(results[1].value)
-        self.assertEqual(results[1].msgs, [])
-
-        ds.setncattr("contributor_role", "resourceProvider")
-        ds.setncattr(
-            "contributor_role_vocabulary",
-            "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
-        )
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertTrue(results[0].value)
-        self.assertEqual(results[0].msgs, [])
-        self.assertTrue(results[1].value)
-        self.assertEqual(results[1].msgs, [])
-
     def test_check_creator_and_publisher_type(self):
         """
         Checks the creator_type and publisher_type global attributes with
@@ -999,7 +945,7 @@ class TestIOOS1_2(BaseTestCase):
 
     def test_check_feattype_timeseries_cf_role(self):
 
-        ### featureType: timeseries and timeseries - msingle station require same tests ###
+        # featureType: timeseries and timeseries - msingle station require same tests
 
         # for ftype in ("timeseries", "timeseries - single station", "timeseries - multiple station"):
         ftype = "timeseries"
