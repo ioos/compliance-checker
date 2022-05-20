@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.1.0
+  rev: v4.2.0
   hooks:
     - id: trailing-whitespace
       exclude: compliance_checker/tests/data
@@ -34,7 +34,7 @@ repos:
     - id: seed-isort-config
 
 - repo: https://github.com/psf/black
-  rev: 21.12b0
+  rev: 22.3.0
   hooks:
   - id: black
     language_version: python3
