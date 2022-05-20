@@ -2,17 +2,22 @@
 # -*- coding: utf-8 -*-
 
 from compliance_checker import cfutil  # noqa: F401
-from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx  # noqa: F401
+from compliance_checker.base import (  # noqa: F401
+    BaseCheck,
+    BaseNCCheck,
+    Result,
+    TestCtx,
+)
 from compliance_checker.cf import util  # noqa: F401
 from compliance_checker.cf.appendix_d import (  # noqa: F401
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
     no_missing_terms,
 )
-
-from compliance_checker.cf.appendix_e import cell_methods16, cell_methods17  # noqa: F401
-from compliance_checker.cf.appendix_f import (  # noqa: F401
-    ellipsoid_names17,
+from compliance_checker.cf.appendix_e import cell_methods16  # noqa: F401
+from compliance_checker.cf.appendix_e import cell_methods17
+from compliance_checker.cf.appendix_f import ellipsoid_names17  # noqa: F401
+from compliance_checker.cf.appendix_f import (
     grid_mapping_attr_types16,
     grid_mapping_attr_types17,
     grid_mapping_dict16,

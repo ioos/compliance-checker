@@ -5,6 +5,8 @@ compliance_checker/protocols/netcdf.py
 Functions to assist in determining if the URL points to a netCDF file
 """
 
+import warnings
+
 import requests
 
 
@@ -79,7 +81,10 @@ def is_remote_netcdf(ds_str):
     try:
         head_req = requests.head(ds_str, allow_redirects=True, timeout=10)
         head_req.raise_for_status()
-    except:
+    except requests.exceptions.RequestException as e:
+        warnings.warn(
+            "Received exception when making HEAD request to {}: {}".format(ds_str, e)
+        )
         content_type = None
     else:
         content_type = head_req.headers.get("content-type")

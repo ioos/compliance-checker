@@ -3,7 +3,6 @@
 
 import pytest
 
-
 from compliance_checker.cf import util
 
 

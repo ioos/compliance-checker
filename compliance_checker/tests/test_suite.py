@@ -224,7 +224,7 @@ class TestSuite(unittest.TestCase):
 
     def test_load_local_dataset_GenericFile(self):
         resp = self.cs.load_local_dataset(static_files["empty"])
-        assert isinstance(resp, GenericFile) == True
+        assert isinstance(resp, GenericFile)
 
     def test_standard_output_score_header(self):
         """
