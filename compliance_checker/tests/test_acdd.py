@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-
 from netCDF4 import Dataset
 
 from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check

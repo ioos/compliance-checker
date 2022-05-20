@@ -1,11 +1,9 @@
 import difflib
 import logging
-
 from collections import defaultdict
 
 import numpy as np
 import regex
-
 from cf_units import Unit
 
 from compliance_checker import cfutil
@@ -19,7 +17,6 @@ from compliance_checker.cf.appendix_f import (
     grid_mapping_dict16,
 )
 from compliance_checker.cf.cf_base import CFNCCheck, appendix_a_base
-
 
 logger = logging.getLogger(__name__)
 

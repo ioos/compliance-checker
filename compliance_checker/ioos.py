@@ -2,11 +2,9 @@
 Check for IOOS-approved attributes
 """
 import re
-
 from numbers import Number
 
 import validators
-
 from cf_units import Unit
 from lxml.etree import XPath
 from owslib.namespaces import Namespaces

@@ -10,7 +10,6 @@ from functools import partial
 
 import numpy as np
 import pendulum
-
 from cftime import num2pydate
 from pygeoif import from_wkt
 

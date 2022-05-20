@@ -6,14 +6,12 @@ import json
 import os
 import re
 import sqlite3
-
 from itertools import chain
 from tempfile import gettempdir
 
 import numpy as np
 import pytest
 import requests_mock
-
 from netCDF4 import Dataset, stringtoarr
 
 from compliance_checker import cfutil

@@ -3,7 +3,6 @@
 """Tests for base compliance checker class"""
 
 import os
-
 from unittest import TestCase
 
 from netCDF4 import Dataset

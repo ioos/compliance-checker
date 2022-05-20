@@ -16,7 +16,6 @@ import warnings
 
 import numpy as np
 import requests
-
 from lxml import etree
 from netCDF4 import Dataset
 from shapely.geometry import Polygon
