@@ -4,6 +4,6 @@ flake8
 httpretty
 mypy
 pre-commit
-pytest-cov
 pytest>=2.9.0
+pytest-cov>=3.0.0
 requests-mock>=1.7.0
