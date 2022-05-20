@@ -29,8 +29,7 @@ from pkg_resources import working_set
 
 from compliance_checker import MemoizedDataset, __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
-from compliance_checker.cf.cf_base import CFBaseCheck
-from compliance_checker.protocols import cdl, erddap, netcdf, opendap
+from compliance_checker.protocols import cdl, netcdf, opendap
 
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
@@ -92,8 +91,7 @@ class CheckSuite(object):
         :type verbose: int
         """
         for checker in sorted(self.checkers.keys()):
-            version = getattr(self.checkers[checker], "_cc_checker_version",
-                              "???")
+            version = getattr(self.checkers[checker], "_cc_checker_version", "???")
             if verbose > 0:
                 print(" - {} (v{})".format(checker, version))
             elif ":" in checker and not checker.endswith(
@@ -109,8 +107,7 @@ class CheckSuite(object):
         :type checker_obj: subclass of compliance_checker.base.BaseChecker
         """
 
-        check_functions = self._get_checks(checker_obj,
-                                           defaultdict(lambda: None))
+        check_functions = self._get_checks(checker_obj, defaultdict(lambda: None))
         for c, _ in check_functions:
             print("- {}".format(c.__name__))
             if c.__doc__ is not None:
@@ -184,8 +181,7 @@ class CheckSuite(object):
                 print("Could not load", c, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
-        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":"
-                               in c])
+        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":" in c])
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
             version_nums = [v[-1] for v in versions]
             try:
@@ -219,12 +215,14 @@ class CheckSuite(object):
         if include_checks:
             for fn_name, fn_obj in meths:
                 if fn_name in include_checks:
-                   returned_checks.append((fn_obj, skip_checks[fn_name]))
+                    returned_checks.append((fn_obj, skip_checks[fn_name]))
         else:
             for fn_name, fn_obj in meths:
-                if (fn_name.startswith("check_") and
-                    skip_checks[fn_name] != BaseCheck.HIGH):
-                   returned_checks.append((fn_obj, skip_checks[fn_name]))
+                if (
+                    fn_name.startswith("check_")
+                    and skip_checks[fn_name] != BaseCheck.HIGH
+                ):
+                    returned_checks.append((fn_obj, skip_checks[fn_name]))
 
         return returned_checks
 
@@ -332,8 +330,7 @@ class CheckSuite(object):
 
         check_dict = defaultdict(lambda: None)
         # A is for "all", "M" is for medium, "L" is for low
-        check_lookup = {"A": BaseCheck.HIGH, "M": BaseCheck.MEDIUM,
-                        "L": BaseCheck.LOW}
+        check_lookup = {"A": BaseCheck.HIGH, "M": BaseCheck.MEDIUM, "L": BaseCheck.LOW}
 
         for skip_check_spec in skip_checks:
             split_check_spec = skip_check_spec.split(":")
@@ -372,8 +369,7 @@ class CheckSuite(object):
         return check_dict
 
     def run(self, ds, skip_checks, *checker_names):
-        warnings.warn("suite.run is deprecated, use suite.run_all in calls "
-                      "instead")
+        warnings.warn("suite.run is deprecated, use suite.run_all in calls " "instead")
         return self.run_all(ds, checker_names, skip_checks=skip_checks)
 
     def run_all(self, ds, checker_names, include_checks=None, skip_checks=None):
@@ -686,8 +682,7 @@ class CheckSuite(object):
         # create dict of the groups -> {level: [reasons]}
         result = {
             key: [v for v in valuesiter if v.value[0] != v.value[1]]
-            for key, valuesiter in itertools.groupby(groups_sorted,
-                                                     key=weight_sort)
+            for key, valuesiter in itertools.groupby(groups_sorted, key=weight_sort)
         }
         priorities = self.checkers[check]._cc_display_headers
 
@@ -732,8 +727,7 @@ class CheckSuite(object):
                     print("{:^{width}}".format(level_name, width=width))
                     print("-" * width)
 
-                data_issues = [process_table(res, check) for res in
-                               result[level]]
+                data_issues = [process_table(res, check) for res in result[level]]
 
                 has_printed = False
                 for issue, reasons in data_issues:
@@ -743,8 +737,7 @@ class CheckSuite(object):
                         print("")
                     # join alphabetized reasons together
                     reason_str = "\n".join(
-                        "* {}".format(r) for r in sorted(reasons,
-                                                         key=lambda x: x[0])
+                        "* {}".format(r) for r in sorted(reasons, key=lambda x: x[0])
                     )
                     proc_str = "{}\n{}".format(issue, reason_str)
                     print(proc_str)

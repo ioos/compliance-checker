@@ -1,24 +1,18 @@
 import logging
 import os
 import sqlite3
-import sys
 
-from collections import OrderedDict, defaultdict
-from functools import wraps
 from warnings import warn
 
 import numpy as np
 import pyproj
 import regex
 
-from cf_units import Unit
 
 from compliance_checker import cfutil
-from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
-from compliance_checker.cf import util
+from compliance_checker.base import BaseCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import (
     dimless_vertical_coordinates_1_7,
-    no_missing_terms,
 )
 from compliance_checker.cf.appendix_e import cell_methods17
 from compliance_checker.cf.appendix_f import (
@@ -32,6 +26,7 @@ from compliance_checker.cf.cf_base import appendix_a_base
 from compliance_checker.cf.cf_1_6 import CF1_6Check
 
 logger = logging.getLogger(__name__)
+
 
 class CF1_7Check(CF1_6Check):
     """Implementation for CF v1.7. Inherits from CF1_6Check as most of the
@@ -59,11 +54,6 @@ class CF1_7Check(CF1_6Check):
                 "attr_loc": {"G"},
                 "cf_section": "2.6.3",
             },
-            "actual_range": {
-                "Type": "N",
-                "attr_loc": {"D", "C"},
-                "cf_section": "2.5.1",
-            },
             "scale_factor": {"Type": "N", "attr_loc": {"D", "C"}, "cf_section": "8.1"},
         }
     )
@@ -87,21 +77,21 @@ class CF1_7Check(CF1_6Check):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :rtype: compliance_checker.base.Result
         """
-        external_vars_ctx = TestCtx(
-            BaseCheck.MEDIUM, self.section_titles["2.6.3"]
-        )
+        external_vars_ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles["2.6.3"])
         # IMPLEMENTATION CONFORMANCE 2.6.3 REQUIRED 2/2
         try:
             external_var_names = set(ds.external_variables.strip().split())
 
-            bad_external_var_names = (external_var_names.intersection(ds.variables))
+            bad_external_var_names = external_var_names.intersection(ds.variables)
 
             if bad_external_var_names:
                 external_vars_ctx.out_of += 1
-                bad_msg = ("Global attribute external_variables should not "
-                           "have any variable names which are present in the dataset. "
-                           "Currently, the following names appear in both external_variables "
-                           f"and the dataset's variables: {bad_external_var_names}")
+                bad_msg = (
+                    "Global attribute external_variables should not "
+                    "have any variable names which are present in the dataset. "
+                    "Currently, the following names appear in both external_variables "
+                    f"and the dataset's variables: {bad_external_var_names}"
+                )
                 external_vars_ctx.messages.append(bad_msg)
 
         # string/global attributes are handled in Appendix A checks
@@ -109,9 +99,6 @@ class CF1_7Check(CF1_6Check):
             pass
 
         return external_vars_ctx.to_result()
-
-
-
 
     def check_actual_range(self, ds):
         """
@@ -739,7 +726,7 @@ class CF1_7Check(CF1_6Check):
             return (True, msg)
 
     def check_grid_mapping(self, ds):
-        __doc__ = super(CF1_7Check, self).check_grid_mapping.__doc__
+        super(CF1_7Check, self).check_grid_mapping.__doc__
         prev_return = super(CF1_7Check, self).check_grid_mapping(ds)
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
         for var_name in sorted(grid_mapping_variables):
@@ -794,8 +781,7 @@ class CF1_7Check(CF1_6Check):
                 )
             elif len_vdatum_name_attrs == 1:
                 # should be one or zero attrs
-                proj_db_path = os.path.join(pyproj.datadir.get_data_dir(),
-                                            "proj.db")
+                proj_db_path = os.path.join(pyproj.datadir.get_data_dir(), "proj.db")
                 try:
                     with sqlite3.connect(proj_db_path) as conn:
                         v_datum_attr = next(iter(vert_datum_attrs))
@@ -830,7 +816,9 @@ class CF1_7Check(CF1_6Check):
         """
         deprecated_var_names = cfutil._find_standard_name_modifier_variables(ds, True)
         if deprecated_var_names:
-            warn(f"Deprecated standard_name modifiers found on variables {deprecated_var_names}")
+            warn(
+                f"Deprecated standard_name modifiers found on variables {deprecated_var_names}"
+            )
 
     def _process_v_datum_str(self, v_datum_str, conn):
         vdatum_query = """SELECT 1 FROM alias_name WHERE

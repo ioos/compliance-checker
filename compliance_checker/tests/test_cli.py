@@ -86,6 +86,7 @@ class TestCLI:
         # since SimpleNamespace is Python 3.3+ only
         CheckSuite.checkers.clear()
         # need to mock setuptools entrypoints here in order to load in checkers
+
         def checker_1():
             return Namespace(name="checker_1")
 

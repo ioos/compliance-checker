@@ -110,10 +110,11 @@ def is_dimensionless_standard_name(standard_name_table, standard_name):
     # standard_name must be string, so if it is not, it is *wrong* by default
     if not isinstance(standard_name, str):
         return False
-    found_standard_name = standard_name_table.find(".//entry[@id='{}']".format(standard_name))
+    found_standard_name = standard_name_table.find(
+        ".//entry[@id='{}']".format(standard_name)
+    )
     if found_standard_name is not None:
-        canonical_units = (Unit(found_standard_name.find("canonical_units").
-                                text))
+        canonical_units = Unit(found_standard_name.find("canonical_units").text)
         return canonical_units.is_dimensionless()
     # if the standard name is not found, assume we need units for the time being
     else:
@@ -374,12 +375,11 @@ def get_cell_boundary_variables(ds):
             boundary_variables.append(var.bounds)
     return boundary_variables
 
+
 @lru_cache(128)
 def get_bounds_variables(ds):
-    contains_bounds = ds.get_variables_by_attributes(bounds=
-                                                     lambda s: s in ds.variables)
+    contains_bounds = ds.get_variables_by_attributes(bounds=lambda s: s in ds.variables)
     return {ds.variables[parent_var.bounds] for parent_var in contains_bounds}
-
 
 
 @lru_cache(128)
@@ -392,8 +392,7 @@ def get_geophysical_variables(ds):
     """
     parameters = []
     for variable in ds.variables:
-        if (is_geophysical(ds, variable) and
-            variable not in get_bounds_variables(ds)):
+        if is_geophysical(ds, variable) and variable not in get_bounds_variables(ds):
             parameters.append(variable)
     return parameters
 
@@ -742,11 +741,18 @@ def _find_standard_name_modifier_variables(ds, return_deprecated=False):
         if not return_deprecated:
             matches = re.search(r"^\w+ +\w+", standard_name_str)
         else:
-            matches = re.search(r"^\w+ +(?:status_flag|number_of_observations)$", standard_name_str)
+            matches = re.search(
+                r"^\w+ +(?:status_flag|number_of_observations)$", standard_name_str
+            )
         return bool(matches)
-    return [var.name for var in
-            ds.get_variables_by_attributes(standard_name=
-                                           match_modifier_variables)]
+
+    return [
+        var.name
+        for var in ds.get_variables_by_attributes(
+            standard_name=match_modifier_variables
+        )
+    ]
+
 
 def get_flag_variables(ds):
     """

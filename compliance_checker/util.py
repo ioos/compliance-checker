@@ -43,5 +43,6 @@ def kvp_convert(input_coll):
         return input_coll
     else:
         return OrderedDict(
-            (l, None) if not isinstance(l, tuple) else (l[0], l[1]) for l in input_coll
+            (thing, None) if not isinstance(thing, tuple) else
+            (thing[0], thing[1]) for thing in input_coll
         )

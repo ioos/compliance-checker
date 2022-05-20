@@ -10,28 +10,16 @@ from warnings import warn
 import numpy as np
 import regex
 
-from cf_units import Unit
 
 from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf import util
 from compliance_checker.cf.appendix_d import (
-    dimless_vertical_coordinates_1_6,
-    dimless_vertical_coordinates_1_7,
     no_missing_terms,
-)
-from compliance_checker.cf.appendix_e import cell_methods16, cell_methods17
-from compliance_checker.cf.appendix_f import (
-    ellipsoid_names17,
-    grid_mapping_attr_types16,
-    grid_mapping_attr_types17,
-    grid_mapping_dict16,
-    grid_mapping_dict17,
-    horizontal_datum_names17,
-    prime_meridian_names17,
 )
 
 logger = logging.getLogger(__name__)
+
 
 class CFBaseCheck(BaseCheck):
     """
@@ -200,7 +188,7 @@ class CFBaseCheck(BaseCheck):
             defines_grid_mapping.assert_true(
                 (isinstance(grid_mapping, str) and grid_mapping),
                 "{}'s grid_mapping attribute must be a "
-                + "space-separated non-empty string".format(variable.name),
+                "space-separated non-empty string".format(variable.name),
             )
             if isinstance(grid_mapping, str):
                 # TODO (badams): refactor functionality to split functionality
@@ -1227,8 +1215,6 @@ class CFNCCheck(BaseNCCheck, CFBaseCheck):
     attributes from BaseNCCheck (like supported_ds) will not be passed to
     CFNCCheck."""
 
-    pass
-
 
 appendix_a_base = {
     "Conventions": {"Type": "S", "attr_loc": {"G"}, "cf_section": None},
@@ -1256,7 +1242,6 @@ appendix_a_base = {
     "formula_terms": {"Type": "S", "attr_loc": {"C"}, "cf_section": "4.3.2"},
     "grid_mapping": {"Type": "S", "attr_loc": {"D"}, "cf_section": "5.6"},
     "history": {"Type": "S", "attr_loc": {"G"}, "cf_section": None},
-    #'instance_dimension': {'Type': 'N', 'attr_loc': {'D'}, 'cf_section': '9.3'},
     "institution": {"Type": "S", "attr_loc": {"G", "D"}, "cf_section": "2.6.2"},
     "leap_month": {"Type": "N", "attr_loc": {"C"}, "cf_section": "4.4.1"},
     "leap_year": {"Type": "N", "attr_loc": {"C"}, "cf_section": "4.4.1"},
@@ -1265,7 +1250,6 @@ appendix_a_base = {
     "month_lengths": {"Type": "N", "attr_loc": {"C"}, "cf_section": "4.4.1"},
     "positive": {"Type": "S", "attr_loc": {"C"}, "cf_section": None},
     "references": {"Type": "S", "attr_loc": {"G", "D"}, "cf_section": "2.6.2"},
-    #'sample_dimension': {'Type': 'N', 'attr_loc': {'D'}, 'cf_section': '9.3'},
     "scale_factor": {"Type": "N", "attr_loc": {"D"}, "cf_section": "8.1"},
     "source": {"Type": "S", "attr_loc": {"G", "D"}, "cf_section": "2.6.2"},
     "standard_error_multiplier": {"Type": "N", "attr_loc": {"D"}, "cf_section": None},
@@ -1276,8 +1260,3 @@ appendix_a_base = {
     "valid_min": {"Type": "N", "attr_loc": {"D", "C"}, "cf_section": None},
     "valid_range": {"Type": "N", "attr_loc": {"D", "C"}, "cf_section": None},
 }
-
-class CFNCCheck(BaseNCCheck, CFBaseCheck):
-    @classmethod
-    def beliefs(cls):  # @TODO
-        return {}

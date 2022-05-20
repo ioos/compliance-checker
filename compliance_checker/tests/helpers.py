@@ -31,12 +31,14 @@ class MockTimeSeries(MockNetCDF):
         super(MockTimeSeries, self).__init__(filename)
         self.createDimension("time", 500)
         for name, std_name, units in (
-                  ("time", "time", "seconds since 1970-01-01"),
-                  ("lon", "longitude", "degrees_east"),
-                  ("lat", "latitude", "degrees_north"),
-                  ("depth", "depth", "m")):
-            var = self.createVariable(name, "d", ("time",),
-                                 fill_value=default_fill_value)
+            ("time", "time", "seconds since 1970-01-01"),
+            ("lon", "longitude", "degrees_east"),
+            ("lat", "latitude", "degrees_north"),
+            ("depth", "depth", "m"),
+        ):
+            var = self.createVariable(
+                name, "d", ("time",), fill_value=default_fill_value
+            )
             var.standard_name = std_name
             var.units = units
 
@@ -72,10 +74,8 @@ class MockVariable(object):
     def __getitem__(self, idx):
         return self._arr[idx]
 
-
     def __setitem__(self, idx, val):
         self._arr[idx] = val
-
 
     def ncattrs(self):
         return [

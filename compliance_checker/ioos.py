@@ -20,7 +20,6 @@ from compliance_checker.base import (
     BaseSOSGCCheck,
     Result,
     TestCtx,
-    attr_check,
     check_has,
 )
 from compliance_checker.cf import util as cf_util  # not to be confused with cfutil.py
@@ -554,7 +553,7 @@ class IOOS1_2Check(IOOSNCCheck):
             ("infoUrl", base.UrlValidator()),
             "license",
             ("naming_authority", NamingAuthorityValidator()),
-            #'platform', # checked in check_platform_global
+            #'platform', # checked in check_platform_global # noqa
             "platform_name",
             "publisher_country",
             ("publisher_email", base.EmailValidator()),
@@ -580,11 +579,11 @@ class IOOS1_2Check(IOOSNCCheck):
             "creator_postalcode",
             "creator_state",
             # checked in check_creator_and_publisher_type
-            #'creator_type',
+            #'creator_type', # noqa
             "institution",
             "instrument",
             # checked in check_ioos_ingest
-            #'ioos_ingest',
+            #'ioos_ingest', # noqa
             "keywords",
             ("platform_id", IOOS1_2_PlatformIDValidator()),  # alphanumeric only
             "publisher_address",
@@ -594,7 +593,7 @@ class IOOS1_2Check(IOOSNCCheck):
             "publisher_postalcode",
             "publisher_state",
             # checked in check_creator_and_publisher_type
-            #'publisher_type',
+            #'publisher_type', # noqa
             "references",
             "instrument_vocabulary",
         ]
@@ -734,7 +733,7 @@ class IOOS1_2Check(IOOSNCCheck):
                             None if role_val else [role_msg.format(_role)],
                         )
                     )
-            except TypeError as e:
+            except TypeError:
                 role_results.append(
                     Result(
                         BaseCheck.MEDIUM,
@@ -767,7 +766,7 @@ class IOOS1_2Check(IOOSNCCheck):
                             None if vocb_val else [vocb_msg.format(_vocb)],
                         )
                     )
-            except TypeError as e:
+            except TypeError:
                 vocb_results.append(
                     Result(
                         BaseCheck.MEDIUM,
@@ -935,7 +934,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 [
                     (
                         f"Invalid featureType '{feature_type_attr}'; please see the "
-                         "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
+                        "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
                     )
                 ],
             )
@@ -959,9 +958,8 @@ class IOOS1_2Check(IOOSNCCheck):
 
         elif feature_type == "point":
             return Result(
-                BaseCheck.MEDIUM,
-                True,
-                "CF DSG: featureType=trajectoryProfile")
+                BaseCheck.MEDIUM, True, "CF DSG: featureType=trajectoryProfile"
+            )
 
         else:
             return Result(
@@ -971,8 +969,8 @@ class IOOS1_2Check(IOOSNCCheck):
                 [
                     (
                         f"Invalid featureType '{feature_type_attr}'; "
-                          "please see the IOOS 1.2 Profile and CF-1.7 "
-                          "Conformance documents for valid featureType"
+                        "please see the IOOS 1.2 Profile and CF-1.7 "
+                        "Conformance documents for valid featureType"
                     )
                 ],
             )
@@ -1443,8 +1441,6 @@ class IOOS1_2Check(IOOSNCCheck):
         bool
         """
 
-        val = False
-
         # should have an ancillary variable with standard_name aggregate_quality_flag
         avar_val = False
         anc_vars = str(getattr(var, "ancillary_variables", "")).split(" ")
@@ -1505,7 +1501,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         # is dataset properly flagged for ingest?
-        glb_gts_attr = getattr(ds, "gts_ingest", None)
+        getattr(ds, "gts_ingest", None)
 
         # check variables
         all_passed_ingest_reqs = True  # default

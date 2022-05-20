@@ -235,6 +235,7 @@ def get_safe(dict_instance, keypath, default=None):
     except Exception:
         return default
 
+
 class VariableReferenceError(Exception):
     """A variable to assign bad variable references to"""
 
@@ -580,6 +581,7 @@ def is_vertical_coordinate(var_name, var):
     if not is_pressure:
         satisfied |= getattr(var, "positive", "").lower() in ("up", "down")
     return satisfied
+
 
 def compare_unit_types(specified, reference):
     """
