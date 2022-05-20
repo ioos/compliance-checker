@@ -8,13 +8,11 @@ import itertools
 import pprint
 import re
 import warnings
-
 from collections import defaultdict
 from functools import wraps
 from io import StringIO
 
 import validators
-
 from lxml import etree
 from netCDF4 import Dataset
 from owslib.namespaces import Namespaces
@@ -22,10 +20,8 @@ from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 
 import compliance_checker.cfutil as cfutil
-
 from compliance_checker import MemoizedDataset, __version__
 from compliance_checker.util import kvp_convert
-
 
 # Python 3.5+ should work, also have a fallback
 try:

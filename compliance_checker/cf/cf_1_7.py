@@ -1,7 +1,6 @@
 import logging
 import os
 import sqlite3
-
 from warnings import warn
 
 import numpy as np
@@ -21,7 +20,6 @@ from compliance_checker.cf.appendix_f import (
 )
 from compliance_checker.cf.cf_1_6 import CF1_6Check
 from compliance_checker.cf.cf_base import appendix_a_base
-
 
 logger = logging.getLogger(__name__)
 

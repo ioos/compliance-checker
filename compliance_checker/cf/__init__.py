@@ -5,7 +5,6 @@ from compliance_checker.cf.appendix_d import (
 )
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
 
-
 __all__ = [
     "CF1_6Check",
     "CF1_7Check",

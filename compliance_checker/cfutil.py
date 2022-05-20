@@ -6,13 +6,11 @@ compliance_checker/cfutil.py
 import csv
 import re
 import warnings
-
 from collections import defaultdict
 from functools import lru_cache, partial
 
 from cf_units import Unit
 from pkg_resources import resource_filename
-
 
 _UNITLESS_DB = None
 _SEA_NAMES = None

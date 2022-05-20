@@ -11,7 +11,6 @@ import subprocess
 import sys
 import textwrap
 import warnings
-
 from collections import defaultdict
 from datetime import datetime, timezone
 from operator import itemgetter
@@ -19,7 +18,6 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
-
 from distutils.version import StrictVersion
 from lxml import etree as ET
 from netCDF4 import Dataset
@@ -30,7 +28,6 @@ from pkg_resources import working_set
 from compliance_checker import MemoizedDataset, __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.protocols import cdl, netcdf, opendap
-
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
