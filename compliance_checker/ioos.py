@@ -2,11 +2,9 @@
 Check for IOOS-approved attributes
 """
 import re
-
 from numbers import Number
 
 import validators
-
 from cf_units import Unit
 from lxml.etree import XPath
 from owslib.namespaces import Namespaces
@@ -426,10 +424,9 @@ class NamingAuthorityValidator(base.UrlValidator):
 
     def validator_func(self, input_value):
         return (
+            # also check for reverse DNS strings
             super().validator_func(input_value)
-            or
-            # check for reverse DNS strings
-            validators.domain(".".join(input_value.split(".")[::-1]))
+            or validators.domain(".".join(input_value.split(".")[::-1]))
         )
 
 

@@ -1,27 +1,22 @@
+import difflib
 import logging
-
 from collections import defaultdict
 
 import numpy as np
 import regex
-
 from cf_units import Unit
 
 from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, Result, TestCtx
 from compliance_checker.cf import util
 from compliance_checker.cf.appendix_c import valid_modifiers
-from compliance_checker.cf.appendix_d import (
-    dimless_vertical_coordinates_1_6,
-)
+from compliance_checker.cf.appendix_d import dimless_vertical_coordinates_1_6
 from compliance_checker.cf.appendix_e import cell_methods16
 from compliance_checker.cf.appendix_f import (
     grid_mapping_attr_types16,
     grid_mapping_dict16,
 )
-
 from compliance_checker.cf.cf_base import CFNCCheck, appendix_a_base
-import difflib
 
 logger = logging.getLogger(__name__)
 

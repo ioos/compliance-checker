@@ -1,16 +1,13 @@
 # coding=utf-8
 import os
 import unittest
-
 from pathlib import Path
 
 import numpy as np
-
 from pkg_resources import resource_filename
 
 from compliance_checker.base import BaseCheck, GenericFile, Result
 from compliance_checker.suite import CheckSuite
-
 
 static_files = {
     "2dim": resource_filename("compliance_checker", "tests/data/2dim-grid.nc"),
@@ -224,7 +221,7 @@ class TestSuite(unittest.TestCase):
 
     def test_load_local_dataset_GenericFile(self):
         resp = self.cs.load_local_dataset(static_files["empty"])
-        assert isinstance(resp, GenericFile) == True
+        assert isinstance(resp, GenericFile)
 
     def test_standard_output_score_header(self):
         """

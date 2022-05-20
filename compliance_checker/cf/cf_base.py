@@ -3,20 +3,16 @@
 import logging
 import os
 import sys
-
 from collections import OrderedDict, defaultdict
 from warnings import warn
 
 import numpy as np
 import regex
 
-
 from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf import util
-from compliance_checker.cf.appendix_d import (
-    no_missing_terms,
-)
+from compliance_checker.cf.appendix_d import no_missing_terms
 
 logger = logging.getLogger(__name__)
 

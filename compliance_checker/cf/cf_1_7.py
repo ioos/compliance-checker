@@ -1,19 +1,15 @@
 import logging
 import os
 import sqlite3
-
 from warnings import warn
 
 import numpy as np
 import pyproj
 import regex
 
-
 from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, Result, TestCtx
-from compliance_checker.cf.appendix_d import (
-    dimless_vertical_coordinates_1_7,
-)
+from compliance_checker.cf.appendix_d import dimless_vertical_coordinates_1_7
 from compliance_checker.cf.appendix_e import cell_methods17
 from compliance_checker.cf.appendix_f import (
     ellipsoid_names17,
@@ -22,8 +18,8 @@ from compliance_checker.cf.appendix_f import (
     horizontal_datum_names17,
     prime_meridian_names17,
 )
-from compliance_checker.cf.cf_base import appendix_a_base
 from compliance_checker.cf.cf_1_6 import CF1_6Check
+from compliance_checker.cf.cf_base import appendix_a_base
 
 logger = logging.getLogger(__name__)
 

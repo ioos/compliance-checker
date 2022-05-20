@@ -1,11 +1,9 @@
 import os
 import subprocess
-
 from itertools import chain
 from pathlib import Path
 
 import pytest
-
 from netCDF4 import Dataset
 from pkg_resources import resource_filename
 

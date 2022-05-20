@@ -3,9 +3,7 @@
 
 import pytest
 
-
 from compliance_checker.cf import util
-
 
 # get current std names table version (it changes)
 std_names = util.StandardNameTable()

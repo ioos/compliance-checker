@@ -2,18 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import copy
+import json
 import os
+import re
 import sqlite3
-
 from itertools import chain
 from tempfile import gettempdir
 
 import numpy as np
 import pytest
-
+import requests_mock
 from netCDF4 import Dataset, stringtoarr
 
 from compliance_checker import cfutil
+from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.cf import (
     CF1_6Check,
     CF1_7Check,
@@ -21,7 +23,6 @@ from compliance_checker.cf.cf import (
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
-from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.util import (
     StandardNameTable,
     create_cached_data_dir,
@@ -38,9 +39,6 @@ from compliance_checker.tests.helpers import (
     MockTimeSeries,
     MockVariable,
 )
-import requests_mock
-import json
-import re
 from compliance_checker.tests.resources import STATIC_FILES
 
 

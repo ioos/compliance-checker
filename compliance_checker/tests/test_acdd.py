@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-
 from netCDF4 import Dataset
 
 from compliance_checker.acdd import ACDD1_1Check, ACDD1_3Check
@@ -15,7 +14,9 @@ def to_singleton_var(item):
     Get the first value of a list if this implements iterator protocol and is
     not a string
     """
-    return [x[0] if hasattr(x, "__iter__") and not isinstance(x, str) else x for x in item]
+    return [
+        x[0] if hasattr(x, "__iter__") and not isinstance(x, str) else x for x in item
+    ]
 
 
 def check_varset_nonintersect(group0, group1):

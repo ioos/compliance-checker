@@ -2,7 +2,6 @@ import io
 import itertools
 import os
 import sys
-
 from collections import defaultdict
 from copy import deepcopy
 from pkgutil import get_data
@@ -10,12 +9,10 @@ from urllib.parse import urljoin
 
 import lxml.html
 import requests
-
 from cf_units import Unit
 from lxml import etree
 from netCDF4 import Dataset, Dimension, Variable
 from pkg_resources import resource_filename
-
 
 # copied from paegan
 # paegan may depend on these later
