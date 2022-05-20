@@ -11,8 +11,6 @@ repos:
     - id: check-docstring-first
     - id: check-added-large-files
     - id: requirements-txt-fixer
-    - id: file-contents-sorter
-      files: test_requirements.txt
 
 - repo: https://github.com/PyCQA/flake8
   rev: 6.0.0
