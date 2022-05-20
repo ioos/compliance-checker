@@ -59,6 +59,9 @@ class TestIOOSSOSDescribeSensor(unittest.TestCase):
         httpretty.register_uri(
             httpretty.GET, url, content_type="text/xml", body=self.resp
         )
+        httpretty.register_uri(
+            httpretty.HEAD, url, content_type="text/xml", body="HTTP/1.1 200"
+        )
         # need to mock out the HEAD response so that compliance checker
         # recognizes this as some sort of XML doc instead of an OPeNDAP
         # source
