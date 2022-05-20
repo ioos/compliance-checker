@@ -582,7 +582,7 @@ class ACDDBaseCheck(BaseCheck):
         try:
             t_min = dateparse(ds.time_coverage_start)
             t_max = dateparse(ds.time_coverage_end)
-        except:
+        except (TypeError, pendulum.parsing.exceptions.ParserError):
             return Result(
                 BaseCheck.MEDIUM,
                 False,
@@ -618,7 +618,7 @@ class ACDDBaseCheck(BaseCheck):
                 num2pydate(ds.variables[timevar][-1], ds.variables[timevar].units),
                 "UTC",
             )
-        except:
+        except ValueError:
             return Result(
                 BaseCheck.MEDIUM,
                 False,
@@ -829,7 +829,8 @@ class ACDD1_3Check(ACDDNCCheck):
             }
             if ctype not in valid_ctypes:
                 msgs.append(
-                    'coverage_content_type "%s" not in %s' % (variable, sorted(valid_ctypes))
+                    'coverage_content_type "%s" not in %s'
+                    % (variable, sorted(valid_ctypes))
                 )
                 results.append(
                     Result(

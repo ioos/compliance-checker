@@ -14,13 +14,13 @@ import warnings
 
 from collections import defaultdict
 from datetime import datetime, timezone
-from distutils.version import StrictVersion
 from operator import itemgetter
 from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
 
+from distutils.version import StrictVersion
 from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
