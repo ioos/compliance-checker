@@ -15,9 +15,9 @@ from compliance_checker.cf.appendix_d import (  # noqa: F401
     no_missing_terms,
 )
 from compliance_checker.cf.appendix_e import cell_methods16  # noqa: F401
-from compliance_checker.cf.appendix_e import cell_methods17
+from compliance_checker.cf.appendix_e import cell_methods17  # noqa: F401
 from compliance_checker.cf.appendix_f import ellipsoid_names17  # noqa: F401
-from compliance_checker.cf.appendix_f import (
+from compliance_checker.cf.appendix_f import (  # noqa: F401
     grid_mapping_attr_types16,
     grid_mapping_attr_types17,
     grid_mapping_dict16,
