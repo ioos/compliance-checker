@@ -1,0 +1,238 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.27.1
+    method: HEAD
+    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom
+  response:
+    body:
+      string: ''
+    headers:
+      Connection:
+      - close
+      Content-Type:
+      - text/plain; charset=UTF-8
+      Date:
+      - Tue, 24 May 2022 11:35:37 GMT
+      Last-Modified:
+      - Tue, 24 May 2022 11:35:37 GMT
+      Location:
+      - https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom.html
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Transfer-Encoding:
+      - chunked
+      erddap-server:
+      - '2.18'
+      xdods-server:
+      - dods/3.7
+    status:
+      code: 302
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.27.1
+    method: HEAD
+    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom.html
+  response:
+    body:
+      string: ''
+    headers:
+      Connection:
+      - close
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - text/html;charset=UTF-8
+      Date:
+      - Tue, 24 May 2022 11:35:48 GMT
+      Last-Modified:
+      - Tue, 24 May 2022 11:35:48 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Transfer-Encoding:
+      - chunked
+      erddap-server:
+      - '2.18'
+      xdods-server:
+      - dods/3.7
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.27.1
+    method: HEAD
+    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom
+  response:
+    body:
+      string: ''
+    headers:
+      Connection:
+      - close
+      Content-Type:
+      - text/plain; charset=UTF-8
+      Date:
+      - Tue, 24 May 2022 11:35:59 GMT
+      Last-Modified:
+      - Tue, 24 May 2022 11:35:59 GMT
+      Location:
+      - https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom.html
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Transfer-Encoding:
+      - chunked
+      erddap-server:
+      - '2.18'
+      xdods-server:
+      - dods/3.7
+    status:
+      code: 302
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.27.1
+    method: HEAD
+    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom.html
+  response:
+    body:
+      string: ''
+    headers:
+      Connection:
+      - close
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - text/html;charset=UTF-8
+      Date:
+      - Tue, 24 May 2022 11:36:10 GMT
+      Last-Modified:
+      - Tue, 24 May 2022 11:36:10 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Transfer-Encoding:
+      - chunked
+      erddap-server:
+      - '2.18'
+      xdods-server:
+      - dods/3.7
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.27.1
+    method: GET
+    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom.das
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      Connection:
+      - close
+      Content-Description:
+      - dods-das
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - text/plain;charset=ISO-8859-1
+      Date:
+      - Tue, 24 May 2022 11:38:22 GMT
+      Last-Modified:
+      - Tue, 24 May 2022 11:38:22 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Transfer-Encoding:
+      - chunked
+      erddap-server:
+      - '2.18'
+      xdods-server:
+      - dods/3.7
+    status:
+      code: 200
+      message: ''
+version: 1
