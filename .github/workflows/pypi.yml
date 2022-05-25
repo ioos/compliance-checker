@@ -1,0 +1,55 @@
+name: PyPI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - published
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  packages:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        # Should be enough for setuptools-scm
+        fetch-depth: 100
+        persist-credentials: false
+
+    - name: Get tags
+      run: git fetch origin 'refs/tags/*:refs/tags/*'
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install build tools
+      run: |
+        python -m pip install --upgrade pip build twine
+
+    - name: Build binary wheel
+      run: python -m build --sdist --wheel . --outdir dist
+
+    - name: CheckFiles
+      run: |
+        ls -lh dist
+
+    - name: Test wheels
+      run: |
+        cd dist && python -m pip install compliance_checker*.whl
+        python -m twine check *
+
+    - name: Publish a Python distribution to PyPI
+      if: success() && github.event_name == 'release'
+      uses: pypa/gh-action-pypi-publish@v1.5.0
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_ACCESS_TOKEN }}
