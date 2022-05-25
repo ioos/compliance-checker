@@ -39,7 +39,7 @@ def test_hyrax():
     """
     Tests that a connection can be made to Hyrax
     """
-    url = "http://ingria.coas.oregonstate.edu/opendap/hyrax/aggregated/ocean_time_aggregation.ncml"
+    url = "http://test.opendap.org:8080/opendap/ioos/mday_joinExist.ncml"
     cs = CheckSuite()
     ds = cs.load_dataset(url)
     assert ds is not None
@@ -49,7 +49,9 @@ def test_thredds():
     """
     Tests that a connection can be made to a remote THREDDS endpoint
     """
-    url = "http://thredds.ucar.edu/thredds/dodsC/grib/NCEP/GFS/Global_0p25deg_ana/TP"
+    url = (
+        "http://thredds.ucar.edu/thredds/dodsC/grib/NCEP/GFS/Global_0p25deg_ana/TP"
+    )
 
     cs = CheckSuite()
     ds = cs.load_dataset(url)
@@ -60,7 +62,7 @@ def test_sos():
     """
     Tests that a connection can be made to an SOS endpoint
     """
-    url = "https://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml"
+    url = "https://thredds.aoos.org/thredds/sos/aoos/cruises/ecofoci/2dy12.nc"
     cs = CheckSuite()
     ds = cs.load_dataset(url)
     assert ds is not None

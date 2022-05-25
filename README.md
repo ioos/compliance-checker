@@ -1,7 +1,6 @@
 # IOOS Compliance Checker
 
 [![Build Status](https://travis-ci.org/ioos/compliance-checker.svg)](https://travis-ci.org/ioos/compliance-checker)
-[![Build status](https://ci.appveyor.com/api/projects/status/lcc9co38pi6o45ho/branch/master?svg=true)](https://ci.appveyor.com/project/ocefpaf/compliance-checker/branch/master)
 [![codecov](https://codecov.io/gh/ioos/compliance-checker/branch/master/graph/badge.svg)](https://codecov.io/gh/ioos/compliance-checker)
 
 The IOOS Compliance Checker is a python based tool for data providers to check
@@ -11,9 +10,6 @@ for completeness and community standard compliance of local or remote
 [ACDD](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3)
 file standards. The python module can be used as a command-line tool or as a
 library that can be integrated into other software.
-
-## Python 2.7 Deprecation Notice
-As of release 4.3.0, the __Compliance Checker no longer officially supports Python 2.7__.
 
 A [web-based version](https://data.ioos.us/compliance/index.html) of the Compliance
 Checker was developed to enable a broader audience and improve accessibility for the
@@ -438,20 +434,14 @@ compliance-checker -t ncei-trajectory-profile-orthogonal -v ~/data/sample-trajec
 compliance-checker -t ncei-grid -f json -o ~/Documents/sample_grid_report.json ~/Documents/sample_grid_report.nc
 ```
 
-## Contributors
-
-- [Dave Foster](https://github.com/daf) &lt;dave@axiomdatascience.com&gt;
-- [Dan Maher](https://github.com/danieljmaher) &lt;daniel.maher@gdit.com&gt;
-- [Luke Campbell](https://github.com/lukecampbell) &lt;luke@axiomdatascience.com&gt;
-- [Kyle Wilcox](https://github.com/kwilcox) &lt;kyle@axiomdatascience.com&gt;
-- [Ben Adams](https://github.com/benjwadams) &lt;ben.adams@rpsgroup.com&gt;
-- [Bob Fratantonio](https://github.com/bobfrat) &lt;robert.fratantonio@rpsgroup.com&gt;
-- [Dalton Kell](https://github.com/daltonkell) &lt;dalton.kell@rpsgroup.com&gt;
-
-And many more testers!
-
-Portions of the CF checker are based on Michael Decker's work, http://repositories.iek.fz-juelich.de/hg/CFchecker/
-
 ## Disclaimer
 
 The objective of the IOOS Compliance Checker is to check your file against our interpretation of select dataset metadata standards to use as a guideline in generating compliant files. The compliance checker should not be considered the authoritative source on whether your file is 100% "compliant". Instead, we recommend that users use the results as a guide to work towards compliance.
+
+
+## Miscellaneous/Acknowledgements
+
+### Contributors
+![GitHub Contributors Image](https://contrib.rocks/image?repo=ioos/compliance-checker)
+
+Portions of the CF checker are based on Michael Decker's work, http://repositories.iek.fz-juelich.de/hg/CFchecker/

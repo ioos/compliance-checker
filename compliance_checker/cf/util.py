@@ -2,7 +2,6 @@ import io
 import itertools
 import os
 import sys
-
 from collections import defaultdict
 from copy import deepcopy
 from pkgutil import get_data
@@ -10,12 +9,10 @@ from urllib.parse import urljoin
 
 import lxml.html
 import requests
-
 from cf_units import Unit
 from lxml import etree
 from netCDF4 import Dataset, Dimension, Variable
 from pkg_resources import resource_filename
-
 
 # copied from paegan
 # paegan may depend on these later
@@ -234,6 +231,7 @@ def get_safe(dict_instance, keypath, default=None):
         return obj
     except Exception:
         return default
+
 
 class VariableReferenceError(Exception):
     """A variable to assign bad variable references to"""
@@ -500,6 +498,12 @@ def units_temporal(units):
         u = Unit(units)
     except ValueError:
         return False
+    # IMPLEMENTATION CONFORMANCE REQUIRED 4.4 1/3
+    # time units of a time_coordinate varialbe must contain a reference
+    # time/date
+    # IMPLEMENTATION CONFORMANCE REQUIRED 4.4 3/3
+    # check that reference time seconds is not greater than or
+    # equal to 60
     return u.is_time_reference()
 
 
@@ -574,6 +578,36 @@ def is_vertical_coordinate(var_name, var):
     if not is_pressure:
         satisfied |= getattr(var, "positive", "").lower() in ("up", "down")
     return satisfied
+
+
+def compare_unit_types(specified, reference):
+    """
+    Compares two unit strings via UDUnits
+
+    :param str specified: The specified unit
+    :param str reference: The reference unit which to compare against
+
+    """
+    msgs = []
+    err_flag = False
+    try:
+        specified_unit = Unit(specified)
+    except ValueError:
+        msgs.append(f"Specified conversion unit f{specified} may not be valid UDUnits")
+        err_flag = True
+
+    try:
+        reference_unit = Unit(reference)
+    except ValueError:
+        msgs.append(f"Specified conversion unit f{reference} may not be valid UDUnits")
+        err_flag = True
+
+    if err_flag:
+        return msgs
+
+    unit_convertible = specified_unit.is_convertible(reference_unit)
+    fail_msg = [f'Units "{specified}" are not convertible to "{reference}"']
+    return msgs if unit_convertible else fail_msg
 
 
 def string_from_var_type(variable):

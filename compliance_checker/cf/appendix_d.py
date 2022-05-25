@@ -27,11 +27,28 @@ is omitted from the formula_terms attribute should be assumed to be zero.
 # vertical coordinates only have one computed_standard_name, but some have
 # multiple acceptable values.
 ocean_computed_standard_names = {
-    "altitude",
-    "height_above_geopotential_datum",
-    "height_above_reference_ellipsoid",
-    "height_above_mean_sea_level",
+    "altitude": {
+        "zlev": "altitude",
+        "eta": "sea_surface_height_above_geoid",
+        "depth": "sea_floor_depth_below_geoid",
+    },
+    "height_above_geopotential_datum": {
+        "zlev": "height_above_geopotential_datum",
+        "eta": "sea_surface_height_above_geopotential_datum",
+        "depth": "sea_floor_depth_below_geopotential_datum",
+    },
+    "height_above_reference_ellipsoid": {
+        "zlev": "height_above_reference_ellipsoid",
+        "eta": "sea_surface_height_above_reference_ellipsoid",
+        "depth": "sea_floor_depth_below_reference_ellipsoid",
+    },
+    "height_above_mean_sea_level": {
+        "zlev": "height_above_mean_sea_level",
+        "eta": "sea_surface_height_above_mean_sea_level",
+        "depth": "sea_floor_depth_below_mean_sea_level",
+    },
 }
+
 dimless_vertical_coordinates_1_6 = {  # only for CF-1.6
     "atmosphere_ln_pressure_coordinate": ({"p0", "lev"}, {"air_pressure"}),
     "atmosphere_sigma_coordinate": ({"sigma", "ps", "ptop"}, {"air_pressure"}),

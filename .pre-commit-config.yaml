@@ -11,27 +11,20 @@ repos:
     - id: check-docstring-first
     - id: check-added-large-files
     - id: requirements-txt-fixer
-    - id: file-contents-sorter
-      files: test_requirements.txt
 
-- repo: https://gitlab.com/pycqa/flake8
-  rev: 3.9.2
+- repo: https://github.com/PyCQA/flake8
+  rev: 4.0.1
   hooks:
     - id: flake8
       exclude: docs/source/conf.py
       args: [--max-line-length=200, "--ignore=E203,E501,W503", "--select=select=C,E,F,W,B,B950"]
 
-- repo: https://github.com/pre-commit/mirrors-isort
-  rev: v5.10.1
+- repo: https://github.com/pycqa/isort
+  rev: 5.10.1
   hooks:
   - id: isort
     additional_dependencies: [toml]
-    args: [--project=compliance_checker, --multi-line=3, --lines-after-imports=2, --lines-between-types=1, --trailing-comma, --force-grid-wrap=0, --use-parentheses, --line-width=88]
-
-- repo: https://github.com/asottile/seed-isort-config
-  rev: v2.2.0
-  hooks:
-    - id: seed-isort-config
+    args: ["--profile", "black", "--filter-files"]
 
 - repo: https://github.com/psf/black
   rev: 22.3.0
@@ -44,7 +37,7 @@ repos:
   hooks:
     - id: codespell
       args:
-        - --ignore-words-list=degreeE,degreee,varn,poit,uint,sur,herat
+        - --ignore-words-list=degreee,varn,poit,uint,sur,herat,claus
       exclude: >
           (?x)^(
               .*\.xml|

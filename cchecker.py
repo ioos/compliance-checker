@@ -3,7 +3,6 @@
 import argparse
 import sys
 import warnings
-
 from collections import defaultdict
 from textwrap import dedent
 
@@ -112,7 +111,7 @@ def main():
                                     will skip medium and low.  "L" will show
                                     both high and medium priority issues, while
                                     skipping low priority issues.  Cannot be
-                                    used with `-i`/`--include` option.
+                                    used with `-i`/`--include-checks` option.
                                     """
         ),
         action="append",
