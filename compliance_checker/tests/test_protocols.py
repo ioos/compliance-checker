@@ -8,7 +8,6 @@ import pytest
 
 from compliance_checker.suite import CheckSuite
 
-
 pytestmark = [pytest.mark.integration]
 
 
@@ -49,9 +48,7 @@ def test_thredds():
     """
     Tests that a connection can be made to a remote THREDDS endpoint
     """
-    url = (
-        "http://thredds.ucar.edu/thredds/dodsC/grib/NCEP/GFS/Global_0p25deg_ana/TP"
-    )
+    url = "http://thredds.ucar.edu/thredds/dodsC/grib/NCEP/GFS/Global_0p25deg_ana/TP"
 
     cs = CheckSuite()
     ds = cs.load_dataset(url)
