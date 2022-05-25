@@ -8,7 +8,6 @@ import pytest
 
 from compliance_checker.suite import CheckSuite
 
-
 pytestmark = [pytest.mark.integration]
 
 
