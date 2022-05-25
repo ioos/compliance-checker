@@ -3,7 +3,7 @@ name: Integration Tests
 on:
   pull_request:
   push:
-    branches: [master]
+    branches: [master,develop,main]
 
 jobs:
   run:
@@ -36,4 +36,4 @@ jobs:
       shell: bash -l {0}
       run: |
         source activate TEST
-        pytest -m "integration" -s -rxs -v compliance_checker
+        pytest -m "integration" -s -rxs -v --vcr-record=none compliance_checker

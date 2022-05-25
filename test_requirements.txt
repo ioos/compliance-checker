@@ -5,5 +5,7 @@ httpretty
 mypy
 pre-commit
 pytest>=2.9.0
+pytest-cov
 pytest-cov>=3.0.0
+pytest-vcr
 requests-mock>=1.7.0
