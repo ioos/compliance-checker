@@ -235,6 +235,7 @@ class CF1_6Check(CFNCCheck):
             "_ChunkSizes",
             "_Coordinate",
             "_Unsigned",
+            "_Encoding",
         ]
 
         rname = regex.compile("^[A-Za-z][A-Za-z0-9_]*$")
