@@ -283,6 +283,20 @@ class TestCF1_6(BaseTestCase):
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
         assert all(r.name == "§2.3 Naming Conventions" for r in results)
 
+        dataset = MockTimeSeries()
+        # test for ignored attributes
+        temp = dataset.createVariable("temperature", "f8", ("time",), fill_value=-9999)
+        temp.standard_name = "sea_water_temperature"
+        temp.units = "degrees_C"
+        temp.DODS = ""
+        temp._ChunkSizes = 5
+        temp._Coordinate = ""
+        temp._Unsigned = 0
+        temp._Encoding = "utf-8"
+        results = self.cf.check_naming_conventions(dataset)
+        scored, out_of, messages = get_results(results)
+        assert scored == out_of
+
     def test_check_names_unique(self):
         """
         2.3 names should not be distinguished purely by case, i.e., if case is disregarded, no two names should be the same.
