@@ -242,6 +242,7 @@ def is_geophysical(ds, variable):
     return True
 
 
+@lru_cache(128)
 def get_coordinate_variables(ds):
     """
     Returns a list of variable names that identify as coordinate variables.

@@ -23,7 +23,6 @@ from compliance_checker.base import (
 from compliance_checker.cf import util as cf_util  # not to be confused with cfutil.py
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
 from compliance_checker.cfutil import (
-    get_coordinate_variables,
     get_geophysical_variables,
     get_instrument_variables,
     get_z_variables,
@@ -487,9 +486,6 @@ class IOOS1_2Check(IOOSNCCheck):
             )
         )
 
-        # geospatial vars must have the following attrs:
-        self.geospat_check_var_attrs = self._default_check_var_attrs
-
         # valid contributor_role values
         self.valid_contributor_roles = set(
             [  # NERC and NOAA
@@ -850,23 +846,6 @@ class IOOS1_2Check(IOOSNCCheck):
             )
 
         return results
-
-    def check_geospatial_vars_have_attrs(self, ds):
-        """
-        All geospatial variables must have certain attributes.
-
-        Parameters
-        ----------
-        ds: netCDF4.Dataset
-
-        Returns
-        -------
-        list: list of Result objects
-        """
-
-        return self._check_vars_have_attrs(
-            ds, get_coordinate_variables(ds), self.geospat_check_var_attrs
-        )
 
     def _check_vars_have_attrs(self, ds, vars_to_check, atts_to_check):
         """
