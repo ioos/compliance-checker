@@ -104,7 +104,7 @@ class CheckSuite(object):
         :type checker_obj: subclass of compliance_checker.base.BaseChecker
         """
 
-        check_functions = self._get_checks(checker_obj, defaultdict(lambda: None))
+        check_functions = self._get_checks(checker_obj, {}, defaultdict(lambda: None))
         for c, _ in check_functions:
             print("- {}".format(c.__name__))
             if c.__doc__ is not None:
