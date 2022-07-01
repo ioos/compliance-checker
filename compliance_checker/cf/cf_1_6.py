@@ -2929,9 +2929,17 @@ class CF1_6Check(CFNCCheck):
         # first, to determine whether or not we have a valid climatological time
         # coordinate variable, we need to make sure it has the attribute "climatology",
         # but not the attribute "bounds"
-
+        time_vars = cfutil.get_time_variables(ds)
         for clim_coord_var in clim_time_coord_vars:
             climatology_ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.3"])
+            # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 1/6
+            if clim_coord_var.name not in time_vars:
+                climatology_ctx.out_of += 1
+                climatology_ctx.messages.append(
+                    f"Variable {clim_coord_var.name} is not detected as a time "
+                    "coordinate variable, but has climatology attribute"
+                )
+            # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED
             if hasattr(clim_coord_var, "bounds"):
                 climatology_ctx.out_of += 1
                 climatology_ctx.messages.append(
@@ -2944,6 +2952,14 @@ class CF1_6Check(CFNCCheck):
 
             # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 2/6
             # make sure the climatology variable referenced actually exists
+            elif not isinstance(clim_coord_var.climatology, str):
+                climatology_ctx.out_of += 1
+                climatology_ctx.messages.append(
+                    f"Variable {clim_coord_var.name} must have a climatology "
+                    "attribute which is a string"
+                )
+                ret_val.append(climatology_ctx.to_result())
+                continue
             elif clim_coord_var.climatology not in ds.variables:
                 climatology_ctx.out_of += 1
                 climatology_ctx.messages.append(
@@ -2952,20 +2968,21 @@ class CF1_6Check(CFNCCheck):
                     )
                 )
             else:
-                # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 4/6
                 clim_var = ds.variables[clim_coord_var.climatology]
+                #
+                # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 4/6
                 if clim_var.dtype is str or not np.issubdtype(clim_var, np.number):
                     climatology_ctx.out_of += 1
                     climatology_ctx.messages.append(
                         f"Climatology variable {clim_var.name} is not a numeric type"
                     )
-                # IMPLEMENTATION CONFORMANCE REQUIRED 6/6
+                # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 6/6
                 if hasattr(clim_var, "_FillValue") or hasattr(
                     clim_var, "missing_value"
                 ):
                     climatology_ctx.out_of += 1
                     climatology_ctx.messages.append(
-                        f"Climatology variable {clim_var.name} may not contain"
+                        f"Climatology variable {clim_var.name} may not contain "
                         "attributes _FillValue or missing_value"
                     )
 
@@ -2976,7 +2993,7 @@ class CF1_6Check(CFNCCheck):
                             getattr(clim_var, same_attr)
                             == getattr(clim_coord_var, same_attr, None),
                             f"Attribute {same_attr} must have the same value in both "
-                            "variables {clim_var.name} and {clim_coord_var.name}",
+                            f"variables {clim_var.name} and {clim_coord_var.name}",
                         )
             ret_val.append(climatology_ctx.to_result())
 
