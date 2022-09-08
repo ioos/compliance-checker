@@ -484,7 +484,7 @@ class GeometryStorage(object):
     def check_geometry(self):
         invalid_vars = []
         for coord_var in self.coord_vars:
-            if not np.issubdtype(coord_var, np.float):
+            if not np.issubdtype(coord_var, float):
                 invalid_vars.append(coord_var.name)
         # can't continue if the geometry variables are not the correct size
         if invalid_vars:
