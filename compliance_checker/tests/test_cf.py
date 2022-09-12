@@ -2265,40 +2265,47 @@ class TestCF1_7(BaseTestCase):
         # create a temporary variable and test this only
         nc_obj = MockTimeSeries()
         nc_obj.createVariable("temperature", "d", ("time",))
-        nc_obj.variables["temperature"].setncattr("test_att", 45)
         att_name = "test_att"
         _var = nc_obj.variables["temperature"]
 
         # first, test all valid checks show that it's valid
-        attr = "my_attr_value"  # string
+        _var.test_att = "my_attr_value"  # string
         attr_type = "S"
-        result = self.cf._check_attr_type(att_name, attr_type, attr)
+        result = self.cf._check_attr_type(att_name, attr_type, _var.test_att)
         self.assertTrue(result[0])
 
-        attr = 1
+        _var.test_att = np.int8(1)
         attr_type = "N"
-        self.assertTrue(self.cf._check_attr_type(att_name, attr_type, attr)[0])
+        self.assertTrue(self.cf._check_attr_type(att_name, attr_type, _var.test_att)[0])
 
-        attr = np.float64(45)
+        _var.test_att = np.float64(45)
         attr_type = "D"
-        self.assertTrue(self.cf._check_attr_type(att_name, attr_type, attr, _var)[0])
+        self.assertTrue(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att, _var)[0]
+        )
 
         # check failures
-        attr = "my_attr_value"
+        _var.test_att = "my_attr_value"
         attr_type = "N"  # should be numeric
-        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr)[0])
+        self.assertFalse(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att)[0]
+        )
 
-        attr = 64
+        _var.test_att = np.int8(64)
         attr_type = "S"  # should be string
-        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr)[0])
+        self.assertFalse(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att)[0]
+        )
 
         nc_obj = MockTimeSeries()
         nc_obj.createVariable("temperature", "d", ("time",))
         nc_obj.variables["temperature"].setncattr("test_att", 45)
         _var = nc_obj.variables["temperature"]
-        attr = 45
+        _var.test_att = np.int8(45)
         attr_type = "D"  # should match
-        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr, _var)[0])
+        self.assertFalse(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att, _var)[0]
+        )
 
     def test_check_grid_mapping_attr_condition(self):
         """
