@@ -106,10 +106,7 @@ class TestCF1_6(BaseTestCase):
         ds.createDimension("siglev", 20)
 
         temp = ds.createVariable(
-            "temp",
-            np.float64,
-            dimensions=("time",),
-            fill_value=np.float(99999999999999999999.0),
+            "temp", np.float64, dimensions=("time",), fill_value=99999999999999999999.0
         )
         temp.coordinates = "sigma noexist"
         ds.createVariable("sigma", np.float64, dimensions=("siglev",))
@@ -184,7 +181,7 @@ class TestCF1_6(BaseTestCase):
             "temp",
             np.float64,
             dimensions=("time",),
-            fill_value=np.float(99999999999999999999.0),
+            fill_value=np.float64(99999999999999999999.0),
         )
 
         # give temp _FillValue as a float, expect good result
@@ -1197,7 +1194,7 @@ class TestCF1_6(BaseTestCase):
         assert bad_month_msg in messages
 
         dataset.variables["time"].month_lengths = np.array(
-            [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31], dtype=np.int
+            [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31], dtype=np.uint8
         )
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
@@ -2268,40 +2265,47 @@ class TestCF1_7(BaseTestCase):
         # create a temporary variable and test this only
         nc_obj = MockTimeSeries()
         nc_obj.createVariable("temperature", "d", ("time",))
-        nc_obj.variables["temperature"].setncattr("test_att", np.float64(45))
         att_name = "test_att"
         _var = nc_obj.variables["temperature"]
 
         # first, test all valid checks show that it's valid
-        attr = "my_attr_value"  # string
+        _var.test_att = "my_attr_value"  # string
         attr_type = "S"
-        result = self.cf._check_attr_type(att_name, attr_type, attr)
+        result = self.cf._check_attr_type(att_name, attr_type, _var.test_att)
         self.assertTrue(result[0])
 
-        attr = np.int64(1)
+        _var.test_att = np.int8(1)
         attr_type = "N"
-        self.assertTrue(self.cf._check_attr_type(att_name, attr_type, attr)[0])
+        self.assertTrue(self.cf._check_attr_type(att_name, attr_type, _var.test_att)[0])
 
-        attr = np.float64(45)
+        _var.test_att = np.float64(45)
         attr_type = "D"
-        self.assertTrue(self.cf._check_attr_type(att_name, attr_type, attr, _var)[0])
+        self.assertTrue(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att, _var)[0]
+        )
 
         # check failures
-        attr = "my_attr_value"
+        _var.test_att = "my_attr_value"
         attr_type = "N"  # should be numeric
-        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr)[0])
+        self.assertFalse(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att)[0]
+        )
 
-        attr = np.int(64)
+        _var.test_att = np.int8(64)
         attr_type = "S"  # should be string
-        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr)[0])
+        self.assertFalse(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att)[0]
+        )
 
         nc_obj = MockTimeSeries()
         nc_obj.createVariable("temperature", "d", ("time",))
-        nc_obj.variables["temperature"].setncattr("test_att", np.int32(45))
+        nc_obj.variables["temperature"].setncattr("test_att", 45)
         _var = nc_obj.variables["temperature"]
-        attr = np.int32(45)
+        _var.test_att = np.int8(45)
         attr_type = "D"  # should match
-        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr, _var)[0])
+        self.assertFalse(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att, _var)[0]
+        )
 
     def test_check_grid_mapping_attr_condition(self):
         """
@@ -2504,13 +2508,13 @@ class TestCF1_7(BaseTestCase):
         self.assertFalse(r[1].value)
         self.assertTrue(r[1].msgs)
 
-        temp.setncattr("scale_factor", np.uint(5))
+        temp.setncattr("scale_factor", np.uint32(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         self.assertFalse(r[1].value)
         self.assertTrue(r[1].msgs)
 
         # set good
-        temp.setncattr("scale_factor", np.float(5))
+        temp.setncattr("scale_factor", np.float64(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         self.assertTrue(r[1].value)
         self.assertFalse(r[1].msgs)
@@ -2522,8 +2526,8 @@ class TestCF1_7(BaseTestCase):
 
         # set same dtype
         dataset = MockTimeSeries()  # time lat lon depth
-        temp = dataset.createVariable("temp", np.int, dimensions=("time",))
-        temp.setncattr("scale_factor", np.int(5))
+        temp = dataset.createVariable("temp", np.int32, dimensions=("time",))
+        temp.setncattr("scale_factor", np.int32(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         self.assertTrue(r[1].value)
         self.assertFalse(r[1].msgs)
