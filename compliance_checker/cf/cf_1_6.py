@@ -155,8 +155,7 @@ class CF1_6Check(CFNCCheck):
                 att.dtype == variable.dtype
             ) or (  # will short-circuit or if first condition is true
                 isinstance(att, (np.float32, np.float64, float))
-                and variable.dtype
-                in (np.byte, np.short, np.int16, np.int, np.int32, int)
+                and variable.dtype in (np.byte, np.short, np.int16, np.int32, int)
             )
         if not val:
             msgs.append(error_msg)
@@ -3157,7 +3156,6 @@ class CF1_6Check(CFNCCheck):
                 else:
                     # Check variable type is byte, short or int
                     if var.dtype.type not in [
-                        np.int,
                         np.int8,
                         np.int16,
                         np.int32,
