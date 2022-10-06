@@ -437,7 +437,7 @@ class CF1_6Check(CFNCCheck):
                     
         return Result(
             BaseCheck.MEDIUM, 
-            (total - len(fails), total),
+            (len(fails), total),
             self.section_titles["2.5"], 
             msgs=fails,
         )
