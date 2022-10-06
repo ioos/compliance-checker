@@ -404,6 +404,37 @@ class CF1_6Check(CFNCCheck):
                 )
         return valid_dimension_order.to_result()
 
+    def check_fill_value_equal_missing_value(self, ds):
+        """
+        If both missing_value and _FillValue be used, they should have the same value. 
+        This according to CF §2.5.1 Recommendations:
+        
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of Results
+        """
+        fails = []
+        total = 0
+
+        for name, variable in ds.variables.items():
+            # If the variable have a defined _FillValue a defined missing_value check it.
+            
+            if hasattr(variable, "_FillValue") and hasattr(variable, "missing_value"):
+                total = total + 1
+                if variable._FillValue != variable.missing_value:
+                    fails.append(
+                        "For the variable {} the missing_value must be equal to the _FillValue".format(
+                        variable.name
+                        )
+                        )             
+                    
+        return Result(
+            BaseCheck.MEDIUM, 
+            (total - len(fails), total),
+            self.section_titles["2.5"], 
+            msgs=fails,
+        )
+    
     def check_fill_value_outside_valid_range(self, ds):
         """
         Checks each variable's _FillValue to ensure that it's in valid_range or
