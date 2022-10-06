@@ -384,7 +384,36 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_dimension_order(dataset)
         self.assertEqual((3, 3), result.value)
         self.assertEqual([], result.msgs)
+        
+    def test_check_fill_value_equal_missing_value(self):
+        """
+        According to CF §2.5.1 Recommendations: If both missing_value and _FillValue be used, 
+        they should have the same value.  
+        """
+        # TEST CONFORMANCE 2.5.1 RECOMMENDED
+        dataset = MockTimeSeries()
+        # Case of _FillValue and missing_value are not equal
+        dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2   
+        dataset.variables["a"].setncattr("missing_value", [9939.9])
 
+        # Case of _FillValue and missing_value are equal
+        dataset.createVariable("b", "d", ("time",), fill_value=9999.9)
+        dataset.variables["b"][0] = 1
+        dataset.variables["b"][1] = 2   
+        dataset.variables["b"].setncattr("missing_value", [9999.9])
+
+
+        result = self.cf.check_fill_value_equal_missing_value(dataset)
+        
+        # check if the test fails when when variable "a" is checked.
+        expected_msgs = [
+            f"For the variable {v_name} the missing_value must be equal to the _FillValue"
+            for v_name in ("a")]
+ 
+        assert result.msgs == expected_msgs 
+        
     def test_check_fill_value_outside_valid_range(self):
         """
         2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
