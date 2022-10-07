@@ -435,6 +435,42 @@ class CF1_6Check(CFNCCheck):
             msgs=fails,
         )
     
+    def check_valid_range_or_valid_min_max_present(self,ds):
+        '''
+        The valid_range attribute must not be present if the valid_min
+        and/or valid_max attributes are present. This according to 2.5.1 Requirements.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of Results
+        '''
+        fails = []
+        total = 0
+
+        for name, variable in ds.variables.items():
+            
+            if (hasattr(variable, "valid_max") 
+                and (hasattr(variable, "valid_min") 
+                or hasattr(variable, "valid_range")
+                )
+                ):
+
+                total = total + 1
+            
+                fails.append(
+                    "For the variable {} the valid_range attribute must not be present "
+                    "if the valid_min and/or valid_max attributes are present".format(
+                    variable.name
+                    )
+                    )               
+                    
+        return Result(
+            BaseCheck.MEDIUM, 
+            (len(fails), total),
+            self.section_titles["2.5"], 
+            msgs=fails,
+        )
+    
     def check_fill_value_outside_valid_range(self, ds):
         """
         Checks each variable's _FillValue to ensure that it's in valid_range or
