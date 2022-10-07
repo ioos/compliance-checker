@@ -382,7 +382,48 @@ class TestCF1_6(BaseTestCase):
             for v_name in ("a")]
  
         assert result.msgs == expected_msgs 
+
+    def test_check_valid_range_or_valid_min_max_present(self):
+        """
+        2.5.1 Missing data, valid and actual range of data
+        Requirements:
+        The valid_range attribute must not be present if the 
+        valid_min and/or valid_max attributes are present.
+        """
+        # TEST CONFORMANCE 2.5.1 REQUIRED
+        dataset = MockTimeSeries()
+        # Case of valid_min, valid_max, and valid_range are present
+        dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2   
+        dataset.variables["a"].setncattr("valid_min", [-10])
+        dataset.variables["a"].setncattr("valid_max", [10])
+        dataset.variables["a"].setncattr("valid_range", [-10, 10])
+
+        # Case of valid_min and valid_max are present and valid_range is absent
+        dataset.createVariable("b", "d", ("time",), fill_value=9999.9)
+        dataset.variables["b"][0] = 1
+        dataset.variables["b"][1] = 2   
+        dataset.variables["a"].setncattr("valid_min", [-10])
+        dataset.variables["a"].setncattr("valid_max", [10])
+
+        # Case of valid_min and valid_max are absent and valid_range is present
+        dataset.createVariable("c", "d", ("time",), fill_value=9999.9)
+        dataset.variables["c"][0] = 1
+        dataset.variables["c"][1] = 2   
+        dataset.variables["c"].setncattr("valid_range", [-10, 10]) 
+
+        result = self.cf.check_valid_range_or_valid_min_max_present(dataset)
         
+        # check if the test fails when when variable "a" is checked.
+        expected_msgs = [
+            f"For the variable {v_name} the valid_range attribute must not be present "
+            f"if the valid_min and/or valid_max attributes are present"
+            for v_name in ("a")]
+ 
+        assert result.msgs == expected_msgs
+        assert result.value[0] == result.value[1]
+    
     def test_check_fill_value_outside_valid_range(self):
         """
         2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
