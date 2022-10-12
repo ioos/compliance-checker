@@ -73,7 +73,7 @@ dimless_vertical_coordinates_1_6 = {  # only for CF-1.6
         ocean_computed_standard_names,
     ),
     "ocean_sigma_z_coordinate": (
-        {"sigma", "eta", "depth", "depth_c", "nsigma", "zlev"},
+        {"sigma", "eta", "depth", "depth_c", "zlev"},
         ocean_computed_standard_names,
     ),
     "ocean_double_sigma_coordinate": (
