@@ -2779,6 +2779,22 @@ class CF1_6Check(CFNCCheck):
                                 cell_meas_var_name
                             )
                         )
+                    else:
+                        # IMPLEMENTATION CONFORMANCE REQUIRED 2/2
+                        # verify this combination {area: 'm2', volume: 'm3'} 
+                        dic_expected = {'area': 'm2', 'volume': 'm3'}
+                        dic_to_be_verified = {(var.cell_measures).split(':')[0]: cell_meas_var.units}                  
+                        print(dic_to_be_verified,'\n') 
+                        if not set(dic_to_be_verified).issubset(dic_expected):
+                            valid = False
+                            reasoning.append(
+                            "Cell measure variable {} must have "
+                            "units that are consistent with the measure type."
+                            "i.e. {}.".format(
+                                cell_meas_var_name, dic_expected
+                            )
+                        )
+                        
                     if not set(cell_meas_var.dimensions).issubset(var.dimensions):
                         valid = False
                         reasoning.append(
