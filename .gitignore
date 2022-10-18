@@ -89,7 +89,6 @@ ENV/
 # IDE project settings
 .spyderproject
 .vscode
-pyrightconfig.json
 
 # Rope project settings
 .ropeproject
