@@ -1159,7 +1159,7 @@ class TestCF1_6(BaseTestCase):
         self.assertTrue(
             no_missing_terms(
                 "ocean_sigma_z_coordinate",
-                {"sigma", "eta", "depth", "depth_c", "nsigma", "zlev"},
+                {"sigma", "eta", "depth", "depth_c", "zlev"},
                 dimless_vertical_coordinates_1_6,
             )
         )
