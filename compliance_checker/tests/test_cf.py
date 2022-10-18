@@ -1240,6 +1240,34 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
         assert leap_year_msg not in messages
 
+        for calendar in ("standard", "gregorian"):
+            dataset.variables["time"].calendar = calendar
+            dataset.variables["time"].units = "seconds since 1582-10-15T00:00Z"
+            # 500 element array with some failing values
+            # TEST CONFORMANCE 4.4.1 RECOMMENDED 4/4
+            dataset.variables["time"][:] = np.arange(-2, 498)
+            results = self.cf.check_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert messages[-1] == (
+                "Variable time has time values prior to "
+                "1582-10-15T00:00Z and utilizes the "
+                "standard/gregorian calendar"
+            )
+            dataset.variables["time"][:] = np.arange(0, 500)
+            results = self.cf.check_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert messages[-1] == (
+                "Variable time has standard/gregorian "
+                "calendar and does not cross 1582-10-15T00:00Z"
+            )
+            # TEST CONFORMANCE 4.4.1 RECOMMENDED 3/4
+            if calendar == "gregorian":
+                assert (
+                    "For time variable time, when using the standard "
+                    'Gregorian calendar, the value "standard" is preferred '
+                    'over "gregorian" for the calendar attribute' in messages
+                )
+
     def test_check_aux_coordinates(self):
         dataset = self.load_dataset(STATIC_FILES["illegal-aux-coords"])
         results = self.cf.check_aux_coordinates(dataset)
