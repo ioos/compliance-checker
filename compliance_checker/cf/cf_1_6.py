@@ -95,6 +95,13 @@ class CF1_6Check(CFNCCheck):
                         k, v.datatype
                     )
                 )
+            # TODO: DRY, don't repeat code path
+            if v.dtype is not str and v.dtype.kind == "S" and v.ndim not in (1, 2):
+                fails.append(
+                    "The fixed-length string variable {} must be one or "
+                    "two-dimensional, current length is {}".format(v.name, v.ndim)
+                )
+
         return Result(
             BaseCheck.HIGH,
             (total - len(fails), total),
@@ -156,8 +163,7 @@ class CF1_6Check(CFNCCheck):
                 att.dtype == variable.dtype
             ) or (  # will short-circuit or if first condition is true
                 isinstance(att, (np.float32, np.float64, float))
-                and variable.dtype
-                in (np.byte, np.short, np.int16, np.int, np.int32, int)
+                and variable.dtype in (np.byte, np.short, np.int16, np.int32, int)
             )
         if not val:
             msgs.append(error_msg)
@@ -3201,7 +3207,6 @@ class CF1_6Check(CFNCCheck):
                 else:
                     # Check variable type is byte, short or int
                     if var.dtype.type not in [
-                        np.int,
                         np.int8,
                         np.int16,
                         np.int32,
