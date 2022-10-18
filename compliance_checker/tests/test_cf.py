@@ -20,6 +20,7 @@ from compliance_checker.cf.cf import (
     CF1_6Check,
     CF1_7Check,
     CF1_8Check,
+    CF1_9Check,
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
@@ -215,7 +216,8 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_good(result)
 
-        # now give invalid integer for valid_min; above two should still check out, this one should fail
+        # now give invalid integer for valid_min; above two should still check
+        # out, this one should fail
         ds.variables["temp"].setncattr("valid_min", 45)
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_bad(result)
@@ -2825,6 +2827,52 @@ class TestCF1_8(BaseTestCase):
         results = self.cf.check_taxa(dataset)
         assert len(results[0].msgs) == 0
         assert results[0].value[0] == results[0].value[1]
+
+
+class TestCF1_9(BaseTestCase):
+    def setUp(self):
+        self.cf = CF1_9Check()
+
+    def test_domain(self):
+        dataset = MockTimeSeries()
+        domain_var = dataset.createVariable("domain", "c", ())
+        domain_var.long_name = "Domain variable"
+        domain_var.coordinates = "lon lat depth"
+        results = self.cf.check_domain_variables(dataset)
+        self.assertEqual(results[0].value[0], results[0].value[1])
+        self.assertFalse(results[0].msgs)
+
+        # missing long_name attribute
+        del domain_var.long_name
+        results = self.cf.check_domain_variables(dataset)
+        self.assertNotEqual(results[0].value[0], results[0].value[1])
+        self.assertTrue(results[0].msgs)
+        self.assertTrue(
+            results[0].msgs[0]
+            == "For domain variable domain it is recommended that attribute long_name be present and a string"
+        )
+
+        # bad coordinates variable
+        domain_var.coordinates = "lon lat depth xyxz abc"
+        domain_var.long_name = "Domain variable"
+        results = self.cf.check_domain_variables(dataset)
+        self.assertNotEqual(results[0].value[0], results[0].value[1])
+        self.assertTrue(
+            results[0].msgs[0]
+            == "Could not find the following variables referenced in "
+            "coordinates attribute from domain variable domain: "
+            "xyxz, abc"
+        )
+
+        del dataset
+        dataset = MockTimeSeries()
+        # domain should be dimensionless -- currently not an error in
+        # compliance checker, but not detected as a domain variable either
+        domain_var = dataset.createVariable("domain", "c", ("time",))
+        domain_var.long_name = "Domain variable"
+        domain_var.coordinates = "lon lat depth"
+        results = self.cf.check_domain_variables(dataset)
+        assert len(results) == 0
 
 
 class TestCFUtil(BaseTestCase):
