@@ -1197,7 +1197,7 @@ class TestCF1_6(BaseTestCase):
         assert bad_month_msg in messages
 
         dataset.variables["time"].month_lengths = np.array(
-            [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31], dtype=np.int
+            [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31], dtype=int
         )
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
