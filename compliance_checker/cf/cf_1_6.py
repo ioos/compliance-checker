@@ -3294,19 +3294,17 @@ class CF1_6Check(CFNCCheck):
             
             # Put the the values of the associated coordinate variable into a list
             coord_list_size = [item.size for item in ds.dimensions.values() if item.name in compress_set]
-            # get the uppper limt of the dimenssion size
+            # get the upper limt of the dimenssion size
             upper_limit_size = np.prod(coord_list_size) - 1
             
             for coord_size in coord_list_size:
                 if coord_size not in range(0,upper_limit_size): 
                     valid = False
                     reasoning.append(
-                            'The dimenssion size {} referenced by the commpress attribute is not ' 
+                            'The dimenssion size {} referenced by the compress attribute is not ' 
                             'in the range (0, The product of the compressed dimension sizes minus 1)'.format(coord_size)
                             )
-            result = Result(
-                BaseCheck.MEDIUM, valid, self.section_titles["8.2"], reasoning
-            )
+            result = Result(BaseCheck.MEDIUM, valid, self.section_titles["8.2"], reasoning)
             ret_val.append(result)
 
         return ret_val
