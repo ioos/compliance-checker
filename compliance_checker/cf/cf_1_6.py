@@ -7,7 +7,7 @@ import regex
 from cf_units import Unit
 
 from compliance_checker import cfutil
-from compliance_checker.base import BaseCheck, Result, TestCtx
+from compliance_checker.base import BaseCheck Result, TestCtx
 from compliance_checker.cf import util
 from compliance_checker.cf.appendix_c import valid_modifiers
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates_1_6
@@ -431,11 +431,10 @@ class CF1_6Check(CFNCCheck):
             if "valid_range" in attrs:
                 if isinstance(variable.valid_range, str):
                     m = "§2.5.1 Fill Values should be outside the range specified by valid_range"  # subsection message
-                    valid_fill_range.assert_true(
+                    valid_fill_range.assert_true
+                    (
                         False,
-                        "{};\n\t{}:valid_range must be a numeric type not a string".format(
-                            m, name
-                        ),
+                        "{}; \n\t{}:valid_range must be a numeric type not a string".format(m, name),
                     )
                     continue
                 rmin, rmax = variable.valid_range
@@ -443,12 +442,14 @@ class CF1_6Check(CFNCCheck):
 
             elif "valid_min" in attrs and "valid_max" in attrs:
                 if isinstance(variable.valid_min, str):
-                    valid_fill_range.assert_true(
+                    valid_fill_range.assert_true
+                    (
                         False,
                         "{}:valid_min must be a numeric type not a string".format(name),
                     )
                 if isinstance(variable.valid_max, str):
-                    valid_fill_range.assert_true(
+                    valid_fill_range.assert_true
+                    (
                         False,
                         "{}:valid_max must be a numeric type not a string".format(name),
                     )
@@ -467,7 +468,8 @@ class CF1_6Check(CFNCCheck):
             else:
                 valid = fill_value < rmin or fill_value > rmax
 
-            valid_fill_range.assert_true(
+            valid_fill_range.assert_true
+            (
                 valid,
                 "{}:_FillValue ({}) should be outside the range specified by {} ({}, {})"
                 "".format(name, fill_value, spec_by, rmin, rmax),
@@ -3363,13 +3365,15 @@ class CF1_6Check(CFNCCheck):
         for variable in ds.get_variables_by_attributes(cf_role=lambda x: x is not None):
             variable_count += 1
             cf_role = variable.cf_role
-            valid_cf_role.assert_true(
+            valid_cf_role.assert_true
+            (
                 cf_role in valid_roles,
                 "{} is not a valid cf_role value. It must be one of {}"
                 "".format(cf_role, ", ".join(valid_roles)),
             )
         if variable_count > 0:
-            m = (
+            m = 
+            (
                 "§9.5 The only acceptable values of cf_role for Discrete Geometry CF"
                 + " data sets are timeseries_id, profile_id, and trajectory_id"
             )
