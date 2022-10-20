@@ -7,7 +7,7 @@ import regex
 from cf_units import Unit
 
 from compliance_checker import cfutil
-from compliance_checker.base import BaseCheck Result TestCtx
+from compliance_checker.base import BaseCheck, Result, TestCtx
 from compliance_checker.cf import util
 from compliance_checker.cf.appendix_c import valid_modifiers
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates_1_6
@@ -403,7 +403,7 @@ class CF1_6Check(CFNCCheck):
                     ),
                 )
         return valid_dimension_order.to_result()
-
+        
     def check_fill_value_outside_valid_range(self, ds):
         """
         Checks each variable's _FillValue to ensure that it's in valid_range or
