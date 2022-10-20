@@ -150,6 +150,35 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_data_types(dataset)
 
+        dataset = MockTimeSeries()
+        # test dimensionality of string
+        dataset.createDimension("num_strings", 3)
+        dataset.createDimension("max_string_length", 80)
+        dataset.createDimension("extra", 9)
+
+        # TEST CONFORMANCE 2.2 1/2
+        # create strings with no dimensions -- fail
+        dataset.createVariable("zero_dimensional", "S1", ())
+        # create strings with one dimension -- valid
+        dataset.createVariable("one_dimensional", "S1", ("max_string_length"))
+        # create strings with two dimensions - valid
+        # NB: string length is supposed to be last, but this can't be inferred
+        #     easily with
+        dataset.createVariable(
+            "two_dimensional", "S1", ("num_strings", "max_string_length")
+        )
+        # create strings with three dimensions - valid
+        dataset.createVariable(
+            "three_dimensional", "S1", ("num_strings", "max_string_length", "extra")
+        )
+
+        result = self.cf.check_data_types(dataset)
+        expected_msgs = [
+            f"The fixed-length string variable {dim_name}_dimensional must "
+            f"be one or two-dimensional, current length is {dim_len}"
+            for dim_name, dim_len in (("zero", 0), ("three", 3))
+        ]
+        assert result.msgs == expected_msgs
         # TODO
         # the acdd_reformat_rebase branch has a new .nc file
         # which constructs the temp variable with an int64 dtype --
@@ -353,7 +382,77 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_dimension_order(dataset)
         self.assertEqual((3, 3), result.value)
         self.assertEqual([], result.msgs)
+        
+    def test_check_fill_value_equal_missing_value(self):
+        """
+        According to CF §2.5.1 Recommendations: If both missing_value and _FillValue be used, 
+        they should have the same value.  
+        """
+        # TEST CONFORMANCE 2.5.1 RECOMMENDED
+        dataset = MockTimeSeries()
+        # Case of _FillValue and missing_value are not equal
+        dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2   
+        dataset.variables["a"].setncattr("missing_value", [9939.9])
 
+        # Case of _FillValue and missing_value are equal
+        dataset.createVariable("b", "d", ("time",), fill_value=9999.9)
+        dataset.variables["b"][0] = 1
+        dataset.variables["b"][1] = 2   
+        dataset.variables["b"].setncattr("missing_value", [9999.9])
+
+
+        result = self.cf.check_fill_value_equal_missing_value(dataset)
+        
+        # check if the test fails when when variable "a" is checked.
+        expected_msgs = [
+            f"For the variable {v_name} the missing_value must be equal to the _FillValue"
+            for v_name in ("a")]
+ 
+        assert result.msgs == expected_msgs 
+
+    def test_check_valid_range_or_valid_min_max_present(self):
+        """
+        2.5.1 Missing data, valid and actual range of data
+        Requirements:
+        The valid_range attribute must not be present if the 
+        valid_min and/or valid_max attributes are present.
+        """
+        # TEST CONFORMANCE 2.5.1 REQUIRED
+        dataset = MockTimeSeries()
+        # Case of valid_min, valid_max, and valid_range are present
+        dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2   
+        dataset.variables["a"].setncattr("valid_min", [-10])
+        dataset.variables["a"].setncattr("valid_max", [10])
+        dataset.variables["a"].setncattr("valid_range", [-10, 10])
+
+        # Case of valid_min and valid_max are present and valid_range is absent
+        dataset.createVariable("b", "d", ("time",), fill_value=9999.9)
+        dataset.variables["b"][0] = 1
+        dataset.variables["b"][1] = 2   
+        dataset.variables["a"].setncattr("valid_min", [-10])
+        dataset.variables["a"].setncattr("valid_max", [10])
+
+        # Case of valid_min and valid_max are absent and valid_range is present
+        dataset.createVariable("c", "d", ("time",), fill_value=9999.9)
+        dataset.variables["c"][0] = 1
+        dataset.variables["c"][1] = 2   
+        dataset.variables["c"].setncattr("valid_range", [-10, 10]) 
+
+        result = self.cf.check_valid_range_or_valid_min_max_present(dataset)
+        
+        # check if the test fails when when variable "a" is checked.
+        expected_msgs = [
+            f"For the variable {v_name} the valid_range attribute must not be present "
+            f"if the valid_min and/or valid_max attributes are present"
+            for v_name in ("a")]
+ 
+        assert result.msgs == expected_msgs
+        assert result.value[0] == result.value[1]
+    
     def test_check_fill_value_outside_valid_range(self):
         """
         2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
@@ -1060,7 +1159,7 @@ class TestCF1_6(BaseTestCase):
         self.assertTrue(
             no_missing_terms(
                 "ocean_sigma_z_coordinate",
-                {"sigma", "eta", "depth", "depth_c", "nsigma", "zlev"},
+                {"sigma", "eta", "depth", "depth_c", "zlev"},
                 dimless_vertical_coordinates_1_6,
             )
         )

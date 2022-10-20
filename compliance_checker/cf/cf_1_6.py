@@ -94,6 +94,13 @@ class CF1_6Check(CFNCCheck):
                         k, v.datatype
                     )
                 )
+            # TODO: DRY, don't repeat code path
+            if v.dtype is not str and v.dtype.kind == "S" and v.ndim not in (1, 2):
+                fails.append(
+                    "The fixed-length string variable {} must be one or "
+                    "two-dimensional, current length is {}".format(v.name, v.ndim)
+                )
+
         return Result(
             BaseCheck.HIGH,
             (total - len(fails), total),
@@ -403,7 +410,74 @@ class CF1_6Check(CFNCCheck):
                     ),
                 )
         return valid_dimension_order.to_result()
+
+    def check_fill_value_equal_missing_value(self, ds):
+        """
+        If both missing_value and _FillValue be used, they should have the same value. 
+        This according to CF §2.5.1 Recommendations:
         
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of Results
+        """
+        fails = []
+        total = 0
+
+        for name, variable in ds.variables.items():
+            # If the variable have a defined _FillValue a defined missing_value check it.
+            
+            if hasattr(variable, "_FillValue") and hasattr(variable, "missing_value"):
+                total = total + 1
+                if variable._FillValue != variable.missing_value:
+                    fails.append(
+                        "For the variable {} the missing_value must be equal to the _FillValue".format(
+                        variable.name
+                        )
+                        )             
+                    
+        return Result(
+            BaseCheck.MEDIUM, 
+            (len(fails), total),
+            self.section_titles["2.5"], 
+            msgs=fails,
+        )
+    
+    def check_valid_range_or_valid_min_max_present(self,ds):
+        '''
+        The valid_range attribute must not be present if the valid_min
+        and/or valid_max attributes are present. This according to 2.5.1 Requirements.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of Results
+        '''
+        fails = []
+        total = 0
+
+        for name, variable in ds.variables.items():
+            
+            if (hasattr(variable, "valid_max") 
+                and (hasattr(variable, "valid_min") 
+                or hasattr(variable, "valid_range")
+                )
+                ):
+
+                total = total + 1
+            
+                fails.append(
+                    "For the variable {} the valid_range attribute must not be present "
+                    "if the valid_min and/or valid_max attributes are present".format(
+                    variable.name
+                    )
+                    )               
+                    
+        return Result(
+            BaseCheck.MEDIUM, 
+            (len(fails), total),
+            self.section_titles["2.5"], 
+            msgs=fails,
+        )
+
     def check_fill_value_outside_valid_range(self, ds):
         """
         Checks each variable's _FillValue to ensure that it's in valid_range or
