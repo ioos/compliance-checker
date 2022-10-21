@@ -1601,7 +1601,7 @@ class TestCF1_7(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
         results = self.cf.check_cell_boundaries(dataset)
         score, out_of, messages = get_results(results)
-        assert (score, out_of) == (2, 2)
+        assert (score, out_of) == (0, 2)
 
         dataset = self.load_dataset(STATIC_FILES["cf_example_cell_measures"])
         results = self.cf.check_cell_boundaries(dataset)
