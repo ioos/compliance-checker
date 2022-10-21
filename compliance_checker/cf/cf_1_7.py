@@ -243,6 +243,10 @@ class CF1_7Check(CF1_6Check):
             variable = ds.variables[variable_name]
             valid = True
             reasoning = []
+            
+            # 7.1 Required 1/5:
+            # The type of the bounds attribute is a string whose value is a single variable name.
+            # The specified variable must exist in the file.
             if boundary_variable_name not in ds.variables:
                 valid = False
                 reasoning.append(
@@ -253,6 +257,8 @@ class CF1_7Check(CF1_6Check):
                 )
             else:
                 boundary_variable = ds.variables[boundary_variable_name]
+            
+            # 7.1 Required 2/5:
             # The number of dimensions in the bounds variable should always be
             # the number of dimensions in the referring variable + 1
             if boundary_variable.ndim < 2:
@@ -285,7 +291,8 @@ class CF1_7Check(CF1_6Check):
                     "".format(variable.name, boundary_variable.dimensions)
                 )
 
-            # ensure p vertices form a valid simplex given previous a...n
+            # 7.1 Required 2/5: continue
+            # Ensure p vertices form a valid simplex given previous a...n
             # previous auxiliary coordinates
             if (
                 ds.dimensions[boundary_variable.dimensions[-1]].size
@@ -301,6 +308,34 @@ class CF1_7Check(CF1_6Check):
                     )
                 )
 
+            # 7.1 Required 3/5:
+            # A boundary variable must be a numeric data type
+            if boundary_variable.dtype.kind not in 'biufc':
+                valid = False
+                reasoning.append(
+                    "Boundary variable {} specified by {}".format(
+                        boundary_variable.name, variable.name
+                    )
+                    + "must be a numeric data type "
+                )
+
+            # 7.1 Required 4/5: 
+            # If a boundary variable has units, standard_name, axis, positive, calendar, leap_month, 
+            # leap_year or month_lengths attributes, they must agree with those of its associated variable.
+            if (boundary_variable.__dict__.keys()):
+                for item in boundary_variable.__dict__.keys():
+                    if hasattr(variable, item):
+                        if getattr(variable, item) != getattr(boundary_variable, item):                         
+                            valid = False
+                            reasoning.append(
+                            "'{}' has attr '{}' with value '{}' that does not agree "
+                            "with its associated variable ('{}')'s attr value '{}'"
+                            "".format(boundary_variable_name, item, getattr(boundary_variable,item),
+                                variable.name, getattr(variable,item), 
+                                )
+                            )
+            
+            # 7.1 Required 5/5:
             # check if formula_terms is present in the var; if so,
             # the bounds variable must also have a formula_terms attr
             if hasattr(variable, "formula_terms"):
@@ -312,6 +347,25 @@ class CF1_7Check(CF1_6Check):
                         )
                     )
 
+           # 7.1 Recommendations 2/2
+           # Boundary variables should not have the _FillValue, missing_value, units, standard_name, axis, 
+           # positive, calendar, leap_month, leap_year or month_lengths attributes.
+            attributes_to_check = {'_FillValue', 'missing_value', 'units', 
+                                'standard_name', 'axis', 'positive', 
+                                'calendar', 'leap_month', 'leap_year',
+                                 'month_lengths'}
+            if (boundary_variable.__dict__.keys()):
+                lst1 = boundary_variable.__dict__.keys()
+                lst2 = attributes_to_check
+                unwanted_attributes = [value for value in lst1 if value in lst2]            
+                if unwanted_attributes:
+                    valid = False
+                    reasoning.append(
+                        "The Boundary variables '{}' should not have the attributes: '{}'".format(
+                            boundary_variable_name, unwanted_attributes
+                        )
+                    )
+            
             result = Result(
                 BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning
             )
