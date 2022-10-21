@@ -2,6 +2,7 @@ import difflib
 import logging
 from collections import defaultdict
 
+import cftime
 import numpy as np
 import regex
 from cf_units import Unit
@@ -1892,25 +1893,69 @@ class CF1_6Check(CFNCCheck):
 
         ret_val = []
 
+        def check_standard_calendar_no_cross(time_var):
+            """
+            Check that the time variable does not cross the date
+            1582-10-15 when standard or gregorian calendars are used
+            """
+            # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED 2/2
+            # Only get non-nan/FillValue times, as these are the only things
+            # that make sense for conversion.  Furthermore, non-null checks
+            # should be made for time coordinate variables anyways, so errors
+            # should be caught where implemented there
+            crossover_date = cftime.DatetimeGregorian(1582, 10, 15)
+            times = cftime.num2date(time_var[:], time_var.units)
+
+            # appears to be necessary to override supplied _FillValue of "?"
+            # FillValues shouldn't fail, so set to crossover date to pass
+            times.set_fill_value(crossover_date)
+            no_cross_1582 = ~np.any(times < crossover_date)
+            if no_cross_1582:
+                reasoning = (
+                    f"Variable {time_var.name} has standard/gregorian "
+                    "calendar and does not cross 1582-10-15T00:00Z"
+                )
+            else:
+                reasoning = (
+                    f"Variable {time_var.name} has time values "
+                    "prior to 1582-10-15T00:00Z and utilizes "
+                    "the standard/gregorian calendar"
+                )
+
+            return Result(
+                BaseCheck.LOW, no_cross_1582, self.section_titles["4.4"], [reasoning]
+            )
+
         # if has a calendar, check that it is within the valid values
         # otherwise no calendar is valid
+
         for time_var in ds.get_variables_by_attributes(
             calendar=lambda c: c is not None
         ):
-            reasoning = None
-            standard_calendar = time_var.calendar in valid_calendars
-
+            if time_var.calendar == "gregorian":
+                reasoning = (
+                    f"For time variable {time_var.name}, when using "
+                    "the standard Gregorian calendar, the value "
+                    '"standard" is preferred over "gregorian" for '
+                    "the calendar attribute"
+                )
+                result = Result(
+                    BaseCheck.LOW, False, self.section_titles["4.4"], [reasoning]
+                )
+                ret_val.append(result)
+                # check here and in the below case that time does not cross
+                # thee date 1582-10-15 as requested by CF conformance
+                ret_val.append(check_standard_calendar_no_cross(time_var))
+            elif time_var.calendar == "standard":
+                ret_val.append(check_standard_calendar_no_cross(time_var))
             # if a nonstandard calendar, then leap_years and leap_months must
             # must be present
-            if not standard_calendar:
+            if time_var.calendar not in valid_calendars:
                 result = self._check_leap_time(time_var)
             # passes if the calendar is valid, otherwise notify of invalid
             # calendar
             else:
-                result = Result(
-                    BaseCheck.LOW, True, self.section_titles["4.4"], reasoning
-                )
-
+                result = Result(BaseCheck.LOW, True, self.section_titles["4.4"], None)
             ret_val.append(result)
 
         return ret_val
