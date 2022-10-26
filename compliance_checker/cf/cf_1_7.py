@@ -372,6 +372,43 @@ class CF1_7Check(CF1_6Check):
             ret_val.append(result)
         return ret_val
 
+    def check_cell_boundaries_interval(self, ds):
+        '''
+        7.1 Cell Boundaries
+        Recommendations: (1/2)
+        The points specified by a coordinate or auxiliary coordinate variable 
+        should lie within, or on the boundary, of the cells specified by the 
+        associated boundary variable.
+        '''
+        ret_val = []
+        reasoning = []
+        for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(
+            ds).items():
+            valid = True
+            
+            variable = ds.variables[variable_name]
+            boundary_variable = ds.variables[boundary_variable_name]
+            
+            for ii in range(len(variable[:])):
+                if abs(boundary_variable[ii][1]) >= abs(boundary_variable[ii][0]):
+                    if not ((abs(variable[ii]) >= abs(boundary_variable[ii][0])) \
+                        and \
+                        (abs(variable[ii]) <= abs(boundary_variable[ii][1]))
+                           ):
+                        valid = False
+                        reasoning.append(
+                            "The points specified by the coordinate variable {} ({})" 
+                            " lie outside the boundary of the cell specified by the " 
+                            "associated boundary variable {} ({})".format(
+                             variable_name, variable[ii], boundary_variable_name, boundary_variable[ii]
+                            )
+                        )
+
+                result = Result(BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning)
+                ret_val.append(result)
+                print(ret_val)
+            return ret_val    
+    
     def check_cell_measures(self, ds):
         """
         A method to over-ride the CF1_6Check method. In CF 1.7, it is specified
