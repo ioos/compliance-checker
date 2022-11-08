@@ -37,7 +37,7 @@ repos:
   hooks:
     - id: codespell
       args:
-        - --ignore-words-list=degreee,varn,poit,uint,sur,herat,claus
+        - --ignore-words-list=degreee,varn,poit,uint,sur,herat,claus,dedent,dedenting,dedents,dedented
       exclude: >
           (?x)^(
               .*\.xml|
