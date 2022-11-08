@@ -243,7 +243,7 @@ class CF1_7Check(CF1_6Check):
             variable = ds.variables[variable_name]
             valid = True
             reasoning = []
-            
+
             # 7.1 Required 1/5:
             # The type of the bounds attribute is a string whose value is a single variable name.
             # The specified variable must exist in the file.
@@ -257,7 +257,7 @@ class CF1_7Check(CF1_6Check):
                 )
             else:
                 boundary_variable = ds.variables[boundary_variable_name]
-            
+
             # 7.1 Required 2/5:
             # The number of dimensions in the bounds variable should always be
             # the number of dimensions in the referring variable + 1
@@ -310,7 +310,7 @@ class CF1_7Check(CF1_6Check):
 
             # 7.1 Required 3/5:
             # A boundary variable must be a numeric data type
-            if boundary_variable.dtype.kind not in 'biufc':
+            if boundary_variable.dtype.kind not in "biufc":
                 valid = False
                 reasoning.append(
                     "Boundary variable {} specified by {}".format(
@@ -319,22 +319,26 @@ class CF1_7Check(CF1_6Check):
                     + "must be a numeric data type "
                 )
 
-            # 7.1 Required 4/5: 
-            # If a boundary variable has units, standard_name, axis, positive, calendar, leap_month, 
+            # 7.1 Required 4/5:
+            # If a boundary variable has units, standard_name, axis, positive, calendar, leap_month,
             # leap_year or month_lengths attributes, they must agree with those of its associated variable.
-            if (boundary_variable.__dict__.keys()):
+            if boundary_variable.__dict__.keys():
                 for item in boundary_variable.__dict__.keys():
                     if hasattr(variable, item):
-                        if getattr(variable, item) != getattr(boundary_variable, item):                         
+                        if getattr(variable, item) != getattr(boundary_variable, item):
                             valid = False
                             reasoning.append(
-                            "'{}' has attr '{}' with value '{}' that does not agree "
-                            "with its associated variable ('{}')'s attr value '{}'"
-                            "".format(boundary_variable_name, item, getattr(boundary_variable,item),
-                                variable.name, getattr(variable,item), 
+                                "'{}' has attr '{}' with value '{}' that does not agree "
+                                "with its associated variable ('{}')'s attr value '{}'"
+                                "".format(
+                                    boundary_variable_name,
+                                    item,
+                                    getattr(boundary_variable, item),
+                                    variable.name,
+                                    getattr(variable, item),
                                 )
                             )
-            
+
             # 7.1 Required 5/5:
             # check if formula_terms is present in the var; if so,
             # the bounds variable must also have a formula_terms attr
@@ -347,17 +351,25 @@ class CF1_7Check(CF1_6Check):
                         )
                     )
 
-           # 7.1 Recommendations 2/2
-           # Boundary variables should not have the _FillValue, missing_value, units, standard_name, axis, 
-           # positive, calendar, leap_month, leap_year or month_lengths attributes.
-            attributes_to_check = {'_FillValue', 'missing_value', 'units', 
-                                'standard_name', 'axis', 'positive', 
-                                'calendar', 'leap_month', 'leap_year',
-                                 'month_lengths'}
-            if (boundary_variable.__dict__.keys()):
+            # 7.1 Recommendations 2/2
+            # Boundary variables should not have the _FillValue, missing_value, units, standard_name, axis,
+            # positive, calendar, leap_month, leap_year or month_lengths attributes.
+            attributes_to_check = {
+                "_FillValue",
+                "missing_value",
+                "units",
+                "standard_name",
+                "axis",
+                "positive",
+                "calendar",
+                "leap_month",
+                "leap_year",
+                "month_lengths",
+            }
+            if boundary_variable.__dict__.keys():
                 lst1 = boundary_variable.__dict__.keys()
                 lst2 = attributes_to_check
-                unwanted_attributes = [value for value in lst1 if value in lst2]            
+                unwanted_attributes = [value for value in lst1 if value in lst2]
                 if unwanted_attributes:
                     valid = False
                     reasoning.append(
@@ -365,7 +377,7 @@ class CF1_7Check(CF1_6Check):
                             boundary_variable_name, unwanted_attributes
                         )
                     )
-            
+
             result = Result(
                 BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning
             )
@@ -373,42 +385,48 @@ class CF1_7Check(CF1_6Check):
         return ret_val
 
     def check_cell_boundaries_interval(self, ds):
-        '''
+        """
         7.1 Cell Boundaries
         Recommendations: (1/2)
-        The points specified by a coordinate or auxiliary coordinate variable 
-        should lie within, or on the boundary, of the cells specified by the 
+        The points specified by a coordinate or auxiliary coordinate variable
+        should lie within, or on the boundary, of the cells specified by the
         associated boundary variable.
-        '''
+        """
         ret_val = []
         reasoning = []
         for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(
-            ds).items():
+            ds
+        ).items():
             valid = True
-            
+
             variable = ds.variables[variable_name]
             boundary_variable = ds.variables[boundary_variable_name]
-            
+
             for ii in range(len(variable[:])):
                 if abs(boundary_variable[ii][1]) >= abs(boundary_variable[ii][0]):
-                    if not ((abs(variable[ii]) >= abs(boundary_variable[ii][0])) \
-                        and \
-                        (abs(variable[ii]) <= abs(boundary_variable[ii][1]))
-                           ):
+                    if not (
+                        (abs(variable[ii]) >= abs(boundary_variable[ii][0]))
+                        and (abs(variable[ii]) <= abs(boundary_variable[ii][1]))
+                    ):
                         valid = False
                         reasoning.append(
-                            "The points specified by the coordinate variable {} ({})" 
-                            " lie outside the boundary of the cell specified by the " 
+                            "The points specified by the coordinate variable {} ({})"
+                            " lie outside the boundary of the cell specified by the "
                             "associated boundary variable {} ({})".format(
-                             variable_name, variable[ii], boundary_variable_name, boundary_variable[ii]
+                                variable_name,
+                                variable[ii],
+                                boundary_variable_name,
+                                boundary_variable[ii],
                             )
                         )
 
-                result = Result(BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning)
+                result = Result(
+                    BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning
+                )
                 ret_val.append(result)
                 print(ret_val)
-            return ret_val    
-    
+            return ret_val
+
     def check_cell_measures(self, ds):
         """
         A method to over-ride the CF1_6Check method. In CF 1.7, it is specified
