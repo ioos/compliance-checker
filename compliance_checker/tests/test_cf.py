@@ -1293,7 +1293,7 @@ class TestCF1_6(BaseTestCase):
         assert len([r for r in results if r.value[0] < r.value[1]]) == 1
         assert all(r.name == "§5.3 Reduced Horizontal Grid" for r in results)
 
-    def test_check_grid_mapping(self):
+#    def test_check_grid_mapping(self):
 #         dataset = self.load_dataset(STATIC_FILES["mapping"])
 #         results = self.cf.check_grid_mapping(dataset)
 
@@ -1303,41 +1303,6 @@ class TestCF1_6(BaseTestCase):
 #             "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
 #         )
 #         assert all(r.name == expected_name for r in results.values())
-        
-        # create Cells with grid_apping variable
-        dataset = MockTimeSeries()
-        
-        dataset.createVariable("temp", "d", ("time"))
-        dataset.createVariable("crsOSGB", "d")
-        dataset.createVariable("crsWGS84", "d")
-        
-        temp = dataset.variables["temp"]
-        temp.standard_name = "air_temperature"
-        temp.units = "K"
-        temp.coordinates = "lat lon"
-        temp.grid_mapping = "crsOSGB: time crsWGS84: lat lon"
-        
-        # create grid_mapping crsOSGB ;
-        crsOSGB = dataset.variables["crsOSGB"]
-        crsOSGB.grid_mapping_name = "transverse_mercator"
-        crsOSGB.semi_major_axis = 6377563.396
-        crsOSGB.inverse_flattening = 299.3249646
-        crsOSGB.ongitude_of_prime_meridian = 0.0
-        crsOSGB.latitude_of_projection_origin = 49.0
-        crsOSGB.longitude_of_central_meridian = -2.0
-        crsOSGB.scale_factor_at_central_meridian = 0.9996012717
-        crsOSGB.false_easting = 400000.0
-        crsOSGB.false_northing = -100000.0
-        crsOSGB.unit = "metre"
-
-        # create grid_mapping crsWGS84
-        crsWGS84 = dataset.variables["crsWGS84"]
-        crsWGS84.grid_mapping_name = "latitude_longitude"
-        crsWGS84.longitude_of_prime_meridian = 0.0
-        crsWGS84.semi_major_axis = 6378137.0
-        crsWGS84.inverse_flattening = 298.257223563
-
-        results = self.cf.check_grid_mapping(dataset)
 
     def test_is_geophysical(self):
 
@@ -1980,6 +1945,52 @@ class TestCF1_7(BaseTestCase):
         message = "Cell measure variable box_area referred to by PS is not present in dataset variables"
         assert message in messages
 
+    def test_check_grid_mapping(self):
+        # dataset = self.load_dataset(STATIC_FILES["mapping"])
+        # results = self.cf.check_grid_mapping(dataset)
+        
+        # assert len(results) == 6
+        # assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 0
+        # expected_name = (
+        #     "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
+        # )
+        # assert all(r.name == expected_name for r in results.values())
+
+        # create Cells with grid_apping variable
+        dataset = MockTimeSeries()
+        
+        dataset.createVariable("temp", "d", ("time"))
+        dataset.createVariable("crsOSGB", "d")
+        dataset.createVariable("crsWGS84", "d")
+        
+        temp = dataset.variables["temp"]
+        temp.standard_name = "air_temperature"
+        temp.units = "K"
+        temp.coordinates = "lat lon"
+        temp.grid_mapping = "crsOSGB: time crsWGS84: lat lon"
+        
+        # create grid_mapping crsOSGB ;
+        crsOSGB = dataset.variables["crsOSGB"]
+        crsOSGB.grid_mapping_name = "transverse_mercator"
+        crsOSGB.semi_major_axis = 6377563.396
+        crsOSGB.inverse_flattening = 299.3249646
+        crsOSGB.ongitude_of_prime_meridian = 0.0
+        crsOSGB.latitude_of_projection_origin = 49.0
+        crsOSGB.longitude_of_central_meridian = -2.0
+        crsOSGB.scale_factor_at_central_meridian = 0.9996012717
+        crsOSGB.false_easting = 400000.0
+        crsOSGB.false_northing = -100000.0
+        crsOSGB.unit = "metre"
+
+        # create grid_mapping crsWGS84
+        crsWGS84 = dataset.variables["crsWGS84"]
+        crsWGS84.grid_mapping_name = "latitude_longitude"
+        crsWGS84.longitude_of_prime_meridian = 0.0
+        crsWGS84.semi_major_axis = 6378137.0
+        crsWGS84.inverse_flattening = 298.257223563
+
+        results = self.cf.check_grid_mapping(dataset)
+        
     def test_variable_features(self):
         with MockTimeSeries() as dataset:
             # I hope to never see an attribute value like this, but since
