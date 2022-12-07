@@ -346,11 +346,7 @@ class CheckSuite(object):
                     )
                     check_max_level = BaseCheck.HIGH
 
-                check_dict[check_name] = check_max_level
-        else:
-            for check_name in skip_checks:
-                # always process
-                check_dict[check_name] = 0
+            check_dict[check_name] = check_max_level
 
         return check_dict
 
