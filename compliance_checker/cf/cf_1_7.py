@@ -237,9 +237,12 @@ class CF1_7Check(CF1_6Check):
         # Note that test does not check monotonicity
         ret_val = []
         reasoning = []
+
         for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(
             ds
         ).items():
+            
+            print(boundary_variable_name, boundary_variable_name.dtype)
             variable = ds.variables[variable_name]
             valid = True
             reasoning = []
@@ -479,7 +482,7 @@ class CF1_7Check(CF1_6Check):
     def _check_gmattr_existence_condition_ell_pmerid_hdatum(self, var):
         """
         If one of reference_ellipsoid_name, prime_meridian_name, or
-        horizontal_datum_name are defined as grid_mapping attributes,
+        horizontal_datum_name, geographic_crs_name are defined as grid_mapping attributes,
         they must all be defined.
 
         :param netCDF4.Variable var
@@ -501,6 +504,7 @@ class CF1_7Check(CF1_6Check):
                     "reference_ellipsoid_name",
                     "prime_meridian_name",
                     "horizontal_datum_name",
+                    "geographic_crs_name",
                 ]
             ]
         ) and (
@@ -509,6 +513,7 @@ class CF1_7Check(CF1_6Check):
                     "reference_ellipsoid_name",
                     "prime_meridian_name",
                     "horizontal_datum_name",
+                    "geographic_crs_name",
                 ]
             ).issubset(_ncattrs)
         ):
@@ -724,17 +729,107 @@ class CF1_7Check(CF1_6Check):
     def check_grid_mapping(self, ds):
         super(CF1_7Check, self).check_grid_mapping.__doc__
         prev_return = super(CF1_7Check, self).check_grid_mapping(ds)
-        grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
-        for var_name in sorted(grid_mapping_variables):
+        test_ctx = self.get_test_ctx(
+                BaseCheck.HIGH, self.section_titles["5.6"]) 
+        # Get the grid_mapping variable list for Requirements 5.6 [.../9]                
+        grid_mapping_variable_list = [] 
+                         
+        for item in  ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
+            # [1/9] The type of the grid_mapping attribute is a string whose value 
+            # is of the following form, in which brackets indicate optional 
+            # text: grid_mapping_name[: coord_var [coord_var ...]][grid_mapping_name: [coord_var ... ]]
+            if not isinstance(item.grid_mapping, str):
+                test_ctx.messages.append("The grid_mapping attribute {} "
+                "is not a string".format(item.grid_mapping))
+                test_ctx.out_of += 1
+                if ' ' in item.grid_mapping:  
+                    for x in item.grid_mapping.replace(":", '').split():      
+                        grid_mapping_variable_list.append(x)   
+                else:
+                    # [2/9] Note that in its simplest form the attribute comprises just 
+                    # a grid_mapping_name as a single word.
+                    grid_mapping_variable_list.append(item.grid_mapping)
+        # 
+        # Get the CF grid_mapping variables list (== only if the variable exist in the Variables list)                
+        grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)  
+        grid_mapping_variables_coordinates = cfutil.get_grid_mapping_variables_coordinates(ds) 
+          
+        #Check if all grid_mapping variables are listed in the file as expected
+            # [3/9] Each grid_mapping_name is the name of a variable (known as a 
+            # grid mapping variable), which must exist in the file.
+        if len(grid_mapping_variable_list) != len(grid_mapping_variables) + len(grid_mapping_variables_coordinates):
+            test_ctx.messages.append("Not all of the grid_mapping variables exist in the file")
+            test_ctx.out_of += 1
+        
+        test_ctx.score += 1
+         
+        # Get the CF coordinate variables or auxiliary coordinate variables 
+        auxiliary_coordinate_variables = cfutil.get_auxiliary_coordinate_variables(ds)
+        coordinate_variables = cfutil.get_coordinate_variables(ds) 
+        # Check the grid_mapping variable coordinates if listed.
+            # [4/9] Each coord_var is the name of a coordinate variable or 
+            # auxiliary coordinate variable, which must exist in the file. If it 
+            # is an auxiliary coordinate variable, it must be listed in the 
+            # coordinates attribute.    
+        for coord_item in grid_mapping_variables_coordinates:                                                   
+            if coord_item not in coordinate_variables and coord_item not in auxiliary_coordinate_variables:
+                test_ctx.messages.append("{} is not listed as coordinate or auxiliary coord Variable.".format(coord_item))
+                test_ctx.out_of += 1
+        
+        test_ctx.score += 1       
+
+        # Check the gid_mapping variable attributes
+        for var_name in sorted(grid_mapping_variables):           
             var = ds.variables[var_name]
             test_ctx = self.get_test_ctx(
-                BaseCheck.HIGH, self.section_titles["5.6"], var.name
-            )
+                BaseCheck.HIGH, self.section_titles["5.6"], var.name)
+            
+            # Recommendation: The grid mapping variables should have 0 dimensions.
+            if var.dimensions:
+               test_ctx.messages.append("The grid mapping variable {} should have 0 dimension".format(var.name))
+               test_ctx.out_of += 1
+            
+            test_ctx.score += 1
 
+            # [5/9] The grid mapping variables must have the grid_mapping_name attribute. 
+            # The legal values for the grid_mapping_name attribute are contained in Appendix F.
+            if "grid_mapping_name" not in var.ncattrs():
+                test_ctx.messages.append("The grid mapping variable "
+                "{} doesn't have the grid_mapping_name attribute".format(var.name))
+                test_ctx.out_of += 1
+            else:
+                if var.grid_mapping_name not in grid_mapping_dict17:
+                   test_ctx.messages.append("The legal values for the grid_mapping_name attribute "
+                    "{} is not contained in Appendix F".format(var.grid_mapping_name))             
+                   test_ctx.out_of += 1
+                
+            test_ctx.score += 1
+
+            # [6/9] The data types of the attributes of the 
+            # grid mapping variable must be specified in Table 1 of Appendix F.
+            type_map = {"S": "str" , "N": "float64"}
+            for attrs_name in var.ncattrs():
+                if attrs_name in grid_mapping_attr_types17:
+                    attrs_type = np.dtype(type(getattr(var,attrs_name)))          
+                    attrs_type17 = type_map[grid_mapping_attr_types17[attrs_name]['type']]
+                    if attrs_type17 != attrs_type:
+                        test_ctx.messages.append("The data types of the attributes "
+                        "{} and {} do not match".format(attrs_type17, attrs_type))               
+                        test_ctx.out_of += 1
+
+                else:
+                    test_ctx.messages.append("The attribute {} "
+                        "does not exist in Table 1 of Appendix F".format(attrs_name))               
+                    test_ctx.out_of += 1
+            test_ctx.score += 1    
+                
             # TODO: check cases where crs_wkt provides part of a necessary
             #       grid_mapping attribute, or where a grid_mapping attribute
             #       overrides what has been provided in crs_wkt.
             # attempt to parse crs_wkt if it is present
+
+            # [7/9] If present, the crs_wkt attribute must be a text string conforming to 
+            # the CRS WKT specification described in reference [OGC_CTS].
             if "crs_wkt" in var.ncattrs():
                 crs_wkt = var.crs_wkt
                 if not isinstance(crs_wkt, str):
@@ -749,23 +844,39 @@ class CF1_7Check(CF1_6Check):
                                 str(crs_error)
                             )
                         )
-                    else:
-                        test_ctx.score += 1
-                    test_ctx.out_of += 1
-
-            # existence_conditions
+                        test_ctx.out_of += 1                                   
+            test_ctx.score += 1
+ 
+            # existence_conditions           
             exist_cond_1 = (
                 self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(var)
             )
-            test_ctx.assert_true(exist_cond_1[0], exist_cond_1[1])
+            if exist_cond_1[0] == False:
+                test_ctx.messages.append("Both geoid_name and geopotential_datum_name "
+                "should not exist for {}".format(var.name))
+                test_ctx.out_of += 1
+            
+            test_ctx.score += 1
+            # test_ctx.assert_true(exist_cond_1[0], exist_cond_1[1])
+
+            # [8/9] reference_ellipsoid_name, prime_meridian_name, horizontal_datum_name and 
+            # geographic_crs_name must be all defined if any one is defined.
             exist_cond_2 = self._check_gmattr_existence_condition_ell_pmerid_hdatum(var)
-            test_ctx.assert_true(exist_cond_2[0], exist_cond_2[1])
+            if exist_cond_2[0] == False:
+                test_ctx.messages.append("reference_ellipsoid_name, prime_meridian_name, "
+                "horizontal_datum_name and geographic_crs_name must be all defined "
+                "if any one is defined")
+                test_ctx.out_of += 1
+            
+            test_ctx.score += 1     
+            # test_ctx.assert_true(exist_cond_2[0], exist_cond_2[1])            
 
             # handle vertical datum related grid_mapping attributes
             vert_datum_attrs = {}
             possible_vert_datum_attrs = {"geoid_name", "geopotential_datum_name"}
             vert_datum_attrs = possible_vert_datum_attrs.intersection(var.ncattrs())
-            len_vdatum_name_attrs = len(vert_datum_attrs)
+            len_vdatum_name_attrs = len(vert_datum_attrs)                  
+            
             # check that geoid_name and geopotential_datum_name are not both
             # present in the grid_mapping variable
             if len_vdatum_name_attrs == 2:
@@ -800,8 +911,22 @@ class CF1_7Check(CF1_6Check):
                         "Error occurred while trying to query "
                         "Proj4 SQLite database at {}: {}".format(proj_db_path, str(e))
                     )
-            prev_return[var.name] = test_ctx.to_result()
 
+            # [9/9] Check If projected_crs_name is defined then geographic_crs_name must be also.
+            test_possible = {"projected_crs_name","geographic_crs_name"}          
+            if "projected_crs_name" in var.ncattrs():
+                test_attr = test_possible.intersection(var.ncattrs())
+                len_test_attr = len(test_attr)
+
+                if len_test_attr != 2:
+                    test_ctx.messages.append("We do not have both projected_crs_name "
+                    "and geographic_crs_name defined")
+                    test_ctx.out_of += 1 
+               
+            test_ctx.score += 1
+            
+            prev_return[var.name] = test_ctx.to_result()
+            
         return prev_return
 
     def check_standard_name_deprecated_modifiers(self, ds):

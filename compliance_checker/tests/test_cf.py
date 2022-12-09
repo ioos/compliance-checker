@@ -1293,16 +1293,18 @@ class TestCF1_6(BaseTestCase):
         assert len([r for r in results if r.value[0] < r.value[1]]) == 1
         assert all(r.name == "§5.3 Reduced Horizontal Grid" for r in results)
 
-#    def test_check_grid_mapping(self):
-#         dataset = self.load_dataset(STATIC_FILES["mapping"])
-#         results = self.cf.check_grid_mapping(dataset)
+    # def test_check_grid_mapping(self):
+    #     dataset = self.load_dataset(STATIC_FILES["mapping"])
+    #     # print(dataset.variables)
+    #     results = self.cf.check_grid_mapping(dataset)
+    #     print(results.values)
 
-#         assert len(results) == 6
-#         assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 0
-#         expected_name = (
-#             "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
-#         )
-#         assert all(r.name == expected_name for r in results.values())
+    #     assert len(results) == 6
+    #     assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 0
+    #     expected_name = (
+    #         "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
+    #     )
+    #     assert all(r.name == expected_name for r in results.values())
 
     def test_is_geophysical(self):
 
@@ -1946,50 +1948,80 @@ class TestCF1_7(BaseTestCase):
         assert message in messages
 
     def test_check_grid_mapping(self):
-        # dataset = self.load_dataset(STATIC_FILES["mapping"])
-        # results = self.cf.check_grid_mapping(dataset)
+        # create cells with grid_apping variable
+        dataset = MockTimeSeries()   
         
-        # assert len(results) == 6
-        # assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 0
-        # expected_name = (
-        #     "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
-        # )
-        # assert all(r.name == expected_name for r in results.values())
+        # add variable to the file as auxilary coordinate
+        # NOTE: Dimension variable It is a one-dimensional variable with the same name as its dimension [e.g.,
+        # time(time) ], and it is defined as a numeric data type with values that are
+        # ordered monotonically. Missing values are not allowed in coordinate variables.
+        # 
+        dataset.createDimension("y", 500)
+        dataset.createDimension("x", 500)
+        dataset.createVariable("y", "d", ("y",)) 
+        dataset.createVariable("x", "d", ("x",))
+        y = dataset.variables["y"]
+        y.axis = "Y"
+        y.standard_name = "projection_y_coordinate"
+        x = dataset.variables["x"]
+        x.axis = "X"
+        x.standard_name = "projection_x_coordinate"
 
-        # create Cells with grid_apping variable
-        dataset = MockTimeSeries()
-        
-        dataset.createVariable("temp", "d", ("time"))
-        dataset.createVariable("crsOSGB", "d")
-        dataset.createVariable("crsWGS84", "d")
+        # add a variable with "grid_mapping" as an attribute  
+        dataset.createVariable("temp", "d", ("time", "x", "y"))
+        dataset.createVariable("crsOSGB", "i")
+        dataset.createVariable("crsWGS84", "i")
         
         temp = dataset.variables["temp"]
         temp.standard_name = "air_temperature"
         temp.units = "K"
         temp.coordinates = "lat lon"
-        temp.grid_mapping = "crsOSGB: time crsWGS84: lat lon"
+        temp.grid_mapping = "crsOSGB: z y crsWGS84: lat lon"  
         
         # create grid_mapping crsOSGB ;
         crsOSGB = dataset.variables["crsOSGB"]
         crsOSGB.grid_mapping_name = "transverse_mercator"
-        crsOSGB.semi_major_axis = 6377563.396
+        crsOSGB.semi_major_axis = "6377563.396"
         crsOSGB.inverse_flattening = 299.3249646
-        crsOSGB.ongitude_of_prime_meridian = 0.0
+        crsOSGB.longitude_of_prime_meridian = 0.0
         crsOSGB.latitude_of_projection_origin = 49.0
         crsOSGB.longitude_of_central_meridian = -2.0
-        crsOSGB.scale_factor_at_central_meridian = 0.9996012717
+        crsOSGB.scale_factor_at_central_meridian = "0.9996012717"
         crsOSGB.false_easting = 400000.0
         crsOSGB.false_northing = -100000.0
         crsOSGB.unit = "metre"
-
+        
         # create grid_mapping crsWGS84
         crsWGS84 = dataset.variables["crsWGS84"]
         crsWGS84.grid_mapping_name = "latitude_longitude"
         crsWGS84.longitude_of_prime_meridian = 0.0
         crsWGS84.semi_major_axis = 6378137.0
         crsWGS84.inverse_flattening = 298.257223563
+        crsWGS84.reference_ellipsoid_name = "testing" 
+        crsWGS84.prime_meridian_name = "testing"
+        crsWGS84.horizontal_datum_name = "testing"
+        crsWGS84.geographic_crs_name = "testing"
+        crsWGS84.projected_crs_name = "testing"
 
         results = self.cf.check_grid_mapping(dataset)
+        assert len(results) == 3
+        assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 1
+        expected_name = (
+            "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
+            )
+        assert all(r.name == expected_name for r in results.values())
+        
+        # test a different datastet
+        dataset = self.load_dataset(STATIC_FILES["mapping"])
+        # print(dataset.variables)
+        results = self.cf.check_grid_mapping(dataset)
+        assert len(results) == 6
+        assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 1
+        expected_name = (
+            "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
+            )
+        assert all(r.name == expected_name for r in results.values())
+
         
     def test_variable_features(self):
         with MockTimeSeries() as dataset:
