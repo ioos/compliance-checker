@@ -1661,6 +1661,14 @@ class TestCF1_6(BaseTestCase):
         # units should not exist for
         temp_flag.units = "1"
 
+        time_flag = dataset.createVariable("time_flag", "i1", ("time",))
+        time_flag.standard_name = "time status_flag"
+        time_flag.flag_values = np.array([1, 2], dtype=np.int8)
+        time_flag.flag_meanings = "good bad"
+
+        lat_flag = dataset.createVariable("lat_flag", "i1", ("time",))
+        lat_flag.standard_name = "latitude status_flag"
+
         temp.ancillary_variables = "temp_flag"
         scored, out_of, messages = get_results(self.cf.check_units(dataset))
         n_failed = out_of - scored
