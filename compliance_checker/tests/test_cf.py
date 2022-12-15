@@ -1665,8 +1665,9 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(self.cf.check_units(dataset))
         assert scored != out_of
         assert (
-            "units attribute for variable temperature_flag must be unset "
-            "when status_flag modifier is set"
+            "units attribute for variable temp_flag must be unset "
+            "when status_flag standard name modifier is set"
+            in messages
         )
 
         del temp_flag.units
