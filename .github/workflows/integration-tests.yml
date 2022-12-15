@@ -18,7 +18,7 @@ jobs:
 
     - name: Create Environment
       shell: bash -l {0}
-      run: > 
+      run: >
         micromamba create --name TEST python=3 pip --file requirements.txt --file test_requirements.txt --channel conda-forge
         && micromamba activate TEST
         && pip install -e . --no-deps --force-reinstall
