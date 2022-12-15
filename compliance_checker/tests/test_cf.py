@@ -1601,7 +1601,7 @@ class TestCF1_7(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
         results = self.cf.check_cell_boundaries(dataset)
         score, out_of, messages = get_results(results)
-        assert (score, out_of) == (0, 2)
+        assert (score, out_of) == (2, 2)
 
         dataset = self.load_dataset(STATIC_FILES["cf_example_cell_measures"])
         results = self.cf.check_cell_boundaries(dataset)
@@ -1638,38 +1638,6 @@ class TestCF1_7(BaseTestCase):
                 "'a' has 'formula_terms' attr, bounds variable 'b' must also have 'formula_terms'"
                 in messages
             )
-
-    def test_check_cell_boundaries_interval(self):
-        """
-        7.1 Cell Boundaries
-        Recommendations: (1/2)
-        The points specified by a coordinate or auxiliary coordinate variable
-        should lie within, or on the boundary, of the cells specified by the
-        associated boundary variable.
-        """
-
-        # create Cells on a longitude axis
-        dataset = MockTimeSeries()
-        dataset.createDimension("rnv", 2)
-        dataset.createDimension("rlon", 2)
-        dataset.createVariable("rlon", "d", ("rlon",))
-        dataset.createVariable("rlon_bnds", "d", ("rlon", "rnv"))
-
-        rlon = dataset.variables["rlon"]
-        rlon.standard_name = "longitude"
-        rlon.units = "degrees_east"
-        rlon.axis = "X"
-        rlon.long_name = "Longitude"
-        rlon.bounds = "rlon_bnds"
-        rlon[:] = np.array([-97.5, -99.5], dtype=np.float64)
-
-        rlon_bnds = dataset.variables["rlon_bnds"]
-        rlon_bnds.long_name = "Longitude Cell Boundaries"
-        rlon_bnds[:] = np.array([[-97, -98], [-98, -99]], dtype=np.float64)
-
-        results = self.cf.check_cell_boundaries_interval(dataset)
-        score, out_of, messages = get_results(results)
-        assert (score, out_of) == (1, 2)
 
     def test_cell_measures(self):
         """Over-ride the test_cell_measures from CF1_6"""
