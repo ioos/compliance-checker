@@ -910,6 +910,9 @@ class CF1_6Check(CFNCCheck):
             # number_of_observations should short circuit and not continue
             # on to further units checks
             return valid_standard_units.to_result()
+        elif standard_name_modifier == "status_flag":
+            # no units required - skip further checks
+            return valid_standard_units.to_result()
 
         # This section represents the different cases where simple udunits
         # comparison isn't comprehensive enough to determine if the units are
