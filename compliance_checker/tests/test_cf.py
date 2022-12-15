@@ -1663,12 +1663,12 @@ class TestCF1_6(BaseTestCase):
 
         temp.ancillary_variables = "temp_flag"
         scored, out_of, messages = get_results(self.cf.check_units(dataset))
-        assert scored != out_of
-        assert (
-            "units attribute for variable temp_flag must be unset "
-            "when status_flag standard name modifier is set"
-            in messages
-        )
+        n_failed = out_of - scored
+        assert n_failed == 1
+        expected_messages = {
+            "units attribute for variable temp_flag must be unset when status_flag standard name modifier is set"
+        }
+        assert set(messages) == expected_messages
 
         del temp_flag.units
         scored, out_of, messages = get_results(self.cf.check_units(dataset))
