@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.2.0
+  rev: v4.4.0
   hooks:
     - id: trailing-whitespace
       exclude: compliance_checker/tests/data
@@ -14,8 +14,8 @@ repos:
     - id: file-contents-sorter
       files: test_requirements.txt
 
-- repo: https://gitlab.com/pycqa/flake8
-  rev: 3.9.2
+- repo: https://github.com/PyCQA/flake8
+  rev: 6.0.0
   hooks:
     - id: flake8
       exclude: docs/source/conf.py
@@ -34,13 +34,13 @@ repos:
     - id: seed-isort-config
 
 - repo: https://github.com/psf/black
-  rev: 22.3.0
+  rev: 22.12.0
   hooks:
   - id: black
     language_version: python3
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.1.0
+  rev: v2.2.2
   hooks:
     - id: codespell
       args:
