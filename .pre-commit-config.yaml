@@ -20,7 +20,7 @@ repos:
       args: [--max-line-length=200, "--ignore=E203,E501,W503", "--select=select=C,E,F,W,B,B950"]
 
 - repo: https://github.com/pycqa/isort
-  rev: 5.10.1
+  rev: 5.11.4
   hooks:
   - id: isort
     additional_dependencies: [toml]
