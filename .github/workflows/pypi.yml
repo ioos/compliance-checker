@@ -27,7 +27,7 @@ jobs:
       run: git fetch origin 'refs/tags/*:refs/tags/*'
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         # no cf_untis wheels for 3.10 yet
         python-version: "3.9"
