@@ -1,9 +1,10 @@
+codecov
 codespell
 flake8
 httpretty
 mypy
 pre-commit
+pytest-cov
+pytest-vcr
 pytest>=2.9.0
 requests-mock>=1.7.0
-codecov
-pytest-cov
