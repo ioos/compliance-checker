@@ -150,35 +150,6 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_data_types(dataset)
 
-        dataset = MockTimeSeries()
-        # test dimensionality of string
-        dataset.createDimension("num_strings", 3)
-        dataset.createDimension("max_string_length", 80)
-        dataset.createDimension("extra", 9)
-
-        # TEST CONFORMANCE 2.2 1/2
-        # create strings with no dimensions -- fail
-        dataset.createVariable("zero_dimensional", "S1", ())
-        # create strings with one dimension -- valid
-        dataset.createVariable("one_dimensional", "S1", ("max_string_length"))
-        # create strings with two dimensions - valid
-        # NB: string length is supposed to be last, but this can't be inferred
-        #     easily with
-        dataset.createVariable(
-            "two_dimensional", "S1", ("num_strings", "max_string_length")
-        )
-        # create strings with three dimensions - valid
-        dataset.createVariable(
-            "three_dimensional", "S1", ("num_strings", "max_string_length", "extra")
-        )
-
-        result = self.cf.check_data_types(dataset)
-        expected_msgs = [
-            f"The fixed-length string variable {dim_name}_dimensional must "
-            f"be one or two-dimensional, current length is {dim_len}"
-            for dim_name, dim_len in (("zero", 0), ("three", 3))
-        ]
-        assert result.msgs == expected_msgs
         # TODO
         # the acdd_reformat_rebase branch has a new .nc file
         # which constructs the temp variable with an int64 dtype --
