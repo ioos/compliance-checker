@@ -1927,7 +1927,7 @@ class CF1_6Check(CFNCCheck):
         for time_var in ds.get_variables_by_attributes(
             calendar=lambda c: c is not None
         ):
-            if time_var.calendar == "gregorian":
+            if time_var.calendar.lower() == "gregorian":
                 reasoning = (
                     f"For time variable {time_var.name}, when using "
                     "the standard Gregorian calendar, the value "
@@ -1945,7 +1945,7 @@ class CF1_6Check(CFNCCheck):
                 ret_val.append(check_standard_calendar_no_cross(time_var))
             # if a nonstandard calendar, then leap_years and leap_months must
             # must be present
-            if time_var.calendar not in valid_calendars:
+            if time_var.calendar.lower() not in valid_calendars:
                 result = self._check_leap_time(time_var)
             # passes if the calendar is valid, otherwise notify of invalid
             # calendar
