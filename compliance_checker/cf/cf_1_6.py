@@ -95,13 +95,6 @@ class CF1_6Check(CFNCCheck):
                         k, v.datatype
                     )
                 )
-            # TODO: DRY, don't repeat code path
-            if v.dtype is not str and v.dtype.kind == "S" and v.ndim not in (1, 2):
-                fails.append(
-                    "The fixed-length string variable {} must be one or "
-                    "two-dimensional, current length is {}".format(v.name, v.ndim)
-                )
-
         return Result(
             BaseCheck.HIGH,
             (total - len(fails), total),
