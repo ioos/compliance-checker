@@ -1287,6 +1287,25 @@ class TestCF1_6(BaseTestCase):
 
         dataset = MockTimeSeries()
         dataset.variables["time"]
+        # test case insensivity
+        valid_calendars = (
+            "GREGORIAN",
+            "STANDARD",
+            "PROLEPTIC_GREGORIAN",
+            "NOLEAP",
+            "365_DAY",
+            "ALL_LEAP",
+            "366_DAY",
+            "360_DAY",
+            "JULIAN",
+            "NONE",
+        )
+        for calendar_uppercase in valid_calendars:
+            results = self.cf.check_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert scored == out_of
+
+        # test custom month length calendars
         dataset.variables["time"].calendar = "custom"
         dataset.variables["time"].month_lengths = np.array([30.3], dtype=np.double)
         results = self.cf.check_calendar(dataset)
