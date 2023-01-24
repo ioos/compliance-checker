@@ -1293,19 +1293,6 @@ class TestCF1_6(BaseTestCase):
         assert len([r for r in results if r.value[0] < r.value[1]]) == 1
         assert all(r.name == "§5.3 Reduced Horizontal Grid" for r in results)
 
-    # def test_check_grid_mapping(self):
-    #     dataset = self.load_dataset(STATIC_FILES["mapping"])
-    #     # print(dataset.variables)
-    #     results = self.cf.check_grid_mapping(dataset)
-    #     print(results.values)
-
-    #     assert len(results) == 6
-    #     assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 0
-    #     expected_name = (
-    #         "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
-    #     )
-    #     assert all(r.name == expected_name for r in results.values())
-
     def test_is_geophysical(self):
 
         # check whether string type variable, which are not `cf_role`, are
@@ -1471,15 +1458,6 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_compression_gathering(dataset)
         self.assertFalse(results[0].value)
         self.assertFalse(results[1].value)
-
-    # def test_check_all_features_are_same_type(self):
-    #    dataset = self.load_dataset(STATIC_FILES["rutgers"])
-    #    result = self.cf.check_all_features_are_same_type(dataset)
-    #    assert result
-
-    #    dataset = self.load_dataset(STATIC_FILES["featureType"])
-    #    result = self.cf.check_all_features_are_same_type(dataset)
-    #    assert result
 
     def test_featureType_is_case_insensitive(self):
         """
