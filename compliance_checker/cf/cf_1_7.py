@@ -242,7 +242,6 @@ class CF1_7Check(CF1_6Check):
             ds
         ).items():
             
-            print(boundary_variable_name, boundary_variable_name.dtype)
             variable = ds.variables[variable_name]
             valid = True
             reasoning = []
@@ -847,46 +846,26 @@ class CF1_7Check(CF1_6Check):
                         test_ctx.out_of += 1                                   
             test_ctx.score += 1
  
-            # existence_conditions           
+            # existence_conditions
+            # Both geoid_name and geopotential_datum_name cannot exist
             exist_cond_1 = (
                 self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(var)
             )
-            if exist_cond_1[0] == False:
-                test_ctx.messages.append("Both geoid_name and geopotential_datum_name "
-                "should not exist for {}".format(var.name))
-                test_ctx.out_of += 1
-            
+            test_ctx.messages.append(exist_cond_1)
             test_ctx.score += 1
-            # test_ctx.assert_true(exist_cond_1[0], exist_cond_1[1])
 
             # [8/9] reference_ellipsoid_name, prime_meridian_name, horizontal_datum_name and 
             # geographic_crs_name must be all defined if any one is defined.
             exist_cond_2 = self._check_gmattr_existence_condition_ell_pmerid_hdatum(var)
-            if exist_cond_2[0] == False:
-                test_ctx.messages.append("reference_ellipsoid_name, prime_meridian_name, "
-                "horizontal_datum_name and geographic_crs_name must be all defined "
-                "if any one is defined")
-                test_ctx.out_of += 1
-            
-            test_ctx.score += 1     
-            # test_ctx.assert_true(exist_cond_2[0], exist_cond_2[1])            
+            test_ctx.messages.append(exist_cond_2)
+            test_ctx.score += 1               
 
             # handle vertical datum related grid_mapping attributes
             vert_datum_attrs = {}
             possible_vert_datum_attrs = {"geoid_name", "geopotential_datum_name"}
-            vert_datum_attrs = possible_vert_datum_attrs.intersection(var.ncattrs())
-            len_vdatum_name_attrs = len(vert_datum_attrs)                  
+            vert_datum_attrs = possible_vert_datum_attrs.intersection(var.ncattrs())                             
             
-            # check that geoid_name and geopotential_datum_name are not both
-            # present in the grid_mapping variable
-            if len_vdatum_name_attrs == 2:
-                test_ctx.out_of += 1
-                test_ctx.messages.append(
-                    "Cannot have both 'geoid_name' and "
-                    "'geopotential_datum_name' attributes in "
-                    "grid mapping variable '{}'".format(var.name)
-                )
-            elif len_vdatum_name_attrs == 1:
+            if  exist_cond_1[0] == True and vert_datum_attrs:              
                 # should be one or zero attrs
                 proj_db_path = os.path.join(pyproj.datadir.get_data_dir(), "proj.db")
                 try:
