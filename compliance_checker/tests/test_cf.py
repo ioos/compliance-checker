@@ -1244,20 +1244,22 @@ class TestCF1_6(BaseTestCase):
             dataset.variables["time"].calendar = calendar
             dataset.variables["time"].units = "seconds since 1582-10-15T00:00Z"
             # 500 element array with some failing values
+            # _FillValue at first element even though should not be present
+            # in time coordinate variable to test bad data handling
             # TEST CONFORMANCE 4.4.1 RECOMMENDED 4/4
-            dataset.variables["time"][:] = np.arange(-2, 498)
+            dataset.variables["time"][1:] = np.arange(-2, 497)
             results = self.cf.check_calendar(dataset)
             scored, out_of, messages = get_results(results)
             assert messages[-1] == (
                 "Variable time has time values prior to "
                 "1582-10-15T00:00Z and utilizes the "
-                "standard/gregorian calendar"
+                "standard or Gregorian calendar"
             )
             dataset.variables["time"][:] = np.arange(0, 500)
             results = self.cf.check_calendar(dataset)
             scored, out_of, messages = get_results(results)
             assert messages[-1] == (
-                "Variable time has standard/gregorian "
+                "Variable time has standard or Gregorian "
                 "calendar and does not cross 1582-10-15T00:00Z"
             )
             # TEST CONFORMANCE 4.4.1 RECOMMENDED 3/4
