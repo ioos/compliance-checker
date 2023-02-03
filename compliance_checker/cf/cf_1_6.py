@@ -1898,22 +1898,19 @@ class CF1_6Check(CFNCCheck):
             # should be made for time coordinate variables anyways, so errors
             # should be caught where implemented there
             crossover_date = cftime.DatetimeGregorian(1582, 10, 15)
-            times = cftime.num2date(time_var[:], time_var.units)
+            times = cftime.num2date(time_var[:].compressed(), time_var.units)
 
-            # appears to be necessary to override supplied _FillValue of "?"
-            # FillValues shouldn't fail, so set to crossover date to pass
-            times.set_fill_value(crossover_date)
             no_cross_1582 = ~np.any(times < crossover_date)
             if no_cross_1582:
                 reasoning = (
-                    f"Variable {time_var.name} has standard/gregorian "
+                    f"Variable {time_var.name} has standard or Gregorian "
                     "calendar and does not cross 1582-10-15T00:00Z"
                 )
             else:
                 reasoning = (
                     f"Variable {time_var.name} has time values "
                     "prior to 1582-10-15T00:00Z and utilizes "
-                    "the standard/gregorian calendar"
+                    "the standard or Gregorian calendar"
                 )
 
             return Result(
