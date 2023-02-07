@@ -216,7 +216,6 @@ class MockRaggedArrayRepr(MockNetCDF):
             )
 
             if structure == "contiguous":
-
                 # create count variable
                 self.createVariable(
                     "counter_var",
@@ -230,7 +229,6 @@ class MockRaggedArrayRepr(MockNetCDF):
                 )
 
             else:
-
                 # create index variable
                 self.createVariable(
                     "index_var",

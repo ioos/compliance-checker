@@ -26,14 +26,12 @@ from compliance_checker.util import dateparse, datetime_is_iso, kvp_convert
 
 
 class ACDDBaseCheck(BaseCheck):
-
     _cc_spec = "acdd"
     _cc_description = "Attribute Conventions for Dataset Discovery (ACDD)"
     _cc_url = "http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery"
     _cc_display_headers = {3: "Highly Recommended", 2: "Recommended", 1: "Suggested"}
 
     def __init__(self):
-
         self.high_rec_atts = ["title", "keywords", "summary"]
 
         self.rec_atts = [
@@ -256,7 +254,6 @@ class ACDDBaseCheck(BaseCheck):
         # identify lat var(s) as per CF 4.1
         lat_vars = {}  # var -> number of criteria passed
         for name, var in ds.variables.items():
-
             # must have units
             if not hasattr(var, "units"):
                 continue
@@ -354,7 +351,6 @@ class ACDDBaseCheck(BaseCheck):
         # identify lon var(s) as per CF 4.2
         lon_vars = {}  # var -> number of criteria passed
         for name, var in ds.variables.items():
-
             # must have units
             if not hasattr(var, "units"):
                 continue
@@ -679,7 +675,6 @@ class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
 
 
 class ACDD1_1Check(ACDDNCCheck):
-
     _cc_spec_version = "1.1"
     _cc_description = "Attribute Conventions for Dataset Discovery (ACDD) 1.1"
     register_checker = True
@@ -699,7 +694,6 @@ class ACDD1_1Check(ACDDNCCheck):
 
 
 class ACDD1_3Check(ACDDNCCheck):
-
     _cc_spec_version = "1.3"
     _cc_description = "Attribute Conventions for Dataset Discovery (ACDD) 1.3"
     register_checker = True
@@ -759,7 +753,6 @@ class ACDD1_3Check(ACDDNCCheck):
             "date_{}".format(suffix)
             for suffix in ("issued", "modified", "metadata_modified")
         ):
-
             self.sug_atts[k] = partial(_check_attr_is_iso_date, k)
 
     def check_metadata_link(self, ds):
