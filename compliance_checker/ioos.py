@@ -440,7 +440,6 @@ class IOOS1_2Check(IOOSNCCheck):
     register_checker = True
 
     def __init__(self):
-
         # instantiate objects used for delegation
         self.acdd1_6 = ACDD1_3Check()
         self.cf1_7 = CF1_7Check()
@@ -952,7 +951,6 @@ class IOOS1_2Check(IOOSNCCheck):
             )
 
     def _check_feattype_timeseries_cf_role(self, ds):
-
         ts_msg = (
             "Dimension length of variable with cf_role={cf_role} "
             "(the '{dim_type}' dimension) is {dim_len}. "
@@ -997,7 +995,6 @@ class IOOS1_2Check(IOOSNCCheck):
         )
 
     def _check_feattype_timeseriesprof_cf_role(self, ds):
-
         ts_prof_msg = (
             "Dimension length of non-platform variable with cf_role={cf_role} "
             " (the '{dim_type}' dimension) is {dim_len}. "
@@ -1598,7 +1595,6 @@ class IOOS1_2Check(IOOSNCCheck):
         for v in ds.get_variables_by_attributes(
             standard_name=lambda x: x in self._qartod_std_names
         ):
-
             missing_msg = "flag_{} not present on {}"
 
             # check if each has flag_values, flag_meanings
@@ -1781,7 +1777,6 @@ class IOOSBaseSOSCheck(BaseCheck):
 
 
 class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseSOSCheck):
-
     # set up namespaces for XPath
     ns = Namespaces().get_namespaces(["sos", "gml", "xlink"])
     ns["ows"] = Namespaces().get_namespace("ows110")
@@ -1860,7 +1855,6 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseSOSCheck):
 
 
 class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseSOSCheck):
-
     # set up namespaces for XPath
     ns = Namespaces().get_namespaces(["sml", "swe", "gml", "xlink"])
 

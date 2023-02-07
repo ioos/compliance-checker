@@ -220,7 +220,6 @@ mult_msgs_diff = "Failed to find the following messages:\n{missing_msgs}\n\n\
 
 
 class TestCFIntegration:
-
     # --------------------------------------------------------------------------------
     # Helper Methods
     # --------------------------------------------------------------------------------

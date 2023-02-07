@@ -449,11 +449,9 @@ class CF1_6Check(CFNCCheck):
         total = 0
 
         for name, variable in ds.variables.items():
-
             if hasattr(variable, "valid_max") and (
                 hasattr(variable, "valid_min") or hasattr(variable, "valid_range")
             ):
-
                 total = total + 1
 
                 fails.append(
@@ -2865,7 +2863,6 @@ class CF1_6Check(CFNCCheck):
                         or var_str == "area"
                         or var_str in getattr(var, "coordinates", "")
                     ):
-
                         valid = True
                     else:
                         valid = False
@@ -3243,7 +3240,6 @@ class CF1_6Check(CFNCCheck):
         """
         ret_val = []
         for name, var in ds.variables.items():
-
             add_offset = getattr(var, "add_offset", None)
             scale_factor = getattr(var, "scale_factor", None)
             if not (add_offset or scale_factor):

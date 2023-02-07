@@ -729,7 +729,6 @@ class CFBaseCheck(BaseCheck):
 
         self._metadata_vars[ds] = []
         for name, var in ds.variables.items():
-
             if name in self._find_ancillary_vars(ds) or name in self._find_coord_vars(
                 ds
             ):
