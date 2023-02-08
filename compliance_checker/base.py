@@ -258,7 +258,6 @@ class Result(object):
         check_method=None,
         variable_name=None,
     ):
-
         self.weight = weight
 
         if value is None:

@@ -444,7 +444,6 @@ class TestFeatureDetection(TestCase):
         )
 
     def test_is_dataset_valid_ragged_array_repr_featureType(self):
-
         # first test single featureType
 
         # ----- timeseries, indexed ----- #

@@ -250,7 +250,6 @@ class NCGraph(object):
     def __init__(
         self, ds, name, nc_object, self_reference_variables, reference_map=None
     ):
-
         self.ds = ds
         self.name = name
         self.coords = DotDict()

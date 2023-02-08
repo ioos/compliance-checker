@@ -944,7 +944,6 @@ class CheckSuite(object):
         ret_val = []
 
         for k, v in grouped:  # iterate through the grouped tuples
-
             k = k[0]  # slice ("name", weight_val) --> "name"
             v = list(v)  # from itertools._grouper to list
 

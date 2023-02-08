@@ -314,7 +314,6 @@ class TestIOOS1_2(BaseTestCase):
         self.ioos = IOOS1_2Check()
 
     def test_check_geophysical_vars_have_attrs(self):
-
         # create geophysical variable
         ds = MockTimeSeries()  # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, dimensions=("time",))
@@ -380,7 +379,6 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(scored, out_of)
 
     def test_check_geospatial_vars_have_attrs(self):
-
         # create geophysical variable
         ds = MockTimeSeries()  # time, lat, lon, depth
         temp = ds.createVariable(
@@ -529,7 +527,6 @@ class TestIOOS1_2(BaseTestCase):
         )
 
     def test_check_instrument_variables(self):
-
         ds = MockTimeSeries()  # time, lat, lon, depth
 
         # no instrument variable, should pass
@@ -689,7 +686,6 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(res.msgs, [])
 
     def test_check_single_platform(self):
-
         ds = MockTimeSeries()  # time, lat, lon, depth
 
         # no global attr but also no platform variables, should pass
@@ -943,7 +939,6 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
     def test_check_feattype_timeseries_cf_role(self):
-
         # featureType: timeseries and timeseries - msingle station require same tests
 
         # for ftype in ("timeseries", "timeseries - single station", "timeseries - multiple station"):

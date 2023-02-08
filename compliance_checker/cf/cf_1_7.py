@@ -124,7 +124,6 @@ class CF1_7Check(CF1_6Check):
             if not hasattr(variable, "actual_range"):
                 continue  # having this attr is only suggested, no Result needed
             else:
-
                 out_of += 1
                 try:
                     if (

@@ -1425,7 +1425,6 @@ class TestCF1_6(BaseTestCase):
         assert all(r.name == expected_name for r in results.values())
 
     def test_is_geophysical(self):
-
         # check whether string type variable, which are not `cf_role`, are
         # properly processed
         dataset = self.load_dataset(STATIC_FILES["string"])
@@ -1713,7 +1712,6 @@ class TestCF1_6(BaseTestCase):
         suite.run(dataset, "cf")
 
     def test_variable_feature_check(self):
-
         # non-compliant dataset -- 1/1 fail
         dataset = self.load_dataset(STATIC_FILES["bad-trajectory"])
         results = self.cf.check_variable_features(dataset)
@@ -2612,7 +2610,6 @@ class TestCF1_7(BaseTestCase):
         dataset.close()
 
     def test_check_gmattr_existence_condition_ell_pmerid_hdatum(self):
-
         # test good (all)
         dataset = MockTimeSeries()
         dataset.createVariable("lev", "d")  # dtype=double, dims=1
@@ -3032,7 +3029,6 @@ class TestCFUtil(BaseTestCase):
         )
 
     def test_is_dataset_valid_ragged_array_repr_featureType(self):
-
         # first test single featureType
 
         # ----- timeseries, indexed ----- #
