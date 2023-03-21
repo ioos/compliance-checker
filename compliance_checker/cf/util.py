@@ -430,7 +430,7 @@ def download_cf_standard_name_table(version, location=None):
         )
 
     if version == "latest":
-        tables_tree = lxml.html.parse("http://cfconventions.org/documents.html")
+        tables_tree = lxml.html.parse("http://cfconventions.org/vocabularies.html")
         end_str = "cf-standard-name-table.xml"
         xpath_expr = (
             "//a[substring(@href, string-length(@href) - "
