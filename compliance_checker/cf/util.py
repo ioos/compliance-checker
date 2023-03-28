@@ -5,7 +5,6 @@ import sys
 from collections import defaultdict
 from copy import deepcopy
 from pkgutil import get_data
-from urllib.parse import urljoin
 
 import requests
 from cf_units import Unit
