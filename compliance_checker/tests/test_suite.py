@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 from pkg_resources import resource_filename
 
+from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.base import BaseCheck, GenericFile, Result
 from compliance_checker.suite import CheckSuite
 
@@ -106,10 +107,17 @@ class TestSuite(unittest.TestCase):
         ds = self.cs.load_dataset(static_files["2dim"])
         # exclude title from the check attributes
         score_groups = self.cs.run_all(ds, ["acdd"], skip_checks=["check_high"])
-        assert all(
-            sg.name not in {"Conventions", "title", "keywords", "summary"}
+        msg_set = {
+            msg
             for sg in score_groups["acdd"][0]
-        )
+            for msg in sg.msgs
+            if sg.weight == BaseCheck.HIGH
+        }
+        skipped_messages = {
+            att + " not present" for att in ACDDBaseCheck().high_rec_atts
+        }
+        # none of the skipped messages should be in the result set
+        self.assertTrue(len(msg_set & skipped_messages) == 0)
 
     def test_skip_check_level(self):
         """Checks level limited skip checks"""

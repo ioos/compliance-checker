@@ -27,7 +27,7 @@ jobs:
       run: git fetch origin 'refs/tags/*:refs/tags/*'
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         # no cf_untis wheels for 3.10 yet
         python-version: "3.9"
@@ -50,7 +50,7 @@ jobs:
 
     - name: Publish a Python distribution to PyPI
       if: success() && github.event_name == 'release'
-      uses: pypa/gh-action-pypi-publish@v1.5.0
+      uses: pypa/gh-action-pypi-publish@v1.8.3
       with:
         user: __token__
         password: ${{ secrets.PYPI_ACCESS_TOKEN }}

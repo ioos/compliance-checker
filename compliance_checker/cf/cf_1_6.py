@@ -2,6 +2,7 @@ import difflib
 import logging
 from collections import defaultdict
 
+import cftime
 import numpy as np
 import regex
 from cf_units import Unit
@@ -94,13 +95,6 @@ class CF1_6Check(CFNCCheck):
                         k, v.datatype
                     )
                 )
-            # TODO: DRY, don't repeat code path
-            if v.dtype is not str and v.dtype.kind == "S" and v.ndim not in (1, 2):
-                fails.append(
-                    "The fixed-length string variable {} must be one or "
-                    "two-dimensional, current length is {}".format(v.name, v.ndim)
-                )
-
         return Result(
             BaseCheck.HIGH,
             (total - len(fails), total),
@@ -410,6 +404,69 @@ class CF1_6Check(CFNCCheck):
                     ),
                 )
         return valid_dimension_order.to_result()
+
+    def check_fill_value_equal_missing_value(self, ds):
+        """
+        If both missing_value and _FillValue be used, they should have the same value.
+        This according to CF §2.5.1 Recommendations:
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of Results
+        """
+        fails = []
+        total = 0
+
+        for name, variable in ds.variables.items():
+            # If the variable have a defined _FillValue a defined missing_value check it.
+
+            if hasattr(variable, "_FillValue") and hasattr(variable, "missing_value"):
+                total = total + 1
+                if variable._FillValue != variable.missing_value:
+                    fails.append(
+                        "For the variable {} the missing_value must be equal to the _FillValue".format(
+                            variable.name
+                        )
+                    )
+
+        return Result(
+            BaseCheck.MEDIUM,
+            (len(fails), total),
+            self.section_titles["2.5"],
+            msgs=fails,
+        )
+
+    def check_valid_range_or_valid_min_max_present(self, ds):
+        """
+        The valid_range attribute must not be present if the valid_min
+        and/or valid_max attributes are present. This according to 2.5.1 Requirements.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: list
+        :return: List of Results
+        """
+        fails = []
+        total = 0
+
+        for name, variable in ds.variables.items():
+            if hasattr(variable, "valid_max") and (
+                hasattr(variable, "valid_min") or hasattr(variable, "valid_range")
+            ):
+                total = total + 1
+
+                fails.append(
+                    "For the variable {} the valid_range attribute must not be present "
+                    "if the valid_min and/or valid_max attributes are present".format(
+                        variable.name
+                    )
+                )
+
+        return Result(
+            BaseCheck.MEDIUM,
+            (len(fails), total),
+            self.section_titles["2.5"],
+            msgs=fails,
+        )
 
     def check_fill_value_outside_valid_range(self, ds):
         """
@@ -843,6 +900,9 @@ class CF1_6Check(CFNCCheck):
                 valid_standard_units.score += 1
             # number_of_observations should short circuit and not continue
             # on to further units checks
+            return valid_standard_units.to_result()
+        elif standard_name_modifier == "status_flag":
+            # no units required - skip further checks
             return valid_standard_units.to_result()
 
         # This section represents the different cases where simple udunits
@@ -1825,25 +1885,66 @@ class CF1_6Check(CFNCCheck):
 
         ret_val = []
 
+        def check_standard_calendar_no_cross(time_var):
+            """
+            Check that the time variable does not cross the date
+            1582-10-15 when standard or gregorian calendars are used
+            """
+            # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED 2/2
+            # Only get non-nan/FillValue times, as these are the only things
+            # that make sense for conversion.  Furthermore, non-null checks
+            # should be made for time coordinate variables anyways, so errors
+            # should be caught where implemented there
+            crossover_date = cftime.DatetimeGregorian(1582, 10, 15)
+            times = cftime.num2date(time_var[:].compressed(), time_var.units)
+
+            no_cross_1582 = ~np.any(times < crossover_date)
+            if no_cross_1582:
+                reasoning = (
+                    f"Variable {time_var.name} has standard or Gregorian "
+                    "calendar and does not cross 1582-10-15T00:00Z"
+                )
+            else:
+                reasoning = (
+                    f"Variable {time_var.name} has time values "
+                    "prior to 1582-10-15T00:00Z and utilizes "
+                    "the standard or Gregorian calendar"
+                )
+
+            return Result(
+                BaseCheck.LOW, no_cross_1582, self.section_titles["4.4"], [reasoning]
+            )
+
         # if has a calendar, check that it is within the valid values
         # otherwise no calendar is valid
+
         for time_var in ds.get_variables_by_attributes(
             calendar=lambda c: c is not None
         ):
-            reasoning = None
-            standard_calendar = time_var.calendar in valid_calendars
-
+            if time_var.calendar.lower() == "gregorian":
+                reasoning = (
+                    f"For time variable {time_var.name}, when using "
+                    "the standard Gregorian calendar, the value "
+                    '"standard" is preferred over "gregorian" for '
+                    "the calendar attribute"
+                )
+                result = Result(
+                    BaseCheck.LOW, False, self.section_titles["4.4"], [reasoning]
+                )
+                ret_val.append(result)
+                # check here and in the below case that time does not cross
+                # thee date 1582-10-15 as requested by CF conformance
+                ret_val.append(check_standard_calendar_no_cross(time_var))
+            elif time_var.calendar == "standard":
+                ret_val.append(check_standard_calendar_no_cross(time_var))
             # if a nonstandard calendar, then leap_years and leap_months must
             # must be present
-            if not standard_calendar:
+            if time_var.calendar.lower() not in valid_calendars:
                 result = self._check_leap_time(time_var)
             # passes if the calendar is valid, otherwise notify of invalid
             # calendar
             else:
-                result = Result(
-                    BaseCheck.LOW, True, self.section_titles["4.4"], reasoning
-                )
-
+                result = Result(BaseCheck.LOW, True, self.section_titles["4.4"], None)
             ret_val.append(result)
 
         return ret_val
@@ -2668,6 +2769,32 @@ class CF1_6Check(CFNCCheck):
                                 cell_meas_var_name
                             )
                         )
+                    else:
+                        # IMPLEMENTATION CONFORMANCE REQUIRED 2/2
+                        # verify this combination {area: 'm2', volume: 'm3'}
+                        dic_expected = {"area": "m2", "volume": "m3"}
+                        dic_to_be_verified = {
+                            (var.cell_measures).split(":")[0]: cell_meas_var.units
+                        }
+                        
+                        if not set(dic_to_be_verified).issubset(dic_expected):
+                            valid = False
+                            reasoning.append(
+                                "Cell measure variable {} must have "
+                                "units that are consistent with the measure type."
+                                "i.e. {}.".format(cell_meas_var_name, dic_expected)
+                            )
+                       
+                        # verify units are recognized by UDUNITS
+                        valid_udunits = self._check_valid_udunits(ds, cell_meas_var_name)
+                        if valid_udunits.value[0] != valid_udunits.value[1]:
+                            valid = False
+                            reasoning.append(
+                                 "Cell measure variable {} referred to by "
+                                 "{} has a unit {} not recognized by UDUNITS".format(
+                                 cell_meas_var_name, var.name, cell_meas_var.units 
+                                 )
+                            )
                     if not set(cell_meas_var.dimensions).issubset(var.dimensions):
                         valid = False
                         reasoning.append(
@@ -2746,7 +2873,6 @@ class CF1_6Check(CFNCCheck):
                         or var_str == "area"
                         or var_str in getattr(var, "coordinates", "")
                     ):
-
                         valid = True
                     else:
                         valid = False
@@ -3124,7 +3250,6 @@ class CF1_6Check(CFNCCheck):
         """
         ret_val = []
         for name, var in ds.variables.items():
-
             add_offset = getattr(var, "add_offset", None)
             scale_factor = getattr(var, "scale_factor", None)
             if not (add_offset or scale_factor):
@@ -3294,7 +3419,29 @@ class CF1_6Check(CFNCCheck):
                         compress_var.name, not_in_dims
                     )
                 )
+            # IMPLEMENTATION CONFORMANCE 8.2 REQUIRED 3/3
+            # The values of the associated coordinate variable must be in the range
+            # starting with 0 and going up to the product of the compressed dimension
+            # sizes minus 1 (CDL index conventions).
 
+            # Put the the values of the associated coordinate variable into a list
+            coord_list_size = [
+                item.size
+                for item in ds.dimensions.values()
+                if item.name in compress_set
+            ]
+            # get the upper limt of the dimenssion size
+            upper_limit_size = np.prod(coord_list_size) - 1
+
+            for coord_size in coord_list_size:
+                if coord_size not in range(0, upper_limit_size):
+                    valid = False
+                    reasoning.append(
+                        "The dimenssion size {} referenced by the compress attribute is not "
+                        "in the range (0, The product of the compressed dimension sizes minus 1)".format(
+                            coord_size
+                        )
+                    )
             result = Result(
                 BaseCheck.MEDIUM, valid, self.section_titles["8.2"], reasoning
             )

@@ -345,23 +345,8 @@ class CheckSuite(object):
                         )
                     )
                     check_max_level = BaseCheck.HIGH
-                else:
-                    try:
-                        check_max_level = check_lookup[split_check_spec[1]]
-                    except KeyError:
-                        warnings.warn(
-                            "Skip specifier '{}' on check '{}' not found,"
-                            " defaulting to skip entire check".format(
-                                split_check_spec[1], check_name
-                            )
-                        )
-                        check_max_level = BaseCheck.HIGH
 
-                check_dict[check_name] = check_max_level
-        else:
-            for check_name in skip_checks:
-                # always process
-                check_dict[check_name] = 0
+            check_dict[check_name] = check_max_level
 
         return check_dict
 
@@ -959,7 +944,6 @@ class CheckSuite(object):
         ret_val = []
 
         for k, v in grouped:  # iterate through the grouped tuples
-
             k = k[0]  # slice ("name", weight_val) --> "name"
             v = list(v)  # from itertools._grouper to list
 

@@ -151,35 +151,6 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_data_types(dataset)
 
-        dataset = MockTimeSeries()
-        # test dimensionality of string
-        dataset.createDimension("num_strings", 3)
-        dataset.createDimension("max_string_length", 80)
-        dataset.createDimension("extra", 9)
-
-        # TEST CONFORMANCE 2.2 1/2
-        # create strings with no dimensions -- fail
-        dataset.createVariable("zero_dimensional", "S1", ())
-        # create strings with one dimension -- valid
-        dataset.createVariable("one_dimensional", "S1", ("max_string_length"))
-        # create strings with two dimensions - valid
-        # NB: string length is supposed to be last, but this can't be inferred
-        #     easily with
-        dataset.createVariable(
-            "two_dimensional", "S1", ("num_strings", "max_string_length")
-        )
-        # create strings with three dimensions - valid
-        dataset.createVariable(
-            "three_dimensional", "S1", ("num_strings", "max_string_length", "extra")
-        )
-
-        result = self.cf.check_data_types(dataset)
-        expected_msgs = [
-            f"The fixed-length string variable {dim_name}_dimensional must "
-            f"be one or two-dimensional, current length is {dim_len}"
-            for dim_name, dim_len in (("zero", 0), ("three", 3))
-        ]
-        assert result.msgs == expected_msgs
         # TODO
         # the acdd_reformat_rebase branch has a new .nc file
         # which constructs the temp variable with an int64 dtype --
@@ -384,6 +355,77 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_dimension_order(dataset)
         self.assertEqual((3, 3), result.value)
         self.assertEqual([], result.msgs)
+
+    def test_check_fill_value_equal_missing_value(self):
+        """
+        According to CF §2.5.1 Recommendations: If both missing_value and _FillValue be used,
+        they should have the same value.
+        """
+        # TEST CONFORMANCE 2.5.1 RECOMMENDED
+        dataset = MockTimeSeries()
+        # Case of _FillValue and missing_value are not equal
+        dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2
+        dataset.variables["a"].setncattr("missing_value", [9939.9])
+
+        # Case of _FillValue and missing_value are equal
+        dataset.createVariable("b", "d", ("time",), fill_value=9999.9)
+        dataset.variables["b"][0] = 1
+        dataset.variables["b"][1] = 2
+        dataset.variables["b"].setncattr("missing_value", [9999.9])
+
+        result = self.cf.check_fill_value_equal_missing_value(dataset)
+
+        # check if the test fails when when variable "a" is checked.
+        expected_msgs = [
+            f"For the variable {v_name} the missing_value must be equal to the _FillValue"
+            for v_name in ("a")
+        ]
+
+        assert result.msgs == expected_msgs
+
+    def test_check_valid_range_or_valid_min_max_present(self):
+        """
+        2.5.1 Missing data, valid and actual range of data
+        Requirements:
+        The valid_range attribute must not be present if the
+        valid_min and/or valid_max attributes are present.
+        """
+        # TEST CONFORMANCE 2.5.1 REQUIRED
+        dataset = MockTimeSeries()
+        # Case of valid_min, valid_max, and valid_range are present
+        dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2
+        dataset.variables["a"].setncattr("valid_min", [-10])
+        dataset.variables["a"].setncattr("valid_max", [10])
+        dataset.variables["a"].setncattr("valid_range", [-10, 10])
+
+        # Case of valid_min and valid_max are present and valid_range is absent
+        dataset.createVariable("b", "d", ("time",), fill_value=9999.9)
+        dataset.variables["b"][0] = 1
+        dataset.variables["b"][1] = 2
+        dataset.variables["a"].setncattr("valid_min", [-10])
+        dataset.variables["a"].setncattr("valid_max", [10])
+
+        # Case of valid_min and valid_max are absent and valid_range is present
+        dataset.createVariable("c", "d", ("time",), fill_value=9999.9)
+        dataset.variables["c"][0] = 1
+        dataset.variables["c"][1] = 2
+        dataset.variables["c"].setncattr("valid_range", [-10, 10])
+
+        result = self.cf.check_valid_range_or_valid_min_max_present(dataset)
+
+        # check if the test fails when when variable "a" is checked.
+        expected_msgs = [
+            f"For the variable {v_name} the valid_range attribute must not be present "
+            f"if the valid_min and/or valid_max attributes are present"
+            for v_name in ("a")
+        ]
+
+        assert result.msgs == expected_msgs
+        assert result.value[0] == result.value[1]
 
     def test_check_fill_value_outside_valid_range(self):
         """
@@ -1091,7 +1133,7 @@ class TestCF1_6(BaseTestCase):
         self.assertTrue(
             no_missing_terms(
                 "ocean_sigma_z_coordinate",
-                {"sigma", "eta", "depth", "depth_c", "nsigma", "zlev"},
+                {"sigma", "eta", "depth", "depth_c", "zlev"},
                 dimless_vertical_coordinates_1_6,
             )
         )
@@ -1218,6 +1260,25 @@ class TestCF1_6(BaseTestCase):
 
         dataset = MockTimeSeries()
         dataset.variables["time"]
+        # test case insensivity
+        valid_calendars = (
+            "GREGORIAN",
+            "STANDARD",
+            "PROLEPTIC_GREGORIAN",
+            "NOLEAP",
+            "365_DAY",
+            "ALL_LEAP",
+            "366_DAY",
+            "360_DAY",
+            "JULIAN",
+            "NONE",
+        )
+        for calendar_uppercase in valid_calendars:
+            results = self.cf.check_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert scored == out_of
+
+        # test custom month length calendars
         dataset.variables["time"].calendar = "custom"
         dataset.variables["time"].month_lengths = np.array([30.3], dtype=np.double)
         results = self.cf.check_calendar(dataset)
@@ -1225,7 +1286,7 @@ class TestCF1_6(BaseTestCase):
         assert bad_month_msg in messages
 
         dataset.variables["time"].month_lengths = np.array(
-            [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31], dtype=np.uint8
+            [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31], dtype=int
         )
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
@@ -1267,6 +1328,36 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
         assert leap_year_msg not in messages
+
+        for calendar in ("standard", "gregorian"):
+            dataset.variables["time"].calendar = calendar
+            dataset.variables["time"].units = "seconds since 1582-10-15T00:00Z"
+            # 500 element array with some failing values
+            # _FillValue at first element even though should not be present
+            # in time coordinate variable to test bad data handling
+            # TEST CONFORMANCE 4.4.1 RECOMMENDED 4/4
+            dataset.variables["time"][1:] = np.arange(-2, 497)
+            results = self.cf.check_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert messages[-1] == (
+                "Variable time has time values prior to "
+                "1582-10-15T00:00Z and utilizes the "
+                "standard or Gregorian calendar"
+            )
+            dataset.variables["time"][:] = np.arange(0, 500)
+            results = self.cf.check_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert messages[-1] == (
+                "Variable time has standard or Gregorian "
+                "calendar and does not cross 1582-10-15T00:00Z"
+            )
+            # TEST CONFORMANCE 4.4.1 RECOMMENDED 3/4
+            if calendar == "gregorian":
+                assert (
+                    "For time variable time, when using the standard "
+                    'Gregorian calendar, the value "standard" is preferred '
+                    'over "gregorian" for the calendar attribute' in messages
+                )
 
     def test_check_aux_coordinates(self):
         dataset = self.load_dataset(STATIC_FILES["illegal-aux-coords"])
@@ -1336,7 +1427,6 @@ class TestCF1_6(BaseTestCase):
         assert all(r.name == expected_name for r in results.values())
 
     def test_is_geophysical(self):
-
         # check whether string type variable, which are not `cf_role`, are
         # properly processed
         dataset = self.load_dataset(STATIC_FILES["string"])
@@ -1564,13 +1654,22 @@ class TestCF1_6(BaseTestCase):
         # units should not exist for
         temp_flag.units = "1"
 
+        time_flag = dataset.createVariable("time_flag", "i1", ("time",))
+        time_flag.standard_name = "time status_flag"
+        time_flag.flag_values = np.array([1, 2], dtype=np.int8)
+        time_flag.flag_meanings = "good bad"
+
+        lat_flag = dataset.createVariable("lat_flag", "i1", ("time",))
+        lat_flag.standard_name = "latitude status_flag"
+
         temp.ancillary_variables = "temp_flag"
         scored, out_of, messages = get_results(self.cf.check_units(dataset))
-        assert scored != out_of
-        assert (
-            "units attribute for variable temperature_flag must be unset "
-            "when status_flag modifier is set"
-        )
+        n_failed = out_of - scored
+        assert n_failed == 1
+        expected_messages = {
+            "units attribute for variable temp_flag must be unset when status_flag standard name modifier is set"
+        }
+        assert set(messages) == expected_messages
 
         del temp_flag.units
         scored, out_of, messages = get_results(self.cf.check_units(dataset))
@@ -1615,7 +1714,6 @@ class TestCF1_6(BaseTestCase):
         suite.run(dataset, "cf")
 
     def test_variable_feature_check(self):
-
         # non-compliant dataset -- 1/1 fail
         dataset = self.load_dataset(STATIC_FILES["bad-trajectory"])
         results = self.cf.check_variable_features(dataset)
@@ -1889,7 +1987,7 @@ class TestCF1_7(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
         results = self.cf.check_cell_boundaries(dataset)
         score, out_of, messages = get_results(results)
-        assert (score, out_of) == (2, 2)
+        assert (score, out_of) == (0, 2)
 
         dataset = self.load_dataset(STATIC_FILES["cf_example_cell_measures"])
         results = self.cf.check_cell_boundaries(dataset)
@@ -1926,6 +2024,38 @@ class TestCF1_7(BaseTestCase):
                 "'a' has 'formula_terms' attr, bounds variable 'b' must also have 'formula_terms'"
                 in messages
             )
+
+    def test_check_cell_boundaries_interval(self):
+        """
+        7.1 Cell Boundaries
+        Recommendations: (1/2)
+        The points specified by a coordinate or auxiliary coordinate variable
+        should lie within, or on the boundary, of the cells specified by the
+        associated boundary variable.
+        """
+
+        # create Cells on a longitude axis
+        dataset = MockTimeSeries()
+        dataset.createDimension("rnv", 2)
+        dataset.createDimension("rlon", 2)
+        dataset.createVariable("rlon", "d", ("rlon",))
+        dataset.createVariable("rlon_bnds", "d", ("rlon", "rnv"))
+
+        rlon = dataset.variables["rlon"]
+        rlon.standard_name = "longitude"
+        rlon.units = "degrees_east"
+        rlon.axis = "X"
+        rlon.long_name = "Longitude"
+        rlon.bounds = "rlon_bnds"
+        rlon[:] = np.array([-97.5, -99.5], dtype=np.float64)
+
+        rlon_bnds = dataset.variables["rlon_bnds"]
+        rlon_bnds.long_name = "Longitude Cell Boundaries"
+        rlon_bnds[:] = np.array([[-97, -98], [-98, -99]], dtype=np.float64)
+
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (1, 2)
 
     def test_cell_measures(self):
         """Over-ride the test_cell_measures from CF1_6"""
@@ -2482,7 +2612,6 @@ class TestCF1_7(BaseTestCase):
         dataset.close()
 
     def test_check_gmattr_existence_condition_ell_pmerid_hdatum(self):
-
         # test good (all)
         dataset = MockTimeSeries()
         dataset.createVariable("lev", "d")  # dtype=double, dims=1
@@ -2948,7 +3077,6 @@ class TestCFUtil(BaseTestCase):
         )
 
     def test_is_dataset_valid_ragged_array_repr_featureType(self):
-
         # first test single featureType
 
         # ----- timeseries, indexed ----- #
