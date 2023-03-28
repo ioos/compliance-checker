@@ -1,7 +1,7 @@
 from netCDF4 import Dataset
 
 from compliance_checker.base import BaseCheck, TestCtx
-from compliance_checker.cf.cf_18 import CF1_8Check
+from compliance_checker.cf.cf_1_8 import CF1_8Check
 from compliance_checker.cf.util import VariableReferenceError, reference_attr_variables
 
 
