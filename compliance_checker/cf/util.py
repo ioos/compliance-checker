@@ -7,7 +7,6 @@ from copy import deepcopy
 from pkgutil import get_data
 from urllib.parse import urljoin
 
-import lxml.html
 import requests
 from cf_units import Unit
 from lxml import etree
@@ -430,16 +429,7 @@ def download_cf_standard_name_table(version, location=None):
         )
 
     if version == "latest":
-        tables_tree = lxml.html.parse("http://cfconventions.org/documents.html")
-        end_str = "cf-standard-name-table.xml"
-        xpath_expr = (
-            "//a[substring(@href, string-length(@href) - "
-            "string-length('{0}') +1) "
-            " = '{0}'][1]".format(end_str)
-        )
-        latest_vers = tables_tree.xpath(xpath_expr)[0]
-
-        url = urljoin("http://cfconventions.org", latest_vers.attrib["href"])
+        url = "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml"
     else:
         url = "http://cfconventions.org/Data/cf-standard-names/{0}/src/cf-standard-name-table.xml".format(
             version
