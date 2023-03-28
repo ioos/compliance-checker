@@ -2776,7 +2776,7 @@ class CF1_6Check(CFNCCheck):
                         dic_to_be_verified = {
                             (var.cell_measures).split(":")[0]: cell_meas_var.units
                         }
-                        print(dic_to_be_verified, "\n")
+                        
                         if not set(dic_to_be_verified).issubset(dic_expected):
                             valid = False
                             reasoning.append(
@@ -2784,7 +2784,17 @@ class CF1_6Check(CFNCCheck):
                                 "units that are consistent with the measure type."
                                 "i.e. {}.".format(cell_meas_var_name, dic_expected)
                             )
-
+                       
+                        # verify units are recognized by UDUNITS
+                        valid_udunits = self._check_valid_udunits(ds, cell_meas_var_name)
+                        if valid_udunits.value[0] != valid_udunits.value[1]:
+                            valid = False
+                            reasoning.append(
+                                 "Cell measure variable {} referred to by "
+                                 "{} has a unit {} not recognized by UDUNITS".format(
+                                 cell_meas_var_name, var.name, cell_meas_var.units 
+                                 )
+                            )
                     if not set(cell_meas_var.dimensions).issubset(var.dimensions):
                         valid = False
                         reasoning.append(
