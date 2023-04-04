@@ -2995,6 +2995,15 @@ class TestCF1_9(BaseTestCase):
     def setUp(self):
         self.cf = CF1_9Check()
 
+    def test_time_variable_has_calendar(self):
+        dataset = MockTimeSeries()
+        dataset.variables["time"]
+        results = self.cf.check_calendar(dataset)
+        assert (
+            results[0].msgs[0] == 'Time coordinate variable "time" should have a '
+            "calendar attribute"
+        )
+
     def test_domain(self):
         dataset = MockTimeSeries()
         domain_var = dataset.createVariable("domain", "c", ())
