@@ -42,8 +42,10 @@ repos:
           (?x)^(
               .*\.xml|
               .*\.cdl|
-              .*_version.py|
-              .*versioneer.py
+              .*_version\.py|
+              .*versioneer\.py|
+              compliance_checker/tests/cassettes/test_netcdf_content_type\.yaml|
+              compliance_checker/data/seanames\.csv
           )$
 
 ci:
