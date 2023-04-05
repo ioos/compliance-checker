@@ -17,7 +17,12 @@ class CF1_9Check(CF1_8Check):
     def check_calendar(self, ds):
         super(CF1_9Check, self).check_calendar.__doc__
         prev_return = super(CF1_9Check, self).check_calendar(ds)
-        time_var_name = cfutil.get_time_variable(ds)
+        time_var_candidate_name = cfutil.get_time_variable(ds)
+        time_var_name = (
+            time_var_candidate_name
+            if time_var_candidate_name in self._find_coord_vars(ds)
+            else None
+        )
         # most datasets should have a time coordinate variable
         test_ctx = self.get_test_ctx(
             BaseCheck.HIGH, self.section_titles["4.4"], time_var_name
