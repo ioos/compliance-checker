@@ -15,6 +15,7 @@ class CF1_9Check(CF1_8Check):
         self.section_titles.update({"5.8": "§5.8 Domain Variables"})
 
     def check_calendar(self, ds):
+        # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED CF 1.9
         super(CF1_9Check, self).check_calendar.__doc__
         prev_return = super(CF1_9Check, self).check_calendar(ds)
         time_var_candidate_name = cfutil.get_time_variable(ds)

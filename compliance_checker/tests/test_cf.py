@@ -2996,6 +2996,7 @@ class TestCF1_9(BaseTestCase):
         self.cf = CF1_9Check()
 
     def test_time_variable_has_calendar(self):
+        # TEST CONFORMANCE 4.4.1 RECOMMENDED CF 1.9
         dataset = MockTimeSeries()
         results = self.cf.check_calendar(dataset)
         assert (
