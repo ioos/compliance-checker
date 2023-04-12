@@ -42,7 +42,7 @@ jobs:
         popd
 
     - name: Deploy preview
-      uses: rossjrw/pr-preview-action@v1
+      uses: rossjrw/pr-preview-action@v1.3.1
       with:
         source-dir: docs/build/html
         preview-branch: gh-pages
