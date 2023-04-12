@@ -3,6 +3,7 @@ codespell
 flake8
 httpretty
 mypy
+myst-parser
 pre-commit
 pytest-cov
 pytest-vcr
