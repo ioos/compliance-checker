@@ -112,4 +112,4 @@ coverage/
 coverage.xml
 
 # shpinx autodoc
-source/generated
+docs/source/generated/
