@@ -110,3 +110,6 @@ activate
 # coverage output
 coverage/
 coverage.xml
+
+# shpinx autodoc
+source/generated
