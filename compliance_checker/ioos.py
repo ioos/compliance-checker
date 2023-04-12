@@ -1276,7 +1276,7 @@ class IOOS1_2Check(IOOSNCCheck):
     def check_platform_vocabulary(self, ds):
         """
         The platform_vocabulary attribute is recommended to be a URL to
-        http://mmisw.org/ont/ioos/platform or
+        https://mmisw.org/ont/ioos/platform or
         http://vocab.nerc.ac.uk/collection/L06/current/. However,
         it is required to at least be a URL.
 
@@ -1452,7 +1452,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
         Check which variables qualify for ingest.
 
-        According to https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#requirements-for-ioos-dataset-gts-ingest,
+        According to https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#requirements-for-ioos-dataset-ndbcgts-ingest,
         the gts_ingest is "required, if applicable". Any variables which a user
         would like ingested must also contain the gts_ingest attribute with a
         value of true. The variable must:

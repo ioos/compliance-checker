@@ -123,7 +123,7 @@ def get_sea_names():
     """
     Returns a list of NODC sea names
 
-    source of list: https://www.nodc.noaa.gov/General/NODC-Archive/seanamelist.txt
+    source of list: https://www.ncei.noaa.gov/resources/ocean-data-format-codes
     """
     global _SEA_NAMES
     if _SEA_NAMES is None:
