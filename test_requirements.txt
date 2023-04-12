@@ -4,6 +4,7 @@ flake8
 httpretty
 mypy
 myst-parser
+numpydoc
 pre-commit
 pytest-cov
 pytest-vcr
