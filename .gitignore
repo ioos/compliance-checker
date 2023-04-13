@@ -111,5 +111,6 @@ activate
 coverage/
 coverage.xml
 
-# shpinx autodoc
+# shpinx docs
 docs/source/generated/
+docs/source/quickintro.md

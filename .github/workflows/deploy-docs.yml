@@ -38,6 +38,7 @@ jobs:
         set -e
         micromamba activate TEST
         pushd docs
+        cp  ../README.md source/quickintro.md
         make clean html linkcheck
         popd
 

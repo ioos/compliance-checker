@@ -7,6 +7,7 @@ Python tool to check your datasets against compliance standards.
    :maxdepth: 3
    :caption: Contents:
 
+   quickintro
    compliance_checker
 
 Indices and tables
