@@ -1,6 +1,6 @@
 # IOOS Compliance Checker
 
-[![Build Status](https://travis-ci.org/ioos/compliance-checker.svg)](https://travis-ci.org/ioos/compliance-checker)
+[![Tests](https://github.com/ioos/compliance-checker/actions/workflows/default-tests.yml/badge.svg)](https://github.com/ioos/compliance-checker/actions/workflows/default-tests.yml)
 [![codecov](https://codecov.io/gh/ioos/compliance-checker/branch/master/graph/badge.svg)](https://codecov.io/gh/ioos/compliance-checker)
 
 The IOOS Compliance Checker is a python based tool for data providers to check
