@@ -1,7 +1,7 @@
 .. _api-index:
 
 ###############
-Reference Guide
+API
 ###############
 
 .. currentmodule:: compliance_checker
