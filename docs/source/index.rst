@@ -8,7 +8,8 @@ Python tool to check your datasets against compliance standards.
    :caption: Contents:
 
    quickintro
-   compliance_checker
+   compliance_checker_api
+   faq
 
 Indices and tables
 ==================
