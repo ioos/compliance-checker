@@ -14,14 +14,20 @@ from cf_units import Unit
 from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf import util
-from compliance_checker.cf.appendix_d import (dimless_vertical_coordinates_1_6,
-                                              no_missing_terms)
+from compliance_checker.cf.appendix_d import (
+    dimless_vertical_coordinates_1_6,
+    no_missing_terms,
+)
 from compliance_checker.cf.appendix_e import cell_methods16
-from compliance_checker.cf.appendix_f import (grid_mapping_attr_types16,
-                                              grid_mapping_dict16)
-
+from compliance_checker.cf.appendix_f import (
+    grid_mapping_attr_types16,
+    grid_mapping_dict16,
+)
 from compliance_checker.cf.cf_base import CFNCCheck, appendix_a_base
+
+
 logger = logging.getLogger(__name__)
+
 
 class CF1_6Check(CFNCCheck):
     """CF-1.6-specific implementation of CFBaseCheck; supports checking
@@ -145,14 +151,13 @@ class CF1_6Check(CFNCCheck):
             val = (
                 att.dtype == variable.dtype
             ) or (  # will short-circuit or if first condition is true
-                isinstance(att.dtype, (np.float, np.double, float))
-                and isinstance(variable.dtype, (np.byte, np.short, np.int, int))
+                isinstance(att.dtype, (np.double, float))
+                and isinstance(variable.dtype, (np.byte, np.short, int))
             )
         if not val:
             msgs.append(error_msg)
 
-        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"],
-                      msgs)
+        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"], msgs)
 
     def check_add_offset_scale_factor_type(self, ds):
         """
@@ -2581,7 +2586,6 @@ class CF1_6Check(CFNCCheck):
                         or var_str == "area"
                         or var_str in getattr(var, "coordinates", "")
                     ):
-
                         valid = True
                     else:
                         valid = False
@@ -2815,11 +2819,14 @@ class CF1_6Check(CFNCCheck):
                 )
                 ret_val.append(result)
 
-            elif (ds.dimensions[
+            elif (
+                ds.dimensions[
                     ds.variables[clim_coord_var.climatology].dimensions[-1]
-                ].size != 2):
+                ].size
+                != 2
+            ):
                 reasoning.append(
-                    "Climatology dimension \"{}\" should only contain two elements".format(
+                    'Climatology dimension "{}" should only contain two elements'.format(
                         ds.variables[clim_coord_var.climatology].name
                     )
                 )
@@ -2908,7 +2915,6 @@ class CF1_6Check(CFNCCheck):
         """
         ret_val = []
         for name, var in ds.variables.items():
-
             add_offset = getattr(var, "add_offset", None)
             scale_factor = getattr(var, "scale_factor", None)
             if not (add_offset or scale_factor):
@@ -2939,7 +2945,7 @@ class CF1_6Check(CFNCCheck):
                 else:
                     # Check variable type is byte, short or int
                     if var.dtype.type not in [
-                        np.int,
+                        int,
                         np.int8,
                         np.int16,
                         np.int32,
@@ -3235,4 +3241,3 @@ class CF1_6Check(CFNCCheck):
                 ret_val.append(result)
 
         return ret_val
-
