@@ -34,17 +34,17 @@ repos:
     - id: seed-isort-config
 
 - repo: https://github.com/psf/black
-  rev: 22.12.0
+  rev: 23.3.0
   hooks:
   - id: black
     language_version: python3
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.2
+  rev: v2.2.4
   hooks:
     - id: codespell
       args:
-        - --ignore-words-list=degreeE,degreee,varn,poit,uint,sur,herat
+        - --ignore-words-list=degreeE,degreee,varn,poit,uint,sur,herat,claus,tung,messsages
       exclude: >
           (?x)^(
               .*\.xml|
