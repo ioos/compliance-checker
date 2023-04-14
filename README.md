@@ -1,17 +1,17 @@
 # IOOS Compliance Checker
 
 [![Tests](https://github.com/ioos/compliance-checker/actions/workflows/default-tests.yml/badge.svg)](https://github.com/ioos/compliance-checker/actions/workflows/default-tests.yml)
-[![codecov](https://codecov.io/gh/ioos/compliance-checker/branch/master/graph/badge.svg)](https://codecov.io/gh/ioos/compliance-checker)
+[![codecov](https://codecov.io/gh/ioos/compliance-checker/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ioos/compliance-checker)
 
 The IOOS Compliance Checker is a python based tool for data providers to check
 for completeness and community standard compliance of local or remote
 [netCDF](https://en.wikipedia.org/wiki/NetCDF) files against
 [CF](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html) and
-[ACDD](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3)
+[ACDD](https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3)
 file standards. The python module can be used as a command-line tool or as a
 library that can be integrated into other software.
 
-A [web-based version](https://data.ioos.us/compliance/index.html) of the Compliance
+A [web-based version](https://compliance.ioos.us/index.html) of the Compliance
 Checker was developed to enable a broader audience and improve accessibility for the
 checker. With the web version, providers can simply provide a link or upload their
 datasets and get the full suite of capabilities that Compliance Checker offers.
@@ -19,17 +19,17 @@ datasets and get the full suite of capabilities that Compliance Checker offers.
 
 It currently supports the following sources and standards:
 
-| Standard                                                                                                                            | Source                                                            | .nc/OPeNDAP/.cdl | SOS                             |
-| ----------------------------------------------------------------------------------------------------                                | -----------                                                       | ------           | ------------------------------- |
-| [ACDD (1.1, 1.3)](http://wiki.esipfed.org/index.php/Attribute_Convention_for_Data_Discovery_1-3)                                    | Built-in                                                          | X                | -                               |
-| [CF (1.8)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html)                                     | Built-in                                                          | X                | -                               |
-| [CF (1.7)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html)                                     | Built-in                                                          | X                | -                               |
-| [CF (1.6)](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html)                                                      | Built-in                                                          | X                | -                               |
-| IOOS SOS                                                                                                                            | Built-in                                                          | -                | GetCapabilities, DescribeSensor |
+| Standard                                                                                                                   | Source                                                            | .nc/OPeNDAP/.cdl | SOS                             |
+| ----------------------------------------------------------------------------------------------------                       | -----------                                                       | ------           | ------------------------------- |
+| [ACDD (1.1, 1.3)](https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3)                                    | Built-in                                                          | X                | -                               |
+| [CF (1.8)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html)                            | Built-in                                                          | X                | -                               |
+| [CF (1.7)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html)                            | Built-in                                                          | X                | -                               |
+| [CF (1.6)](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html)                                             | Built-in                                                          | X                | -                               |
+| IOOS SOS                                                                                                                   | Built-in                                                          | -                | GetCapabilities, DescribeSensor |
 | [IOOS (1.1)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes) | Built-in                                                          | X                | -                               |
-| [IOOS (1.2)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html) | Built-in                                                          | X                | -                               |
-| [Glider DAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2)                                             | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | X                | -                               |
-| [NCEI (1.1, 2.0)](https://www.nodc.noaa.gov/data/formats/netcdf/v2.0/)                                                              | [ioos/cc-plugin-ncei](https://github.com/ioos/cc-plugin-ncei)     | X                | -                               |
+| [IOOS (1.2)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html)                                         | Built-in                                                          | X                | -                               |
+| [Glider DAC](https://github.com/ioos/ioosngdac/wiki/NetCDF-Specification)                                                  | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | X                | -                               |
+| [NCEI (1.1, 2.0)](https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html)                               | [ioos/cc-plugin-ncei](https://github.com/ioos/cc-plugin-ncei)     | X                | -                               |
 
 
 ## Advice to data providers
@@ -45,11 +45,11 @@ If you feel you will need to run a batch of files through the Compliance Checker
 the IOOS Program Office Operations Division for assistance.
 
 
-# [The Compliance Checker Web Tool](https://data.ioos.us/compliance/)
+# [The Compliance Checker Web Tool](https://compliance.ioos.us/index.html)
 
 The IOOS Compliance Checker front end companion.
 
-[https://data.ioos.us/compliance/](https://data.ioos.us/compliance/)
+[https://compliance.ioos.us/index.html](https://compliance.ioos.us/index.html)
 
 Source Code is available on GitHub:
 
@@ -74,11 +74,11 @@ Here are a couple examples:
 
 **HTML Output**
 
-https://data.ioos.us/compliance/api/run?report_format=html&test=acdd&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
+https://compliance.ioos.us/index.htmlapi/run?report_format=html&test=acdd&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
 
 **JSON Output**
 
-https://data.ioos.us/compliance/api/run?report_format=json&test=acdd&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
+https://compliance.ioos.us/index.htmlapi/run?report_format=json&test=acdd&url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml
 
 # The Compliance Checker Command Line Tool
 
@@ -380,11 +380,11 @@ master Compliance Checker, but they are all designed to run with the master Comp
 
 - [GliderDAC](https://github.com/ioos/cc-plugin-glider/releases)
 
-This is a checker for [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NGDAC-NetCDF-File-Format-Version-2) files
+This is a checker for [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NetCDF-Specification) files
 
 - [NCEI](https://github.com/ioos/cc-plugin-ncei/releases) - [link](https://github.com/ioos/cc-plugin-ncei)
 
-This is a checker for NCEI netCDF Templates [v1.1](https://www.nodc.noaa.gov/data/formats/netcdf/v1.1/) and [v2.0](https://www.nodc.noaa.gov/data/formats/netcdf/v2.0/) files.
+This is a checker for NCEI netCDF Templates [v1.1](https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v1.1/index.html) and [v2.0](https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html) files.
 
 These plug-ins must be installed separately but work on top of the base compliance checker software.
 
