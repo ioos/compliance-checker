@@ -6,11 +6,8 @@ mypy
 myst-parser
 numpydoc
 pre-commit
+pydata-sphinx-theme
 pytest-cov
 pytest-vcr
-<<<<<<< HEAD
 pytest>=2.9.0
 requests-mock>=1.7.0
-=======
-requests-mock>=1.7.0
->>>>>>> 0674b9b (sphinx-autodoc2 doesn't support numpy docstrings)
