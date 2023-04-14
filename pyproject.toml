@@ -26,6 +26,10 @@ select = [
 target-version = "py38"
 line-length = 200
 
+exclude = [
+  "compliance_checker/cf/cf.py",
+]
+
 ignore = [
   "E501",
 ]

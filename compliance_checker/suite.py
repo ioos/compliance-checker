@@ -11,7 +11,6 @@ import subprocess
 import sys
 import textwrap
 import warnings
-
 from collections import defaultdict
 from datetime import datetime, timezone
 from distutils.version import StrictVersion
@@ -20,7 +19,6 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
-
 from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
@@ -29,9 +27,7 @@ from pkg_resources import working_set
 
 from compliance_checker import MemoizedDataset, __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
-from compliance_checker.cf.cf_base import CFBaseCheck
-from compliance_checker.protocols import cdl, erddap, netcdf, opendap
-
+from compliance_checker.protocols import cdl, netcdf, opendap
 
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
@@ -53,13 +49,13 @@ def extract_docstring_summary(docstring):
         r"^(?=.)",
         "  ",
         textwrap.dedent(
-            re.split(r"\n\s*:\w", docstring, flags=re.MULTILINE)[0]
+            re.split(r"\n\s*:\w", docstring, flags=re.MULTILINE)[0],
         ).strip(),
         flags=re.MULTILINE,
     )
 
 
-class CheckSuite(object):
+class CheckSuite:
     checkers = (
         {}
     )  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
@@ -92,14 +88,13 @@ class CheckSuite(object):
         :type verbose: int
         """
         for checker in sorted(self.checkers.keys()):
-            version = getattr(self.checkers[checker], "_cc_checker_version",
-                              "???")
+            version = getattr(self.checkers[checker], "_cc_checker_version", "???")
             if verbose > 0:
-                print(" - {} (v{})".format(checker, version))
+                print(f" - {checker} (v{version})")
             elif ":" in checker and not checker.endswith(
-                ":latest"
+                ":latest",
             ):  # Skip the "latest" output
-                print(" - {}".format(checker))
+                print(f" - {checker}")
 
     def _print_checker(self, checker_obj):
         """
@@ -109,13 +104,12 @@ class CheckSuite(object):
         :type checker_obj: subclass of compliance_checker.base.BaseChecker
         """
 
-        check_functions = self._get_checks(checker_obj,
-                                           defaultdict(lambda: None))
+        check_functions = self._get_checks(checker_obj, defaultdict(lambda: None))
         for c, _ in check_functions:
-            print("- {}".format(c.__name__))
+            print(f"- {c.__name__}")
             if c.__doc__ is not None:
                 u_doc = c.__doc__
-                print("\n{}\n".format(extract_docstring_summary(u_doc)))
+                print(f"\n{extract_docstring_summary(u_doc)}\n")
 
     @classmethod
     def add_plugin_args(cls, parser):
@@ -155,10 +149,11 @@ class CheckSuite(object):
             try:
                 check_obj = c.resolve()
                 if hasattr(check_obj, "_cc_spec") and hasattr(
-                    check_obj, "_cc_spec_version"
+                    check_obj,
+                    "_cc_spec_version",
                 ):
                     check_version_str = ":".join(
-                        (check_obj._cc_spec, check_obj._cc_spec_version)
+                        (check_obj._cc_spec, check_obj._cc_spec_version),
                     )
                     cls.checkers[check_version_str] = check_obj
                 # TODO: remove this once all checkers move over to the new
@@ -167,7 +162,9 @@ class CheckSuite(object):
                     # if _cc_spec and _cc_spec_version attributes aren't
                     # present, fall back to using name attribute
                     checker_name = getattr(check_obj, "name", None) or getattr(
-                        check_obj, "_cc_spec", None
+                        check_obj,
+                        "_cc_spec",
+                        None,
                     )
                     warnings.warn(
                         "Checker for {} should implement both "
@@ -178,14 +175,13 @@ class CheckSuite(object):
                     )
                     # append "unknown" to version string since no versioning
                     # info was provided
-                    cls.checkers["{}:unknown".format(checker_name)] = check_obj
+                    cls.checkers[f"{checker_name}:unknown"] = check_obj
 
             except Exception as e:
                 print("Could not load", c, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
-        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":"
-                               in c])
+        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":" in c])
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
             version_nums = [v[-1] for v in versions]
             try:
@@ -219,12 +215,14 @@ class CheckSuite(object):
         if include_checks:
             for fn_name, fn_obj in meths:
                 if fn_name in include_checks:
-                   returned_checks.append((fn_obj, skip_checks[fn_name]))
+                    returned_checks.append((fn_obj, skip_checks[fn_name]))
         else:
             for fn_name, fn_obj in meths:
-                if (fn_name.startswith("check_") and
-                    skip_checks[fn_name] != BaseCheck.HIGH):
-                   returned_checks.append((fn_obj, skip_checks[fn_name]))
+                if (
+                    fn_name.startswith("check_")
+                    and skip_checks[fn_name] != BaseCheck.HIGH
+                ):
+                    returned_checks.append((fn_obj, skip_checks[fn_name]))
 
         return returned_checks
 
@@ -258,7 +256,10 @@ class CheckSuite(object):
             return check_val
         else:
             check_val = fix_return_value(
-                val, check_method.__func__.__name__, check_method, check_method.__self__
+                val,
+                check_method.__func__.__name__,
+                check_method,
+                check_method.__self__,
             )
             if max_level is None or check_val.weight > max_level:
                 return [check_val]
@@ -275,7 +276,7 @@ class CheckSuite(object):
         """
         if ":" not in check_name or ":latest" in check_name:
             check_name = ":".join(
-                (check_name.split(":")[0], self.checkers[check_name]._cc_spec_version)
+                (check_name.split(":")[0], self.checkers[check_name]._cc_spec_version),
             )
         return check_name
 
@@ -305,7 +306,7 @@ class CheckSuite(object):
         ]
         valid = []
 
-        all_checked = set(a[1] for a in args)  # only class types
+        all_checked = {a[1] for a in args}  # only class types
         checker_queue = set(args)
         while len(checker_queue):
             name, a = checker_queue.pop()
@@ -332,8 +333,7 @@ class CheckSuite(object):
 
         check_dict = defaultdict(lambda: None)
         # A is for "all", "M" is for medium, "L" is for low
-        check_lookup = {"A": BaseCheck.HIGH, "M": BaseCheck.MEDIUM,
-                        "L": BaseCheck.LOW}
+        check_lookup = {"A": BaseCheck.HIGH, "M": BaseCheck.MEDIUM, "L": BaseCheck.LOW}
 
         for skip_check_spec in skip_checks:
             split_check_spec = skip_check_spec.split(":")
@@ -347,8 +347,9 @@ class CheckSuite(object):
                     warnings.warn(
                         "Skip specifier '{}' on check '{}' not found,"
                         " defaulting to skip entire check".format(
-                            split_check_spec[1], check_name
-                        )
+                            split_check_spec[1],
+                            check_name,
+                        ),
                     )
                     check_max_level = BaseCheck.HIGH
                 else:
@@ -358,8 +359,9 @@ class CheckSuite(object):
                         warnings.warn(
                             "Skip specifier '{}' on check '{}' not found,"
                             " defaulting to skip entire check".format(
-                                split_check_spec[1], check_name
-                            )
+                                split_check_spec[1],
+                                check_name,
+                            ),
                         )
                         check_max_level = BaseCheck.HIGH
 
@@ -372,8 +374,7 @@ class CheckSuite(object):
         return check_dict
 
     def run(self, ds, skip_checks, *checker_names):
-        warnings.warn("suite.run is deprecated, use suite.run_all in calls "
-                      "instead")
+        warnings.warn("suite.run is deprecated, use suite.run_all in calls " "instead")
         return self.run_all(ds, checker_names, skip_checks=skip_checks)
 
     def run_all(self, ds, checker_names, include_checks=None, skip_checks=None):
@@ -398,7 +399,9 @@ class CheckSuite(object):
 
         if len(checkers) == 0:
             print(
-                "No valid checkers found for tests '{}'".format(",".join(checker_names))
+                "No valid checkers found for tests '{}'".format(
+                    ",".join(checker_names),
+                ),
             )
 
         for checker_name, checker_class in checkers:
@@ -532,7 +535,7 @@ class CheckSuite(object):
         aggregates["cc_spec_version"] = self.checkers[check_name]._cc_spec_version
         aggregates["cc_url"] = self._get_check_url(aggregates["testname"])
         aggregates["report_timestamp"] = datetime.now(timezone.utc).strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
+            "%Y-%m-%dT%H:%M:%SZ",
         )
         aggregates["cc_version"] = __version__
         return aggregates
@@ -579,7 +582,7 @@ class CheckSuite(object):
         from jinja2 import Environment, PackageLoader
 
         self.j2 = Environment(
-            loader=PackageLoader(self.templates_root, "data/templates")
+            loader=PackageLoader(self.templates_root, "data/templates"),
         )
         template = self.j2.get_template("ccheck.html.j2")
 
@@ -639,22 +642,24 @@ class CheckSuite(object):
         print("\n")
         print("-" * width)
         print("IOOS Compliance Checker Report".center(width))
-        print("Version {}".format(__version__).center(width))
+        print(f"Version {__version__}".center(width))
         print(
             "Report generated {}".format(
-                datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-            ).center(width)
+                datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            ).center(width),
         )
-        print("{}".format(check_name).center(width))
-        print("{}".format(check_url).center(width))
+        print(f"{check_name}".center(width))
+        print(f"{check_url}".center(width))
         print("-" * width)
         if issue_count > 0:
             print("Corrective Actions".center(width))
             plural = "" if issue_count == 1 else "s"
             print(
                 "{} has {} potential issue{}".format(
-                    os.path.basename(ds), issue_count, plural
-                )
+                    os.path.basename(ds),
+                    issue_count,
+                    plural,
+                ),
             )
 
         return [groups, points, out_of]
@@ -686,8 +691,7 @@ class CheckSuite(object):
         # create dict of the groups -> {level: [reasons]}
         result = {
             key: [v for v in valuesiter if v.value[0] != v.value[1]]
-            for key, valuesiter in itertools.groupby(groups_sorted,
-                                                     key=weight_sort)
+            for key, valuesiter in itertools.groupby(groups_sorted, key=weight_sort)
         }
         priorities = self.checkers[check]._cc_display_headers
 
@@ -702,7 +706,9 @@ class CheckSuite(object):
                 reasons = res.msgs
             else:
                 child_reasons = self.reasoning_routine(
-                    res.children, check, _top_level=False
+                    res.children,
+                    check,
+                    _top_level=False,
                 )
                 # there shouldn't be messages if there are children
                 # is this a valid assumption?
@@ -732,8 +738,7 @@ class CheckSuite(object):
                     print("{:^{width}}".format(level_name, width=width))
                     print("-" * width)
 
-                data_issues = [process_table(res, check) for res in
-                               result[level]]
+                data_issues = [process_table(res, check) for res in result[level]]
 
                 has_printed = False
                 for issue, reasons in data_issues:
@@ -743,10 +748,9 @@ class CheckSuite(object):
                         print("")
                     # join alphabetized reasons together
                     reason_str = "\n".join(
-                        "* {}".format(r) for r in sorted(reasons,
-                                                         key=lambda x: x[0])
+                        f"* {r}" for r in sorted(reasons, key=lambda x: x[0])
                     )
-                    proc_str = "{}\n{}".format(issue, reason_str)
+                    proc_str = f"{issue}\n{reason_str}"
                     print(proc_str)
                     proc_strs.append(proc_str)
                     has_printed = True
@@ -767,7 +771,7 @@ class CheckSuite(object):
         elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
             ds = SensorML(xml_doc)
         else:
-            raise ValueError("Unrecognized XML root element: {}".format(xml_doc.tag))
+            raise ValueError(f"Unrecognized XML root element: {xml_doc.tag}")
         return ds
 
     def generate_dataset(self, cdl_path):
@@ -788,24 +792,26 @@ class CheckSuite(object):
 
         # generate netCDF-4 file
         iostat = subprocess.run(
-            ["ncgen", "-k", "nc4", "-o", ds_str, cdl_path], stderr=subprocess.PIPE
+            ["ncgen", "-k", "nc4", "-o", ds_str, cdl_path],
+            stderr=subprocess.PIPE,
         )
         if iostat.returncode != 0:
             # if not successful, create netCDF classic file
             print(
-                "netCDF-4 file could not be generated from cdl file with " + "message:"
+                "netCDF-4 file could not be generated from cdl file with " + "message:",
             )
             print(iostat.stderr.decode())
             print("Trying to create netCDF Classic file instead.")
             iostat = subprocess.run(
-                ["ncgen", "-k", "nc3", "-o", ds_str, cdl_path], stderr=subprocess.PIPE
+                ["ncgen", "-k", "nc3", "-o", ds_str, cdl_path],
+                stderr=subprocess.PIPE,
             )
             if iostat.returncode != 0:
                 # Exit program if neither a netCDF Classic nor a netCDF-4 file
                 # could be created.
                 print(
                     "netCDF Classic file could not be generated from cdl file"
-                    + "with message:"
+                    + "with message:",
                 )
                 print(iostat.stderr.decode())
                 sys.exit(1)
@@ -834,7 +840,8 @@ class CheckSuite(object):
             response = requests.get(ds_str, allow_redirects=True, timeout=60)
             try:
                 return MemoizedDataset(
-                    urlparse(response.url).path, memory=response.content
+                    urlparse(response.url).path,
+                    memory=response.content,
                 )
             except OSError:
                 # handle case when netCDF C libs weren't compiled with
@@ -864,7 +871,7 @@ class CheckSuite(object):
             variables_str = opendap.create_DAP_variable_str(ds_str)
 
             # join to create a URL to an .ncCF resource
-            ds_str = "{}.ncCF?{}".format(ds_str, variables_str)
+            ds_str = f"{ds_str}.ncCF?{variables_str}"
 
         nc_remote_result = self.check_remote_netcdf(ds_str)
         if nc_remote_result:
@@ -884,7 +891,7 @@ class CheckSuite(object):
             return self.process_doc(response.content)
         else:
             raise ValueError(
-                "Unknown service with content-type: {}".format(content_type)
+                f"Unknown service with content-type: {content_type}",
             )
 
     def load_local_dataset(self, ds_str):
@@ -969,7 +976,6 @@ class CheckSuite(object):
         ret_val = []
 
         for k, v in grouped:  # iterate through the grouped tuples
-
             k = k[0]  # slice ("name", weight_val) --> "name"
             v = list(v)  # from itertools._grouper to list
 
@@ -983,14 +989,18 @@ class CheckSuite(object):
             else:
                 max_weight = max([x.weight for x in v])
                 sum_scores = tuple(
-                    map(sum, list(zip(*([self._translate_value(x.value) for x in v]))))
+                    map(sum, list(zip(*([self._translate_value(x.value) for x in v])))),
                 )
                 msgs = sum([x.msgs for x in v], [])
 
             ret_val.append(
                 Result(
-                    name=k, weight=max_weight, value=sum_scores, children=cv, msgs=msgs
-                )
+                    name=k,
+                    weight=max_weight,
+                    value=sum_scores,
+                    children=cv,
+                    msgs=msgs,
+                ),
             )
 
         return ret_val

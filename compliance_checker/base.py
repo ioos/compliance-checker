@@ -7,15 +7,12 @@ import csv
 import itertools
 import pprint
 import re
-import sys
 import warnings
-
 from collections import defaultdict
 from functools import wraps
 from io import StringIO
 
 import validators
-
 from lxml import etree
 from netCDF4 import Dataset
 from owslib.namespaces import Namespaces
@@ -23,10 +20,8 @@ from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 
 import compliance_checker.cfutil as cfutil
-
 from compliance_checker import MemoizedDataset, __version__
 from compliance_checker.util import kvp_convert
-
 
 # Python 3.5+ should work, also have a fallback
 try:
@@ -64,7 +59,7 @@ def csv_splitter(input_string):
     return list(itertools.chain.from_iterable(csv_contents))
 
 
-class ValidationObject(object):
+class ValidationObject:
     validator_fail_msg = ""
     expected_type = None
 
@@ -131,7 +126,7 @@ class UrlValidator(ValidationObject):
 
 
 # Simple class for Generic File type (default to this if file not recognised)
-class GenericFile(object):
+class GenericFile:
     """
     Simple class for any file. Has same path lookup as netCDF4.Dataset.
     """
@@ -143,7 +138,7 @@ class GenericFile(object):
         return self.fpath
 
 
-class BaseCheck(object):
+class BaseCheck:
     HIGH = 3
     MEDIUM = 2
     LOW = 1
@@ -185,7 +180,9 @@ class BaseCheck(object):
         # per check?  If so, it could be eliminated from key hierarchy
         if severity not in self._defined_results[name][variable]:
             self._defined_results[name][variable][severity] = TestCtx(
-                severity, name, variable=variable
+                severity,
+                name,
+                variable=variable,
             )
         return self._defined_results[name][variable][severity]
 
@@ -200,7 +197,7 @@ class BaseCheck(object):
         cfutil.get_time_variables.cache_clear()
 
 
-class BaseNCCheck(object):
+class BaseNCCheck:
     """
     Base Class for NetCDF Dataset supporting Check Suites.
     """
@@ -226,7 +223,7 @@ class BaseNCCheck(object):
         return name in dataset.ncattrs()
 
 
-class BaseSOSGCCheck(object):
+class BaseSOSGCCheck:
     """
     Base class for SOS-GetCapabilities supporting Check Suites.
     """
@@ -234,7 +231,7 @@ class BaseSOSGCCheck(object):
     supported_ds = [SensorObservationService_1_0_0]
 
 
-class BaseSOSDSCheck(object):
+class BaseSOSDSCheck:
     """
     Base class for SOS-DescribeSensor supporting Check Suites.
     """
@@ -242,7 +239,7 @@ class BaseSOSDSCheck(object):
     supported_ds = [SensorML]
 
 
-class Result(object):
+class Result:
     """
     Holds the result of a check method.
 
@@ -264,7 +261,6 @@ class Result(object):
         check_method=None,
         variable_name=None,
     ):
-
         self.weight = weight
 
         if value is None:
@@ -284,16 +280,16 @@ class Result(object):
         self.variable_name = variable_name
 
     def __repr__(self):
-        ret = "{} (*{}): {}".format(self.name, self.weight, self.value)
+        ret = f"{self.name} (*{self.weight}): {self.value}"
 
         if len(self.msgs):
             if len(self.msgs) == 1:
-                ret += " ({})".format(self.msgs[0])
+                ret += f" ({self.msgs[0]})"
             else:
-                ret += " ({!s} msgs)".format(len(self.msgs))
+                ret += f" ({len(self.msgs)!s} msgs)"
 
         if len(self.children):
-            ret += " ({!s} children)".format(len(self.children))
+            ret += f" ({len(self.children)!s} children)"
             ret += "\n" + pprint.pformat(self.children)
 
         return ret
@@ -314,7 +310,7 @@ class Result(object):
         return self.serialize() == other.serialize()
 
 
-class TestCtx(object):
+class TestCtx:
     """
     Simple struct object that holds score values and messages to compile into a result
     """
@@ -446,7 +442,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
     msgs = []
     name, other = kvp
     if var_name is not None:
-        display_name = "attribute {} in variable {}".format(name, var_name)
+        display_name = f"attribute {name} in variable {var_name}"
         base_context = ds.variables[var_name]
     else:
         display_name = name
@@ -454,7 +450,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
     if other is None:
         res = std_check(ds, name)
         if not res:
-            msgs = ["{} not present".format(display_name)]
+            msgs = [f"{display_name} not present"]
         else:
             try:
                 # see if this attribute is a string, try stripping
@@ -462,7 +458,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
                 att_strip = base_context.getncattr(name).strip()
                 if not att_strip:
                     res = False
-                    msgs = ["{} is empty or completely whitespace".format(display_name)]
+                    msgs = [f"{display_name} is empty or completely whitespace"]
             # if not a string/has no strip method we should be OK
             except AttributeError:
                 pass
@@ -475,19 +471,20 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
                 name=gname if gname else name,
                 msgs=msgs,
                 variable_name=var_name,
-            )
+            ),
         )
     elif hasattr(other, "__iter__"):
         # redundant, we could easily do this with a hasattr
         # check instead
         res = std_check_in(base_context, name, other)
         if res == 0:
-            msgs.append("{} not present".format(display_name))
+            msgs.append(f"{display_name} not present")
         elif res == 1:
             msgs.append(
                 "{} present, but not in expected value list ({})".format(
-                    display_name, sorted(other)
-                )
+                    display_name,
+                    sorted(other),
+                ),
             )
 
         ret_val.append(
@@ -497,7 +494,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
                 gname if gname else name,  # groups Globals if supplied
                 msgs,
                 variable_name=var_name,
-            )
+            ),
         )
     # if we have an XPath expression, call it on the document
     elif type(other) is etree.XPath:
@@ -505,11 +502,15 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
         # no execution path for variable
         res = xpath_check(ds._root, other)
         if not res:
-            msgs = ["XPath for {} not found".format(display_name)]
+            msgs = [f"XPath for {display_name} not found"]
         ret_val.append(
             Result(
-                priority, res, gname if gname else name, msgs, variable_name=var_name
-            )
+                priority,
+                res,
+                gname if gname else name,
+                msgs,
+                variable_name=var_name,
+            ),
         )
     # check if this is a subclass of ValidationObject
     elif isinstance(other, ValidationObject):
@@ -531,16 +532,16 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
             check_val = attr_result[1]
         if not isinstance(check_val, str):
             res = False
-            msgs = ["{} must be a string".format(name)]
+            msgs = [f"{name} must be a string"]
         elif not other.search(check_val):
             res = False
-            msgs = ["{} must match regular expression {}".format(name, other)]
+            msgs = [f"{name} must match regular expression {other}"]
         else:
             res = True
             msgs = []
 
         ret_val.append(
-            Result(priority, value=res, name=gname if gname else name, msgs=msgs)
+            Result(priority, value=res, name=gname if gname else name, msgs=msgs),
         )
 
     # if the attribute is a function, call it
@@ -558,7 +559,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
 
         res = other(base_context)  # call the method on the dataset
         if not res:
-            msgs = ["{} not present".format(display_name)]
+            msgs = [f"{display_name} not present"]
             ret_val.append(
                 Result(
                     priority,
@@ -566,14 +567,14 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
                     gname if gname else name,
                     msgs,
                     variable_name=var_name,
-                )
+                ),
             )
         else:
             ret_val.append(res(priority))
     # unsupported second type in second
     else:
         raise TypeError(
-            "Second arg in tuple has unsupported type: {}".format(type(other))
+            f"Second arg in tuple has unsupported type: {type(other)}",
         )
 
     return ret_val

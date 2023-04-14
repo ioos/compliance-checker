@@ -79,7 +79,7 @@ def is_remote_netcdf(ds_str):
     try:
         head_req = requests.head(ds_str, allow_redirects=True, timeout=10)
         head_req.raise_for_status()
-    except:
+    except Exception:
         content_type = None
     else:
         content_type = head_req.headers.get("content-type")

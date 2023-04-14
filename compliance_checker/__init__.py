@@ -5,7 +5,6 @@ from typing import BinaryIO, Generator
 
 from netCDF4 import Dataset
 
-
 try:
     from ._version import __version__
 except ImportError:
@@ -22,7 +21,7 @@ class MemoizedDataset(Dataset):
 
     @lru_cache(128)
     def get_variables_by_attributes(self, **kwargs):
-        return super(MemoizedDataset, self).get_variables_by_attributes(**kwargs)
+        return super().get_variables_by_attributes(**kwargs)
 
 
 @contextmanager

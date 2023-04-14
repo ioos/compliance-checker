@@ -1,16 +1,14 @@
-import io
-
 from setuptools import find_packages, setup
 
 
 def readme():
-    with io.open("README.md", encoding="utf-8") as f:
+    with open("README.md", encoding="utf-8") as f:
         return f.read()
 
 
 def pip_requirements(fname="requirements.txt"):
     reqs = []
-    with open(fname, "r") as f:
+    with open(fname) as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#"):
@@ -18,7 +16,6 @@ def pip_requirements(fname="requirements.txt"):
             reqs.append(line)
 
     return reqs
-
 
 
 setup(
@@ -64,7 +61,7 @@ setup(
             "ioos_sos = compliance_checker.ioos:IOOSBaseSOSCheck",
             "ioos-0.1 = compliance_checker.ioos:IOOS0_1Check",
             "ioos-1.1 = compliance_checker.ioos:IOOS1_1Check",
-            "ioos-1.2 = compliance_checker.ioos:IOOS1_2Check"
+            "ioos-1.2 = compliance_checker.ioos:IOOS1_2Check",
         ],
     },
     package_data={

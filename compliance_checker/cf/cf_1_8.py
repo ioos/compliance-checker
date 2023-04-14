@@ -1,26 +1,3 @@
-import itertools
-import re
-import warnings
-
-import numpy as np
-import requests
-
-from lxml import etree
-from netCDF4 import Dataset
-from shapely.geometry import (
-    LineString,
-    MultiLineString,
-    MultiPoint,
-    MultiPolygon,
-    Polygon,
-)
-
-from compliance_checker import MemoizedDataset
-from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
-from compliance_checker.cf.cf_1_7 import CF1_7Check
-from compliance_checker.cf.util import reference_attr_variables, string_from_var_type
-
-
 """
 What's new in CF-1.8
 --------------------
@@ -34,6 +11,24 @@ What's new in CF-1.8
 """
 
 
+import itertools
+import re
+import warnings
+
+import numpy as np
+import requests
+from lxml import etree
+from netCDF4 import Dataset
+from shapely.geometry import (
+    Polygon,
+)
+
+from compliance_checker import MemoizedDataset
+from compliance_checker.base import BaseCheck, TestCtx
+from compliance_checker.cf.cf_1_7 import CF1_7Check
+from compliance_checker.cf.util import reference_attr_variables, string_from_var_type
+
+
 class CF1_8Check(CF1_7Check):
     """Implementation for CF v1.8. Inherits from CF1_7Check."""
 
@@ -45,13 +40,13 @@ class CF1_8Check(CF1_7Check):
     NON_ROOT_GROUP_OPT = ["title", "history"]
 
     def __init__(self, options=None):
-        super(CF1_8Check, self).__init__(options)
+        super().__init__(options)
         self.section_titles.update(
             {
                 "2.7": "§2.7 Groups",
                 "6.1.2": "§6.1.2 Taxon Names and Identifiers",
                 "7.5": "§7.5 Geometries",
-            }
+            },
         )
 
     def check_groups(self, ds: MemoizedDataset):
@@ -97,14 +92,14 @@ class CF1_8Check(CF1_7Check):
         # root group.
         for gname in ds.groups:
             ginstance = ds.createGroup(
-                gname
+                gname,
             )  # returns existing Group; doesn't create a new one
 
             for attr in ginstance.ncattrs():
                 if attr in CF1_8Check.ROOT_GROUP_ONLY_ATTRS:
                     ctx_hi.messages.append(
                         f'§2.7.2 Attribute "{ attr }" MAY ONLY be used in the root group '
-                        "and SHALL NOT be duplicated or overridden in child groups."
+                        "and SHALL NOT be duplicated or overridden in child groups.",
                     )
 
                     results.append(ctx_hi.to_result())
@@ -114,7 +109,7 @@ class CF1_8Check(CF1_7Check):
                         f"§2.7.2 Note: attribute '{ attr }' found on non-root group '{ gname }'. "
                         "This is optional for non-root groups. It is allowed in order to provide additional "
                         "provenance and description of the subsidiary data. It does not override "
-                        "attributes from parent groups."
+                        "attributes from parent groups.",
                     )
                     results.append(ctx_lo.to_result())
 
@@ -126,7 +121,7 @@ class CF1_8Check(CF1_7Check):
         :returns list: List of error messages
         """
         vars_with_geometry = ds.get_variables_by_attributes(
-            geometry=lambda g: g is not None
+            geometry=lambda g: g is not None,
         )
         results = []
         unique_geometry_var_names = {var.geometry for var in vars_with_geometry}
@@ -136,7 +131,7 @@ class CF1_8Check(CF1_7Check):
         for geometry_var_name in unique_geometry_var_names:
             if geometry_var_name not in ds.variables:
                 geom_valid.messages.append(
-                    "Cannot find geometry variable " f"named {geometry_var_name}"
+                    "Cannot find geometry variable " f"named {geometry_var_name}",
                 )
                 results.append(geom_valid.to_result())
                 continue
@@ -144,21 +139,20 @@ class CF1_8Check(CF1_7Check):
                 geometry_var = ds.variables[geometry_var_name]
 
             geometry_type = getattr(geometry_var, "geometry_type")
-            valid_geometry_types = {"point", "line", "polygon"}
             try:
                 node_coord_var_names = geometry_var.node_coordinates
-            except AttributeError as e:
+            except AttributeError:
                 geom_valid.messsages.append(
                     "Could not find required attribute "
                     '"node_coordinates" in geometry '
-                    f'variable "{geometry_var_name}"'
+                    f'variable "{geometry_var_name}"',
                 )
                 results.append(geom_valid.to_result())
             if not isinstance(node_coord_var_names, str):
                 geom_valid.messages.append(
                     'Attribute "node_coordinates" in geometry '
                     f'variable "{geometry_var_name}" must be '
-                    "a string"
+                    "a string",
                 )
                 results.append(geom_valid.to_result())
                 continue
@@ -175,22 +169,25 @@ class CF1_8Check(CF1_7Check):
                     "The following referenced node coordinate"
                     "variables for geometry variable"
                     f'"{geometry_var_name}" were not found: '
-                    f"{not_found_node_vars}"
+                    f"{not_found_node_vars}",
                 )
                 results.append(geom_valid.to_result())
                 continue
                 return error_msgs
 
             node_count = reference_attr_variables(
-                ds, getattr(geometry_var, "node_count", None)
+                ds,
+                getattr(geometry_var, "node_count", None),
             )
             # multipart lines and polygons only
             part_node_count = reference_attr_variables(
-                ds, getattr(geometry_var, "part_node_count", None)
+                ds,
+                getattr(geometry_var, "part_node_count", None),
             )
             # polygons with interior geometry only
             interior_ring = reference_attr_variables(
-                ds, getattr(geometry_var, "interior_ring", None)
+                ds,
+                getattr(geometry_var, "interior_ring", None),
             )
 
             if geometry_type == "point":
@@ -199,14 +196,17 @@ class CF1_8Check(CF1_7Check):
                 geometry = LineGeometry(node_coord_vars, node_count, part_node_count)
             elif geometry_type == "polygon":
                 geometry = PolygonGeometry(
-                    node_coord_vars, node_count, part_node_count, interior_ring
+                    node_coord_vars,
+                    node_count,
+                    part_node_count,
+                    interior_ring,
                 )
             else:
                 geom_valid.messages.append(
                     f'For geometry variable "{geometry_var_name}'
                     'the attribute "geometry_type" must exist'
                     "and have one of the following values:"
-                    '"point", "line", "polygon"'
+                    '"point", "line", "polygon"',
                 )
                 results.append(geom_valid.to_result())
                 continue
@@ -251,11 +251,11 @@ class CF1_8Check(CF1_7Check):
         """
         ret_val = []
         # taxa identification variables
-        taxa_name_variables = ds.get_variables_by_attributes(
-            standard_name="biological_taxon_name"
+        ds.get_variables_by_attributes(
+            standard_name="biological_taxon_name",
         )
-        taxa_lsid_variables = ds.get_variables_by_attributes(
-            standard_name="biological_taxon_identifier"
+        ds.get_variables_by_attributes(
+            standard_name="biological_taxon_identifier",
         )
 
         def match_taxa_standard_names(standard_name_string):
@@ -274,7 +274,7 @@ class CF1_8Check(CF1_7Check):
             )
 
         taxa_quantifier_variables = ds.get_variables_by_attributes(
-            standard_name=match_taxa_standard_names
+            standard_name=match_taxa_standard_names,
         )
         # If there are no matches, there either are no taxa variables
         # or the standard names are not appropriate, which will be picked up
@@ -285,10 +285,11 @@ class CF1_8Check(CF1_7Check):
         for taxon_quantifier_variable in taxa_quantifier_variables:
             valid_taxa = TestCtx(BaseCheck.HIGH, self.section_titles["6.1.2"])
             if not isinstance(
-                getattr(taxon_quantifier_variable, "coordinates", None), str
+                getattr(taxon_quantifier_variable, "coordinates", None),
+                str,
             ):
                 valid_taxa.add_failure(
-                    f'{taxon_quantifier_variable.name} must have a string valued "coordinates" attribute'
+                    f'{taxon_quantifier_variable.name} must have a string valued "coordinates" attribute',
                 )
                 continue
 
@@ -297,12 +298,12 @@ class CF1_8Check(CF1_7Check):
             if invalid_coord_vars:
                 valid_taxa.add_failure(
                     'The following values for "coordinates" attributes were not found in the dataset\'s variables '
-                    f"{invalid_coord_vars}"
+                    f"{invalid_coord_vars}",
                 )
 
             if len(coordinate_var_names) > 2:
                 valid_taxa.add_failure(
-                    "coordinates attribute for taxon data must either reference one or two variable names"
+                    "coordinates attribute for taxon data must either reference one or two variable names",
                 )
                 continue
 
@@ -335,7 +336,7 @@ class CF1_8Check(CF1_7Check):
             else:
                 valid_taxa.add_failure(
                     f"coordinates attribute for variable {taxon_quantifier_variable} must consist of "
-                    'variables containing standard names of either just "biological_taxon_name", or "biological_taxon_name" and "biological_taxon_identifier"'
+                    'variables containing standard names of either just "biological_taxon_name", or "biological_taxon_name" and "biological_taxon_identifier"',
                 )
             ret_val.append(valid_taxa.to_result())
 
@@ -355,7 +356,8 @@ class CF1_8Check(CF1_7Check):
             r"(?P<object_id>\w+)(?::(?P<version>\w+))?"
         )
         for taxon_lsid, taxon_name in zip(
-            taxon_lsid_variable[:], taxon_name_variable[:]
+            taxon_lsid_variable[:],
+            taxon_name_variable[:],
         ):
             # TODO: handle case where LSID is not present.  This can happen
             #       if the species is not present in the database desired.
@@ -377,7 +379,7 @@ class CF1_8Check(CF1_7Check):
                     "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
                     "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
                     "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
-                    "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>"
+                    "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>",
                 )
                 continue
             if lsid_str.startswith("urn"):
@@ -397,12 +399,12 @@ class CF1_8Check(CF1_7Check):
                     messages.append(
                         "http://lsid.info returned an error message "
                         f"for submitted LSID string '{lsid_str}': "
-                        f"{problem_text}"
+                        f"{problem_text}",
                     )
                 else:
                     messages.append(
                         "Error occurred attempting to check LSID "
-                        f"'{lsid_str}': {str(e)}"
+                        f"'{lsid_str}': {str(e)}",
                     )
                 continue
 
@@ -417,16 +419,16 @@ class CF1_8Check(CF1_7Check):
                         timeout=15,
                     )
                     response.raise_for_status()
-                except requests.exceptions.RequestException as e:
+                except requests.exceptions.RequestException:
                     messages.append(
                         "Aphia ID {taxon_match['object_id'] returned "
-                        "other error: {str(e)}"
+                        "other error: {str(e)}",
                     )
                 # record not found in database
                 if response.status_code == 204:
                     messages.append(
                         "Aphia ID {taxon_match['object_id'] "
-                        "not found in WoRMS database"
+                        "not found in WoRMS database",
                     )
                 # good case, parse JSON
                 elif response.status_code == 200:
@@ -435,14 +437,14 @@ class CF1_8Check(CF1_7Check):
                         messages.append(
                             "Supplied taxon name and WoRMS valid name do not match. "
                             f"Supplied taxon name is '{taxon_name_str}', WoRMS valid name "
-                            f"is '{valid_name}.'"
+                            f"is '{valid_name}.'",
                         )
                 # Misc non-error code.  Should not reach here.
                 else:
                     messages.append(
                         f"Aphia ID {taxon_match['object_id']}"
                         "returned an unhandled HTTP status "
-                        f"code {response.status_code}"
+                        f"code {response.status_code}",
                     )
                     continue
 
@@ -458,12 +460,12 @@ class CF1_8Check(CF1_7Check):
                 except requests.exceptions.RequestException as e:
                     if itis_response.status_code == 404:
                         messages.append(
-                            "itis.gov TSN " f"{taxon_match['object_id']} not found."
+                            "itis.gov TSN " f"{taxon_match['object_id']} not found.",
                         )
                         continue
                     else:
                         messages.append(
-                            "itis.gov identifier returned other " f"error: {str(e)}"
+                            "itis.gov identifier returned other " f"error: {str(e)}",
                         )
                         continue
                 json_contents = itis_response.json()
@@ -473,7 +475,7 @@ class CF1_8Check(CF1_7Check):
                     messages.append(
                         "Supplied taxon name and ITIS scientific name do not match. "
                         f"Supplied taxon name is '{taxon_name_str}', ITIS scientific name "
-                        f"for TSN {taxon_match['object_id']} is '{combined_name}.'"
+                        f"for TSN {taxon_match['object_id']} is '{combined_name}.'",
                     )
 
             else:
@@ -482,13 +484,13 @@ class CF1_8Check(CF1_7Check):
                     "LSID URNs of the form "
                     "'urn:lsid:marinespecies.org:taxname:<AphiaID>' or "
                     "'urn:lsid:itis.gov:itis_tsn:<TSN>'.  Assuming "
-                    "pass condition"
+                    "pass condition",
                 )
 
         return messages
 
 
-class GeometryStorage(object):
+class GeometryStorage:
     """Abstract base class for geometries"""
 
     def __init__(self, coord_vars, node_count):
@@ -511,9 +513,9 @@ class PointGeometry(GeometryStorage):
         super().check_geometry()
         # non-multipoint should have exactly one feature
         if self.node_count is None:
-            expected_node_count = 1
+            pass
         else:
-            expected_node_count = self.node_count
+            pass
 
         if all(len(cv.dimensions) != 0 for cv in self.coord_vars):
             same_dim_group = itertools.groupby(self.coord_vars, lambda x: x.dimensions)
@@ -523,7 +525,7 @@ class PointGeometry(GeometryStorage):
                     "For a point geometry, coordinate "
                     "variables must be the same length as "
                     "node_count defined, or must be "
-                    "length 1 if node_count is not set"
+                    "length 1 if node_count is not set",
                 )
         return self.errors
 
@@ -546,7 +548,7 @@ class LineGeometry(GeometryStorage):
                 "Coordinate variables must be the same length. "
                 "If node_count is specified, this value must "
                 "also sum to the length of the coordinate "
-                "variables."
+                "variables.",
             )
         # if a multipart
         if self.node_count is not None:
@@ -556,19 +558,19 @@ class LineGeometry(GeometryStorage):
                     "Coordinate variables must be the same "
                     "length. If node_count is specified, this "
                     "value must also sum to the length of the "
-                    "coordinate variables."
+                    "coordinate variables.",
                 )
         if self.part_node_count is not None:
             if not np.issubdtype(self.part_node_count.dtype, np.integer):
                 geom_errors.append(
                     "when part_node_count is specified, it must "
-                    "be an array of integers"
+                    "be an array of integers",
                 )
             same_node_count = len(self.coord_vars[0]) == self.node_count[:].sum()
             if not same_node_count:
                 geom_errors.append(
                     "The sum of part_node_count must be equal "
-                    "to the value of node_count"
+                    "to the value of node_count",
                 )
         return geom_errors
 
@@ -604,7 +606,7 @@ class PolygonGeometry(LineGeometry):
             polygon = Polygon(transposed_coords.tolist())
         except ValueError:
             raise ValueError(
-                "Polygon contains too few points to perform orientation test"
+                "Polygon contains too few points to perform orientation test",
             )
 
         ccw = polygon.exterior.is_ccw
@@ -622,7 +624,7 @@ class PolygonGeometry(LineGeometry):
                 ring_orientation = self.interior_ring[:].astype(bool)
             else:
                 ring_orientation = np.zeros(len(self.part_count), dtype=bool)
-            current_node_count = self.node_count[:].copy()
+            self.node_count[:].copy()
             node_indexer_len = len(self.part_node_count)
         else:
             extents = np.concatenate([np.array([0]), self.node_count[:].cumsum()])
@@ -636,7 +638,8 @@ class PolygonGeometry(LineGeometry):
             extent_slice = slice(extents[i], extents[i + 1])
             poly_sliced = np.vstack([cv[extent_slice] for cv in self.coord_vars]).T
             pass_orientation = self.check_polygon_orientation(
-                poly_sliced, ring_orientation[i]
+                poly_sliced,
+                ring_orientation[i],
             )
             if not pass_orientation:
                 orient_fix = (
@@ -659,7 +662,7 @@ class PolygonGeometry(LineGeometry):
 
         """
         vars_with_geometry = ds.get_variables_by_attributes(
-            geometry=lambda g: g is not None
+            geometry=lambda g: g is not None,
         )
         results = []
         unique_geometry_var_names = {var.geometry for var in vars_with_geometry}
@@ -669,7 +672,7 @@ class PolygonGeometry(LineGeometry):
         for geometry_var_name in unique_geometry_var_names:
             if geometry_var_name not in ds.variables:
                 geom_valid.messages.append(
-                    "Cannot find geometry variable " f"named {geometry_var_name}"
+                    "Cannot find geometry variable " f"named {geometry_var_name}",
                 )
                 results.append(geom_valid.to_result())
                 continue
@@ -683,7 +686,7 @@ class PolygonGeometry(LineGeometry):
                 geom_valid.messages.append(
                     "Could not find required attribute "
                     '"node_coordinates" in geometry '
-                    f'variable "{geometry_var_name}"'
+                    f'variable "{geometry_var_name}"',
                 )
                 results.append(geom_valid.to_result())
                 continue
@@ -691,7 +694,7 @@ class PolygonGeometry(LineGeometry):
                 geom_valid.messages.append(
                     'Attribute "node_coordinates" in geometry '
                     f'variable "{geometry_var_name}" must be '
-                    "a string"
+                    "a string",
                 )
                 results.append(geom_valid.to_result())
                 continue
@@ -708,21 +711,24 @@ class PolygonGeometry(LineGeometry):
                     "The following referenced node coordinate"
                     "variables for geometry variable"
                     f'"{geometry_var_name}" were not found: '
-                    f"{not_found_node_vars}"
+                    f"{not_found_node_vars}",
                 )
                 results.append(geom_valid.to_result())
                 continue
 
             node_count = reference_attr_variables(
-                ds, getattr(geometry_var, "node_count", None)
+                ds,
+                getattr(geometry_var, "node_count", None),
             )
             # multipart lines and polygons only
             part_node_count = reference_attr_variables(
-                ds, getattr(geometry_var, "part_node_count", None)
+                ds,
+                getattr(geometry_var, "part_node_count", None),
             )
             # polygons with interior geometry only
             interior_ring = reference_attr_variables(
-                ds, getattr(geometry_var, "interior_ring", None)
+                ds,
+                getattr(geometry_var, "interior_ring", None),
             )
 
             if geometry_type == "point":
@@ -731,14 +737,17 @@ class PolygonGeometry(LineGeometry):
                 geometry = LineGeometry(node_coord_vars, node_count, part_node_count)
             elif geometry_type == "polygon":
                 geometry = PolygonGeometry(
-                    node_coord_vars, node_count, part_node_count, interior_ring
+                    node_coord_vars,
+                    node_count,
+                    part_node_count,
+                    interior_ring,
                 )
             else:
                 geom_valid.messages.append(
                     f'For geometry variable "{geometry_var_name}'
                     'the attribute "geometry_type" must exist'
                     "and have one of the following values:"
-                    '"point", "line", "polygon"'
+                    '"point", "line", "polygon"',
                 )
                 results.append(geom_valid.to_result())
                 continue
@@ -750,7 +759,7 @@ class PolygonGeometry(LineGeometry):
         return results
 
 
-class GeometryStorage(object):
+class GeometryStorage:
     """Abstract base class for geometries"""
 
     def __init__(self, coord_vars, node_count):
@@ -769,7 +778,7 @@ class GeometryStorage(object):
         if invalid_vars:
             self.errors.append(
                 "The following geometry variables "
-                f"have non-numeric contents: {invalid_vars}"
+                f"have non-numeric contents: {invalid_vars}",
             )
 
     def _split_mulitpart_geometry(self):
@@ -792,7 +801,7 @@ class PointGeometry(GeometryStorage):
                     "For a point geometry, coordinate "
                     "variables must be the same length as "
                     "node_count defined, or must be "
-                    "length 1 if node_count is not set"
+                    "length 1 if node_count is not set",
                 )
         return self.errors
 
@@ -815,7 +824,7 @@ class LineGeometry(GeometryStorage):
                 "Coordinate variables must be the same length. "
                 "If node_count is specified, this value must "
                 "also sum to the length of the coordinate "
-                "variables."
+                "variables.",
             )
         # if a multipart
         if self.node_count is not None:
@@ -825,19 +834,19 @@ class LineGeometry(GeometryStorage):
                     "Coordinate variables must be the same "
                     "length. If node_count is specified, this "
                     "value must also sum to the length of the "
-                    "coordinate variables."
+                    "coordinate variables.",
                 )
         if self.part_node_count is not None:
             if not np.issubdtype(self.part_node_count.dtype, np.integer):
                 geom_errors.append(
                     "when part_node_count is specified, it must "
-                    "be an array of integers"
+                    "be an array of integers",
                 )
             same_node_count = len(self.coord_vars[0]) == self.node_count[:].sum()
             if not same_node_count:
                 geom_errors.append(
                     "The sum of part_node_count must be equal "
-                    "to the value of node_count"
+                    "to the value of node_count",
                 )
         return geom_errors
 
@@ -873,7 +882,7 @@ class PolygonGeometry(LineGeometry):
             polygon = Polygon(transposed_coords.tolist())
         except ValueError:
             raise ValueError(
-                "Polygon contains too few points to perform orientation test"
+                "Polygon contains too few points to perform orientation test",
             )
 
         ccw = polygon.exterior.is_ccw
@@ -904,7 +913,8 @@ class PolygonGeometry(LineGeometry):
             extent_slice = slice(extents[i], extents[i + 1])
             poly_sliced = np.vstack([cv[extent_slice] for cv in self.coord_vars]).T
             pass_orientation = self.check_polygon_orientation(
-                poly_sliced, ring_orientation[i]
+                poly_sliced,
+                ring_orientation[i],
             )
             if not pass_orientation:
                 orient_fix = (

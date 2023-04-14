@@ -15,7 +15,7 @@ def datetime_is_iso(date_str):
         else:
             isodate.parse_date(date_str)
         return True, []
-    except:  # Any error qualifies as not ISO format
+    except Exception:  # Any error qualifies as not ISO format
         return False, ["Datetime provided is not in a valid ISO 8601 format"]
 
 
@@ -43,5 +43,8 @@ def kvp_convert(input_coll):
         return input_coll
     else:
         return OrderedDict(
-            (l, None) if not isinstance(l, tuple) else (l[0], l[1]) for l in input_coll
+            (element, None)
+            if not isinstance(element, tuple)
+            else (element[0], element[1])
+            for element in input_coll
         )
