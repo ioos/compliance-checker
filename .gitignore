@@ -110,3 +110,7 @@ activate
 # coverage output
 coverage/
 coverage.xml
+
+# shpinx docs
+docs/source/generated/
+docs/source/quickintro.md
