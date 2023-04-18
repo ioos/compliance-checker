@@ -3289,6 +3289,7 @@ class CF1_6Check(CFNCCheck):
                 else:
                     # Check variable type is byte, short or int
                     if var.dtype.type not in [
+                        int,
                         np.int8,
                         np.int16,
                         np.int32,
