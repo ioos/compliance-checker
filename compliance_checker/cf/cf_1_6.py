@@ -1821,10 +1821,45 @@ class CF1_6Check(CFNCCheck):
             reasoning = None
             if not correct_units:
                 reasoning = ["%s does not have correct time units" % name]
-            result = Result(
-                BaseCheck.HIGH, correct_units, self.section_titles["4.4"], reasoning
+                result = Result(
+                    BaseCheck.HIGH, correct_units, self.section_titles["4.4"], reasoning
+                )
+                ret_val.append(result)
+                continue
+            # TODO: Is this a reasonable regex for extracting reference time
+            #       fields of interest?  Was unable to locate the grammar
+            #       or documentation for how reference times should be formed
+            time_regex = regex.compile(
+                r"(?P<time_interval>(\w+)) since "
+                r"(?P<year>\d{1,4})-\d{1,2}-\d{1,2}(?:[ T]"
+                r"\d{1,2}:(?P<minutes>\d{1,2})?)?"
             )
-            ret_val.append(result)
+            match_vals = regex.match(time_regex, variable.units)
+            time_interval = match_vals.group("time_interval")
+            # IMPLEMENTATION CONFORMANCE 4.4 RECOMMENDED 2/2
+            if time_interval.startswith("month") or time_interval.startswith("year"):
+                msg = f"Using relative time interval of months or years is not recommended for coordinate variable {variable.name}"
+                result = Result(
+                    BaseCheck.MEDIUM, False, self.section_titles["4.4"], [msg]
+                )
+                ret_val.append(result)
+            # IMPLEMENTATION CONFORMANCE 4.4 RECOMMENDED 1/2
+            if hasattr(variable, "climatology") and int(match_vals.group("year")) == 0:
+                msg = f"Time coordinate variable {variable.name}'s use of year 0 for climatological time is deprecated"
+                result = Result(
+                    BaseCheck.MEDIUM, False, self.section_titles["4.4"], [msg]
+                )
+                ret_val.append(result)
+            # IMPLEMENTATION CONFORMANCE 4.4 REQUIRED 2/2
+            if (
+                match_vals.group("minutes") is not None
+                and int(match_vals.group("minutes")) >= 60
+            ):
+                msg = f"Time coordinate variable {variable.name} may not have a minute value greater than or equal to 60"
+                result = Result(
+                    BaseCheck.MEDIUM, False, self.section_titles["4.4"], [msg]
+                )
+                ret_val.append(result)
 
         return ret_val
 

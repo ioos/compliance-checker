@@ -1233,6 +1233,7 @@ class TestCF1_6(BaseTestCase):
         for r in results:
             self.assertTrue(r.value)
 
+        # TEST CONFORMANCE 4.4 REQUIRED 1/2
         dataset = self.load_dataset(STATIC_FILES["bad"])
         results = self.cf.check_time_coordinate(dataset)
 
@@ -1240,6 +1241,22 @@ class TestCF1_6(BaseTestCase):
 
         assert "time does not have correct time units" in messages
         assert (scored, out_of) == (1, 2)
+        # TEST CONFORMANCE 4.4 REQUIRED 2/2, RECOMMENDED 1, 2/2
+        dataset = MockTimeSeries()
+        dataset.variables["time"].units = "months since 0-1-1 23:60:00"
+        dataset.variables[
+            "time"
+        ].climatology = (
+            "nonexistent_variable_reference_only_used_to_test_year_zero_failure"
+        )
+        results = self.cf.check_time_coordinate(dataset)
+        scored, out_of, messages = get_results(results)
+        assert scored < out_of
+        assert {
+            "Using relative time interval of months or years is not recommended for coordinate variable time",
+            "Time coordinate variable time's use of year 0 for climatological time is deprecated",
+            "Time coordinate variable time may not have a minute value greater than or equal to 60",
+        } == set(messages)
 
     def test_check_calendar(self):
         """Load a dataset with an invalid calendar attribute (non-comp/bad.nc).

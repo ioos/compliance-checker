@@ -31,7 +31,7 @@ class MockTimeSeries(MockNetCDF):
         super(MockTimeSeries, self).__init__(filename)
         self.createDimension("time", 500)
         for name, std_name, units, axis in (
-            ("time", "time", "seconds since 1970-01-01", "T"),
+            ("time", "time", "seconds since 1970-01-01 00:00:00", "T"),
             ("lon", "longitude", "degrees_east", "X"),
             ("lat", "latitude", "degrees_north", "Y"),
             ("depth", "depth", "m", "Z"),
