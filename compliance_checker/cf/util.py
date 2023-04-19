@@ -2,13 +2,12 @@ import io
 import itertools
 import os
 import sys
-from copy import deepcopy
 from pkgutil import get_data
 
 import requests
 from cf_units import Unit
 from lxml import etree
-from netCDF4 import Dataset, Dimension, Variable
+from netCDF4 import Dataset
 from pkg_resources import resource_filename
 
 # copied from paegan
@@ -163,57 +162,6 @@ _possibletunits = {
 _possibleaxisunits = _possiblexunits | _possibleyunits | _possibletunits
 
 
-class DotDict(dict):
-    """
-    Subclass of dict that will recursively look up attributes with dot notation.
-    This is primarily for working with JSON-style data in a cleaner way like javascript.
-    Note that this will instantiate a number of child DotDicts when you first access attributes;
-    do not use in performance-critical parts of your code.
-    """
-
-    def __dir__(self):
-        return list(self.__dict__.keys()) + list(self.keys())
-
-    def __getattr__(self, key):
-        """Make attempts to lookup by nonexistent attributes also attempt key lookups."""
-        if key in self:
-            return self[key]
-        import dis
-        import sys
-
-        frame = sys._getframe(1)
-        if "\x00%c" % dis.opmap["STORE_ATTR"] in frame.f_code.co_code:
-            self[key] = DotDict()
-            return self[key]
-
-        raise AttributeError(key)
-
-    def __setattr__(self, key, value):
-        if key in dir(dict):
-            raise AttributeError("%s conflicts with builtin." % key)
-        if isinstance(value, dict):
-            self[key] = DotDict(value)
-        else:
-            self[key] = value
-
-    def copy(self):
-        return deepcopy(self)
-
-    def get_safe(self, qual_key, default=None):
-        """
-        @brief Returns value of qualified key, such as "system.name" or None if not exists.
-                If default is given, returns the default. No exception thrown.
-        """
-        value = get_safe(self, qual_key)
-        if value is None:
-            value = default
-        return value
-
-    @classmethod
-    def fromkeys(cls, seq, value=None):
-        return DotDict(dict.fromkeys(seq, value))
-
-
 def get_safe(dict_instance, keypath, default=None):
     """
     Returns a value with in a nested dict structure from a dot separated
@@ -241,91 +189,6 @@ class VariableReferenceError(Exception):
         return (
             f"Cannot find variable named {self.name} in dataset " f"{self}.dataset_path"
         )
-
-
-class NCGraph(object):
-    def __init__(
-        self, ds, name, nc_object, self_reference_variables, reference_map=None
-    ):
-        self.ds = ds
-        self.name = name
-        self.coords = DotDict()
-        self.dims = DotDict()
-        self.grid_mapping = DotDict()
-        self.obj = nc_object
-
-        self.reference_variables = self_reference_variables
-        self.reference_map = reference_map or {}
-
-        self.reference_map[name] = self
-
-        if isinstance(nc_object, Dimension):
-            self._type = "dim"
-
-        elif isinstance(nc_object, Variable):
-            self._type = "var"
-
-            self.get_references()
-
-        else:
-            raise TypeError("unknown type %s" % repr(type(nc_object)))
-
-    def get_references(self):
-        for dim in self.obj.dimensions:
-            self.dims[dim] = self.get_dimension(dim)
-
-        if hasattr(self.obj, "coordinates"):
-            coords = self.obj.coordinates.split(" ")
-            for coord in coords:
-                self.coords[coord] = self.get_coordinate(coord)
-
-        if hasattr(self.obj, "grid_mapping"):
-            gm = self.obj.grid_mapping
-            self.grid_mapping[gm] = self.get_grid_mapping(gm)
-
-    def get_dimension(self, dim):
-        if dim in self.reference_map:
-            return self.reference_map[dim]
-        return NCGraph(
-            self.ds,
-            dim,
-            self.ds.dimensions[dim],
-            self.reference_variables,
-            self.reference_map,
-        )
-
-    def get_coordinate(self, coord):
-        if coord not in self.ds.variables:
-            return
-        if coord in self.reference_map:
-            if self.name == coord:
-                self.reference_variables.add(self.name)
-            return self.reference_map[coord]
-        return NCGraph(
-            self.ds,
-            coord,
-            self.ds.variables[coord],
-            self.reference_variables,
-            self.reference_map,
-        )
-
-    def get_grid_mapping(self, gm):
-        if gm not in self.ds.variables:
-            return
-        if gm in self.reference_map:
-            return self.reference_map[gm]
-        return NCGraph(
-            self.ds,
-            gm,
-            self.ds.variables[gm],
-            self.reference_variables,
-            self.reference_map,
-        )
-
-    def __getattr__(self, key):
-        if key in self.__dict__:
-            return self.__dict__[key]
-        return getattr(self.obj, key)
 
 
 class StandardNameTable(object):
