@@ -2,7 +2,6 @@ import io
 import itertools
 import os
 import sys
-from collections import defaultdict
 from copy import deepcopy
 from pkgutil import get_data
 
@@ -493,29 +492,6 @@ def units_temporal(units):
     # check that reference time seconds is not greater than or
     # equal to 60
     return u.is_time_reference()
-
-
-def map_axes(dim_vars, reverse_map=False):
-    """
-    axis name       -> [dimension names]
-    dimension name  -> [axis_name], length 0 if reverse_map
-    """
-    ret_val = defaultdict(list)
-    axes = ["X", "Y", "Z", "T"]
-
-    for k, v in dim_vars.items():
-        axis = getattr(v, "axis", "")
-        if not axis:
-            continue
-
-        axis = axis.upper()
-        if axis in axes:
-            if reverse_map:
-                ret_val[k].append(axis)
-            else:
-                ret_val[axis].append(k)
-
-    return dict(ret_val)
 
 
 def find_coord_vars(ncds):
