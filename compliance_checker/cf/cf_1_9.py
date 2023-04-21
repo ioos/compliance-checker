@@ -1,5 +1,6 @@
 from netCDF4 import Dataset
 
+from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, TestCtx
 from compliance_checker.cf.cf_1_8 import CF1_8Check
 from compliance_checker.cf.util import VariableReferenceError, reference_attr_variables
@@ -12,6 +13,31 @@ class CF1_9Check(CF1_8Check):
     def __init__(self, options=None):
         super(CF1_9Check, self).__init__(options)
         self.section_titles.update({"5.8": "§5.8 Domain Variables"})
+
+    def check_calendar(self, ds):
+        # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED CF 1.9
+        super(CF1_9Check, self).check_calendar.__doc__
+        prev_return = super(CF1_9Check, self).check_calendar(ds)
+        time_var_candidate_name = cfutil.get_time_variable(ds)
+        time_var_name = (
+            time_var_candidate_name
+            if time_var_candidate_name in self._find_coord_vars(ds)
+            else None
+        )
+        # most datasets should have a time coordinate variable
+        test_ctx = self.get_test_ctx(
+            BaseCheck.HIGH, self.section_titles["4.4"], time_var_name
+        )
+        if time_var_name is None:
+            return prev_return
+
+        test_ctx.assert_true(
+            hasattr(ds.variables[time_var_name], "calendar"),
+            f'Time coordinate variable "{time_var_name}" '
+            "should have a calendar attribute",
+        )
+        prev_return.append(test_ctx.to_result())
+        return prev_return
 
     def check_domain_variables(self, ds: Dataset):
         # Domain variables should have coordinates attribute, but should have
