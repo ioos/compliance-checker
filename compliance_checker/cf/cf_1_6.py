@@ -1894,7 +1894,7 @@ class CF1_6Check(CFNCCheck):
         :rtype: list
         :return: List of results
         """
-        valid_calendars = {
+        standard_calendars = {
             "gregorian",
             "standard",
             "proleptic_gregorian",
@@ -1963,7 +1963,7 @@ class CF1_6Check(CFNCCheck):
                 ret_val.append(check_standard_calendar_no_cross(time_var))
             # if a nonstandard calendar, then leap_years and leap_months must
             # must be present
-            if time_var.calendar.lower() not in valid_calendars:
+            if time_var.calendar.lower() not in standard_calendars:
                 result = self._check_leap_time(time_var)
             # passes if the calendar is valid, otherwise notify of invalid
             # calendar

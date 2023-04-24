@@ -1243,6 +1243,8 @@ class TestCF1_6(BaseTestCase):
         assert (scored, out_of) == (1, 2)
         # TEST CONFORMANCE 4.4 REQUIRED 2/2, RECOMMENDED 1, 2/2
         dataset = MockTimeSeries()
+        # NB: >= 60 seconds is nonstandard, but isn't actually a CF requirement
+        # until CF 1.9 onwards
         dataset.variables["time"].units = "months since 0-1-1 23:60:00"
         dataset.variables[
             "time"

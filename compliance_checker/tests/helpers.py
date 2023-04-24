@@ -46,6 +46,7 @@ class MockTimeSeries(MockNetCDF):
         # give some applicable units
         self.variables["time"].units = "seconds since 2019-04-11T00:00:00"
         self.variables["time"].axis = "T"
+        self.variables["time"].calendar = "standard"
         self.variables["lat"].units = "degree_north"
         self.variables["lat"].axis = "Y"
         self.variables["lon"].units = "degree_east"
