@@ -1255,7 +1255,6 @@ class TestCF1_6(BaseTestCase):
         assert {
             "Using relative time interval of months or years is not recommended for coordinate variable time",
             "Time coordinate variable time's use of year 0 for climatological time is deprecated",
-            "Time coordinate variable time may not have a minute value greater than or equal to 60",
         } == set(messages)
 
     def test_check_calendar(self):
