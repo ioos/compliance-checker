@@ -1920,10 +1920,17 @@ class CF1_6Check(CFNCCheck):
             # should be made for time coordinate variables anyways, so errors
             # should be caught where implemented there
             crossover_date = cftime.DatetimeGregorian(1582, 10, 15)
-            times = cftime.num2date(time_var[:].compressed(), time_var.units)
+            # has_year_zero set to true in order to just check crossover,
+            # actual year less than or equal to zero check handled elsewhere
+            # when standard/Gregorian, or Julian calendars used.
+            times = cftime.num2date(
+                time_var[:].compressed(), time_var.units, has_year_zero=True
+            )
 
-            no_cross_1582 = ~np.any(times < crossover_date)
-            if no_cross_1582:
+            crossover_1582 = np.any(times < crossover_date) and np.any(
+                times >= crossover_date
+            )
+            if not crossover_1582:
                 reasoning = (
                     f"Variable {time_var.name} has standard or Gregorian "
                     "calendar and does not cross 1582-10-15T00:00Z"
@@ -1936,7 +1943,10 @@ class CF1_6Check(CFNCCheck):
                 )
 
             return Result(
-                BaseCheck.LOW, no_cross_1582, self.section_titles["4.4"], [reasoning]
+                BaseCheck.LOW,
+                not crossover_1582,
+                self.section_titles["4.4"],
+                [reasoning],
             )
 
         # if has a calendar, check that it is within the valid values
