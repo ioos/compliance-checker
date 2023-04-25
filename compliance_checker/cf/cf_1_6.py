@@ -1952,9 +1952,22 @@ class CF1_6Check(CFNCCheck):
         # if has a calendar, check that it is within the valid values
         # otherwise no calendar is valid
 
-        for time_var in ds.get_variables_by_attributes(
-            calendar=lambda c: c is not None
-        ):
+        # this will only fetch variables with time units defined
+        for time_var_name in cfutil.get_time_variables(ds):
+            time_var = ds.variables[time_var_name]
+            if not hasattr(time_var, "calendar") or not isinstance(
+                time_var.calendar, str
+            ):
+                reasoning = (
+                    f'For time coordinate variable "{time_var.name}", '
+                    'it is recommended that an attribute "calendar" '
+                    "with a string value is specified"
+                )
+                result = Result(
+                    BaseCheck.MEDIUM, False, self.section_titles["4.4.1"], [reasoning]
+                )
+                ret_val.append(result)
+                continue
             if time_var.calendar.lower() == "gregorian":
                 reasoning = (
                     f"For time variable {time_var.name}, when using "
@@ -1963,7 +1976,7 @@ class CF1_6Check(CFNCCheck):
                     "the calendar attribute"
                 )
                 result = Result(
-                    BaseCheck.LOW, False, self.section_titles["4.4"], [reasoning]
+                    BaseCheck.LOW, False, self.section_titles["4.4.1"], [reasoning]
                 )
                 ret_val.append(result)
                 # check here and in the below case that time does not cross
@@ -1978,7 +1991,7 @@ class CF1_6Check(CFNCCheck):
             # passes if the calendar is valid, otherwise notify of invalid
             # calendar
             else:
-                result = Result(BaseCheck.LOW, True, self.section_titles["4.4"], None)
+                result = Result(BaseCheck.LOW, True, self.section_titles["4.4.1"])
             ret_val.append(result)
 
         return ret_val

@@ -1279,7 +1279,15 @@ class TestCF1_6(BaseTestCase):
         assert bad_month_msg in messages
 
         dataset = MockTimeSeries()
-        dataset.variables["time"]
+        # no calendar should raise an issue on time coordinate variables
+        del dataset.variables["time"].calendar
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert (
+            'For time coordinate variable "time", it is recommended that '
+            'an attribute "calendar" with a string value is specified' in messages
+        )
+
         # test case insensivity
         valid_calendars = (
             "GREGORIAN",
@@ -1294,6 +1302,10 @@ class TestCF1_6(BaseTestCase):
             "NONE",
         )
         for calendar_uppercase in valid_calendars:
+            # need to make a new MockTimeSeries when attribute deleted for
+            # calendar attributes to work properly
+            dataset = MockTimeSeries()
+            dataset.calendar = calendar_uppercase
             results = self.cf.check_calendar(dataset)
             scored, out_of, messages = get_results(results)
             assert scored == out_of
