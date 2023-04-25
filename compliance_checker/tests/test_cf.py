@@ -3027,6 +3027,30 @@ class TestCF1_9(BaseTestCase):
     def setUp(self):
         self.cf = CF1_9Check()
 
+    def test_time_variable_has_calendar(self):
+        # TEST CONFORMANCE 4.4.1 RECOMMENDED CF 1.9
+        dataset = MockTimeSeries()
+        results = self.cf.check_calendar(dataset)
+        assert (
+            results[0].msgs[0] == 'Time coordinate variable "time" should have a '
+            "calendar attribute"
+        )
+        # FIXME: NetCDF files shouldn't normally be modified so we can usually
+        # depend on cached results. Here we need to recreate the checker
+        # instance in order to not have previous results included pass condition
+        self.cf = CF1_9Check()
+        dataset.variables["time"].calendar = "standard"
+        results = self.cf.check_calendar(dataset)
+        # no time coordinate present, i.e. there is no time variable name with
+        # the same name as the time dimension name.
+        self.cf = CF1_9Check()
+        dataset = MockTimeSeries()
+        dataset.variables["time2"] = dataset.variables["time"]
+        del dataset.variables["time"]
+        results = self.cf.check_calendar(dataset)
+        # results array should be empty as no time coordinate variable detected
+        assert not results
+
     def test_domain(self):
         dataset = MockTimeSeries()
         domain_var = dataset.createVariable("domain", "c", ())

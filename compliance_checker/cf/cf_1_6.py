@@ -2268,7 +2268,7 @@ class CF1_6Check(CFNCCheck):
 
             alt = (
                 "{} has no coordinate associated with a variable identified as true latitude/longitude; "
-                + "its coordinate variable should also share a subset of {}'s dimensions"
+                "its coordinate variable should also share a subset of {}'s dimensions"
             )
 
             # Make sure we can find latitude and its dimensions are a subset
