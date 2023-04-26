@@ -1968,6 +1968,8 @@ class CF1_6Check(CFNCCheck):
         # this will only fetch variables with time units defined
         for time_var_name in cfutil.get_time_variables(ds):
             time_var = ds.variables[time_var_name]
+            if time_var not in util.find_coord_vars(ds):
+                continue
             if not hasattr(time_var, "calendar") or not isinstance(
                 time_var.calendar, str
             ):
