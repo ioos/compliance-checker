@@ -1279,14 +1279,11 @@ class TestCF1_6(BaseTestCase):
         assert bad_month_msg in messages
 
         dataset = MockTimeSeries()
-        # no calendar should raise an issue on time coordinate variables
+        # no calendar should not raise an issue on time coordinate variables
         del dataset.variables["time"].calendar
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
-        assert (
-            'For time coordinate variable "time", it is recommended that '
-            'an attribute "calendar" with a string value is specified' in messages
-        )
+        assert not messages
 
         # test case insensivity
         valid_calendars = (
@@ -3030,10 +3027,12 @@ class TestCF1_9(BaseTestCase):
     def test_time_variable_has_calendar(self):
         # TEST CONFORMANCE 4.4.1 RECOMMENDED CF 1.9
         dataset = MockTimeSeries()
+        del dataset.variables["time"].calendar
         results = self.cf.check_calendar(dataset)
-        assert (
-            results[0].msgs[0] == 'Time coordinate variable "time" should have a '
-            "calendar attribute"
+        assert results[0].msgs[0] == (
+            'For time coordinate variable "time", it is '
+            'recommended that an attribute "calendar" '
+            "with a string value is specified"
         )
         # FIXME: NetCDF files shouldn't normally be modified so we can usually
         # depend on cached results. Here we need to recreate the checker

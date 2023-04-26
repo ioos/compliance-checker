@@ -1,7 +1,11 @@
-from netCDF4 import Dataset
+from typing import List
+
+import regex
+from netCDF4 import Dataset, Variable
 
 from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, TestCtx
+from compliance_checker.cf import util
 from compliance_checker.cf.cf_1_8 import CF1_8Check
 from compliance_checker.cf.util import VariableReferenceError, reference_attr_variables
 
@@ -14,29 +18,39 @@ class CF1_9Check(CF1_8Check):
         super(CF1_9Check, self).__init__(options)
         self.section_titles.update({"5.8": "§5.8 Domain Variables"})
 
-    def check_calendar(self, ds):
-        # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED CF 1.9
-        super(CF1_9Check, self).check_calendar.__doc__
-        prev_return = super(CF1_9Check, self).check_calendar(ds)
-        time_var_candidate_name = cfutil.get_time_variable(ds)
-        time_var_name = (
-            time_var_candidate_name
-            if time_var_candidate_name in self._find_coord_vars(ds)
-            else None
-        )
-        # most datasets should have a time coordinate variable
-        test_ctx = self.get_test_ctx(
-            BaseCheck.HIGH, self.section_titles["4.4"], time_var_name
-        )
-        if time_var_name is None:
-            return prev_return
+    def _calendar_invalid(self, time_var: Variable) -> List[str]:
+        return [
+            f'For time coordinate variable "{time_var.name}", '
+            'it is recommended that an attribute "calendar" '
+            "with a string value is specified"
+        ]
 
-        test_ctx.assert_true(
-            hasattr(ds.variables[time_var_name], "calendar"),
-            f'Time coordinate variable "{time_var_name}" '
-            "should have a calendar attribute",
+    def check_time_coordinate(self, ds):
+        super(CF1_9Check, self).check_calendar.__doc__
+        prev_return = super(CF1_9Check, self).check_time_coordinate(ds)
+        seconds_regex = regex.compile(
+            r"\w+ since \d{1,4}-\d{1,2}-\d{1,2}[ T]"
+            r"\d{1,2}:\d{1,2}:(?P<seconds>\d{1,2})"
         )
-        prev_return.append(test_ctx.to_result())
+        for name in cfutil.get_time_variables(ds):
+            # DRY: get rid of time coordinate variable boilerplate
+            if name not in {var.name for var in util.find_coord_vars(ds)}:
+                continue
+            time_var = ds.variables[name]
+            test_ctx = self.get_test_ctx(
+                BaseCheck.HIGH, self.section_titles["4.4"], name
+            )
+            try:
+                match = regex.match(seconds_regex, time_var.units)
+            except AttributeError:
+                # not much can be done if there are no units
+                continue
+            test_ctx.assert_true(
+                match.group("seconds") is None or int(match.group("seconds")) < 60,
+                f'Time coordinate variable "{name}" must have '
+                "units with seconds less than 60",
+            )
+            prev_return.append(test_ctx.to_result())
         return prev_return
 
     def check_domain_variables(self, ds: Dataset):
