@@ -1923,9 +1923,22 @@ class CF1_6Check(CFNCCheck):
             # has_year_zero set to true in order to just check crossover,
             # actual year less than or equal to zero check handled elsewhere
             # when standard/Gregorian, or Julian calendars used.
-            times = cftime.num2date(
-                time_var[:].compressed(), time_var.units, has_year_zero=True
-            )
+
+            # WARNING: might fail here if months_since are used and suppress
+            #          usual warning
+            try:
+                times = cftime.num2date(
+                    time_var[:].compressed(), time_var.units, has_year_zero=True
+                )
+            except ValueError:
+                return Result(
+                    BaseCheck.LOW,
+                    False,
+                    self.section_titles["4.4"],
+                    [
+                        "Miscellaneous failure when attempting to calculate crossover, possible malformed date"
+                    ],
+                )
 
             crossover_1582 = np.any(times < crossover_date) and np.any(
                 times >= crossover_date
