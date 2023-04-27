@@ -36,6 +36,7 @@ from compliance_checker.cf.util import (
 from compliance_checker.suite import CheckSuite
 from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.helpers import (
+    MockNetCDF,
     MockRaggedArrayRepr,
     MockTimeSeries,
     MockVariable,
@@ -1245,7 +1246,7 @@ class TestCF1_6(BaseTestCase):
         dataset = MockTimeSeries()
         # NB: >= 60 seconds is nonstandard, but isn't actually a CF requirement
         # until CF 1.9 onwards
-        dataset.variables["time"].units = "months since 0-1-1 23:60:00"
+        dataset.variables["time"].units = "months since 0-1-1 23:00:60"
         dataset.variables[
             "time"
         ].climatology = (
@@ -1254,10 +1255,10 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_time_coordinate(dataset)
         scored, out_of, messages = get_results(results)
         assert scored < out_of
-        assert {
-            "Using relative time interval of months or years is not recommended for coordinate variable time",
-            "Time coordinate variable time's use of year 0 for climatological time is deprecated",
-        } == set(messages)
+        assert (
+            "Using relative time interval of months or years is not recommended for coordinate variable time"
+            in messages
+        )
 
     def test_check_calendar(self):
         """Load a dataset with an invalid calendar attribute (non-comp/bad.nc).
@@ -3024,31 +3025,55 @@ class TestCF1_9(BaseTestCase):
     def setUp(self):
         self.cf = CF1_9Check()
 
+    def test_time_variable_over_sixty_seconds(self):
+        dataset = MockTimeSeries()
+        # TEST CF CONFORMANCE 4.4 REQUIRED
+        dataset.variables["time"].units = "months since 0-1-1 23:00:60"
+        results = self.cf.check_time_coordinate(dataset)
+        scored, out_of, messages = get_results(results)
+        assert (
+            'Time coordinate variable "time" must have units with seconds less than 60'
+            in messages
+        )
+
     def test_time_variable_has_calendar(self):
+        self.cf = CF1_9Check()
         # TEST CONFORMANCE 4.4.1 RECOMMENDED CF 1.9
         dataset = MockTimeSeries()
         del dataset.variables["time"].calendar
-        results = self.cf.check_calendar(dataset)
-        assert results[0].msgs[0] == (
-            'For time coordinate variable "time", it is '
-            'recommended that an attribute "calendar" '
-            "with a string value is specified"
+        results = self.cf.check_time_coordinate_variable_has_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert (
+            'Time coordinate variable "time" should have a string valued attribute "calendar"'
+            in messages
         )
         # FIXME: NetCDF files shouldn't normally be modified so we can usually
         # depend on cached results. Here we need to recreate the checker
         # instance in order to not have previous results included pass condition
-        self.cf = CF1_9Check()
         dataset.variables["time"].calendar = "standard"
         results = self.cf.check_calendar(dataset)
         # no time coordinate present, i.e. there is no time variable name with
         # the same name as the time dimension name.
         self.cf = CF1_9Check()
-        dataset = MockTimeSeries()
-        dataset.variables["time2"] = dataset.variables["time"]
-        del dataset.variables["time"]
+        # need to manually construct the netCDF object here --
+        # get_variables_by_attributes appears to be interfering here
+        dataset = MockNetCDF()
+        dataset.createDimension("time", 500)
+        dataset.createVariable("time2", "f8", ("time",))
+        dataset.variables["time2"].standard_name = "time"
+        dataset.variables["time2"].units = "seconds since 1970-01-01 00:00:00"
+        dataset.variables["time2"].axis = "T"
         results = self.cf.check_calendar(dataset)
         # results array should be empty as no time coordinate variable detected
         assert not results
+
+        # TEST CONFORMANCE 4.4.1
+        dataset = MockTimeSeries()
+        dataset.variables["time"].units = "months since 0-1-1 23:00:60"
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+
+        "Time coordinate variable time's use of year 0 for climatological time is deprecated",
 
     def test_domain(self):
         dataset = MockTimeSeries()

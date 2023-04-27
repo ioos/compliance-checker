@@ -1,13 +1,11 @@
 import difflib
 import logging
 from collections import defaultdict
-from typing import List
 
 import cftime
 import numpy as np
 import regex
 from cf_units import Unit
-from netCDF4 import Variable
 
 from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, Result, TestCtx
@@ -1854,10 +1852,6 @@ class CF1_6Check(CFNCCheck):
                 ret_val.append(result)
         return ret_val
 
-    # dummy return, implemented in CF >= 1.9
-    def _calendar_invalid(self, time_var: Variable) -> List[str]:
-        return []
-
     def check_calendar(self, ds):
         """
         Check the calendar attribute for variables defining time and ensure it
@@ -1976,15 +1970,7 @@ class CF1_6Check(CFNCCheck):
             if time_var_name not in {var.name for var in util.find_coord_vars(ds)}:
                 continue
             time_var = ds.variables[time_var_name]
-            if not hasattr(time_var, "calendar") or not isinstance(
-                time_var.calendar, str
-            ):
-                reasoning_list = self._calendar_invalid(time_var)
-
-                result = Result(
-                    BaseCheck.MEDIUM, True, self.section_titles["4.4.1"], reasoning_list
-                )
-                ret_val.append(result)
+            if not hasattr(time_var, "calendar"):
                 continue
             if time_var.calendar.lower() == "gregorian":
                 reasoning = (

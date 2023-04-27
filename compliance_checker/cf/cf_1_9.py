@@ -1,10 +1,8 @@
-from typing import List
-
 import regex
-from netCDF4 import Dataset, Variable
+from netCDF4 import Dataset
 
 from compliance_checker import cfutil
-from compliance_checker.base import BaseCheck, TestCtx
+from compliance_checker.base import BaseCheck, Result, TestCtx
 from compliance_checker.cf import util
 from compliance_checker.cf.cf_1_8 import CF1_8Check
 from compliance_checker.cf.util import VariableReferenceError, reference_attr_variables
@@ -18,12 +16,30 @@ class CF1_9Check(CF1_8Check):
         super(CF1_9Check, self).__init__(options)
         self.section_titles.update({"5.8": "§5.8 Domain Variables"})
 
-    def _calendar_invalid(self, time_var: Variable) -> List[str]:
-        return [
-            f'For time coordinate variable "{time_var.name}", '
-            'it is recommended that an attribute "calendar" '
-            "with a string value is specified"
-        ]
+    def check_time_coordinate_variable_has_calendar(self, ds):
+        """
+        Ensure that time coordinate variables have a calendar attribute
+        """
+        ret_val = []
+        for name in cfutil.get_time_variables(ds):
+            # DRY: get rid of time coordinate variable boilerplate
+            if name not in {var.name for var in util.find_coord_vars(ds)}:
+                continue
+            time_var = ds.variables[name]
+            if not hasattr(time_var, "calendar") or not isinstance(
+                time_var.calendar, str
+            ):
+                result = Result(
+                    BaseCheck.MEDIUM,
+                    True,
+                    self.section_titles["4.4.1"],
+                    [
+                        f'Time coordinate variable "{name}" should have a '
+                        'string valued attribute "calendar"'
+                    ],
+                )
+                ret_val.append(result)
+        return ret_val
 
     def check_time_coordinate(self, ds):
         super(CF1_9Check, self).check_calendar.__doc__
