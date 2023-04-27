@@ -1,3 +1,4 @@
+import cftime
 import regex
 from netCDF4 import Dataset
 
@@ -39,6 +40,31 @@ class CF1_9Check(CF1_8Check):
                     ],
                 )
                 ret_val.append(result)
+                continue
+            if time_var.calendar.lower() in {"gregorian", "julian", "standard"}:
+                try:
+                    reference_year = cftime.num2date(
+                        0, time_var.units, time_var.calendar, has_year_zero=True
+                    ).year
+                # will fail on months, certain other time specifications
+                except ValueError:
+                    continue
+                if reference_year == 0:
+                    reasoning = (
+                        f'For time variable "{time_var.name}", when using '
+                        "the Gregorian or Julian calendars, the use of year "
+                        "zero is not recommended. Furthermore, the use of year "
+                        "zero to signify a climatological variable as in COARDS "
+                        "is deprecated in CF."
+                    )
+                    result = Result(
+                        BaseCheck.MEDIUM,
+                        False,
+                        self.section_titles["4.4.1"],
+                        [reasoning],
+                    )
+
+                    ret_val.append(result)
         return ret_val
 
     def check_time_coordinate(self, ds):

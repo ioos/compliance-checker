@@ -3073,7 +3073,20 @@ class TestCF1_9(BaseTestCase):
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
 
-        "Time coordinate variable time's use of year 0 for climatological time is deprecated",
+        # test greater than or equal to one zero year for Julian and Gregorian
+        # calendars
+        dataset = MockTimeSeries()
+        dataset.variables["time"].units = "seconds since 0-01-01 00:00:00"
+        for calendar_name in ("standard", "julian", "gregorian"):
+            dataset.variables["time"].calendar = calendar_name
+            results = self.cf.check_time_coordinate_variable_has_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert (
+                'For time variable "time", when using the Gregorian or Julian '
+                "calendars, the use of year zero is not recommended. "
+                "Furthermore, the use of year zero to signify a climatological "
+                "variable as in COARDS is deprecated in CF." in messages
+            )
 
     def test_domain(self):
         dataset = MockTimeSeries()
