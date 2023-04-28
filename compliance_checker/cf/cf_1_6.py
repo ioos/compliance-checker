@@ -1821,11 +1821,35 @@ class CF1_6Check(CFNCCheck):
             reasoning = None
             if not correct_units:
                 reasoning = ["%s does not have correct time units" % name]
-            result = Result(
-                BaseCheck.HIGH, correct_units, self.section_titles["4.4"], reasoning
-            )
-            ret_val.append(result)
-
+                result = Result(
+                    BaseCheck.HIGH, correct_units, self.section_titles["4.4"], reasoning
+                )
+                ret_val.append(result)
+                continue
+            # IMPLEMENTATION CONFORMANCE 4.4 RECOMMENDED 1/2
+            if hasattr(variable, "climatology"):
+                year_match = regex.match(r"\w+ since (?P<year>\d{1,4})", variable.units)
+                # year should always exist at this point if it's been parsed as
+                # valid date
+                if int(year_match.group("year")) == 0:
+                    message = (
+                        f"Time coordinate variable {variable.name}'s "
+                        "use of year 0 for climatological time is "
+                        "deprecated"
+                    )
+                    result = Result(
+                        BaseCheck.MEDIUM, False, self.section_titles["4.4"], [message]
+                    )
+                    ret_val.append(result)
+            # IMPLEMENTATION CONFORMANCE 4.4 RECOMMENDED 2/2
+            # catch non-recommended months or years time interval
+            unit = Unit(variable.units)
+            if unit.is_long_time_interval():
+                message = f"Using relative time interval of months or years is not recommended for coordinate variable {variable.name}"
+                result = Result(
+                    BaseCheck.MEDIUM, False, self.section_titles["4.4"], [message]
+                )
+                ret_val.append(result)
         return ret_val
 
     def check_calendar(self, ds):
@@ -1870,7 +1894,7 @@ class CF1_6Check(CFNCCheck):
         :rtype: list
         :return: List of results
         """
-        valid_calendars = {
+        standard_calendars = {
             "gregorian",
             "standard",
             "proleptic_gregorian",
@@ -1896,10 +1920,30 @@ class CF1_6Check(CFNCCheck):
             # should be made for time coordinate variables anyways, so errors
             # should be caught where implemented there
             crossover_date = cftime.DatetimeGregorian(1582, 10, 15)
-            times = cftime.num2date(time_var[:].compressed(), time_var.units)
+            # has_year_zero set to true in order to just check crossover,
+            # actual year less than or equal to zero check handled elsewhere
+            # when standard/Gregorian, or Julian calendars used.
 
-            no_cross_1582 = ~np.any(times < crossover_date)
-            if no_cross_1582:
+            # WARNING: might fail here if months_since are used and suppress
+            #          usual warning
+            try:
+                times = cftime.num2date(
+                    time_var[:].compressed(), time_var.units, has_year_zero=True
+                )
+            except ValueError:
+                return Result(
+                    BaseCheck.LOW,
+                    False,
+                    self.section_titles["4.4"],
+                    [
+                        "Miscellaneous failure when attempting to calculate crossover, possible malformed date"
+                    ],
+                )
+
+            crossover_1582 = np.any(times < crossover_date) and np.any(
+                times >= crossover_date
+            )
+            if not crossover_1582:
                 reasoning = (
                     f"Variable {time_var.name} has standard or Gregorian "
                     "calendar and does not cross 1582-10-15T00:00Z"
@@ -1912,15 +1956,22 @@ class CF1_6Check(CFNCCheck):
                 )
 
             return Result(
-                BaseCheck.LOW, no_cross_1582, self.section_titles["4.4"], [reasoning]
+                BaseCheck.LOW,
+                not crossover_1582,
+                self.section_titles["4.4"],
+                [reasoning],
             )
 
         # if has a calendar, check that it is within the valid values
         # otherwise no calendar is valid
 
-        for time_var in ds.get_variables_by_attributes(
-            calendar=lambda c: c is not None
-        ):
+        # this will only fetch variables with time units defined
+        for time_var_name in cfutil.get_time_variables(ds):
+            if time_var_name not in {var.name for var in util.find_coord_vars(ds)}:
+                continue
+            time_var = ds.variables[time_var_name]
+            if not hasattr(time_var, "calendar"):
+                continue
             if time_var.calendar.lower() == "gregorian":
                 reasoning = (
                     f"For time variable {time_var.name}, when using "
@@ -1929,7 +1980,7 @@ class CF1_6Check(CFNCCheck):
                     "the calendar attribute"
                 )
                 result = Result(
-                    BaseCheck.LOW, False, self.section_titles["4.4"], [reasoning]
+                    BaseCheck.LOW, False, self.section_titles["4.4.1"], [reasoning]
                 )
                 ret_val.append(result)
                 # check here and in the below case that time does not cross
@@ -1939,12 +1990,12 @@ class CF1_6Check(CFNCCheck):
                 ret_val.append(check_standard_calendar_no_cross(time_var))
             # if a nonstandard calendar, then leap_years and leap_months must
             # must be present
-            if time_var.calendar.lower() not in valid_calendars:
+            if time_var.calendar.lower() not in standard_calendars:
                 result = self._check_leap_time(time_var)
             # passes if the calendar is valid, otherwise notify of invalid
             # calendar
             else:
-                result = Result(BaseCheck.LOW, True, self.section_titles["4.4"], None)
+                result = Result(BaseCheck.LOW, True, self.section_titles["4.4.1"])
             ret_val.append(result)
 
         return ret_val

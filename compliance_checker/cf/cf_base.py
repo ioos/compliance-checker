@@ -58,6 +58,7 @@ class CFBaseCheck(BaseCheck):
             "4.2": "§4.2 Longitude Coordinate",
             "4.3": "§4.3 Vertical Coordinate",
             "4.4": "§4.4 Time Coordinate",
+            "4.4.1": "§4.4.1 Calendar",
             "4.5": "§4.5 Discrete Axis",
             "5": "§5 Coordinate Systems",
             "5.1": "§5.1 Independent Latitude, Longitude, Vertical, and Time Axes",

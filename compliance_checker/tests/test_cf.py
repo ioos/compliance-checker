@@ -36,6 +36,7 @@ from compliance_checker.cf.util import (
 from compliance_checker.suite import CheckSuite
 from compliance_checker.tests import BaseTestCase
 from compliance_checker.tests.helpers import (
+    MockNetCDF,
     MockRaggedArrayRepr,
     MockTimeSeries,
     MockVariable,
@@ -1233,6 +1234,7 @@ class TestCF1_6(BaseTestCase):
         for r in results:
             self.assertTrue(r.value)
 
+        # TEST CONFORMANCE 4.4 REQUIRED 1/2
         dataset = self.load_dataset(STATIC_FILES["bad"])
         results = self.cf.check_time_coordinate(dataset)
 
@@ -1240,6 +1242,23 @@ class TestCF1_6(BaseTestCase):
 
         assert "time does not have correct time units" in messages
         assert (scored, out_of) == (1, 2)
+        # TEST CONFORMANCE 4.4 REQUIRED 2/2, RECOMMENDED 1, 2/2
+        dataset = MockTimeSeries()
+        # NB: >= 60 seconds is nonstandard, but isn't actually a CF requirement
+        # until CF 1.9 onwards
+        dataset.variables["time"].units = "months since 0-1-1 23:00:60"
+        dataset.variables[
+            "time"
+        ].climatology = (
+            "nonexistent_variable_reference_only_used_to_test_year_zero_failure"
+        )
+        results = self.cf.check_time_coordinate(dataset)
+        scored, out_of, messages = get_results(results)
+        assert scored < out_of
+        assert (
+            "Using relative time interval of months or years is not recommended for coordinate variable time"
+            in messages
+        )
 
     def test_check_calendar(self):
         """Load a dataset with an invalid calendar attribute (non-comp/bad.nc).
@@ -1261,7 +1280,12 @@ class TestCF1_6(BaseTestCase):
         assert bad_month_msg in messages
 
         dataset = MockTimeSeries()
-        dataset.variables["time"]
+        # no calendar should not raise an issue on time coordinate variables
+        del dataset.variables["time"].calendar
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert not messages
+
         # test case insensivity
         valid_calendars = (
             "GREGORIAN",
@@ -1276,6 +1300,10 @@ class TestCF1_6(BaseTestCase):
             "NONE",
         )
         for calendar_uppercase in valid_calendars:
+            # need to make a new MockTimeSeries when attribute deleted for
+            # calendar attributes to work properly
+            dataset = MockTimeSeries()
+            dataset.calendar = calendar_uppercase
             results = self.cf.check_calendar(dataset)
             scored, out_of, messages = get_results(results)
             assert scored == out_of
@@ -2997,29 +3025,68 @@ class TestCF1_9(BaseTestCase):
     def setUp(self):
         self.cf = CF1_9Check()
 
+    def test_time_variable_over_sixty_seconds(self):
+        dataset = MockTimeSeries()
+        # TEST CF CONFORMANCE 4.4 REQUIRED
+        dataset.variables["time"].units = "months since 0-1-1 23:00:60"
+        results = self.cf.check_time_coordinate(dataset)
+        scored, out_of, messages = get_results(results)
+        assert (
+            'Time coordinate variable "time" must have units with seconds less than 60'
+            in messages
+        )
+
     def test_time_variable_has_calendar(self):
+        self.cf = CF1_9Check()
         # TEST CONFORMANCE 4.4.1 RECOMMENDED CF 1.9
         dataset = MockTimeSeries()
-        results = self.cf.check_calendar(dataset)
+        del dataset.variables["time"].calendar
+        results = self.cf.check_time_coordinate_variable_has_calendar(dataset)
+        scored, out_of, messages = get_results(results)
         assert (
-            results[0].msgs[0] == 'Time coordinate variable "time" should have a '
-            "calendar attribute"
+            'Time coordinate variable "time" should have a string valued attribute "calendar"'
+            in messages
         )
         # FIXME: NetCDF files shouldn't normally be modified so we can usually
         # depend on cached results. Here we need to recreate the checker
         # instance in order to not have previous results included pass condition
-        self.cf = CF1_9Check()
         dataset.variables["time"].calendar = "standard"
         results = self.cf.check_calendar(dataset)
         # no time coordinate present, i.e. there is no time variable name with
         # the same name as the time dimension name.
         self.cf = CF1_9Check()
-        dataset = MockTimeSeries()
-        dataset.variables["time2"] = dataset.variables["time"]
-        del dataset.variables["time"]
+        # need to manually construct the netCDF object here --
+        # get_variables_by_attributes appears to be interfering here
+        dataset = MockNetCDF()
+        dataset.createDimension("time", 500)
+        dataset.createVariable("time2", "f8", ("time",))
+        dataset.variables["time2"].standard_name = "time"
+        dataset.variables["time2"].units = "seconds since 1970-01-01 00:00:00"
+        dataset.variables["time2"].axis = "T"
         results = self.cf.check_calendar(dataset)
         # results array should be empty as no time coordinate variable detected
         assert not results
+
+        # TEST CONFORMANCE 4.4.1
+        dataset = MockTimeSeries()
+        dataset.variables["time"].units = "months since 0-1-1 23:00:60"
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+
+        # test greater than or equal to one zero year for Julian and Gregorian
+        # calendars
+        dataset = MockTimeSeries()
+        dataset.variables["time"].units = "seconds since 0-01-01 00:00:00"
+        for calendar_name in ("standard", "julian", "gregorian"):
+            dataset.variables["time"].calendar = calendar_name
+            results = self.cf.check_time_coordinate_variable_has_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert (
+                'For time variable "time", when using the Gregorian or Julian '
+                "calendars, the use of year zero is not recommended. "
+                "Furthermore, the use of year zero to signify a climatological "
+                "variable as in COARDS is deprecated in CF." in messages
+            )
 
     def test_domain(self):
         dataset = MockTimeSeries()
