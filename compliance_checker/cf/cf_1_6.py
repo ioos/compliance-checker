@@ -564,6 +564,26 @@ class CF1_6Check(CFNCCheck):
             )
         return valid_globals.to_result()
 
+    # IMPLEMENTATION
+    def check_coordinate_variables_strict_monotonicity(self, ds):
+        """
+        Checks that data in coordinate variables is either monotonically
+        increasing or decreasing
+        """
+
+        ret_val = []
+        for coord_var_name in self._find_coord_vars(ds):
+            coord_var = ds.variables[coord_var_name]
+            arr_diff = np.diff(coord_var)
+            monotonicity = TestCtx(BaseCheck.HIGH, self.section_titles["5"])
+            monotonicity.assert_true(
+                np.all(arr_diff > 0) or np.all(arr_diff < 0),
+                f'Coordinate variable "{coord_var_name}" must be strictly monotonic',
+            )
+            ret_val.append(monotonicity.to_result())
+
+        return ret_val
+
     def check_convention_possibly_var_attrs(self, ds):
         """
         Check variable and global attributes are strings for recommended attributes under CF §2.6.2
