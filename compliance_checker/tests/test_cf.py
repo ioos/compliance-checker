@@ -122,6 +122,12 @@ class TestCF1_6(BaseTestCase):
         # present in coord_data_vars
         self.assertEqual(self.cf.coord_data_vars, {"time", "sigma"})
 
+        ds = MockTimeSeries()
+        ds.variables["time"][:3] = np.array([20, -2, 0])
+        result = self.cf.check_coordinate_variables_strict_monotonicity(ds)
+        _, _, messages = get_results(result)
+        assert 'Coordinate variable "time" must be strictly monotonic' in messages
+
     # --------------------------------------------------------------------------------
     # Compliance Tests
     # --------------------------------------------------------------------------------
