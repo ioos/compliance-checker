@@ -741,13 +741,11 @@ class CF1_7Check(CF1_6Check):
                 test_ctx.messages.append("The grid_mapping attribute {} "
                 "is not a string".format(item.grid_mapping))
                 test_ctx.out_of += 1
-                if ' ' in item.grid_mapping:  
-                    for x in item.grid_mapping.replace(":", '').split():      
-                        grid_mapping_variable_list.append(x)   
-                else:
-                    # [2/9] Note that in its simplest form the attribute comprises just 
-                    # a grid_mapping_name as a single word.
-                    grid_mapping_variable_list.append(item.grid_mapping)
+                
+                # [2/9] Note that in its simplest form the attribute comprises just 
+                # a grid_mapping_name as a single word.
+                grid_mapping_variable_list.append(regex.findall(r"(\w+)",item.grid_mapping))
+                    
         # 
         # Get the CF grid_mapping variables list (== only if the variable exist in the Variables list)                
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)  
