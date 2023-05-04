@@ -10,7 +10,6 @@ from functools import partial
 
 import numpy as np
 import pendulum
-
 from cftime import num2pydate
 from pygeoif import from_wkt
 
@@ -27,14 +26,12 @@ from compliance_checker.util import dateparse, datetime_is_iso, kvp_convert
 
 
 class ACDDBaseCheck(BaseCheck):
-
     _cc_spec = "acdd"
     _cc_description = "Attribute Conventions for Dataset Discovery (ACDD)"
     _cc_url = "http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery"
     _cc_display_headers = {3: "Highly Recommended", 2: "Recommended", 1: "Suggested"}
 
     def __init__(self):
-
         self.high_rec_atts = ["title", "keywords", "summary"]
 
         self.rec_atts = [
@@ -257,7 +254,6 @@ class ACDDBaseCheck(BaseCheck):
         # identify lat var(s) as per CF 4.1
         lat_vars = {}  # var -> number of criteria passed
         for name, var in ds.variables.items():
-
             # must have units
             if not hasattr(var, "units"):
                 continue
@@ -355,7 +351,6 @@ class ACDDBaseCheck(BaseCheck):
         # identify lon var(s) as per CF 4.2
         lon_vars = {}  # var -> number of criteria passed
         for name, var in ds.variables.items():
-
             # must have units
             if not hasattr(var, "units"):
                 continue
@@ -582,7 +577,7 @@ class ACDDBaseCheck(BaseCheck):
         try:
             t_min = dateparse(ds.time_coverage_start)
             t_max = dateparse(ds.time_coverage_end)
-        except:
+        except (TypeError, pendulum.parsing.exceptions.ParserError):
             return Result(
                 BaseCheck.MEDIUM,
                 False,
@@ -618,7 +613,7 @@ class ACDDBaseCheck(BaseCheck):
                 num2pydate(ds.variables[timevar][-1], ds.variables[timevar].units),
                 "UTC",
             )
-        except:
+        except ValueError:
             return Result(
                 BaseCheck.MEDIUM,
                 False,
@@ -680,7 +675,6 @@ class ACDDNCCheck(BaseNCCheck, ACDDBaseCheck):
 
 
 class ACDD1_1Check(ACDDNCCheck):
-
     _cc_spec_version = "1.1"
     _cc_description = "Attribute Conventions for Dataset Discovery (ACDD) 1.1"
     register_checker = True
@@ -700,7 +694,6 @@ class ACDD1_1Check(ACDDNCCheck):
 
 
 class ACDD1_3Check(ACDDNCCheck):
-
     _cc_spec_version = "1.3"
     _cc_description = "Attribute Conventions for Dataset Discovery (ACDD) 1.3"
     register_checker = True
@@ -760,7 +753,6 @@ class ACDD1_3Check(ACDDNCCheck):
             "date_{}".format(suffix)
             for suffix in ("issued", "modified", "metadata_modified")
         ):
-
             self.sug_atts[k] = partial(_check_attr_is_iso_date, k)
 
     def check_metadata_link(self, ds):
@@ -769,7 +761,7 @@ class ACDD1_3Check(ACDDNCCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
-        if not hasattr(ds, u"metadata_link"):
+        if not hasattr(ds, "metadata_link"):
             return
         msgs = []
         meta_link = getattr(ds, "metadata_link")
@@ -784,14 +776,14 @@ class ACDD1_3Check(ACDDNCCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
-        if not hasattr(ds, u"id"):
+        if not hasattr(ds, "id"):
             return
-        if " " in getattr(ds, u"id"):
+        if " " in getattr(ds, "id"):
             return Result(
                 BaseCheck.MEDIUM,
                 False,
                 "no_blanks_in_id",
-                msgs=[u"There should be no blanks in the id field"],
+                msgs=["There should be no blanks in the id field"],
             )
         else:
             return Result(BaseCheck.MEDIUM, True, "no_blanks_in_id", msgs=[])
@@ -829,7 +821,8 @@ class ACDD1_3Check(ACDDNCCheck):
             }
             if ctype not in valid_ctypes:
                 msgs.append(
-                    'coverage_content_type in "%s"' % (variable, sorted(valid_ctypes))
+                    'coverage_content_type "%s" not in %s'
+                    % (variable, sorted(valid_ctypes))
                 )
                 results.append(
                     Result(

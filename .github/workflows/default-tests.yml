@@ -3,42 +3,33 @@ name: Default Tests
 on:
   pull_request:
   push:
-    branches: [master]
 
 jobs:
   run:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         os: [windows-latest, ubuntu-latest, macos-latest]
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - name: Setup Conda
-      uses: s-weigand/setup-conda@v1
+    - name: Setup Micromamba
+      uses: mamba-org/provision-with-micromamba@v15
       with:
-        activate-conda: false
-        conda-channels: conda-forge
+        environment-file: false
 
     - name: Python ${{ matrix.python-version }}
       shell: bash -l {0}
-      run: |
-        conda create --name TEST python=${{ matrix.python-version }} pip --file requirements.txt --file test_requirements.txt --strict-channel-priority
-        source activate TEST
-        pip install -e . --no-deps --force-reinstall
-
-    - name: Conda Info
-      shell: bash -l {0}
-      run: |
-        source activate TEST
-        conda info --all
-        conda list
+      run: >
+        micromamba create --name TEST python=${{ matrix.python-version }} pip --file requirements.txt --file test_requirements.txt --channel conda-forge
+        && micromamba activate TEST
+        && pip install -e . --no-deps --force-reinstall
 
     - name: Default Tests
       shell: bash -l {0}
       run: |
-        source activate TEST
+        micromamba activate TEST
         pytest -s -rxs -v -k "not integration" compliance_checker

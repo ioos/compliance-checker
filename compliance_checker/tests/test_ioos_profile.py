@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-
 from netCDF4 import Dataset
 
 from compliance_checker.ioos import (
@@ -12,8 +11,7 @@ from compliance_checker.ioos import (
     NamingAuthorityValidator,
 )
 from compliance_checker.tests import BaseTestCase
-from compliance_checker.tests.helpers import (MockTimeSeries, MockVariable,
-                                              MockNetCDF)
+from compliance_checker.tests.helpers import MockNetCDF, MockTimeSeries
 from compliance_checker.tests.resources import STATIC_FILES
 from compliance_checker.tests.test_cf import get_results
 
@@ -316,7 +314,6 @@ class TestIOOS1_2(BaseTestCase):
         self.ioos = IOOS1_2Check()
 
     def test_check_geophysical_vars_have_attrs(self):
-
         # create geophysical variable
         ds = MockTimeSeries()  # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, dimensions=("time",))
@@ -382,7 +379,6 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(scored, out_of)
 
     def test_check_geospatial_vars_have_attrs(self):
-
         # create geophysical variable
         ds = MockTimeSeries()  # time, lat, lon, depth
         temp = ds.createVariable(
@@ -415,60 +411,6 @@ class TestIOOS1_2(BaseTestCase):
         results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
-
-    def test_check_contributor_role_and_vocabulary(self):
-        ds = MockTimeSeries()  # time, lat, lon, depth
-
-        # no contributor_role or vocab, fail both
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertFalse(all(r.value for r in results))
-
-        # bad contributor_role and vocab
-        ds.setncattr("contributor_role", "bad")
-        ds.setncattr("contributor_role_vocabulary", "bad")
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertFalse(all(r.value for r in results))
-
-        # good role, bad vocab
-        ds.setncattr("contributor_role", "contributor")
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertTrue(results[0].value)
-        self.assertEqual(results[0].msgs, [])
-        self.assertFalse(results[1].value)
-
-        # bad role, good vocab
-        ds.setncattr("contributor_role", "bad")
-        ds.setncattr(
-            "contributor_role_vocabulary",
-            "http://vocab.nerc.ac.uk/collection/G04/current/",
-        )
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertFalse(results[0].value)
-        self.assertTrue(results[1].value)
-        self.assertEqual(results[1].msgs, [])
-
-        # good role, good vocab
-        ds.setncattr("contributor_role", "contributor")
-        ds.setncattr(
-            "contributor_role_vocabulary",
-            "http://vocab.nerc.ac.uk/collection/G04/current/",
-        )
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertTrue(results[0].value)
-        self.assertEqual(results[0].msgs, [])
-        self.assertTrue(results[1].value)
-        self.assertEqual(results[1].msgs, [])
-
-        ds.setncattr("contributor_role", "resourceProvider")
-        ds.setncattr(
-            "contributor_role_vocabulary",
-            "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
-        )
-        results = self.ioos.check_contributor_role_and_vocabulary(ds)
-        self.assertTrue(results[0].value)
-        self.assertEqual(results[0].msgs, [])
-        self.assertTrue(results[1].value)
-        self.assertEqual(results[1].msgs, [])
 
     def test_check_creator_and_publisher_type(self):
         """
@@ -585,7 +527,6 @@ class TestIOOS1_2(BaseTestCase):
         )
 
     def test_check_instrument_variables(self):
-
         ds = MockTimeSeries()  # time, lat, lon, depth
 
         # no instrument variable, should pass
@@ -655,21 +596,20 @@ class TestIOOS1_2(BaseTestCase):
 
     def test_check_standard_name(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
-
-        # no standard names
-        results = self.ioos.check_standard_name(ds)
-        scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
-
-        # give standard names to all variables
-        ds.variables["time"].setncattr("standard_name", "time")
-        ds.variables["lon"].setncattr("standard_name", "longitude")
-        ds.variables["lat"].setncattr("standard_name", "latitude")
-        ds.variables["depth"].setncattr("standard_name", "depth")
+        # all standard names on variables
         results = self.ioos.check_standard_name(ds)
         scored, out_of, messages = get_results(results)
         self.assertEqual(scored, out_of)
 
+        # all standard names except for depth
+        del ds.variables["depth"].standard_name
+        results = self.ioos.check_standard_name(ds)
+        scored, out_of, messages = get_results(results)
+        self.assertLess(scored, out_of)
+
+        # have to recreate here or temperature gives KeyError despite appearing
+        # deleted -- why?
+        ds = MockTimeSeries()  # time, lat, lon, depth
         # add a QARTOD variable, no standard name - should fail
         qr = ds.createVariable("depth_qc", np.byte)
         qr.setncattr("flag_meanings", "blah")
@@ -746,7 +686,6 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(res.msgs, [])
 
     def test_check_single_platform(self):
-
         ds = MockTimeSeries()  # time, lat, lon, depth
 
         # no global attr but also no platform variables, should pass
@@ -809,8 +748,10 @@ class TestIOOS1_2(BaseTestCase):
         # QARTOD variable with flag meanings, without flag_meanings
         qr.setncattr("flag_values", np.array([0, 1, 2], dtype=np.byte))
         results = self.ioos.check_qartod_variables_flags(ds)
-        self.assertIn("Variable depth_qc must have attribute flag_meanings defined when flag_values attribute is present",
-                      results[0].msgs)
+        self.assertIn(
+            "Variable depth_qc must have attribute flag_meanings defined when flag_values attribute is present",
+            results[0].msgs,
+        )
         self.assertNotEqual(results[0].value[0], results[0].value[1])  # should fail
         self.assertFalse(results[1].value)  # still fail
 
@@ -998,8 +939,7 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
     def test_check_feattype_timeseries_cf_role(self):
-
-        ### featureType: timeseries and timeseries - msingle station require same tests ###
+        # featureType: timeseries and timeseries - msingle station require same tests
 
         # for ftype in ("timeseries", "timeseries - single station", "timeseries - multiple station"):
         ftype = "timeseries"

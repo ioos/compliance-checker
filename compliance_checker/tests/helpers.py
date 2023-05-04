@@ -30,19 +30,21 @@ class MockTimeSeries(MockNetCDF):
     def __init__(self, filename=None, default_fill_value=None):
         super(MockTimeSeries, self).__init__(filename)
         self.createDimension("time", 500)
-        for v in ("time", "lon", "lat", "depth"):
-            self.createVariable(v, "d", ("time",),
-                                fill_value=default_fill_value)
+        for name, std_name, units, axis in (
+            ("time", "time", "seconds since 1970-01-01 00:00:00", "T"),
+            ("lon", "longitude", "degrees_east", "X"),
+            ("lat", "latitude", "degrees_north", "Y"),
+            ("depth", "depth", "m", "Z"),
+        ):
+            var = self.createVariable(
+                name, "d", ("time",), fill_value=default_fill_value
+            )
+            var.standard_name = std_name
+            var.units = units
+            var.axis = axis
 
         # give some applicable units
-        self.variables["time"].units = "seconds since 2019-04-11T00:00:00"
-        self.variables["time"].axis = "T"
-        self.variables["lat"].units = "degree_north"
-        self.variables["lat"].axis = "Y"
-        self.variables["lon"].units = "degree_east"
-        self.variables["lon"].axis = "X"
-        self.variables["depth"].units = "meters"
-        self.variables["depth"].axis = "Z"
+        self.variables["time"].calendar = "standard"
         self.variables["depth"].positive = "down"
 
 
@@ -66,10 +68,8 @@ class MockVariable(object):
     def __getitem__(self, idx):
         return self._arr[idx]
 
-
     def __setitem__(self, idx, val):
         self._arr[idx] = val
-
 
     def ncattrs(self):
         return [
@@ -209,7 +209,6 @@ class MockRaggedArrayRepr(MockNetCDF):
             )
 
             if structure == "contiguous":
-
                 # create count variable
                 self.createVariable(
                     "counter_var",
@@ -223,7 +222,6 @@ class MockRaggedArrayRepr(MockNetCDF):
                 )
 
             else:
-
                 # create index variable
                 self.createVariable(
                     "index_var",

@@ -1,25 +1,15 @@
 import logging
 import os
 import sqlite3
-import sys
-
-from collections import OrderedDict, defaultdict
-from functools import wraps
 from warnings import warn
 
 import numpy as np
 import pyproj
 import regex
 
-from cf_units import Unit
-
 from compliance_checker import cfutil
-from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
-from compliance_checker.cf import util
-from compliance_checker.cf.appendix_d import (
-    dimless_vertical_coordinates_1_7,
-    no_missing_terms,
-)
+from compliance_checker.base import BaseCheck, Result, TestCtx
+from compliance_checker.cf.appendix_d import dimless_vertical_coordinates_1_7
 from compliance_checker.cf.appendix_e import cell_methods17
 from compliance_checker.cf.appendix_f import (
     ellipsoid_names17,
@@ -28,10 +18,11 @@ from compliance_checker.cf.appendix_f import (
     horizontal_datum_names17,
     prime_meridian_names17,
 )
-from compliance_checker.cf.cf_base import appendix_a_base
 from compliance_checker.cf.cf_1_6 import CF1_6Check
+from compliance_checker.cf.cf_base import appendix_a_base
 
 logger = logging.getLogger(__name__)
+
 
 class CF1_7Check(CF1_6Check):
     """Implementation for CF v1.7. Inherits from CF1_6Check as most of the
@@ -59,11 +50,6 @@ class CF1_7Check(CF1_6Check):
                 "attr_loc": {"G"},
                 "cf_section": "2.6.3",
             },
-            "actual_range": {
-                "Type": "N",
-                "attr_loc": {"D", "C"},
-                "cf_section": "2.5.1",
-            },
             "scale_factor": {"Type": "N", "attr_loc": {"D", "C"}, "cf_section": "8.1"},
         }
     )
@@ -75,8 +61,44 @@ class CF1_7Check(CF1_6Check):
         self.grid_mapping_dict = grid_mapping_dict17
         self.grid_mapping_attr_types = grid_mapping_attr_types17
 
+    def check_external_variables(self, ds):
+        """
+        The global external_variables attribute is a blank-separated list of the
+        names of variables which are named by attributes in the file but which
+        are not present in the file. These variables are to be found in other
+        files (called "external files") but CF does not provide conventions for
+        identifying the files concerned. The only attribute for which CF
+        standardises the use of external variables is cell_measures.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :rtype: compliance_checker.base.Result
+        """
+        external_vars_ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles["2.6.3"])
+        # IMPLEMENTATION CONFORMANCE 2.6.3 REQUIRED 2/2
+        try:
+            external_var_names = set(ds.external_variables.strip().split())
+
+            bad_external_var_names = external_var_names.intersection(ds.variables)
+
+            if bad_external_var_names:
+                external_vars_ctx.out_of += 1
+                bad_msg = (
+                    "Global attribute external_variables should not "
+                    "have any variable names which are present in the dataset. "
+                    "Currently, the following names appear in both external_variables "
+                    f"and the dataset's variables: {bad_external_var_names}"
+                )
+                external_vars_ctx.messages.append(bad_msg)
+
+        # string/global attributes are handled in Appendix A checks
+        except (AttributeError, ValueError):
+            pass
+
+        return external_vars_ctx.to_result()
+
     def check_actual_range(self, ds):
-        """Check the actual_range attribute of variables. As stated in
+        """
+        Check the actual_range attribute of variables. As stated in
         section 2.5.1 of version 1.7, this convention defines a two-element
         vector attribute designed to describe the actual minimum and actual
         maximum values of variables containing numeric data. Conditions:
@@ -102,7 +124,6 @@ class CF1_7Check(CF1_6Check):
             if not hasattr(variable, "actual_range"):
                 continue  # having this attr is only suggested, no Result needed
             else:
-
                 out_of += 1
                 try:
                     if (
@@ -221,6 +242,10 @@ class CF1_7Check(CF1_6Check):
             variable = ds.variables[variable_name]
             valid = True
             reasoning = []
+
+            # 7.1 Required 1/5:
+            # The type of the bounds attribute is a string whose value is a single variable name.
+            # The specified variable must exist in the file.
             if boundary_variable_name not in ds.variables:
                 valid = False
                 reasoning.append(
@@ -231,6 +256,8 @@ class CF1_7Check(CF1_6Check):
                 )
             else:
                 boundary_variable = ds.variables[boundary_variable_name]
+
+            # 7.1 Required 2/5:
             # The number of dimensions in the bounds variable should always be
             # the number of dimensions in the referring variable + 1
             if boundary_variable.ndim < 2:
@@ -263,7 +290,8 @@ class CF1_7Check(CF1_6Check):
                     "".format(variable.name, boundary_variable.dimensions)
                 )
 
-            # ensure p vertices form a valid simplex given previous a...n
+            # 7.1 Required 2/5: continue
+            # Ensure p vertices form a valid simplex given previous a...n
             # previous auxiliary coordinates
             if (
                 ds.dimensions[boundary_variable.dimensions[-1]].size
@@ -279,6 +307,38 @@ class CF1_7Check(CF1_6Check):
                     )
                 )
 
+            # 7.1 Required 3/5:
+            # A boundary variable must be a numeric data type
+            if boundary_variable.dtype.kind not in "biufc":
+                valid = False
+                reasoning.append(
+                    "Boundary variable {} specified by {}".format(
+                        boundary_variable.name, variable.name
+                    )
+                    + "must be a numeric data type "
+                )
+
+            # 7.1 Required 4/5:
+            # If a boundary variable has units, standard_name, axis, positive, calendar, leap_month,
+            # leap_year or month_lengths attributes, they must agree with those of its associated variable.
+            if boundary_variable.__dict__.keys():
+                for item in boundary_variable.__dict__.keys():
+                    if hasattr(variable, item):
+                        if getattr(variable, item) != getattr(boundary_variable, item):
+                            valid = False
+                            reasoning.append(
+                                "'{}' has attr '{}' with value '{}' that does not agree "
+                                "with its associated variable ('{}')'s attr value '{}'"
+                                "".format(
+                                    boundary_variable_name,
+                                    item,
+                                    getattr(boundary_variable, item),
+                                    variable.name,
+                                    getattr(variable, item),
+                                )
+                            )
+
+            # 7.1 Required 5/5:
             # check if formula_terms is present in the var; if so,
             # the bounds variable must also have a formula_terms attr
             if hasattr(variable, "formula_terms"):
@@ -290,11 +350,81 @@ class CF1_7Check(CF1_6Check):
                         )
                     )
 
+            # 7.1 Recommendations 2/2
+            # Boundary variables should not have the _FillValue, missing_value, units, standard_name, axis,
+            # positive, calendar, leap_month, leap_year or month_lengths attributes.
+            attributes_to_check = {
+                "_FillValue",
+                "missing_value",
+                "units",
+                "standard_name",
+                "axis",
+                "positive",
+                "calendar",
+                "leap_month",
+                "leap_year",
+                "month_lengths",
+            }
+            if boundary_variable.__dict__.keys():
+                lst1 = boundary_variable.__dict__.keys()
+                lst2 = attributes_to_check
+                unwanted_attributes = [value for value in lst1 if value in lst2]
+                if unwanted_attributes:
+                    valid = False
+                    reasoning.append(
+                        "The Boundary variables '{}' should not have the attributes: '{}'".format(
+                            boundary_variable_name, unwanted_attributes
+                        )
+                    )
+
             result = Result(
                 BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning
             )
             ret_val.append(result)
         return ret_val
+
+    def check_cell_boundaries_interval(self, ds):
+        """
+        7.1 Cell Boundaries
+        Recommendations: (1/2)
+        The points specified by a coordinate or auxiliary coordinate variable
+        should lie within, or on the boundary, of the cells specified by the
+        associated boundary variable.
+        """
+        ret_val = []
+        reasoning = []
+        for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(
+            ds
+        ).items():
+            valid = True
+
+            variable = ds.variables[variable_name]
+            boundary_variable = ds.variables[boundary_variable_name]
+
+            for ii in range(len(variable[:])):
+                if abs(boundary_variable[ii][1]) >= abs(boundary_variable[ii][0]):
+                    if not (
+                        (abs(variable[ii]) >= abs(boundary_variable[ii][0]))
+                        and (abs(variable[ii]) <= abs(boundary_variable[ii][1]))
+                    ):
+                        valid = False
+                        reasoning.append(
+                            "The points specified by the coordinate variable {} ({})"
+                            " lie outside the boundary of the cell specified by the "
+                            "associated boundary variable {} ({})".format(
+                                variable_name,
+                                variable[ii],
+                                boundary_variable_name,
+                                boundary_variable[ii],
+                            )
+                        )
+
+                result = Result(
+                    BaseCheck.MEDIUM, valid, self.section_titles["7.1"], reasoning
+                )
+                ret_val.append(result)
+                print(ret_val)
+            return ret_val
 
     def check_cell_measures(self, ds):
         """
@@ -700,7 +830,7 @@ class CF1_7Check(CF1_6Check):
             return (True, msg)
 
     def check_grid_mapping(self, ds):
-        __doc__ = super(CF1_7Check, self).check_grid_mapping.__doc__
+        super(CF1_7Check, self).check_grid_mapping.__doc__
         prev_return = super(CF1_7Check, self).check_grid_mapping(ds)
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
         for var_name in sorted(grid_mapping_variables):
@@ -755,8 +885,7 @@ class CF1_7Check(CF1_6Check):
                 )
             elif len_vdatum_name_attrs == 1:
                 # should be one or zero attrs
-                proj_db_path = os.path.join(pyproj.datadir.get_data_dir(),
-                                            "proj.db")
+                proj_db_path = os.path.join(pyproj.datadir.get_data_dir(), "proj.db")
                 try:
                     with sqlite3.connect(proj_db_path) as conn:
                         v_datum_attr = next(iter(vert_datum_attrs))
@@ -791,7 +920,9 @@ class CF1_7Check(CF1_6Check):
         """
         deprecated_var_names = cfutil._find_standard_name_modifier_variables(ds, True)
         if deprecated_var_names:
-            warn(f"Deprecated standard_name modifiers found on variables {deprecated_var_names}")
+            warn(
+                f"Deprecated standard_name modifiers found on variables {deprecated_var_names}"
+            )
 
     def _process_v_datum_str(self, v_datum_str, conn):
         vdatum_query = """SELECT 1 FROM alias_name WHERE

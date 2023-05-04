@@ -5,7 +5,6 @@ from typing import BinaryIO, Generator
 
 from netCDF4 import Dataset
 
-
 try:
     from ._version import __version__
 except ImportError:

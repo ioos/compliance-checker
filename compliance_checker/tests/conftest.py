@@ -1,15 +1,13 @@
 import os
 import subprocess
-
 from itertools import chain
 from pathlib import Path
 
 import pytest
-
 from netCDF4 import Dataset
 from pkg_resources import resource_filename
 
-from compliance_checker.cf import CF1_6Check, CF1_7Check, util
+from compliance_checker.cf import util
 from compliance_checker.suite import CheckSuite
 
 

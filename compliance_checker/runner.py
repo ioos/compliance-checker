@@ -3,7 +3,6 @@ import json
 import os
 import sys
 import traceback
-
 from collections import OrderedDict
 from contextlib import contextmanager
 
@@ -77,8 +76,7 @@ class ComplianceChecker(object):
         for loc in locs:  # loop through each dataset and run specified checks
             ds = cs.load_dataset(loc)
 
-            score_groups = cs.run_all(ds, checker_names, include_checks,
-                                      skip_checks)
+            score_groups = cs.run_all(ds, checker_names, include_checks, skip_checks)
             for group in score_groups.values():
                 all_groups.append(group[0])
             # TODO: consider wrapping in a proper context manager instead
@@ -131,8 +129,7 @@ class ComplianceChecker(object):
                     output_filename = "{}.json".format(
                         os.path.splitext(output_filename)[0]
                     )
-                cls.json_output(cs, score_dict, output_filename, ds_loc, limit,
-                                out_fmt)
+                cls.json_output(cs, score_dict, output_filename, ds_loc, limit, out_fmt)
 
             else:
                 raise TypeError("Invalid format %s" % out_fmt)

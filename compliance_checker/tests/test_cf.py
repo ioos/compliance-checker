@@ -2,26 +2,28 @@
 # -*- coding: utf-8 -*-
 
 import copy
+import json
 import os
+import re
 import sqlite3
-
 from itertools import chain
 from tempfile import gettempdir
 
 import numpy as np
 import pytest
-
+import requests_mock
 from netCDF4 import Dataset, stringtoarr
 
 from compliance_checker import cfutil
+from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.cf import (
     CF1_6Check,
     CF1_7Check,
     CF1_8Check,
+    CF1_9Check,
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
-from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.util import (
     StandardNameTable,
     create_cached_data_dir,
@@ -33,11 +35,12 @@ from compliance_checker.cf.util import (
 )
 from compliance_checker.suite import CheckSuite
 from compliance_checker.tests import BaseTestCase
-from compliance_checker.tests.helpers import (MockRaggedArrayRepr,
-                                              MockTimeSeries, MockVariable)
-import requests_mock
-import json
-import re
+from compliance_checker.tests.helpers import (
+    MockNetCDF,
+    MockRaggedArrayRepr,
+    MockTimeSeries,
+    MockVariable,
+)
 from compliance_checker.tests.resources import STATIC_FILES
 
 
@@ -108,7 +111,7 @@ class TestCF1_6(BaseTestCase):
             "temp",
             np.float64,
             dimensions=("time",),
-            fill_value=np.float(99999999999999999999.0),
+            fill_value=float(99999999999999999999.0),
         )
         temp.coordinates = "sigma noexist"
         ds.createVariable("sigma", np.float64, dimensions=("siglev",))
@@ -132,6 +135,7 @@ class TestCF1_6(BaseTestCase):
         """
 
         # TEST CONFORMANCE 2.2 REQUIRED
+        # TODO: Check 1D char array
 
         # check default netCDF data types
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
@@ -182,7 +186,7 @@ class TestCF1_6(BaseTestCase):
             "temp",
             np.float64,
             dimensions=("time",),
-            fill_value=np.float(99999999999999999999.0),
+            fill_value=float(99999999999999999999.0),
         )
 
         # give temp _FillValue as a float, expect good result
@@ -213,7 +217,8 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_good(result)
 
-        # now give invalid integer for valid_min; above two should still check out, this one should fail
+        # now give invalid integer for valid_min; above two should still check
+        # out, this one should fail
         ds.variables["temp"].setncattr("valid_min", 45)
         result = self.cf.check_child_attr_data_types(ds)
         self.assert_result_is_bad(result)
@@ -270,7 +275,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 3
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u"§2.3 Naming Conventions" for r in results)
+        assert all(r.name == "§2.3 Naming Conventions" for r in results)
 
         # another non-compliant dataset
         dataset = self.load_dataset(STATIC_FILES["chap2"])
@@ -279,7 +284,21 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 3
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u"§2.3 Naming Conventions" for r in results)
+        assert all(r.name == "§2.3 Naming Conventions" for r in results)
+
+        dataset = MockTimeSeries()
+        # test for ignored attributes
+        temp = dataset.createVariable("temperature", "f8", ("time",), fill_value=-9999)
+        temp.standard_name = "sea_water_temperature"
+        temp.units = "degrees_C"
+        temp.DODS = ""
+        temp._ChunkSizes = 5
+        temp._Coordinate = ""
+        temp._Unsigned = 0
+        temp._Encoding = "utf-8"
+        results = self.cf.check_naming_conventions(dataset)
+        scored, out_of, messages = get_results(results)
+        assert scored == out_of
 
     def test_check_names_unique(self):
         """
@@ -299,7 +318,7 @@ class TestCF1_6(BaseTestCase):
         assert result.value == (6, 7)
         assert (
             result.msgs[0]
-            == u"Variables are not case sensitive. Duplicate variables named: not_unique"
+            == "Variables are not case sensitive. Duplicate variables named: not_unique"
         )
 
     def test_check_dimension_names(self):
@@ -315,7 +334,7 @@ class TestCF1_6(BaseTestCase):
 
         dataset = self.load_dataset(STATIC_FILES["chap2"])
         result = self.cf.check_dimension_names(dataset)
-        assert result.msgs[0] == u"no_reason has two or more dimensions named time"
+        assert result.msgs[0] == "no_reason has two or more dimensions named time"
 
     def test_check_dimension_order(self):
         """
@@ -329,7 +348,7 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_dimension_order(dataset)
         assert result.value == (5, 6)
         assert result.msgs[0] == (
-            u"really_bad's spatio-temporal dimensions are not in the "
+            "really_bad's spatio-temporal dimensions are not in the "
             "recommended order T, Z, Y, X and/or further dimensions are not "
             "located left of T, Z, Y, X. The dimensions (and their guessed "
             "types) are latitude (Y), power (U) (with U: other/unknown; L: "
@@ -341,6 +360,77 @@ class TestCF1_6(BaseTestCase):
         self.assertEqual((3, 3), result.value)
         self.assertEqual([], result.msgs)
 
+    def test_check_fill_value_equal_missing_value(self):
+        """
+        According to CF §2.5.1 Recommendations: If both missing_value and _FillValue be used,
+        they should have the same value.
+        """
+        # TEST CONFORMANCE 2.5.1 RECOMMENDED
+        dataset = MockTimeSeries()
+        # Case of _FillValue and missing_value are not equal
+        dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2
+        dataset.variables["a"].setncattr("missing_value", [9939.9])
+
+        # Case of _FillValue and missing_value are equal
+        dataset.createVariable("b", "d", ("time",), fill_value=9999.9)
+        dataset.variables["b"][0] = 1
+        dataset.variables["b"][1] = 2
+        dataset.variables["b"].setncattr("missing_value", [9999.9])
+
+        result = self.cf.check_fill_value_equal_missing_value(dataset)
+
+        # check if the test fails when when variable "a" is checked.
+        expected_msgs = [
+            f"For the variable {v_name} the missing_value must be equal to the _FillValue"
+            for v_name in ("a")
+        ]
+
+        assert result.msgs == expected_msgs
+
+    def test_check_valid_range_or_valid_min_max_present(self):
+        """
+        2.5.1 Missing data, valid and actual range of data
+        Requirements:
+        The valid_range attribute must not be present if the
+        valid_min and/or valid_max attributes are present.
+        """
+        # TEST CONFORMANCE 2.5.1 REQUIRED
+        dataset = MockTimeSeries()
+        # Case of valid_min, valid_max, and valid_range are present
+        dataset.createVariable("a", "d", ("time",), fill_value=9999.9)
+        dataset.variables["a"][0] = 1
+        dataset.variables["a"][1] = 2
+        dataset.variables["a"].setncattr("valid_min", [-10])
+        dataset.variables["a"].setncattr("valid_max", [10])
+        dataset.variables["a"].setncattr("valid_range", [-10, 10])
+
+        # Case of valid_min and valid_max are present and valid_range is absent
+        dataset.createVariable("b", "d", ("time",), fill_value=9999.9)
+        dataset.variables["b"][0] = 1
+        dataset.variables["b"][1] = 2
+        dataset.variables["a"].setncattr("valid_min", [-10])
+        dataset.variables["a"].setncattr("valid_max", [10])
+
+        # Case of valid_min and valid_max are absent and valid_range is present
+        dataset.createVariable("c", "d", ("time",), fill_value=9999.9)
+        dataset.variables["c"][0] = 1
+        dataset.variables["c"][1] = 2
+        dataset.variables["c"].setncattr("valid_range", [-10, 10])
+
+        result = self.cf.check_valid_range_or_valid_min_max_present(dataset)
+
+        # check if the test fails when when variable "a" is checked.
+        expected_msgs = [
+            f"For the variable {v_name} the valid_range attribute must not be present "
+            f"if the valid_min and/or valid_max attributes are present"
+            for v_name in ("a")
+        ]
+
+        assert result.msgs == expected_msgs
+        assert result.value[0] == result.value[1]
+
     def test_check_fill_value_outside_valid_range(self):
         """
         2.5.1 The _FillValue should be outside the range specified by valid_range (if used) for a variable.
@@ -349,7 +439,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_fill_value_outside_valid_range(dataset)
         assert result.msgs[0] == (
-            u"salinity:_FillValue (1.0) should be outside the "
+            "salinity:_FillValue (1.0) should be outside the "
             "range specified by valid_min/valid_max (-10, 10)"
         )
 
@@ -357,7 +447,7 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_fill_value_outside_valid_range(dataset)
         assert result.value == (1, 2)
         assert result.msgs[0] == (
-            u"wind_speed:_FillValue (12.0) should be outside the "
+            "wind_speed:_FillValue (12.0) should be outside the "
             "range specified by valid_min/valid_max (0.0, 20.0)"
         )
 
@@ -366,7 +456,7 @@ class TestCF1_6(BaseTestCase):
         §2.6.1 the NUG defined global attribute Conventions to the string value
         "CF-1.6"
         """
-        # CONFORMANCE 2.6.1 REQUIRED
+        # TEST CONFORMANCE 2.6.1 REQUIRED
         # Note: conformance doc for 1.6 mentions CF-1.5
         # :Conventions = "CF-1.6"
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
@@ -383,7 +473,7 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_conventions_version(dataset)
         self.assertFalse(result.value)
         assert result.msgs[0] == (
-            u"§2.6.1 Conventions global attribute does not contain " '"CF-1.6"'
+            "§2.6.1 Conventions global attribute does not contain " '"CF-1.6"'
         )
 
     def test_check_convention_globals(self):
@@ -404,7 +494,7 @@ class TestCF1_6(BaseTestCase):
         assert result.value[0] != result.value[1]
         assert (
             result.msgs[0]
-            == u"§2.6.2 global attribute title should exist and be a non-empty string"
+            == "§2.6.2 global attribute title should exist and be a non-empty string"
         )
 
     def test_check_convention_possibly_var_attrs(self):
@@ -432,7 +522,7 @@ class TestCF1_6(BaseTestCase):
         assert result.value[0] != result.value[1]
         assert (
             result.msgs[0]
-            == u"§2.6.2 references global attribute should be a non-empty string"
+            == "§2.6.2 references global attribute should be a non-empty string"
         )
 
         # load bad_data_type.nc
@@ -446,8 +536,7 @@ class TestCF1_6(BaseTestCase):
 
         assert result.value[0] != result.value[1]
         assert (
-            result.msgs[0]
-            == u"§2.6.2 salinity:institution should be a non-empty string"
+            result.msgs[0] == "§2.6.2 salinity:institution should be a non-empty string"
         )
 
     def test_check_standard_name(self):
@@ -469,7 +558,18 @@ class TestCF1_6(BaseTestCase):
         # 9 vars checked, 8 fail
         assert len(results) == 9
         assert score < out_of
-        assert all(r.name == u"§3.3 Standard Name" for r in results)
+        assert all(r.name == "§3.3 Standard Name" for r in results)
+
+        # check recommendations with a misspelled standard name
+        dataset = MockTimeSeries()
+        temperature = dataset.createVariable("temperature", "f8", ("time",))
+        temperature.units = "degree_C"
+        temperature.standard_name = "sea_water_temperatrue"
+        results = self.cf.check_standard_name(dataset)
+        score, out_of, messages = get_results(results)
+        # only check for recommendation substring as recommendations might
+        # vary with differing standard name tables
+        assert " Possible close match(es):" in messages[-1]
 
         # load different ds --  ll vars pass this check
         dataset = self.load_dataset(STATIC_FILES["reduced_horizontal_grid"])
@@ -479,18 +579,30 @@ class TestCF1_6(BaseTestCase):
 
         dataset = MockTimeSeries()
         temperature = dataset.createVariable("temperature", "f8", ("time",))
+        temperature.standard_name = "sea_water_temperature"
         temperature.ancillary_variables = "temperature_flag"
 
         temperature_flag = dataset.createVariable("temperature_flag", "i2", ("time",))
         # bad modifier
         temperature_flag.standard_name = "sea_water_temperature status flag"
         _, _, messages = get_results(self.cf.check_standard_name(dataset))
-        assert ('Standard name modifier "status flag" for variable temperature_flag is not a valid modifier according to CF Appendix C'
-                in messages)
+        assert (
+            'Standard name modifier "status flag" for variable temperature_flag is not a valid modifier according to CF Appendix C'
+            in messages
+        )
         # proper name, units supplied
         temperature_flag.standard_name = "sea_water_temperature status_flag"
         temperature_flag.units = "1"
         _, _, messages = get_results(self.cf.check_standard_name(dataset))
+
+        # TEST CONFORMANCE 3 RECOMMENDED
+        # long_name or standard_name present
+        del temperature.standard_name
+        _, _, messages = get_results(self.cf.check_standard_name(dataset))
+        assert (
+            "Attribute long_name or/and standard_name is highly "
+            "recommended for variable temperature" in messages
+        )
 
     def test_cell_bounds(self):
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
@@ -540,7 +652,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_cell_measure2"])
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
-        message = u"Cell measure variable box_area referred to by PS is not present in dataset variables"
+        message = "Cell measure variable box_area referred to by PS is not present in dataset variables"
         assert message in messages
 
     def test_climatology_cell_methods(self):
@@ -588,6 +700,31 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         self.assertEqual(score, out_of)
 
+        # TEST CONFORMMANCE 7.4 REQUIRED 5/6
+        dataset.variables["climatology_bounds"] = MockVariable(
+            dataset.variables["climatology_bounds"]
+        )
+        clim_bounds = dataset.variables["climatology_bounds"]
+        clim_bounds.standard_name = "forecast_reference_time"
+        clim_bounds.calendar = "proleptic_gregorian"
+        clim_bounds.units = "hours since 1999-02-01"
+        results = self.cf.check_climatological_statistics(dataset)
+        score, out_of, messages = get_results(results)
+        for attr_name in ("calendar", "standard_name", "units"):
+            assert (
+                f"Attribute {attr_name} must have the same value in both variables {clim_bounds.name} and time"
+                in messages
+            )
+        # TEST CONFORMANCE 7.4 REQUIRED 6/6
+        clim_bounds.missing_value = clim_bounds._FillValue = -9999.99
+        results = self.cf.check_climatological_statistics(dataset)
+        score, out_of, messages = get_results(results)
+        assert (
+            f"Climatology variable {clim_bounds.name} may not contain attributes _FillValue or missing_value"
+            in messages
+        )
+
+        # TEST CONFORMANCE 7.4 REQUIRED 3/6
         bad_dim_ds = MockTimeSeries()
         bad_dim_ds.createDimension("clim_bounds", 3)
 
@@ -595,9 +732,25 @@ class TestCF1_6(BaseTestCase):
         bad_dim_ds.createVariable("clim_bounds", "f8", ("time"))
         temp.climatology = "clim_bounds"
         results = self.cf.check_climatological_statistics(bad_dim_ds)
-        assert results[0].value[0] < results[0].value[1]
-        assert (results[0].msgs[0] == 'Climatology dimension "clim_bounds" '
-                "should only contain two elements")
+        assert results[1].value[0] < results[1].value[1]
+        assert (
+            results[1].msgs[0] == 'Climatology dimension "clim_bounds" '
+            "should only contain two elements"
+        )
+        # TEST CONFORMANCE 7.4 REQUIRED 1/6
+        assert (
+            results[0].msgs[0]
+            == "Variable temperature is not detected as a time coordinate "
+            "variable, but has climatology attribute"
+        )
+
+        # TEST CONFORMANCE 7.4 REQUIRED 2/6
+        bad_dim_ds.variables["time"].climatology = 1
+        results = self.cf.check_climatological_statistics(bad_dim_ds)
+        assert (
+            results[0].msgs[0]
+            == "Variable time must have a climatology attribute which is a string"
+        )
 
     def test_check_ancillary_variables(self):
         """
@@ -607,15 +760,15 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["rutgers"])
         results = self.cf.check_ancillary_variables(dataset)
         result_dict = {result.name: result for result in results}
-        result = result_dict[u"§3.4 Ancillary Data"]
+        result = result_dict["§3.4 Ancillary Data"]
         assert result.value == (2, 2)
 
         dataset = self.load_dataset(STATIC_FILES["bad_reference"])
         results = self.cf.check_ancillary_variables(dataset)
         result_dict = {result.name: result for result in results}
-        result = result_dict[u"§3.4 Ancillary Data"]
+        result = result_dict["§3.4 Ancillary Data"]
         assert result.value == (1, 2)
-        assert u"temp_qc is not a variable in this dataset" == result.msgs[0]
+        assert "temp_qc is not a variable in this dataset" == result.msgs[0]
 
     def test_download_standard_name_table(self):
         """
@@ -668,6 +821,12 @@ class TestCF1_6(BaseTestCase):
         # only 4 variables in this dataset do not have perfect scores
         imperfect = [r.value for r in results if r.value[0] < r.value[1]]
         assert len(imperfect) == 4
+        dataset.variables["conductivity_qc"] = MockVariable(
+            dataset.variables["conductivity_qc"]
+        )
+        # Test with single element.  Will fail, but should not throw exception.
+        dataset.variables["conductivity_qc"].flag_values = np.array([1], dtype=np.int8)
+        results = self.cf.check_flags(dataset)
 
     def test_check_flag_masks(self):
         dataset = self.load_dataset(STATIC_FILES["ghrsst"])
@@ -681,9 +840,28 @@ class TestCF1_6(BaseTestCase):
         flags_var = dataset.createVariable("flags", "f8", ("time",))
         flags_var.standard_name = "quality_flag"
         flags_var.flag_meanings = "LAND"
+        flags_var.flag_values = [1]
+        # test single element
         flags_var.flag_masks = np.array([1], dtype="i2")
         results = self.cf.check_flags(dataset)
         assert scored > 0 and scored == out_of
+        # TEST CONFORMANCE 3.5 REQUIRED 7/8
+        flags_var.flag_masks = np.array([0, 1], dtype="i2")
+        results = self.cf.check_flags(dataset)
+        score, out_of, messages = get_results(results)
+        assert (
+            "flag_masks for variable flags must not contain zero as an "
+            "element" in messages
+        )
+        # IMPLEMENTATION 3.5 REQUIRED 1/1
+        flags_var.flag_masks = np.array([1], dtype="i2")
+        flags_var.flag_values = np.array([2], dtype="i2")
+        results = self.cf.check_flags(dataset)
+        score, out_of, messages = get_results(results)
+        assert (
+            "flag masks and flag values for 'flags' combined don't equal "
+            "flag values" in messages
+        )
 
     def test_check_bad_units(self):
         """Load a dataset with units that are expected to fail (bad_units.nc).
@@ -707,12 +885,10 @@ class TestCF1_6(BaseTestCase):
         results_list = list(chain(*(r.msgs for r in all_results if r.msgs)))
 
         # check the results only have '§3.1 Units' as the header
-        assert all(r.name == u"§3.1 Units" for r in all_results)
+        assert all(r.name == "§3.1 Units" for r in all_results)
 
         # check that all the expected variables have been hit
-        assert all(
-            any(s in msg for msg in results_list) for s in ["time", "lev"]
-        )
+        assert all(any(s in msg for msg in results_list) for s in ["time", "lev"])
 
     def test_latitude(self):
         """
@@ -731,7 +907,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 12
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
-        assert (r.name == u"§4.1 Latitude Coordinate" for r in results)
+        assert (r.name == "§4.1 Latitude Coordinate" for r in results)
 
         # check with another ds -- all 6 vars checked pass
         dataset = self.load_dataset(STATIC_FILES["rotated_pole_grid"])
@@ -739,7 +915,7 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
         assert len(results) == 6
         assert scored == out_of
-        assert (r.name == u"§4.1 Latitude Coordinate" for r in results)
+        assert (r.name == "§4.1 Latitude Coordinate" for r in results)
 
         # hack to avoid writing to read-only file
         dataset.variables["rlat"] = MockVariable(dataset.variables["rlat"])
@@ -749,7 +925,7 @@ class TestCF1_6(BaseTestCase):
         rlat.units = "degrees_north"
         results = self.cf.check_latitude(dataset)
         scored, out_of, messages = get_results(results)
-        wrong_format = u"Grid latitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
+        wrong_format = "Grid latitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
         self.assertTrue(wrong_format.format(rlat.name, rlat.units) in messages)
         rlat.units = "radians"
         results = self.cf.check_latitude(dataset)
@@ -773,7 +949,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 12
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
-        assert all(r.name == u"§4.2 Longitude Coordinate" for r in results)
+        assert all(r.name == "§4.2 Longitude Coordinate" for r in results)
 
         # check different dataset # TODO can be improved for check_latitude too
         dataset = self.load_dataset(STATIC_FILES["rotated_pole_grid"])
@@ -788,7 +964,7 @@ class TestCF1_6(BaseTestCase):
         rlon.units = "degrees_east"
         results = self.cf.check_longitude(dataset)
         scored, out_of, messages = get_results(results)
-        wrong_format = u"Grid longitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
+        wrong_format = "Grid longitude variable '{}' should use degree equivalent units without east or north components. Current units are {}"
         self.assertTrue(wrong_format.format(rlon.name, rlon.units) in messages)
         rlon.units = "radians"
         results = self.cf.check_longitude(dataset)
@@ -846,14 +1022,14 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["example-grid"])
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
         assert len(results) == 1
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
         # non-compliance -- one check fails
         dataset = self.load_dataset(STATIC_FILES["illegal-vertical"])
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
         scored, out_of, messages = get_results(results)
         assert len(results) == 1
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
         assert scored < out_of
 
     def test_appendix_d(self):
@@ -961,7 +1137,7 @@ class TestCF1_6(BaseTestCase):
         self.assertTrue(
             no_missing_terms(
                 "ocean_sigma_z_coordinate",
-                {"sigma", "eta", "depth", "depth_c", "nsigma", "zlev"},
+                {"sigma", "eta", "depth", "depth_c", "zlev"},
                 dimless_vertical_coordinates_1_6,
             )
         )
@@ -985,7 +1161,7 @@ class TestCF1_6(BaseTestCase):
         # all variables checked (2) pass
         assert len(results) == 2
         assert scored == out_of
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
         # Check negative compliance -- 3 out of 4 pass
 
@@ -995,7 +1171,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 4
         assert scored <= out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
         # test with an invalid formula_terms
         dataset.variables["lev2"] = MockVariable(dataset.variables["lev2"])
@@ -1010,7 +1186,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 4
         assert scored <= out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
     def test_is_time_variable(self):
         var1 = MockVariable()
@@ -1058,13 +1234,31 @@ class TestCF1_6(BaseTestCase):
         for r in results:
             self.assertTrue(r.value)
 
+        # TEST CONFORMANCE 4.4 REQUIRED 1/2
         dataset = self.load_dataset(STATIC_FILES["bad"])
         results = self.cf.check_time_coordinate(dataset)
 
         scored, out_of, messages = get_results(results)
 
-        assert u"time does not have correct time units" in messages
+        assert "time does not have correct time units" in messages
         assert (scored, out_of) == (1, 2)
+        # TEST CONFORMANCE 4.4 REQUIRED 2/2, RECOMMENDED 1, 2/2
+        dataset = MockTimeSeries()
+        # NB: >= 60 seconds is nonstandard, but isn't actually a CF requirement
+        # until CF 1.9 onwards
+        dataset.variables["time"].units = "months since 0-1-1 23:00:60"
+        dataset.variables[
+            "time"
+        ].climatology = (
+            "nonexistent_variable_reference_only_used_to_test_year_zero_failure"
+        )
+        results = self.cf.check_time_coordinate(dataset)
+        scored, out_of, messages = get_results(results)
+        assert scored < out_of
+        assert (
+            "Using relative time interval of months or years is not recommended for coordinate variable time"
+            in messages
+        )
 
     def test_check_calendar(self):
         """Load a dataset with an invalid calendar attribute (non-comp/bad.nc).
@@ -1078,17 +1272,128 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad"])
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
-
-        assert (
-            u"§4.4.1 Variable time should have a valid calendar: 'nope' is not a valid calendar"
-            in messages
+        # TEST CONFORMANCE 4.4.1 REQUIRED 2, 3 / 5
+        bad_month_msg = (
+            "For nonstandard calendar on variable time, attribute "
+            "month_lengths must be supplied as a 12-element integer array"
         )
+        assert bad_month_msg in messages
+
+        dataset = MockTimeSeries()
+        # no calendar should not raise an issue on time coordinate variables
+        del dataset.variables["time"].calendar
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert not messages
+
+        # test case insensivity
+        valid_calendars = (
+            "GREGORIAN",
+            "STANDARD",
+            "PROLEPTIC_GREGORIAN",
+            "NOLEAP",
+            "365_DAY",
+            "ALL_LEAP",
+            "366_DAY",
+            "360_DAY",
+            "JULIAN",
+            "NONE",
+        )
+        for calendar_uppercase in valid_calendars:
+            # need to make a new MockTimeSeries when attribute deleted for
+            # calendar attributes to work properly
+            dataset = MockTimeSeries()
+            dataset.calendar = calendar_uppercase
+            results = self.cf.check_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert scored == out_of
+
+        # test custom month length calendars
+        dataset.variables["time"].calendar = "custom"
+        dataset.variables["time"].month_lengths = np.array([30.3], dtype=np.double)
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert bad_month_msg in messages
+
+        dataset.variables["time"].month_lengths = np.array(
+            [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31], dtype=int
+        )
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert bad_month_msg not in messages
+
+        # TEST CONFORMANCE 4.4.1 REQUIRED 4,5/5
+        leap_month_msg = (
+            "When attribute leap_month is supplied for variable "
+            "time, the value must be a scalar integer between 1 "
+            "and 12"
+        )
+        dataset.variables["time"].leap_month = np.array([0], dtype=np.uint8)
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert leap_month_msg in messages
+
+        dataset.variables["time"].leap_month = 2
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert leap_month_msg not in messages
+        # TEST CONFORMANCE 4.4.1 RECOMMENDED 1/2
+        assert (
+            "For time variable time, attribute leap_year must be present "
+            "if leap_month attribute is defined" in messages
+        )
+
+        # TEST CONFORMANCE 4.4.1 REQUIRED 5/5
+        leap_year_msg = (
+            "When attribute leap_year is supplied for variable "
+            "time, the value must be a scalar integer"
+        )
+
+        dataset.variables["time"].leap_year = ["2.18"]
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert leap_year_msg in messages
+
+        dataset.variables["time"].leap_year = 4
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert leap_year_msg not in messages
+
+        for calendar in ("standard", "gregorian"):
+            dataset.variables["time"].calendar = calendar
+            dataset.variables["time"].units = "seconds since 1582-10-15T00:00Z"
+            # 500 element array with some failing values
+            # _FillValue at first element even though should not be present
+            # in time coordinate variable to test bad data handling
+            # TEST CONFORMANCE 4.4.1 RECOMMENDED 4/4
+            dataset.variables["time"][1:] = np.arange(-2, 497)
+            results = self.cf.check_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert messages[-1] == (
+                "Variable time has time values prior to "
+                "1582-10-15T00:00Z and utilizes the "
+                "standard or Gregorian calendar"
+            )
+            dataset.variables["time"][:] = np.arange(0, 500)
+            results = self.cf.check_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert messages[-1] == (
+                "Variable time has standard or Gregorian "
+                "calendar and does not cross 1582-10-15T00:00Z"
+            )
+            # TEST CONFORMANCE 4.4.1 RECOMMENDED 3/4
+            if calendar == "gregorian":
+                assert (
+                    "For time variable time, when using the standard "
+                    'Gregorian calendar, the value "standard" is preferred '
+                    'over "gregorian" for the calendar attribute' in messages
+                )
 
     def test_check_aux_coordinates(self):
         dataset = self.load_dataset(STATIC_FILES["illegal-aux-coords"])
         results = self.cf.check_aux_coordinates(dataset)
         result_dict = {result.name: result for result in results}
-        result = result_dict[u"§5 Coordinate Systems"]
+        result = result_dict["§5 Coordinate Systems"]
         assert result.msgs == []  # shouldn't have any messages
         assert result.value == (4, 4)
 
@@ -1099,7 +1404,7 @@ class TestCF1_6(BaseTestCase):
 
         result_dict = {result.name: result for result in results}
         result = result_dict[
-            u"§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
+            "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
         ]
         assert result.value == (2, 2)
         assert (scored, out_of) == (2, 2)
@@ -1119,7 +1424,7 @@ class TestCF1_6(BaseTestCase):
         assert scored < out_of
         assert all(
             r.name
-            == u"§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
+            == "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
             for r in results
         )
 
@@ -1129,7 +1434,7 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
         assert scored == out_of
         assert len(results) == 1
-        assert all(r.name == u"§5.3 Reduced Horizontal Grid" for r in results)
+        assert all(r.name == "§5.3 Reduced Horizontal Grid" for r in results)
 
         # load failing ds -- one variable has failing check
         dataset = self.load_dataset(STATIC_FILES["bad-rhgrid"])
@@ -1138,7 +1443,7 @@ class TestCF1_6(BaseTestCase):
         assert scored != out_of
         assert len(results) == 2
         assert len([r for r in results if r.value[0] < r.value[1]]) == 1
-        assert all(r.name == u"§5.3 Reduced Horizontal Grid" for r in results)
+        assert all(r.name == "§5.3 Reduced Horizontal Grid" for r in results)
 
     def test_check_grid_mapping(self):
         dataset = self.load_dataset(STATIC_FILES["mapping"])
@@ -1152,7 +1457,6 @@ class TestCF1_6(BaseTestCase):
         assert all(r.name == expected_name for r in results.values())
 
     def test_is_geophysical(self):
-
         # check whether string type variable, which are not `cf_role`, are
         # properly processed
         dataset = self.load_dataset(STATIC_FILES["string"])
@@ -1286,7 +1590,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 2
         assert scored < out_of
         assert (
-            u"6.1.1 'Neverland' specified by 'neverland' is not a valid region"
+            "6.1.1 'Neverland' specified by 'neverland' is not a valid region"
             in messages
         )
 
@@ -1380,21 +1684,29 @@ class TestCF1_6(BaseTestCase):
         # units should not exist for
         temp_flag.units = "1"
 
+        time_flag = dataset.createVariable("time_flag", "i1", ("time",))
+        time_flag.standard_name = "time status_flag"
+        time_flag.flag_values = np.array([1, 2], dtype=np.int8)
+        time_flag.flag_meanings = "good bad"
+
+        lat_flag = dataset.createVariable("lat_flag", "i1", ("time",))
+        lat_flag.standard_name = "latitude status_flag"
+
         temp.ancillary_variables = "temp_flag"
         scored, out_of, messages = get_results(self.cf.check_units(dataset))
-        assert scored != out_of
-        assert ("units attribute for variable temperature_flag must be unset "
-                "when status_flag modifier is set")
+        n_failed = out_of - scored
+        assert n_failed == 1
+        expected_messages = {
+            "units attribute for variable temp_flag must be unset when status_flag standard name modifier is set"
+        }
+        assert set(messages) == expected_messages
 
         del temp_flag.units
         scored, out_of, messages = get_results(self.cf.check_units(dataset))
         assert scored == out_of
 
-        temp_counts = dataset.createVariable("temp_counts", "i1", ("time",))
+        dataset.createVariable("temp_counts", "i1", ("time",))
         temp.ancillary_variables += " temp_counts"
-
-
-
 
     def test_check_duplicates(self):
         """
@@ -1409,7 +1721,7 @@ class TestCF1_6(BaseTestCase):
 
         # only one check run here, so we can directly compare all the values
         assert scored != out_of
-        assert messages[0] == u"'temp' has duplicate axis X defined by [lon_rho, lon_u]"
+        assert messages[0] == "'temp' has duplicate axis X defined by [lon_rho, lon_u]"
 
     def test_check_multi_dimensional_coords(self):
         """
@@ -1423,7 +1735,7 @@ class TestCF1_6(BaseTestCase):
         # 4 variables were checked in this ds, 2 of which passed
         assert len(results) == 4
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
-        assert all(r.name == u"§5 Coordinate Systems" for r in results)
+        assert all(r.name == "§5 Coordinate Systems" for r in results)
 
     def test_64bit(self):
         dataset = self.load_dataset(STATIC_FILES["ints64"])
@@ -1432,7 +1744,6 @@ class TestCF1_6(BaseTestCase):
         suite.run(dataset, "cf")
 
     def test_variable_feature_check(self):
-
         # non-compliant dataset -- 1/1 fail
         dataset = self.load_dataset(STATIC_FILES["bad-trajectory"])
         results = self.cf.check_variable_features(dataset)
@@ -1440,7 +1751,7 @@ class TestCF1_6(BaseTestCase):
         assert len(results) == 2
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 1
-        assert all(r.name == u"§9.1 Features and feature types" for r in results)
+        assert all(r.name == "§9.1 Features and feature types" for r in results)
 
         # compliant dataset
         dataset = self.load_dataset(STATIC_FILES["trajectory-complete"])
@@ -1469,7 +1780,7 @@ class TestCF1_6(BaseTestCase):
 
         # check the results only have expected headers
         assert set([r.name for r in results]).issubset(
-            set([u"§7.1 Cell Boundaries", u"§7.3 Cell Methods"])
+            set(["§7.1 Cell Boundaries", "§7.3 Cell Methods"])
         )
 
         # check that all the expected variables have been hit
@@ -1501,7 +1812,7 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
 
         self.assertTrue(
-            u'§7.3.3 The non-standard "comment:" element must come after any standard elements in cell_methods for variable temperature'
+            '§7.3.3 The non-standard "comment:" element must come after any standard elements in cell_methods for variable temperature'
             in messages
         )
 
@@ -1518,7 +1829,7 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_cell_methods(nc_obj)
         scored, out_of, messages = get_results(results)
         self.assertTrue(
-            u'§7.3.3 Invalid cell_methods keyword "invalid_keyword:" for variable temperature. Must be one of [interval, comment]'
+            '§7.3.3 Invalid cell_methods keyword "invalid_keyword:" for variable temperature. Must be one of [interval, comment]'
             in messages
         )
 
@@ -1529,7 +1840,7 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_cell_methods(nc_obj)
         scored, out_of, messages = get_results(results)
         assert (
-            u"§7.3.3 Parenthetical content inside temperature:cell_methods is not well formed: interval 0.2 m interval: 0.01 degrees"
+            "§7.3.3 Parenthetical content inside temperature:cell_methods is not well formed: interval 0.2 m interval: 0.01 degrees"
             in messages
         )
 
@@ -1555,6 +1866,28 @@ class TestCF1_7(BaseTestCase):
 
         self.cf = CF1_7Check()
 
+    def test_check_external_variables(self):
+        dataset = MockTimeSeries()
+        # bad type should be ignored here and instead handled by CF Appendix A
+        dataset.external_variables = 1
+        result = self.cf.check_external_variables(dataset)
+        assert result.value[0] == result.value[1] == 0
+        dataset.external_variables = "ext1 ext2 ext3"
+        result = self.cf.check_external_variables(dataset)
+        assert result.value[0] == result.value[1]
+        # TEST CONFORMANCE 2.6.3 REQUIRED 2/2
+        # dataset should not contain any external variables which are present in
+        # the dataset's variables
+        dataset.createVariable("ext3", "i4", ())
+        result = self.cf.check_external_variables(dataset)
+        assert result.value[0] < result.value[1]
+        assert (
+            "Global attribute external_variables should not have any "
+            "variable names which are present in the dataset. Currently, "
+            "the following names appear in both external_variables "
+            "and the dataset's variables: {'ext3'}" in result.msgs
+        )
+
     def test_check_actual_range(self):
         """Test the check_actual_range method works as expected"""
 
@@ -1578,7 +1911,7 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 1
-        assert messages[0] == u"actual_range of 'a' must be 2 elements"
+        assert messages[0] == "actual_range of 'a' must be 2 elements"
         dataset.close()
 
         dataset = MockTimeSeries()
@@ -1677,12 +2010,14 @@ class TestCF1_7(BaseTestCase):
         dataset.close()
 
     def test_check_cell_boundaries(self):
-        """Check our over-ridden check_cell_boundaries emthod behaves as expected"""
+        """
+        Check our over-ridden check_cell_boundaries method behaves as expected
+        """
 
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
         results = self.cf.check_cell_boundaries(dataset)
         score, out_of, messages = get_results(results)
-        assert (score, out_of) == (2, 2)
+        assert (score, out_of) == (0, 2)
 
         dataset = self.load_dataset(STATIC_FILES["cf_example_cell_measures"])
         results = self.cf.check_cell_boundaries(dataset)
@@ -1719,6 +2054,38 @@ class TestCF1_7(BaseTestCase):
                 "'a' has 'formula_terms' attr, bounds variable 'b' must also have 'formula_terms'"
                 in messages
             )
+
+    def test_check_cell_boundaries_interval(self):
+        """
+        7.1 Cell Boundaries
+        Recommendations: (1/2)
+        The points specified by a coordinate or auxiliary coordinate variable
+        should lie within, or on the boundary, of the cells specified by the
+        associated boundary variable.
+        """
+
+        # create Cells on a longitude axis
+        dataset = MockTimeSeries()
+        dataset.createDimension("rnv", 2)
+        dataset.createDimension("rlon", 2)
+        dataset.createVariable("rlon", "d", ("rlon",))
+        dataset.createVariable("rlon_bnds", "d", ("rlon", "rnv"))
+
+        rlon = dataset.variables["rlon"]
+        rlon.standard_name = "longitude"
+        rlon.units = "degrees_east"
+        rlon.axis = "X"
+        rlon.long_name = "Longitude"
+        rlon.bounds = "rlon_bnds"
+        rlon[:] = np.array([-97.5, -99.5], dtype=np.float64)
+
+        rlon_bnds = dataset.variables["rlon_bnds"]
+        rlon_bnds.long_name = "Longitude Cell Boundaries"
+        rlon_bnds[:] = np.array([[-97, -98], [-98, -99]], dtype=np.float64)
+
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (1, 2)
 
     def test_cell_measures(self):
         """Over-ride the test_cell_measures from CF1_6"""
@@ -1766,7 +2133,7 @@ class TestCF1_7(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_cell_measure2"])
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
-        message = u"Cell measure variable box_area referred to by PS is not present in dataset variables"
+        message = "Cell measure variable box_area referred to by PS is not present in dataset variables"
         assert message in messages
 
     def test_variable_features(self):
@@ -2040,8 +2407,7 @@ class TestCF1_7(BaseTestCase):
 
             # this time, assign computed_standard_name
             ret_val = []
-            dataset.variables["lev"].setncattr("computed_standard_name",
-                                               "air_pressure")
+            dataset.variables["lev"].setncattr("computed_standard_name", "air_pressure")
 
             # run the check
             self.cf._check_dimensionless_vertical_coordinate_1_7(
@@ -2071,7 +2437,7 @@ class TestCF1_7(BaseTestCase):
         # all variables checked (2) pass
         assert len(results) == 3
         assert scored == out_of
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
         # make one variable's computed_standard_name incorrect, one should fail
         dataset.variables["lev"].computed_standard_name = "definitely_not_right"
@@ -2080,7 +2446,7 @@ class TestCF1_7(BaseTestCase):
 
         assert len(results) == 3
         assert scored < out_of
-        assert all(r.name == u"§4.3 Vertical Coordinate" for r in results)
+        assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
     def test_check_attr_type(self):
         """
@@ -2090,40 +2456,47 @@ class TestCF1_7(BaseTestCase):
         # create a temporary variable and test this only
         nc_obj = MockTimeSeries()
         nc_obj.createVariable("temperature", "d", ("time",))
-        nc_obj.variables["temperature"].setncattr("test_att", np.float64(45))
         att_name = "test_att"
         _var = nc_obj.variables["temperature"]
 
         # first, test all valid checks show that it's valid
-        attr = "my_attr_value"  # string
+        _var.test_att = "my_attr_value"  # string
         attr_type = "S"
-        result = self.cf._check_attr_type(att_name, attr_type, attr)
+        result = self.cf._check_attr_type(att_name, attr_type, _var.test_att)
         self.assertTrue(result[0])
 
-        attr = np.int64(1)
+        _var.test_att = np.int8(1)
         attr_type = "N"
-        self.assertTrue(self.cf._check_attr_type(att_name, attr_type, attr)[0])
+        self.assertTrue(self.cf._check_attr_type(att_name, attr_type, _var.test_att)[0])
 
-        attr = np.float64(45)
+        _var.test_att = np.float64(45)
         attr_type = "D"
-        self.assertTrue(self.cf._check_attr_type(att_name, attr_type, attr, _var)[0])
+        self.assertTrue(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att, _var)[0]
+        )
 
         # check failures
-        attr = "my_attr_value"
+        _var.test_att = "my_attr_value"
         attr_type = "N"  # should be numeric
-        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr)[0])
+        self.assertFalse(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att)[0]
+        )
 
-        attr = np.int(64)
+        _var.test_att = np.int8(64)
         attr_type = "S"  # should be string
-        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr)[0])
+        self.assertFalse(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att)[0]
+        )
 
         nc_obj = MockTimeSeries()
         nc_obj.createVariable("temperature", "d", ("time",))
-        nc_obj.variables["temperature"].setncattr("test_att", np.int32(45))
+        nc_obj.variables["temperature"].setncattr("test_att", 45)
         _var = nc_obj.variables["temperature"]
-        attr = np.int32(45)
+        _var.test_att = np.int8(45)
         attr_type = "D"  # should match
-        self.assertFalse(self.cf._check_attr_type(att_name, attr_type, attr, _var)[0])
+        self.assertFalse(
+            self.cf._check_attr_type(att_name, attr_type, _var.test_att, _var)[0]
+        )
 
     def test_check_grid_mapping_attr_condition(self):
         """
@@ -2269,7 +2642,6 @@ class TestCF1_7(BaseTestCase):
         dataset.close()
 
     def test_check_gmattr_existence_condition_ell_pmerid_hdatum(self):
-
         # test good (all)
         dataset = MockTimeSeries()
         dataset.createVariable("lev", "d")  # dtype=double, dims=1
@@ -2326,13 +2698,13 @@ class TestCF1_7(BaseTestCase):
         self.assertFalse(r[1].value)
         self.assertTrue(r[1].msgs)
 
-        temp.setncattr("scale_factor", np.uint(5))
+        temp.setncattr("scale_factor", np.uint32(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         self.assertFalse(r[1].value)
         self.assertTrue(r[1].msgs)
 
         # set good
-        temp.setncattr("scale_factor", np.float(5))
+        temp.setncattr("scale_factor", float(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         self.assertTrue(r[1].value)
         self.assertFalse(r[1].msgs)
@@ -2344,18 +2716,18 @@ class TestCF1_7(BaseTestCase):
 
         # set same dtype
         dataset = MockTimeSeries()  # time lat lon depth
-        temp = dataset.createVariable("temp", np.int, dimensions=("time",))
-        temp.setncattr("scale_factor", np.int(5))
+        temp = dataset.createVariable("temp", int, dimensions=("time",))
+        temp.setncattr("scale_factor", int(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         self.assertTrue(r[1].value)
         self.assertFalse(r[1].msgs)
 
         # integer variable type (int8, int16, int32) compared against
-        #floating point add_offset/scale_factor
+        # floating point add_offset/scale_factor
         for var_bytes in ("1", "2", "4"):
-            coarse_temp = dataset.createVariable(f"coarse_temp_{var_bytes}",
-                                                 f"i{var_bytes}",
-                                                 dimensions=("time",))
+            coarse_temp = dataset.createVariable(
+                f"coarse_temp_{var_bytes}", f"i{var_bytes}", dimensions=("time",)
+            )
             coarse_temp.setncattr("scale_factor", np.float32(23.0))
             coarse_temp.setncattr("add_offset", np.double(-2.1))
             r = self.cf.check_add_offset_scale_factor_type(dataset)
@@ -2363,10 +2735,12 @@ class TestCF1_7(BaseTestCase):
             # are same type should be false
             self.assertFalse(r[0].value)
             # TEST CONFORMANCE 8.1 REQUIRED 1/3
-            self.assertEqual(r[0].msgs[0],
-                   "When both scale_factor and add_offset are supplied for "
-                   f"variable coarse_temp_{var_bytes}, they must have the "
-                   "same type")
+            self.assertEqual(
+                r[0].msgs[0],
+                "When both scale_factor and add_offset are supplied for "
+                f"variable coarse_temp_{var_bytes}, they must have the "
+                "same type",
+            )
             # Individual checks for scale_factor/add_offset should be OK,
             # however
             self.assertTrue(r[-1].value)
@@ -2664,277 +3038,113 @@ class TestCF1_8(BaseTestCase):
         assert results[0].value[0] == results[0].value[1]
 
 
-class TestCF1_8(BaseTestCase):
+class TestCF1_9(BaseTestCase):
     def setUp(self):
-        self.cf = CF1_8Check()
+        self.cf = CF1_9Check()
 
-    def test_point_geometry_simple(self):
+    def test_time_variable_over_sixty_seconds(self):
         dataset = MockTimeSeries()
-        fake_data = dataset.createVariable("someData", "f8", ("time",))
-        fake_data.geometry = "geometry"
-        x = dataset.createVariable("x", "f8", ())
-        y = dataset.createVariable("y", "f8", ())
-        geom_var = dataset.createVariable("geometry", "i4", ())
-        geom_var.geometry_type = "point"
-        geom_var.node_coordinates = "x y"
-        x[:] = 1
-        y[:] = 1
-        self.cf.check_geometry(dataset)
-
-    def test_point_geometry_multiple(self):
-        dataset = MockTimeSeries()
-        dataset.createDimension("point_count", 3)
-        fake_data = dataset.createVariable("someData", "f8", ("time",))
-        fake_data.geometry = "geometry"
-        x = dataset.createVariable("x", "f8", ("point_count",))
-        y = dataset.createVariable("y", "f8", ("point_count",))
-        geom_var = dataset.createVariable("geometry", "i4", ())
-        geom_var.geometry_type = "point"
-        geom_var.node_coordinates = "x y"
-        x[:] = np.array([10, 20, 30])
-        y[:] = np.array([30, 35, 21])
-        results = self.cf.check_geometry(dataset)
-        assert results[0].value[0] == results[0].value[1]
-        dataset.createDimension("point_count_2", 2)
-        # can't recreate y, even with del issued first
-        y2 = dataset.createVariable("y2", "f8", ("point_count_2",))
-        geom_var.node_coordinates = "x y2"
-        y2[:] = np.array([30, 35])
-        results = self.cf.check_geometry(dataset)
-        assert results[0].value[0] < results[0].value[1]
-
-    def test_line_geometry(self):
-        dataset = self.load_dataset(STATIC_FILES["line_geometry"])
-        self.cf.check_geometry(dataset)
-
-    def test_polygon_geometry(self):
-        dataset = self.load_dataset(STATIC_FILES["polygon_geometry"])
-        self.cf.check_geometry(dataset)
-        dataset.variables["interior_ring"] = MockVariable(
-            dataset.variables["interior_ring"]
+        # TEST CF CONFORMANCE 4.4 REQUIRED
+        dataset.variables["time"].units = "months since 0-1-1 23:00:60"
+        results = self.cf.check_time_coordinate(dataset)
+        scored, out_of, messages = get_results(results)
+        assert (
+            'Time coordinate variable "time" must have units with seconds less than 60'
+            in messages
         )
-        # Flip sign indicator for interior rings.  Should cause failure
-        flip_ring_bits = (dataset.variables["interior_ring"][:] == 0).astype(int)
-        dataset.variables["interior_ring"][:] = flip_ring_bits
-        results = self.cf.check_geometry(dataset)
-        # There should be messages regarding improper polygon order
-        assert results[0].value[0] < results[0].value[1]
-        assert results[0].msgs
 
-    def test_bad_lsid(self):
-        """
-        Tests malformed and nonexistent LSIDs
-        """
+    def test_time_variable_has_calendar(self):
+        self.cf = CF1_9Check()
+        # TEST CONFORMANCE 4.4.1 RECOMMENDED CF 1.9
         dataset = MockTimeSeries()
-        # TODO: handle scalar dimension
-        dataset.createDimension("taxon", 1)
-        abundance = dataset.createVariable("abundance", "f8", ("time",))
-        abundance.standard_name = (
-            "number_concentration_of_biological_taxon_in_sea_water"
+        del dataset.variables["time"].calendar
+        results = self.cf.check_time_coordinate_variable_has_calendar(dataset)
+        scored, out_of, messages = get_results(results)
+        assert (
+            'Time coordinate variable "time" should have a string valued attribute "calendar"'
+            in messages
         )
-        abundance.units = "m-3"
-        abundance.coordinates = "taxon_name taxon_lsid"
-        taxon_name = dataset.createVariable("taxon_name", str, ("taxon",))
-        taxon_name.standard_name = "biological_taxon_name"
-        taxon_lsid = dataset.createVariable("taxon_lsid", str, ("taxon",))
-        taxon_lsid.standard_name = "biological_taxon_lsid"
-        taxon_name[0] = "Esox lucius"
-        taxon_lsid[0] = "urn:lsid:itis.gov:itis_tsn:99999999999"
-        with requests_mock.Mocker() as m:
-            # bad ID
-            taxon_lsid[0] = "99999999999"
-            m.get(
-                "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999",
-                status_code=400,
-                text="<html><head><title>400 Bad Request</head><body><h1>Bad Request</h1><p>Unknown LSID</p></body></html>",
-            )
-            results = self.cf.check_taxa(dataset)
-            assert len(results) == 1
-            messages = results[0].msgs
-            assert results[0].value[0] < results[0].value[1]
-            assert len(messages) == 1
-            taxon_lsid[
-                0
-            ] = "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999"
-            results = self.cf.check_taxa(dataset)
-            assert messages[0].startswith(
-                "Taxon id must match one of the following forms:"
-            )
-            assert results[0].value[0] < results[0].value[1]
+        # FIXME: NetCDF files shouldn't normally be modified so we can usually
+        # depend on cached results. Here we need to recreate the checker
+        # instance in order to not have previous results included pass condition
+        dataset.variables["time"].calendar = "standard"
+        results = self.cf.check_calendar(dataset)
+        # no time coordinate present, i.e. there is no time variable name with
+        # the same name as the time dimension name.
+        self.cf = CF1_9Check()
+        # need to manually construct the netCDF object here --
+        # get_variables_by_attributes appears to be interfering here
+        dataset = MockNetCDF()
+        dataset.createDimension("time", 500)
+        dataset.createVariable("time2", "f8", ("time",))
+        dataset.variables["time2"].standard_name = "time"
+        dataset.variables["time2"].units = "seconds since 1970-01-01 00:00:00"
+        dataset.variables["time2"].axis = "T"
+        results = self.cf.check_calendar(dataset)
+        # results array should be empty as no time coordinate variable detected
+        assert not results
 
-    def test_taxonomy_data_worms_valid(self):
-        """
-        Tests taxonomy data with a mocked pyworms call
-        """
-        with requests_mock.Mocker() as m:
-            # assume LSID lookups for WoRMS return valid HTTP status code
-            m.get(
-                re.compile(
-                    r"^http://www.lsid.info/urn:lsid:marinespecies.org:taxname:\d+$"
-                )
-            )
-            response_1 = json.dumps(
-                {
-                    "AphiaID": 104464,
-                    "url": "http://www.marinespecies.org/aphia.php?p=taxdetails&id=104464",
-                    "scientificname": "Calanus finmarchicus",
-                    "authority": "(Gunnerus, 1770)",
-                    "status": "accepted",
-                    "unacceptreason": None,
-                    "taxonRankID": 220,
-                    "rank": "Species",
-                    "valid_AphiaID": 104464,
-                    "valid_name": "Calanus finmarchicus",
-                    "valid_authority": "(Gunnerus, 1770)",
-                    "parentNameUsageID": 104152,
-                    "kingdom": "Animalia",
-                    "phylum": "Arthropoda",
-                    "class": "Hexanauplia",
-                    "order": "Calanoida",
-                    "family": "Calanidae",
-                    "genus": "Calanus",
-                    "citation": "Walter, T.C.; Boxshall, G. (2021). World of Copepods Database. Calanus finmarchicus (Gunnerus, 1770). Accessed through: World Register of Marine Species at: http://www.marinespecies.org/aphia.php?p=taxdetails&id=104464 on 2021-11-11",
-                    "lsid": "urn:lsid:marinespecies.org:taxname:104464",
-                    "isMarine": 1,
-                    "isBrackish": 0,
-                    "isFreshwater": 0,
-                    "isTerrestrial": 0,
-                    "isExtinct": None,
-                    "match_type": "exact",
-                    "modified": "2020-10-06T15:25:25.040Z",
-                }
-            )
-            m.get(
-                "http://www.marinespecies.org/rest/AphiaRecordByAphiaID/104464",
-                text=response_1,
-            )
-            response_2 = json.dumps(
-                {
-                    "AphiaID": 104466,
-                    "url": "http://www.marinespecies.org/aphia.php?p=taxdetails&id=104466",
-                    "scientificname": "Calanus helgolandicus",
-                    "authority": "(Claus, 1863)",
-                    "status": "accepted",
-                    "unacceptreason": None,
-                    "taxonRankID": 220,
-                    "rank": "Species",
-                    "valid_AphiaID": 104466,
-                    "valid_name": "Calanus helgolandicus",
-                    "valid_authority": "(Claus, 1863)",
-                    "parentNameUsageID": 104152,
-                    "kingdom": "Animalia",
-                    "phylum": "Arthropoda",
-                    "class": "Hexanauplia",
-                    "order": "Calanoida",
-                    "family": "Calanidae",
-                    "genus": "Calanus",
-                    "citation": "Walter, T.C.; Boxshall, G. (2021). World of Copepods Database. Calanus helgolandicus (Claus, 1863). Accessed through: World Register of Marine Species at: http://www.marinespecies.org/aphia.php?p=taxdetails&id=104466 on 2021-11-11",
-                    "lsid": "urn:lsid:marinespecies.org:taxname:104466",
-                    "isMarine": 1,
-                    "isBrackish": 0,
-                    "isFreshwater": 0,
-                    "isTerrestrial": 0,
-                    "isExtinct": None,
-                    "match_type": "exact",
-                    "modified": "2004-12-21T15:54:05Z",
-                }
-            )
-            m.get(
-                "http://www.marinespecies.org/rest/AphiaRecordByAphiaID/104466",
-                text=response_2,
-            )
-            dataset = self.load_dataset(STATIC_FILES["taxonomy_example"])
-
-            results = self.cf.check_taxa(dataset)
-            assert len(results) == 1
-            assert results[0].value[0] == results[0].value[1]
-
-    def test_taxonomy_data_itis_valid(self):
-        """
-        Tests taxonomy data with a mocked ITIS call
-        """
+        # TEST CONFORMANCE 4.4.1
         dataset = MockTimeSeries()
-        # TODO: handle scalar dimension
-        dataset.createDimension("taxon", 1)
-        abundance = dataset.createVariable("abundance", "f8", ("time",))
-        abundance.standard_name = (
-            "number_concentration_of_biological_taxon_in_sea_water"
-        )
-        abundance.units = "m-3"
-        abundance.coordinates = "taxon_name taxon_lsid"
-        taxon_name = dataset.createVariable("taxon_name", str, ("taxon",))
-        taxon_name.standard_name = "biological_taxon_name"
-        taxon_lsid = dataset.createVariable("taxon_lsid", str, ("taxon",))
-        taxon_lsid.standard_name = "biological_taxon_lsid"
-        taxon_name[0] = "Esox lucius"
-        taxon_lsid[0] = "urn:lsid:itis.gov:itis_tsn:162139"
+        dataset.variables["time"].units = "months since 0-1-1 23:00:60"
+        results = self.cf.check_calendar(dataset)
+        scored, out_of, messages = get_results(results)
 
-        with requests_mock.Mocker() as m:
-            m.get(re.compile(r"^http://www.lsid.info/urn:lsid:itis.gov:itis_tsn:\d+$"))
-            response = r"""{"acceptedNameList":{"acceptedNames":[null],"class":"gov.usgs.itis.itis_service.data.SvcAcceptedNameList","tsn":"162139"},"class":"gov.usgs.itis.itis_service.data.SvcFullRecord","commentList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonCommentList","comments":[null],"tsn":"162139"},"commonNameList":{"class":"gov.usgs.itis.itis_service.data.SvcCommonNameList","commonNames":[{"class":"gov.usgs.itis.itis_service.data.SvcCommonName","commonName":"northern pike","language":"English","tsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcCommonName","commonName":"grand brochet","language":"French","tsn":"162139"}],"tsn":"162139"},"completenessRating":{"class":"gov.usgs.itis.itis_service.data.SvcGlobalSpeciesCompleteness","completeness":"","rankId":220,"tsn":"162139"},"coreMetadata":{"class":"gov.usgs.itis.itis_service.data.SvcCoreMetadata","credRating":"TWG standards met","rankId":220,"taxonCoverage":"","taxonCurrency":"","taxonUsageRating":"valid","tsn":"162139","unacceptReason":""},"credibilityRating":{"class":"gov.usgs.itis.itis_service.data.SvcCredibilityData","credRating":"TWG standards met","tsn":"162139"},"currencyRating":{"class":"gov.usgs.itis.itis_service.data.SvcCurrencyData","rankId":220,"taxonCurrency":"","tsn":"162139"},"dateData":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonDateData","initialTimeStamp":"1996-06-13 14:51:08.0","tsn":"162139","updateDate":"2004-01-22"},"expertList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonExpertList","experts":[{"class":"gov.usgs.itis.itis_service.data.SvcTaxonExpert","comment":"Research Curator of Fishes, North Carolina State Museum of Natural Sciences, Research Laboratory, 4301 Reedy Creek Rd., Raleigh, NC, 27607, USA","expert":"Wayne C. Starnes","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"updateDate":"2004-02-23"}],"tsn":"162139"},"geographicDivisionList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonGeoDivisionList","geoDivisions":[{"class":"gov.usgs.itis.itis_service.data.SvcTaxonGeoDivision","geographicValue":"North America","updateDate":"1998-09-14"}],"tsn":"162139"},"hierarchyUp":{"author":null,"class":"gov.usgs.itis.itis_service.data.SvcHierarchyRecord","parentName":"Esox","parentTsn":"162138","rankName":"Species","taxonName":"Esox lucius","tsn":"162139"},"jurisdictionalOriginList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOriginList","jurisdictionalOrigins":[{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOrigin","jurisdictionValue":"Alaska","origin":"Native","updateDate":"2004-01-22"},{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOrigin","jurisdictionValue":"Canada","origin":"Native","updateDate":"2004-01-22"},{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOrigin","jurisdictionValue":"Continental US","origin":"Native & Introduced","updateDate":"2004-01-22"}],"tsn":"162139"},"kingdom":{"class":"gov.usgs.itis.itis_service.data.SvcKingdomInfo","kingdomId":"5","kingdomName":"Animalia  ","tsn":"162139"},"otherSourceList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSourceList","otherSources":[{"acquisitionDate":"2003-03-17","class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSource","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"source":"Catalog of Fishes, 17-Mar-2003","sourceComment":"http://www.calacademy.org/research/ichthyology/catalog/","sourceType":"website","updateDate":"2004-02-11","version":"13-Mar-03"},{"acquisitionDate":"1996-07-29","class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSource","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"source":"NODC Taxonomic Code","sourceComment":"","sourceType":"database","updateDate":"2010-01-14","version":"8.0"},{"acquisitionDate":"2003-05-06","class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSource","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"northern pike","refLanguage":"English","referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"grand brochet","refLanguage":"French","referredTsn":"162139"}],"source":"<a href=\"http://www.menv.gouv.qc.ca/biodiversite/centre.htm\">CDP","sourceComment":"","sourceType":"database","updateDate":"2003-05-08","version":"1999"}],"tsn":"162139"},"parentTSN":{"class":"gov.usgs.itis.itis_service.data.SvcParentTsn","parentTsn":"162138","tsn":"162139"},"publicationList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonPublicationList","publications":[{"actualPubDate":"2004-07-01","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"1-888569-61-1","issn":"0097-0638","listedPubDate":"2004-01-01","pages":"ix + 386","pubComment":"Full author list: Nelson, Joseph S., Edwin J. Crossman, H�ctor Espinosa-P�rez, Lloyd T. Findley, Carter R. Gilbert, Robert N. Lea, and James D. Williams","pubName":"American Fisheries Society Special Publication, no. 29","pubPlace":"Bethesda, Maryland, USA","publisher":"American Fisheries Society","referenceAuthor":"Nelson, Joseph S., Edwin J. Crossman, H. Espinosa-P�rez, L. T. Findley, C. R. Gilbert, et al., eds.","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"grand brochet","refLanguage":"French","referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"northern pike","refLanguage":"English","referredTsn":"162139"}],"title":"Common and scientific names of fishes from the United States, Canada, and Mexico, Sixth Edition","updateDate":"2021-10-27"},{"actualPubDate":"2003-12-31","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"","issn":"","listedPubDate":"2003-12-31","pages":"","pubComment":"As-yet (2003) unpublished manuscript from 1998","pubName":"Checklist of Vertebrates of the United States, the U.S. Territories, and Canada","pubPlace":"","publisher":"","referenceAuthor":"Banks, R. C., R. W. McDiarmid, A. L. Gardner, and W. C. Starnes","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"title":"","updateDate":"2021-08-26"},{"actualPubDate":"1980-01-01","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"","issn":"0097-0638","listedPubDate":"1980-01-01","pages":"174","pubComment":"","pubName":"American Fisheries Society Special Publication, no. 12","pubPlace":"Bethesda, Maryland, USA","publisher":"American Fisheries Society","referenceAuthor":"Robins, Richard C., Reeve M. Bailey, Carl E. Bond, James R. Brooker, Ernest A. Lachner, et al.","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"northern pike","refLanguage":"English","referredTsn":"162139"}],"title":"A List of Common and Scientific Names of Fishes from the United States and Canada, Fourth Edition","updateDate":"2021-10-27"},{"actualPubDate":"1991-01-01","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"0-913235-70-9","issn":"0097-0638","listedPubDate":"1991-01-01","pages":"183","pubComment":"","pubName":"American Fisheries Society Special Publication, no. 20","pubPlace":"Bethesda, Maryland, USA","publisher":"American Fisheries Society","referenceAuthor":"Robins, Richard C., Reeve M. Bailey, Carl E. Bond, James R. Brooker, Ernest A. Lachner, et al.","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"title":"Common and Scientific Names of Fishes from the United States and Canada, Fifth Edition","updateDate":"2021-10-27"}],"tsn":"162139"},"scientificName":{"author":"Linnaeus, 1758","class":"gov.usgs.itis.itis_service.data.SvcScientificName","combinedName":"Esox lucius","kingdom":null,"tsn":"162139","unitInd1":null,"unitInd2":null,"unitInd3":null,"unitInd4":null,"unitName1":"Esox                               ","unitName2":"lucius","unitName3":null,"unitName4":null},"synonymList":{"class":"gov.usgs.itis.itis_service.data.SvcSynonymNameList","synonyms":[null],"tsn":"162139"},"taxRank":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonRankInfo","kingdomId":"5","kingdomName":"Animalia  ","rankId":"220","rankName":"Species        ","tsn":"162139"},"taxonAuthor":{"authorship":"Linnaeus, 1758","class":"gov.usgs.itis.itis_service.data.SvcTaxonAuthorship","tsn":"162139","updateDate":"2004-04-09"},"tsn":"162139","unacceptReason":{"class":"gov.usgs.itis.itis_service.data.SvcUnacceptData","tsn":"162139","unacceptReason":null},"usage":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonUsageData","taxonUsageRating":"valid","tsn":"162139"}}"""
-            m.get(
-                "https://www.itis.gov/ITISWebService/jsonservice/getFullRecordFromTSN?tsn=162139",
-                text=response,
+        # test greater than or equal to one zero year for Julian and Gregorian
+        # calendars
+        dataset = MockTimeSeries()
+        dataset.variables["time"].units = "seconds since 0-01-01 00:00:00"
+        for calendar_name in ("standard", "julian", "gregorian"):
+            dataset.variables["time"].calendar = calendar_name
+            results = self.cf.check_time_coordinate_variable_has_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert (
+                'For time variable "time", when using the Gregorian or Julian '
+                "calendars, the use of year zero is not recommended. "
+                "Furthermore, the use of year zero to signify a climatological "
+                "variable as in COARDS is deprecated in CF." in messages
             )
 
-            results = self.cf.check_taxa(dataset)
-
-            assert len(results) == 1
-            assert results[0].value[0] == results[0].value[1]
-
-            # try non-matching name
-            taxon_name[0] = "Morone saxitilis"
-            results = self.cf.check_taxa(dataset)
-            result = results[0]
-            assert result.msgs == [
-                "Supplied taxon name and ITIS scientific name do not match. "
-                "Supplied taxon name is 'Morone saxitilis', ITIS scientific name "
-                "for TSN 162139 is 'Esox lucius.'"
-            ]
-
-    def test_taxonomy_skip_lsid(self):
-        """
-        Tests that nodata/unset LSID values are skipped for validation
-        """
+    def test_domain(self):
         dataset = MockTimeSeries()
-        # TODO: handle scalar dimension
-        dataset.createDimension("taxon", 1)
-        abundance = dataset.createVariable("abundance", "f8", ("time",))
-        abundance.standard_name = (
-            "number_concentration_of_biological_taxon_in_sea_water"
-        )
-        abundance.units = "m-3"
-        abundance.coordinates = "taxon_name taxon_lsid"
-        taxon_name = dataset.createVariable("taxon_name", str, ("taxon",))
-        taxon_name.standard_name = "biological_taxon_name"
-        taxon_lsid = dataset.createVariable("taxon_lsid", str, ("taxon",))
-        taxon_lsid.standard_name = "biological_taxon_lsid"
-        # This would fail if checked against an LSID or even for binomial
-        # nomenclature, obviously.
-        taxon_name[0] = "No check"
-        results = self.cf.check_taxa(dataset)
-        assert len(results[0].msgs) == 0
-        assert results[0].value[0] == results[0].value[1]
+        domain_var = dataset.createVariable("domain", "c", ())
+        domain_var.long_name = "Domain variable"
+        domain_var.coordinates = "lon lat depth"
+        results = self.cf.check_domain_variables(dataset)
+        self.assertEqual(results[0].value[0], results[0].value[1])
+        self.assertFalse(results[0].msgs)
 
-        dataset = MockTimeSeries()
-        # TODO: handle scalar dimension?
-        dataset.createDimension("string80", 80)
-        dataset.createDimension("taxon", 1)
-        abundance = dataset.createVariable("abundance", "f8", ("time",))
-        abundance.standard_name = (
-            "number_concentration_of_biological_taxon_in_sea_water"
+        # missing long_name attribute
+        del domain_var.long_name
+        results = self.cf.check_domain_variables(dataset)
+        self.assertNotEqual(results[0].value[0], results[0].value[1])
+        self.assertTrue(results[0].msgs)
+        self.assertTrue(
+            results[0].msgs[0]
+            == "For domain variable domain it is recommended that attribute long_name be present and a string"
         )
-        abundance.units = "m-3"
-        abundance.coordinates = "taxon_name taxon_lsid"
-        taxon_name = dataset.createVariable("taxon_name", "S1", ("taxon", "string80"))
-        taxon_name.standard_name = "biological_taxon_name"
-        taxon_lsid = dataset.createVariable("taxon_lsid", "S1", ("taxon", "string80"))
-        taxon_lsid.standard_name = "biological_taxon_lsid"
-        fake_str = "No check"
-        taxon_name[0] = stringtoarr(fake_str, 80)
-        results = self.cf.check_taxa(dataset)
-        assert len(results[0].msgs) == 0
-        assert results[0].value[0] == results[0].value[1]
+
+        # bad coordinates variable
+        domain_var.coordinates = "lon lat depth xyxz abc"
+        domain_var.long_name = "Domain variable"
+        results = self.cf.check_domain_variables(dataset)
+        self.assertNotEqual(results[0].value[0], results[0].value[1])
+        self.assertTrue(
+            results[0].msgs[0]
+            == "Could not find the following variables referenced in "
+            "coordinates attribute from domain variable domain: "
+            "xyxz, abc"
+        )
+
+        del dataset
+        dataset = MockTimeSeries()
+        # domain should be dimensionless -- currently not an error in
+        # compliance checker, but not detected as a domain variable either
+        domain_var = dataset.createVariable("domain", "c", ("time",))
+        domain_var.long_name = "Domain variable"
+        domain_var.coordinates = "lon lat depth"
+        results = self.cf.check_domain_variables(dataset)
+        assert len(results) == 0
 
 
 class TestCFUtil(BaseTestCase):
@@ -2977,7 +3187,6 @@ class TestCFUtil(BaseTestCase):
         )
 
     def test_is_dataset_valid_ragged_array_repr_featureType(self):
-
         # first test single featureType
 
         # ----- timeseries, indexed ----- #

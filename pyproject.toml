@@ -7,3 +7,6 @@ markers = [
     "integration: marks integration tests (deselect with '-m \"not integration\"')",
     "slowtest: marks slow tests (deselect with '-m \"not slowtest\"')"
 ]
+
+[tool.isort]
+profile = "black"

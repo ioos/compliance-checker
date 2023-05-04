@@ -3,10 +3,7 @@
 
 import pytest
 
-from netCDF4 import Dataset
-
 from compliance_checker.cf import util
-
 
 # get current std names table version (it changes)
 std_names = util.StandardNameTable()
@@ -21,15 +18,15 @@ dataset_stem__expected_messages = [
     (
         "sldmb_43093_agg",
         [
-            u"attribute time:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
-            u"attribute lat:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
-            u"attribute lon:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
-            u"§2.6.2 global attribute history should exist and be a non-empty string",
-            u"standard_name temperature is not defined in Standard Name Table v{}".format(
+            "attribute time:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
+            "attribute lat:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
+            "attribute lon:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
+            "§2.6.2 global attribute history should exist and be a non-empty string",
+            "standard_name temperature is not defined in Standard Name Table v{}. Possible close match(es): ['air_temperature', 'soil_temperature', 'snow_temperature']".format(
                 std_names._version
             ),
-            u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lat, is not a variable in this dataset",
-            u"temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
+            "temperature's auxiliary coordinate specified by the coordinates attribute, precise_lat, is not a variable in this dataset",
+            "temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
         ],
     ),
     (
@@ -49,28 +46,28 @@ dataset_stem__expected_messages = [
             "Attribute 'valid_range' (type: <class 'numpy.int16'>) and parent variable 'wind_direction_qc' (type: <class 'numpy.int8'>) must have equivalent datatypes",
             "Attribute 'valid_range' (type: <class 'numpy.int16'>) and parent variable 'visibility_qc' (type: <class 'numpy.int8'>) must have equivalent datatypes",
             '§2.6.1 Conventions global attribute does not contain "CF-1.8"',
-            "standard_name visibility is not defined in Standard Name Table v{}".format(
+            "standard_name visibility is not defined in Standard Name Table v{}. Possible close match(es): ['visibility_in_air']".format(
                 std_names._version
             ),
-            "Standard name modifier \"data_quality\" for variable visibility_qc is not a valid modifier according to CF Appendix C",
-            "standard_name wind_direction is not defined in Standard Name Table v{}".format(
+            'Standard name modifier "data_quality" for variable visibility_qc is not a valid modifier according to CF Appendix C',
+            "standard_name wind_direction is not defined in Standard Name Table v{}. Possible close match(es): ['wind_to_direction', 'wind_from_direction', 'wind_gust_from_direction']".format(
                 std_names._version
             ),
-            "Standard name modifier \"data_quality\" for variable wind_direction_qc is not a valid modifier according to CF Appendix C",
-            "standard_name wind_gust is not defined in Standard Name Table v{}".format(
+            'Standard name modifier "data_quality" for variable wind_direction_qc is not a valid modifier according to CF Appendix C',
+            "standard_name wind_gust is not defined in Standard Name Table v{}. Possible close match(es): ['y_wind_gust', 'x_wind_gust', 'wind_speed_of_gust']".format(
                 std_names._version
             ),
-            "Standard name modifier \"data_quality\" for variable wind_gust_qc is not a valid modifier according to CF Appendix C",
-            "Standard name modifier \"data_quality\" for variable air_temperature_qc is not a valid modifier according to CF Appendix C",
-            "standard_name use_wind is not defined in Standard Name Table v{}".format(
+            'Standard name modifier "data_quality" for variable wind_gust_qc is not a valid modifier according to CF Appendix C',
+            'Standard name modifier "data_quality" for variable air_temperature_qc is not a valid modifier according to CF Appendix C',
+            "standard_name use_wind is not defined in Standard Name Table v{}. Possible close match(es): ['y_wind', 'x_wind']".format(
                 std_names._version
             ),
-            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(
+            "standard_name barometric_pressure is not defined in Standard Name Table v{}. Possible close match(es): ['air_pressure', 'reference_pressure', 'barometric_altitude']".format(
                 std_names._version
             ),
-            "Standard name modifier \"data_quality\" for variable barometric_pressure_qc is not a valid modifier according to CF Appendix C",
-            "Standard name modifier \"data_quality\" for variable wind_speed_qc is not a valid modifier according to CF Appendix C",
-            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(
+            'Standard name modifier "data_quality" for variable barometric_pressure_qc is not a valid modifier according to CF Appendix C',
+            'Standard name modifier "data_quality" for variable wind_speed_qc is not a valid modifier according to CF Appendix C',
+            "standard_name barometric_pressure is not defined in Standard Name Table v{}. Possible close match(es): ['air_pressure', 'reference_pressure', 'barometric_altitude']".format(
                 std_names._version
             ),
             "CF recommends latitude variable 'lat' to use units degrees_north",
@@ -81,23 +78,23 @@ dataset_stem__expected_messages = [
     (
         "3mf07",
         [
-            u"latitude:valid_min must be a numeric type not a string",
-            u"latitude:valid_max must be a numeric type not a string",
-            u"longitude:valid_min must be a numeric type not a string",
-            u"longitude:valid_max must be a numeric type not a string",
-            u"§2.6.2 references global attribute should be a non-empty string",
-            u"§2.6.2 comment global attribute should be a non-empty string",
-            u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for variable flag (profile)",
-            u"dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for variable haul (profile)",
+            "latitude:valid_min must be a numeric type not a string",
+            "latitude:valid_max must be a numeric type not a string",
+            "longitude:valid_min must be a numeric type not a string",
+            "longitude:valid_max must be a numeric type not a string",
+            "§2.6.2 references global attribute should be a non-empty string",
+            "§2.6.2 comment global attribute should be a non-empty string",
+            "dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for variable flag (profile)",
+            "dimensions for auxiliary coordinate variable z (z) are not a subset of dimensions for variable haul (profile)",
         ],
     ),
     (
         "ooi_glider",
         [
-            u"§2.6.2 comment global attribute should be a non-empty string",
-            u"Attribute long_name or/and standard_name is highly recommended for variable deployment",
-            u"latitude variable 'latitude' should define standard_name='latitude' or axis='Y'",
-            u"longitude variable 'longitude' should define standard_name='longitude' or axis='X'",
+            "§2.6.2 comment global attribute should be a non-empty string",
+            "Attribute long_name or/and standard_name is highly recommended for variable deployment",
+            "latitude variable 'latitude' should define standard_name='latitude' or axis='Y'",
+            "longitude variable 'longitude' should define standard_name='longitude' or axis='X'",
         ],
     ),
     (
@@ -115,7 +112,7 @@ dataset_stem__expected_messages = [
     ),
     (
         "kibesillah",
-        [u"§2.6.2 global attribute title should exist and be a non-empty string"],
+        ["§2.6.2 global attribute title should exist and be a non-empty string"],
     ),
     (
         "pr_inundation",
@@ -140,14 +137,14 @@ dataset_stem__expected_messages = [
     (
         "ww3",
         [
-            u"§2.6.2 global attribute title should exist and be a non-empty string",
-            u"§2.6.2 global attribute history should exist and be a non-empty string",
-            u"§2.6.1 Conventions field is not present",
-            u"Attribute long_name or/and standard_name is highly recommended for variable time",
-            u"Attribute long_name or/and standard_name is highly recommended for variable lon",
-            u"Attribute long_name or/and standard_name is highly recommended for variable lat",
-            u"latitude variable 'lat' should define standard_name='latitude' or axis='Y'",
-            u"longitude variable 'lon' should define standard_name='longitude' or axis='X'",
+            "§2.6.2 global attribute title should exist and be a non-empty string",
+            "§2.6.2 global attribute history should exist and be a non-empty string",
+            "§2.6.1 Conventions field is not present",
+            "Attribute long_name or/and standard_name is highly recommended for variable time",
+            "Attribute long_name or/and standard_name is highly recommended for variable lon",
+            "Attribute long_name or/and standard_name is highly recommended for variable lat",
+            "latitude variable 'lat' should define standard_name='latitude' or axis='Y'",
+            "longitude variable 'lon' should define standard_name='longitude' or axis='X'",
         ],
     ),
     (
@@ -155,30 +152,30 @@ dataset_stem__expected_messages = [
         [
             # TODO: referenced/relative time is treated like time units
             'Units "hours since 2016-01-01T12:00:00Z" for variable time_offset must be convertible to canonical units "s"',
-            "standard_name cloud_cover is not defined in Standard Name Table v{}".format(
+            "standard_name cloud_cover is not defined in Standard Name Table v{}. Possible close match(es): ['land_cover', 'land_cover_lccs', 'cloud_albedo']".format(
                 std_names._version
             ),
-            u"standard_name dew_point is not defined in Standard Name Table v{}".format(
+            "standard_name dew_point is not defined in Standard Name Table v{}. Possible close match(es): ['dew_point_depression', 'dew_point_temperature']".format(
                 std_names._version
             ),
             (
-                u"GRID is not a valid CF featureType. It must be one of point, timeseries, "
+                "GRID is not a valid CF featureType. It must be one of point, timeseries, "
                 "trajectory, profile, timeseriesprofile, trajectoryprofile"
             ),
             (
-                u"global attribute _CoordSysBuilder should begin with a letter and "
+                "global attribute _CoordSysBuilder should begin with a letter and "
                 "be composed of letters, digits, and underscores"
             ),
-            u'units for cl, "fraction" are not recognized by UDUNITS',
+            'units for cl, "fraction" are not recognized by UDUNITS',
         ],
     ),
     (
         "bad_cf_role",
         [
-            u"§2.6.2 global attribute title should exist and be a non-empty string",
-            u"§2.6.2 global attribute history should exist and be a non-empty string",
-            u"§2.6.1 Conventions field is not present",
-            u"§9.5 The only acceptable values of cf_role for Discrete Geometry CF data sets are timeseries_id, profile_id, and trajectory_id",
+            "§2.6.2 global attribute title should exist and be a non-empty string",
+            "§2.6.2 global attribute history should exist and be a non-empty string",
+            "§2.6.1 Conventions field is not present",
+            "§9.5 The only acceptable values of cf_role for Discrete Geometry CF data sets are timeseries_id, profile_id, and trajectory_id",
         ],
     ),
     pytest.param(
@@ -223,7 +220,6 @@ mult_msgs_diff = "Failed to find the following messages:\n{missing_msgs}\n\n\
 
 
 class TestCFIntegration:
-
     # --------------------------------------------------------------------------------
     # Helper Methods
     # --------------------------------------------------------------------------------
@@ -307,7 +303,7 @@ class TestCFIntegration:
         # it's not clear to me what this is supposed to be doing -- this else clause is outside of the if
         else:
             raise AssertionError(
-                u'"dimensions for auxiliary coordinate variable siglay (node, siglay) '
+                '"dimensions for auxiliary coordinate variable siglay (node, siglay) '
                 'are not a subset of dimensions for variable u (siglay, nele, time)"'
                 " not in messages"
             )

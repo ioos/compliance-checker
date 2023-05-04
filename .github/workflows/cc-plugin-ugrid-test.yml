@@ -3,7 +3,6 @@ name: UGRID Plugin Tests
 on:
   pull_request:
   push:
-    branches: [master]
 
 jobs:
   run:
@@ -17,19 +16,12 @@ jobs:
       with:
         environment-file: false
 
-    - name: Python ${{ matrix.python-version }}
+    - name: Python
       shell: bash -l {0}
       run: >
         micromamba create --name TEST python=3 pip --file requirements.txt --file test_requirements.txt --channel conda-forge
         && micromamba activate TEST
         && pip install -e . --no-deps --force-reinstall
-
-    - name: Conda Info
-      shell: bash -l {0}
-      run: |
-        source activate TEST
-        conda info --all
-        conda list
 
     - name: cc-plugin-glider tests
       shell: bash -l {0}
