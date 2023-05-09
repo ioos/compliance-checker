@@ -12,7 +12,6 @@ from tempfile import gettempdir
 import numpy as np
 import pytest
 import requests_mock
-
 from netCDF4 import Dataset, stringtoarr
 
 from compliance_checker import cfutil
@@ -2757,17 +2756,14 @@ class TestCF1_8(BaseTestCase):
         dataset = MockTimeSeries()
         # TEST CONFORMANCE 2.7 REQUIRED 1/4
         nonroot_group = dataset.createGroup("nonroot")
-        dummy = nonroot_group.createVariable("dummy", "i2", ())
-        dummy.Conventions = "CF-1.8"
-        dummy.external_variables = "ext1"
+        nonroot_group.setncattr("Conventions", "CF-1.8")
+        nonroot_group.setncattr("external_variables", "ext1")
         results = self.cf.check_groups(dataset)
-        bad_msg_template = ("§2.7.2 Note: attribute '{}' found on non-root "
-                            "group 'nonroot'. It is allowed in order to provide "
-                            "additional provenance and description of the "
-                            "subsidiary data. It does not override "
-                            "attributes from the parent groups.")
-        bad_messages = {bad_msg_template.format(attr_name) for attr_name in
-                        ["Conventions", "external_variables"]}
+        bad_msg_template = '§2.7.2 Attribute "{}" MAY ONLY be used in the root group and SHALL NOT be duplicated or overridden in child groups.'
+        bad_messages = {
+            bad_msg_template.format(attr_name)
+            for attr_name in ["Conventions", "external_variables"]
+        }
         assert bad_messages == set(results[0].msgs)
 
     def test_point_geometry_simple(self):

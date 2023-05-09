@@ -89,9 +89,7 @@ class CF1_8Check(CF1_7Check):
         # Make sure `Conventions` & `external_variables` attributes are only present in the
         # root group.
         for gname in ds.groups:
-            ginstance = ds.createGroup(
-                gname
-            )  # returns existing Group; doesn't create a new one
+            ginstance = ds.groups[gname]
 
             for attr in ginstance.ncattrs():
                 if attr in CF1_8Check.ROOT_GROUP_ONLY_ATTRS:
