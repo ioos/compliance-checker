@@ -85,12 +85,11 @@ class CF1_8Check(CF1_7Check):
         ctx_hi = TestCtx(BaseCheck.HIGH, self.section_titles["2.7"])
         ctx_lo = TestCtx(BaseCheck.LOW, self.section_titles["2.7"])
 
+        # IMPLEMENTATION CONFORMANCE 2.7 REQUIRED 1/4
         # Make sure `Conventions` & `external_variables` attributes are only present in the
         # root group.
         for gname in ds.groups:
-            ginstance = ds.createGroup(
-                gname
-            )  # returns existing Group; doesn't create a new one
+            ginstance = ds.groups[gname]
 
             for attr in ginstance.ncattrs():
                 if attr in CF1_8Check.ROOT_GROUP_ONLY_ATTRS:

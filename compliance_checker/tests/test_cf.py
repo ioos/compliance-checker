@@ -2758,6 +2758,20 @@ class TestCF1_8(BaseTestCase):
     def setUp(self):
         self.cf = CF1_8Check()
 
+    def test_groups(self):
+        dataset = MockTimeSeries()
+        # TEST CONFORMANCE 2.7 REQUIRED 1/4
+        nonroot_group = dataset.createGroup("nonroot")
+        nonroot_group.setncattr("Conventions", "CF-1.8")
+        nonroot_group.setncattr("external_variables", "ext1")
+        results = self.cf.check_groups(dataset)
+        bad_msg_template = '§2.7.2 Attribute "{}" MAY ONLY be used in the root group and SHALL NOT be duplicated or overridden in child groups.'
+        bad_messages = {
+            bad_msg_template.format(attr_name)
+            for attr_name in ["Conventions", "external_variables"]
+        }
+        assert bad_messages == set(results[0].msgs)
+
     def test_point_geometry_simple(self):
         dataset = MockTimeSeries()
         fake_data = dataset.createVariable("someData", "f8", ("time",))
