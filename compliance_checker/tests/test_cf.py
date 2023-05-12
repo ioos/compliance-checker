@@ -2132,6 +2132,7 @@ class TestCF1_7(BaseTestCase):
             )
 
             dataset.variables["PS"].cell_measures = "area: no_units"
+            dataset.createVariable("no_units", "i2", ())
             results = self.cf.check_cell_measures(dataset)
             score, out_of, messages = get_results(results)
             assert (
