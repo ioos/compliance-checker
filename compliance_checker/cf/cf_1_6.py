@@ -2779,6 +2779,86 @@ class CF1_6Check(CFNCCheck):
             ret_val.append(result)
         return ret_val
 
+    def _cell_measures_core(self, ds, var, external_set, variable_template):
+        # IMPLEMENTATION CONFORMANCE REQUIRED 1/2
+        reasoning = []
+        search_str = (
+            r"^(?P<measure_type>area|volume):\s+" r"(?P<cell_measure_var_name>\w+)$"
+        )
+        search_res = regex.match(search_str, var.cell_measures)
+        if not search_res:
+            valid = False
+            reasoning.append(
+                "The cell_measures attribute for variable {} "
+                "is formatted incorrectly. It should take the "
+                "form of either 'area: cell_var' or "
+                "'volume: cell_var' where cell_var is an existing name of "
+                "a variable describing the cell measures.".format(var.name)
+            )
+        else:
+            valid = True
+            cell_measure_var_name = search_res.group("cell_measure_var_name")
+            cell_measure_type = search_res.group("measure_type")
+            # TODO: cache previous results
+            if cell_measure_var_name not in set(ds.variables.keys()).union(
+                external_set
+            ):
+                valid = False
+                reasoning.append(
+                    f"Cell measure variable {cell_measure_var_name} referred to by "
+                    f"{var.name} is not present in {variable_template}".format(
+                        cell_measure_var_name, var.name
+                    )
+                )
+            # CF 1.7+ assume external variables -- further checks can't be run here
+            elif cell_measure_var_name in external_set:
+                # can't test anything on an external var
+                return Result(
+                    BaseCheck.MEDIUM, valid, (self.section_titles["7.2"]), reasoning
+                )
+
+            else:
+                cell_measure_var = ds.variables[cell_measure_var_name]
+                if not hasattr(cell_measure_var, "units"):
+                    valid = False
+                    reasoning.append(
+                        "Cell measure variable {} is required "
+                        "to have units attribute defined".format(cell_measure_var_name)
+                    )
+                else:
+                    # IMPLEMENTATION CONFORMANCE REQUIRED 2/2
+                    # verify this combination {area: 'm2', volume: 'm3'}
+
+                    # key is valid measure types, value is expected
+                    # exponent
+                    exponent_lookup = {"area": 2, "volume": 3}
+                    exponent = exponent_lookup[search_res.group("measure_type")]
+                    conversion_failure_msg = (
+                        f'Variable "{cell_measure_var.name}" must have units which are convertible '
+                        f'to UDUNITS "m{exponent}" when variable is referred to by a {variable_template} with '
+                        f'cell_methods attribute with a measure type of "{cell_measure_type}".'
+                    )
+                    try:
+                        cell_measure_units = Unit(cell_measure_var.units)
+                    except ValueError:
+                        valid = False
+                        reasoning.append(conversion_failure_msg)
+                    else:
+                        if not cell_measure_units.is_convertible(Unit(f"m{exponent}")):
+                            valid = False
+                            reasoning.append(conversion_failure_msg)
+                    if not set(cell_measure_var.dimensions).issubset(var.dimensions):
+                        valid = False
+                        reasoning.append(
+                            "Cell measure variable {} must have "
+                            "dimensions which are a subset of "
+                            "those defined in variable {}.".format(
+                                cell_measure_var_name, var.name
+                            )
+                        )
+
+        return Result(BaseCheck.MEDIUM, valid, (self.section_titles["7.2"]), reasoning)
+
     def check_cell_measures(self, ds):
         """
         7.2 To indicate extra information about the spatial properties of a
@@ -2801,85 +2881,12 @@ class CF1_6Check(CFNCCheck):
         :return: List of results
         """
         ret_val = []
-        reasoning = []
         variables = ds.get_variables_by_attributes(
             cell_measures=lambda c: c is not None
         )
         for var in variables:
-            # IMPLEMENTATION CONFORMANCE REQUIRED 1/2
-            search_str = r"^(?:area|volume): (\w+)$"
-            search_res = regex.search(search_str, var.cell_measures)
-            if not search_res:
-                valid = False
-                reasoning.append(
-                    "The cell_measures attribute for variable {} "
-                    "is formatted incorrectly.  It should take the"
-                    " form of either 'area: cell_var' or "
-                    "'volume: cell_var' where cell_var is the "
-                    "variable describing the cell measures".format(var.name)
-                )
-            else:
-                valid = True
-                cell_meas_var_name = search_res.groups()[0]
-                # TODO: cache previous results
-                if cell_meas_var_name not in ds.variables:
-                    valid = False
-                    reasoning.append(
-                        "Cell measure variable {} referred to by "
-                        "{} is not present in dataset variables".format(
-                            cell_meas_var_name, var.name
-                        )
-                    )
-                else:
-                    cell_meas_var = ds.variables[cell_meas_var_name]
-                    if not hasattr(cell_meas_var, "units"):
-                        valid = False
-                        reasoning.append(
-                            "Cell measure variable {} is required "
-                            "to have units attribute defined.".format(
-                                cell_meas_var_name
-                            )
-                        )
-                    else:
-                        # IMPLEMENTATION CONFORMANCE REQUIRED 2/2
-                        # verify this combination {area: 'm2', volume: 'm3'}
-                        dic_expected = {"area": "m2", "volume": "m3"}
-                        dic_to_be_verified = {
-                            (var.cell_measures).split(":")[0]: cell_meas_var.units
-                        }
-
-                        if not set(dic_to_be_verified).issubset(dic_expected):
-                            valid = False
-                            reasoning.append(
-                                "Cell measure variable {} must have "
-                                "units that are consistent with the measure type."
-                                "i.e. {}.".format(cell_meas_var_name, dic_expected)
-                            )
-
-                        # verify units are recognized by UDUNITS
-                        valid_udunits = self._check_valid_udunits(
-                            ds, cell_meas_var_name
-                        )
-                        if valid_udunits.value[0] != valid_udunits.value[1]:
-                            valid = False
-                            reasoning.append(
-                                "Cell measure variable {} referred to by "
-                                "{} has a unit {} not recognized by UDUNITS".format(
-                                    cell_meas_var_name, var.name, cell_meas_var.units
-                                )
-                            )
-                    if not set(cell_meas_var.dimensions).issubset(var.dimensions):
-                        valid = False
-                        reasoning.append(
-                            "Cell measure variable {} must have "
-                            "dimensions which are a subset of "
-                            "those defined in variable {}.".format(
-                                cell_meas_var_name, var.name
-                            )
-                        )
-
-            result = Result(
-                BaseCheck.MEDIUM, valid, (self.section_titles["7.2"]), reasoning
+            result = self._cell_measures_core(
+                ds, var, ds.variables, "dataset variables"
             )
             ret_val.append(result)
 

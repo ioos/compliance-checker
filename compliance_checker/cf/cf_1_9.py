@@ -104,6 +104,7 @@ class CF1_9Check(CF1_8Check):
             for var in ds.get_variables_by_attributes(
                 coordinates=lambda c: c is not None
             )
+            # IMPLICIT
             if not var.dimensions
         ):
             domain_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["5.8"])

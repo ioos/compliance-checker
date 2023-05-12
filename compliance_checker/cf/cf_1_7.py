@@ -5,7 +5,6 @@ from warnings import warn
 
 import numpy as np
 import pyproj
-import regex
 
 from compliance_checker import cfutil
 from compliance_checker.base import BaseCheck, Result, TestCtx
@@ -453,74 +452,26 @@ class CF1_7Check(CF1_6Check):
         :return: List of results
         """
         ret_val = []
-        reasoning = []
         variables = ds.get_variables_by_attributes(
             cell_measures=lambda c: c is not None
         )
-        for var in variables:
-            search_str = r"^(?:area|volume): (\w+)$"
-            search_res = regex.search(search_str, var.cell_measures)
-            if not search_res:
-                valid = False
-                reasoning.append(
-                    "The cell_measures attribute for variable {} "
-                    "is formatted incorrectly.  It should take the"
-                    " form of either 'area: cell_var' or "
-                    "'volume: cell_var' where cell_var is the "
-                    "variable describing the cell measures".format(var.name)
-                )
+        try:
+            external_variables_str = ds.getncattr("external_variables")
+            if external_variables_str is not None:
+                external_variables_names = set(external_variables_str.split(" "))
             else:
-                valid = True
-                cell_meas_var_name = search_res.groups()[0]
-                # TODO: cache previous results
-
-                # if the dataset has external_variables, get it
-                try:
-                    external_variables = ds.getncattr("external_variables")
-                except AttributeError:
-                    external_variables = []
-                if cell_meas_var_name not in ds.variables:
-                    if cell_meas_var_name not in external_variables:
-                        valid = False
-                        reasoning.append(
-                            "Cell measure variable {} referred to by {} is not present in dataset variables".format(
-                                cell_meas_var_name, var.name
-                            )
-                        )
-                    else:
-                        valid = True
-
-                    # make Result
-                    result = Result(
-                        BaseCheck.MEDIUM, valid, (self.section_titles["7.2"]), reasoning
-                    )
-                    ret_val.append(result)
-                    continue  # can't test anything on an external var
-
-                else:
-                    cell_meas_var = ds.variables[cell_meas_var_name]
-                    if not hasattr(cell_meas_var, "units"):
-                        valid = False
-                        reasoning.append(
-                            "Cell measure variable {} is required "
-                            "to have units attribute defined.".format(
-                                cell_meas_var_name
-                            )
-                        )
-                    if not set(cell_meas_var.dimensions).issubset(var.dimensions):
-                        valid = False
-                        reasoning.append(
-                            "Cell measure variable {} must have "
-                            "dimensions which are a subset of "
-                            "those defined in variable {}.".format(
-                                cell_meas_var_name, var.name
-                            )
-                        )
-
-            result = Result(
-                BaseCheck.MEDIUM, valid, (self.section_titles["7.2"]), reasoning
+                external_variables_names = set()
+        except (ValueError, AttributeError):
+            external_variables_names = set()
+        for var in variables:
+            ret_val.append(
+                self._cell_measures_core(
+                    ds,
+                    var,
+                    external_variables_names,
+                    "dataset variables or external variables",
+                )
             )
-            ret_val.append(result)
 
         return ret_val
 
