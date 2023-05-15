@@ -7,7 +7,7 @@ myst-parser
 numpydoc
 pre-commit
 pydata-sphinx-theme
+pytest>=2.9.0
 pytest-cov>=3.0.0
 pytest-vcr
-pytest>=2.9.0
 requests-mock>=1.7.0
