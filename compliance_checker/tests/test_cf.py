@@ -1231,6 +1231,11 @@ class TestCF1_6(BaseTestCase):
         assert len([r for r in results if r.value[0] < r.value[1]]) == 2
         assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
+        # blank string is not valid and won't match, ensure this is caught
+        lev2.formula_terms = ""
+        results = self.cf.check_dimensionless_vertical_coordinates(dataset)
+        assert "Attribute formula_terms is not well-formed"
+
     def test_is_time_variable(self):
         var1 = MockVariable()
         var1.standard_name = "time"
