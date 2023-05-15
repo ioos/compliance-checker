@@ -469,7 +469,7 @@ class CF1_7Check(CF1_6Check):
                     ds,
                     var,
                     external_variables_names,
-                    "dataset variables or external variables",
+                    "dataset or external variable",
                 )
             )
 

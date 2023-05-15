@@ -2783,7 +2783,7 @@ class CF1_6Check(CFNCCheck):
         # IMPLEMENTATION CONFORMANCE REQUIRED 1/2
         reasoning = []
         search_str = (
-            r"^(?P<measure_type>area|volume):\s+" r"(?P<cell_measure_var_name>\w+)$"
+            r"^(?P<measure_type>area|volume):\s+(?P<cell_measure_var_name>\w+)$"
         )
         search_res = regex.match(search_str, var.cell_measures)
         if not search_res:
@@ -2806,7 +2806,7 @@ class CF1_6Check(CFNCCheck):
                 valid = False
                 reasoning.append(
                     f"Cell measure variable {cell_measure_var_name} referred to by "
-                    f"{var.name} is not present in {variable_template}".format(
+                    f"{var.name} is not present in {variable_template}s".format(
                         cell_measure_var_name, var.name
                     )
                 )
@@ -2885,9 +2885,7 @@ class CF1_6Check(CFNCCheck):
             cell_measures=lambda c: c is not None
         )
         for var in variables:
-            result = self._cell_measures_core(
-                ds, var, ds.variables, "dataset variables"
-            )
+            result = self._cell_measures_core(ds, var, set(), "dataset variable")
             ret_val.append(result)
 
         return ret_val
