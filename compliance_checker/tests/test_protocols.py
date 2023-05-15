@@ -59,7 +59,7 @@ def test_sos():
     """
     Tests that a connection can be made to an SOS endpoint
     """
-    url = "https://thredds.aoos.org/thredds/sos/aoos/cruises/ecofoci/2dy12.nc"
+    url = "https://thredds.aoos.org/thredds/dodsC/aoos/cruises/ecofoci/2dy12.nc"
     cs = CheckSuite()
     ds = cs.load_dataset(url)
     assert ds is not None
