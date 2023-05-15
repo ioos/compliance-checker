@@ -50,6 +50,7 @@ repos:
           (?x)^(
               .*\.xml|
               .*\.cdl|
+              .*\.yaml|
               .*_version.py|
               .*versioneer.py
           )$
