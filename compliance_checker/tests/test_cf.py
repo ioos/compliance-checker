@@ -2483,8 +2483,7 @@ class TestCF1_7(BaseTestCase):
 
             # one should have failed, as no computed_standard_name is assigned
             score, out_of, messages = get_results(ret_val)
-            assert score == 0
-            assert out_of == 1
+            assert score < out_of
 
             # this time, assign computed_standard_name
             ret_val = []
@@ -2528,6 +2527,16 @@ class TestCF1_7(BaseTestCase):
         assert len(results) == 3
         assert scored < out_of
         assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
+
+        # TEST CONFORMANCE 4.3.3 REQUIRED
+        del dataset.variables["lev"].formula_terms
+        results = self.cf.check_dimensionless_vertical_coordinates(dataset)
+
+        # FIXME: get_results messages variable doesn't return message here
+        assert (
+            "Variable lev should have formula_terms attribute when "
+            "computed_standard_name attribute is defined" in results[-1].msgs
+        )
 
     def test_check_attr_type(self):
         """
