@@ -648,18 +648,55 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_cell_measure1"])
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
-        message = (
-            "The cell_measures attribute for variable PS is formatted incorrectly.  "
+        expected_message = (
+            "The cell_measures attribute for variable PS is formatted incorrectly. "
             "It should take the form of either 'area: cell_var' or 'volume: cell_var' "
-            "where cell_var is the variable describing the cell measures"
+            "where cell_var is an existing name of a variable describing the "
+            "cell measures."
         )
-        assert message in messages
+        assert expected_message in messages
 
         dataset = self.load_dataset(STATIC_FILES["bad_cell_measure2"])
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
         message = "Cell measure variable box_area referred to by PS is not present in dataset variables"
         assert message in messages
+
+        dataset = MockTimeSeries()
+        dataset.createVariable("PS", "d", ("time",))  # dtype=double, dims=time
+        dataset.variables["PS"].setncattr("cell_measures", "area: cell_area")
+        # ensure the cell_measures var is in the dataset
+        dataset.createVariable("cell_area", "d", ("time",))
+        dataset.variables["cell_area"].setncattr("units", "m3")
+        # TEST CONFORMANCE 7.2 REQUIRED
+        # inappropriate length exponent for area
+        expected_fail_msg = (
+            'Variable "cell_area" must have units which are convertible '
+            'to UDUNITS "m2" when variable is referred to by a dataset variable with '
+            'cell_methods attribute with a measure type of "area".'
+        )
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = get_results(results)
+        assert expected_fail_msg in messages
+
+        # set erroneous units that aren't convertible to UDUnits length
+        # units
+        dataset.variables["cell_area"].setncattr("units", "s3")
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = get_results(results)
+        assert expected_fail_msg in messages
+
+        # TEST CONFORMANCE 7.2 REQUIRED 1/2
+        dataset.createDimension("depth2", 5)
+        dataset.variables["PS"].setncattr("cell_measures", "area: cell_area2")
+        dataset.createVariable("cell_area2", "f8", ("time", "depth2"))
+        dataset.variables["cell_area2"].setncattr("units", "m2")
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = get_results(results)
+        assert (
+            "Cell measure variable cell_area2 must have dimensions which are a subset of those defined in variable PS."
+            in messages
+        )
 
     def test_climatology_cell_methods(self):
         """
@@ -706,7 +743,7 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         self.assertEqual(score, out_of)
 
-        # TEST CONFORMMANCE 7.4 REQUIRED 5/6
+        # TEST CONFORMANCE 7.4 REQUIRED 5/6
         dataset.variables["climatology_bounds"] = MockVariable(
             dataset.variables["climatology_bounds"]
         )
@@ -2094,8 +2131,6 @@ class TestCF1_7(BaseTestCase):
         assert (score, out_of) == (1, 2)
 
     def test_cell_measures(self):
-        """Over-ride the test_cell_measures from CF1_6"""
-
         # create a temporary variable and test this only
         with MockTimeSeries() as dataset:
             dataset.createVariable("PS", "d", ("time",))  # dtype=double, dims=time
@@ -2109,37 +2144,72 @@ class TestCF1_7(BaseTestCase):
             score, out_of, messages = get_results(results)
             assert (score == out_of) and (score > 0)
 
-        # same thing, but test that the cell_area variable is in
-        # the global attr "external_variables"
-
-        with MockTimeSeries() as dataset:
-            dataset.createVariable("PS", "d", ("time",))  # dtype=double, dims=time
-            dataset.variables["PS"].setncattr("cell_measures", "area: cell_area")
-            dataset.setncattr("external_variables", ["cell_area"])
-
-            # run the check
+            # bad measure, not area or volume
+            dataset.variables["PS"].cell_measures = "length: cell_area"
             results = self.cf.check_cell_measures(dataset)
             score, out_of, messages = get_results(results)
-            assert score > 0
-            assert score == out_of
+            assert (
+                "The cell_measures attribute for variable PS is formatted "
+                "incorrectly. It should take the form of either 'area: "
+                "cell_var' or 'volume: cell_var' where cell_var is an "
+                "existing name of a variable describing the cell measures." in messages
+            )
+
+            # proper measure type, but referenced variable does not exist
+            dataset.variables["PS"].cell_measures = "area: NONEXISTENT_VAR"
+            results = self.cf.check_cell_measures(dataset)
+            score, out_of, messages = get_results(results)
+            assert (
+                "Cell measure variable NONEXISTENT_VAR referred to by "
+                "PS is not present in dataset or external variables" in messages
+            )
+
+            dataset.variables["PS"].cell_measures = "area: no_units"
+            dataset.createVariable("no_units", "i2", ())
+            results = self.cf.check_cell_measures(dataset)
+            score, out_of, messages = get_results(results)
+            assert (
+                "Cell measure variable no_units is required to have units "
+                "attribute defined" in messages
+            )
+
+        # cell_area variable is in
+        # the global attr "external_variables"
+
+        dataset = MockTimeSeries()
+        dataset.createVariable("PS", "d", ("time",))  # dtype=double, dims=time
+        dataset.variables["PS"].setncattr("cell_measures", "area: cell_area")
+        dataset.setncattr("external_variables", "cell_area")
+
+        # run the check
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = get_results(results)
+        assert score > 0
+        assert score == out_of
+
+        # Non-string external variables, just treat as empty
+        dataset.setncattr("external_variables", 1)
+        results = self.cf.check_cell_measures(dataset)
+        score, out_of, messages = get_results(results)
+        message = "Cell measure variable cell_area referred to by PS is not present in dataset or external variables"
 
         # now test a dataset with a poorly formatted cell_measure attr
         dataset = self.load_dataset(STATIC_FILES["bad_cell_measure1"])
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
-        message = (
-            "The cell_measures attribute for variable PS is formatted incorrectly.  "
+        expected_message = (
+            "The cell_measures attribute for variable PS is formatted incorrectly. "
             "It should take the form of either 'area: cell_var' or 'volume: cell_var' "
-            "where cell_var is the variable describing the cell measures"
+            "where cell_var is an existing name of a variable describing the cell measures."
         )
-        assert message in messages
+        assert expected_message in messages
 
         # test a dataset where the cell_measure attr is not in the dataset or external_variables
         # check for the variable should fail
         dataset = self.load_dataset(STATIC_FILES["bad_cell_measure2"])
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
-        message = "Cell measure variable box_area referred to by PS is not present in dataset variables"
+        message = "Cell measure variable box_area referred to by PS is not present in dataset or external variables"
         assert message in messages
 
     def test_variable_features(self):
