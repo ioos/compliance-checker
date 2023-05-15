@@ -16,7 +16,7 @@ jobs:
       with:
         environment-file: false
 
-    - name: Create Environment
+    - name: Setup Env
       shell: bash -l {0}
       run: >
         micromamba create --name TEST python=3 pip --file requirements.txt --file test_requirements.txt --channel conda-forge
