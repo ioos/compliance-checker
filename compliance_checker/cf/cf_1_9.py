@@ -14,7 +14,7 @@ class CF1_9Check(CF1_8Check):
     _cc_url = "http://cfconventions.org/Data/cf-conventions/cf-conventions-1.9/cf-conventions.html"
 
     def __init__(self, options=None):
-        super(CF1_9Check, self).__init__(options)
+        super().__init__(options)
         self.section_titles.update({"5.8": "§5.8 Domain Variables"})
 
     def check_time_coordinate_variable_has_calendar(self, ds):
@@ -28,7 +28,8 @@ class CF1_9Check(CF1_8Check):
                 continue
             time_var = ds.variables[name]
             if not hasattr(time_var, "calendar") or not isinstance(
-                time_var.calendar, str
+                time_var.calendar,
+                str,
             ):
                 result = Result(
                     BaseCheck.MEDIUM,
@@ -36,7 +37,7 @@ class CF1_9Check(CF1_8Check):
                     self.section_titles["4.4.1"],
                     [
                         f'Time coordinate variable "{name}" should have a '
-                        'string valued attribute "calendar"'
+                        'string valued attribute "calendar"',
                     ],
                 )
                 ret_val.append(result)
@@ -44,7 +45,10 @@ class CF1_9Check(CF1_8Check):
             if time_var.calendar.lower() in {"gregorian", "julian", "standard"}:
                 try:
                     reference_year = cftime.num2date(
-                        0, time_var.units, time_var.calendar, has_year_zero=True
+                        0,
+                        time_var.units,
+                        time_var.calendar,
+                        has_year_zero=True,
                     ).year
                 # will fail on months, certain other time specifications
                 except ValueError:
@@ -68,11 +72,11 @@ class CF1_9Check(CF1_8Check):
         return ret_val
 
     def check_time_coordinate(self, ds):
-        super(CF1_9Check, self).check_calendar.__doc__
-        prev_return = super(CF1_9Check, self).check_time_coordinate(ds)
+        super().check_calendar.__doc__
+        prev_return = super().check_time_coordinate(ds)
         seconds_regex = regex.compile(
             r"\w+ since \d{1,4}-\d{1,2}-\d{1,2}[ T]"
-            r"\d{1,2}:\d{1,2}:(?P<seconds>\d{1,2})"
+            r"\d{1,2}:\d{1,2}:(?P<seconds>\d{1,2})",
         )
         for name in cfutil.get_time_variables(ds):
             # DRY: get rid of time coordinate variable boilerplate
@@ -80,7 +84,9 @@ class CF1_9Check(CF1_8Check):
                 continue
             time_var = ds.variables[name]
             test_ctx = self.get_test_ctx(
-                BaseCheck.HIGH, self.section_titles["4.4"], name
+                BaseCheck.HIGH,
+                self.section_titles["4.4"],
+                name,
             )
             try:
                 match = regex.match(seconds_regex, time_var.units)
@@ -102,7 +108,7 @@ class CF1_9Check(CF1_8Check):
         for domain_var in (
             var
             for var in ds.get_variables_by_attributes(
-                coordinates=lambda c: c is not None
+                coordinates=lambda c: c is not None,
             )
             # IMPLICIT
             if not var.dimensions
@@ -110,7 +116,9 @@ class CF1_9Check(CF1_8Check):
             domain_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["5.8"])
             domain_valid.out_of += 1
             domain_coord_vars = reference_attr_variables(
-                ds, domain_var.coordinates, " "
+                ds,
+                domain_var.coordinates,
+                " ",
             )
             errors = [
                 maybe_error.name
@@ -124,7 +132,7 @@ class CF1_9Check(CF1_8Check):
                     "variables referenced in "
                     "coordinates attribute from "
                     "domain variable "
-                    f"{domain_var.name}: {errors_str}"
+                    f"{domain_var.name}: {errors_str}",
                 )
 
             else:
@@ -132,7 +140,7 @@ class CF1_9Check(CF1_8Check):
                 if long_name is None or not isinstance(long_name, str):
                     domain_valid.messages.append(
                         f"For domain variable {domain_var.name} "
-                        f"it is recommended that attribute long_name be present and a string"
+                        f"it is recommended that attribute long_name be present and a string",
                     )
                     results.append(domain_valid.to_result())
                     continue
@@ -145,7 +153,7 @@ class CF1_9Check(CF1_8Check):
                     domain_valid.messages.append(
                         f"The following attributes appear in variable {domain_var.name} "
                         "and CF Appendix A, but are not for use in domain variables: "
-                        f"{appendix_a_not_recommended_attrs}"
+                        f"{appendix_a_not_recommended_attrs}",
                     )
 
                 # no errors occurred

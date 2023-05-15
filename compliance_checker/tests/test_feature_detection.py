@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 compliance_checker/tests/test_feature_detection.py
 """
@@ -24,7 +23,7 @@ class TestFeatureDetection(TestCase):
         """
         with Dataset(resources.STATIC_FILES["point"]) as nc:
             for variable in util.get_geophysical_variables(nc):
-                assert util.is_point(nc, variable), "{} is point".format(variable)
+                assert util.is_point(nc, variable), f"{variable} is point"
 
     def test_timeseries(self):
         """
@@ -33,7 +32,7 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["timeseries"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_timeseries(nc, variable), "{} is timeseries".format(
-                    variable
+                    variable,
                 )
 
     def test_multi_timeseries_orthogonal(self):
@@ -43,8 +42,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["multi-timeseries-orthogonal"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_multi_timeseries_orthogonal(
-                    nc, variable
-                ), "{} is multi-timeseries orthogonal".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is multi-timeseries orthogonal"
 
     def test_multi_timeseries_incomplete(self):
         """
@@ -53,8 +53,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["multi-timeseries-incomplete"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_multi_timeseries_incomplete(
-                    nc, variable
-                ), "{} is multi-timeseries incomplete".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is multi-timeseries incomplete"
 
     def test_trajectory(self):
         """
@@ -63,7 +64,7 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["trajectory"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_cf_trajectory(nc, variable), "{} is trajectory".format(
-                    variable
+                    variable,
                 )
 
     def test_trajectory_single(self):
@@ -73,8 +74,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["trajectory-single"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_single_trajectory(
-                    nc, variable
-                ), "{} is trajectory-single".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is trajectory-single"
 
     def test_profile_orthogonal(self):
         """
@@ -83,8 +85,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["profile-orthogonal"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_profile_orthogonal(
-                    nc, variable
-                ), "{} is profile-orthogonal".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is profile-orthogonal"
 
     def test_profile_incomplete(self):
         """
@@ -93,8 +96,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["profile-incomplete"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_profile_incomplete(
-                    nc, variable
-                ), "{} is profile-incomplete".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is profile-incomplete"
 
     def test_timeseries_profile_single_station(self):
         """
@@ -103,8 +107,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["timeseries-profile-single-station"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_timeseries_profile_single_station(
-                    nc, variable
-                ), "{} is timeseries-profile-single-station".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is timeseries-profile-single-station"
 
     def test_timeseries_profile_multi_station(self):
         """
@@ -113,32 +118,35 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["timeseries-profile-multi-station"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_timeseries_profile_multi_station(
-                    nc, variable
-                ), "{} is timeseries-profile-multi-station".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is timeseries-profile-multi-station"
 
     def test_timeseries_profile_single_ortho_time(self):
         """
         Ensures timeseries profile single station ortho time detection works
         """
         with Dataset(
-            resources.STATIC_FILES["timeseries-profile-single-ortho-time"]
+            resources.STATIC_FILES["timeseries-profile-single-ortho-time"],
         ) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_timeseries_profile_single_ortho_time(
-                    nc, variable
-                ), "{} is timeseries-profile-single-ortho-time".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is timeseries-profile-single-ortho-time"
 
     def test_timeseries_profile_multi_ortho_time(self):
         """
         Ensures timeseries profile multi station ortho time detection works
         """
         with Dataset(
-            resources.STATIC_FILES["timeseries-profile-multi-ortho-time"]
+            resources.STATIC_FILES["timeseries-profile-multi-ortho-time"],
         ) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_timeseries_profile_multi_ortho_time(
-                    nc, variable
-                ), "{} is timeseries-profile-multi-ortho-time".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is timeseries-profile-multi-ortho-time"
 
     def test_timeseries_profile_ortho_depth(self):
         """
@@ -147,8 +155,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["timeseries-profile-ortho-depth"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_timeseries_profile_ortho_depth(
-                    nc, variable
-                ), "{} is timeseries-profile-ortho-depth".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is timeseries-profile-ortho-depth"
 
     def test_timeseries_profile_incomplete(self):
         """
@@ -157,8 +166,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["timeseries-profile-incomplete"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_timeseries_profile_incomplete(
-                    nc, variable
-                ), "{} is timeseries-profile-incomplete".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is timeseries-profile-incomplete"
 
     def test_trajectory_profile_orthogonal(self):
         """
@@ -167,8 +177,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["trajectory-profile-orthogonal"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_trajectory_profile_orthogonal(
-                    nc, variable
-                ), "{} is trajectory profile orthogonal".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is trajectory profile orthogonal"
 
     def test_trajectory_profile_incomplete(self):
         """
@@ -177,8 +188,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["trajectory-profile-incomplete"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_trajectory_profile_incomplete(
-                    nc, variable
-                ), "{} is trajectory profile incomplete".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is trajectory profile incomplete"
 
     def test_2d_regular_grid(self):
         """
@@ -187,8 +199,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["2d-regular-grid"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_2d_regular_grid(
-                    nc, variable
-                ), "{} is 2D regular grid".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is 2D regular grid"
 
     def test_2d_static_grid(self):
         """
@@ -197,8 +210,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["2d-static-grid"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_2d_static_grid(
-                    nc, variable
-                ), "{} is a 2D static grid".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is a 2D static grid"
 
     def test_3d_regular_grid(self):
         """
@@ -207,8 +221,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["3d-regular-grid"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_3d_regular_grid(
-                    nc, variable
-                ), "{} is 3d regular grid".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is 3d regular grid"
 
     def test_3d_static_grid(self):
         """
@@ -217,8 +232,9 @@ class TestFeatureDetection(TestCase):
         with Dataset(resources.STATIC_FILES["3d-static-grid"]) as nc:
             for variable in util.get_geophysical_variables(nc):
                 assert util.is_3d_static_grid(
-                    nc, variable
-                ), "{} is a 3D static grid".format(variable)
+                    nc,
+                    variable,
+                ), f"{variable} is a 3D static grid"
 
     def test_boundaries(self):
         """
@@ -255,8 +271,8 @@ class TestFeatureDetection(TestCase):
             axis_variables = util.get_axis_variables(nc)
 
             assert "rotated_pole" in grid_mapping
-            assert set(["rlon", "rlat", "lev"]) == set(coordinate_variables)
-            assert set(["rlon", "rlat", "lev"]) == set(axis_variables)
+            assert {"rlon", "rlat", "lev"} == set(coordinate_variables)
+            assert {"rlon", "rlat", "lev"} == set(axis_variables)
             assert "lat" == util.get_lat_variable(nc)
             assert "lon" == util.get_lon_variable(nc)
 
@@ -266,10 +282,10 @@ class TestFeatureDetection(TestCase):
         """
         with Dataset(resources.STATIC_FILES["bad_units"]) as nc:
             coordinate_variables = util.get_coordinate_variables(nc)
-            assert set(["time"]) == set(coordinate_variables)
+            assert {"time"} == set(coordinate_variables)
 
             aux_coord_vards = util.get_auxiliary_coordinate_variables(nc)
-            assert set(["lat", "lon"]) == set(aux_coord_vards)
+            assert {"lat", "lon"} == set(aux_coord_vards)
 
     def test_forecast_reference_metadata(self):
         """
@@ -416,7 +432,7 @@ class TestFeatureDetection(TestCase):
         v = nc.createVariable("data1", "d", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "blah")
         self.assertFalse(
-            util.is_variable_valid_ragged_array_repr_featureType(nc, "data1")
+            util.is_variable_valid_ragged_array_repr_featureType(nc, "data1"),
         )
 
         # add geophysical variable with correct dimension
@@ -425,7 +441,7 @@ class TestFeatureDetection(TestCase):
         v.setncattr("standard_name", "sea_water_pressure")
         # test the variable
         self.assertTrue(
-            util.is_variable_valid_ragged_array_repr_featureType(nc, "data1")
+            util.is_variable_valid_ragged_array_repr_featureType(nc, "data1"),
         )
 
         # add good variable and another variable, this time with the improper dimension
@@ -437,10 +453,10 @@ class TestFeatureDetection(TestCase):
 
         # good variable should pass, second should fail
         self.assertTrue(
-            util.is_variable_valid_ragged_array_repr_featureType(nc, "data1")
+            util.is_variable_valid_ragged_array_repr_featureType(nc, "data1"),
         )
         self.assertFalse(
-            util.is_variable_valid_ragged_array_repr_featureType(nc, "data2")
+            util.is_variable_valid_ragged_array_repr_featureType(nc, "data2"),
         )
 
     def test_is_dataset_valid_ragged_array_repr_featureType(self):
@@ -450,7 +466,7 @@ class TestFeatureDetection(TestCase):
 
         nc = MockRaggedArrayRepr("timeseries", "indexed")
         self.assertTrue(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries"),
         )
 
         # we'll add another cf_role variable
@@ -458,7 +474,7 @@ class TestFeatureDetection(TestCase):
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries"),
         )
 
         # we'll add another index variable, also bad
@@ -466,13 +482,13 @@ class TestFeatureDetection(TestCase):
         v = nc.createVariable("index_var2", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("instance_dimension", "INSTANCE_DIMENSION")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries"),
         )
 
         # ----- timeseries, contiguous ----- #
         nc = MockRaggedArrayRepr("timeseries", "contiguous")
         self.assertTrue(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries"),
         )
 
         # add another cf_role var, bad
@@ -480,23 +496,26 @@ class TestFeatureDetection(TestCase):
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries"),
         )
 
         # add another count variable, bad
         v = nc.createVariable(
-            "count_var2", "i", ("INSTANCE_DIMENSION",), fill_value=None
+            "count_var2",
+            "i",
+            ("INSTANCE_DIMENSION",),
+            fill_value=None,
         )
         v.setncattr("sample_dimension", "SAMPLE_DIMENSION")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries"),
         )
 
         # ----- profile, indexed ----- #
 
         nc = MockRaggedArrayRepr("profile", "indexed")
         self.assertTrue(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile"),
         )
 
         # add another cf_role var
@@ -504,7 +523,7 @@ class TestFeatureDetection(TestCase):
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile"),
         )
 
         # we'll add another index variable, also bad
@@ -512,13 +531,13 @@ class TestFeatureDetection(TestCase):
         v = nc.createVariable("index_var2", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("instance_dimension", "INSTANCE_DIMENSION")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile"),
         )
 
         # ----- profile, contiguous ----- #
         nc = MockRaggedArrayRepr("profile", "contiguous")
         self.assertTrue(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile"),
         )
 
         # add another cf_role var
@@ -526,23 +545,26 @@ class TestFeatureDetection(TestCase):
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile"),
         )
 
         # we'll add another count variable, also bad
         nc = MockRaggedArrayRepr("profile", "contiguous")
         v = nc.createVariable(
-            "index_var2", "i", ("INSTANCE_DIMENSION",), fill_value=None
+            "index_var2",
+            "i",
+            ("INSTANCE_DIMENSION",),
+            fill_value=None,
         )
         v.setncattr("sample_dimension", "SAMPLE_DIMENSION")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "profile"),
         )
 
         # ----- trajectory, indexed ----- #
         nc = MockRaggedArrayRepr("trajectory", "indexed")
         self.assertTrue(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory"),
         )
 
         # add another cf_role var
@@ -550,7 +572,7 @@ class TestFeatureDetection(TestCase):
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory"),
         )
 
         # we'll add another index variable, also bad
@@ -558,13 +580,13 @@ class TestFeatureDetection(TestCase):
         v = nc.createVariable("index_var2", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("instance_dimension", "INSTANCE_DIMENSION")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory"),
         )
 
         # ----- trajectory, contiguous ----- #
         nc = MockRaggedArrayRepr("trajectory", "contiguous")
         self.assertTrue(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory"),
         )
 
         # add another cf_role var
@@ -572,17 +594,20 @@ class TestFeatureDetection(TestCase):
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory"),
         )
 
         # we'll add another count variable, also bad
         nc = MockRaggedArrayRepr("trajectory", "contiguous")
         v = nc.createVariable(
-            "index_var2", "i", ("INSTANCE_DIMENSION",), fill_value=None
+            "index_var2",
+            "i",
+            ("INSTANCE_DIMENSION",),
+            fill_value=None,
         )
         v.setncattr("sample_dimension", "SAMPLE_DIMENSION")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
+            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory"),
         )
 
         # ----- now test compound featureType ----- #
@@ -593,7 +618,10 @@ class TestFeatureDetection(TestCase):
         # NOTE
         # has no geophysical vars, so should (?) (will) fail
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseriesprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "timeseriesprofile",
+            ),
         )
 
         # add a geophysical variable and test again
@@ -601,18 +629,27 @@ class TestFeatureDetection(TestCase):
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1.setncattr("standard_name", "pressure")
         self.assertTrue(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseriesprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "timeseriesprofile",
+            ),
         )
 
         nc = MockRaggedArrayRepr("timeSeriesProfile")
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         # add a third cf_role variable - this should fail
         v = nc.createVariable(
-            "cf_role_var3", "i", ("INSTANCE_DIMENSION",), fill_value=None
+            "cf_role_var3",
+            "i",
+            ("INSTANCE_DIMENSION",),
+            fill_value=None,
         )
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseriesprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "timeseriesprofile",
+            ),
         )
 
         # set the index variable to have an incorrect attr
@@ -621,7 +658,10 @@ class TestFeatureDetection(TestCase):
         nc.variables["station_index_variable"].instance_dimension = "SIKE!"
 
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseriesprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "timeseriesprofile",
+            ),
         )
 
         # change the sample_dimension attr on the count variable, bad
@@ -630,17 +670,26 @@ class TestFeatureDetection(TestCase):
         nc.variables["counter_var"].sample_dimension = "SIKE!"
 
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseriesprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "timeseriesprofile",
+            ),
         )
 
         # give another geophysical data variable a different dimension
         nc = MockRaggedArrayRepr("timeSeriesProfile")
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1 = nc.createVariable(
-            "data2", "i", ("STATION_DIMENSION",), fill_value=None  # bad!
+            "data2",
+            "i",
+            ("STATION_DIMENSION",),
+            fill_value=None,  # bad!
         )
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseriesprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "timeseriesprofile",
+            ),
         )
 
         # ----- trajectoryProfile ----- #
@@ -649,7 +698,10 @@ class TestFeatureDetection(TestCase):
         # NOTE
         # has no geophysical vars, so should (?) (will) fail
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectoryprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "trajectoryprofile",
+            ),
         )
 
         # add a geophysical variable and test again
@@ -657,18 +709,27 @@ class TestFeatureDetection(TestCase):
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1.setncattr("standard_name", "pressure")
         self.assertTrue(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectoryprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "trajectoryprofile",
+            ),
         )
 
         nc = MockRaggedArrayRepr("trajectoryProfile")
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         # add a third cf_role variable - this should fail
         v = nc.createVariable(
-            "cf_role_var3", "i", ("INSTANCE_DIMENSION",), fill_value=None
+            "cf_role_var3",
+            "i",
+            ("INSTANCE_DIMENSION",),
+            fill_value=None,
         )
         v.setncattr("cf_role", "yeetyeet_id")
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectoryprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "trajectoryprofile",
+            ),
         )
 
         # set the index variable to have an incorrect attr
@@ -677,7 +738,10 @@ class TestFeatureDetection(TestCase):
         nc.variables["station_index_variable"].instance_dimension = "SIKE!"
 
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectoryprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "trajectoryprofile",
+            ),
         )
 
         # change the sample_dimension attr on the count variable, bad
@@ -686,15 +750,24 @@ class TestFeatureDetection(TestCase):
         nc.variables["counter_var"].sample_dimension = "SIKE!"
 
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectoryprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "trajectoryprofile",
+            ),
         )
 
         # give another geophysical data variable a different dimension
         nc = MockRaggedArrayRepr("trajectoryProfile")
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1 = nc.createVariable(
-            "data2", "i", ("STATION_DIMENSION",), fill_value=None  # bad!
+            "data2",
+            "i",
+            ("STATION_DIMENSION",),
+            fill_value=None,  # bad!
         )
         self.assertFalse(
-            util.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectoryprofile")
+            util.is_dataset_valid_ragged_array_repr_featureType(
+                nc,
+                "trajectoryprofile",
+            ),
         )
