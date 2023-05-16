@@ -83,7 +83,7 @@ def is_remote_netcdf(ds_str):
         head_req.raise_for_status()
     except requests.exceptions.RequestException as e:
         warnings.warn(
-            "Received exception when making HEAD request to {}: {}".format(ds_str, e)
+            f"Received exception when making HEAD request to {ds_str}: {e}",
         )
         content_type = None
     else:

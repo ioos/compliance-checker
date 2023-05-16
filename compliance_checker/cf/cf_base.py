@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import logging
 import os
 import sys
@@ -29,7 +28,7 @@ class CFBaseCheck(BaseCheck):
 
         # Each default dict is a key, value mapping from the dataset object to
         # a list of variables
-        super(CFBaseCheck, self).__init__(options)
+        super().__init__(options)
         self._coord_vars = defaultdict(list)
         self._ancillary_vars = defaultdict(list)
         self._clim_vars = defaultdict(list)
@@ -104,7 +103,7 @@ class CFBaseCheck(BaseCheck):
         self._find_cf_standard_name_table(ds)
         self._find_geophysical_vars(ds)
         coord_containing_vars = ds.get_variables_by_attributes(
-            coordinates=lambda val: isinstance(val, str)
+            coordinates=lambda val: isinstance(val, str),
         )
 
         # coordinate data variables
@@ -176,11 +175,13 @@ class CFBaseCheck(BaseCheck):
 
         # Check the grid_mapping attribute to be a non-empty string and that its reference exists
         for variable in ds.get_variables_by_attributes(
-            grid_mapping=lambda x: x is not None
+            grid_mapping=lambda x: x is not None,
         ):
             grid_mapping = getattr(variable, "grid_mapping", None)
             defines_grid_mapping = self.get_test_ctx(
-                BaseCheck.HIGH, self.section_titles["5.6"], variable.name
+                BaseCheck.HIGH,
+                self.section_titles["5.6"],
+                variable.name,
             )
             defines_grid_mapping.assert_true(
                 (isinstance(grid_mapping, str) and grid_mapping),
@@ -193,26 +194,28 @@ class CFBaseCheck(BaseCheck):
                 if ":" in grid_mapping and self._cc_spec_version >= "1.7":
                     colon_count = grid_mapping.count(":")
                     re_all = regex.findall(
-                        r"(\w+):\s*((?:\w+\s+)*(?:\w+)(?![\w:]))", grid_mapping
+                        r"(\w+):\s*((?:\w+\s+)*(?:\w+)(?![\w:]))",
+                        grid_mapping,
                     )
                     if colon_count != len(re_all):
                         defines_grid_mapping.out_of += 1
                         defines_grid_mapping.messages.append(
-                            "Could not consume entire grid_mapping expression, please check for well-formedness"
+                            "Could not consume entire grid_mapping expression, please check for well-formedness",
                         )
                     else:
                         for grid_var_name, coord_var_str in re_all:
                             defines_grid_mapping.assert_true(
                                 grid_var_name in ds.variables,
                                 "grid mapping variable {} must exist in this dataset".format(
-                                    grid_var_name
+                                    grid_var_name,
                                 ),
                             )
                             for ref_var in coord_var_str.split():
                                 defines_grid_mapping.assert_true(
                                     ref_var in ds.variables,
                                     "Coordinate-related variable {} referenced by grid_mapping variable {} must exist in this dataset".format(
-                                        ref_var, grid_var_name
+                                        ref_var,
+                                        grid_var_name,
                                     ),
                                 )
 
@@ -221,7 +224,7 @@ class CFBaseCheck(BaseCheck):
                         defines_grid_mapping.assert_true(
                             grid_var_name in ds.variables,
                             "grid mapping variable {} must exist in this dataset".format(
-                                grid_var_name
+                                grid_var_name,
                             ),
                         )
             ret_val[variable.name] = defines_grid_mapping.to_result()
@@ -229,7 +232,9 @@ class CFBaseCheck(BaseCheck):
         # Check the grid mapping variables themselves
         for grid_var_name in grid_mapping_variables:
             valid_grid_mapping = self.get_test_ctx(
-                BaseCheck.HIGH, self.section_titles["5.6"], grid_var_name
+                BaseCheck.HIGH,
+                self.section_titles["5.6"],
+                grid_var_name,
             )
             grid_var = ds.variables[grid_var_name]
 
@@ -238,7 +243,7 @@ class CFBaseCheck(BaseCheck):
             # Grid mapping name must be in appendix F
             valid_grid_mapping.assert_true(
                 grid_mapping_name in self.grid_mapping_dict,
-                "{} is not a valid grid_mapping_name.".format(grid_mapping_name)
+                f"{grid_mapping_name} is not a valid grid_mapping_name."
                 + " See Appendix F for valid grid mappings",
             )
 
@@ -260,7 +265,8 @@ class CFBaseCheck(BaseCheck):
                 valid_grid_mapping.assert_true(
                     hasattr(grid_var, req),
                     "{} is a required attribute for grid mapping {}".format(
-                        req, grid_mapping_name
+                        req,
+                        grid_mapping_name,
                     ),
                 )
 
@@ -273,7 +279,7 @@ class CFBaseCheck(BaseCheck):
                         number_found += 1
                 valid_grid_mapping.assert_true(
                     number_found == 1,
-                    "grid mapping {}".format(grid_mapping_name)
+                    f"grid mapping {grid_mapping_name}"
                     + "must define exactly one of these attributes: "
                     + "{}".format(" or ".join(at_least_attr)),
                 )
@@ -282,13 +288,13 @@ class CFBaseCheck(BaseCheck):
             expected_std_names = grid_mapping[2]
             for expected_std_name in expected_std_names:
                 found_vars = ds.get_variables_by_attributes(
-                    standard_name=expected_std_name
+                    standard_name=expected_std_name,
                 )
                 valid_grid_mapping.assert_true(
                     len(found_vars) == 1,
-                    "grid mapping {} requires exactly ".format(grid_mapping_name)
+                    f"grid mapping {grid_mapping_name} requires exactly "
                     + "one variable with standard_name "
-                    + "{} to be defined".format(expected_std_name),
+                    + f"{expected_std_name} to be defined",
                 )
 
             ret_val[grid_var_name] = valid_grid_mapping.to_result()
@@ -308,7 +314,8 @@ class CFBaseCheck(BaseCheck):
         valid = False
         reasoning = []
         correct_version_string = "{}-{}".format(
-            self._cc_spec, self._cc_spec_version
+            self._cc_spec,
+            self._cc_spec_version,
         ).upper()
         if hasattr(ds, "Conventions"):
             conventions = regex.split(r",|\s+", getattr(ds, "Conventions", ""))
@@ -319,13 +326,16 @@ class CFBaseCheck(BaseCheck):
             else:
                 reasoning = [
                     "§2.6.1 Conventions global attribute does not contain "
-                    '"{}"'.format(correct_version_string)
+                    '"{}"'.format(correct_version_string),
                 ]
         else:
             valid = False
             reasoning = ["§2.6.1 Conventions field is not present"]
         return Result(
-            BaseCheck.MEDIUM, valid, self.section_titles["2.6"], msgs=reasoning
+            BaseCheck.MEDIUM,
+            valid,
+            self.section_titles["2.6"],
+            msgs=reasoning,
         )
 
     def _check_dimensionless_vertical_coordinates(
@@ -406,7 +416,8 @@ class CFBaseCheck(BaseCheck):
         missing_vars = sorted(set(m.group(2) for m in matches) - set(ds.variables))
         missing_fmt = "The following variable(s) referenced in {}:formula_terms are not present in the dataset: {}"
         valid_formula_terms.assert_true(
-            len(missing_vars) == 0, missing_fmt.format(coord, ", ".join(missing_vars))
+            len(missing_vars) == 0,
+            missing_fmt.format(coord, ", ".join(missing_vars)),
         )
         # try to reconstruct formula_terms by adding space in between the regex
         # matches.  If it doesn't exactly match the original, the formatting
@@ -480,7 +491,10 @@ class CFBaseCheck(BaseCheck):
             type_match,
             "Attribute '{}' (type: {}) and parent variable '{}' (type: {}) "
             "must have equivalent datatypes".format(
-                attr_name, val_type, var.name, var.dtype.type
+                attr_name,
+                val_type,
+                var.name,
+                var.dtype.type,
             ),
         )
 
@@ -623,7 +637,7 @@ class CFBaseCheck(BaseCheck):
                     except IndexError:
                         warn(
                             "Cannot extract CF standard name version number "
-                            "from standard_name_vocabulary string"
+                            "from standard_name_vocabulary string",
                         )
                         return False
             else:
@@ -635,7 +649,7 @@ class CFBaseCheck(BaseCheck):
             warn(
                 "Cannot convert standard name table to lowercase.  This can "
                 "occur if a non-string standard_name_vocabulary global "
-                "attribute is supplied"
+                "attribute is supplied",
             )
             return False
 
@@ -645,7 +659,7 @@ class CFBaseCheck(BaseCheck):
         # If the packaged version is what we're after, then we're good
         if version == self._std_names._version:
             print(
-                "Using packaged standard name table v{0}".format(version),
+                f"Using packaged standard name table v{version}",
                 file=sys.stderr,
             )
             return False
@@ -654,19 +668,21 @@ class CFBaseCheck(BaseCheck):
         try:
             data_directory = util.create_cached_data_dir()
             location = os.path.join(
-                data_directory, "cf-standard-name-table-test-{0}.xml".format(version)
+                data_directory,
+                f"cf-standard-name-table-test-{version}.xml",
             )
             # Did we already download this before?
             if not os.path.isfile(location):
                 util.download_cf_standard_name_table(version, location)
                 print(
-                    "Using downloaded standard name table v{0}".format(version),
+                    f"Using downloaded standard name table v{version}",
                     file=sys.stderr,
                 )
             else:
                 print(
-                    "Using cached standard name table v{0} from {1}".format(
-                        version, location
+                    "Using cached standard name table v{} from {}".format(
+                        version,
+                        location,
                     ),
                     file=sys.stderr,
                 )
@@ -676,8 +692,8 @@ class CFBaseCheck(BaseCheck):
         except Exception as e:
             # There was an error downloading the CF table. That's ok, we'll just use the packaged version
             warn(
-                "Problem fetching standard name table:\n{0}\n"
-                "Using packaged v{1}".format(e, self._std_names._version)
+                f"Problem fetching standard name table:\n{e}\n"
+                f"Using packaged v{self._std_names._version}",
             )
             return False
 
@@ -739,7 +755,7 @@ class CFBaseCheck(BaseCheck):
         self._metadata_vars[ds] = []
         for name, var in ds.variables.items():
             if name in self._find_ancillary_vars(ds) or name in self._find_coord_vars(
-                ds
+                ds,
             ):
                 continue
 
@@ -890,7 +906,7 @@ class CFBaseCheck(BaseCheck):
         """
         ret_val = []
         for variable in ds.get_variables_by_attributes(
-            cf_role=lambda x: isinstance(x, str)
+            cf_role=lambda x: isinstance(x, str),
         ):
             if variable.ndim > 0:
                 ret_val.append(variable.dimensions[0])
@@ -930,7 +946,7 @@ class CFBaseCheck(BaseCheck):
         """
         dim_names = []
         for dim, dim_type in zip(ds.variables[name].dimensions, dim_types):
-            dim_name = "{} ({}".format(dim, dim_type)
+            dim_name = f"{dim} ({dim_type}"
             if ds.dimensions[dim].isunlimited():
                 dim_name += ", unlimited)"
             else:
@@ -1012,7 +1028,8 @@ class CFBaseCheck(BaseCheck):
             """
 
             return "{} ({})".format(
-                attr_location_ident.get(att_letter, "other"), att_letter
+                attr_location_ident.get(att_letter, "other"),
+                att_letter,
             )
 
         def _att_loc_msg(att_loc):
@@ -1037,16 +1054,17 @@ class CFBaseCheck(BaseCheck):
                 valid_loc = att_loc_print_helper(loc_sort[0])
             elif att_loc_len == 2:
                 valid_loc = "{} and {}".format(
-                    att_loc_print_helper(loc_sort[0]), att_loc_print_helper(loc_sort[1])
+                    att_loc_print_helper(loc_sort[0]),
+                    att_loc_print_helper(loc_sort[1]),
                 )
             # shouldn't be reached under normal circumstances, as any attribute
             # should be either G, C, or D but if another
             # category is added, this will be useful.
             else:
                 valid_loc = ", ".join(loc_sort[:-1]) + ", and {}".format(
-                    att_loc_print_helper(loc_sort[-1])
+                    att_loc_print_helper(loc_sort[-1]),
                 )
-            return "This attribute may only appear in {}.".format(valid_loc)
+            return f"This attribute may only appear in {valid_loc}."
 
         for global_att_name in possible_global_atts:
             global_att = ds.getncattr(global_att_name)
@@ -1057,7 +1075,8 @@ class CFBaseCheck(BaseCheck):
                 subsection_test = ".".join(att_dict["cf_section"].split(".")[:2])
 
                 section_loc = self.section_titles.get(
-                    subsection_test, att_dict["cf_section"]
+                    subsection_test,
+                    att_dict["cf_section"],
                 )
             else:
                 section_loc = None
@@ -1067,7 +1086,7 @@ class CFBaseCheck(BaseCheck):
             if "G" not in att_loc:
                 test_ctx.messages.append(
                     '[Appendix A] Attribute "{}" should not be present in global (G) '
-                    "attributes. {}".format(global_att_name, valid_loc_warn)
+                    "attributes. {}".format(global_att_name, valid_loc_warn),
                 )
             else:
                 result = self._handle_dtype_check(global_att, global_att_name, att_dict)
@@ -1089,11 +1108,12 @@ class CFBaseCheck(BaseCheck):
                     att_dict = self.appendix_a[att_name]
                     if att_dict["cf_section"] is not None:
                         subsection_test = ".".join(
-                            att_dict["cf_section"].split(".")[:2]
+                            att_dict["cf_section"].split(".")[:2],
                         )
 
                         section_loc = self.section_titles.get(
-                            subsection_test, att_dict["cf_section"]
+                            subsection_test,
+                            att_dict["cf_section"],
                         )
                     else:
                         section_loc = None
@@ -1110,7 +1130,7 @@ class CFBaseCheck(BaseCheck):
                                 att_loc_print_helper(coord_letter),
                                 var_name,
                                 valid_loc_warn,
-                            )
+                            ),
                         )
                     else:
                         result = self._handle_dtype_check(att, att_name, att_dict, var)
@@ -1143,20 +1163,20 @@ class CFBaseCheck(BaseCheck):
 
         if attr_type == "S":
             if not isinstance(attribute, str):
-                return [False, "{} must be a string".format(attr_name)]
+                return [False, f"{attr_name} must be a string"]
         else:
             # if it's not a string, it should have a numpy dtype
             underlying_dtype = getattr(attribute, "dtype", None)
 
             # TODO check for np.nan separately
             if underlying_dtype is None:
-                return [False, "{} must be a numeric type".format(attr_name)]
+                return [False, f"{attr_name} must be a numeric type"]
 
             # both D and N should be some kind of numeric value
             is_numeric = np.issubdtype(underlying_dtype, np.number)
             if attr_type == "N":
                 if not is_numeric:
-                    return [False, "{} must be a numeric type".format(attr_name)]
+                    return [False, f"{attr_name} must be a numeric type"]
             elif attr_type == "D":
                 # TODO: handle edge case where variable is unset here
                 temp_ctx = TestCtx()
@@ -1166,14 +1186,15 @@ class CFBaseCheck(BaseCheck):
                     return (
                         False,
                         "{} must be numeric and must be equivalent to {} dtype".format(
-                            attr_name, var_dtype
+                            attr_name,
+                            var_dtype,
                         ),
                     )
             else:
                 # If we reached here, we fell off with an unrecognized type
                 return (
                     False,
-                    "{} has unrecognized type '{}'".format(attr_name, attr_type),
+                    f"{attr_name} has unrecognized type '{attr_type}'",
                 )
         # pass if all other possible failure conditions have been evaluated
         return (True, None)
@@ -1194,12 +1215,12 @@ class CFBaseCheck(BaseCheck):
         attr_type = attr_dict["Type"]
         if variable is None and "G" not in attr_dict["attr_loc"]:
             raise ValueError(
-                "Non-global attributes must be associated with a " " variable"
+                "Non-global attributes must be associated with a " " variable",
             )
         attr_str = (
-            "Global attribute {}".format(attr_name)
+            f"Global attribute {attr_name}"
             if "G" in attr_dict["attr_loc"] and variable is None
-            else "Attribute {} in variable {}".format(attr_name, variable.name)
+            else f"Attribute {attr_name} in variable {variable.name}"
         )
 
         # check the type

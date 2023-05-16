@@ -37,11 +37,11 @@ STATIC_FILES = {
     "bad2dim": get_filename("tests/data/non-comp/bad2dim.cdl"),
     "bounds_bad_order": get_filename("tests/data/non-comp/bounds_bad_order.cdl"),
     "bounds_bad_num_coords": get_filename(
-        "tests/data/non-comp/bounds_bad_num_coords.cdl"
+        "tests/data/non-comp/bounds_bad_num_coords.cdl",
     ),
     "cell_measure": get_filename("tests/data/cell_measure.cdl"),
     "cf_example_cell_measures": get_filename(
-        "tests/data/examples/cf_example_cell_measures.cdl"
+        "tests/data/examples/cf_example_cell_measures.cdl",
     ),
     "chap2": get_filename("tests/data/chap2.cdl"),
     "climatology": get_filename("tests/data/climatology.cdl"),
@@ -58,7 +58,7 @@ STATIC_FILES = {
     "forecast_reference": get_filename("tests/data/forecast_reference.cdl"),
     "fvcom": get_filename("tests/data/examples/fvcom.cdl"),
     "ghrsst": get_filename(
-        "tests/data/20160919092000-ABOM-L3S_GHRSST-SSTfnd-AVHRR_D-1d_dn_truncate.cdl"
+        "tests/data/20160919092000-ABOM-L3S_GHRSST-SSTfnd-AVHRR_D-1d_dn_truncate.cdl",
     ),
     "glcfs": get_filename("tests/data/examples/glcfs.cdl"),
     "grid-boundaries": get_filename("tests/data/grid-boundaries.cdl"),
@@ -66,10 +66,10 @@ STATIC_FILES = {
     "hycom_global": get_filename("tests/data/examples/hycom_global.cdl"),
     "h_point": get_filename("tests/data/appendix_h/point.cdl"),
     "h_timeseries-incomplete": get_filename(
-        "tests/data/appendix_h/timeseries-incomplete.cdl"
+        "tests/data/appendix_h/timeseries-incomplete.cdl",
     ),
     "h_timeseries-orthogonal": get_filename(
-        "tests/data/appendix_h/timeseries-orthogonal.cdl"
+        "tests/data/appendix_h/timeseries-orthogonal.cdl",
     ),
     "h_timeseries-single": get_filename("tests/data/appendix_h/timeseries-single.cdl"),
     "illegal-vertical": get_filename("tests/data/illegal-vertical.cdl"),
@@ -84,15 +84,15 @@ STATIC_FILES = {
     "mapping": get_filename("tests/data/mapping.cdl"),
     "multi-dim-coordinates": get_filename("tests/data/multi-dim-coordinates.cdl"),
     "multi-timeseries-orthogonal": get_filename(
-        "tests/data/multi-timeseries-orthogonal.cdl"
+        "tests/data/multi-timeseries-orthogonal.cdl",
     ),
     "multi-timeseries-incomplete": get_filename(
-        "tests/data/multi-timeseries-incomplete.cdl"
+        "tests/data/multi-timeseries-incomplete.cdl",
     ),
     "ncei_gold_point_1": get_filename("tests/data/ncei_gold_point_1.cdl"),
     "ncei_gold_point_2": get_filename("tests/data/ncei_gold_point_2.cdl"),
     "NCEI_profile_template_v2_0": get_filename(
-        "tests/data/NCEI_profile_template_v2.0_2016-09-22_181835.151325.cdl"
+        "tests/data/NCEI_profile_template_v2.0_2016-09-22_181835.151325.cdl",
     ),
     "ocos": get_filename("tests/data/examples/ocos.cdl"),
     "ooi_glider": get_filename("tests/data/examples/ooi_glider.cdl"),
@@ -106,7 +106,7 @@ STATIC_FILES = {
     "rhgrid": get_filename("tests/data/rhgrid.cdl"),
     "rutgers": get_filename("tests/data/ru07-20130824T170228_rt0.cdl"),
     "scalar_coordinate_variable": get_filename(
-        "tests/data/scalar_coordinate_variable.cdl"
+        "tests/data/scalar_coordinate_variable.cdl",
     ),
     "self-referencing-var": get_filename("tests/data/self-referencing-var.cdl"),
     "self_referencing": get_filename("tests/data/non-comp/self_referencing.cdl"),
@@ -117,31 +117,31 @@ STATIC_FILES = {
     "taxonomy_example": get_filename("tests/data/taxonomy_example.cdl"),
     "timeseries": get_filename("tests/data/timeseries.cdl"),
     "timeseries-profile-single-station": get_filename(
-        "tests/data/timeseries-profile-single-station.cdl"
+        "tests/data/timeseries-profile-single-station.cdl",
     ),
     "timeseries-profile-multi-station": get_filename(
-        "tests/data/timeseries-profile-multi-station.cdl"
+        "tests/data/timeseries-profile-multi-station.cdl",
     ),
     "timeseries-profile-single-ortho-time": get_filename(
-        "tests/data/timeseries-profile-single-ortho-time.cdl"
+        "tests/data/timeseries-profile-single-ortho-time.cdl",
     ),
     "timeseries-profile-multi-ortho-time": get_filename(
-        "tests/data/timeseries-profile-multi-ortho-time.cdl"
+        "tests/data/timeseries-profile-multi-ortho-time.cdl",
     ),
     "timeseries-profile-ortho-depth": get_filename(
-        "tests/data/timeseries-profile-ortho-depth.cdl"
+        "tests/data/timeseries-profile-ortho-depth.cdl",
     ),
     "timeseries-profile-incomplete": get_filename(
-        "tests/data/timeseries-profile-incomplete.cdl"
+        "tests/data/timeseries-profile-incomplete.cdl",
     ),
     "time_units": get_filename("tests/data/non-comp/time_units.cdl"),
     "trajectory-complete": get_filename("tests/data/trajectory-complete.cdl"),
     "trajectory-implied": get_filename("tests/data/trajectory-implied.cdl"),
     "trajectory-profile-orthogonal": get_filename(
-        "tests/data/trajectory-profile-orthogonal.cdl"
+        "tests/data/trajectory-profile-orthogonal.cdl",
     ),
     "trajectory-profile-incomplete": get_filename(
-        "tests/data/trajectory-profile-incomplete.cdl"
+        "tests/data/trajectory-profile-incomplete.cdl",
     ),
     "trajectory": get_filename("tests/data/trajectory.cdl"),
     "trajectory-single": get_filename("tests/data/trajectory-single.cdl"),

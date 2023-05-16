@@ -27,5 +27,5 @@ cell_methods17 = cell_methods16.union(
         "mean_of_upper_decile",
         "range",
         "root_mean_square",
-    }
+    },
 )
