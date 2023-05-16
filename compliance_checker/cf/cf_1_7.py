@@ -925,14 +925,19 @@ class CF1_7Check(CF1_6Check):
         standard_name = getattr(variable, "standard_name", None)
         formula_terms = getattr(variable, "formula_terms", None)
         # Skip the variable if it's dimensional
+        correct_computed_std_name_ctx = TestCtx(
+            BaseCheck.MEDIUM, self.section_titles["4.3"]
+        )
+        # IMPLEMENTATION CONFORMANCE 4.3.3 REQUIRED
+        correct_computed_std_name_ctx.assert_true(
+            not (formula_terms is None and hasattr(variable, "computed_standard_name")),
+            f"Variable {vname} should have formula_terms attribute when "
+            "computed_standard_name attribute is defined",
+        )
         if formula_terms is None and standard_name not in dim_vert_coords_dict:
             return
 
         # assert that the computed_standard_name is maps to the standard_name correctly
-        correct_computed_std_name_ctx = TestCtx(
-            BaseCheck.MEDIUM,
-            self.section_titles["4.3"],
-        )
         _comp_std_name = dim_vert_coords_dict[standard_name][1]
         correct_computed_std_name_ctx.assert_true(
             getattr(variable, "computed_standard_name", None) in _comp_std_name,
