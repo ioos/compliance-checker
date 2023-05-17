@@ -400,20 +400,20 @@ class CFBaseCheck(BaseCheck):
         # the regex grouping always has component names in even positions and
         # the corresponding variable name in odd positions.
         poorly_formed_formula_terms = ("Attribute formula_terms is not well-formed",)
-        matches = [
-            match
-            for match in regex.finditer(
-                r"(\w+):\s+(\w+)(?:\s+(?!$)|$)", variable.formula_terms
-            )
-        ]
+        matches = list(
+            regex.finditer(
+                r"(\w+):\s+(\w+)(?:\s+(?!$)|$)",
+                variable.formula_terms,
+            ),
+        )
         if not matches:
             valid_formula_terms.add_failure(poorly_formed_formula_terms)
             return valid_formula_terms.to_result()
 
-        terms = set(m.group(1) for m in matches)
+        terms = {m.group(1) for m in matches}
         # get the variables named in the formula terms and check if any
         # are not present in the dataset
-        missing_vars = sorted(set(m.group(2) for m in matches) - set(ds.variables))
+        missing_vars = sorted({m.group(2) for m in matches} - set(ds.variables))
         missing_fmt = "The following variable(s) referenced in {}:formula_terms are not present in the dataset: {}"
         valid_formula_terms.assert_true(
             len(missing_vars) == 0,

@@ -926,7 +926,8 @@ class CF1_7Check(CF1_6Check):
         formula_terms = getattr(variable, "formula_terms", None)
         # Skip the variable if it's dimensional
         correct_computed_std_name_ctx = TestCtx(
-            BaseCheck.MEDIUM, self.section_titles["4.3"]
+            BaseCheck.MEDIUM,
+            self.section_titles["4.3"],
         )
         # IMPLEMENTATION CONFORMANCE 4.3.3 REQUIRED
         correct_computed_std_name_ctx.assert_true(
