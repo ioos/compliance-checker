@@ -26,8 +26,7 @@ class CF1_6Check(CFNCCheck):
     """CF-1.6-specific implementation of CFBaseCheck; supports checking
     netCDF datasets.
     These checks are translated documents:
-        http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html
-        http://cf-pcmdi.llnl.gov/conformance/requirements-and-recommendations/1.6/"""
+        https://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html"""
 
     register_checker = True
     _cc_spec = "cf"
