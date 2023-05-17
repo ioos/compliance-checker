@@ -1,0 +1,12 @@
+stdout_redirector
+===========================================
+
+.. currentmodule:: compliance_checker.runner
+
+.. autofunction:: stdout_redirector
+
+.. include:: compliance_checker.runner.stdout_redirector.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

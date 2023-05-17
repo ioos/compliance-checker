@@ -1,0 +1,12 @@
+is_timeseries_profile_single_station
+==============================================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: is_timeseries_profile_single_station
+
+.. include:: compliance_checker.cfutil.is_timeseries_profile_single_station.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

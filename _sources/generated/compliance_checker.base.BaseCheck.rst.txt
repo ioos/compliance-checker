@@ -1,0 +1,68 @@
+BaseCheck
+=================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autoclass:: BaseCheck
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~BaseCheck.HIGH
+      ~BaseCheck.LOW
+      ~BaseCheck.MEDIUM
+      ~BaseCheck.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~BaseCheck.__init__
+      ~BaseCheck.get_test_ctx
+      ~BaseCheck.setup
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: HIGH
+   .. autoattribute:: LOW
+   .. autoattribute:: MEDIUM
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: get_test_ctx
+   .. automethod:: setup
+
+   
+   
+
+.. include:: compliance_checker.base.BaseCheck.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

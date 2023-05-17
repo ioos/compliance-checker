@@ -1,0 +1,12 @@
+get_lat_variable
+==========================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: get_lat_variable
+
+.. include:: compliance_checker.cfutil.get_lat_variable.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

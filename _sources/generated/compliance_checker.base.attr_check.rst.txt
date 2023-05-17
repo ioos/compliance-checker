@@ -1,0 +1,12 @@
+attr_check
+==================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: attr_check
+
+.. include:: compliance_checker.base.attr_check.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

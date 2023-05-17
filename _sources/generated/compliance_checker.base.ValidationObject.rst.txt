@@ -1,0 +1,66 @@
+ValidationObject
+========================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autoclass:: ValidationObject
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~ValidationObject.expected_type
+      ~ValidationObject.validator_fail_msg
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~ValidationObject.__init__
+      ~ValidationObject.validate
+      ~ValidationObject.validate_type
+      ~ValidationObject.validator_func
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: expected_type
+   .. autoattribute:: validator_fail_msg
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: validate
+   .. automethod:: validate_type
+   .. automethod:: validator_func
+
+   
+   
+
+.. include:: compliance_checker.base.ValidationObject.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

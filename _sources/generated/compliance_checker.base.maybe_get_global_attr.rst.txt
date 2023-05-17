@@ -1,0 +1,12 @@
+maybe_get_global_attr
+=============================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: maybe_get_global_attr
+
+.. include:: compliance_checker.base.maybe_get_global_attr.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

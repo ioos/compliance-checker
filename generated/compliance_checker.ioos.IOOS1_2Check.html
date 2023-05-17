@@ -1,0 +1,1239 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>IOOS1_2Check &#8212; compliance_checker 5.1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/compliance_checker.ioos.IOOS1_2Check';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IOOS1_2_ConventionsValidator" href="compliance_checker.ioos.IOOS1_2_ConventionsValidator.html" />
+    <link rel="prev" title="IOOS1_1Check" href="compliance_checker.ioos.IOOS1_1Check.html" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/generated/compliance_checker.ioos.IOOS1_2Check.html" />
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+  <nav class="navbar navbar-dark navbar-expand-lg bg-unidata fixed-top bd-navbar shadow" id="navbar-main">
+  </nav>
+
+
+    <div class="container-fluid" id="banner"></div>
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../quickintro.html">
+                        IOOS Compliance Checker
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../compliance_checker_api.html">
+                        API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../faq.html">
+                        Frequently Asked Questions
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/ioos/compliance-checker/releases">
+                    Release Notes
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  Version 5.1.0
+</a>
+<div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.cf.html">Cf <code class="docutils literal notranslate"><span class="pre">(compliance_checker.cf)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cf.CF1_6Check.html">CF1_6Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cf.CF1_7Check.html">CF1_7Check</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="compliance_checker.protocols.html">Protocols <code class="docutils literal notranslate"><span class="pre">(compliance_checker.protocols)</span></code></a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.acdd.html">Acdd <code class="docutils literal notranslate"><span class="pre">(compliance_checker.acdd)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDD1_1Check.html">ACDD1_1Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDD1_3Check.html">ACDD1_3Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDDBaseCheck.html">ACDDBaseCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDDNCCheck.html">ACDDNCCheck</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.base.html">Base <code class="docutils literal notranslate"><span class="pre">(compliance_checker.base)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.attr_check.html">attr_check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.check_has.html">check_has</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.csv_splitter.html">csv_splitter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.fix_return_value.html">fix_return_value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.get_namespaces.html">get_namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.maybe_get_global_attr.html">maybe_get_global_attr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.ratable_result.html">ratable_result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.score_group.html">score_group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.std_check.html">std_check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.std_check_in.html">std_check_in</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.xpath_check.html">xpath_check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.BaseCheck.html">BaseCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.BaseNCCheck.html">BaseNCCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.BaseSOSDSCheck.html">BaseSOSDSCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.BaseSOSGCCheck.html">BaseSOSGCCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.EmailValidator.html">EmailValidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.GenericFile.html">GenericFile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.RegexValidator.html">RegexValidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.Result.html">Result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.TestCtx.html">TestCtx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.UrlValidator.html">UrlValidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.ValidationObject.html">ValidationObject</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.cfutil.html">Cfutil <code class="docutils literal notranslate"><span class="pre">(compliance_checker.cfutil)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.attr_membership.html">attr_membership</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.coordinate_dimension_matrix.html">coordinate_dimension_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_auxiliary_coordinate_variables.html">get_auxiliary_coordinate_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_axis_map.html">get_axis_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_axis_variables.html">get_axis_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_bounds_variables.html">get_bounds_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_cell_boundary_map.html">get_cell_boundary_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_cell_boundary_variables.html">get_cell_boundary_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_climatology_variable.html">get_climatology_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_coordinate_variables.html">get_coordinate_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_flag_variables.html">get_flag_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_forecast_metadata_variables.html">get_forecast_metadata_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_geophysical_variables.html">get_geophysical_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_grid_mapping_variables.html">get_grid_mapping_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_instrument_variables.html">get_instrument_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_lat_variable.html">get_lat_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_latitude_variables.html">get_latitude_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_lon_variable.html">get_lon_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_longitude_variables.html">get_longitude_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_platform_variables.html">get_platform_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_sea_names.html">get_sea_names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_time_variable.html">get_time_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_time_variables.html">get_time_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_true_latitude_variables.html">get_true_latitude_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_true_longitude_variables.html">get_true_longitude_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_z_variable.html">get_z_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_z_variables.html">get_z_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.guess_feature_type.html">guess_feature_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.isProfile.html">isProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.isTimeSeries.html">isTimeSeries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.isTimeSeriesProfile.html">isTimeSeriesProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.isTrajectory.html">isTrajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.isTrajectoryProfile.html">isTrajectoryProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_2d_regular_grid.html">is_2d_regular_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_2d_static_grid.html">is_2d_static_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_3d_regular_grid.html">is_3d_regular_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_3d_static_grid.html">is_3d_static_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_cf_trajectory.html">is_cf_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_compression_coordinate.html">is_compression_coordinate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_coordinate_variable.html">is_coordinate_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_dataset_valid_ragged_array_repr_featureType.html">is_dataset_valid_ragged_array_repr_featureType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_dimensionless_standard_name.html">is_dimensionless_standard_name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_geophysical.html">is_geophysical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_mapped_grid.html">is_mapped_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_multi_timeseries_incomplete.html">is_multi_timeseries_incomplete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_multi_timeseries_orthogonal.html">is_multi_timeseries_orthogonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_point.html">is_point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_profile_incomplete.html">is_profile_incomplete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_profile_orthogonal.html">is_profile_orthogonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_reduced_grid.html">is_reduced_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_single_trajectory.html">is_single_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries.html">is_timeseries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_incomplete.html">is_timeseries_profile_incomplete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_multi_ortho_time.html">is_timeseries_profile_multi_ortho_time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_multi_station.html">is_timeseries_profile_multi_station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_ortho_depth.html">is_timeseries_profile_ortho_depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_single_ortho_time.html">is_timeseries_profile_single_ortho_time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_single_station.html">is_timeseries_profile_single_station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_trajectory_profile_incomplete.html">is_trajectory_profile_incomplete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_trajectory_profile_orthogonal.html">is_trajectory_profile_orthogonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_unitless.html">is_unitless</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_variable_valid_ragged_array_repr_featureType.html">is_variable_valid_ragged_array_repr_featureType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.units_convertible.html">units_convertible</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="compliance_checker.ioos.html">Ioos <code class="docutils literal notranslate"><span class="pre">(compliance_checker.ioos)</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS0_1Check.html">IOOS0_1Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS1_1Check.html">IOOS1_1Check</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">IOOS1_2Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS1_2_ConventionsValidator.html">IOOS1_2_ConventionsValidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS1_2_PlatformIDValidator.html">IOOS1_2_PlatformIDValidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSBaseCheck.html">IOOSBaseCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSBaseSOSCheck.html">IOOSBaseSOSCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSNCCheck.html">IOOSNCCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSSOSDSCheck.html">IOOSSOSDSCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSSOSGCCheck.html">IOOSSOSGCCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.NamingAuthorityValidator.html">NamingAuthorityValidator</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.runner.html">Runner <code class="docutils literal notranslate"><span class="pre">(compliance_checker.runner)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.runner.stdout_redirector.html">stdout_redirector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.runner.ComplianceChecker.html">ComplianceChecker</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.suite.html">Suite <code class="docutils literal notranslate"><span class="pre">(compliance_checker.suite)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.suite.extract_docstring_summary.html">extract_docstring_summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.suite.CheckSuite.html">CheckSuite</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.util.html">Util <code class="docutils literal notranslate"><span class="pre">(compliance_checker.util)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.util.dateparse.html">dateparse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.util.datetime_is_iso.html">datetime_is_iso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.util.kvp_convert.html">kvp_convert</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../compliance_checker_api.html" class="nav-link">API</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="compliance_checker.ioos.html" class="nav-link">Ioos <code class="docutils literal notranslate"><span class="pre">(compliance_checker.ioos)</span></code></a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">IOOS1_2Check</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="ioos1-2check">
+<h1>IOOS1_2Check<a class="headerlink" href="#ioos1-2check" title="Permalink to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">compliance_checker.ioos.</span></span><span class="sig-name descname"><span class="pre">IOOS1_2Check</span></span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check" title="Permalink to this definition">#</a></dt>
+<dd><p>Class to implement the IOOS Metadata 1.2 Specification</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_accuracy" title="compliance_checker.ioos.IOOS1_2Check.check_accuracy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_accuracy</span></code></a>(ds)</p></td>
+<td><p>Special check for accuracy when in the salinity context.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_cf_role_variables" title="compliance_checker.ioos.IOOS1_2Check.check_cf_role_variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_cf_role_variables</span></code></a>(ds)</p></td>
+<td><p>The IOOS-1.2 specification details the following requirements regarding the cf_role attribute and its relation to variable dimensionality:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_contributor_role_and_vocabulary" title="compliance_checker.ioos.IOOS1_2Check.check_contributor_role_and_vocabulary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_contributor_role_and_vocabulary</span></code></a>(ds)</p></td>
+<td><p>Check the dataset has global attributes contributor_role and contributor_role_vocabulary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_creator_and_publisher_type" title="compliance_checker.ioos.IOOS1_2Check.check_creator_and_publisher_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_creator_and_publisher_type</span></code></a>(ds)</p></td>
+<td><p>Check if global attribute creator_type and publisher_type are contained within the values &quot;person&quot;, &quot;group&quot;, &quot;institution&quot;, or &quot;position&quot;.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_feature_type" title="compliance_checker.ioos.IOOS1_2Check.check_feature_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_feature_type</span></code></a>(ds)</p></td>
+<td><p>Wrapper for checking featureType global attribute using the CF module.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_geophysical_vars_have_attrs" title="compliance_checker.ioos.IOOS1_2Check.check_geophysical_vars_have_attrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_geophysical_vars_have_attrs</span></code></a>(ds)</p></td>
+<td><p>All geophysical variables must have certain attributes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_global" title="compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_global"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_gts_ingest_global</span></code></a>(ds)</p></td>
+<td><p>Check if a dataset has the global attribute &quot;gts_ingest&quot; and that it matches &quot;true&quot; or &quot;false&quot;.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_requirements" title="compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_requirements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_gts_ingest_requirements</span></code></a>(ds)</p></td>
+<td><p>Check which variables qualify for ingest.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_high" title="compliance_checker.ioos.IOOS1_2Check.check_high"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_high</span></code></a>(ds)</p></td>
+<td><p>Performs a check on each highly recommended attributes' existence in the dataset</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_instrument_make_model_calib_date" title="compliance_checker.ioos.IOOS1_2Check.check_instrument_make_model_calib_date"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_instrument_make_model_calib_date</span></code></a>(ds)</p></td>
+<td><p>Instrument variables should have attributes make_model and calibration_date.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_instrument_variables" title="compliance_checker.ioos.IOOS1_2Check.check_instrument_variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_instrument_variables</span></code></a>(ds)</p></td>
+<td><p>If present, the instrument_variable is one that contains additional metadata about the instrument the data was collected with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_ioos_ingest" title="compliance_checker.ioos.IOOS1_2Check.check_ioos_ingest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_ioos_ingest</span></code></a>(ds)</p></td>
+<td><p>If a dataset contains the global attribute ioos_ingest, its value must be &quot;false&quot;.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_platform_global" title="compliance_checker.ioos.IOOS1_2Check.check_platform_global"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_platform_global</span></code></a>(ds)</p></td>
+<td><p>The &quot;platform&quot; attribute must be a single string containing no blank characters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_platform_vocabulary" title="compliance_checker.ioos.IOOS1_2Check.check_platform_vocabulary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_platform_vocabulary</span></code></a>(ds)</p></td>
+<td><p>The platform_vocabulary attribute is recommended to be a URL to <a class="reference external" href="https://mmisw.org/ont/ioos/platform">https://mmisw.org/ont/ioos/platform</a> or <a class="reference external" href="http://vocab.nerc.ac.uk/collection/L06/current/">http://vocab.nerc.ac.uk/collection/L06/current/</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_flags" title="compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_flags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_qartod_variables_flags</span></code></a>(ds)</p></td>
+<td><p><a class="reference external" href="https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#quality-controlqartod">https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#quality-controlqartod</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_references" title="compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_references"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_qartod_variables_references</span></code></a>(ds)</p></td>
+<td><p>For any variables that are deemed QARTOD variables, check that they contain the &quot;references&quot; attribute and that the value of the attribute is a valid URL.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_recommended" title="compliance_checker.ioos.IOOS1_2Check.check_recommended"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_recommended</span></code></a>(ds)</p></td>
+<td><p>Performs a check on each recommended attributes' existence in the dataset</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_single_platform" title="compliance_checker.ioos.IOOS1_2Check.check_single_platform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_single_platform</span></code></a>(ds)</p></td>
+<td><p>Verify that a dataset only has a single platform attribute, and thus a single platform variable.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_standard_name" title="compliance_checker.ioos.IOOS1_2Check.check_standard_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_standard_name</span></code></a>(ds)</p></td>
+<td><p>Wrapper for checking standard names using the CF module.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_station_location_lat" title="compliance_checker.ioos.IOOS1_2Check.check_station_location_lat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_station_location_lat</span></code></a>(ds)</p></td>
+<td><p>Checks station lat attributes are set</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_station_location_lon" title="compliance_checker.ioos.IOOS1_2Check.check_station_location_lon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_station_location_lon</span></code></a>(ds)</p></td>
+<td><p>Checks station lon attributes are set</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_time_period" title="compliance_checker.ioos.IOOS1_2Check.check_time_period"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_time_period</span></code></a>(ds)</p></td>
+<td><p>Check that time period attributes are both set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_units" title="compliance_checker.ioos.IOOS1_2Check.check_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_units</span></code></a>(ds)</p></td>
+<td><p>Wrapper to check units with the CF module.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_vertical_coordinates" title="compliance_checker.ioos.IOOS1_2Check.check_vertical_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_vertical_coordinates</span></code></a>(ds)</p></td>
+<td><p>Check that vertical units (corresponding to axis &quot;Z&quot;) are a unit equivalent to one of &quot;meter&quot;, &quot;inch&quot;, &quot;foot&quot;, &quot;yard&quot;, &quot;US_survey_foot&quot;, &quot;mile&quot;, or &quot;fathom&quot;.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_wmo_platform_code" title="compliance_checker.ioos.IOOS1_2Check.check_wmo_platform_code"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_wmo_platform_code</span></code></a>(ds)</p></td>
+<td><p>Per the spec:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.get_test_ctx" title="compliance_checker.ioos.IOOS1_2Check.get_test_ctx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_test_ctx</span></code></a>(severity, name[, variable])</p></td>
+<td><p>Creates an existing TestCtx object in _defined_results dict if it does not exist for the current checker instance, or an returns the existing TestCtx for modification.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.setup" title="compliance_checker.ioos.IOOS1_2Check.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup</span></code></a>(ds)</p></td>
+<td><p>Common setup method for a Checker.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.std_check_in" title="compliance_checker.ioos.IOOS1_2Check.std_check_in"><code class="xref py py-obj docutils literal notranslate"><span class="pre">std_check_in</span></code></a>(dataset, name, allowed_vals)</p></td>
+<td><p>Returns 0 if attr not present, 1 if present but not in correct value, 2 if good</p></td>
+</tr>
+</tbody>
+</table>
+<table class="table">
+<tbody>
+<tr class="row-odd"><td><p><strong>std_check</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Summary</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.HIGH" title="compliance_checker.ioos.IOOS1_2Check.HIGH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HIGH</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.LOW" title="compliance_checker.ioos.IOOS1_2Check.LOW"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LOW</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.MEDIUM" title="compliance_checker.ioos.IOOS1_2Check.MEDIUM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MEDIUM</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.register_checker" title="compliance_checker.ioos.IOOS1_2Check.register_checker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_checker</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.supported_ds" title="compliance_checker.ioos.IOOS1_2Check.supported_ds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">supported_ds</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.__init__" title="compliance_checker.ioos.IOOS1_2Check.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_accuracy" title="compliance_checker.ioos.IOOS1_2Check.check_accuracy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_accuracy</span></code></a>(ds)</p></td>
+<td><p>Special check for accuracy when in the salinity context.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_cf_role_variables" title="compliance_checker.ioos.IOOS1_2Check.check_cf_role_variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_cf_role_variables</span></code></a>(ds)</p></td>
+<td><p>The IOOS-1.2 specification details the following requirements regarding the cf_role attribute and its relation to variable dimensionality:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_contributor_role_and_vocabulary" title="compliance_checker.ioos.IOOS1_2Check.check_contributor_role_and_vocabulary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_contributor_role_and_vocabulary</span></code></a>(ds)</p></td>
+<td><p>Check the dataset has global attributes contributor_role and contributor_role_vocabulary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_creator_and_publisher_type" title="compliance_checker.ioos.IOOS1_2Check.check_creator_and_publisher_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_creator_and_publisher_type</span></code></a>(ds)</p></td>
+<td><p>Check if global attribute creator_type and publisher_type are contained within the values &quot;person&quot;, &quot;group&quot;, &quot;institution&quot;, or &quot;position&quot;.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_feature_type" title="compliance_checker.ioos.IOOS1_2Check.check_feature_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_feature_type</span></code></a>(ds)</p></td>
+<td><p>Wrapper for checking featureType global attribute using the CF module.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_geophysical_vars_have_attrs" title="compliance_checker.ioos.IOOS1_2Check.check_geophysical_vars_have_attrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_geophysical_vars_have_attrs</span></code></a>(ds)</p></td>
+<td><p>All geophysical variables must have certain attributes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_global" title="compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_global"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_gts_ingest_global</span></code></a>(ds)</p></td>
+<td><p>Check if a dataset has the global attribute &quot;gts_ingest&quot; and that it matches &quot;true&quot; or &quot;false&quot;.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_requirements" title="compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_requirements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_gts_ingest_requirements</span></code></a>(ds)</p></td>
+<td><p>Check which variables qualify for ingest.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_high" title="compliance_checker.ioos.IOOS1_2Check.check_high"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_high</span></code></a>(ds)</p></td>
+<td><p>Performs a check on each highly recommended attributes' existence in the dataset</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_instrument_make_model_calib_date" title="compliance_checker.ioos.IOOS1_2Check.check_instrument_make_model_calib_date"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_instrument_make_model_calib_date</span></code></a>(ds)</p></td>
+<td><p>Instrument variables should have attributes make_model and calibration_date.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_instrument_variables" title="compliance_checker.ioos.IOOS1_2Check.check_instrument_variables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_instrument_variables</span></code></a>(ds)</p></td>
+<td><p>If present, the instrument_variable is one that contains additional metadata about the instrument the data was collected with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_ioos_ingest" title="compliance_checker.ioos.IOOS1_2Check.check_ioos_ingest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_ioos_ingest</span></code></a>(ds)</p></td>
+<td><p>If a dataset contains the global attribute ioos_ingest, its value must be &quot;false&quot;.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_platform_global" title="compliance_checker.ioos.IOOS1_2Check.check_platform_global"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_platform_global</span></code></a>(ds)</p></td>
+<td><p>The &quot;platform&quot; attribute must be a single string containing no blank characters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_platform_vocabulary" title="compliance_checker.ioos.IOOS1_2Check.check_platform_vocabulary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_platform_vocabulary</span></code></a>(ds)</p></td>
+<td><p>The platform_vocabulary attribute is recommended to be a URL to <a class="reference external" href="https://mmisw.org/ont/ioos/platform">https://mmisw.org/ont/ioos/platform</a> or <a class="reference external" href="http://vocab.nerc.ac.uk/collection/L06/current/">http://vocab.nerc.ac.uk/collection/L06/current/</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_flags" title="compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_flags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_qartod_variables_flags</span></code></a>(ds)</p></td>
+<td><p><a class="reference external" href="https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#quality-controlqartod">https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#quality-controlqartod</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_references" title="compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_references"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_qartod_variables_references</span></code></a>(ds)</p></td>
+<td><p>For any variables that are deemed QARTOD variables, check that they contain the &quot;references&quot; attribute and that the value of the attribute is a valid URL.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_recommended" title="compliance_checker.ioos.IOOS1_2Check.check_recommended"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_recommended</span></code></a>(ds)</p></td>
+<td><p>Performs a check on each recommended attributes' existence in the dataset</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_single_platform" title="compliance_checker.ioos.IOOS1_2Check.check_single_platform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_single_platform</span></code></a>(ds)</p></td>
+<td><p>Verify that a dataset only has a single platform attribute, and thus a single platform variable.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_standard_name" title="compliance_checker.ioos.IOOS1_2Check.check_standard_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_standard_name</span></code></a>(ds)</p></td>
+<td><p>Wrapper for checking standard names using the CF module.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_station_location_lat" title="compliance_checker.ioos.IOOS1_2Check.check_station_location_lat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_station_location_lat</span></code></a>(ds)</p></td>
+<td><p>Checks station lat attributes are set</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_station_location_lon" title="compliance_checker.ioos.IOOS1_2Check.check_station_location_lon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_station_location_lon</span></code></a>(ds)</p></td>
+<td><p>Checks station lon attributes are set</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_time_period" title="compliance_checker.ioos.IOOS1_2Check.check_time_period"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_time_period</span></code></a>(ds)</p></td>
+<td><p>Check that time period attributes are both set.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_units" title="compliance_checker.ioos.IOOS1_2Check.check_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_units</span></code></a>(ds)</p></td>
+<td><p>Wrapper to check units with the CF module.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_vertical_coordinates" title="compliance_checker.ioos.IOOS1_2Check.check_vertical_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_vertical_coordinates</span></code></a>(ds)</p></td>
+<td><p>Check that vertical units (corresponding to axis &quot;Z&quot;) are a unit equivalent to one of &quot;meter&quot;, &quot;inch&quot;, &quot;foot&quot;, &quot;yard&quot;, &quot;US_survey_foot&quot;, &quot;mile&quot;, or &quot;fathom&quot;.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.check_wmo_platform_code" title="compliance_checker.ioos.IOOS1_2Check.check_wmo_platform_code"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_wmo_platform_code</span></code></a>(ds)</p></td>
+<td><p>Per the spec:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.get_test_ctx" title="compliance_checker.ioos.IOOS1_2Check.get_test_ctx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_test_ctx</span></code></a>(severity, name[, variable])</p></td>
+<td><p>Creates an existing TestCtx object in _defined_results dict if it does not exist for the current checker instance, or an returns the existing TestCtx for modification.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.setup" title="compliance_checker.ioos.IOOS1_2Check.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup</span></code></a>(ds)</p></td>
+<td><p>Common setup method for a Checker.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.std_check" title="compliance_checker.ioos.IOOS1_2Check.std_check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">std_check</span></code></a>(dataset, name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.ioos.IOOS1_2Check.std_check_in" title="compliance_checker.ioos.IOOS1_2Check.std_check_in"><code class="xref py py-obj docutils literal notranslate"><span class="pre">std_check_in</span></code></a>(dataset, name, allowed_vals)</p></td>
+<td><p>Returns 0 if attr not present, 1 if present but not in correct value, 2 if good</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.HIGH">
+<span class="sig-name descname"><span class="pre">HIGH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.HIGH" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.LOW">
+<span class="sig-name descname"><span class="pre">LOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.LOW" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.MEDIUM">
+<span class="sig-name descname"><span class="pre">MEDIUM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.MEDIUM" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.register_checker">
+<span class="sig-name descname"><span class="pre">register_checker</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.register_checker" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.supported_ds">
+<span class="sig-name descname"><span class="pre">supported_ds</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;class</span> <span class="pre">'netCDF4._netCDF4.Dataset'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'compliance_checker.MemoizedDataset'&gt;}</span></em><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.supported_ds" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods Documentation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.__init__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_accuracy">
+<span class="sig-name descname"><span class="pre">check_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_accuracy" title="Permalink to this definition">#</a></dt>
+<dd><p>Special check for accuracy when in the salinity context.
+<a class="github reference external" href="https://github.com/ioos/compliance-checker/issues/839">ioos/compliance-checker#839</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ds: netCDF4.Dataset</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>list of Results objects</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_cf_role_variables">
+<span class="sig-name descname"><span class="pre">check_cf_role_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_cf_role_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_cf_role_variables" title="Permalink to this definition">#</a></dt>
+<dd><p>The IOOS-1.2 specification details the following requirements regarding
+the cf_role attribute and its relation to variable dimensionality:</p>
+<blockquote>
+<div><p>cf_role may be applied to the “Platform Variable”, as indicated by
+geophysical_variable:platform, but it may also be an independent
+variable. To comply with the single platform per dataset rule of
+the IOOS Metadata Profile, the cf_role variable will typically
+have a dimension of 1, unless it is a TimeSeries dataset following
+the ‘TimeSeries - multiple station’ format.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>To summarize the rules checked in this method:</dt><dd><ul class="simple">
+<li><p>‘timeseries’, cf_role var must have dim 1</p></li>
+<li><p>‘timeseriesprofile’ must have
+cf_role=timeseries_id variable have dim 1 and dim of cf_role=profile_id
+can be &gt; 1</p></li>
+<li><p>‘trajectory’ or ‘trajectoryprofile’ variable with cf_role=trajectory_id
+must have dim 1, cf_role=profile_id variable can be &gt; 1</p></li>
+</ul>
+</dd>
+</dl>
+<p>Relevant documentation found in the specification as well as GitHub issues:
+<a class="github reference external" href="https://github.com/ioos/compliance-checker/issues/748#issuecomment-606659685">ioos/compliance-checker#748</a>
+<a class="github reference external" href="https://github.com/ioos/compliance-checker/issues/828">ioos/compliance-checker#828</a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_contributor_role_and_vocabulary">
+<span class="sig-name descname"><span class="pre">check_contributor_role_and_vocabulary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_contributor_role_and_vocabulary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_contributor_role_and_vocabulary" title="Permalink to this definition">#</a></dt>
+<dd><p>Check the dataset has global attributes contributor_role and
+contributor_role_vocabulary. It is recommended to come from
+one of NERC or NOAA-NCEI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ds: netCDF4.Dataset (open)</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>list of Result objects</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_creator_and_publisher_type">
+<span class="sig-name descname"><span class="pre">check_creator_and_publisher_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_creator_and_publisher_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_creator_and_publisher_type" title="Permalink to this definition">#</a></dt>
+<dd><p>Check if global attribute creator_type and publisher_type
+are contained within the values “person”, “group”, “institution”, or
+“position”.  If creator_type is not present within the global
+attributes, assume it is set to a value of “person”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ds: netCDF4.Dataset</strong></dt><dd><p>An open netCDF4 Dataset</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>list of Result</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_feature_type">
+<span class="sig-name descname"><span class="pre">check_feature_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_feature_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_feature_type" title="Permalink to this definition">#</a></dt>
+<dd><p>Wrapper for checking featureType global attribute using the CF module.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_geophysical_vars_have_attrs">
+<span class="sig-name descname"><span class="pre">check_geophysical_vars_have_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_geophysical_vars_have_attrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_geophysical_vars_have_attrs" title="Permalink to this definition">#</a></dt>
+<dd><p>All geophysical variables must have certain attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ds: netCDF4.Dataset</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>list: list of Result objects</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_global">
+<span class="sig-name descname"><span class="pre">check_gts_ingest_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_gts_ingest_global"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_global" title="Permalink to this definition">#</a></dt>
+<dd><p>Check if a dataset has the global attribute “gts_ingest” and that
+it matches “true” or “false”. This attribute is “required, if applicable”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ds (netCDF4.Dataset): open dataset</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Result</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_requirements">
+<span class="sig-name descname"><span class="pre">check_gts_ingest_requirements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_gts_ingest_requirements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_requirements" title="Permalink to this definition">#</a></dt>
+<dd><p>Check which variables qualify for ingest.</p>
+<p>According to <a class="reference external" href="https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#requirements-for-ioos-dataset-ndbcgts-ingest">https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#requirements-for-ioos-dataset-ndbcgts-ingest</a>,
+the gts_ingest is “required, if applicable”. Any variables which a user
+would like ingested must also contain the gts_ingest attribute with a
+value of true. The variable must:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>have a valid CF standard_name attribute (already checked)</p></li>
+<li><p>have an ancillary variable reqpresenting QARTOD aggregate flags</p></li>
+<li><p>have a valid udunits units attribute (already checked)</p></li>
+</ul>
+</div></blockquote>
+<p>This check will always fail so as to notify the user which variables
+qualified/did not qualify for ingest.
+<a class="github reference external" href="https://github.com/ioos/compliance-checker/issues/759#issuecomment-629454412">ioos/compliance-checker#759</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ds (netCDF4.Dataset): open Dataset</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Result</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_high">
+<span class="sig-name descname"><span class="pre">check_high</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_high"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_high" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs a check on each highly recommended attributes’ existence in the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ds</strong> (<em>netCDF4.Dataset</em>) – An open netCDF dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_instrument_make_model_calib_date">
+<span class="sig-name descname"><span class="pre">check_instrument_make_model_calib_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_instrument_make_model_calib_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_instrument_make_model_calib_date" title="Permalink to this definition">#</a></dt>
+<dd><p>Instrument variables should have attributes make_model and
+calibration_date. Both should be strings, with calibration_date
+following ISO-8601 date format.</p>
+<p><a class="github reference external" href="https://github.com/ioos/compliance-checker/issues/839">ioos/compliance-checker#839</a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_instrument_variables">
+<span class="sig-name descname"><span class="pre">check_instrument_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_instrument_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_instrument_variables" title="Permalink to this definition">#</a></dt>
+<dd><p>If present, the instrument_variable is one that contains additional
+metadata about the instrument the data was collected with.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ds</strong> (<em>netCDF4.Dataset</em>) – open Dataset</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of Results</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_ioos_ingest">
+<span class="sig-name descname"><span class="pre">check_ioos_ingest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_ioos_ingest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_ioos_ingest" title="Permalink to this definition">#</a></dt>
+<dd><p>If a dataset contains the global attribute ioos_ingest,
+its value must be “false”. All datasets are assumed to be
+ingested except those with this flag. If the dataset should
+be ingested, no flag (or “true”) should be present.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ds: netCDF4.Dataset (open)</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Result</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_platform_global">
+<span class="sig-name descname"><span class="pre">check_platform_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_platform_global"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_platform_global" title="Permalink to this definition">#</a></dt>
+<dd><p>The “platform” attribute must be a single string containing
+no blank characters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ds: netCDF4.Dataset (open)</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>Result</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_platform_vocabulary">
+<span class="sig-name descname"><span class="pre">check_platform_vocabulary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_platform_vocabulary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_platform_vocabulary" title="Permalink to this definition">#</a></dt>
+<dd><p>The platform_vocabulary attribute is recommended to be a URL to
+<a class="reference external" href="https://mmisw.org/ont/ioos/platform">https://mmisw.org/ont/ioos/platform</a> or
+<a class="reference external" href="http://vocab.nerc.ac.uk/collection/L06/current/">http://vocab.nerc.ac.uk/collection/L06/current/</a>. However,
+it is required to at least be a URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ds</strong> (<em>netCDF4.Dataset</em>) – open Dataset</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_flags">
+<span class="sig-name descname"><span class="pre">check_qartod_variables_flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_qartod_variables_flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_flags" title="Permalink to this definition">#</a></dt>
+<dd><p><a class="reference external" href="https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#quality-controlqartod">https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#quality-controlqartod</a></p>
+<p>Check that all QARTOD variables have flag_meanings and flag_values attributes.
+Use delegation to methods in the CF module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ds (netCDF4.Dataset): open dataset</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>list of Result objects</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_references">
+<span class="sig-name descname"><span class="pre">check_qartod_variables_references</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_qartod_variables_references"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_references" title="Permalink to this definition">#</a></dt>
+<dd><p>For any variables that are deemed QARTOD variables, check that they
+contain the “references” attribute and that the value of the attribute
+is a valid URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ds</strong> (<em>netCDF4.Dataset</em>) – open Dataset</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of Results</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_recommended">
+<span class="sig-name descname"><span class="pre">check_recommended</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_recommended"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_recommended" title="Permalink to this definition">#</a></dt>
+<dd><p>Performs a check on each recommended attributes’ existence in the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ds</strong> (<em>netCDF4.Dataset</em>) – An open netCDF dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_single_platform">
+<span class="sig-name descname"><span class="pre">check_single_platform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_single_platform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_single_platform" title="Permalink to this definition">#</a></dt>
+<dd><p>Verify that a dataset only has a single platform attribute, and thus
+a single platform variable. Gridded model datasets are not required
+to declare a platform or platform variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ds</strong> (<em>netCDF-4 Dataset</em>) – open Dataset object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_standard_name">
+<span class="sig-name descname"><span class="pre">check_standard_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_standard_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_standard_name" title="Permalink to this definition">#</a></dt>
+<dd><p>Wrapper for checking standard names using the CF module.
+Extends the StandardNameTable to include QARTOD variable
+standard names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_station_location_lat">
+<span class="sig-name descname"><span class="pre">check_station_location_lat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_station_location_lat" title="Permalink to this definition">#</a></dt>
+<dd><p>Checks station lat attributes are set</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_station_location_lon">
+<span class="sig-name descname"><span class="pre">check_station_location_lon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_station_location_lon" title="Permalink to this definition">#</a></dt>
+<dd><p>Checks station lon attributes are set</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_time_period">
+<span class="sig-name descname"><span class="pre">check_time_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_time_period" title="Permalink to this definition">#</a></dt>
+<dd><p>Check that time period attributes are both set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_units">
+<span class="sig-name descname"><span class="pre">check_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_units" title="Permalink to this definition">#</a></dt>
+<dd><p>Wrapper to check units with the CF module.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_vertical_coordinates">
+<span class="sig-name descname"><span class="pre">check_vertical_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_vertical_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_vertical_coordinates" title="Permalink to this definition">#</a></dt>
+<dd><p>Check that vertical units (corresponding to axis “Z”) are a unit
+equivalent to one of “meter”, “inch”, “foot”, “yard”, “US_survey_foot”,
+“mile”, or “fathom”.  Check that the vertical coordinate variable
+“positive” attribute is either “up” or “down”.  Note that unlike the CF
+version of this check, pressure units are not accepted and length units
+are constrained to the aforementioned set instead of accepting any valid
+UDUNITS length unit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ds</strong> (<em>netCDF4.Dataset</em>) – An open netCDF dataset</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of results</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.check_wmo_platform_code">
+<span class="sig-name descname"><span class="pre">check_wmo_platform_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.check_wmo_platform_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.check_wmo_platform_code" title="Permalink to this definition">#</a></dt>
+<dd><p>Per the spec:</p>
+<p>“The WMO identifier for the platform used to measure the data. This
+identifier can be any of the following types:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>WMO ID for buoys (numeric, 5 digits)</p></li>
+<li><p>WMO ID for gliders (numeric, 7 digits)</p></li>
+<li><p>NWS ID (alphanumeric, 5 digits)”</p></li>
+</ul>
+</div></blockquote>
+<p>This attribute is “required, if applicable” – a warning message will
+only show up if the attribute is present and does not conform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ds</strong> (<em>netCDF4.Dataset</em>) – open Dataset</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.get_test_ctx">
+<span class="sig-name descname"><span class="pre">get_test_ctx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">severity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.get_test_ctx" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates an existing TestCtx object in _defined_results dict if it does
+not exist for the current checker instance, or an returns the existing
+TestCtx for modification. Takes a severity level and name and uses the
+two element tuple formed by the arguments as a key into the dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>severity</strong> (<em>int</em>) – A BaseCheck severity level</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the check</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rtype compliance_checker.base.TestCtx<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new or or existing <cite>TestCtx</cite> instance taken from this
+instance’s _defined_results dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/ioos.html#IOOS1_2Check.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.setup" title="Permalink to this definition">#</a></dt>
+<dd><p>Common setup method for a Checker.</p>
+<p>Automatically run when running a CheckSuite. Define this method in your Checker class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.std_check">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.std_check" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="compliance_checker.ioos.IOOS1_2Check.std_check_in">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std_check_in</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_vals</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.ioos.IOOS1_2Check.std_check_in" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns 0 if attr not present, 1 if present but not in correct value, 2 if good</p>
+</dd></dl>
+
+</dd></dl>
+
+<div style='clear:both'></div></section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="compliance_checker.ioos.IOOS1_1Check.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">IOOS1_1Check</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="compliance_checker.ioos.IOOS1_2_ConventionsValidator.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">IOOS1_2_ConventionsValidator</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.HIGH"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.HIGH</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.LOW"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.LOW</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.MEDIUM"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.MEDIUM</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.register_checker"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.register_checker</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.supported_ds"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.supported_ds</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.__init__"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_accuracy"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_accuracy()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_cf_role_variables"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_cf_role_variables()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_contributor_role_and_vocabulary"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_contributor_role_and_vocabulary()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_creator_and_publisher_type"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_creator_and_publisher_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_feature_type"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_feature_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_geophysical_vars_have_attrs"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_geophysical_vars_have_attrs()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_global"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_gts_ingest_global()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_requirements"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_gts_ingest_requirements()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_high"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_high()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_instrument_make_model_calib_date"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_instrument_make_model_calib_date()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_instrument_variables"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_instrument_variables()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_ioos_ingest"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_ioos_ingest()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_platform_global"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_platform_global()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_platform_vocabulary"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_platform_vocabulary()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_flags"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_qartod_variables_flags()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_references"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_qartod_variables_references()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_recommended"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_recommended()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_single_platform"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_single_platform()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_standard_name"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_standard_name()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_station_location_lat"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_station_location_lat()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_station_location_lon"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_station_location_lon()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_time_period"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_time_period()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_units"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_units()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_vertical_coordinates"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_vertical_coordinates()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.check_wmo_platform_code"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.check_wmo_platform_code()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.get_test_ctx"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.get_test_ctx()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.setup"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.setup()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.std_check"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.std_check()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.ioos.IOOS1_2Check.std_check_in"><code class="docutils literal notranslate"><span class="pre">IOOS1_2Check.std_check_in()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/generated/compliance_checker.ioos.IOOS1_2Check.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Dave Foster.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

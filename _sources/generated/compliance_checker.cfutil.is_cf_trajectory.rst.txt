@@ -1,0 +1,12 @@
+is_cf_trajectory
+==========================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: is_cf_trajectory
+
+.. include:: compliance_checker.cfutil.is_cf_trajectory.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

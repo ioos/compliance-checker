@@ -1,0 +1,12 @@
+check_has
+=================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: check_has
+
+.. include:: compliance_checker.base.check_has.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

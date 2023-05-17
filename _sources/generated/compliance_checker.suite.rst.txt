@@ -1,0 +1,38 @@
+﻿   
+      
+   
+
+Suite ``(compliance_checker.suite)``
+====================================
+
+.. automodule:: compliance_checker.suite
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree: ./
+   
+      extract_docstring_summary
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: ./
+   
+      CheckSuite
+   
+   
+
+   
+   
+   

@@ -1,0 +1,96 @@
+ACDDBaseCheck
+=====================================
+
+.. currentmodule:: compliance_checker.acdd
+
+.. autoclass:: ACDDBaseCheck
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~ACDDBaseCheck.HIGH
+      ~ACDDBaseCheck.LOW
+      ~ACDDBaseCheck.MEDIUM
+      ~ACDDBaseCheck.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~ACDDBaseCheck.__init__
+      ~ACDDBaseCheck.check_acknowledgment
+      ~ACDDBaseCheck.check_high
+      ~ACDDBaseCheck.check_lat_extents
+      ~ACDDBaseCheck.check_lon_extents
+      ~ACDDBaseCheck.check_recommended
+      ~ACDDBaseCheck.check_suggested
+      ~ACDDBaseCheck.check_time_extents
+      ~ACDDBaseCheck.check_var_long_name
+      ~ACDDBaseCheck.check_var_standard_name
+      ~ACDDBaseCheck.check_var_units
+      ~ACDDBaseCheck.check_vertical_extents
+      ~ACDDBaseCheck.get_applicable_variables
+      ~ACDDBaseCheck.get_test_ctx
+      ~ACDDBaseCheck.setup
+      ~ACDDBaseCheck.verify_convention_version
+      ~ACDDBaseCheck.verify_geospatial_bounds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: HIGH
+   .. autoattribute:: LOW
+   .. autoattribute:: MEDIUM
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: check_acknowledgment
+   .. automethod:: check_high
+   .. automethod:: check_lat_extents
+   .. automethod:: check_lon_extents
+   .. automethod:: check_recommended
+   .. automethod:: check_suggested
+   .. automethod:: check_time_extents
+   .. automethod:: check_var_long_name
+   .. automethod:: check_var_standard_name
+   .. automethod:: check_var_units
+   .. automethod:: check_vertical_extents
+   .. automethod:: get_applicable_variables
+   .. automethod:: get_test_ctx
+   .. automethod:: setup
+   .. automethod:: verify_convention_version
+   .. automethod:: verify_geospatial_bounds
+
+   
+   
+
+.. include:: compliance_checker.acdd.ACDDBaseCheck.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

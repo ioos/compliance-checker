@@ -1,0 +1,166 @@
+CF1_6Check
+================================
+
+.. currentmodule:: compliance_checker.cf
+
+.. autoclass:: CF1_6Check
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~CF1_6Check.HIGH
+      ~CF1_6Check.LOW
+      ~CF1_6Check.MEDIUM
+      ~CF1_6Check.appendix_a
+      ~CF1_6Check.appendix_d_parametric_coords
+      ~CF1_6Check.register_checker
+      ~CF1_6Check.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~CF1_6Check.__init__
+      ~CF1_6Check.check_add_offset_scale_factor_type
+      ~CF1_6Check.check_ancillary_variables
+      ~CF1_6Check.check_appendix_a
+      ~CF1_6Check.check_aux_coordinates
+      ~CF1_6Check.check_calendar
+      ~CF1_6Check.check_cell_boundaries
+      ~CF1_6Check.check_cell_measures
+      ~CF1_6Check.check_cell_methods
+      ~CF1_6Check.check_cf_role
+      ~CF1_6Check.check_child_attr_data_types
+      ~CF1_6Check.check_climatological_statistics
+      ~CF1_6Check.check_compression_gathering
+      ~CF1_6Check.check_convention_globals
+      ~CF1_6Check.check_convention_possibly_var_attrs
+      ~CF1_6Check.check_conventions_version
+      ~CF1_6Check.check_coordinate_types
+      ~CF1_6Check.check_coordinate_variables_strict_monotonicity
+      ~CF1_6Check.check_data_types
+      ~CF1_6Check.check_dimension_names
+      ~CF1_6Check.check_dimension_order
+      ~CF1_6Check.check_dimensional_vertical_coordinate
+      ~CF1_6Check.check_dimensionless_vertical_coordinates
+      ~CF1_6Check.check_duplicate_axis
+      ~CF1_6Check.check_feature_type
+      ~CF1_6Check.check_filename
+      ~CF1_6Check.check_fill_value_equal_missing_value
+      ~CF1_6Check.check_fill_value_outside_valid_range
+      ~CF1_6Check.check_flags
+      ~CF1_6Check.check_geographic_region
+      ~CF1_6Check.check_grid_coordinates
+      ~CF1_6Check.check_grid_mapping
+      ~CF1_6Check.check_hints
+      ~CF1_6Check.check_latitude
+      ~CF1_6Check.check_longitude
+      ~CF1_6Check.check_multi_dimensional_coords
+      ~CF1_6Check.check_names_unique
+      ~CF1_6Check.check_naming_conventions
+      ~CF1_6Check.check_packed_data
+      ~CF1_6Check.check_reduced_horizontal_grid
+      ~CF1_6Check.check_standard_name
+      ~CF1_6Check.check_time_coordinate
+      ~CF1_6Check.check_units
+      ~CF1_6Check.check_valid_range_or_valid_min_max_present
+      ~CF1_6Check.check_variable_features
+      ~CF1_6Check.get_test_ctx
+      ~CF1_6Check.setup
+      ~CF1_6Check.std_check
+      ~CF1_6Check.std_check_in
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: HIGH
+   .. autoattribute:: LOW
+   .. autoattribute:: MEDIUM
+   .. autoattribute:: appendix_a
+   .. autoattribute:: appendix_d_parametric_coords
+   .. autoattribute:: register_checker
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: check_add_offset_scale_factor_type
+   .. automethod:: check_ancillary_variables
+   .. automethod:: check_appendix_a
+   .. automethod:: check_aux_coordinates
+   .. automethod:: check_calendar
+   .. automethod:: check_cell_boundaries
+   .. automethod:: check_cell_measures
+   .. automethod:: check_cell_methods
+   .. automethod:: check_cf_role
+   .. automethod:: check_child_attr_data_types
+   .. automethod:: check_climatological_statistics
+   .. automethod:: check_compression_gathering
+   .. automethod:: check_convention_globals
+   .. automethod:: check_convention_possibly_var_attrs
+   .. automethod:: check_conventions_version
+   .. automethod:: check_coordinate_types
+   .. automethod:: check_coordinate_variables_strict_monotonicity
+   .. automethod:: check_data_types
+   .. automethod:: check_dimension_names
+   .. automethod:: check_dimension_order
+   .. automethod:: check_dimensional_vertical_coordinate
+   .. automethod:: check_dimensionless_vertical_coordinates
+   .. automethod:: check_duplicate_axis
+   .. automethod:: check_feature_type
+   .. automethod:: check_filename
+   .. automethod:: check_fill_value_equal_missing_value
+   .. automethod:: check_fill_value_outside_valid_range
+   .. automethod:: check_flags
+   .. automethod:: check_geographic_region
+   .. automethod:: check_grid_coordinates
+   .. automethod:: check_grid_mapping
+   .. automethod:: check_hints
+   .. automethod:: check_latitude
+   .. automethod:: check_longitude
+   .. automethod:: check_multi_dimensional_coords
+   .. automethod:: check_names_unique
+   .. automethod:: check_naming_conventions
+   .. automethod:: check_packed_data
+   .. automethod:: check_reduced_horizontal_grid
+   .. automethod:: check_standard_name
+   .. automethod:: check_time_coordinate
+   .. automethod:: check_units
+   .. automethod:: check_valid_range_or_valid_min_max_present
+   .. automethod:: check_variable_features
+   .. automethod:: get_test_ctx
+   .. automethod:: setup
+   .. automethod:: std_check
+   .. automethod:: std_check_in
+
+   
+   
+
+.. include:: compliance_checker.cf.CF1_6Check.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

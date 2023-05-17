@@ -1,0 +1,12 @@
+attr_membership
+=========================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: attr_membership
+
+.. include:: compliance_checker.cfutil.attr_membership.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

@@ -1,0 +1,45 @@
+Result
+==============================
+
+.. currentmodule:: compliance_checker.base
+
+.. autoclass:: Result
+
+   
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~Result.__init__
+      ~Result.serialize
+
+   
+   
+
+   
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: serialize
+
+   
+   
+
+.. include:: compliance_checker.base.Result.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

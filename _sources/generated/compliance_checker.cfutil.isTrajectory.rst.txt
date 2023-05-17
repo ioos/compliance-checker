@@ -1,0 +1,12 @@
+isTrajectory
+======================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: isTrajectory
+
+.. include:: compliance_checker.cfutil.isTrajectory.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

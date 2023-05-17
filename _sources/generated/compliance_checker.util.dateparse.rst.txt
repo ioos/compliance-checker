@@ -1,0 +1,12 @@
+dateparse
+=================================
+
+.. currentmodule:: compliance_checker.util
+
+.. autofunction:: dateparse
+
+.. include:: compliance_checker.util.dateparse.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

@@ -1,0 +1,12 @@
+fix_return_value
+========================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: fix_return_value
+
+.. include:: compliance_checker.base.fix_return_value.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

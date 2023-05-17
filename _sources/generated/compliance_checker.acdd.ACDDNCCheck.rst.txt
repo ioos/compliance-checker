@@ -1,0 +1,100 @@
+ACDDNCCheck
+===================================
+
+.. currentmodule:: compliance_checker.acdd
+
+.. autoclass:: ACDDNCCheck
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~ACDDNCCheck.HIGH
+      ~ACDDNCCheck.LOW
+      ~ACDDNCCheck.MEDIUM
+      ~ACDDNCCheck.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~ACDDNCCheck.__init__
+      ~ACDDNCCheck.check_acknowledgment
+      ~ACDDNCCheck.check_high
+      ~ACDDNCCheck.check_lat_extents
+      ~ACDDNCCheck.check_lon_extents
+      ~ACDDNCCheck.check_recommended
+      ~ACDDNCCheck.check_suggested
+      ~ACDDNCCheck.check_time_extents
+      ~ACDDNCCheck.check_var_long_name
+      ~ACDDNCCheck.check_var_standard_name
+      ~ACDDNCCheck.check_var_units
+      ~ACDDNCCheck.check_vertical_extents
+      ~ACDDNCCheck.get_applicable_variables
+      ~ACDDNCCheck.get_test_ctx
+      ~ACDDNCCheck.setup
+      ~ACDDNCCheck.std_check
+      ~ACDDNCCheck.std_check_in
+      ~ACDDNCCheck.verify_convention_version
+      ~ACDDNCCheck.verify_geospatial_bounds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: HIGH
+   .. autoattribute:: LOW
+   .. autoattribute:: MEDIUM
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: check_acknowledgment
+   .. automethod:: check_high
+   .. automethod:: check_lat_extents
+   .. automethod:: check_lon_extents
+   .. automethod:: check_recommended
+   .. automethod:: check_suggested
+   .. automethod:: check_time_extents
+   .. automethod:: check_var_long_name
+   .. automethod:: check_var_standard_name
+   .. automethod:: check_var_units
+   .. automethod:: check_vertical_extents
+   .. automethod:: get_applicable_variables
+   .. automethod:: get_test_ctx
+   .. automethod:: setup
+   .. automethod:: std_check
+   .. automethod:: std_check_in
+   .. automethod:: verify_convention_version
+   .. automethod:: verify_geospatial_bounds
+
+   
+   
+
+.. include:: compliance_checker.acdd.ACDDNCCheck.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

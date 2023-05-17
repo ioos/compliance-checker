@@ -1,0 +1,12 @@
+std_check_in
+====================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: std_check_in
+
+.. include:: compliance_checker.base.std_check_in.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

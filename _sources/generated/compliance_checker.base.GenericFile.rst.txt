@@ -1,0 +1,45 @@
+GenericFile
+===================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autoclass:: GenericFile
+
+   
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~GenericFile.__init__
+      ~GenericFile.filepath
+
+   
+   
+
+   
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: filepath
+
+   
+   
+
+.. include:: compliance_checker.base.GenericFile.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

@@ -1,0 +1,90 @@
+IOOS0_1Check
+====================================
+
+.. currentmodule:: compliance_checker.ioos
+
+.. autoclass:: IOOS0_1Check
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~IOOS0_1Check.HIGH
+      ~IOOS0_1Check.LOW
+      ~IOOS0_1Check.MEDIUM
+      ~IOOS0_1Check.register_checker
+      ~IOOS0_1Check.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~IOOS0_1Check.__init__
+      ~IOOS0_1Check.check_altitude_units
+      ~IOOS0_1Check.check_global_attributes
+      ~IOOS0_1Check.check_station_location_lat
+      ~IOOS0_1Check.check_station_location_lon
+      ~IOOS0_1Check.check_time_period
+      ~IOOS0_1Check.check_variable_attributes
+      ~IOOS0_1Check.check_variable_names
+      ~IOOS0_1Check.check_variable_units
+      ~IOOS0_1Check.get_test_ctx
+      ~IOOS0_1Check.setup
+      ~IOOS0_1Check.std_check
+      ~IOOS0_1Check.std_check_in
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: HIGH
+   .. autoattribute:: LOW
+   .. autoattribute:: MEDIUM
+   .. autoattribute:: register_checker
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: check_altitude_units
+   .. automethod:: check_global_attributes
+   .. automethod:: check_station_location_lat
+   .. automethod:: check_station_location_lon
+   .. automethod:: check_time_period
+   .. automethod:: check_variable_attributes
+   .. automethod:: check_variable_names
+   .. automethod:: check_variable_units
+   .. automethod:: get_test_ctx
+   .. automethod:: setup
+   .. automethod:: std_check
+   .. automethod:: std_check_in
+
+   
+   
+
+.. include:: compliance_checker.ioos.IOOS0_1Check.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

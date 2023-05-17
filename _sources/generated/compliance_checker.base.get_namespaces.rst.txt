@@ -1,0 +1,12 @@
+get_namespaces
+======================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: get_namespaces
+
+.. include:: compliance_checker.base.get_namespaces.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

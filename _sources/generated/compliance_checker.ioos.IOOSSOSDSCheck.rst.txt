@@ -1,0 +1,78 @@
+IOOSSOSDSCheck
+======================================
+
+.. currentmodule:: compliance_checker.ioos
+
+.. autoclass:: IOOSSOSDSCheck
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~IOOSSOSDSCheck.HIGH
+      ~IOOSSOSDSCheck.LOW
+      ~IOOSSOSDSCheck.MEDIUM
+      ~IOOSSOSDSCheck.ns
+      ~IOOSSOSDSCheck.register_checker
+      ~IOOSSOSDSCheck.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~IOOSSOSDSCheck.__init__
+      ~IOOSSOSDSCheck.check_high
+      ~IOOSSOSDSCheck.check_recommended
+      ~IOOSSOSDSCheck.check_suggested
+      ~IOOSSOSDSCheck.get_test_ctx
+      ~IOOSSOSDSCheck.setup
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: HIGH
+   .. autoattribute:: LOW
+   .. autoattribute:: MEDIUM
+   .. autoattribute:: ns
+   .. autoattribute:: register_checker
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: check_high
+   .. automethod:: check_recommended
+   .. automethod:: check_suggested
+   .. automethod:: get_test_ctx
+   .. automethod:: setup
+
+   
+   
+
+.. include:: compliance_checker.ioos.IOOSSOSDSCheck.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

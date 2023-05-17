@@ -1,0 +1,12 @@
+isTimeSeries
+======================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: isTimeSeries
+
+.. include:: compliance_checker.cfutil.isTimeSeries.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

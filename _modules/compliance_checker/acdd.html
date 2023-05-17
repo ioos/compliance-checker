@@ -1,0 +1,1176 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>compliance_checker.acdd &#8212; compliance_checker 5.1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/acdd';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/_modules/compliance_checker/acdd.html" />
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+  <nav class="navbar navbar-dark navbar-expand-lg bg-unidata fixed-top bd-navbar shadow" id="navbar-main">
+  </nav>
+
+
+    <div class="container-fluid" id="banner"></div>
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../quickintro.html">
+                        IOOS Compliance Checker
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../compliance_checker_api.html">
+                        API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../faq.html">
+                        Frequently Asked Questions
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/ioos/compliance-checker/releases">
+                    Release Notes
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  Version 5.1.0
+</a>
+<div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">compliance_checker.acdd</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for compliance_checker.acdd</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Checks for the Attribute Conventions for Dataset Discovery (ACDD)</span>
+
+<span class="sd">This module contains classes defined as checks part of the compliance checker</span>
+<span class="sd">project for the verification and scoring of attributes for datasets.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pendulum</span>
+<span class="kn">from</span> <span class="nn">cftime</span> <span class="kn">import</span> <span class="n">num2pydate</span>
+<span class="kn">from</span> <span class="nn">pygeoif</span> <span class="kn">import</span> <span class="n">from_wkt</span>
+
+<span class="kn">from</span> <span class="nn">compliance_checker</span> <span class="kn">import</span> <span class="n">cfutil</span>
+<span class="kn">from</span> <span class="nn">compliance_checker.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BaseCheck</span><span class="p">,</span>
+    <span class="n">BaseNCCheck</span><span class="p">,</span>
+    <span class="n">Result</span><span class="p">,</span>
+    <span class="n">check_has</span><span class="p">,</span>
+    <span class="n">ratable_result</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">compliance_checker.cf.util</span> <span class="kn">import</span> <span class="n">_possiblexunits</span><span class="p">,</span> <span class="n">_possibleyunits</span>
+<span class="kn">from</span> <span class="nn">compliance_checker.util</span> <span class="kn">import</span> <span class="n">dateparse</span><span class="p">,</span> <span class="n">datetime_is_iso</span><span class="p">,</span> <span class="n">kvp_convert</span>
+
+
+<div class="viewcode-block" id="ACDDBaseCheck"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck">[docs]</a><span class="k">class</span> <span class="nc">ACDDBaseCheck</span><span class="p">(</span><span class="n">BaseCheck</span><span class="p">):</span>
+    <span class="n">_cc_spec</span> <span class="o">=</span> <span class="s2">&quot;acdd&quot;</span>
+    <span class="n">_cc_description</span> <span class="o">=</span> <span class="s2">&quot;Attribute Conventions for Dataset Discovery (ACDD)&quot;</span>
+    <span class="n">_cc_url</span> <span class="o">=</span> <span class="s2">&quot;http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery&quot;</span>
+    <span class="n">_cc_display_headers</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;Highly Recommended&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Recommended&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Suggested&quot;</span><span class="p">}</span>
+
+<div class="viewcode-block" id="ACDDBaseCheck.__init__"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">high_rec_atts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;keywords&quot;</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;naming_authority&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;history&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;comment&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;date_created&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;creator_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;creator_url&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;creator_email&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;institution&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;project&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;processing_level&quot;</span><span class="p">,</span>
+            <span class="p">(</span><span class="s2">&quot;geospatial_bounds&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verify_geospatial_bounds</span><span class="p">),</span>
+            <span class="s2">&quot;geospatial_lat_min&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_lat_max&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_lon_min&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_lon_max&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_vertical_min&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_vertical_max&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;time_coverage_start&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;time_coverage_end&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;time_coverage_duration&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;time_coverage_resolution&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;standard_name_vocabulary&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;license&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sug_atts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;contributor_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;contributor_role&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;date_modified&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;date_issued&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_lat_units&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_lat_resolution&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_lon_units&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_lon_resolution&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_vertical_units&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;geospatial_vertical_resolution&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="c1"># This variable is used to cache the results of applicable variables so</span>
+        <span class="c1"># the method isn&#39;t executed repeatedly.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_applicable_variables</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># to be used to format variable Result groups headers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_var_header</span> <span class="o">=</span> <span class="s1">&#39;variable &quot;</span><span class="si">{}</span><span class="s1">&quot; missing the following attributes:&#39;</span></div>
+
+    <span class="c1"># set up attributes according to version</span>
+<div class="viewcode-block" id="ACDDBaseCheck.check_high"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_high">[docs]</a>    <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="n">gname</span><span class="o">=</span><span class="s2">&quot;Global Attributes&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">check_high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a check on each highly recommended attributes&#39; existence in the dataset</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">high_rec_atts</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.check_recommended"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_recommended">[docs]</a>    <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span> <span class="n">gname</span><span class="o">=</span><span class="s2">&quot;Global Attributes&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">check_recommended</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a check on each recommended attributes&#39; existence in the dataset</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.check_suggested"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_suggested">[docs]</a>    <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">LOW</span><span class="p">,</span> <span class="n">gname</span><span class="o">=</span><span class="s2">&quot;Global Attributes&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">check_suggested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a check on each suggested attributes&#39; existence in the dataset</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sug_atts</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.get_applicable_variables"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.get_applicable_variables">[docs]</a>    <span class="k">def</span> <span class="nf">get_applicable_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of variable names that are applicable to ACDD Metadata</span>
+<span class="sd">        Checks for variables. This includes geophysical and coordinate</span>
+<span class="sd">        variables only.</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applicable_variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applicable_variables</span> <span class="o">=</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_geophysical_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="n">varname</span> <span class="o">=</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_time_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="c1"># avoid duplicates by checking if already present</span>
+            <span class="k">if</span> <span class="n">varname</span> <span class="ow">and</span> <span class="p">(</span><span class="n">varname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicable_variables</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">applicable_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span>
+            <span class="n">varname</span> <span class="o">=</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_lon_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">varname</span> <span class="ow">and</span> <span class="p">(</span><span class="n">varname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicable_variables</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">applicable_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span>
+            <span class="n">varname</span> <span class="o">=</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_lat_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">varname</span> <span class="ow">and</span> <span class="p">(</span><span class="n">varname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicable_variables</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">applicable_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span>
+            <span class="n">varname</span> <span class="o">=</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_z_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">varname</span> <span class="ow">and</span> <span class="p">(</span><span class="n">varname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicable_variables</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">applicable_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicable_variables</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.check_var_long_name"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_var_long_name">[docs]</a>    <span class="k">def</span> <span class="nf">check_var_long_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks each applicable variable for the long_name attribute</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># ACDD Variable Metadata applies to all coordinate variables and</span>
+        <span class="c1"># geophysical variables only.</span>
+
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_applicable_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+            <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">long_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">variable</span><span class="p">],</span> <span class="s2">&quot;long_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">check</span> <span class="o">=</span> <span class="n">long_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+                <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;long_name&quot;</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Result</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="n">check</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_var_header</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">variable</span><span class="p">),</span> <span class="n">msgs</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.check_var_standard_name"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_var_standard_name">[docs]</a>    <span class="k">def</span> <span class="nf">check_var_standard_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks each applicable variable for the standard_name attribute</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_applicable_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+            <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">std_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">variable</span><span class="p">],</span> <span class="s2">&quot;standard_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">check</span> <span class="o">=</span> <span class="n">std_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+                <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;standard_name&quot;</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Result</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="n">check</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_var_header</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">variable</span><span class="p">),</span> <span class="n">msgs</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.check_var_units"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_var_units">[docs]</a>    <span class="k">def</span> <span class="nf">check_var_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks each applicable variable for the units attribute</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_applicable_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+            <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># Check units and dims for variable</span>
+            <span class="n">unit_check</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">variable</span><span class="p">],</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span>
+            <span class="n">no_dim_check</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="p">()</span>
+            <span class="c1"># Check if we have no dimensions.  If no dims, skip test</span>
+            <span class="k">if</span> <span class="n">no_dim_check</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># Check if we have no units</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">unit_check</span><span class="p">:</span>
+                <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Result</span><span class="p">(</span>
+                    <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span>
+                    <span class="n">unit_check</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_var_header</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">variable</span><span class="p">),</span>
+                    <span class="n">msgs</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.check_acknowledgment"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_acknowledgment">[docs]</a>    <span class="k">def</span> <span class="nf">check_acknowledgment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if acknowledgment/acknowledgment attribute is present. Because</span>
+<span class="sd">        acknowledgement has its own check, we are keeping it out of the Global</span>
+<span class="sd">        Attributes (even though it is a Global Attr).</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;acknowledgment&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;acknowledgement&quot;</span><span class="p">):</span>
+            <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;acknowledgment/acknowledgement not present&quot;</span><span class="p">)</span>
+
+        <span class="c1"># name=&quot;Global Attributes&quot; so gets grouped with Global Attributes</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span> <span class="n">check</span><span class="p">,</span> <span class="s2">&quot;Global Attributes&quot;</span><span class="p">,</span> <span class="n">msgs</span><span class="o">=</span><span class="n">messages</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.check_lat_extents"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_lat_extents">[docs]</a>    <span class="k">def</span> <span class="nf">check_lat_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that the values of geospatial_lat_min/geospatial_lat_max</span>
+<span class="sd">        approximately match the data.</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_lat_min&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_lat_max&quot;</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;geospatial_lat_extents_match&quot;</span><span class="p">,</span>
+                <span class="p">[</span><span class="s2">&quot;geospatial_lat_min/max attribute not found, CF-1.6 spec chapter 4.1&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>  <span class="c1"># type cast</span>
+            <span class="n">lat_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lat_min</span><span class="p">)</span>
+            <span class="n">lat_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lat_max</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;geospatial_lat_extents_match&quot;</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;Could not convert one of geospatial_lat_min (</span><span class="si">{}</span><span class="s2">) or max (</span><span class="si">{}</span><span class="s2">) to float see CF-1.6 spec chapter 4.1&quot;</span>
+                    <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lat_min</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lat_max</span><span class="p">),</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="c1"># identify lat var(s) as per CF 4.1</span>
+        <span class="n">lat_vars</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># var -&gt; number of criteria passed</span>
+        <span class="k">for</span> <span class="n">_name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># must have units</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">lat_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># units in this set</span>
+            <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">units</span> <span class="ow">in</span> <span class="n">_possibleyunits</span><span class="p">:</span>
+                <span class="n">lat_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># standard name of &quot;latitude&quot;</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;standard_name&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">var</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">==</span> <span class="s2">&quot;latitude&quot;</span><span class="p">:</span>
+                <span class="n">lat_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># axis of &quot;Y&quot;</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;axis&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">var</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">:</span>
+                <span class="n">lat_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># trim out any zeros</span>
+        <span class="n">lat_vars</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">lat_vars</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lat_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;geospatial_lat_extents_match&quot;</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;Could not find lat variable to test extent of geospatial_lat_min/max, see CF-1.6 spec chapter 4.1&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="c1"># sort by criteria passed</span>
+        <span class="n">final_lats</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lat_vars</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">lat_vars</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">obs_mins</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lats</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="n">obs_maxs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lats</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="n">min_pass</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">lat_min</span><span class="p">,</span> <span class="n">min_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">min_val</span> <span class="ow">in</span> <span class="n">obs_mins</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">max_pass</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">lat_max</span><span class="p">,</span> <span class="n">max_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">max_val</span> <span class="ow">in</span> <span class="n">obs_maxs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="n">allpass</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">min_pass</span><span class="p">,</span> <span class="n">max_pass</span><span class="p">))</span>
+
+        <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">min_pass</span><span class="p">:</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Data for possible latitude variables (</span><span class="si">{</span><span class="n">obs_mins</span><span class="si">}</span><span class="s2">) did not match geospatial_lat_min value (</span><span class="si">{</span><span class="n">lat_min</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">max_pass</span><span class="p">:</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Data for possible latitude variables (</span><span class="si">{</span><span class="n">obs_maxs</span><span class="si">}</span><span class="s2">) did not match geospatial_lat_max value (</span><span class="si">{</span><span class="n">lat_max</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+            <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">allpass</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="s2">&quot;geospatial_lat_extents_match&quot;</span><span class="p">,</span>
+            <span class="n">msgs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.check_lon_extents"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_lon_extents">[docs]</a>    <span class="k">def</span> <span class="nf">check_lon_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that the values of geospatial_lon_min/geospatial_lon_max</span>
+<span class="sd">        approximately match the data.</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_lon_min&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_lon_max&quot;</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;geospatial_lon_extents_match&quot;</span><span class="p">,</span>
+                <span class="p">[</span><span class="s2">&quot;geospatial_lon_min/max attribute not found, CF-1.6 spec chapter 4.1&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>  <span class="c1"># type cast</span>
+            <span class="n">lon_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lon_min</span><span class="p">)</span>
+            <span class="n">lon_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lon_max</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;geospatial_lon_extents_match&quot;</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;Could not convert one of geospatial_lon_min (</span><span class="si">{}</span><span class="s2">) or max (</span><span class="si">{}</span><span class="s2">) to float see CF-1.6 spec chapter 4.1&quot;</span>
+                    <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lon_min</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lon_max</span><span class="p">),</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="c1"># identify lon var(s) as per CF 4.2</span>
+        <span class="n">lon_vars</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># var -&gt; number of criteria passed</span>
+        <span class="k">for</span> <span class="n">_name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># must have units</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">lon_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># units in this set</span>
+            <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">units</span> <span class="ow">in</span> <span class="n">_possiblexunits</span><span class="p">:</span>
+                <span class="n">lon_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># standard name of &quot;longitude&quot;</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;standard_name&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">var</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">==</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span>
+                <span class="n">lon_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># axis of &quot;Y&quot;</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;axis&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">var</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+                <span class="n">lon_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># trim out any zeros</span>
+        <span class="n">lon_vars</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">lon_vars</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lon_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;geospatial_lon_extents_match&quot;</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;Could not find lon variable to test extent of geospatial_lon_min/max, see CF-1.6 spec chapter 4.2&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="c1"># sort by criteria passed</span>
+        <span class="n">final_lons</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lon_vars</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">lon_vars</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">obs_mins</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lons</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="n">obs_maxs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lons</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="n">min_pass</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">lon_min</span><span class="p">,</span> <span class="n">min_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">min_val</span> <span class="ow">in</span> <span class="n">obs_mins</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">max_pass</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">lon_max</span><span class="p">,</span> <span class="n">max_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">max_val</span> <span class="ow">in</span> <span class="n">obs_maxs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="n">allpass</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">min_pass</span><span class="p">,</span> <span class="n">max_pass</span><span class="p">))</span>
+
+        <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">min_pass</span><span class="p">:</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Data for possible longitude variables (</span><span class="si">{</span><span class="n">obs_mins</span><span class="si">}</span><span class="s2">) did not match geospatial_lon_min value (</span><span class="si">{</span><span class="n">lon_min</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">max_pass</span><span class="p">:</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Data for possible longitude variables (</span><span class="si">{</span><span class="n">obs_maxs</span><span class="si">}</span><span class="s2">) did not match geospatial_lon_max value (</span><span class="si">{</span><span class="n">lon_max</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+            <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">allpass</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="s2">&quot;geospatial_lon_extents_match&quot;</span><span class="p">,</span>
+            <span class="n">msgs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.verify_geospatial_bounds"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.verify_geospatial_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">verify_geospatial_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks that the geospatial bounds is well formed OGC WKT&quot;&quot;&quot;</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_bounds&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ratable_result</span><span class="p">(</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;Global Attributes&quot;</span><span class="p">,</span>  <span class="c1"># grouped with Globals</span>
+                <span class="p">[</span><span class="s2">&quot;geospatial_bounds not present&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># TODO: verify that WKT is valid given CRS (defaults to EPSG:4326</span>
+            <span class="c1">#       in ACDD.</span>
+            <span class="n">from_wkt</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_bounds</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ratable_result</span><span class="p">(</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;Global Attributes&quot;</span><span class="p">,</span>  <span class="c1"># grouped with Globals</span>
+                <span class="p">[</span>
+                    <span class="p">(</span>
+                        <span class="s2">&quot;Could not parse WKT from geospatial_bounds,&quot;</span>
+                        <span class="s1">&#39; possible bad value: &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_bounds</span><span class="p">)</span>
+                    <span class="p">),</span>
+                <span class="p">],</span>
+                <span class="n">variable_name</span><span class="o">=</span><span class="s2">&quot;geospatial_bounds&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># parsed OK</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ratable_result</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Global Attributes&quot;</span><span class="p">,</span> <span class="p">())</span></div>
+
+    <span class="k">def</span> <span class="nf">_check_total_z_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">z_variable</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check the entire array of Z for minimum and maximum and compare that to</span>
+<span class="sd">        the vertical extents defined in the global attributes</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        :param str z_variable: Name of the variable representing the Z-Axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vert_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_vertical_min</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;geospatial_vertical_min cannot be cast to float&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vert_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_vertical_max</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;geospatial_vertical_max cannot be cast to float&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">msgs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">total</span><span class="p">),</span>
+                <span class="s2">&quot;geospatial_vertical_extents_match&quot;</span><span class="p">,</span>
+                <span class="n">msgs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">zvalue</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">z_variable</span><span class="p">][:]</span>
+        <span class="c1"># If the array has fill values, which is allowed in the case of point</span>
+        <span class="c1"># features</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">zvalue</span><span class="p">,</span> <span class="s2">&quot;mask&quot;</span><span class="p">):</span>
+            <span class="n">zvalue</span> <span class="o">=</span> <span class="n">zvalue</span><span class="p">[</span><span class="o">~</span><span class="n">zvalue</span><span class="o">.</span><span class="n">mask</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">zvalue</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;Cannot compare geospatial vertical extents &quot;</span>
+                <span class="s2">&quot;against min/max of data, as non-masked data &quot;</span>
+                <span class="s2">&quot;length is zero&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">total</span><span class="p">),</span>
+                <span class="s2">&quot;geospatial_vertical_extents_match&quot;</span><span class="p">,</span>
+                <span class="n">msgs</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">zmin</span> <span class="o">=</span> <span class="n">zvalue</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">zmax</span> <span class="o">=</span> <span class="n">zvalue</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vert_min</span><span class="p">,</span> <span class="n">zmin</span><span class="p">):</span>
+                <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;geospatial_vertical_min != min(</span><span class="si">{</span><span class="n">z_variable</span><span class="si">}</span><span class="s2">) values, </span><span class="si">{</span><span class="n">vert_min</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="n">zmin</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vert_max</span><span class="p">,</span> <span class="n">zmax</span><span class="p">):</span>
+                <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;geospatial_vertical_max != max(</span><span class="si">{</span><span class="n">z_variable</span><span class="si">}</span><span class="s2">) values, </span><span class="si">{</span><span class="n">vert_min</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="n">zmax</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+            <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">total</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">msgs</span><span class="p">),</span> <span class="n">total</span><span class="p">),</span>
+            <span class="s2">&quot;geospatial_vertical_extents_match&quot;</span><span class="p">,</span>
+            <span class="n">msgs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_scalar_vertical_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">z_variable</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check the scalar value of Z compared to the vertical extents which</span>
+<span class="sd">        should also be equivalent</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        :param str z_variable: Name of the variable representing the Z-Axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vert_min</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">geospatial_vertical_min</span>
+        <span class="n">vert_max</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">geospatial_vertical_max</span>
+        <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="n">zvalue</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">z_variable</span><span class="p">][:]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vert_min</span><span class="p">,</span> <span class="n">vert_max</span><span class="p">):</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;geospatial_vertical_min != geospatial_vertical_max for scalar depth values, </span><span class="si">{</span><span class="n">vert_min</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="n">vert_max</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vert_max</span><span class="p">,</span> <span class="n">zvalue</span><span class="p">):</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;geospatial_vertical_max != </span><span class="si">{</span><span class="n">z_variable</span><span class="si">}</span><span class="s2"> values, </span><span class="si">{</span><span class="n">vert_max</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="n">zvalue</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+            <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">total</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">msgs</span><span class="p">),</span> <span class="n">total</span><span class="p">),</span>
+            <span class="s2">&quot;geospatial_vertical_extents_match&quot;</span><span class="p">,</span>
+            <span class="n">msgs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="ACDDBaseCheck.check_vertical_extents"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_vertical_extents">[docs]</a>    <span class="k">def</span> <span class="nf">check_vertical_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that the values of geospatial_vertical_min/geospatial_vertical_max approximately match the data.</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_vertical_min&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_vertical_max&quot;</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">z_variable</span> <span class="o">=</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_z_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">z_variable</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;geospatial_vertical_extents_match&quot;</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;Could not find vertical variable to test extent of geospatial_vertical_min/geospatial_vertical_max, see CF-1.6 spec chapter 4.3&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">z_variable</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_scalar_vertical_extents</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">z_variable</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_total_z_extents</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">z_variable</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.check_time_extents"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.check_time_extents">[docs]</a>    <span class="k">def</span> <span class="nf">check_time_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that the values of time_coverage_start/time_coverage_end approximately match the data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;time_coverage_start&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;time_coverage_end&quot;</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Parse the ISO 8601 formatted dates</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">t_min</span> <span class="o">=</span> <span class="n">dateparse</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time_coverage_start</span><span class="p">)</span>
+            <span class="n">t_max</span> <span class="o">=</span> <span class="n">dateparse</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time_coverage_end</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">pendulum</span><span class="o">.</span><span class="n">parsing</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ParserError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;time_coverage_extents_match&quot;</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;time_coverage attributes are not formatted properly. Use the ISO 8601:2004 date format, preferably the extended format.&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="n">timevar</span> <span class="o">=</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_time_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">timevar</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;time_coverage_extents_match&quot;</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;Could not find time variable to test extent of time_coverage_start/time_coverage_end, see CF-1.6 spec chapter 4.4&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Time should be monotonically increasing, so we make that assumption here so we don&#39;t have to download THE ENTIRE ARRAY</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># num2date returns as naive date, but with time adjusted to UTC</span>
+            <span class="c1"># we need to attach timezone information here, or the date</span>
+            <span class="c1"># subtraction from t_min/t_max will assume that a naive timestamp is</span>
+            <span class="c1"># in the same time zone and cause erroneous results.</span>
+            <span class="c1"># Pendulum uses UTC by default, but we are being explicit here</span>
+            <span class="n">time0</span> <span class="o">=</span> <span class="n">pendulum</span><span class="o">.</span><span class="n">instance</span><span class="p">(</span>
+                <span class="n">num2pydate</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">),</span>
+                <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">time1</span> <span class="o">=</span> <span class="n">pendulum</span><span class="o">.</span><span class="n">instance</span><span class="p">(</span>
+                <span class="n">num2pydate</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">),</span>
+                <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;time_coverage_extents_match&quot;</span><span class="p">,</span>
+                <span class="p">[</span><span class="s2">&quot;Failed to retrieve and convert times for variables </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">timevar</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="n">start_dt</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">time0</span> <span class="o">-</span> <span class="n">t_min</span><span class="p">)</span>
+        <span class="n">end_dt</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">time1</span> <span class="o">-</span> <span class="n">t_max</span><span class="p">)</span>
+
+        <span class="n">score</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">start_dt</span> <span class="o">&gt;</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;Date time mismatch between time_coverage_start and actual &quot;</span>
+                <span class="s2">&quot;time values </span><span class="si">{}</span><span class="s2"> (time_coverage_start) != </span><span class="si">{}</span><span class="s2"> (time[0])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">t_min</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                    <span class="n">time0</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">score</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">end_dt</span> <span class="o">&gt;</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;Date time mismatch between time_coverage_end and actual &quot;</span>
+                <span class="s2">&quot;time values </span><span class="si">{}</span><span class="s2"> (time_coverage_end) != </span><span class="si">{}</span><span class="s2"> (time[N])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">t_max</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                    <span class="n">time1</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">score</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span> <span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;time_coverage_extents_match&quot;</span><span class="p">,</span> <span class="n">msgs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ACDDBaseCheck.verify_convention_version"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDBaseCheck.html#compliance_checker.acdd.ACDDBaseCheck.verify_convention_version">[docs]</a>    <span class="k">def</span> <span class="nf">verify_convention_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Verify that the version in the Conventions field is correct</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">convention</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;Conventions&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="n">convention</span> <span class="o">==</span> <span class="s2">&quot;ACDD-&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cc_spec_version</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">ratable_result</span><span class="p">(</span>
+                        <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                        <span class="kc">None</span><span class="p">,</span>
+                        <span class="p">[],</span>
+                    <span class="p">)</span>  <span class="c1"># name=None so grouped with Globals</span>
+
+            <span class="c1"># if no/wrong ACDD convention, return appropriate result</span>
+            <span class="c1"># Result will have name &quot;Global Attributes&quot; to group with globals</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Conventions does not contain &#39;ACDD-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_cc_spec_version</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">ratable_result</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;Global Attributes&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>  <span class="c1"># NetCDF attribute not found</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">&quot;No Conventions attribute present; must contain ACDD-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_cc_spec_version</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">]</span>
+            <span class="c1"># Result will have name &quot;Global Attributes&quot; to group with globals</span>
+            <span class="k">return</span> <span class="n">ratable_result</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;Global Attributes&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ACDDNCCheck"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDDNCCheck.html#compliance_checker.acdd.ACDDNCCheck">[docs]</a><span class="k">class</span> <span class="nc">ACDDNCCheck</span><span class="p">(</span><span class="n">BaseNCCheck</span><span class="p">,</span> <span class="n">ACDDBaseCheck</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ACDD1_1Check"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDD1_1Check.html#compliance_checker.acdd.ACDD1_1Check">[docs]</a><span class="k">class</span> <span class="nc">ACDD1_1Check</span><span class="p">(</span><span class="n">ACDDNCCheck</span><span class="p">):</span>
+    <span class="n">_cc_spec_version</span> <span class="o">=</span> <span class="s2">&quot;1.1&quot;</span>
+    <span class="n">_cc_description</span> <span class="o">=</span> <span class="s2">&quot;Attribute Conventions for Dataset Discovery (ACDD) 1.1&quot;</span>
+    <span class="n">register_checker</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="ACDD1_1Check.__init__"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDD1_1Check.html#compliance_checker.acdd.ACDD1_1Check.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;keywords_vocabulary&quot;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sug_atts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="s2">&quot;publisher_name&quot;</span><span class="p">,</span>  <span class="c1"># publisher,dataCenter</span>
+                <span class="s2">&quot;publisher_url&quot;</span><span class="p">,</span>  <span class="c1"># publisher</span>
+                <span class="s2">&quot;publisher_email&quot;</span><span class="p">,</span>  <span class="c1"># publisher</span>
+                <span class="s2">&quot;geospatial_vertical_positive&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ACDD1_3Check"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDD1_3Check.html#compliance_checker.acdd.ACDD1_3Check">[docs]</a><span class="k">class</span> <span class="nc">ACDD1_3Check</span><span class="p">(</span><span class="n">ACDDNCCheck</span><span class="p">):</span>
+    <span class="n">_cc_spec_version</span> <span class="o">=</span> <span class="s2">&quot;1.3&quot;</span>
+    <span class="n">_cc_description</span> <span class="o">=</span> <span class="s2">&quot;Attribute Conventions for Dataset Discovery (ACDD) 1.3&quot;</span>
+    <span class="n">register_checker</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="ACDD1_3Check.__init__"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDD1_3Check.html#compliance_checker.acdd.ACDD1_3Check.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">high_rec_atts</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="s2">&quot;Conventions&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verify_convention_version</span><span class="p">)])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="s2">&quot;geospatial_vertical_positive&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;geospatial_bounds_crs&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;geospatial_bounds_vertical_crs&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;publisher_name&quot;</span><span class="p">,</span>  <span class="c1"># publisher,dataCenter</span>
+                <span class="s2">&quot;publisher_url&quot;</span><span class="p">,</span>  <span class="c1"># publisher</span>
+                <span class="s2">&quot;publisher_email&quot;</span><span class="p">,</span>  <span class="c1"># publisher</span>
+                <span class="s2">&quot;source&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sug_atts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="s2">&quot;creator_type&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;person&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="s2">&quot;institution&quot;</span><span class="p">,</span> <span class="s2">&quot;position&quot;</span><span class="p">]),</span>
+                <span class="s2">&quot;creator_institution&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;platform&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;platform_vocabulary&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;keywords_vocabulary&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;metadata_link&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;product_version&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;references&quot;</span><span class="p">,</span>
+                <span class="p">(</span><span class="s2">&quot;publisher_type&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;person&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="s2">&quot;institution&quot;</span><span class="p">,</span> <span class="s2">&quot;position&quot;</span><span class="p">]),</span>
+                <span class="s2">&quot;instrument_vocabulary&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;date_metadata_modified&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;program&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;publisher_institution&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="c1"># override the ISO date checks in</span>
+        <span class="k">def</span> <span class="nf">_check_attr_is_iso_date</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+            <span class="n">result_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">_is_iso&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">ratable_result</span><span class="p">(</span>
+                    <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                    <span class="n">result_name</span><span class="p">,</span>
+                    <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Attr </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> is not present&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">iso_check</span><span class="p">,</span> <span class="n">msgs</span> <span class="o">=</span> <span class="n">datetime_is_iso</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">ratable_result</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">iso_check</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">result_name</span><span class="p">,</span> <span class="n">msgs</span><span class="p">)</span>
+
+        <span class="c1"># run ISO 8601 date checks against the date_created, date_issued,</span>
+        <span class="c1"># date_modified, and date_metadata_modified global attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span> <span class="o">=</span> <span class="n">kvp_convert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span><span class="p">[</span><span class="s2">&quot;date_created&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_check_attr_is_iso_date</span><span class="p">,</span> <span class="s2">&quot;date_created&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sug_atts</span> <span class="o">=</span> <span class="n">kvp_convert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sug_atts</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;date_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;issued&quot;</span><span class="p">,</span> <span class="s2">&quot;modified&quot;</span><span class="p">,</span> <span class="s2">&quot;metadata_modified&quot;</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sug_atts</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_check_attr_is_iso_date</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ACDD1_3Check.check_metadata_link"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDD1_3Check.html#compliance_checker.acdd.ACDD1_3Check.check_metadata_link">[docs]</a>    <span class="k">def</span> <span class="nf">check_metadata_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if metadata link is formed in a rational manner</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;metadata_link&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">meta_link</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">metadata_link</span>
+        <span class="k">if</span> <span class="s2">&quot;http&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">meta_link</span><span class="p">:</span>
+            <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Metadata URL should include http:// or https://&quot;</span><span class="p">)</span>
+        <span class="n">valid_link</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">msgs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">LOW</span><span class="p">,</span> <span class="n">valid_link</span><span class="p">,</span> <span class="s2">&quot;metadata_link_valid&quot;</span><span class="p">,</span> <span class="n">msgs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ACDD1_3Check.check_id_has_no_blanks"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDD1_3Check.html#compliance_checker.acdd.ACDD1_3Check.check_id_has_no_blanks">[docs]</a>    <span class="k">def</span> <span class="nf">check_id_has_no_blanks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if there are blanks in the id field</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="s2">&quot; &quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;no_blanks_in_id&quot;</span><span class="p">,</span>
+                <span class="n">msgs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;There should be no blanks in the id field&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;no_blanks_in_id&quot;</span><span class="p">,</span> <span class="n">msgs</span><span class="o">=</span><span class="p">[])</span></div>
+
+<div class="viewcode-block" id="ACDD1_3Check.check_var_coverage_content_type"><a class="viewcode-back" href="../../generated/compliance_checker.acdd.ACDD1_3Check.html#compliance_checker.acdd.ACDD1_3Check.check_var_coverage_content_type">[docs]</a>    <span class="k">def</span> <span class="nf">check_var_coverage_content_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check coverage content type against valid ISO-19115-1 codes</span>
+
+<span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_geophysical_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+            <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">ctype</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">variable</span><span class="p">],</span> <span class="s2">&quot;coverage_content_type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">check</span> <span class="o">=</span> <span class="n">ctype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+                <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;coverage_content_type&quot;</span><span class="p">)</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">Result</span><span class="p">(</span>
+                        <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span>
+                        <span class="n">check</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_var_header</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">variable</span><span class="p">),</span>
+                        <span class="n">msgs</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># ISO 19115-1 codes</span>
+            <span class="n">valid_ctypes</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;image&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;thematicClassification&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;physicalMeasurement&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;auxiliaryInformation&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;qualityInformation&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;referenceInformation&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;modelResult&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;coordinate&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="n">ctype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_ctypes</span><span class="p">:</span>
+                <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;coverage_content_type &quot;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">&quot; not in </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">valid_ctypes</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">Result</span><span class="p">(</span>
+                        <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span>
+                        <span class="n">check</span><span class="p">,</span>  <span class="c1"># append to list</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_var_header</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">variable</span><span class="p">),</span>
+                        <span class="n">msgs</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">results</span></div></div>
+</pre></div>
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Dave Foster.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

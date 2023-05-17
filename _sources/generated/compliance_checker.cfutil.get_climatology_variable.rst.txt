@@ -1,0 +1,12 @@
+get_climatology_variable
+==================================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: get_climatology_variable
+
+.. include:: compliance_checker.cfutil.get_climatology_variable.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

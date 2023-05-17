@@ -1,0 +1,12 @@
+xpath_check
+===================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: xpath_check
+
+.. include:: compliance_checker.base.xpath_check.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

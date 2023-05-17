@@ -1,0 +1,12 @@
+ratable_result
+======================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: ratable_result
+
+.. include:: compliance_checker.base.ratable_result.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

@@ -1,0 +1,64 @@
+EmailValidator
+======================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autoclass:: EmailValidator
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~EmailValidator.validator_fail_msg
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~EmailValidator.__init__
+      ~EmailValidator.validate
+      ~EmailValidator.validate_type
+      ~EmailValidator.validator_func
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: validator_fail_msg
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: validate
+   .. automethod:: validate_type
+   .. automethod:: validator_func
+
+   
+   
+
+.. include:: compliance_checker.base.EmailValidator.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

@@ -1,0 +1,66 @@
+IOOS1_2_ConventionsValidator
+====================================================
+
+.. currentmodule:: compliance_checker.ioos
+
+.. autoclass:: IOOS1_2_ConventionsValidator
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~IOOS1_2_ConventionsValidator.validator_fail_msg
+      ~IOOS1_2_ConventionsValidator.validator_regex
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~IOOS1_2_ConventionsValidator.__init__
+      ~IOOS1_2_ConventionsValidator.validate
+      ~IOOS1_2_ConventionsValidator.validate_type
+      ~IOOS1_2_ConventionsValidator.validator_func
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: validator_fail_msg
+   .. autoattribute:: validator_regex
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: validate
+   .. automethod:: validate_type
+   .. automethod:: validator_func
+
+   
+   
+
+.. include:: compliance_checker.ioos.IOOS1_2_ConventionsValidator.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

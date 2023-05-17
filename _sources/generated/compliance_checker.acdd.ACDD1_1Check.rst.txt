@@ -1,0 +1,102 @@
+ACDD1_1Check
+====================================
+
+.. currentmodule:: compliance_checker.acdd
+
+.. autoclass:: ACDD1_1Check
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~ACDD1_1Check.HIGH
+      ~ACDD1_1Check.LOW
+      ~ACDD1_1Check.MEDIUM
+      ~ACDD1_1Check.register_checker
+      ~ACDD1_1Check.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~ACDD1_1Check.__init__
+      ~ACDD1_1Check.check_acknowledgment
+      ~ACDD1_1Check.check_high
+      ~ACDD1_1Check.check_lat_extents
+      ~ACDD1_1Check.check_lon_extents
+      ~ACDD1_1Check.check_recommended
+      ~ACDD1_1Check.check_suggested
+      ~ACDD1_1Check.check_time_extents
+      ~ACDD1_1Check.check_var_long_name
+      ~ACDD1_1Check.check_var_standard_name
+      ~ACDD1_1Check.check_var_units
+      ~ACDD1_1Check.check_vertical_extents
+      ~ACDD1_1Check.get_applicable_variables
+      ~ACDD1_1Check.get_test_ctx
+      ~ACDD1_1Check.setup
+      ~ACDD1_1Check.std_check
+      ~ACDD1_1Check.std_check_in
+      ~ACDD1_1Check.verify_convention_version
+      ~ACDD1_1Check.verify_geospatial_bounds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: HIGH
+   .. autoattribute:: LOW
+   .. autoattribute:: MEDIUM
+   .. autoattribute:: register_checker
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: check_acknowledgment
+   .. automethod:: check_high
+   .. automethod:: check_lat_extents
+   .. automethod:: check_lon_extents
+   .. automethod:: check_recommended
+   .. automethod:: check_suggested
+   .. automethod:: check_time_extents
+   .. automethod:: check_var_long_name
+   .. automethod:: check_var_standard_name
+   .. automethod:: check_var_units
+   .. automethod:: check_vertical_extents
+   .. automethod:: get_applicable_variables
+   .. automethod:: get_test_ctx
+   .. automethod:: setup
+   .. automethod:: std_check
+   .. automethod:: std_check_in
+   .. automethod:: verify_convention_version
+   .. automethod:: verify_geospatial_bounds
+
+   
+   
+
+.. include:: compliance_checker.acdd.ACDD1_1Check.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

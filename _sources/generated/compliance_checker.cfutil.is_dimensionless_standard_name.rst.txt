@@ -1,0 +1,12 @@
+is_dimensionless_standard_name
+========================================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: is_dimensionless_standard_name
+
+.. include:: compliance_checker.cfutil.is_dimensionless_standard_name.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

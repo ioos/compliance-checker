@@ -1,0 +1,12 @@
+datetime_is_iso
+=======================================
+
+.. currentmodule:: compliance_checker.util
+
+.. autofunction:: datetime_is_iso
+
+.. include:: compliance_checker.util.datetime_is_iso.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

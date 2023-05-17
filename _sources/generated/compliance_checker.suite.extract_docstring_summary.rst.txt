@@ -1,0 +1,12 @@
+extract_docstring_summary
+==================================================
+
+.. currentmodule:: compliance_checker.suite
+
+.. autofunction:: extract_docstring_summary
+
+.. include:: compliance_checker.suite.extract_docstring_summary.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

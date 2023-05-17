@@ -1,0 +1,12 @@
+get_time_variables
+============================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: get_time_variables
+
+.. include:: compliance_checker.cfutil.get_time_variables.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

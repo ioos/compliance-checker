@@ -1,0 +1,12 @@
+get_axis_map
+======================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: get_axis_map
+
+.. include:: compliance_checker.cfutil.get_axis_map.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

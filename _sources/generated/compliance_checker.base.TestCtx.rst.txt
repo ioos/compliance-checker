@@ -1,0 +1,51 @@
+TestCtx
+===============================
+
+.. currentmodule:: compliance_checker.base
+
+.. autoclass:: TestCtx
+
+   
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~TestCtx.__init__
+      ~TestCtx.add_failure
+      ~TestCtx.add_pass
+      ~TestCtx.assert_true
+      ~TestCtx.to_result
+
+   
+   
+
+   
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: add_failure
+   .. automethod:: add_pass
+   .. automethod:: assert_true
+   .. automethod:: to_result
+
+   
+   
+
+.. include:: compliance_checker.base.TestCtx.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

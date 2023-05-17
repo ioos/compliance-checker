@@ -1,0 +1,78 @@
+IOOSNCCheck
+===================================
+
+.. currentmodule:: compliance_checker.ioos
+
+.. autoclass:: IOOSNCCheck
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~IOOSNCCheck.HIGH
+      ~IOOSNCCheck.LOW
+      ~IOOSNCCheck.MEDIUM
+      ~IOOSNCCheck.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~IOOSNCCheck.__init__
+      ~IOOSNCCheck.check_station_location_lat
+      ~IOOSNCCheck.check_station_location_lon
+      ~IOOSNCCheck.check_time_period
+      ~IOOSNCCheck.get_test_ctx
+      ~IOOSNCCheck.setup
+      ~IOOSNCCheck.std_check
+      ~IOOSNCCheck.std_check_in
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: HIGH
+   .. autoattribute:: LOW
+   .. autoattribute:: MEDIUM
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: check_station_location_lat
+   .. automethod:: check_station_location_lon
+   .. automethod:: check_time_period
+   .. automethod:: get_test_ctx
+   .. automethod:: setup
+   .. automethod:: std_check
+   .. automethod:: std_check_in
+
+   
+   
+
+.. include:: compliance_checker.ioos.IOOSNCCheck.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

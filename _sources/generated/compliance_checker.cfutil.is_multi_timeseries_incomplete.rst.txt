@@ -1,0 +1,12 @@
+is_multi_timeseries_incomplete
+========================================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: is_multi_timeseries_incomplete
+
+.. include:: compliance_checker.cfutil.is_multi_timeseries_incomplete.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

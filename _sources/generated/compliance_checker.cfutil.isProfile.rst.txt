@@ -1,0 +1,12 @@
+isProfile
+===================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: isProfile
+
+.. include:: compliance_checker.cfutil.isProfile.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

@@ -1,0 +1,12 @@
+get_axis_variables
+============================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: get_axis_variables
+
+.. include:: compliance_checker.cfutil.get_axis_variables.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

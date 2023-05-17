@@ -1,0 +1,12 @@
+units_convertible
+===========================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: units_convertible
+
+.. include:: compliance_checker.cfutil.units_convertible.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

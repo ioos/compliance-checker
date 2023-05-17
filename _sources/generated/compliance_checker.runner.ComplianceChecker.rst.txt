@@ -1,0 +1,53 @@
+ComplianceChecker
+===========================================
+
+.. currentmodule:: compliance_checker.runner
+
+.. autoclass:: ComplianceChecker
+
+   
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~ComplianceChecker.__init__
+      ~ComplianceChecker.check_errors
+      ~ComplianceChecker.html_output
+      ~ComplianceChecker.json_output
+      ~ComplianceChecker.run_checker
+      ~ComplianceChecker.stdout_output
+
+   
+   
+
+   
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: check_errors
+   .. automethod:: html_output
+   .. automethod:: json_output
+   .. automethod:: run_checker
+   .. automethod:: stdout_output
+
+   
+   
+
+.. include:: compliance_checker.runner.ComplianceChecker.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

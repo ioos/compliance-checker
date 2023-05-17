@@ -1,0 +1,12 @@
+get_z_variables
+=========================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: get_z_variables
+
+.. include:: compliance_checker.cfutil.get_z_variables.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

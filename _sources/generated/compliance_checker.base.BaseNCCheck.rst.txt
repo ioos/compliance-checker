@@ -1,0 +1,62 @@
+BaseNCCheck
+===================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autoclass:: BaseNCCheck
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~BaseNCCheck.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~BaseNCCheck.__init__
+      ~BaseNCCheck.std_check
+      ~BaseNCCheck.std_check_in
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: std_check
+   .. automethod:: std_check_in
+
+   
+   
+
+.. include:: compliance_checker.base.BaseNCCheck.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

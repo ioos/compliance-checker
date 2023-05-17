@@ -1,0 +1,12 @@
+is_trajectory_profile_incomplete
+==========================================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: is_trajectory_profile_incomplete
+
+.. include:: compliance_checker.cfutil.is_trajectory_profile_incomplete.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

@@ -1,0 +1,12 @@
+kvp_convert
+===================================
+
+.. currentmodule:: compliance_checker.util
+
+.. autofunction:: kvp_convert
+
+.. include:: compliance_checker.util.kvp_convert.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

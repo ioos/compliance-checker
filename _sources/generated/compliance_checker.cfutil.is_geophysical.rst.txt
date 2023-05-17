@@ -1,0 +1,12 @@
+is_geophysical
+========================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: is_geophysical
+
+.. include:: compliance_checker.cfutil.is_geophysical.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

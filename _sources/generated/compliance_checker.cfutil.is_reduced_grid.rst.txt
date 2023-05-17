@@ -1,0 +1,12 @@
+is_reduced_grid
+=========================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: is_reduced_grid
+
+.. include:: compliance_checker.cfutil.is_reduced_grid.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

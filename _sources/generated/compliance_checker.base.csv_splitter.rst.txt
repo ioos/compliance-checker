@@ -1,0 +1,12 @@
+csv_splitter
+====================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: csv_splitter
+
+.. include:: compliance_checker.base.csv_splitter.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

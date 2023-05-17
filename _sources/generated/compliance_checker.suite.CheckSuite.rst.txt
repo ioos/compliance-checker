@@ -1,0 +1,104 @@
+CheckSuite
+===================================
+
+.. currentmodule:: compliance_checker.suite
+
+.. autoclass:: CheckSuite
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~CheckSuite.checkers
+      ~CheckSuite.templates_root
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~CheckSuite.__init__
+      ~CheckSuite.add_plugin_args
+      ~CheckSuite.build_structure
+      ~CheckSuite.check_remote_netcdf
+      ~CheckSuite.checker_html_output
+      ~CheckSuite.dict_output
+      ~CheckSuite.generate_dataset
+      ~CheckSuite.get_points
+      ~CheckSuite.html_output
+      ~CheckSuite.load_all_available_checkers
+      ~CheckSuite.load_dataset
+      ~CheckSuite.load_generated_checkers
+      ~CheckSuite.load_local_dataset
+      ~CheckSuite.load_remote_dataset
+      ~CheckSuite.passtree
+      ~CheckSuite.process_doc
+      ~CheckSuite.reasoning_routine
+      ~CheckSuite.run
+      ~CheckSuite.run_all
+      ~CheckSuite.scores
+      ~CheckSuite.serialize
+      ~CheckSuite.standard_output
+      ~CheckSuite.standard_output_generation
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: checkers
+   .. autoattribute:: templates_root
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: add_plugin_args
+   .. automethod:: build_structure
+   .. automethod:: check_remote_netcdf
+   .. automethod:: checker_html_output
+   .. automethod:: dict_output
+   .. automethod:: generate_dataset
+   .. automethod:: get_points
+   .. automethod:: html_output
+   .. automethod:: load_all_available_checkers
+   .. automethod:: load_dataset
+   .. automethod:: load_generated_checkers
+   .. automethod:: load_local_dataset
+   .. automethod:: load_remote_dataset
+   .. automethod:: passtree
+   .. automethod:: process_doc
+   .. automethod:: reasoning_routine
+   .. automethod:: run
+   .. automethod:: run_all
+   .. automethod:: scores
+   .. automethod:: serialize
+   .. automethod:: standard_output
+   .. automethod:: standard_output_generation
+
+   
+   
+
+.. include:: compliance_checker.suite.CheckSuite.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

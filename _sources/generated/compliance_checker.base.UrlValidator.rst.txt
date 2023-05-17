@@ -1,0 +1,64 @@
+UrlValidator
+====================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autoclass:: UrlValidator
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~UrlValidator.validator_fail_msg
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~UrlValidator.__init__
+      ~UrlValidator.validate
+      ~UrlValidator.validate_type
+      ~UrlValidator.validator_func
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: validator_fail_msg
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: validate
+   .. automethod:: validate_type
+   .. automethod:: validator_func
+
+   
+   
+
+.. include:: compliance_checker.base.UrlValidator.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

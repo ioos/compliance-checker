@@ -1,0 +1,12 @@
+score_group
+===================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: score_group
+
+.. include:: compliance_checker.base.score_group.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

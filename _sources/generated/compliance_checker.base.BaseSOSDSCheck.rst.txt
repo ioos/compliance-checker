@@ -1,0 +1,58 @@
+BaseSOSDSCheck
+======================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autoclass:: BaseSOSDSCheck
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~BaseSOSDSCheck.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~BaseSOSDSCheck.__init__
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+
+   
+   
+
+.. include:: compliance_checker.base.BaseSOSDSCheck.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

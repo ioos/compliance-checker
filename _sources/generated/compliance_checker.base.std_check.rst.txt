@@ -1,0 +1,12 @@
+std_check
+=================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autofunction:: std_check
+
+.. include:: compliance_checker.base.std_check.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

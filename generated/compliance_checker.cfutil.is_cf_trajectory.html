@@ -1,0 +1,526 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>is_cf_trajectory &#8212; compliance_checker 5.1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'generated/compliance_checker.cfutil.is_cf_trajectory';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="is_compression_coordinate" href="compliance_checker.cfutil.is_compression_coordinate.html" />
+    <link rel="prev" title="is_3d_static_grid" href="compliance_checker.cfutil.is_3d_static_grid.html" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/generated/compliance_checker.cfutil.is_cf_trajectory.html" />
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+  <nav class="navbar navbar-dark navbar-expand-lg bg-unidata fixed-top bd-navbar shadow" id="navbar-main">
+  </nav>
+
+
+    <div class="container-fluid" id="banner"></div>
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../quickintro.html">
+                        IOOS Compliance Checker
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../compliance_checker_api.html">
+                        API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../faq.html">
+                        Frequently Asked Questions
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/ioos/compliance-checker/releases">
+                    Release Notes
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  Version 5.1.0
+</a>
+<div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.cf.html">Cf <code class="docutils literal notranslate"><span class="pre">(compliance_checker.cf)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cf.CF1_6Check.html">CF1_6Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cf.CF1_7Check.html">CF1_7Check</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="compliance_checker.protocols.html">Protocols <code class="docutils literal notranslate"><span class="pre">(compliance_checker.protocols)</span></code></a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.acdd.html">Acdd <code class="docutils literal notranslate"><span class="pre">(compliance_checker.acdd)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDD1_1Check.html">ACDD1_1Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDD1_3Check.html">ACDD1_3Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDDBaseCheck.html">ACDDBaseCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDDNCCheck.html">ACDDNCCheck</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.base.html">Base <code class="docutils literal notranslate"><span class="pre">(compliance_checker.base)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.attr_check.html">attr_check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.check_has.html">check_has</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.csv_splitter.html">csv_splitter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.fix_return_value.html">fix_return_value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.get_namespaces.html">get_namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.maybe_get_global_attr.html">maybe_get_global_attr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.ratable_result.html">ratable_result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.score_group.html">score_group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.std_check.html">std_check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.std_check_in.html">std_check_in</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.xpath_check.html">xpath_check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.BaseCheck.html">BaseCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.BaseNCCheck.html">BaseNCCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.BaseSOSDSCheck.html">BaseSOSDSCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.BaseSOSGCCheck.html">BaseSOSGCCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.EmailValidator.html">EmailValidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.GenericFile.html">GenericFile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.RegexValidator.html">RegexValidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.Result.html">Result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.TestCtx.html">TestCtx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.UrlValidator.html">UrlValidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.ValidationObject.html">ValidationObject</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="compliance_checker.cfutil.html">Cfutil <code class="docutils literal notranslate"><span class="pre">(compliance_checker.cfutil)</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.attr_membership.html">attr_membership</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.coordinate_dimension_matrix.html">coordinate_dimension_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_auxiliary_coordinate_variables.html">get_auxiliary_coordinate_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_axis_map.html">get_axis_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_axis_variables.html">get_axis_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_bounds_variables.html">get_bounds_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_cell_boundary_map.html">get_cell_boundary_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_cell_boundary_variables.html">get_cell_boundary_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_climatology_variable.html">get_climatology_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_coordinate_variables.html">get_coordinate_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_flag_variables.html">get_flag_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_forecast_metadata_variables.html">get_forecast_metadata_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_geophysical_variables.html">get_geophysical_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_grid_mapping_variables.html">get_grid_mapping_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_instrument_variables.html">get_instrument_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_lat_variable.html">get_lat_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_latitude_variables.html">get_latitude_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_lon_variable.html">get_lon_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_longitude_variables.html">get_longitude_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_platform_variables.html">get_platform_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_sea_names.html">get_sea_names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_time_variable.html">get_time_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_time_variables.html">get_time_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_true_latitude_variables.html">get_true_latitude_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_true_longitude_variables.html">get_true_longitude_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_z_variable.html">get_z_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_z_variables.html">get_z_variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.guess_feature_type.html">guess_feature_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.isProfile.html">isProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.isTimeSeries.html">isTimeSeries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.isTimeSeriesProfile.html">isTimeSeriesProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.isTrajectory.html">isTrajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.isTrajectoryProfile.html">isTrajectoryProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_2d_regular_grid.html">is_2d_regular_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_2d_static_grid.html">is_2d_static_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_3d_regular_grid.html">is_3d_regular_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_3d_static_grid.html">is_3d_static_grid</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">is_cf_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_compression_coordinate.html">is_compression_coordinate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_coordinate_variable.html">is_coordinate_variable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_dataset_valid_ragged_array_repr_featureType.html">is_dataset_valid_ragged_array_repr_featureType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_dimensionless_standard_name.html">is_dimensionless_standard_name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_geophysical.html">is_geophysical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_mapped_grid.html">is_mapped_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_multi_timeseries_incomplete.html">is_multi_timeseries_incomplete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_multi_timeseries_orthogonal.html">is_multi_timeseries_orthogonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_point.html">is_point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_profile_incomplete.html">is_profile_incomplete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_profile_orthogonal.html">is_profile_orthogonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_reduced_grid.html">is_reduced_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_single_trajectory.html">is_single_trajectory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries.html">is_timeseries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_incomplete.html">is_timeseries_profile_incomplete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_multi_ortho_time.html">is_timeseries_profile_multi_ortho_time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_multi_station.html">is_timeseries_profile_multi_station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_ortho_depth.html">is_timeseries_profile_ortho_depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_single_ortho_time.html">is_timeseries_profile_single_ortho_time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_timeseries_profile_single_station.html">is_timeseries_profile_single_station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_trajectory_profile_incomplete.html">is_trajectory_profile_incomplete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_trajectory_profile_orthogonal.html">is_trajectory_profile_orthogonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_unitless.html">is_unitless</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_variable_valid_ragged_array_repr_featureType.html">is_variable_valid_ragged_array_repr_featureType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.units_convertible.html">units_convertible</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.ioos.html">Ioos <code class="docutils literal notranslate"><span class="pre">(compliance_checker.ioos)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS0_1Check.html">IOOS0_1Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS1_1Check.html">IOOS1_1Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS1_2Check.html">IOOS1_2Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS1_2_ConventionsValidator.html">IOOS1_2_ConventionsValidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS1_2_PlatformIDValidator.html">IOOS1_2_PlatformIDValidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSBaseCheck.html">IOOSBaseCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSBaseSOSCheck.html">IOOSBaseSOSCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSNCCheck.html">IOOSNCCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSSOSDSCheck.html">IOOSSOSDSCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSSOSGCCheck.html">IOOSSOSGCCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.NamingAuthorityValidator.html">NamingAuthorityValidator</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.runner.html">Runner <code class="docutils literal notranslate"><span class="pre">(compliance_checker.runner)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.runner.stdout_redirector.html">stdout_redirector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.runner.ComplianceChecker.html">ComplianceChecker</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.suite.html">Suite <code class="docutils literal notranslate"><span class="pre">(compliance_checker.suite)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.suite.extract_docstring_summary.html">extract_docstring_summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.suite.CheckSuite.html">CheckSuite</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.util.html">Util <code class="docutils literal notranslate"><span class="pre">(compliance_checker.util)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.util.dateparse.html">dateparse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.util.datetime_is_iso.html">datetime_is_iso</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.util.kvp_convert.html">kvp_convert</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../compliance_checker_api.html" class="nav-link">API</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="compliance_checker.cfutil.html" class="nav-link">Cfutil <code class="docutils literal notranslate"><span class="pre">(compliance_checker.cfutil)</span></code></a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">is_cf_trajectory</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="is-cf-trajectory">
+<h1>is_cf_trajectory<a class="headerlink" href="#is-cf-trajectory" title="Permalink to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="compliance_checker.cfutil.is_cf_trajectory">
+<span class="sig-prename descclassname"><span class="pre">compliance_checker.cfutil.</span></span><span class="sig-name descname"><span class="pre">is_cf_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cfutil.html#is_cf_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cfutil.is_cf_trajectory" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns true if the variable is a CF trajectory feature type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nc</strong> (<em>netCDF4.Dataset</em>) – An open netCDF dataset</p></li>
+<li><p><strong>variable</strong> (<em>str</em>) – name of the variable to check</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div style='clear:both'></div></section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="compliance_checker.cfutil.is_3d_static_grid.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">is_3d_static_grid</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="compliance_checker.cfutil.is_compression_coordinate.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">is_compression_coordinate</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cfutil.is_cf_trajectory"><code class="docutils literal notranslate"><span class="pre">is_cf_trajectory()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/generated/compliance_checker.cfutil.is_cf_trajectory.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Dave Foster.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

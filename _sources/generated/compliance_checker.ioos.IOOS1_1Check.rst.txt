@@ -1,0 +1,94 @@
+IOOS1_1Check
+====================================
+
+.. currentmodule:: compliance_checker.ioos
+
+.. autoclass:: IOOS1_1Check
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~IOOS1_1Check.HIGH
+      ~IOOS1_1Check.LOW
+      ~IOOS1_1Check.MEDIUM
+      ~IOOS1_1Check.register_checker
+      ~IOOS1_1Check.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~IOOS1_1Check.__init__
+      ~IOOS1_1Check.check_geophysical_vars_fill_value
+      ~IOOS1_1Check.check_geophysical_vars_standard_name
+      ~IOOS1_1Check.check_high
+      ~IOOS1_1Check.check_platform_variable_attributes
+      ~IOOS1_1Check.check_platform_variables
+      ~IOOS1_1Check.check_recommended
+      ~IOOS1_1Check.check_station_location_lat
+      ~IOOS1_1Check.check_station_location_lon
+      ~IOOS1_1Check.check_time_period
+      ~IOOS1_1Check.check_units
+      ~IOOS1_1Check.get_test_ctx
+      ~IOOS1_1Check.setup
+      ~IOOS1_1Check.std_check
+      ~IOOS1_1Check.std_check_in
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: HIGH
+   .. autoattribute:: LOW
+   .. autoattribute:: MEDIUM
+   .. autoattribute:: register_checker
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: check_geophysical_vars_fill_value
+   .. automethod:: check_geophysical_vars_standard_name
+   .. automethod:: check_high
+   .. automethod:: check_platform_variable_attributes
+   .. automethod:: check_platform_variables
+   .. automethod:: check_recommended
+   .. automethod:: check_station_location_lat
+   .. automethod:: check_station_location_lon
+   .. automethod:: check_time_period
+   .. automethod:: check_units
+   .. automethod:: get_test_ctx
+   .. automethod:: setup
+   .. automethod:: std_check
+   .. automethod:: std_check_in
+
+   
+   
+
+.. include:: compliance_checker.ioos.IOOS1_1Check.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

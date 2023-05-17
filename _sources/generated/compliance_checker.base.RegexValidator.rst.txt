@@ -1,0 +1,66 @@
+RegexValidator
+======================================
+
+.. currentmodule:: compliance_checker.base
+
+.. autoclass:: RegexValidator
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~RegexValidator.validator_fail_msg
+      ~RegexValidator.validator_regex
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~RegexValidator.__init__
+      ~RegexValidator.validate
+      ~RegexValidator.validate_type
+      ~RegexValidator.validator_func
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: validator_fail_msg
+   .. autoattribute:: validator_regex
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: validate
+   .. automethod:: validate_type
+   .. automethod:: validator_func
+
+   
+   
+
+.. include:: compliance_checker.base.RegexValidator.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

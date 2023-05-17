@@ -1,0 +1,124 @@
+IOOS1_2Check
+====================================
+
+.. currentmodule:: compliance_checker.ioos
+
+.. autoclass:: IOOS1_2Check
+
+   
+   
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+   
+      ~IOOS1_2Check.HIGH
+      ~IOOS1_2Check.LOW
+      ~IOOS1_2Check.MEDIUM
+      ~IOOS1_2Check.register_checker
+      ~IOOS1_2Check.supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+   
+      ~IOOS1_2Check.__init__
+      ~IOOS1_2Check.check_accuracy
+      ~IOOS1_2Check.check_cf_role_variables
+      ~IOOS1_2Check.check_contributor_role_and_vocabulary
+      ~IOOS1_2Check.check_creator_and_publisher_type
+      ~IOOS1_2Check.check_feature_type
+      ~IOOS1_2Check.check_geophysical_vars_have_attrs
+      ~IOOS1_2Check.check_gts_ingest_global
+      ~IOOS1_2Check.check_gts_ingest_requirements
+      ~IOOS1_2Check.check_high
+      ~IOOS1_2Check.check_instrument_make_model_calib_date
+      ~IOOS1_2Check.check_instrument_variables
+      ~IOOS1_2Check.check_ioos_ingest
+      ~IOOS1_2Check.check_platform_global
+      ~IOOS1_2Check.check_platform_vocabulary
+      ~IOOS1_2Check.check_qartod_variables_flags
+      ~IOOS1_2Check.check_qartod_variables_references
+      ~IOOS1_2Check.check_recommended
+      ~IOOS1_2Check.check_single_platform
+      ~IOOS1_2Check.check_standard_name
+      ~IOOS1_2Check.check_station_location_lat
+      ~IOOS1_2Check.check_station_location_lon
+      ~IOOS1_2Check.check_time_period
+      ~IOOS1_2Check.check_units
+      ~IOOS1_2Check.check_vertical_coordinates
+      ~IOOS1_2Check.check_wmo_platform_code
+      ~IOOS1_2Check.get_test_ctx
+      ~IOOS1_2Check.setup
+      ~IOOS1_2Check.std_check
+      ~IOOS1_2Check.std_check_in
+
+   
+   
+
+   
+   
+
+   .. rubric:: Attributes Documentation
+
+   
+   .. autoattribute:: HIGH
+   .. autoattribute:: LOW
+   .. autoattribute:: MEDIUM
+   .. autoattribute:: register_checker
+   .. autoattribute:: supported_ds
+
+   
+   
+
+   
+   
+
+   .. rubric:: Methods Documentation
+
+   
+   .. automethod:: __init__
+   .. automethod:: check_accuracy
+   .. automethod:: check_cf_role_variables
+   .. automethod:: check_contributor_role_and_vocabulary
+   .. automethod:: check_creator_and_publisher_type
+   .. automethod:: check_feature_type
+   .. automethod:: check_geophysical_vars_have_attrs
+   .. automethod:: check_gts_ingest_global
+   .. automethod:: check_gts_ingest_requirements
+   .. automethod:: check_high
+   .. automethod:: check_instrument_make_model_calib_date
+   .. automethod:: check_instrument_variables
+   .. automethod:: check_ioos_ingest
+   .. automethod:: check_platform_global
+   .. automethod:: check_platform_vocabulary
+   .. automethod:: check_qartod_variables_flags
+   .. automethod:: check_qartod_variables_references
+   .. automethod:: check_recommended
+   .. automethod:: check_single_platform
+   .. automethod:: check_standard_name
+   .. automethod:: check_station_location_lat
+   .. automethod:: check_station_location_lon
+   .. automethod:: check_time_period
+   .. automethod:: check_units
+   .. automethod:: check_vertical_coordinates
+   .. automethod:: check_wmo_platform_code
+   .. automethod:: get_test_ctx
+   .. automethod:: setup
+   .. automethod:: std_check
+   .. automethod:: std_check_in
+
+   
+   
+
+.. include:: compliance_checker.ioos.IOOS1_2Check.examples
+
+.. raw:: html
+
+     <div style='clear:both'></div>

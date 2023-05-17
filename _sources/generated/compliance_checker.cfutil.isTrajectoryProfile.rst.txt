@@ -1,0 +1,12 @@
+isTrajectoryProfile
+=============================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: isTrajectoryProfile
+
+.. include:: compliance_checker.cfutil.isTrajectoryProfile.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

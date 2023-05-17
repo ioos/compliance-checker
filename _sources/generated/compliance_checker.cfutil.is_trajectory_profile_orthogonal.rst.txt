@@ -1,0 +1,12 @@
+is_trajectory_profile_orthogonal
+==========================================================
+
+.. currentmodule:: compliance_checker.cfutil
+
+.. autofunction:: is_trajectory_profile_orthogonal
+
+.. include:: compliance_checker.cfutil.is_trajectory_profile_orthogonal.examples
+
+.. raw:: html
+
+      <div style='clear:both'></div>

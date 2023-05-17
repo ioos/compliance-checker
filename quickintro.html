@@ -1,0 +1,866 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>IOOS Compliance Checker &#8212; compliance_checker 5.1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'quickintro';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API" href="compliance_checker_api.html" />
+    <link rel="prev" title="compliance_checker" href="index.html" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/quickintro.html" />
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+  <nav class="navbar navbar-dark navbar-expand-lg bg-unidata fixed-top bd-navbar shadow" id="navbar-main">
+  </nav>
+
+
+    <div class="container-fluid" id="banner"></div>
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        IOOS Compliance Checker
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="compliance_checker_api.html">
+                        API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="faq.html">
+                        Frequently Asked Questions
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/ioos/compliance-checker/releases">
+                    Release Notes
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  Version 5.1.0
+</a>
+<div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">IOOS Compliance Checker</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="ioos-compliance-checker">
+<h1>IOOS Compliance Checker<a class="headerlink" href="#ioos-compliance-checker" title="Permalink to this heading">#</a></h1>
+<p><a class="reference external" href="https://github.com/ioos/compliance-checker/actions/workflows/default-tests.yml"><img alt="Tests" src="https://github.com/ioos/compliance-checker/actions/workflows/default-tests.yml/badge.svg" /></a>
+<a class="reference external" href="https://app.codecov.io/gh/ioos/compliance-checker"><img alt="codecov" src="https://codecov.io/gh/ioos/compliance-checker/branch/develop/graph/badge.svg" /></a></p>
+<p>The IOOS Compliance Checker is a python based tool for data providers to check
+for completeness and community standard compliance of local or remote
+<a class="reference external" href="https://en.wikipedia.org/wiki/NetCDF">netCDF</a> files against
+<a class="reference external" href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html">CF</a> and
+<a class="reference external" href="https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3">ACDD</a>
+file standards. The python module can be used as a command-line tool or as a
+library that can be integrated into other software.</p>
+<p>A <a class="reference external" href="https://compliance.ioos.us/index.html">web-based version</a> of the Compliance
+Checker was developed to enable a broader audience and improve accessibility for the
+checker. With the web version, providers can simply provide a link or upload their
+datasets and get the full suite of capabilities that Compliance Checker offers.</p>
+<p>It currently supports the following sources and standards:</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Standard</p></th>
+<th class="head"><p>Source</p></th>
+<th class="head"><p>.nc/OPeNDAP/.cdl</p></th>
+<th class="head"><p>SOS</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3">ACDD (1.1, 1.3)</a></p></td>
+<td><p>Built-in</p></td>
+<td><p>X</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html">CF (1.8)</a></p></td>
+<td><p>Built-in</p></td>
+<td><p>X</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html">CF (1.7)</a></p></td>
+<td><p>Built-in</p></td>
+<td><p>X</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html">CF (1.6)</a></p></td>
+<td><p>Built-in</p></td>
+<td><p>X</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p>IOOS SOS</p></td>
+<td><p>Built-in</p></td>
+<td><p>-</p></td>
+<td><p>GetCapabilities, DescribeSensor</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes">IOOS (1.1)</a></p></td>
+<td><p>Built-in</p></td>
+<td><p>X</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html">IOOS (1.2)</a></p></td>
+<td><p>Built-in</p></td>
+<td><p>X</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/ioos/ioosngdac/wiki/NetCDF-Specification">Glider DAC</a></p></td>
+<td><p><a class="reference external" href="https://github.com/ioos/cc-plugin-glider">ioos/cc-plugin-glider</a></p></td>
+<td><p>X</p></td>
+<td><p>-</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html">NCEI (1.1, 2.0)</a></p></td>
+<td><p><a class="reference external" href="https://github.com/ioos/cc-plugin-ncei">ioos/cc-plugin-ncei</a></p></td>
+<td><p>X</p></td>
+<td><p>-</p></td>
+</tr>
+</tbody>
+</table>
+<section id="advice-to-data-providers">
+<h2>Advice to data providers<a class="headerlink" href="#advice-to-data-providers" title="Permalink to this heading">#</a></h2>
+<p>While the command-line version of this tool can be run in a loop, it is not necessary to check
+every file if they are all created the same way. In short, this tool is not meant for
+identifying bugs in your data processing stream. It is, however, intended to help you identify
+your process procedure compliance to the standards.  If you change your processing procedure
+for any reason it would be worth your while to run one file through the Compliance Checker to
+insure you procedure change does not impact your file’s compliance.</p>
+<p>If you feel you will need to run a batch of files through the Compliance Checker, please contact
+the IOOS Program Office Operations Division for assistance.</p>
+</section>
+</section>
+<section id="the-compliance-checker-web-tool">
+<h1><a class="reference external" href="https://compliance.ioos.us/index.html">The Compliance Checker Web Tool</a><a class="headerlink" href="#the-compliance-checker-web-tool" title="Permalink to this heading">#</a></h1>
+<p>The IOOS Compliance Checker front end companion.</p>
+<p><a class="reference external" href="https://compliance.ioos.us/index.html">https://compliance.ioos.us/index.html</a></p>
+<p>Source Code is available on GitHub:</p>
+<p><a class="github reference external" href="https://github.com/ioos/compliance-checker-web">ioos/compliance-checker-web</a></p>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">#</a></h2>
+<p>Select the test you want to run from the dropdown menu. Then, either upload your dataset or provide a url to a
+remote dataset (OPeNDAP) and click ‘Submit’.</p>
+<p>The output of the Compliance Checker will give you a comprehensive list of issues and the actions needed to correct them.
+You may download the Compliance Checker report as a text file by clicking the ‘Download Report’ button</p>
+<p><img alt="Compliance-Checker-Web" src="https://user-images.githubusercontent.com/5702672/30527267-b4bb136c-9bf4-11e7-8345-dd9b8e2e859f.png" /></p>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this heading">#</a></h2>
+<p>In addition to a web-based front-end for the IOOS Compliance Checker project, an API is provided for
+users interested in batch processing files hosted via OPeNDAP. Details on how to use the API are
+available on the Compliance Checker Web <a class="reference external" href="https://github.com/ioos/compliance-checker-web/wiki/API">wiki page</a>.</p>
+<p>Here are a couple examples:</p>
+<p><strong>HTML Output</strong></p>
+<p>https://compliance.ioos.us/index.htmlapi/run?report_format=html&amp;test=acdd&amp;url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml</p>
+<p><strong>JSON Output</strong></p>
+<p>https://compliance.ioos.us/index.htmlapi/run?report_format=json&amp;test=acdd&amp;url=http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml</p>
+</section>
+</section>
+<section id="the-compliance-checker-command-line-tool">
+<h1>The Compliance Checker Command Line Tool<a class="headerlink" href="#the-compliance-checker-command-line-tool" title="Permalink to this heading">#</a></h1>
+<section id="concepts-terminology">
+<h2>Concepts &amp; Terminology<a class="headerlink" href="#concepts-terminology" title="Permalink to this heading">#</a></h2>
+<p>Each compliance standard is executed by a Check Suite,
+which functions similar to a Python standard Unit Test.
+A Check Suite runs checks against a dataset based on a metadata standard,
+returning a list of Results which are then aggregated into a summary.</p>
+<p>Each Result has a (# passed / # total) score, a weight (HIGH/MEDIUM/LOW),
+a computer-readable name, an optional list of human-readable messages,
+and optionally a list of child Results.</p>
+<p>A single score is then calculated by aggregating on the names,
+then multiplying the score by the weight and summing them together.</p>
+<p>The computer-readable name field controls how Results are aggregated together - in order to prevent the overall score for a Check Suite varying on the number of variables,
+it is possible to <em>group</em> Results together via the name property.
+Grouped results will only add up to a single top-level entry.</p>
+<p>See the <a class="reference internal" href="#//github.com/ioos/compliance-checker/wiki/Development"><span class="xref myst">Development</span></a> wiki page for more details on implementation.</p>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h2>
+<p>Check out the <a class="reference external" href="https://github.com/ioos/compliance-checker/wiki/Installation">Installation wiki</a> for instructions on how to install.</p>
+</section>
+<section id="command-line-usage">
+<h2>Command Line Usage<a class="headerlink" href="#command-line-usage" title="Permalink to this heading">#</a></h2>
+<p>The compliance-checker can work against local files (<code class="docutils literal notranslate"><span class="pre">.nc</span></code> files, <code class="docutils literal notranslate"><span class="pre">.cdl</span></code>
+metadata files, .xml files of SOS GetCapabilities/DescribeSensor requests)
+or against remote URLs (OPeNDAP data URLs, SOS GetCapabilities/DescribeSensor URLs).</p>
+<p>If you are aiming to check a netCDF-dump, also known as a CDL file, the file
+must be named to end with a <code class="docutils literal notranslate"><span class="pre">.cdl</span></code> for the check-suite to be able to correctly
+parse it’s contents.</p>
+<blockquote>
+<div><p><strong>WARNING</strong> The CF/ACDD checks <strong>will access data</strong>, so if using a remote OPeNDAP URL, please be sure the size is reasonable!</p>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>usage: cchecker.py [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
+                   [--verbose] [--describe-checks] [--skip-checks SKIP_CHECKS]
+                   [-f {text,html,json,json_new}] [-o OUTPUT] [-O OPTION] [-V]
+                   [-l] [-d DOWNLOAD_STANDARD_NAMES]
+                   [dataset_location [dataset_location ...]]
+
+positional arguments:
+  dataset_location      Defines the location of the dataset to be checked.
+                        The location can be a local netCDF file, a remote
+                        OPeNDAP endpoint, a remote netCDF file which returns
+                        content-type header of &#39;application/x-netcdf&#39;, or an
+                        ERDDAP TableDAP endpoint. Note that the ERDDAP TableDAP
+                        endpoint will currently attempt to fetch the entire
+                        TableDAP dataset.
+
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --test TEST, -t TEST, --test= TEST, -t= TEST
+                        Select the Checks you want to perform. Defaults to
+                        &#39;acdd&#39; if unspecified. Versions of standards can be
+                        specified via `-t &lt;test_standard&gt;:&lt;version&gt;`. If
+                        `&lt;version&gt;` is omitted, or is &quot;latest&quot;, the latest
+                        version of the test standard is used.
+  --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
+                        Define the criteria for the checks. Either Strict,
+                        Normal, or Lenient. Defaults to Normal.
+  --verbose, -v         Increase output. May be specified up to three times.
+  --describe-checks, -D
+                        Describes checks for checkers specified using `-t`. If
+                        `-t` is not specified, lists checks from all available
+                        checkers.
+  --skip-checks SKIP_CHECKS, -s SKIP_CHECKS
+                        Specifies tests to skip. Can take the form of either
+                        `&lt;check_name&gt;` or `&lt;check_name&gt;:&lt;skip_level&gt;`. The
+                        first form skips any checks matching the name. In the
+                        second form &lt;skip_level&gt; may be specified as &quot;A&quot;, &quot;M&quot;,
+                        or &quot;L&quot;. &quot;A&quot; skips all checks and is equivalent to
+                        calling the first form. &quot;M&quot; will only show high
+                        priority output from the given check and will skip
+                        medium and low. &quot;L&quot; will show both high and medium
+                        priority issues, while skipping low priority issues.
+  -f {text,html,json,json_new}, --format {text,html,json,json_new}
+                        Output format(s). Options are &#39;text&#39;, &#39;html&#39;, &#39;json&#39;,
+                        &#39;json_new&#39;. The difference between the &#39;json&#39; and the
+                        &#39;json_new&#39; formats is that the &#39;json&#39; format has the
+                        check as the top level key, whereas the &#39;json_new&#39;
+                        format has the dataset name(s) as the main key in the
+                        output follow by any checks as subkeys. Also, &#39;json&#39;
+                        format can be only be run against one input file,
+                        whereas &#39;json_new&#39; can be run against multiple files.
+  -o OUTPUT, --output OUTPUT
+                        Output filename(s). If &#39;-&#39; is supplied, output to
+                        stdout. Can either be one or many files. If one file
+                        is supplied, but the checker is run against many
+                        files, all the output from the checks goes to that
+                        file (does not presently work with &#39;json&#39; format). If
+                        more than one output file is supplied, the number of
+                        input datasets supplied must match the number of
+                        output files.
+  -O OPTION, --option OPTION
+                        Additional options to be passed to the checkers.
+                        Multiple options can be specified via multiple
+                        invocations of this switch. Options should be prefixed
+                        with a the checker name followed by the option, e.g.
+                        &#39;&lt;checker&gt;:&lt;option_name&gt;&#39; Available options:
+                        &#39;cf:enable_appendix_a_checks&#39; - Allow check results
+                        against CF Appendix A for attribute location and data
+                        types.
+
+  -V, --version         Display the IOOS Compliance Checker version
+                        information.
+  -l, --list-tests      List the available tests
+  -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
+                        Specify a version of the cf standard name table to
+                        download as packaged version. Either specify a version
+                        number (e.g. &quot;72&quot;) to fetch a specific version or
+                        &quot;latest&quot; to get the latest CF standard name table.
+</pre></div>
+</div>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">#</a></h2>
+<section id="check-a-local-file-against-cf-1-6">
+<h3>Check a local file against CF 1.6<a class="headerlink" href="#check-a-local-file-against-cf-1-6" title="Permalink to this heading">#</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ compliance-checker --test=cf:1.6 compliance_checker/tests/data/examples/hycom_global.nc
+
+
+--------------------------------------------------------------------------------
+                         IOOS Compliance Checker Report
+                                  cf:1.6 check
+--------------------------------------------------------------------------------
+                               Corrective Actions
+hycom_global.nc has 9 potential issues
+
+
+                                     Errors
+--------------------------------------------------------------------------------
+Name                                      Reasoning
+§3.2 Either long_name or standard_name    Attribute long_name or/and standard_name
+is highly recommended for variable time:  is highly recommended for variable time
+§4.3.1 depth is a valid vertical          vertical coordinates not defining
+coordinate:                               pressure must include a positive
+                                          attribute that is either &#39;up&#39; or &#39;down&#39;
+
+
+                                    Warnings
+--------------------------------------------------------------------------------
+Name                                   Reasoning
+§2.6.1 Global Attribute Conventions    Conventions global attribute does not
+includes CF-1.6:                       contain &quot;CF-1.6&quot;. The CF Checker only
+                                       supports CF-1.6 at this time.
+§2.6.2 Recommended Attributes:         institution should be defined source
+                                       should be defined references should be
+                                       defined
+§2.6.2 Recommended Global Attributes:  global attribute history should exist
+                                       and be a non-empty string
+§8.1 Packed Data defined by water_u    Attributes add_offset and scale_factor
+contains valid packing:                are not of type float or double.
+§8.1 Packed Data defined by water_v    Attributes add_offset and scale_factor
+contains valid packing:                are not of type float or double.
+</pre></div>
+</div>
+</section>
+<section id="check-a-remote-file-against-acdd-1-3">
+<h3>Check a remote file against ACDD 1.3<a class="headerlink" href="#check-a-remote-file-against-acdd-1-3" title="Permalink to this heading">#</a></h3>
+<p>The remote dataset url is taken from the Data URL section of an OPeNDAP endpoint.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>compliance-checker<span class="w"> </span>--test<span class="o">=</span>acdd:1.3<span class="w"> </span><span class="s2">&quot;http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="checking-against-remote-erddap-datasets">
+<h3>Checking against remote ERDDAP Datasets<a class="headerlink" href="#checking-against-remote-erddap-datasets" title="Permalink to this heading">#</a></h3>
+<p>ERDDAP datasets are becoming a popular way to access data. Supply an ERDDAP <code class="docutils literal notranslate"><span class="pre">TableDAP</span></code> or <code class="docutils literal notranslate"><span class="pre">GridDAP</span></code> URL to the checker:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>compliance-checker<span class="w"> </span>--test<span class="w"> </span>ioos:1.2<span class="w"> </span><span class="s2">&quot;https://pae-paha.pacioos.hawaii.edu/erddap/griddap/pibhmc_bathy_60m_guam&quot;</span>
+</pre></div>
+</div>
+<p>Ensure to supply the URL <em>without</em> the format extension at the end (no <code class="docutils literal notranslate"><span class="pre">.nc</span></code>, <code class="docutils literal notranslate"><span class="pre">.ncCF</span></code>, etc.).</p>
+<p>Some examples of ERDDAP datasets:</p>
+<ul class="simple">
+<li><p>https://pae-paha.pacioos.hawaii.edu/erddap/tabledap/AWS-HIMB</p></li>
+<li><p>http://erddap.secoora.org/erddap/tabledap/edu_usf_marine_comps_1407d550</p></li>
+<li><p>http://erddap.cencoos.org/erddap/tabledap/bodega-bay-bml_wts</p></li>
+<li><p>http://erddap.cencoos.org/erddap/tabledap/fort-point</p></li>
+<li><p>http://erddap.cencoos.org/erddap/tabledap/edu_humboldt_humboldt</p></li>
+<li><p>http://erddap.cencoos.org/erddap/tabledap/edu_calpoly_marine_morro</p></li>
+<li><p>http://erddap.cencoos.org/erddap/tabledap/mlml_mlml_sea</p></li>
+<li><p>http://erddap.cencoos.org/erddap/tabledap/mlml_mlml_met</p></li>
+<li><p>http://erddap.cencoos.org/erddap/tabledap/mlml_monterey</p></li>
+<li><p>http://erddap.cencoos.org/erddap/tabledap/edu_humboldt_tdp</p></li>
+</ul>
+</section>
+<section id="write-results-to-text-file">
+<h3>Write results to text file<a class="headerlink" href="#write-results-to-text-file" title="Permalink to this heading">#</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>compliance-checker<span class="w"> </span>--test<span class="o">=</span>acdd:1.3<span class="w"> </span>--format<span class="o">=</span>text<span class="w"> </span>--output<span class="o">=</span>/tmp/report.txt<span class="w"> </span>compliance_checker/tests/data/examples/hycom_global.nc
+</pre></div>
+</div>
+</section>
+<section id="write-results-to-json-file">
+<h3>Write results to JSON file<a class="headerlink" href="#write-results-to-json-file" title="Permalink to this heading">#</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>compliance-checker<span class="w"> </span>--test<span class="o">=</span>acdd:1.3<span class="w"> </span>--format<span class="o">=</span>json<span class="w"> </span>--output<span class="o">=</span>/tmp/report.json<span class="w"> </span>compliance_checker/tests/data/examples/hycom_global.nc
+</pre></div>
+</div>
+</section>
+<section id="write-results-to-html-file">
+<h3>Write results to HTML file<a class="headerlink" href="#write-results-to-html-file" title="Permalink to this heading">#</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>compliance-checker<span class="w"> </span>--test<span class="o">=</span>acdd:1.3<span class="w"> </span>--format<span class="o">=</span>html<span class="w"> </span>--output<span class="o">=</span>/tmp/report.html<span class="w"> </span>compliance_checker/tests/data/examples/hycom_global.nc
+</pre></div>
+</div>
+</section>
+<section id="output-text-from-multiple-input-files-to-one-output-file">
+<h3>Output text from multiple input files to one output file<a class="headerlink" href="#output-text-from-multiple-input-files-to-one-output-file" title="Permalink to this heading">#</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ compliance-checker --test=cf:1.6 --format text --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
+</pre></div>
+</div>
+</section>
+<section id="output-html-and-text-files-from-multiple-input-files-part-1">
+<h3>Output html and text files from multiple input files (part 1)<a class="headerlink" href="#output-html-and-text-files-from-multiple-input-files-part-1" title="Permalink to this heading">#</a></h3>
+<p>In this case you’ll get 2 files <code class="docutils literal notranslate"><span class="pre">/tmp/combined_output.txt</span></code> and <code class="docutils literal notranslate"><span class="pre">/tmp/combined_output.html</span></code> that contain cf check results for both input files because you only specified 1 output filename.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ compliance-checker --test=cf:1.6 --format text --format html --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
+</pre></div>
+</div>
+</section>
+<section id="output-html-and-text-files-from-multiple-input-files-part-2">
+<h3>Output html and text files from multiple input files (part 2)<a class="headerlink" href="#output-html-and-text-files-from-multiple-input-files-part-2" title="Permalink to this heading">#</a></h3>
+<p>In this case you’ll get 4 files <code class="docutils literal notranslate"><span class="pre">/tmp/hycom.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">/tmp/hycom.html</span></code>, <code class="docutils literal notranslate"><span class="pre">/tmp/ww3.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">/tmp/ww3.html</span></code> that contain cf check results because you specified as many output filenames as input filenames.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ compliance-checker --test=cf:1.6 --format text --format html --output=/tmp/hycom.txt --output=/tmp/ww3.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
+</pre></div>
+</div>
+</section>
+<section id="download-a-particular-cf-standard-names-table-for-use-in-the-test">
+<h3>Download a particular CF standard names table for use in the test<a class="headerlink" href="#download-a-particular-cf-standard-names-table-for-use-in-the-test" title="Permalink to this heading">#</a></h3>
+<p><strong>Note</strong>
+During the CF test, if a file has a particular version of the cf standard name table specified in the global attributes
+(i.e. <code class="docutils literal notranslate"><span class="pre">:standard_name_vocabulary</span> <span class="pre">=</span> <span class="pre">&quot;CF</span> <span class="pre">Standard</span> <span class="pre">Name</span> <span class="pre">Table</span> <span class="pre">v30&quot;</span> <span class="pre">;</span></code>) that doesn’t match the packaged version, it will
+try to download the specified version. If it fails, it will fall back to packaged version.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ compliance-checker -d 35
+
+Downloading cf-standard-names table version 35 from: http://cfconventions.org/Data/cf-standard-names/35/src/cf-standard-name-table.xml
+</pre></div>
+</div>
+<p>Alternatively, you can specify an absolute path to a standard name table you may have locally in an environment variable named CF_STANDARD_NAME_TABLE and the compliance checker will use that version instead.</p>
+</section>
+</section>
+<section id="python-usage">
+<h2>Python Usage<a class="headerlink" href="#python-usage" title="Permalink to this heading">#</a></h2>
+<p>If you are interested in incorporating the IOOS Compliance Checker into your own python projects, check out the following python code example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">compliance_checker.runner</span> <span class="kn">import</span> <span class="n">ComplianceChecker</span><span class="p">,</span> <span class="n">CheckSuite</span>
+
+<span class="c1"># Load all available checker classes</span>
+<span class="n">check_suite</span> <span class="o">=</span> <span class="n">CheckSuite</span><span class="p">()</span>
+<span class="n">check_suite</span><span class="o">.</span><span class="n">load_all_available_checkers</span><span class="p">()</span>
+
+<span class="c1"># Run cf and adcc checks</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/path/or/url/to/your/dataset&#39;</span>
+<span class="n">checker_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cf&#39;</span><span class="p">,</span> <span class="s1">&#39;acdd&#39;</span><span class="p">]</span>
+<span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">criteria</span> <span class="o">=</span> <span class="s1">&#39;normal&#39;</span>
+<span class="n">output_filename</span> <span class="o">=</span> <span class="s1">&#39;/output/report.json&#39;</span>
+<span class="n">output_format</span> <span class="o">=</span> <span class="s1">&#39;json&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Inputs to ComplianceChecker.run_checker</span>
+
+<span class="sd">path            Dataset location (url or file)</span>
+<span class="sd">checker_names   List of string names to run, should match keys of checkers dict (empty list means run all)</span>
+<span class="sd">verbose         Verbosity of the output (0, 1, 2)</span>
+<span class="sd">criteria        Determines failure (lenient, normal, strict)</span>
+<span class="sd">output_filename Path to the file for output</span>
+<span class="sd">output_format   Format of the output</span>
+
+<span class="sd">@returns                If the tests failed (based on the criteria)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">return_value</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">ComplianceChecker</span><span class="o">.</span><span class="n">run_checker</span><span class="p">(</span><span class="n">path</span><span class="p">,</span>
+                                                     <span class="n">checker_names</span><span class="p">,</span>
+                                                     <span class="n">verbose</span><span class="p">,</span>
+                                                     <span class="n">criteria</span><span class="p">,</span>
+                                                     <span class="n">output_filename</span><span class="o">=</span><span class="n">output_filename</span><span class="p">,</span>
+                                                     <span class="n">output_format</span><span class="o">=</span><span class="n">output_format</span><span class="p">)</span>
+
+<span class="c1"># Open the JSON output and get the compliance scores</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+    <span class="n">cc_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+    <span class="n">scored</span> <span class="o">=</span> <span class="n">cc_data</span><span class="p">[</span><span class="n">cc_test</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s1">&#39;scored_points&#39;</span><span class="p">]</span>
+    <span class="n">possible</span> <span class="o">=</span> <span class="n">cc_data</span><span class="p">[</span><span class="n">cc_test</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s1">&#39;possible_points&#39;</span><span class="p">]</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;CC Scored </span><span class="si">{}</span><span class="s1"> out of </span><span class="si">{}</span><span class="s1"> possible points&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">scored</span><span class="p">,</span> <span class="n">possible</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="compliance-checker-plug-ins">
+<h2>Compliance Checker Plug-Ins<a class="headerlink" href="#compliance-checker-plug-ins" title="Permalink to this heading">#</a></h2>
+<p>Separate Plug-ins have been developed to complement the Compliance Checker tool with
+specifications for preparing data to be submitted to different data assembly centers.
+The version numbering of these plug-ins are not necessarily link to the version of the
+Compliance Checker, but they are all designed to run with the Compliance Checker tool.</p>
+<section id="current-plug-in-releases">
+<h3>Current Plug-in Releases:<a class="headerlink" href="#current-plug-in-releases" title="Permalink to this heading">#</a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/ioos/cc-plugin-glider/releases">GliderDAC</a></p></li>
+</ul>
+<p>This is a checker for <a class="reference external" href="https://github.com/ioos/ioosngdac/wiki/NetCDF-Specification">GliderDAC</a> files</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/ioos/cc-plugin-ncei/releases">NCEI</a> - <a class="reference external" href="https://github.com/ioos/cc-plugin-ncei">link</a></p></li>
+</ul>
+<p>This is a checker for NCEI netCDF Templates <a class="reference external" href="https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v1.1/index.html">v1.1</a> and <a class="reference external" href="https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html">v2.0</a> files.</p>
+<p>These plug-ins must be installed separately but work on top of the base compliance checker software.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">cc</span><span class="o">-</span><span class="n">plugin</span><span class="o">-</span><span class="n">ncei</span>
+</pre></div>
+</div>
+<p>Check to see if it installed correctly, list the tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">-</span><span class="n">l</span>
+</pre></div>
+</div>
+<p>You should see</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">IOOS</span> <span class="n">compliance</span> <span class="n">checker</span> <span class="n">available</span> <span class="n">checker</span> <span class="n">suites</span> <span class="p">(</span><span class="n">code</span> <span class="n">version</span><span class="p">):</span>
+ <span class="o">-</span> <span class="n">ncei</span><span class="o">-</span><span class="n">grid</span> <span class="p">(</span><span class="mf">2.1.0</span><span class="p">)</span>
+ <span class="o">-</span> <span class="n">ncei</span><span class="o">-</span><span class="n">grid</span><span class="p">:</span><span class="mf">1.1</span> <span class="p">(</span><span class="mf">2.1.0</span><span class="p">)</span>
+ <span class="o">-</span> <span class="n">ncei</span><span class="o">-</span><span class="n">grid</span><span class="p">:</span><span class="mf">2.0</span> <span class="p">(</span><span class="mf">2.3.0</span><span class="p">)</span>
+ <span class="o">-</span> <span class="n">ncei</span><span class="o">-</span><span class="n">grid</span><span class="p">:</span><span class="n">latest</span> <span class="p">(</span><span class="mf">2.1.0</span><span class="p">)</span>
+ <span class="o">-</span> <span class="n">ncei</span><span class="o">-</span><span class="n">point</span> <span class="p">(</span><span class="mf">2.3.0</span><span class="p">)</span>
+ <span class="o">-</span> <span class="n">ncei</span><span class="o">-</span><span class="n">point</span><span class="p">:</span><span class="mf">1.1</span> <span class="p">(</span><span class="mf">2.1.0</span><span class="p">)</span>
+ <span class="o">-</span> <span class="n">ncei</span><span class="o">-</span><span class="n">point</span><span class="p">:</span><span class="mf">2.0</span> <span class="p">(</span><span class="mf">2.3.0</span><span class="p">)</span>
+ <span class="n">etc</span> <span class="o">....</span>
+</pre></div>
+</div>
+<p>Once installing the plug-in the usage is similar to the built in checkers.</p>
+</section>
+<section id="examples-of-how-to-use-the-plug-ins">
+<h3>Examples of how to use the Plug-Ins<a class="headerlink" href="#examples-of-how-to-use-the-plug-ins" title="Permalink to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>Run the NCEI Point check on a THREDDS endpoint</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">-</span><span class="n">t</span> <span class="n">ncei</span><span class="o">-</span><span class="n">point</span> <span class="o">-</span><span class="n">v</span> <span class="s2">&quot;https://data.nodc.noaa.gov/thredds/dodsC/testdata/mbiddle/GOLD_STANDARD_NETCDF/1.1/NODC_point_template_v1.1_2016-06-15_133710.844375.nc&quot;</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Run NCEI Trajectory Profile Orthogonal Check on local dataset</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">-</span><span class="n">t</span> <span class="n">ncei</span><span class="o">-</span><span class="n">trajectory</span><span class="o">-</span><span class="n">profile</span><span class="o">-</span><span class="n">orthogonal</span> <span class="o">-</span><span class="n">v</span> <span class="o">~/</span><span class="n">data</span><span class="o">/</span><span class="n">sample</span><span class="o">-</span><span class="n">trajectory</span><span class="o">-</span><span class="n">profile</span><span class="o">.</span><span class="n">nc</span>
+
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Outputting JSON from a gridded file check</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">-</span><span class="n">t</span> <span class="n">ncei</span><span class="o">-</span><span class="n">grid</span> <span class="o">-</span><span class="n">f</span> <span class="n">json</span> <span class="o">-</span><span class="n">o</span> <span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">sample_grid_report</span><span class="o">.</span><span class="n">json</span> <span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">sample_grid_report</span><span class="o">.</span><span class="n">nc</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Permalink to this heading">#</a></h2>
+<p>The objective of the IOOS Compliance Checker is to check your file against our interpretation of select dataset metadata standards to use as a guideline in generating compliant files. The compliance checker should not be considered the authoritative source on whether your file is 100% “compliant”. Instead, we recommend that users use the results as a guide to work towards compliance.</p>
+</section>
+<section id="miscellaneous-acknowledgements">
+<h2>Miscellaneous/Acknowledgements<a class="headerlink" href="#miscellaneous-acknowledgements" title="Permalink to this heading">#</a></h2>
+<section id="contributors">
+<h3>Contributors<a class="headerlink" href="#contributors" title="Permalink to this heading">#</a></h3>
+<p><img alt="GitHub Contributors Image" src="https://contrib.rocks/image?repo=ioos/compliance-checker" /></p>
+<p>Portions of the CF checker are based on Michael Decker’s work, http://repositories.iek.fz-juelich.de/hg/CFchecker/</p>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">compliance_checker</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="compliance_checker_api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">IOOS Compliance Checker</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advice-to-data-providers">Advice to data providers</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#the-compliance-checker-web-tool">The Compliance Checker Web Tool</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usage">Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api">API</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#the-compliance-checker-command-line-tool">The Compliance Checker Command Line Tool</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#concepts-terminology">Concepts &amp; Terminology</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#command-line-usage">Command Line Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-a-local-file-against-cf-1-6">Check a local file against CF 1.6</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#check-a-remote-file-against-acdd-1-3">Check a remote file against ACDD 1.3</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#checking-against-remote-erddap-datasets">Checking against remote ERDDAP Datasets</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#write-results-to-text-file">Write results to text file</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#write-results-to-json-file">Write results to JSON file</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#write-results-to-html-file">Write results to HTML file</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output-text-from-multiple-input-files-to-one-output-file">Output text from multiple input files to one output file</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output-html-and-text-files-from-multiple-input-files-part-1">Output html and text files from multiple input files (part 1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output-html-and-text-files-from-multiple-input-files-part-2">Output html and text files from multiple input files (part 2)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#download-a-particular-cf-standard-names-table-for-use-in-the-test">Download a particular CF standard names table for use in the test</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-usage">Python Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance-checker-plug-ins">Compliance Checker Plug-Ins</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-plug-in-releases">Current Plug-in Releases:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-of-how-to-use-the-plug-ins">Examples of how to use the Plug-Ins</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#disclaimer">Disclaimer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#miscellaneous-acknowledgements">Miscellaneous/Acknowledgements</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#contributors">Contributors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="_sources/quickintro.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023, Dave Foster.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

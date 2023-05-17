@@ -1,0 +1,32 @@
+﻿   
+      
+   
+
+Cf ``(compliance_checker.cf)``
+==============================
+
+.. automodule:: compliance_checker.cf
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: ./
+   
+      CF1_6Check
+      CF1_7Check
+   
+   
+
+   
+   
+   
