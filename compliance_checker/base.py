@@ -549,7 +549,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
     # starting with "check".  Avoid naming check functions
     # starting with check if you want to pass them in with
     # a tuple to avoid them being checked more than once
-    elif hasattr(other, "__call__"):
+    elif callable(other):
         # check that the attribute is actually present.
         # This reduces boilerplate in functions by not needing
         # to check whether the attribute is present every time
@@ -629,7 +629,10 @@ def score_group(group_name=None):
     Please do not using scoring groups and update your plugins
     if necessary
     """
-    warnings.warn("Score_group is deprecated as of Compliance Checker v3.2.")
+    warnings.warn(
+        "Score_group is deprecated as of Compliance Checker v3.2.",
+        stacklevel=2,
+    )
 
     def _inner(func):
         def _dec(s, ds):

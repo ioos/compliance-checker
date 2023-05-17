@@ -567,7 +567,7 @@ class CFBaseCheck(BaseCheck):
         # Invalidate the cache at all costs
         self._ancillary_vars[ds] = []
 
-        for name, var in ds.variables.items():
+        for _name, var in ds.variables.items():
             if hasattr(var, "ancillary_variables"):
                 for anc_name in var.ancillary_variables.split(" "):
                     if anc_name in ds.variables:
@@ -638,6 +638,7 @@ class CFBaseCheck(BaseCheck):
                         warn(
                             "Cannot extract CF standard name version number "
                             "from standard_name_vocabulary string",
+                            stacklevel=2,
                         )
                         return False
             else:
@@ -650,6 +651,7 @@ class CFBaseCheck(BaseCheck):
                 "Cannot convert standard name table to lowercase.  This can "
                 "occur if a non-string standard_name_vocabulary global "
                 "attribute is supplied",
+                stacklevel=2,
             )
             return False
 
@@ -694,6 +696,7 @@ class CFBaseCheck(BaseCheck):
             warn(
                 f"Problem fetching standard name table:\n{e}\n"
                 f"Using packaged v{self._std_names._version}",
+                stacklevel=2,
             )
             return False
 

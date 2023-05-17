@@ -794,7 +794,8 @@ class CF1_7Check(CF1_6Check):
             return (True, msg)
 
     def check_grid_mapping(self, ds):
-        super().check_grid_mapping.__doc__
+        # FIXME: Looks like this is not needed.
+        # super().check_grid_mapping.__doc__
         prev_return = super().check_grid_mapping(ds)
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
         for var_name in sorted(grid_mapping_variables):
@@ -876,6 +877,7 @@ class CF1_7Check(CF1_6Check):
                     warn(
                         "Error occurred while trying to query "
                         "Proj4 SQLite database at {}: {}".format(proj_db_path, str(e)),
+                        stacklevel=2,
                     )
             prev_return[var.name] = test_ctx.to_result()
 
@@ -891,6 +893,7 @@ class CF1_7Check(CF1_6Check):
         if deprecated_var_names:
             warn(
                 f"Deprecated standard_name modifiers found on variables {deprecated_var_names}",
+                stacklevel=2,
             )
 
     def _process_v_datum_str(self, v_datum_str, conn):

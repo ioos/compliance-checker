@@ -67,8 +67,8 @@ def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x)
 
     if not isinstance(attr_val, attr_type):
         warnings.warn(
-            "Attribute is of type {}, {} expected. "
-            "Attempting to cast to expected type.".format(type(attr_val), attr_type),
+            f"Attribute is of type {type(attr_val)!r}, {attr_type!r} expected. Attempting to cast to expected type.",
+            stacklevel=2,
         )
         try:
             # if the expected type is str, try casting to unicode type
@@ -79,7 +79,7 @@ def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x)
                 new_attr_val = attr_type(attr_val)
         # catch casting errors
         except (ValueError, UnicodeEncodeError):
-            warnings.warn(f"Could not cast to type {attr_type}")
+            warnings.warn(f"Could not cast to type {attr_type}", stacklevel=2)
             return False
     else:
         new_attr_val = attr_val
@@ -88,8 +88,8 @@ def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x)
         is_in_set = modifier_fn(new_attr_val) in value_set
     except Exception as e:
         warnings.warn(
-            "Could not apply modifier function {} to value: "
-            " {}".format(modifier_fn, e.msg),
+            f"Could not apply modifier function {modifier_fn} to value: {e.msg}",
+            stacklevel=2,
         )
         return False
 
@@ -172,15 +172,15 @@ def is_geophysical(ds, variable):
 
     if not isinstance(standard_name_test, str):
         warnings.warn(
-            "Variable {} has non string standard name, "
-            "Attempting cast to string".format(variable),
+            f"Variable {variable} has non string standard name, Attempting cast to string",
+            stacklevel=2,
         )
         try:
             standard_name = str(standard_name_test)
         except ValueError:
             warnings.warn(
-                "Unable to cast standard name to string, excluding "
-                "from geophysical variables",
+                "Unable to cast standard name to string, excluding from geophysical variables",
+                stacklevel=2,
             )
     else:
         standard_name = standard_name_test

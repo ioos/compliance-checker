@@ -188,7 +188,7 @@ class ACDDBaseCheck(BaseCheck):
             msgs = []
             # Check units and dims for variable
             unit_check = hasattr(ds.variables[variable], "units")
-            no_dim_check = getattr(ds.variables[variable], "dimensions") == ()
+            no_dim_check = ds.variables[variable].dimensions == ()
             # Check if we have no dimensions.  If no dims, skip test
             if no_dim_check:
                 continue
@@ -256,7 +256,7 @@ class ACDDBaseCheck(BaseCheck):
 
         # identify lat var(s) as per CF 4.1
         lat_vars = {}  # var -> number of criteria passed
-        for name, var in ds.variables.items():
+        for _name, var in ds.variables.items():
             # must have units
             if not hasattr(var, "units"):
                 continue
@@ -354,7 +354,7 @@ class ACDDBaseCheck(BaseCheck):
 
         # identify lon var(s) as per CF 4.2
         lon_vars = {}  # var -> number of criteria passed
-        for name, var in ds.variables.items():
+        for _name, var in ds.variables.items():
             # must have units
             if not hasattr(var, "units"):
                 continue
@@ -779,7 +779,7 @@ class ACDD1_3Check(ACDDNCCheck):
         if not hasattr(ds, "metadata_link"):
             return
         msgs = []
-        meta_link = getattr(ds, "metadata_link")
+        meta_link = ds.metadata_link
         if "http" not in meta_link:
             msgs.append("Metadata URL should include http:// or https://")
         valid_link = len(msgs) == 0
@@ -793,7 +793,7 @@ class ACDD1_3Check(ACDDNCCheck):
         """
         if not hasattr(ds, "id"):
             return
-        if " " in getattr(ds, "id"):
+        if " " in ds.id:
             return Result(
                 BaseCheck.MEDIUM,
                 False,

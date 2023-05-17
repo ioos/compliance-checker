@@ -127,7 +127,7 @@ class CF1_6Check(CFNCCheck):
             "_FillValue",
         }
 
-        for var_name, var in ds.variables.items():
+        for _var_name, var in ds.variables.items():
             for att_name in special_attrs.intersection(var.ncattrs()):
                 self._parent_var_attr_type_check(att_name, var, ctx)
         return ctx.to_result()
@@ -417,7 +417,7 @@ class CF1_6Check(CFNCCheck):
         fails = []
         total = 0
 
-        for name, variable in ds.variables.items():
+        for _name, variable in ds.variables.items():
             # If the variable have a defined _FillValue a defined missing_value check it.
 
             if hasattr(variable, "_FillValue") and hasattr(variable, "missing_value"):
@@ -448,7 +448,7 @@ class CF1_6Check(CFNCCheck):
         fails = []
         total = 0
 
-        for name, variable in ds.variables.items():
+        for _name, variable in ds.variables.items():
             if hasattr(variable, "valid_max") and (
                 hasattr(variable, "valid_min") or hasattr(variable, "valid_range")
             ):

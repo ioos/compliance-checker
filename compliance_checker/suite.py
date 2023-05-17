@@ -172,6 +172,7 @@ class CheckSuite:
                         'attributes. "name" attribute is deprecated. '
                         "Assuming checker is latest version.",
                         DeprecationWarning,
+                        stacklevel=2,
                     )
                     # append "unknown" to version string since no versioning
                     # info was provided
@@ -350,6 +351,7 @@ class CheckSuite:
                             split_check_spec[1],
                             check_name,
                         ),
+                        stacklevel=2,
                     )
                     check_max_level = BaseCheck.HIGH
 
@@ -358,7 +360,10 @@ class CheckSuite:
         return check_dict
 
     def run(self, ds, skip_checks, *checker_names):
-        warnings.warn("suite.run is deprecated, use suite.run_all in calls " "instead")
+        warnings.warn(
+            "suite.run is deprecated, use suite.run_all in calls instead",
+            stacklevel=2,
+        )
         return self.run_all(ds, checker_names, skip_checks=skip_checks)
 
     def run_all(self, ds, checker_names, include_checks=None, skip_checks=None):

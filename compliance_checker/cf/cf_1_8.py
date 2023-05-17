@@ -134,7 +134,7 @@ class CF1_8Check(CF1_7Check):
             else:
                 geometry_var = ds.variables[geometry_var_name]
 
-            geometry_type = getattr(geometry_var, "geometry_type")
+            geometry_type = geometry_var.geometry_type
             try:
                 node_coord_var_names = geometry_var.node_coordinates
             except AttributeError:
@@ -471,6 +471,7 @@ class CF1_8Check(CF1_7Check):
                     "'urn:lsid:marinespecies.org:taxname:<AphiaID>' or "
                     "'urn:lsid:itis.gov:itis_tsn:<TSN>'.  Assuming "
                     "pass condition",
+                    stacklevel=1,
                 )
 
         return messages
@@ -597,8 +598,8 @@ class PolygonGeometry(LineGeometry):
 
         try:
             polygon = Polygon(transposed_coords.tolist())
-        except ValueError:
-            raise ValueError(
+        except ValueError as err:
+            raise ValueError from err(
                 "Polygon contains too few points to perform orientation test",
             )
 

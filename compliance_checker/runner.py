@@ -40,7 +40,7 @@ class ComplianceChecker:
         skip_checks=None,
         include_checks=None,
         output_filename="-",
-        output_format=["text"],
+        output_format="text",
         options=None,
     ):
         """
@@ -184,7 +184,7 @@ class ComplianceChecker:
         """
         checkers_html = []
         for ds, score_groups in score_dict.items():
-            for checker, (groups, errors) in score_groups.items():
+            for checker, (groups, _errors) in score_groups.items():
                 checkers_html.append(cs.checker_html_output(checker, groups, ds, limit))
 
         html = cs.html_output(checkers_html)
