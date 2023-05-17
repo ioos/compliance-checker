@@ -34,7 +34,7 @@ def parse_options(opts):
         try:
             checker_type, checker_opt = opt_str.split(":", 1)
         except ValueError:
-            warnings.warn(f"Could not split option {opt_str}, ignoring", stacklevel=1)
+            warnings.warn(f"Could not split option {opt_str}, ignoring", stacklevel=2)
         else:
             options_dict[checker_type].add(checker_opt)
     return options_dict
