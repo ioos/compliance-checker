@@ -37,6 +37,15 @@ class CF1_6Check(CFNCCheck):
     _cc_display_headers = {3: "Errors", 2: "Warnings", 1: "Info"}
     appendix_a = appendix_a_base
     appendix_d_parametric_coords = dimless_vertical_coordinates_1_6
+    _allowed_numeric_var_types = {
+        np.character,
+        np.bytes_,  # "|S1" dtype, byte array used as string
+        np.int8,
+        np.int16,
+        np.int32,
+        np.float32,
+        np.float64,
+    }
 
     def __init__(self, options=None):  # initialize with parent methods and data
         super().__init__(options)
@@ -77,18 +86,7 @@ class CF1_6Check(CFNCCheck):
             if (
                 v.dtype is not str
                 and v.dtype.kind != "S"
-                and all(
-                    v.dtype.type != t
-                    for t in (
-                        np.character,
-                        np.dtype("|S1"),
-                        np.dtype("b"),
-                        np.dtype("i2"),
-                        np.dtype("i4"),
-                        np.float32,
-                        np.double,
-                    )
-                )
+                and v.dtype.type not in self._allowed_numeric_var_types
             ):
                 fails.append(
                     "The variable {} failed because the datatype is {}".format(
