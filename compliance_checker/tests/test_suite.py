@@ -1,4 +1,3 @@
-# coding=utf-8
 import os
 import unittest
 from pathlib import Path
@@ -14,18 +13,22 @@ static_files = {
     "2dim": resource_filename("compliance_checker", "tests/data/2dim-grid.nc"),
     "bad_region": resource_filename("compliance_checker", "tests/data/bad_region.nc"),
     "bad_data_type": resource_filename(
-        "compliance_checker", "tests/data/bad_data_type.nc"
+        "compliance_checker",
+        "tests/data/bad_data_type.nc",
     ),
     "test_cdl": resource_filename("compliance_checker", "tests/data/test_cdl.cdl"),
     "test_cdl_nc": resource_filename(
-        "compliance_checker", "tests/data/test_cdl_nc_file.nc"
+        "compliance_checker",
+        "tests/data/test_cdl_nc_file.nc",
     ),
     "empty": resource_filename("compliance_checker", "tests/data/non-comp/empty.file"),
     "ru07": resource_filename(
-        "compliance_checker", "tests/data/ru07-20130824T170228_rt0.nc"
+        "compliance_checker",
+        "tests/data/ru07-20130824T170228_rt0.nc",
     ),
     "netCDF4": resource_filename(
-        "compliance_checker", "tests/data/test_cdl_nc4_file.cdl"
+        "compliance_checker",
+        "tests/data/test_cdl_nc4_file.cdl",
     ),
 }
 
@@ -47,9 +50,9 @@ class TestSuite(unittest.TestCase):
         name = self.id()
         name = name.split(".")
         if name[0] not in ["ion", "pyon"]:
-            return "%s (%s)" % (name[-1], ".".join(name[:-1]))
+            return "{} ({})".format(name[-1], ".".join(name[:-1]))
         else:
-            return "%s ( %s )" % (
+            return "{} ( {} )".format(
                 name[-1],
                 ".".join(name[:-2]) + ":" + ".".join(name[-2:]),
             )
@@ -75,7 +78,10 @@ class TestSuite(unittest.TestCase):
         for checker, rpair in score_groups.items():
             groups, errors = rpair
             score_list, points, out_of = self.cs.standard_output(
-                ds.filepath(), limit, checker, groups
+                ds.filepath(),
+                limit,
+                checker,
+                groups,
             )
             # This asserts that print is able to generate all of the unicode
             # output
@@ -164,7 +170,10 @@ class TestSuite(unittest.TestCase):
         for checker, rpair in score_groups.items():
             groups, errors = rpair
             score_list, points, out_of = self.cs.standard_output(
-                ds.filepath(), limit, checker, groups
+                ds.filepath(),
+                limit,
+                checker,
+                groups,
             )
             # This asserts that print is able to generate all of the unicode output
             self.cs.standard_output_generation(groups, limit, points, out_of, checker)
@@ -196,11 +205,18 @@ class TestSuite(unittest.TestCase):
         for checker, rpair in vals.items():
             groups, errors = rpair
             score_list, cdl_points, cdl_out_of = self.cs.standard_output(
-                ds.filepath(), limit, checker, groups
+                ds.filepath(),
+                limit,
+                checker,
+                groups,
             )
             # This asserts that print is able to generate all of the unicode output
             self.cs.standard_output_generation(
-                groups, limit, cdl_points, cdl_out_of, checker
+                groups,
+                limit,
+                cdl_points,
+                cdl_out_of,
+                checker,
             )
         ds.close()
 
@@ -212,11 +228,18 @@ class TestSuite(unittest.TestCase):
         for checker, rpair in vals.items():
             groups, errors = rpair
             score_list, nc_points, nc_out_of = self.cs.standard_output(
-                ds.filepath(), limit, checker, groups
+                ds.filepath(),
+                limit,
+                checker,
+                groups,
             )
             # This asserts that print is able to generate all of the unicode output
             self.cs.standard_output_generation(
-                groups, limit, nc_points, nc_out_of, checker
+                groups,
+                limit,
+                nc_points,
+                nc_out_of,
+                checker,
             )
         ds.close()
 
@@ -241,7 +264,10 @@ class TestSuite(unittest.TestCase):
         limit = 2
         groups, errors = score_groups["cf"]
         score_list, all_passed, out_of = self.cs.standard_output(
-            ds.filepath(), limit, "cf", groups
+            ds.filepath(),
+            limit,
+            "cf",
+            groups,
         )
         assert all_passed < out_of
 

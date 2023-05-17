@@ -106,14 +106,15 @@ class TestACDD1_1(BaseTestCase):
         Checks that all highly recommended attributes are present
         """
         assert check_varset_nonintersect(
-            self.expected["Highly Recommended"], self.acdd_highly_recommended
+            self.expected["Highly Recommended"],
+            self.acdd_highly_recommended,
         )
 
         # Check the reference dataset, NCEI 1.1 Gold Standard Point
         missing = ["\"Conventions\" does not contain 'ACDD-1.3'"]
         results = self.acdd.check_high(self.ds)
         for result in results:
-            if result.msgs and all([m in missing for m in result.msgs]):
+            if result.msgs and all(m in missing for m in result.msgs):
                 # only the Conventions check should have failed
                 self.assert_result_is_bad(result)
             self.assert_result_is_good(result)
@@ -133,7 +134,8 @@ class TestACDD1_1(BaseTestCase):
         # 'geospatial_bounds' attribute currently has its own separate check
         # from the list of required atts
         assert check_varset_nonintersect(
-            self.expected["Recommended"], self.acdd_recommended
+            self.expected["Recommended"],
+            self.acdd_recommended,
         )
 
         ncei_exceptions = [
@@ -144,7 +146,7 @@ class TestACDD1_1(BaseTestCase):
         results = self.acdd.check_recommended(self.ds)
         for result in results:
             if (result.msgs) and all(
-                [m in ncei_exceptions for m in result.msgs]
+                m in ncei_exceptions for m in result.msgs
             ):  # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
@@ -165,7 +167,8 @@ class TestACDD1_1(BaseTestCase):
         Checks that all suggested attributes are present
         """
         assert check_varset_nonintersect(
-            self.expected["Suggested"], self.acdd_suggested
+            self.expected["Suggested"],
+            self.acdd_suggested,
         )
 
         # Attributes that are missing from NCEI but should be there
@@ -178,7 +181,7 @@ class TestACDD1_1(BaseTestCase):
         results = self.acdd.check_suggested(self.ds)
         for result in results:
             if (result.msgs) and all(
-                [m in missing for m in result.msgs]
+                m in missing for m in result.msgs
             ):  # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
@@ -311,7 +314,8 @@ class TestACDD1_3(BaseTestCase):
         Checks that all highly recommended attributes are present
         """
         assert check_varset_nonintersect(
-            self.expected["Highly Recommended"], self.acdd_highly_recommended
+            self.expected["Highly Recommended"],
+            self.acdd_highly_recommended,
         )
 
         results = self.acdd.check_high(self.ds)
@@ -324,7 +328,8 @@ class TestACDD1_3(BaseTestCase):
         Checks that all recommended attributes are present
         """
         assert check_varset_nonintersect(
-            self.expected["Recommended"], self.acdd_recommended
+            self.expected["Recommended"],
+            self.acdd_recommended,
         )
 
         results = self.acdd.check_recommended(self.ds)
@@ -334,7 +339,7 @@ class TestACDD1_3(BaseTestCase):
         ]
         for result in results:
             if (result.msgs) and all(
-                [m in ncei_exceptions for m in result.msgs]
+                m in ncei_exceptions for m in result.msgs
             ):  # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
@@ -346,7 +351,8 @@ class TestACDD1_3(BaseTestCase):
         Checks that all suggested attributes are present
         """
         assert check_varset_nonintersect(
-            self.expected["Suggested"], self.acdd_suggested
+            self.expected["Suggested"],
+            self.acdd_suggested,
         )
 
         results = self.acdd.check_suggested(self.ds)
@@ -358,7 +364,7 @@ class TestACDD1_3(BaseTestCase):
         ]
         for result in results:
             if (result.msgs) and all(
-                [m in ncei_exceptions for m in result.msgs]
+                m in ncei_exceptions for m in result.msgs
             ):  # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
@@ -470,7 +476,9 @@ class TestACDD1_3(BaseTestCase):
         # create dataset using MockDataset, give it lat/lon dimensions
         ds = MockTimeSeries()
         ds.variables["lat"][:] = np.linspace(
-            -135.0, -130.0, num=500
+            -135.0,
+            -130.0,
+            num=500,
         )  # arbitrary, but matches time dim size
 
         # test no values, expect failure

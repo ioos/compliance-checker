@@ -1,16 +1,14 @@
-import io
-
 from setuptools import find_packages, setup
 
 
 def readme():
-    with io.open("README.md", encoding="utf-8") as f:
+    with open("README.md", encoding="utf-8") as f:
         return f.read()
 
 
 def pip_requirements(fname="requirements.txt"):
     reqs = []
-    with open(fname, "r") as f:
+    with open(fname) as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#"):

@@ -1,4 +1,3 @@
-import io
 import json
 import os
 import sys
@@ -22,7 +21,7 @@ def stdout_redirector(stream):
         sys.stdout = old_stdout
 
 
-class ComplianceChecker(object):
+class ComplianceChecker:
     """
     Compliance Checker runner class.
 
@@ -41,7 +40,7 @@ class ComplianceChecker(object):
         skip_checks=None,
         include_checks=None,
         output_filename="-",
-        output_format=["text"],
+        output_format="text",
         options=None,
     ):
         """
@@ -85,7 +84,7 @@ class ComplianceChecker(object):
 
             if not score_groups:
                 raise ValueError(
-                    "No checks found, please check the name of the checker(s) and that they are installed"
+                    "No checks found, please check the name of the checker(s) and that they are installed",
                 )
             else:
                 score_dict[loc] = score_groups
@@ -109,9 +108,9 @@ class ComplianceChecker(object):
                     if len(output_format) > 1:
                         # Update file name if needed
                         output_filename = "{}.txt".format(
-                            os.path.splitext(output_filename)[0]
+                            os.path.splitext(output_filename)[0],
                         )
-                    with io.open(output_filename, "w", encoding="utf-8") as f:
+                    with open(output_filename, "w", encoding="utf-8") as f:
                         with stdout_redirector(f):
                             cls.stdout_output(cs, score_dict, verbose, limit)
 
@@ -119,7 +118,7 @@ class ComplianceChecker(object):
                 # Update file name if needed
                 if len(output_format) > 1 and output_filename != "-":
                     output_filename = "{}.html".format(
-                        os.path.splitext(output_filename)[0]
+                        os.path.splitext(output_filename)[0],
                     )
                 cls.html_output(cs, score_dict, output_filename, ds_loc, limit)
 
@@ -127,7 +126,7 @@ class ComplianceChecker(object):
                 # Update file name if needed
                 if len(output_format) > 1 and output_filename != "-":
                     output_filename = "{}.json".format(
-                        os.path.splitext(output_filename)[0]
+                        os.path.splitext(output_filename)[0],
                     )
                 cls.json_output(cs, score_dict, output_filename, ds_loc, limit, out_fmt)
 
@@ -158,11 +157,18 @@ class ComplianceChecker(object):
             for checker, rpair in score_groups.items():
                 groups, errors = rpair
                 score_list, points, out_of = cs.standard_output(
-                    ds, limit, checker, groups
+                    ds,
+                    limit,
+                    checker,
+                    groups,
                 )
                 # send list of grouped result objects to stdout & reasoning_routine
                 cs.standard_output_generation(
-                    groups, limit, points, out_of, check=checker
+                    groups,
+                    limit,
+                    points,
+                    out_of,
+                    check=checker,
                 )
         return groups
 
@@ -178,21 +184,27 @@ class ComplianceChecker(object):
         """
         checkers_html = []
         for ds, score_groups in score_dict.items():
-            for checker, (groups, errors) in score_groups.items():
+            for checker, (groups, _errors) in score_groups.items():
                 checkers_html.append(cs.checker_html_output(checker, groups, ds, limit))
 
         html = cs.html_output(checkers_html)
         if output_filename == "-":
             print(html)
         else:
-            with io.open(output_filename, "w", encoding="utf8") as f:
+            with open(output_filename, "w", encoding="utf8") as f:
                 f.write(html)
 
         return groups
 
     @classmethod
     def json_output(
-        cls, cs, score_dict, output_filename, ds_loc, limit, output_type="json"
+        cls,
+        cs,
+        score_dict,
+        output_filename,
+        ds_loc,
+        limit,
+        output_type="json",
     ):
         """
         Generates JSON output for the ocmpliance score(s)
@@ -209,7 +221,7 @@ class ComplianceChecker(object):
         # json output keys out at the top level by
         if len(score_dict) > 1 and output_type != "json_new":
             raise ValueError(
-                "output_type must be set to 'json_new' if outputting multiple datasets to a single json file or stdout"
+                "output_type must be set to 'json_new' if outputting multiple datasets to a single json file or stdout",
             )
 
         if output_type == "json":
@@ -233,7 +245,7 @@ class ComplianceChecker(object):
         if output_filename == "-":
             print(json_results)
         else:
-            with io.open(output_filename, "w", encoding="utf8") as f:
+            with open(output_filename, "w", encoding="utf8") as f:
                 f.write(json_results)
 
         return groups
@@ -259,12 +271,13 @@ class ComplianceChecker(object):
                 )
                 for check_name, epair in errors.items():
                     print(
-                        "%s.%s: %s" % (checker, check_name, epair[0]), file=sys.stderr
+                        f"{checker}.{check_name}: {epair[0]}",
+                        file=sys.stderr,
                     )
 
                     if verbose > 0:
                         traceback.print_tb(
-                            epair[1].tb_next.tb_next
+                            epair[1].tb_next.tb_next,
                         )  # skip first two as they are noise from the running itself @TODO search for check_name
                         print(file=sys.stderr)
 

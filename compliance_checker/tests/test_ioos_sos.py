@@ -12,8 +12,9 @@ class TestIOOSSOSGetCapabilities(unittest.TestCase):
     def setUp(self):
         with open(
             os.path.join(
-                os.path.dirname(__file__), "data/http_mocks/ncsos_getcapabilities.xml"
-            )
+                os.path.dirname(__file__),
+                "data/http_mocks/ncsos_getcapabilities.xml",
+            ),
         ) as f:
             self.resp = f.read()
         # need to monkey patch checkers prior to running tests, or no checker
@@ -25,10 +26,16 @@ class TestIOOSSOSGetCapabilities(unittest.TestCase):
         """Method that simulates retrieving SOS GetCapabilities"""
         url = "http://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml"
         httpretty.register_uri(
-            httpretty.GET, url, content_type="text/xml", body=self.resp
+            httpretty.GET,
+            url,
+            content_type="text/xml",
+            body=self.resp,
         )
         httpretty.register_uri(
-            httpretty.HEAD, url, content_type="text/xml", body="HTTP/1.1 200"
+            httpretty.HEAD,
+            url,
+            content_type="text/xml",
+            body="HTTP/1.1 200",
         )
         ComplianceChecker.run_checker(url, ["ioos_sos"], 1, "normal")
 
@@ -37,8 +44,9 @@ class TestIOOSSOSDescribeSensor(unittest.TestCase):
     def setUp(self):
         with open(
             os.path.join(
-                os.path.dirname(__file__), "data/http_mocks/ncsos_describesensor.xml"
-            )
+                os.path.dirname(__file__),
+                "data/http_mocks/ncsos_describesensor.xml",
+            ),
         ) as f:
             self.resp = f.read()
         # need to monkey patch checkers prior to running tests, or no checker
@@ -57,10 +65,16 @@ class TestIOOSSOSDescribeSensor(unittest.TestCase):
             "&version=1.0.0"
         )
         httpretty.register_uri(
-            httpretty.GET, url, content_type="text/xml", body=self.resp
+            httpretty.GET,
+            url,
+            content_type="text/xml",
+            body=self.resp,
         )
         httpretty.register_uri(
-            httpretty.HEAD, url, content_type="text/xml", body="HTTP/1.1 200"
+            httpretty.HEAD,
+            url,
+            content_type="text/xml",
+            body="HTTP/1.1 200",
         )
         # need to mock out the HEAD response so that compliance checker
         # recognizes this as some sort of XML doc instead of an OPeNDAP

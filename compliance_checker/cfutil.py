@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 compliance_checker/cfutil.py
 """
@@ -68,8 +67,8 @@ def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x)
 
     if not isinstance(attr_val, attr_type):
         warnings.warn(
-            "Attribute is of type {}, {} expected. "
-            "Attempting to cast to expected type.".format(type(attr_val), attr_type)
+            f"Attribute is of type {type(attr_val)!r}, {attr_type!r} expected. Attempting to cast to expected type.",
+            stacklevel=2,
         )
         try:
             # if the expected type is str, try casting to unicode type
@@ -80,7 +79,7 @@ def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x)
                 new_attr_val = attr_type(attr_val)
         # catch casting errors
         except (ValueError, UnicodeEncodeError):
-            warnings.warn("Could not cast to type {}".format(attr_type))
+            warnings.warn(f"Could not cast to type {attr_type}", stacklevel=2)
             return False
     else:
         new_attr_val = attr_val
@@ -89,8 +88,8 @@ def attr_membership(attr_val, value_set, attr_type=str, modifier_fn=lambda x: x)
         is_in_set = modifier_fn(new_attr_val) in value_set
     except Exception as e:
         warnings.warn(
-            "Could not apply modifier function {} to value: "
-            " {}".format(modifier_fn, e.msg)
+            f"Could not apply modifier function {modifier_fn} to value: {e.msg}",
+            stacklevel=2,
         )
         return False
 
@@ -109,7 +108,7 @@ def is_dimensionless_standard_name(standard_name_table, standard_name):
     if not isinstance(standard_name, str):
         return False
     found_standard_name = standard_name_table.find(
-        ".//entry[@id='{}']".format(standard_name)
+        f".//entry[@id='{standard_name}']",
     )
     if found_standard_name is not None:
         canonical_units = Unit(found_standard_name.find("canonical_units").text)
@@ -123,13 +122,13 @@ def get_sea_names():
     """
     Returns a list of NODC sea names
 
-    source of list: https://www.nodc.noaa.gov/General/NODC-Archive/seanamelist.txt
+    source of list: https://www.ncei.noaa.gov/resources/ocean-data-format-codes
     """
     global _SEA_NAMES
     if _SEA_NAMES is None:
         buf = {}
         with open(
-            resource_filename("compliance_checker", "data/seanames.csv"), "r"
+            resource_filename("compliance_checker", "data/seanames.csv"),
         ) as f:
             reader = csv.reader(f)
             for code, sea_name in reader:
@@ -173,15 +172,15 @@ def is_geophysical(ds, variable):
 
     if not isinstance(standard_name_test, str):
         warnings.warn(
-            "Variable {} has non string standard name, "
-            "Attempting cast to string".format(variable)
+            f"Variable {variable} has non string standard name, Attempting cast to string",
+            stacklevel=2,
         )
         try:
             standard_name = str(standard_name_test)
         except ValueError:
             warnings.warn(
-                "Unable to cast standard name to string, excluding "
-                "from geophysical variables"
+                "Unable to cast standard name to string, excluding from geophysical variables",
+                stacklevel=2,
             )
     else:
         standard_name = standard_name_test
@@ -280,7 +279,7 @@ def get_auxiliary_coordinate_variables(ds):
     aux_vars = []
     # get any variables referecned by the coordinates attribute
     for ncvar in ds.get_variables_by_attributes(
-        coordinates=lambda x: isinstance(x, str)
+        coordinates=lambda x: isinstance(x, str),
     ):
         # split the coordinates into individual variable names
         referenced_variables = ncvar.coordinates.split(" ")
@@ -310,7 +309,7 @@ def get_auxiliary_coordinate_variables(ds):
 
     # Some datasets like ROMS use multiple variables to define coordinates
     for ncvar in ds.get_variables_by_attributes(
-        standard_name=lambda x: x in coordinate_standard_names
+        standard_name=lambda x: x in coordinate_standard_names,
     ):
         if ncvar.name not in aux_vars:
             aux_vars.append(ncvar.name)
@@ -503,7 +502,9 @@ def get_latitude_variables(nc):
             latitude_variables.append(variable.name)
 
     check_fn = partial(
-        attr_membership, value_set=VALID_LAT_UNITS, modifier_fn=lambda s: s.lower()
+        attr_membership,
+        value_set=VALID_LAT_UNITS,
+        modifier_fn=lambda s: s.lower(),
     )
     for variable in nc.get_variables_by_attributes(units=check_fn):
         if variable.name not in latitude_variables:
@@ -568,7 +569,9 @@ def get_longitude_variables(nc):
             longitude_variables.append(variable.name)
 
     check_fn = partial(
-        attr_membership, value_set=VALID_LON_UNITS, modifier_fn=lambda s: s.lower()
+        attr_membership,
+        value_set=VALID_LON_UNITS,
+        modifier_fn=lambda s: s.lower(),
     )
     for variable in nc.get_variables_by_attributes(units=check_fn):
         if variable.name not in longitude_variables:
@@ -741,14 +744,15 @@ def _find_standard_name_modifier_variables(ds, return_deprecated=False):
             matches = re.search(r"^\w+ +\w+", standard_name_str)
         else:
             matches = re.search(
-                r"^\w+ +(?:status_flag|number_of_observations)$", standard_name_str
+                r"^\w+ +(?:status_flag|number_of_observations)$",
+                standard_name_str,
             )
         return bool(matches)
 
     return [
         var.name
         for var in ds.get_variables_by_attributes(
-            standard_name=match_modifier_variables
+            standard_name=match_modifier_variables,
         )
     ]
 
@@ -929,7 +933,7 @@ def is_dataset_valid_ragged_array_repr_featureType(nc, feature_type: str):
         or (len(cf_role_vars) > 2 and is_compound)
     ):
         return False
-    cf_role_var = nc.get_variables_by_attributes(cf_role="{}_id".format(ftype))[0]
+    cf_role_var = nc.get_variables_by_attributes(cf_role=f"{ftype}_id")[0]
     if (
         cf_role_var.cf_role.split("_id")[0].lower() != ftype
     ):  # if cf_role_var returns None, this should raise an error?
@@ -948,10 +952,10 @@ def is_dataset_valid_ragged_array_repr_featureType(nc, feature_type: str):
     # if the index/count variable is present, we check that only one of
     # each is present and that their dimensions are correct
     index_vars = nc.get_variables_by_attributes(
-        instance_dimension=lambda x: x is not None
+        instance_dimension=lambda x: x is not None,
     )
     count_vars = nc.get_variables_by_attributes(
-        sample_dimension=lambda x: x is not None
+        sample_dimension=lambda x: x is not None,
     )
 
     # if the featureType isn't compound, shouldn't have both count and index
@@ -1751,7 +1755,8 @@ def isTrajectoryProfile(nc, variable):
     # NOTE
     # does this take into account single trajectory profile?
     if is_trajectory_profile_orthogonal(
-        nc, variable
+        nc,
+        variable,
     ) or is_trajectory_profile_incomplete(nc, variable):
         return True
 

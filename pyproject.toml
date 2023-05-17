@@ -1,6 +1,10 @@
 [build-system]
-requires = ["setuptools>=41.2", "setuptools_scm", "wheel"]
 build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools>=42",
+  "setuptools_scm",
+  "wheel",
+]
 
 [tool.pytest.ini_options]
 markers = [
@@ -8,5 +12,32 @@ markers = [
     "slowtest: marks slow tests (deselect with '-m \"not slowtest\"')"
 ]
 
-[tool.isort]
-profile = "black"
+[tool.ruff]
+select = [
+    "A", # flake8-builtins
+    "B", # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "E", # pycodecstyle
+    "F", # flakes
+    "I", # import sorting
+    "W", # pydocstyle
+    "UP", # upgrade
+]
+target-version = "py38"
+line-length = 200
+
+exclude = [
+  "compliance_checker/cf/cf.py",
+]
+
+ignore = [
+  "E501",
+]
+
+[tool.ruff.per-file-ignores]
+"docs/source/conf.py" = [
+  "E402",
+  "A001",
+]
+"compliance_checker/__init__.py" = ["B019"]
+"compliance_checker/cfutil.py" = ["B028"]

@@ -95,7 +95,7 @@ dimless_vertical_coordinates_1_7.update(
             {"s", "C", "eta", "depth", "depth_c"},
             ocean_computed_standard_names,
         ),
-    }
+    },
 )
 
 

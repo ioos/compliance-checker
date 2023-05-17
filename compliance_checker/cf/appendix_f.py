@@ -77,7 +77,7 @@ grid_mapping_attr_types17.update(
         "projected_crs_name": {"type": "S", "extra_condition": True},
         "reference_ellipsoid_name": {"type": "S", "extra_condition": False},
         "towgs84": {"type": "N", "extra_condition": True},
-    }
+    },
 )
 
 
@@ -193,7 +193,7 @@ grid_mapping_dict17.update(
             ("false_easting", "false_northing"),
             ("projection_x_coordinate", "projection_y_coordinate"),
         ],
-    }
+    },
 )
 
 # horizontal datum names from https://github.com/cf-convention/cf-conventions/wiki/csv/horiz_datum.csv

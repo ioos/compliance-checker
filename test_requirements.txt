@@ -3,7 +3,10 @@ codespell
 flake8
 httpretty
 mypy
+myst-parser
+numpydoc
 pre-commit
+pydata-sphinx-theme
 pytest>=2.9.0
 pytest-cov>=3.0.0
 pytest-vcr

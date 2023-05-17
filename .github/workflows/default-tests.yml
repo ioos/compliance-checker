@@ -17,11 +17,11 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Setup Micromamba
-      uses: mamba-org/provision-with-micromamba@v14
+      uses: mamba-org/provision-with-micromamba@v15
       with:
         environment-file: false
 
-    - name: Python ${{ matrix.python-version }}
+    - name: Setup Env ${{ matrix.python-version }}
       shell: bash -l {0}
       run: >
         micromamba create --name TEST python=${{ matrix.python-version }} pip --file requirements.txt --file test_requirements.txt --channel conda-forge

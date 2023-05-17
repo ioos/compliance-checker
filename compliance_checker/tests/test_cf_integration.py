@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import pytest
 
@@ -22,8 +21,8 @@ dataset_stem__expected_messages = [
             "attribute lat:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             "attribute lon:_CoordianteAxisType should begin with a letter and be composed of letters, digits, and underscores",
             "§2.6.2 global attribute history should exist and be a non-empty string",
-            "standard_name temperature is not defined in Standard Name Table v{}".format(
-                std_names._version
+            "standard_name temperature is not defined in Standard Name Table v{}. Possible close match(es): ['air_temperature', 'soil_temperature', 'snow_temperature']".format(
+                std_names._version,
             ),
             "temperature's auxiliary coordinate specified by the coordinates attribute, precise_lat, is not a variable in this dataset",
             "temperature's auxiliary coordinate specified by the coordinates attribute, precise_lon, is not a variable in this dataset",
@@ -46,29 +45,29 @@ dataset_stem__expected_messages = [
             "Attribute 'valid_range' (type: <class 'numpy.int16'>) and parent variable 'wind_direction_qc' (type: <class 'numpy.int8'>) must have equivalent datatypes",
             "Attribute 'valid_range' (type: <class 'numpy.int16'>) and parent variable 'visibility_qc' (type: <class 'numpy.int8'>) must have equivalent datatypes",
             '§2.6.1 Conventions global attribute does not contain "CF-1.8"',
-            "standard_name visibility is not defined in Standard Name Table v{}".format(
-                std_names._version
+            "standard_name visibility is not defined in Standard Name Table v{}. Possible close match(es): ['visibility_in_air']".format(
+                std_names._version,
             ),
             'Standard name modifier "data_quality" for variable visibility_qc is not a valid modifier according to CF Appendix C',
-            "standard_name wind_direction is not defined in Standard Name Table v{}".format(
-                std_names._version
+            "standard_name wind_direction is not defined in Standard Name Table v{}. Possible close match(es): ['wind_to_direction', 'wind_from_direction', 'wind_gust_from_direction']".format(
+                std_names._version,
             ),
             'Standard name modifier "data_quality" for variable wind_direction_qc is not a valid modifier according to CF Appendix C',
-            "standard_name wind_gust is not defined in Standard Name Table v{}".format(
-                std_names._version
+            "standard_name wind_gust is not defined in Standard Name Table v{}. Possible close match(es): ['y_wind_gust', 'x_wind_gust', 'wind_speed_of_gust']".format(
+                std_names._version,
             ),
             'Standard name modifier "data_quality" for variable wind_gust_qc is not a valid modifier according to CF Appendix C',
             'Standard name modifier "data_quality" for variable air_temperature_qc is not a valid modifier according to CF Appendix C',
-            "standard_name use_wind is not defined in Standard Name Table v{}".format(
-                std_names._version
+            "standard_name use_wind is not defined in Standard Name Table v{}. Possible close match(es): ['y_wind', 'x_wind']".format(
+                std_names._version,
             ),
-            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(
-                std_names._version
+            "standard_name barometric_pressure is not defined in Standard Name Table v{}. Possible close match(es): ['air_pressure', 'reference_pressure', 'barometric_altitude']".format(
+                std_names._version,
             ),
             'Standard name modifier "data_quality" for variable barometric_pressure_qc is not a valid modifier according to CF Appendix C',
             'Standard name modifier "data_quality" for variable wind_speed_qc is not a valid modifier according to CF Appendix C',
-            "standard_name barometric_pressure is not defined in Standard Name Table v{}".format(
-                std_names._version
+            "standard_name barometric_pressure is not defined in Standard Name Table v{}. Possible close match(es): ['air_pressure', 'reference_pressure', 'barometric_altitude']".format(
+                std_names._version,
             ),
             "CF recommends latitude variable 'lat' to use units degrees_north",
             "CF recommends longitude variable 'lon' to use units degrees_east",
@@ -152,11 +151,11 @@ dataset_stem__expected_messages = [
         [
             # TODO: referenced/relative time is treated like time units
             'Units "hours since 2016-01-01T12:00:00Z" for variable time_offset must be convertible to canonical units "s"',
-            "standard_name cloud_cover is not defined in Standard Name Table v{}".format(
-                std_names._version
+            "standard_name cloud_cover is not defined in Standard Name Table v{}. Possible close match(es): ['land_cover', 'land_cover_lccs', 'cloud_albedo']".format(
+                std_names._version,
             ),
-            "standard_name dew_point is not defined in Standard Name Table v{}".format(
-                std_names._version
+            "standard_name dew_point is not defined in Standard Name Table v{}. Possible close match(es): ['dew_point_depression', 'dew_point_temperature']".format(
+                std_names._version,
             ),
             (
                 "GRID is not a valid CF featureType. It must be one of point, timeseries, "
@@ -231,7 +230,10 @@ class TestCFIntegration:
         cs: instance of CheckSuite object
         """
         aggregation = checksuite.build_structure(
-            "cf", check_results["cf"][0], "test", 1
+            "cf",
+            check_results["cf"][0],
+            "test",
+            1,
         )
         out_of = 0
         scored = 0
@@ -257,7 +259,7 @@ class TestCFIntegration:
         "loaded_dataset,expected_messages",
         dataset_stem__expected_messages,
         indirect=[
-            "loaded_dataset"
+            "loaded_dataset",
         ],  # must be specified to load this param at runtime, instead of at collection
     )
     def test_cf_integration(self, loaded_dataset, expected_messages, cs):
@@ -266,7 +268,7 @@ class TestCFIntegration:
 
         assert scored < out_of
 
-        assert all([m in messages for m in expected_messages]), mult_msgs_diff.format(
+        assert all(m in messages for m in expected_messages), mult_msgs_diff.format(
             missing_msgs="\n".join([m for m in expected_messages if m not in messages]),
             found_msgs="\n".join(messages),
         )
@@ -305,7 +307,7 @@ class TestCFIntegration:
             raise AssertionError(
                 '"dimensions for auxiliary coordinate variable siglay (node, siglay) '
                 'are not a subset of dimensions for variable u (siglay, nele, time)"'
-                " not in messages"
+                " not in messages",
             )
         assert (
             '§2.6.1 Conventions global attribute does not contain "CF-1.8"'
