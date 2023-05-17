@@ -76,7 +76,8 @@ class CF1_9Check(CF1_8Check):
         return ret_val
 
     def check_time_coordinate(self, ds):
-        super().check_calendar.__doc__
+        # FIXME: Looks like this is not needed.
+        # super().check_calendar.__doc__
         prev_return = super().check_time_coordinate(ds)
         seconds_regex = regex.compile(
             r"\w+ since \d{1,4}-\d{1,2}-\d{1,2}[ T]"

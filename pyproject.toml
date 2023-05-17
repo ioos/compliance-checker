@@ -15,7 +15,7 @@ markers = [
 [tool.ruff]
 select = [
     "A", # flake8-builtins
-    # "B", # flake8-bugbear
+    "B", # flake8-bugbear
     "C4", # flake8-comprehensions
     "E", # pycodecstyle
     "F", # flakes
@@ -39,3 +39,5 @@ ignore = [
   "E402",
   "A001",
 ]
+"compliance_checker/__init__.py" = ["B019"]
+"compliance_checker/cfutil.py" = ["B028"]

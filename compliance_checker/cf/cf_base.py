@@ -400,20 +400,20 @@ class CFBaseCheck(BaseCheck):
         # the regex grouping always has component names in even positions and
         # the corresponding variable name in odd positions.
         poorly_formed_formula_terms = ("Attribute formula_terms is not well-formed",)
-        matches = [
-            match
-            for match in regex.finditer(
-                r"(\w+):\s+(\w+)(?:\s+(?!$)|$)", variable.formula_terms
-            )
-        ]
+        matches = list(
+            regex.finditer(
+                r"(\w+):\s+(\w+)(?:\s+(?!$)|$)",
+                variable.formula_terms,
+            ),
+        )
         if not matches:
             valid_formula_terms.add_failure(poorly_formed_formula_terms)
             return valid_formula_terms.to_result()
 
-        terms = set(m.group(1) for m in matches)
+        terms = {m.group(1) for m in matches}
         # get the variables named in the formula terms and check if any
         # are not present in the dataset
-        missing_vars = sorted(set(m.group(2) for m in matches) - set(ds.variables))
+        missing_vars = sorted({m.group(2) for m in matches} - set(ds.variables))
         missing_fmt = "The following variable(s) referenced in {}:formula_terms are not present in the dataset: {}"
         valid_formula_terms.assert_true(
             len(missing_vars) == 0,
@@ -567,7 +567,7 @@ class CFBaseCheck(BaseCheck):
         # Invalidate the cache at all costs
         self._ancillary_vars[ds] = []
 
-        for name, var in ds.variables.items():
+        for _name, var in ds.variables.items():
             if hasattr(var, "ancillary_variables"):
                 for anc_name in var.ancillary_variables.split(" "):
                     if anc_name in ds.variables:
@@ -638,6 +638,7 @@ class CFBaseCheck(BaseCheck):
                         warn(
                             "Cannot extract CF standard name version number "
                             "from standard_name_vocabulary string",
+                            stacklevel=2,
                         )
                         return False
             else:
@@ -650,6 +651,7 @@ class CFBaseCheck(BaseCheck):
                 "Cannot convert standard name table to lowercase.  This can "
                 "occur if a non-string standard_name_vocabulary global "
                 "attribute is supplied",
+                stacklevel=2,
             )
             return False
 
@@ -694,6 +696,7 @@ class CFBaseCheck(BaseCheck):
             warn(
                 f"Problem fetching standard name table:\n{e}\n"
                 f"Using packaged v{self._std_names._version}",
+                stacklevel=2,
             )
             return False
 
