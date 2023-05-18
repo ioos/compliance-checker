@@ -39,5 +39,4 @@ ignore = [
   "E402",
   "A001",
 ]
-"compliance_checker/__init__.py" = ["B019"]
 "compliance_checker/cfutil.py" = ["B028"]
