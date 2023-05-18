@@ -256,7 +256,7 @@ class ACDDBaseCheck(BaseCheck):
 
         # identify lat var(s) as per CF 4.1
         lat_vars = {}  # var -> number of criteria passed
-        for _name, var in ds.variables.items():
+        for var in ds.variables.values():
             # must have units
             if not hasattr(var, "units"):
                 continue
@@ -354,7 +354,7 @@ class ACDDBaseCheck(BaseCheck):
 
         # identify lon var(s) as per CF 4.2
         lon_vars = {}  # var -> number of criteria passed
-        for _name, var in ds.variables.items():
+        for var in ds.variables.values():
             # must have units
             if not hasattr(var, "units"):
                 continue

@@ -416,7 +416,7 @@ class CF1_6Check(CFNCCheck):
         fails = []
         total = 0
 
-        for _name, variable in ds.variables.items():
+        for variable in ds.variables.values():
             # If the variable have a defined _FillValue a defined missing_value check it.
 
             if hasattr(variable, "_FillValue") and hasattr(variable, "missing_value"):
@@ -447,7 +447,7 @@ class CF1_6Check(CFNCCheck):
         fails = []
         total = 0
 
-        for _name, variable in ds.variables.items():
+        for variable in ds.variables.values():
             if hasattr(variable, "valid_max") and (
                 hasattr(variable, "valid_min") or hasattr(variable, "valid_range")
             ):
