@@ -1328,7 +1328,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
         The platform_vocabulary attribute is recommended to be a URL to
         https://mmisw.org/ont/ioos/platform or
-        http://vocab.nerc.ac.uk/collection/L06/current/. However,
+        https://vocab.nerc.ac.uk/collection/L06/current/. However,
         it is required to at least be a URL.
 
         Args:

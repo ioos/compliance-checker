@@ -109,7 +109,7 @@ class CF1_6Check(CFNCCheck):
             - add_offset
             - _FillValue
         the data type of the attribute must match the type of its parent variable as specified in the
-        NetCDF User Guide (NUG) https://www.unidata.ucar.edu/software/netcdf/docs/attribute_conventions.html,
+        NetCDF User Guide (NUG) https://docs.unidata.ucar.edu/netcdf-c/current/attribute_conventions.html,
         referenced in the CF Conventions in Section 2.5.2
         (http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#missing-data)
 
