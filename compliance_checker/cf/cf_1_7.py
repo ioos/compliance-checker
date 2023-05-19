@@ -794,8 +794,6 @@ class CF1_7Check(CF1_6Check):
             return (True, msg)
 
     def check_grid_mapping(self, ds):
-        # FIXME: Looks like this is not needed.
-        # super().check_grid_mapping.__doc__
         prev_return = super().check_grid_mapping(ds)
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
         for var_name in sorted(grid_mapping_variables):

@@ -567,7 +567,7 @@ class CFBaseCheck(BaseCheck):
         # Invalidate the cache at all costs
         self._ancillary_vars[ds] = []
 
-        for _name, var in ds.variables.items():
+        for var in ds.variables.values():
             if hasattr(var, "ancillary_variables"):
                 for anc_name in var.ancillary_variables.split(" "):
                     if anc_name in ds.variables:
