@@ -18,23 +18,26 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup Mamba
-      uses: mamba-org/provision-with-micromamba@v16
+    - name: Setup Micromamba
+      uses: mamba-org/setup-micromamba@v1
       with:
-        environment-file: false
+        environment-name: TEST
+        init-shell: bash
+        create-args: >-
+          python=3 pip
+          --file requirements.txt
+          --file test_requirements.txt
+          --channel conda-forge
 
-    - name: Build environment
+    - name: Install compliance-checker
       shell: bash -l {0}
       run: |
-        micromamba create --name TEST python=3 --file requirements.txt --file test_requirements.txt --channel conda-forge
-        micromamba activate TEST
         python -m pip install -e . --no-deps --force-reinstall
 
     - name: Build documentation
       shell: bash -l {0}
       run: |
         set -e
-        micromamba activate TEST
         pushd docs
         cp  ../README.md source/quickintro.md
         make clean html linkcheck
