@@ -13,8 +13,11 @@ name = "compliance-checker"
 description = "Checks Datasets and SOS endpoints for standards compliance"
 readme = "README.md"
 license = {text = "Apache-2.0"}
-authors = [
+maintainers = [
     {name = "Dave Foster", email = "dave@axiomdatascience.com"},
+    {name = "Benjamin Adams"},
+    {name = "Luke Campbell"},
+    {name = "Filipe Fernandes"},
 ]
 requires-python = ">=3.8"
 classifiers=[
