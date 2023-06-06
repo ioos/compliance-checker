@@ -25,7 +25,7 @@ from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from pkg_resources import working_set
 
-from compliance_checker import MemoizedDataset, __version__, tempnc
+from compliance_checker import __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.protocols import cdl, netcdf, opendap
 
@@ -828,7 +828,7 @@ class CheckSuite:
         if netcdf.is_remote_netcdf(ds_str):
             response = requests.get(ds_str, allow_redirects=True, timeout=60)
             try:
-                return MemoizedDataset(
+                return Dataset(
                     urlparse(response.url).path,
                     memory=response.content,
                 )
@@ -836,7 +836,7 @@ class CheckSuite:
                 # handle case when netCDF C libs weren't compiled with
                 # in-memory support by using tempfile
                 with tempnc(response.content) as _nc:
-                    return MemoizedDataset(_nc)
+                    return Dataset(_nc)
 
     def load_remote_dataset(self, ds_str):
         """
@@ -893,7 +893,7 @@ class CheckSuite:
             ds_str = self.generate_dataset(ds_str)
 
         if netcdf.is_netcdf(ds_str):
-            return MemoizedDataset(ds_str)
+            return Dataset(ds_str)
 
         # Assume this is just a Generic File if it exists
         if os.path.isfile(ds_str):
