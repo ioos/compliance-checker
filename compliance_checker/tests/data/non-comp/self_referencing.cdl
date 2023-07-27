@@ -337,7 +337,7 @@ variables:
 		:time_coverage_start = "2015-02-05T00:01:00Z" ;
 		:time_coverage_end = "2015-02-05T23:57:00Z" ;
 		:data_centre = "eMarine Information Infrastructure (eMII)" ;
-		:data_center_email = "info@emii.org.au" ;
+		:data_center_email = "info@aodn.org.au" ;
 		:author = "Ruslan Verein" ;
 		:author_email = "r.verein@bom.gov.au" ;
 		:principal_investigator = "Eric Schulz" ;
@@ -366,7 +366,7 @@ variables:
 			"1 - Oost et al. (2001), 2 - Taylor and Yelland (2000)" ;
 		:data_comment = "for complete list of instruments see corresponding file version 1 (FV01)" ;
 		:Conventions = "CF-1.6,IMOS-1.3" ;
-		:data_centre_email = "info@emii.org.au" ;
+		:data_centre_email = "info@aodn.org.au" ;
 		:history = "Wed Nov  4 16:19:27 2015: ncks -a -d TIME,,,10 self_referencing.nc temp.nc" ;
 		:NCO = "4.4.2" ;
 data:
