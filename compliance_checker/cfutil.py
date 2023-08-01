@@ -3,13 +3,13 @@
 compliance_checker/cfutil.py
 """
 import csv
+import importlib.resources
 import re
 import warnings
 from collections import defaultdict
 from functools import lru_cache, partial
 
 from cf_units import Unit
-from pkg_resources import resource_filename
 
 _UNITLESS_DB = None
 _SEA_NAMES = None
@@ -128,7 +128,7 @@ def get_sea_names():
     if _SEA_NAMES is None:
         buf = {}
         with open(
-            resource_filename("compliance_checker", "data/seanames.csv"),
+            importlib.resources.files("compliance_checker") / "data/seanames.csv",
         ) as f:
             reader = csv.reader(f)
             for code, sea_name in reader:

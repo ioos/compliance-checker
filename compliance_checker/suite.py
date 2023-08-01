@@ -765,12 +765,9 @@ class CheckSuite:
 
         :param str cdl_path: Absolute path to cdl file that is used to generate netCDF file
         """
-        if (
-            ".cdl" in cdl_path
-        ):  # it's possible the filename doesn't have the .cdl extension
-            ds_str = cdl_path.replace(".cdl", ".nc")
-        else:
-            ds_str = cdl_path + ".nc"
+        if isinstance(cdl_path, str):
+            cdl_path = Path(cdl_path)
+        ds_str = cdl_path.with_suffix(".nc")
 
         # generate netCDF-4 file
         iostat = subprocess.run(
