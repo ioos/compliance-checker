@@ -644,11 +644,7 @@ class CheckSuite:
             print("Corrective Actions".center(width))
             plural = "" if issue_count == 1 else "s"
             print(
-                "{} has {} potential issue{}".format(
-                    os.path.basename(ds),
-                    issue_count,
-                    plural,
-                ),
+                f"{os.path.basename(ds)} has {issue_count} potential issue{plural}",
             )
 
         return [groups, points, out_of]

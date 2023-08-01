@@ -293,9 +293,7 @@ def main():
     if output_len == 1:
         if args.format != "json":
             print(
-                "Running Compliance Checker on the datasets from: {}".format(
-                    args.dataset_location,
-                ),
+                f"Running Compliance Checker on the datasets from: {args.dataset_location}",
                 file=sys.stderr,
             )
         return_value, errors = ComplianceChecker.run_checker(
@@ -315,9 +313,7 @@ def main():
         for output, dataset in zip(args.output, args.dataset_location):
             if args.format != "json":
                 print(
-                    "Running Compliance Checker on the dataset from: {}".format(
-                        dataset,
-                    ),
+                    f"Running Compliance Checker on the dataset from: {dataset}",
                     file=sys.stderr,
                 )
             return_value, errors = ComplianceChecker.run_checker(

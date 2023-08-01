@@ -110,7 +110,7 @@ class TestCF1_6(BaseTestCase):
             "temp",
             np.float64,
             dimensions=("time",),
-            fill_value=float(99999999999999999999.0),
+            fill_value=99999999999999999999.0,
         )
         temp.coordinates = "sigma noexist"
         ds.createVariable("sigma", np.float64, dimensions=("siglev",))
@@ -193,7 +193,7 @@ class TestCF1_6(BaseTestCase):
             "temp",
             np.float64,
             dimensions=("time",),
-            fill_value=float(99999999999999999999.0),
+            fill_value=99999999999999999999.0,
         )
 
         # give temp _FillValue as a float, expect good result
@@ -2816,7 +2816,7 @@ class TestCF1_7(BaseTestCase):
         # set same dtype
         dataset = MockTimeSeries()  # time lat lon depth
         temp = dataset.createVariable("temp", int, dimensions=("time",))
-        temp.setncattr("scale_factor", int(5))
+        temp.setncattr("scale_factor", 5)
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         self.assertTrue(r[1].value)
         self.assertFalse(r[1].msgs)

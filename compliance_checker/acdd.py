@@ -676,9 +676,7 @@ class ACDDBaseCheck(BaseCheck):
             return ratable_result((1, 2), "Global Attributes", m)
         except AttributeError:  # NetCDF attribute not found
             m = [
-                "No Conventions attribute present; must contain ACDD-{}".format(
-                    self._cc_spec_version,
-                ),
+                f"No Conventions attribute present; must contain ACDD-{self._cc_spec_version}",
             ]
             # Result will have name "Global Attributes" to group with globals
             return ratable_result((0, 2), "Global Attributes", m)

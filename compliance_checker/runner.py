@@ -107,9 +107,7 @@ class ComplianceChecker:
                 else:
                     if len(output_format) > 1:
                         # Update file name if needed
-                        output_filename = "{}.txt".format(
-                            os.path.splitext(output_filename)[0],
-                        )
+                        output_filename = f"{os.path.splitext(output_filename)[0]}.txt"
                     with open(output_filename, "w", encoding="utf-8") as f:
                         with stdout_redirector(f):
                             cls.stdout_output(cs, score_dict, verbose, limit)
@@ -117,17 +115,13 @@ class ComplianceChecker:
             elif out_fmt == "html":
                 # Update file name if needed
                 if len(output_format) > 1 and output_filename != "-":
-                    output_filename = "{}.html".format(
-                        os.path.splitext(output_filename)[0],
-                    )
+                    output_filename = f"{os.path.splitext(output_filename)[0]}.html"
                 cls.html_output(cs, score_dict, output_filename, ds_loc, limit)
 
             elif out_fmt in {"json", "json_new"}:
                 # Update file name if needed
                 if len(output_format) > 1 and output_filename != "-":
-                    output_filename = "{}.json".format(
-                        os.path.splitext(output_filename)[0],
-                    )
+                    output_filename = f"{os.path.splitext(output_filename)[0]}.json"
                 cls.json_output(cs, score_dict, output_filename, ds_loc, limit, out_fmt)
 
             else:

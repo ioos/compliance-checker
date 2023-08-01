@@ -206,26 +206,19 @@ class CFBaseCheck(BaseCheck):
                         for grid_var_name, coord_var_str in re_all:
                             defines_grid_mapping.assert_true(
                                 grid_var_name in ds.variables,
-                                "grid mapping variable {} must exist in this dataset".format(
-                                    grid_var_name,
-                                ),
+                                f"grid mapping variable {grid_var_name} must exist in this dataset",
                             )
                             for ref_var in coord_var_str.split():
                                 defines_grid_mapping.assert_true(
                                     ref_var in ds.variables,
-                                    "Coordinate-related variable {} referenced by grid_mapping variable {} must exist in this dataset".format(
-                                        ref_var,
-                                        grid_var_name,
-                                    ),
+                                    f"Coordinate-related variable {ref_var} referenced by grid_mapping variable {grid_var_name} must exist in this dataset",
                                 )
 
                 else:
                     for grid_var_name in grid_mapping.split():
                         defines_grid_mapping.assert_true(
                             grid_var_name in ds.variables,
-                            "grid mapping variable {} must exist in this dataset".format(
-                                grid_var_name,
-                            ),
+                            f"grid mapping variable {grid_var_name} must exist in this dataset",
                         )
             ret_val[variable.name] = defines_grid_mapping.to_result()
 
@@ -264,10 +257,7 @@ class CFBaseCheck(BaseCheck):
             for req in required_attrs:
                 valid_grid_mapping.assert_true(
                     hasattr(grid_var, req),
-                    "{} is a required attribute for grid mapping {}".format(
-                        req,
-                        grid_mapping_name,
-                    ),
+                    f"{req} is a required attribute for grid mapping {grid_mapping_name}",
                 )
 
             # Make sure that exactly one of the exclusive attributes exist
@@ -313,10 +303,7 @@ class CFBaseCheck(BaseCheck):
 
         valid = False
         reasoning = []
-        correct_version_string = "{}-{}".format(
-            self._cc_spec,
-            self._cc_spec_version,
-        ).upper()
+        correct_version_string = f"{self._cc_spec}-{self._cc_spec_version}".upper()
         if hasattr(ds, "Conventions"):
             conventions = regex.split(r",|\s+", getattr(ds, "Conventions", ""))
             for convention in conventions:
@@ -682,10 +669,7 @@ class CFBaseCheck(BaseCheck):
                 )
             else:
                 print(
-                    "Using cached standard name table v{} from {}".format(
-                        version,
-                        location,
-                    ),
+                    f"Using cached standard name table v{version} from {location}",
                     file=sys.stderr,
                 )
 
@@ -1056,16 +1040,14 @@ class CFBaseCheck(BaseCheck):
             if att_loc_len == 1:
                 valid_loc = att_loc_print_helper(loc_sort[0])
             elif att_loc_len == 2:
-                valid_loc = "{} and {}".format(
-                    att_loc_print_helper(loc_sort[0]),
-                    att_loc_print_helper(loc_sort[1]),
-                )
+                valid_loc = f"{att_loc_print_helper(loc_sort[0])} and {att_loc_print_helper(loc_sort[1])}"
             # shouldn't be reached under normal circumstances, as any attribute
             # should be either G, C, or D but if another
             # category is added, this will be useful.
             else:
-                valid_loc = ", ".join(loc_sort[:-1]) + ", and {}".format(
-                    att_loc_print_helper(loc_sort[-1]),
+                valid_loc = (
+                    ", ".join(loc_sort[:-1])
+                    + f", and {att_loc_print_helper(loc_sort[-1])}"
                 )
             return f"This attribute may only appear in {valid_loc}."
 
@@ -1188,10 +1170,7 @@ class CFBaseCheck(BaseCheck):
                 if temp_ctx.messages:
                     return (
                         False,
-                        "{} must be numeric and must be equivalent to {} dtype".format(
-                            attr_name,
-                            var_dtype,
-                        ),
+                        f"{attr_name} must be numeric and must be equivalent to {var_dtype} dtype",
                     )
             else:
                 # If we reached here, we fell off with an unrecognized type

@@ -88,10 +88,7 @@ class CF1_6Check(CFNCCheck):
                 and v.dtype.type not in self._allowed_numeric_var_types
             ):
                 fails.append(
-                    "The variable {} failed because the datatype is {}".format(
-                        k,
-                        v.datatype,
-                    ),
+                    f"The variable {k} failed because the datatype is {v.datatype}",
                 )
         return Result(
             BaseCheck.HIGH,
@@ -423,9 +420,7 @@ class CF1_6Check(CFNCCheck):
                 total = total + 1
                 if variable._FillValue != variable.missing_value:
                     fails.append(
-                        "For the variable {} the missing_value must be equal to the _FillValue".format(
-                            variable.name,
-                        ),
+                        f"For the variable {variable.name} the missing_value must be equal to the _FillValue",
                     )
 
         return Result(
@@ -496,10 +491,7 @@ class CF1_6Check(CFNCCheck):
                     m = "§2.5.1 Fill Values should be outside the range specified by valid_range"  # subsection message
                     valid_fill_range.assert_true(
                         False,
-                        "{};\n\t{}:valid_range must be a numeric type not a string".format(
-                            m,
-                            name,
-                        ),
+                        f"{m};\n\t{name}:valid_range must be a numeric type not a string",
                     )
                     continue
                 rmin, rmax = variable.valid_range
@@ -720,10 +712,7 @@ class CF1_6Check(CFNCCheck):
             # side effects, but better than teasing out the individual result
             if units is not None and units_attr_is_string.assert_true(
                 isinstance(units, str),
-                "units ({}) attribute of '{}' must be a string compatible with UDUNITS".format(
-                    units,
-                    variable.name,
-                ),
+                f"units ({units}) attribute of '{variable.name}' must be a string compatible with UDUNITS",
             ):
                 valid_udunits = self._check_valid_udunits(ds, name)
                 ret_val.append(valid_udunits)
@@ -808,9 +797,7 @@ class CF1_6Check(CFNCCheck):
         # 1) Units must exist
         valid_units.assert_true(
             should_be_dimensionless or units is not None,
-            "units attribute is required for {} when variable is not a dimensionless quantity".format(
-                variable_name,
-            ),
+            f"units attribute is required for {variable_name} when variable is not a dimensionless quantity",
         )
 
         # Don't bother checking the rest
@@ -875,10 +862,7 @@ class CF1_6Check(CFNCCheck):
         are_udunits = units is not None and util.units_known(units)
         valid_udunits.assert_true(
             should_be_dimensionless or are_udunits or units is None,
-            'units for {}, "{}" are not recognized by UDUNITS'.format(
-                variable_name,
-                units,
-            ),
+            f'units for {variable_name}, "{units}" are not recognized by UDUNITS',
         )
         return valid_udunits.to_result()
 
@@ -1039,9 +1023,7 @@ class CF1_6Check(CFNCCheck):
                 valid_std_name = TestCtx(BaseCheck.HIGH, self.section_titles["3.3"])
                 valid_std_name.assert_true(
                     isinstance(standard_name, str),
-                    "Attribute standard_name for variable {} must be a string".format(
-                        name,
-                    ),
+                    f"Attribute standard_name for variable {name} must be a string",
                 )
                 valid_std_name.out_of += 1
                 if standard_name not in self._std_names:
@@ -1080,9 +1062,7 @@ class CF1_6Check(CFNCCheck):
             # IMPLEMENTATION CONFORMANCE 3 RECOMMENDED
             long_or_std_name.assert_true(
                 long_name_present or standard_name_present,
-                "Attribute long_name or/and standard_name is highly recommended for variable {}".format(
-                    name,
-                ),
+                f"Attribute long_name or/and standard_name is highly recommended for variable {name}",
             )
             ret_val.append(long_or_std_name.to_result())
         return ret_val
@@ -1209,9 +1189,7 @@ class CF1_6Check(CFNCCheck):
                 allvr = Result(BaseCheck.MEDIUM, allv, self.section_titles["3.5"])
                 if not allvr.value:
                     allvr.msgs = [
-                        "flag masks and flag values for '{}' combined don't equal flag values".format(
-                            name,
-                        ),
+                        f"flag masks and flag values for '{name}' combined don't equal flag values",
                     ]
 
                 ret_val.append(allvr)
@@ -1367,9 +1345,7 @@ class CF1_6Check(CFNCCheck):
             if flag_regx.match(meaning) is None:
                 valid_meanings.assert_true(
                     False,
-                    "{}'s flag_meanings attribute defined an illegal flag meaning ".format(
-                        name,
-                    )
+                    f"{name}'s flag_meanings attribute defined an illegal flag meaning "
                     + f"{meaning}",
                 )
         return valid_meanings.to_result()
@@ -2761,10 +2737,7 @@ class CF1_6Check(CFNCCheck):
             if boundary_variable_name not in ds.variables:
                 valid = False
                 reasoning.append(
-                    "Boundary variable {} referenced by {} not ".format(
-                        boundary_variable_name,
-                        variable.name,
-                    )
+                    f"Boundary variable {boundary_variable_name} referenced by {variable.name} not "
                     + "found in dataset variables",
                 )
             else:
@@ -2774,10 +2747,7 @@ class CF1_6Check(CFNCCheck):
             if boundary_variable.ndim < 2:
                 valid = False
                 reasoning.append(
-                    "Boundary variable {} specified by {}".format(
-                        boundary_variable.name,
-                        variable.name,
-                    )
+                    f"Boundary variable {boundary_variable.name} specified by {variable.name}"
                     + " should have at least two dimensions to enclose the base "
                     + "case of a one dimensionsal variable",
                 )
@@ -3073,10 +3043,7 @@ class CF1_6Check(CFNCCheck):
                 # attempt to get the number for the interval
                 if not interval_matches:
                     valid_info.messages.append(
-                        '§7.3.3 {}:cell_methods contains an interval specification that does not parse: "{}". Should be in format "interval: <number> <units>"'.format(
-                            var.name,
-                            val,
-                        ),
+                        f'§7.3.3 {var.name}:cell_methods contains an interval specification that does not parse: "{val}". Should be in format "interval: <number> <units>"',
                     )
                 else:
                     try:
@@ -3111,17 +3078,13 @@ class CF1_6Check(CFNCCheck):
                 valid_info.out_of += 1
                 if len(pmatches) == 1:
                     valid_info.messages.append(
-                        "§7.3.3 If there is no standardized information, the keyword comment: should be omitted for variable {}".format(
-                            var.name,
-                        ),
+                        f"§7.3.3 If there is no standardized information, the keyword comment: should be omitted for variable {var.name}",
                     )
                 # otherwise check that the comment is the last
                 # item in the parentheses
                 elif i != len(pmatches) - 1:
                     valid_info.messages.append(
-                        '§7.3.3 The non-standard "comment:" element must come after any standard elements in cell_methods for variable {}'.format(
-                            var.name,
-                        ),
+                        f'§7.3.3 The non-standard "comment:" element must come after any standard elements in cell_methods for variable {var.name}',
                     )
                 #
                 else:
@@ -3129,20 +3092,14 @@ class CF1_6Check(CFNCCheck):
             else:
                 valid_info.out_of += 1
                 valid_info.messages.append(
-                    '§7.3.3 Invalid cell_methods keyword "{}" for variable {}. Must be one of [interval, comment]'.format(
-                        keyword,
-                        var.name,
-                    ),
+                    f'§7.3.3 Invalid cell_methods keyword "{keyword}" for variable {var.name}. Must be one of [interval, comment]',
                 )
 
         # Ensure concatenated reconstructed matches are the same as the
         # original string.  If they're not, there's likely a formatting error
         valid_info.assert_true(
             "".join(m.group(0) for m in pmatches) == paren_contents,
-            "§7.3.3 Parenthetical content inside {}:cell_methods is not well formed: {}".format(
-                var.name,
-                paren_contents,
-            ),
+            f"§7.3.3 Parenthetical content inside {var.name}:cell_methods is not well formed: {paren_contents}",
         )
 
         return valid_info
@@ -3281,9 +3238,7 @@ class CF1_6Check(CFNCCheck):
             ):
                 total_climate_count += 1
                 reasoning.append(
-                    "Climatology variable coordinates are in improper order: {}. Bounds-specific dimensions should be last".format(
-                        ds.variables[clim_coord_var.climatology].dimensions,
-                    ),
+                    f"Climatology variable coordinates are in improper order: {ds.variables[clim_coord_var.climatology].dimensions}. Bounds-specific dimensions should be last",
                 )
                 result = Result(
                     BaseCheck.MEDIUM,
@@ -3302,9 +3257,7 @@ class CF1_6Check(CFNCCheck):
                 != 2
             ):
                 reasoning.append(
-                    'Climatology dimension "{}" should only contain two elements'.format(
-                        ds.variables[clim_coord_var.climatology].name,
-                    ),
+                    f'Climatology dimension "{ds.variables[clim_coord_var.climatology].name}" should only contain two elements',
                 )
                 total_climate_count += 1
                 result = Result(
@@ -3346,9 +3299,7 @@ class CF1_6Check(CFNCCheck):
                 total_climate_count += 1
                 if not regex.search(re_string, cell_method_var.cell_methods):
                     reasoning.append(
-                        'The "time: method within years/days over years/days" format is not correct in variable {}.'.format(
-                            cell_method_var.name,
-                        ),
+                        f'The "time: method within years/days over years/days" format is not correct in variable {cell_method_var.name}.',
                     )
                 else:
                     valid_climate_count += 1
@@ -3536,9 +3487,7 @@ class CF1_6Check(CFNCCheck):
             if compress_var.ndim != 1:
                 valid = False
                 reasoning.append(
-                    "Compression variable {} may only have one dimension".format(
-                        compress_var.name,
-                    ),
+                    f"Compression variable {compress_var.name} may only have one dimension",
                 )
             # IMPLEMENTATION CONFORMANCE 8.2 REQUIRED 1/3
             # ensure compression variable is a proper index, and thus is an
@@ -3548,9 +3497,7 @@ class CF1_6Check(CFNCCheck):
             ):
                 valid = False
                 reasoning.append(
-                    "Compression variable {} must be an integer type to form a proper array index".format(
-                        compress_var.name,
-                    ),
+                    f"Compression variable {compress_var.name} must be an integer type to form a proper array index",
                 )
             # IMPLEMENTATION CONFORMANCE 8.2 REQUIRED 2/3
             # make sure all the variables referred to are contained by the
@@ -3559,10 +3506,7 @@ class CF1_6Check(CFNCCheck):
                 not_in_dims = sorted(compress_set.difference(ds.dimensions))
                 valid = False
                 reasoning.append(
-                    "The following dimensions referenced by the compress attribute of variable {} do not exist: {}".format(
-                        compress_var.name,
-                        not_in_dims,
-                    ),
+                    f"The following dimensions referenced by the compress attribute of variable {compress_var.name} do not exist: {not_in_dims}",
                 )
             # IMPLEMENTATION CONFORMANCE 8.2 REQUIRED 3/3
             # The values of the associated coordinate variable must be in the range

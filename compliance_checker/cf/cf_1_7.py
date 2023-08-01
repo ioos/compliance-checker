@@ -167,9 +167,7 @@ class CF1_7Check(CF1_6Check):
                         variable[:].min(),
                     ) or not np.isclose(variable.actual_range[1], variable[:].max()):
                         msgs.append(
-                            "actual_range elements of '{}' inconsistent with its min/max values".format(
-                                name,
-                            ),
+                            f"actual_range elements of '{name}' inconsistent with its min/max values",
                         )
                     else:
                         score += 1
@@ -181,9 +179,7 @@ class CF1_7Check(CF1_6Check):
                         variable.actual_range[1] > variable.valid_range[1]
                     ):
                         msgs.append(
-                            '"{}"\'s actual_range must be within valid_range'.format(
-                                name,
-                            ),
+                            f'"{name}"\'s actual_range must be within valid_range',
                         )
                     else:
                         score += 1
@@ -194,10 +190,7 @@ class CF1_7Check(CF1_6Check):
                     out_of += 1
                     if variable.actual_range[0] < variable.valid_min:
                         msgs.append(
-                            '"{}"\'s actual_range first element must be >= valid_min ({})'.format(
-                                name,
-                                variable.valid_min,
-                            ),
+                            f'"{name}"\'s actual_range first element must be >= valid_min ({variable.valid_min})',
                         )
                     else:
                         score += 1
@@ -205,10 +198,7 @@ class CF1_7Check(CF1_6Check):
                     out_of += 1
                     if variable.actual_range[1] > variable.valid_max:
                         msgs.append(
-                            '"{}"\'s actual_range second element must be <= valid_max ({})'.format(
-                                name,
-                                variable.valid_max,
-                            ),
+                            f'"{name}"\'s actual_range second element must be <= valid_max ({variable.valid_max})',
                         )
                     else:
                         score += 1
@@ -254,10 +244,7 @@ class CF1_7Check(CF1_6Check):
             if boundary_variable_name not in ds.variables:
                 valid = False
                 reasoning.append(
-                    "Boundary variable {} referenced by {} not ".format(
-                        boundary_variable_name,
-                        variable.name,
-                    )
+                    f"Boundary variable {boundary_variable_name} referenced by {variable.name} not "
                     + "found in dataset variables",
                 )
             else:
@@ -269,10 +256,7 @@ class CF1_7Check(CF1_6Check):
             if boundary_variable.ndim < 2:
                 valid = False
                 reasoning.append(
-                    "Boundary variable {} specified by {}".format(
-                        boundary_variable.name,
-                        variable.name,
-                    )
+                    f"Boundary variable {boundary_variable.name} specified by {variable.name}"
                     + " should have at least two dimensions to enclose the base "
                     + "case of a one dimensionsal variable",
                 )
@@ -318,10 +302,7 @@ class CF1_7Check(CF1_6Check):
             if boundary_variable.dtype.kind not in "biufc":
                 valid = False
                 reasoning.append(
-                    "Boundary variable {} specified by {}".format(
-                        boundary_variable.name,
-                        variable.name,
-                    )
+                    f"Boundary variable {boundary_variable.name} specified by {variable.name}"
                     + "must be a numeric data type ",
                 )
 
@@ -352,10 +333,7 @@ class CF1_7Check(CF1_6Check):
                 if not hasattr(boundary_variable, "formula_terms"):
                     valid = False
                     reasoning.append(
-                        "'{}' has 'formula_terms' attr, bounds variable '{}' must also have 'formula_terms'".format(
-                            variable_name,
-                            boundary_variable_name,
-                        ),
+                        f"'{variable_name}' has 'formula_terms' attr, bounds variable '{boundary_variable_name}' must also have 'formula_terms'",
                     )
 
             # 7.1 Recommendations 2/2
@@ -380,10 +358,7 @@ class CF1_7Check(CF1_6Check):
                 if unwanted_attributes:
                     valid = False
                     reasoning.append(
-                        "The Boundary variables '{}' should not have the attributes: '{}'".format(
-                            boundary_variable_name,
-                            unwanted_attributes,
-                        ),
+                        f"The Boundary variables '{boundary_variable_name}' should not have the attributes: '{unwanted_attributes}'",
                     )
 
             result = Result(
@@ -818,9 +793,7 @@ class CF1_7Check(CF1_6Check):
                         pyproj.CRS.from_wkt(crs_wkt)
                     except pyproj.exceptions.CRSError as crs_error:
                         test_ctx.messages.append(
-                            "Cannot parse crs_wkt attribute to CRS using Proj4. Proj4 error: {}".format(
-                                str(crs_error),
-                            ),
+                            f"Cannot parse crs_wkt attribute to CRS using Proj4. Proj4 error: {str(crs_error)}",
                         )
                     else:
                         test_ctx.score += 1
@@ -943,10 +916,7 @@ class CF1_7Check(CF1_6Check):
         _comp_std_name = dim_vert_coords_dict[standard_name][1]
         correct_computed_std_name_ctx.assert_true(
             getattr(variable, "computed_standard_name", None) in _comp_std_name,
-            "§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`".format(
-                vname,
-                sorted(_comp_std_name),
-            ),
+            f"§4.3.3 The standard_name of `{vname}` must map to the correct computed_standard_name, `{sorted(_comp_std_name)}`",
         )
         ret_val.append(correct_computed_std_name_ctx.to_result())
 
