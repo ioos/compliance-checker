@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from netCDF4 import Dataset
 
@@ -25,8 +26,8 @@ class BaseTestCase(unittest.TestCase):
         """
         Return a loaded NC Dataset for the given path
         """
-        if not isinstance(nc_dataset, str):
-            raise ValueError("nc_dataset should be a string")
+        if not isinstance(nc_dataset, (str, Path)):
+            raise ValueError("nc_dataset should be a valid path")
 
         nc_dataset = Dataset(nc_dataset, "r")
         self.addCleanup(nc_dataset.close)
