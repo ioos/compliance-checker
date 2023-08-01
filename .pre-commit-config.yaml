@@ -19,29 +19,29 @@ repos:
         - test_requirements.txt
 
 - repo: https://github.com/psf/black
-  rev: 23.3.0
+  rev: 23.7.0
   hooks:
   - id: black
     language_version: python3
 
 - repo: https://github.com/asottile/add-trailing-comma
-  rev: v2.4.0
+  rev: v3.0.1
   hooks:
     - id: add-trailing-comma
 
 
-- repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.270
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.0.281
   hooks:
     - id: ruff
 
 - repo: https://github.com/tox-dev/pyproject-fmt
-  rev: 0.11.2
+  rev: 0.13.0
   hooks:
     - id: pyproject-fmt
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.4
+  rev: v2.2.5
   hooks:
     - id: codespell
       args:
