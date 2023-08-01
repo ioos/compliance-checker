@@ -146,7 +146,6 @@ class TestSuite(unittest.TestCase):
             "§3.5 flag_meanings for lat",
             "§3.5 flag_meanings for lon",
             "§3.5 lat is a valid flags variable",
-            "§3.5 lat is a valid flags variable",
             "§3.5 lon is a valid flags variable",
         }
 

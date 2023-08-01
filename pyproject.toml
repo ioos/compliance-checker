@@ -6,12 +6,6 @@ requires = [
   "wheel",
 ]
 
-[tool.pytest.ini_options]
-markers = [
-    "integration: marks integration tests (deselect with '-m \"not integration\"')",
-    "slowtest: marks slow tests (deselect with '-m \"not slowtest\"')"
-]
-
 [tool.ruff]
 select = [
     "A", # flake8-builtins
@@ -40,3 +34,10 @@ ignore = [
   "A001",
 ]
 "compliance_checker/cfutil.py" = ["B028"]
+"compliance_checker/cf/appendix_f.py" = ["B033"]  # ignore duplicates items in the set
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks integration tests (deselect with '-m \"not integration\"')",
+    "slowtest: marks slow tests (deselect with '-m \"not slowtest\"')"
+]
