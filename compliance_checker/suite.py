@@ -13,7 +13,6 @@ import textwrap
 import warnings
 from collections import defaultdict
 from datetime import datetime, timezone
-from distutils.version import StrictVersion
 from operator import itemgetter
 from pathlib import Path
 from urllib.parse import urlparse
@@ -23,6 +22,7 @@ from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
+from packaging.version import parse
 from pkg_resources import working_set
 
 from compliance_checker import __version__, tempnc
@@ -186,9 +186,8 @@ class CheckSuite:
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
             version_nums = [v[-1] for v in versions]
             try:
-                latest_version = str(max(StrictVersion(v) for v in version_nums))
-            # if the version can't be parsed as a StrictVersion, parse
-            # according to character collation
+                latest_version = str(max(parse(v) for v in version_nums))
+            # if the version can't be parsed, do it according to character collation
             except ValueError:
                 latest_version = max(version_nums)
             cls.checkers[spec] = cls.checkers[spec + ":latest"] = cls.checkers[
