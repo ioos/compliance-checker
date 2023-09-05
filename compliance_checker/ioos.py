@@ -46,10 +46,7 @@ class IOOSBaseCheck(BaseCheck):
 
         if not val:
             msgs.append(
-                "Attr '{}' (IOOS concept: '{}') not found in dataset".format(
-                    attr,
-                    concept_name,
-                ),
+                f"Attr '{attr}' (IOOS concept: '{concept_name}') not found in dataset",
             )
 
         return Result(priority, val, concept_name, msgs)
@@ -64,22 +61,14 @@ class IOOSBaseCheck(BaseCheck):
         if vname not in dataset.variables:
             val = False
             msgs.append(
-                "Variable '{}' not present while checking for attr '{}' for IOOS concept: '{}'".format(
-                    vname,
-                    attr,
-                    concept_name,
-                ),
+                f"Variable '{vname}' not present while checking for attr '{attr}' for IOOS concept: '{concept_name}'",
             )
         else:
             v = dataset.variables[vname]
             if attr not in v.ncattrs():
                 val = False
                 msgs.append(
-                    "Attr '{}' not present on var '{}' while checking for IOOS concept: '{}'".format(
-                        attr,
-                        vname,
-                        concept_name,
-                    ),
+                    f"Attr '{attr}' not present on var '{vname}' while checking for IOOS concept: '{concept_name}'",
                 )
 
         return Result(priority, val, concept_name, msgs)
@@ -796,9 +785,7 @@ class IOOS1_2Check(IOOSNCCheck):
                         False,
                         "contributor_role_vocabulary",
                         [
-                            "contributor_role_vocabulary '{}' must be of type 'string'".format(
-                                vocb,
-                            ),
+                            f"contributor_role_vocabulary '{vocb}' must be of type 'string'",
                         ],
                     ),
                 )
@@ -1245,8 +1232,8 @@ class IOOS1_2Check(IOOSNCCheck):
                 else:
                     pass_stat = False
                     messages.append(
-                        "If specified, {} must be in value list "
-                        "({})".format(global_att_name, sorted(expected_types)),
+                        f"If specified, {global_att_name} must be in value list "
+                        f"({sorted(expected_types)})",
                     )
 
             result_list.append(
@@ -1302,9 +1289,7 @@ class IOOS1_2Check(IOOSNCCheck):
 
         num_platforms = len(platform_set)
         if num_platforms > 1 and glb_platform:
-            msg = "A dataset may only have one platform; {} found".format(
-                len(platform_set),
-            )
+            msg = f"A dataset may only have one platform; {len(platform_set)} found"
             val = False
 
         elif (not glb_platform) and num_platforms > 0:
@@ -1405,14 +1390,14 @@ class IOOS1_2Check(IOOSNCCheck):
 
             valid_vertical_coord = TestCtx(BaseCheck.HIGH, "Vertical coordinates")
             units_set_msg = (
-                "{}'s units attribute {} is not equivalent to one "
-                "of {}".format(name, units_str, expected_unit_strs)
+                f"{name}'s units attribute {units_str} is not equivalent to one "
+                f"of {expected_unit_strs}"
             )
             valid_vertical_coord.assert_true(pass_stat, units_set_msg)
 
             pos_msg = (
-                "{}: vertical coordinates must include a positive "
-                "attribute that is either 'up' or 'down'".format(name)
+                f"{name}: vertical coordinates must include a positive "
+                "attribute that is either 'up' or 'down'"
             )
             valid_vertical_coord.assert_true(positive in ("up", "down"), pos_msg)
 
@@ -1586,10 +1571,7 @@ class IOOS1_2Check(IOOSNCCheck):
             if instr in ds.variables:
                 compnt = getattr(ds.variables[instr], "component", None)
                 m = [
-                    "component attribute of {} ({}) must be a string".format(
-                        instr,
-                        compnt,
-                    ),
+                    f"component attribute of {instr} ({compnt}) must be a string",
                 ]
                 if compnt:
                     results.append(
@@ -1607,10 +1589,7 @@ class IOOS1_2Check(IOOSNCCheck):
 
                 disct = getattr(ds.variables[instr], "discriminant", None)
                 m = [
-                    "discriminant attribute of {} ({}) must be a string".format(
-                        instr,
-                        disct,
-                    ),
+                    f"discriminant attribute of {instr} ({disct}) must be a string",
                 ]
                 if disct:
                     results.append(
@@ -1706,14 +1685,12 @@ class IOOS1_2Check(IOOSNCCheck):
             attval = getattr(v, "references", None)
             if attval is None:
                 msg = (
-                    '"references" attribute not present for variable {}.'
+                    f'"references" attribute not present for variable {v.name}.'
                     "If present, it should be a valid URL."
-                ).format(v.name)
+                )
                 val = False
             else:
-                msg = '"references" attribute for variable "{}" must be a valid URL'.format(
-                    v.name,
-                )
+                msg = f'"references" attribute for variable "{v.name}" must be a valid URL'
                 val = bool(validators.url(attval))
 
             results.append(

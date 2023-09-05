@@ -31,9 +31,7 @@ class TestFeatureDetection(TestCase):
         """
         with Dataset(resources.STATIC_FILES["timeseries"]) as nc:
             for variable in util.get_geophysical_variables(nc):
-                assert util.is_timeseries(nc, variable), "{} is timeseries".format(
-                    variable,
-                )
+                assert util.is_timeseries(nc, variable), f"{variable} is timeseries"
 
     def test_multi_timeseries_orthogonal(self):
         """
@@ -63,9 +61,7 @@ class TestFeatureDetection(TestCase):
         """
         with Dataset(resources.STATIC_FILES["trajectory"]) as nc:
             for variable in util.get_geophysical_variables(nc):
-                assert util.is_cf_trajectory(nc, variable), "{} is trajectory".format(
-                    variable,
-                )
+                assert util.is_cf_trajectory(nc, variable), f"{variable} is trajectory"
 
     def test_trajectory_single(self):
         """

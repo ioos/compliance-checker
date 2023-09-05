@@ -249,8 +249,8 @@ class ACDDBaseCheck(BaseCheck):
                 False,
                 "geospatial_lat_extents_match",
                 [
-                    "Could not convert one of geospatial_lat_min ({}) or max ({}) to float see CF-1.6 spec chapter 4.1"
-                    "".format(ds.geospatial_lat_min, ds.geospatial_lat_max),
+                    f"Could not convert one of geospatial_lat_min ({ds.geospatial_lat_min}) or max ({ds.geospatial_lat_max}) to float see CF-1.6 spec chapter 4.1"
+                    "",
                 ],
             )
 
@@ -347,8 +347,8 @@ class ACDDBaseCheck(BaseCheck):
                 False,
                 "geospatial_lon_extents_match",
                 [
-                    "Could not convert one of geospatial_lon_min ({}) or max ({}) to float see CF-1.6 spec chapter 4.1"
-                    "".format(ds.geospatial_lon_min, ds.geospatial_lon_max),
+                    f"Could not convert one of geospatial_lon_min ({ds.geospatial_lon_min}) or max ({ds.geospatial_lon_max}) to float see CF-1.6 spec chapter 4.1"
+                    "",
                 ],
             )
 
@@ -440,7 +440,7 @@ class ACDDBaseCheck(BaseCheck):
                 [
                     (
                         "Could not parse WKT from geospatial_bounds,"
-                        ' possible bad value: "{}"'.format(ds.geospatial_bounds)
+                        f' possible bad value: "{ds.geospatial_bounds}"'
                     ),
                 ],
                 variable_name="geospatial_bounds",
@@ -637,19 +637,13 @@ class ACDDBaseCheck(BaseCheck):
         if start_dt > timedelta(hours=1):
             msgs.append(
                 "Date time mismatch between time_coverage_start and actual "
-                "time values {} (time_coverage_start) != {} (time[0])".format(
-                    t_min.isoformat(),
-                    time0.isoformat(),
-                ),
+                f"time values {t_min.isoformat()} (time_coverage_start) != {time0.isoformat()} (time[0])",
             )
             score -= 1
         if end_dt > timedelta(hours=1):
             msgs.append(
                 "Date time mismatch between time_coverage_end and actual "
-                "time values {} (time_coverage_end) != {} (time[N])".format(
-                    t_max.isoformat(),
-                    time1.isoformat(),
-                ),
+                f"time values {t_max.isoformat()} (time_coverage_end) != {time1.isoformat()} (time[N])",
             )
             score -= 1
 
@@ -676,9 +670,7 @@ class ACDDBaseCheck(BaseCheck):
             return ratable_result((1, 2), "Global Attributes", m)
         except AttributeError:  # NetCDF attribute not found
             m = [
-                "No Conventions attribute present; must contain ACDD-{}".format(
-                    self._cc_spec_version,
-                ),
+                f"No Conventions attribute present; must contain ACDD-{self._cc_spec_version}",
             ]
             # Result will have name "Global Attributes" to group with globals
             return ratable_result((0, 2), "Global Attributes", m)

@@ -480,10 +480,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
             msgs.append(f"{display_name} not present")
         elif res == 1:
             msgs.append(
-                "{} present, but not in expected value list ({})".format(
-                    display_name,
-                    sorted(other),
-                ),
+                f"{display_name} present, but not in expected value list ({sorted(other)})",
             )
 
         ret_val.append(
