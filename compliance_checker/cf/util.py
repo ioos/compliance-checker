@@ -167,7 +167,7 @@ def get_safe(dict_instance, keypath, default=None):
     """
     try:
         obj = dict_instance
-        keylist = keypath if type(keypath) is list else keypath.split(".")
+        keylist = keypath if isinstance(keypath, list) else keypath.split(".")
         for key in keylist:
             obj = obj[key]
         return obj
