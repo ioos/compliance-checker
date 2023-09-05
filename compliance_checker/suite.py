@@ -346,11 +346,8 @@ class CheckSuite:
                     check_max_level = check_lookup[split_check_spec[1]]
                 except KeyError:
                     warnings.warn(
-                        "Skip specifier '{}' on check '{}' not found,"
-                        " defaulting to skip entire check".format(
-                            split_check_spec[1],
-                            check_name,
-                        ),
+                        f"Skip specifier '{split_check_spec[1]}' on check '{check_name}' not found,"
+                        " defaulting to skip entire check",
                         stacklevel=2,
                     )
                     check_max_level = BaseCheck.HIGH

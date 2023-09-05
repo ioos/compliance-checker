@@ -263,21 +263,15 @@ class CF1_7Check(CF1_6Check):
             if boundary_variable.ndim != variable.ndim + 1:
                 valid = False
                 reasoning.append(
-                    "The number of dimensions of the variable {} is {}, but the "
-                    "number of dimensions of the boundary variable {} is {}. The boundary variable "
-                    "should have {} dimensions".format(
-                        variable.name,
-                        variable.ndim,
-                        boundary_variable.name,
-                        boundary_variable.ndim,
-                        variable.ndim + 1,
-                    ),
+                    f"The number of dimensions of the variable {variable.name} is {variable.ndim}, but the "
+                    f"number of dimensions of the boundary variable {boundary_variable.name} is {boundary_variable.ndim}. The boundary variable "
+                    f"should have {variable.ndim + 1} dimensions",
                 )
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
-                    "Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
-                    "".format(variable.name, boundary_variable.dimensions),
+                    f"Boundary variable coordinates (for {variable.name}) are in improper order: {boundary_variable.dimensions}. Bounds-specific dimensions should be last"
+                    "",
                 )
 
             # 7.1 Required 2/5: continue
@@ -315,15 +309,9 @@ class CF1_7Check(CF1_6Check):
                         if getattr(variable, item) != getattr(boundary_variable, item):
                             valid = False
                             reasoning.append(
-                                "'{}' has attr '{}' with value '{}' that does not agree "
-                                "with its associated variable ('{}')'s attr value '{}'"
-                                "".format(
-                                    boundary_variable_name,
-                                    item,
-                                    getattr(boundary_variable, item),
-                                    variable.name,
-                                    getattr(variable, item),
-                                ),
+                                f"'{boundary_variable_name}' has attr '{item}' with value '{getattr(boundary_variable, item)}' that does not agree "
+                                f"with its associated variable ('{variable.name}')'s attr value '{getattr(variable, item)}'"
+                                "",
                             )
 
             # 7.1 Required 5/5:
@@ -396,14 +384,9 @@ class CF1_7Check(CF1_6Check):
                     ):
                         valid = False
                         reasoning.append(
-                            "The points specified by the coordinate variable {} ({})"
+                            f"The points specified by the coordinate variable {variable_name} ({variable[ii]})"
                             " lie outside the boundary of the cell specified by the "
-                            "associated boundary variable {} ({})".format(
-                                variable_name,
-                                variable[ii],
-                                boundary_variable_name,
-                                boundary_variable[ii],
-                            ),
+                            f"associated boundary variable {boundary_variable_name} ({boundary_variable[ii]})",
                         )
 
                 result = Result(
@@ -819,7 +802,7 @@ class CF1_7Check(CF1_6Check):
                 test_ctx.messages.append(
                     "Cannot have both 'geoid_name' and "
                     "'geopotential_datum_name' attributes in "
-                    "grid mapping variable '{}'".format(var.name),
+                    f"grid mapping variable '{var.name}'",
                 )
             elif len_vdatum_name_attrs == 1:
                 # should be one or zero attrs
@@ -834,20 +817,16 @@ class CF1_7Check(CF1_6Check):
                         )
 
                         invalid_msg = (
-                            "Vertical datum value '{}' for "
-                            "attribute '{}' in grid mapping "
-                            "variable '{}' is not valid".format(
-                                v_datum_value,
-                                v_datum_attr,
-                                var.name,
-                            )
+                            f"Vertical datum value '{v_datum_value}' for "
+                            f"attribute '{v_datum_attr}' in grid mapping "
+                            f"variable '{var.name}' is not valid"
                         )
                         test_ctx.assert_true(v_datum_str_valid, invalid_msg)
                 except sqlite3.Error as e:
                     # if we hit an error, skip the check
                     warn(
                         "Error occurred while trying to query "
-                        "Proj4 SQLite database at {}: {}".format(proj_db_path, str(e)),
+                        f"Proj4 SQLite database at {proj_db_path}: {str(e)}",
                         stacklevel=2,
                     )
             prev_return[var.name] = test_ctx.to_result()

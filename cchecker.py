@@ -253,8 +253,8 @@ def main():
         for checker_name in sorted(checker_names):
             if checker_name not in check_suite.checkers:
                 print(
-                    "Cannot find checker '{}' with which to "
-                    "describe checks".format(checker_name),
+                    f"Cannot find checker '{checker_name}' with which to "
+                    "describe checks",
                     file=sys.stderr,
                 )
                 error_stat = 1

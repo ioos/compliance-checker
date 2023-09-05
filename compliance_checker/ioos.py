@@ -1232,8 +1232,8 @@ class IOOS1_2Check(IOOSNCCheck):
                 else:
                     pass_stat = False
                     messages.append(
-                        "If specified, {} must be in value list "
-                        "({})".format(global_att_name, sorted(expected_types)),
+                        f"If specified, {global_att_name} must be in value list "
+                        f"({sorted(expected_types)})",
                     )
 
             result_list.append(
@@ -1390,14 +1390,14 @@ class IOOS1_2Check(IOOSNCCheck):
 
             valid_vertical_coord = TestCtx(BaseCheck.HIGH, "Vertical coordinates")
             units_set_msg = (
-                "{}'s units attribute {} is not equivalent to one "
-                "of {}".format(name, units_str, expected_unit_strs)
+                f"{name}'s units attribute {units_str} is not equivalent to one "
+                f"of {expected_unit_strs}"
             )
             valid_vertical_coord.assert_true(pass_stat, units_set_msg)
 
             pos_msg = (
-                "{}: vertical coordinates must include a positive "
-                "attribute that is either 'up' or 'down'".format(name)
+                f"{name}: vertical coordinates must include a positive "
+                "attribute that is either 'up' or 'down'"
             )
             valid_vertical_coord.assert_true(positive in ("up", "down"), pos_msg)
 
@@ -1685,9 +1685,9 @@ class IOOS1_2Check(IOOSNCCheck):
             attval = getattr(v, "references", None)
             if attval is None:
                 msg = (
-                    '"references" attribute not present for variable {}.'
+                    f'"references" attribute not present for variable {v.name}.'
                     "If present, it should be a valid URL."
-                ).format(v.name)
+                )
                 val = False
             else:
                 msg = f'"references" attribute for variable "{v.name}" must be a valid URL'

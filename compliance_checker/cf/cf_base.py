@@ -185,8 +185,8 @@ class CFBaseCheck(BaseCheck):
             )
             defines_grid_mapping.assert_true(
                 (isinstance(grid_mapping, str) and grid_mapping),
-                "{}'s grid_mapping attribute must be a "
-                "space-separated non-empty string".format(variable.name),
+                f"{variable.name}'s grid_mapping attribute must be a "
+                "space-separated non-empty string",
             )
             if isinstance(grid_mapping, str):
                 # TODO (badams): refactor functionality to split functionality
@@ -313,7 +313,7 @@ class CFBaseCheck(BaseCheck):
             else:
                 reasoning = [
                     "§2.6.1 Conventions global attribute does not contain "
-                    '"{}"'.format(correct_version_string),
+                    f'"{correct_version_string}"',
                 ]
         else:
             valid = False
@@ -375,8 +375,8 @@ class CFBaseCheck(BaseCheck):
 
         valid_formula_terms.assert_true(
             isinstance(formula_terms, str) and formula_terms,
-            "§4.3.2: {}'s formula_terms is a required attribute and must be a non-empty string"
-            "".format(coord),
+            f"§4.3.2: {coord}'s formula_terms is a required attribute and must be a non-empty string"
+            "",
         )
         # We can't check any more
         if not formula_terms:
@@ -417,16 +417,16 @@ class CFBaseCheck(BaseCheck):
 
         valid_formula_terms.assert_true(
             standard_name in dimless_coords_dict,
-            "unknown standard_name '{}' for dimensionless vertical coordinate {}"
-            "".format(standard_name, coord),
+            f"unknown standard_name '{standard_name}' for dimensionless vertical coordinate {coord}"
+            "",
         )
         if standard_name not in dimless_coords_dict:
             return valid_formula_terms.to_result()
 
         valid_formula_terms.assert_true(
             no_missing_terms(standard_name, terms, dimless_coords_dict),
-            "{}'s formula_terms are invalid for {}, please see appendix D of CF 1.6"
-            "".format(coord, standard_name),
+            f"{coord}'s formula_terms are invalid for {standard_name}, please see appendix D of CF 1.6"
+            "",
         )
 
         return valid_formula_terms.to_result()
@@ -476,13 +476,8 @@ class CFBaseCheck(BaseCheck):
 
         ctx.assert_true(
             type_match,
-            "Attribute '{}' (type: {}) and parent variable '{}' (type: {}) "
-            "must have equivalent datatypes".format(
-                attr_name,
-                val_type,
-                var.name,
-                var.dtype.type,
-            ),
+            f"Attribute '{attr_name}' (type: {val_type}) and parent variable '{var.name}' (type: {var.dtype.type}) "
+            "must have equivalent datatypes",
         )
 
     def _find_aux_coord_vars(self, ds, refresh=False):
@@ -1070,8 +1065,8 @@ class CFBaseCheck(BaseCheck):
             test_ctx.out_of += 1
             if "G" not in att_loc:
                 test_ctx.messages.append(
-                    '[Appendix A] Attribute "{}" should not be present in global (G) '
-                    "attributes. {}".format(global_att_name, valid_loc_warn),
+                    f'[Appendix A] Attribute "{global_att_name}" should not be present in global (G) '
+                    f"attributes. {valid_loc_warn}",
                 )
             else:
                 result = self._handle_dtype_check(global_att, global_att_name, att_dict)
@@ -1109,13 +1104,8 @@ class CFBaseCheck(BaseCheck):
                     test_ctx.out_of += 1
                     if coord_letter not in att_loc:
                         test_ctx.messages.append(
-                            '[Appendix A] Attribute "{}" should not be present in {} '
-                            'variable "{}". {}'.format(
-                                att_name,
-                                att_loc_print_helper(coord_letter),
-                                var_name,
-                                valid_loc_warn,
-                            ),
+                            f'[Appendix A] Attribute "{att_name}" should not be present in {att_loc_print_helper(coord_letter)} '
+                            f'variable "{var_name}". {valid_loc_warn}',
                         )
                     else:
                         result = self._handle_dtype_check(att, att_name, att_dict, var)
