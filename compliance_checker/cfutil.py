@@ -277,7 +277,7 @@ def get_auxiliary_coordinate_variables(ds):
     :param netCDf4.Dataset ds: An open netCDF dataset
     """
     aux_vars = []
-    # get any variables referecned by the coordinates attribute
+    # get any variables referenced by the coordinates attribute
     for ncvar in ds.get_variables_by_attributes(
         coordinates=lambda x: isinstance(x, str),
     ):

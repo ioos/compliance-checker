@@ -2026,7 +2026,7 @@ class CF1_6Check(CFNCCheck):
 
     def _check_leap_time(self, time_variable):
         """
-        Helper method to handle checking custom calendar leap time specifiations
+        Helper method to handle checking custom calendar leap time specifications
         """
         leap_time = TestCtx(BaseCheck.HIGH, self.section_titles["4.4"])
         leap_time.out_of = 1
@@ -3501,7 +3501,7 @@ class CF1_6Check(CFNCCheck):
                 for item in ds.dimensions.values()
                 if item.name in compress_set
             ]
-            # get the upper limt of the dimenssion size
+            # get the upper limit of the dimenssion size
             upper_limit_size = np.prod(coord_list_size) - 1
 
             for coord_size in coord_list_size:
