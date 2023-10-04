@@ -6,8 +6,6 @@ requires = [
   "wheel",
 ]
 
-<<<<<<< HEAD
-=======
 [project]
 name = "compliance-checker"
 description = "Checks Datasets and SOS endpoints for standards compliance"
@@ -82,18 +80,6 @@ write_to = "compliance_checker/_version.py"
 write_to_template = "__version__ = '{version}'"
 tag_regex = "^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$"
 
-[tool.pytest.ini_options]
-markers = [
-    "integration: marks integration tests (deselect with '-m \"not integration\"')",
-    "slowtest: marks slow tests (deselect with '-m \"not slowtest\"')"
-]
-filterwarnings = [
-    "error:::compliance-checker.*",
-    "ignore::UserWarning",
-    "ignore::RuntimeWarning",
-]
-
->>>>>>> 2fb66ed (move to pyproject.toml)
 [tool.ruff]
 lint.select = [
     "A", # flake8-builtins
@@ -128,4 +114,9 @@ lint.ignore = [
 markers = [
     "integration: marks integration tests (deselect with '-m \"not integration\"')",
     "slowtest: marks slow tests (deselect with '-m \"not slowtest\"')"
+]
+filterwarnings = [
+    "error:::compliance-checker.*",
+    "ignore::UserWarning",
+    "ignore::RuntimeWarning",
 ]
