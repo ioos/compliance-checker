@@ -396,7 +396,6 @@ class CF1_7Check(CF1_6Check):
                     reasoning,
                 )
                 ret_val.append(result)
-                print(ret_val)
             return ret_val
 
     def check_cell_measures(self, ds):
