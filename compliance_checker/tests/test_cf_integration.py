@@ -247,7 +247,8 @@ class TestCFIntegration:
         ],  # must be specified to load this param at runtime, instead of at collection
     )
     def test_cf_integration(self, loaded_dataset, expected_messages, cs):
-        check_results = cs.run(loaded_dataset, [], "cf")
+        #check_results = cs.run(loaded_dataset, [], "cf")
+        check_results = cs.run_all(loaded_dataset, ["cf"], skip_checks=[])
         scored, out_of, messages = self.get_results(check_results, cs)
 
         assert scored < out_of
@@ -272,14 +273,16 @@ class TestCFIntegration:
         indirect=["loaded_dataset"],
     )
     def test_no_incorrect_errors(self, cs, loaded_dataset, wrong_message):
-        check_results = cs.run(loaded_dataset, [], True, "cf")
+        #check_results = cs.run(loaded_dataset, [], True, "cf")
+        check_results = cs.run_all(loaded_dataset, ["cf"], skip_checks=[])
         messages = self.get_results(check_results, cs)[-1]
 
         assert wrong_message not in "".join(messages)
 
     @pytest.mark.parametrize("loaded_dataset", ["fvcom"], indirect=True)
     def test_fvcom(self, cs, loaded_dataset):
-        check_results = cs.run(loaded_dataset, [], True, "cf")
+        #check_results = cs.run(loaded_dataset, [], True, "cf")
+        check_results = cs.run_all(loaded_dataset, ["cf"], skip_checks=[])
         scored, out_of, messages = self.get_results(check_results, cs)
         assert scored < out_of
 
@@ -307,6 +310,7 @@ class TestCFIntegration:
         Tests some of the NCEI NetCDF templates, which usually should get a
         perfect score.
         """
-        check_results = cs.run(loaded_dataset, [], "cf")
+        #check_results = cs.run(loaded_dataset, [], "cf")
+        check_results = cs.run_all(loaded_dataset, ["cf"], skip_checks=[])
         scored, out_of, messages = self.get_results(check_results, cs)
         assert scored < out_of

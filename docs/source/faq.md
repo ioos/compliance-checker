@@ -45,6 +45,8 @@ The Compliance Checker is completely open-source and available on [GitHub](https
 
 ## Disclaimer
 
-The objective of the IOOS Compliance Checker is to check your file against our interpretation of select dataset metadata standards to use as a guideline in generating compliant files.
-The compliance checker should not be considered the authoritative source on whether your file is 100% "compliant".
+The objective of the IOOS Compliance Checker is to check your file against
+our interpretation of select dataset metadata standards to use as a
+guideline in generating compliant files.  The compliance checker should
+not be considered the authoritative source on whether your file is 100% "compliant".
 Instead, we recommend that users use the results as a guide to work towards compliance.
