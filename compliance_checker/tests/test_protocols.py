@@ -52,7 +52,7 @@ def test_thredds():
     Tests that a connection can be made to a remote THREDDS endpoint
     """
     # Returns: error 400
-    #url = "http://thredds.ucar.edu/thredds/dodsC/grib/NCEP/GFS/Global_0p25deg_ana/TP"
+    # url = "http://thredds.ucar.edu/thredds/dodsC/grib/NCEP/GFS/Global_0p25deg_ana/TP"
     # Use a smaller dataset
     url = "https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/GFS/Global_0p25deg_ana/TP?var=Temperature_altitude_above_msl&accept=netcdf3"
 
