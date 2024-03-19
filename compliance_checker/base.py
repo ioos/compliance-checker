@@ -192,8 +192,9 @@ class BaseCheck:
         inadvertently mutated by other functions.
         """
 
-        cfutil.get_geophysical_variables.cache_clear()
-        cfutil.get_time_variables.cache_clear()
+        if cfutil is not None:
+            cfutil.get_geophysical_variables.cache_clear()
+            cfutil.get_time_variables.cache_clear()
 
 
 class BaseNCCheck:

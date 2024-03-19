@@ -871,6 +871,11 @@ class CheckSuite:
         content_type = response.headers.get("content-type")
         if content_type.split(";")[0] == "text/xml":
             return self.process_doc(response.content)
+        elif content_type.split(";")[0] == "application/x-netcdf":
+            return Dataset(
+                urlparse(response.url).path,
+                memory=response.content,
+            )
         else:
             raise ValueError(
                 f"Unknown service with content-type: {content_type}",

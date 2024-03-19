@@ -90,6 +90,10 @@ def is_remote_netcdf(ds_str):
     else:
         content_type = head_req.headers.get("content-type")
 
+    if content_type is None:
+        return False
+
     # if the Content-Type header returned was "application/x-netcdf",
     # or a netCDF file (not OPeNDAP) we can open this into a Dataset
-    return content_type == "application/x-netcdf"
+    # Add support for application/x-netcdf;ver=4
+    return content_type.split(";")[0] == "application/x-netcdf"

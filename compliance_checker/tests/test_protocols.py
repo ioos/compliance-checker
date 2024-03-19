@@ -38,7 +38,10 @@ def test_hyrax():
     """
     Tests that a connection can be made to Hyrax
     """
-    url = "http://test.opendap.org:8080/opendap/ioos/mday_joinExist.ncml"
+    # Returns: error 405
+    # url = "http://test.opendap.org:8080/opendap/ioos/mday_joinExist.ncml"
+    # More direct file
+    url = "http://test.opendap.org:8080/opendap/ioos/mday_joinExist.ncml.dap.nc4"
     cs = CheckSuite()
     ds = cs.load_dataset(url)
     assert ds is not None
@@ -48,13 +51,17 @@ def test_thredds():
     """
     Tests that a connection can be made to a remote THREDDS endpoint
     """
-    url = "http://thredds.ucar.edu/thredds/dodsC/grib/NCEP/GFS/Global_0p25deg_ana/TP"
+    # Returns: error 400
+    # url = "http://thredds.ucar.edu/thredds/dodsC/grib/NCEP/GFS/Global_0p25deg_ana/TP"
+    # Use a smaller dataset
+    url = "https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/GFS/Global_0p25deg_ana/TP?var=Temperature_altitude_above_msl&accept=netcdf3"
 
     cs = CheckSuite()
     ds = cs.load_dataset(url)
     assert ds is not None
 
 
+@pytest.mark.skip(reason="The thredds endpoint is no longer serving SOS.")
 def test_sos():
     """
     Tests that a connection can be made to an SOS endpoint
