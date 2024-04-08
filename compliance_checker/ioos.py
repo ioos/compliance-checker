@@ -1,6 +1,7 @@
 """
 Check for IOOS-approved attributes
 """
+
 import re
 from numbers import Number
 
@@ -1543,12 +1544,14 @@ class IOOS1_2Check(IOOSNCCheck):
             BaseCheck.HIGH,
             False,  # always fail
             "NDBC/GTS Ingest Requirements",
-            [var_passed_ingest_msg.format(", ".join(_var_passed))]
-            if all_passed_ingest_reqs
-            else [
-                var_passed_ingest_msg.format(", ".join(_var_passed)),
-                var_failed_ingest_msg.format(", ".join(_var_failed)),
-            ],
+            (
+                [var_passed_ingest_msg.format(", ".join(_var_passed))]
+                if all_passed_ingest_reqs
+                else [
+                    var_passed_ingest_msg.format(", ".join(_var_passed)),
+                    var_failed_ingest_msg.format(", ".join(_var_failed)),
+                ]
+            ),
         )
 
     def check_instrument_variables(self, ds):
@@ -1764,9 +1767,11 @@ class IOOS1_2Check(IOOSNCCheck):
                     BaseCheck.MEDIUM,
                     valid,
                     "instrument_variable:make_model",
-                    None
-                    if valid
-                    else [f"Attribute {v}:make_model ({mm}) should be a string"],
+                    (
+                        None
+                        if valid
+                        else [f"Attribute {v}:make_model ({mm}) should be a string"]
+                    ),
                 ),
             )
 
@@ -1784,11 +1789,13 @@ class IOOS1_2Check(IOOSNCCheck):
                     BaseCheck.MEDIUM,
                     valid,
                     "instrument_variable:calibration_date",
-                    None
-                    if valid
-                    else [
-                        f"Attribute {v}:calibration_date ({cd}) should be an ISO-8601 string",
-                    ],
+                    (
+                        None
+                        if valid
+                        else [
+                            f"Attribute {v}:calibration_date ({cd}) should be an ISO-8601 string",
+                        ]
+                    ),
                 ),
             )
 
