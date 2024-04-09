@@ -1,22 +1,27 @@
 import os
 import subprocess
+import importlib
 
-from pkg_resources import resource_filename
+# from pkg_resources import resource_filename
 
 
 def get_filename(path):
     """
     Returns the path to a valid dataset
     """
-    filename = resource_filename("compliance_checker", path)
-    nc_path = filename.replace(".cdl", ".nc")
-    if not os.path.exists(nc_path):
+    # breakpoint()
+    # filename = resource_filename("compliance_checker", path)
+    filename = importlib.resources.files('compliance_checker') / path
+    print(filename)
+    nc_path = filename.with_suffix(".nc")
+    print(nc_path)
+    if not nc_path.is_file():
         generate_dataset(filename, nc_path)
-    return nc_path
+    return str(nc_path)
 
 
 def generate_dataset(cdl_path, nc_path):
-    subprocess.call(["ncgen", "-4", "-o", nc_path, cdl_path])
+    subprocess.call(["ncgen", "-4", "-o", str(nc_path), str(cdl_path)])
 
 
 STATIC_FILES = {

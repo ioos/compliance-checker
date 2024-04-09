@@ -17,11 +17,12 @@ def is_netcdf(url):
     :param str url: Location of file on the file system
     """
     # Try an obvious exclusion of remote resources
+    url = str(url) # in case it's a Path object
     if url.startswith("http"):
         return False
 
     # If it's a known extension, give it a shot
-    if url.endswith("nc"):
+    if url.endswith(".nc"):
         return True
 
     # Brute force

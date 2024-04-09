@@ -7,7 +7,7 @@ import requests
 from cf_units import Unit
 from lxml import etree
 from netCDF4 import Dataset
-from pkg_resources import resource_filename
+import importlib
 
 # copied from paegan
 # paegan may depend on these later
@@ -284,10 +284,8 @@ def download_cf_standard_name_table(version, location=None):
     if (
         location is None
     ):  # This case occurs when updating the packaged version from command line
-        location = resource_filename(
-            "compliance_checker",
-            "data/cf-standard-name-table.xml",
-        )
+        location = importlib.resources.files("compliance_checker")
+        location /= "data/cf-standard-name-table.xml"
 
     if version == "latest":
         url = "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml"
