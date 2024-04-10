@@ -6,6 +6,82 @@ requires = [
   "wheel",
 ]
 
+[project]
+name = "compliance-checker"
+description = "Checks Datasets and SOS endpoints for standards compliance"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+maintainers = [
+    {name = "Dave Foster", email = "dave@axiomdatascience.com"},
+    {name = "Benjamin Adams"},
+    {name = "Luke Campbell"},
+    {name = "Filipe Fernandes"},
+]
+requires-python = ">=3.8"
+classifiers=[
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering",
+]
+dynamic = [
+  "dependencies",
+  "version",
+]
+
+[project.urls]
+documentation = "https://ioos.github.io/compliance-checker"
+homepage = "https://compliance.ioos.us/index.html"
+repository = "https://github.com/ioos/compliance-checker"
+
+[project.entry-points."compliance_checker.suites"]
+"acdd-1.1" = "compliance_checker.acdd:ACDD1_1Check"
+"acdd-1.3" = "compliance_checker.acdd:ACDD1_3Check"
+"cf-1.6" = "compliance_checker.cf.cf:CF1_6Check"
+"cf-1.7" = "compliance_checker.cf.cf:CF1_7Check"
+"cf-1.8" = "compliance_checker.cf.cf:CF1_8Check"
+"ioos-0.1" = "compliance_checker.ioos:IOOS0_1Check"
+"ioos-1.1" = "compliance_checker.ioos:IOOS1_1Check"
+"ioos-1.2" = "compliance_checker.ioos:IOOS1_2Check"
+"ioos_sos" = "compliance_checker.ioos:IOOSBaseSOSCheck"
+
+[tool.setuptools]
+packages = ["compliance_checker"]
+license-files = ["LICENSE"]
+zip-safe = false
+include-package-data = true
+
+[tool.setuptools.package-data]
+compliance_checker = [
+  "data/*.xml",
+  "tests/data/*.nc",
+  "tests/data/*.cdl",
+  "tests/data/non-comp/*.cdl",
+  "data/templates/*.j2",
+]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+readme = {file = "README.md", content-type = "text/markdown"}
+
+[project.scripts]
+cchecker = "compliance_checker.cchecker:main"
+
+[tool.setuptools_scm]
+write_to = "compliance_checker/_version.py"
+write_to_template = "__version__ = '{version}'"
+tag_regex = "^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$"
+
 [tool.ruff]
 select = [
     "A", # flake8-builtins
@@ -40,4 +116,9 @@ ignore = [
 markers = [
     "integration: marks integration tests (deselect with '-m \"not integration\"')",
     "slowtest: marks slow tests (deselect with '-m \"not slowtest\"')"
+]
+filterwarnings = [
+    "error:::compliance-checker.*",
+    "ignore::UserWarning",
+    "ignore::RuntimeWarning",
 ]
