@@ -1,30 +1,23 @@
-import importlib.resources
 import os
 import unittest
 from pathlib import Path
 
 import numpy as np
+from importlib_resources import files
 
 from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.base import BaseCheck, GenericFile, Result
 from compliance_checker.suite import CheckSuite
 
 static_files = {
-    "2dim": importlib.resources.files("compliance_checker") / "tests/data/2dim-grid.nc",
-    "bad_region": importlib.resources.files("compliance_checker")
-    / "tests/data/bad_region.nc",
-    "bad_data_type": importlib.resources.files("compliance_checker")
-    / "tests/data/bad_data_type.nc",
-    "test_cdl": importlib.resources.files("compliance_checker")
-    / "tests/data/test_cdl.cdl",
-    "test_cdl_nc": importlib.resources.files("compliance_checker")
-    / "tests/data/test_cdl_nc_file.nc",
-    "empty": importlib.resources.files("compliance_checker")
-    / "tests/data/non-comp/empty.file",
-    "ru07": importlib.resources.files("compliance_checker")
-    / "tests/data/ru07-20130824T170228_rt0.nc",
-    "netCDF4": importlib.resources.files("compliance_checker")
-    / "tests/data/test_cdl_nc4_file.cdl",
+    "2dim": files("compliance_checker") / "tests/data/2dim-grid.nc",
+    "bad_region": files("compliance_checker") / "tests/data/bad_region.nc",
+    "bad_data_type": files("compliance_checker") / "tests/data/bad_data_type.nc",
+    "test_cdl": files("compliance_checker") / "tests/data/test_cdl.cdl",
+    "test_cdl_nc": files("compliance_checker") / "tests/data/test_cdl_nc_file.nc",
+    "empty": files("compliance_checker") / "tests/data/non-comp/empty.file",
+    "ru07": files("compliance_checker") / "tests/data/ru07-20130824T170228_rt0.nc",
+    "netCDF4": files("compliance_checker") / "tests/data/test_cdl_nc4_file.cdl",
 }
 
 

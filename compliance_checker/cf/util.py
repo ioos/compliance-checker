@@ -1,4 +1,3 @@
-import importlib.resources
 import itertools
 import os
 import sys
@@ -6,6 +5,7 @@ from pkgutil import get_data
 
 import requests
 from cf_units import Unit
+from importlib_resources import files
 from lxml import etree
 from netCDF4 import Dataset
 
@@ -284,10 +284,7 @@ def download_cf_standard_name_table(version, location=None):
     if (
         location is None
     ):  # This case occurs when updating the packaged version from command line
-        location = (
-            importlib.resources.files("compliance_checker")
-            / "data/cf-standard-name-table.xml"
-        )
+        location = files("compliance_checker") / "data/cf-standard-name-table.xml"
 
     if version == "latest":
         url = "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml"

@@ -1,9 +1,9 @@
-import importlib.resources
 import os
 import subprocess
 from itertools import chain
 
 import pytest
+from importlib_resources import files
 from netCDF4 import Dataset
 
 from compliance_checker.cf import util
@@ -26,9 +26,7 @@ def static_files(cdl_stem):
     Returns the Path to a valid nc dataset\n
     replaces the old STATIC_FILES dict
     """
-    datadir = (
-        importlib.resources.files("compliance_checker").joinpath("tests/data").resolve()
-    )
+    datadir = files("compliance_checker").joinpath("tests/data").resolve()
     assert datadir.exists(), f"{datadir} not found"
 
     cdl_paths = glob_down(datadir, f"{cdl_stem}.cdl", 3)
