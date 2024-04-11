@@ -283,12 +283,7 @@ class CF1_7Check(CF1_6Check):
             ):
                 valid = False
                 reasoning.append(
-                    "Dimension {} of boundary variable (for {}) must have at least {} elements to form a simplex/closed cell with previous dimensions {}.".format(
-                        boundary_variable.name,
-                        variable.name,
-                        len(variable.dimensions) + 1,
-                        boundary_variable.dimensions[:-1],
-                    ),
+                    f"Dimension {boundary_variable.name} of boundary variable (for {variable.name}) must have at least {len(variable.dimensions) + 1} elements to form a simplex/closed cell with previous dimensions {boundary_variable.dimensions[:-1]}.",
                 )
 
             # 7.1 Required 3/5:

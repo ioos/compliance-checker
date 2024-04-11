@@ -45,9 +45,7 @@ dataset_stem__expected_messages = [
             '§2.6.1 Conventions global attribute does not contain "CF-1.8"',
             f"standard_name visibility is not defined in Standard Name Table v{std_names._version}. Possible close match(es): ['visibility_in_air']",
             'Standard name modifier "data_quality" for variable visibility_qc is not a valid modifier according to CF Appendix C',
-            "standard_name wind_direction is not defined in Standard Name Table v{}. Possible close match(es): ['wind_to_direction', 'wind_from_direction', 'wind_gust_from_direction']".format(
-                std_names._version,
-            ),
+            f"standard_name wind_direction is not defined in Standard Name Table v{std_names._version}. Possible close match(es): ['wind_to_direction', 'wind_from_direction', 'wind_gust_from_direction']",
             'Standard name modifier "data_quality" for variable wind_direction_qc is not a valid modifier according to CF Appendix C',
             f"standard_name wind_gust is not defined in Standard Name Table v{std_names._version}. Possible close match(es): ['y_wind_gust', 'x_wind_gust', 'wind_speed_of_gust']",
             'Standard name modifier "data_quality" for variable wind_gust_qc is not a valid modifier according to CF Appendix C',

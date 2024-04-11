@@ -5,6 +5,7 @@ jinja2>=2.7.3
 lxml>=3.2.1
 netcdf4>=1.6.4
 owsLib>=0.8.3
+packaging
 pendulum>=1.2.4
 pygeoif>=0.6
 pyproj>=2.2.1
