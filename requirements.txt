@@ -1,5 +1,6 @@
 cf-units>=2
 cftime>=1.1.0
+importlib-resources  # drop this when dropping Python 3.8
 isodate>=0.6.1
 jinja2>=2.7.3
 lxml>=3.2.1

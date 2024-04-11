@@ -1,12 +1,13 @@
-import importlib.resources
 import subprocess
+
+from importlib_resources import files
 
 
 def get_filename(path):
     """
     Returns the path to a valid dataset
     """
-    filename = importlib.resources.files("compliance_checker") / path
+    filename = files("compliance_checker") / path
     nc_path = filename.with_suffix(".nc")
     if not nc_path.exists():
         generate_dataset(filename, nc_path)
