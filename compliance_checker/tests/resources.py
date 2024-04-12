@@ -1,6 +1,9 @@
 import subprocess
 
-from importlib_resources import files
+try:
+    from importlib.resources import files
+except ImportError:
+    from importlib_resources import files
 
 
 def get_filename(path):

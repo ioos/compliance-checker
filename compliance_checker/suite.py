@@ -13,6 +13,7 @@ import textwrap
 import warnings
 from collections import defaultdict
 from datetime import datetime, timezone
+from packaging import version
 from operator import itemgetter
 from pathlib import Path
 from urllib.parse import urlparse
@@ -22,8 +23,10 @@ from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
-from packaging.version import parse
-from pkg_resources import working_set
+if sys.version_info >= (3, 9):
+    import importlib.metadata as impmd
+else:
+    import importlib_metadata as impmd
 
 from compliance_checker import __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
@@ -71,10 +74,11 @@ class CheckSuite:
         Return a list of classes from external plugins that are used to
         generate checker classes
         """
-
+        # NOTE: updated to not use pkg_resources, but
+        #       not tested -- it is ever used?
         if not hasattr(cls, "suite_generators"):
-            gens = working_set.iter_entry_points("compliance_checker.generators")
-            cls.suite_generators = [x.resolve() for x in gens]
+            gens = impmd.entry_points(group='compliance_checker.generators')
+            cls.suite_generators = [x.load() for x in gens]
 
         return cls.suite_generators
 
@@ -136,7 +140,9 @@ class CheckSuite:
         Helper method to retrieve all sub checker classes derived from various
         base classes.
         """
-        cls._load_checkers(working_set.iter_entry_points("compliance_checker.suites"))
+        checkers = impmd.entry_points(group='compliance_checker.suites')
+        cls._load_checkers(checkers)
+
 
     @classmethod
     def _load_checkers(cls, checkers):
@@ -147,7 +153,8 @@ class CheckSuite:
 
         for c in checkers:
             try:
-                check_obj = c.resolve()
+                # check_obj = c.resolve()
+                check_obj = c.load()
                 if hasattr(check_obj, "_cc_spec") and hasattr(
                     check_obj,
                     "_cc_spec_version",
@@ -186,8 +193,8 @@ class CheckSuite:
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
             version_nums = [v[-1] for v in versions]
             try:
-                latest_version = str(max(parse(v) for v in version_nums))
-            # if the version can't be parsed, do it according to character collation
+                latest_version = str(max(version.parse(v) for v in version_nums))
+            # if the version can't be parsed, sort according to character collation
             except ValueError:
                 latest_version = max(version_nums)
             cls.checkers[spec] = cls.checkers[spec + ":latest"] = cls.checkers[
@@ -764,9 +771,14 @@ class CheckSuite:
 
         :param str cdl_path: Absolute path to cdl file that is used to generate netCDF file
         """
-        if isinstance(cdl_path, str):
-            cdl_path = Path(cdl_path)
-        ds_str = cdl_path.with_suffix(".nc")
+        # better to update the following code with Path object -- some day
+        cdl_path = os.fspath(cdl_path)
+        if (
+            ".cdl" in cdl_path
+        ):  # it's possible the filename doesn't have the .cdl extension
+            ds_str = cdl_path.replace(".cdl", ".nc")
+        else:
+            ds_str = cdl_path + ".nc"
 
         # generate netCDF-4 file
         iostat = subprocess.run(
