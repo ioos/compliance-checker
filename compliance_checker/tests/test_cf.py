@@ -110,7 +110,7 @@ class TestCF1_6(BaseTestCase):
             "temp",
             np.float64,
             dimensions=("time",),
-            fill_value=float(99999999999999999999.0),
+            fill_value=99999999999999999999.0,
         )
         temp.coordinates = "sigma noexist"
         ds.createVariable("sigma", np.float64, dimensions=("siglev",))
@@ -193,7 +193,7 @@ class TestCF1_6(BaseTestCase):
             "temp",
             np.float64,
             dimensions=("time",),
-            fill_value=float(99999999999999999999.0),
+            fill_value=99999999999999999999.0,
         )
 
         # give temp _FillValue as a float, expect good result
@@ -1300,9 +1300,7 @@ class TestCF1_6(BaseTestCase):
         # NB: >= 60 seconds is nonstandard, but isn't actually a CF requirement
         # until CF 1.9 onwards
         dataset.variables["time"].units = "months since 0-1-1 23:00:60"
-        dataset.variables[
-            "time"
-        ].climatology = (
+        dataset.variables["time"].climatology = (
             "nonexistent_variable_reference_only_used_to_test_year_zero_failure"
         )
         results = self.cf.check_time_coordinate(dataset)
@@ -2816,7 +2814,7 @@ class TestCF1_7(BaseTestCase):
         # set same dtype
         dataset = MockTimeSeries()  # time lat lon depth
         temp = dataset.createVariable("temp", int, dimensions=("time",))
-        temp.setncattr("scale_factor", int(5))
+        temp.setncattr("scale_factor", 5)
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         self.assertTrue(r[1].value)
         self.assertFalse(r[1].msgs)
@@ -2952,9 +2950,9 @@ class TestCF1_8(BaseTestCase):
             messages = results[0].msgs
             assert results[0].value[0] < results[0].value[1]
             assert len(messages) == 1
-            taxon_lsid[
-                0
-            ] = "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999"
+            taxon_lsid[0] = (
+                "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999"
+            )
             results = self.cf.check_taxa(dataset)
             assert messages[0].startswith(
                 "Taxon id must match one of the following forms:",

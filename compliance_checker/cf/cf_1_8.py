@@ -20,7 +20,6 @@ from lxml import etree
 from netCDF4 import Dataset
 from shapely.geometry import Polygon
 
-from compliance_checker import MemoizedDataset
 from compliance_checker.base import BaseCheck, TestCtx
 from compliance_checker.cf.cf_1_7 import CF1_7Check
 from compliance_checker.cf.util import reference_attr_variables, string_from_var_type
@@ -46,7 +45,7 @@ class CF1_8Check(CF1_7Check):
             },
         )
 
-    def check_groups(self, ds: MemoizedDataset):
+    def check_groups(self, ds: Dataset):
         """
         2.7.2. Application of attributes
 

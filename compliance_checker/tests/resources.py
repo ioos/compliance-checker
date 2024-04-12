@@ -1,16 +1,15 @@
-import os
 import subprocess
 
-from pkg_resources import resource_filename
+from importlib_resources import files
 
 
 def get_filename(path):
     """
     Returns the path to a valid dataset
     """
-    filename = resource_filename("compliance_checker", path)
-    nc_path = filename.replace(".cdl", ".nc")
-    if not os.path.exists(nc_path):
+    filename = files("compliance_checker") / path
+    nc_path = filename.with_suffix(".nc")
+    if not nc_path.exists():
         generate_dataset(filename, nc_path)
     return nc_path
 

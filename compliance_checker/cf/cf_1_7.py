@@ -167,9 +167,7 @@ class CF1_7Check(CF1_6Check):
                         variable[:].min(),
                     ) or not np.isclose(variable.actual_range[1], variable[:].max()):
                         msgs.append(
-                            "actual_range elements of '{}' inconsistent with its min/max values".format(
-                                name,
-                            ),
+                            f"actual_range elements of '{name}' inconsistent with its min/max values",
                         )
                     else:
                         score += 1
@@ -181,9 +179,7 @@ class CF1_7Check(CF1_6Check):
                         variable.actual_range[1] > variable.valid_range[1]
                     ):
                         msgs.append(
-                            '"{}"\'s actual_range must be within valid_range'.format(
-                                name,
-                            ),
+                            f'"{name}"\'s actual_range must be within valid_range',
                         )
                     else:
                         score += 1
@@ -194,10 +190,7 @@ class CF1_7Check(CF1_6Check):
                     out_of += 1
                     if variable.actual_range[0] < variable.valid_min:
                         msgs.append(
-                            '"{}"\'s actual_range first element must be >= valid_min ({})'.format(
-                                name,
-                                variable.valid_min,
-                            ),
+                            f'"{name}"\'s actual_range first element must be >= valid_min ({variable.valid_min})',
                         )
                     else:
                         score += 1
@@ -205,10 +198,7 @@ class CF1_7Check(CF1_6Check):
                     out_of += 1
                     if variable.actual_range[1] > variable.valid_max:
                         msgs.append(
-                            '"{}"\'s actual_range second element must be <= valid_max ({})'.format(
-                                name,
-                                variable.valid_max,
-                            ),
+                            f'"{name}"\'s actual_range second element must be <= valid_max ({variable.valid_max})',
                         )
                     else:
                         score += 1
@@ -254,10 +244,7 @@ class CF1_7Check(CF1_6Check):
             if boundary_variable_name not in ds.variables:
                 valid = False
                 reasoning.append(
-                    "Boundary variable {} referenced by {} not ".format(
-                        boundary_variable_name,
-                        variable.name,
-                    )
+                    f"Boundary variable {boundary_variable_name} referenced by {variable.name} not "
                     + "found in dataset variables",
                 )
             else:
@@ -269,31 +256,22 @@ class CF1_7Check(CF1_6Check):
             if boundary_variable.ndim < 2:
                 valid = False
                 reasoning.append(
-                    "Boundary variable {} specified by {}".format(
-                        boundary_variable.name,
-                        variable.name,
-                    )
+                    f"Boundary variable {boundary_variable.name} specified by {variable.name}"
                     + " should have at least two dimensions to enclose the base "
                     + "case of a one dimensionsal variable",
                 )
             if boundary_variable.ndim != variable.ndim + 1:
                 valid = False
                 reasoning.append(
-                    "The number of dimensions of the variable {} is {}, but the "
-                    "number of dimensions of the boundary variable {} is {}. The boundary variable "
-                    "should have {} dimensions".format(
-                        variable.name,
-                        variable.ndim,
-                        boundary_variable.name,
-                        boundary_variable.ndim,
-                        variable.ndim + 1,
-                    ),
+                    f"The number of dimensions of the variable {variable.name} is {variable.ndim}, but the "
+                    f"number of dimensions of the boundary variable {boundary_variable.name} is {boundary_variable.ndim}. The boundary variable "
+                    f"should have {variable.ndim + 1} dimensions",
                 )
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
-                    "Boundary variable coordinates (for {}) are in improper order: {}. Bounds-specific dimensions should be last"
-                    "".format(variable.name, boundary_variable.dimensions),
+                    f"Boundary variable coordinates (for {variable.name}) are in improper order: {boundary_variable.dimensions}. Bounds-specific dimensions should be last"
+                    "",
                 )
 
             # 7.1 Required 2/5: continue
@@ -305,12 +283,7 @@ class CF1_7Check(CF1_6Check):
             ):
                 valid = False
                 reasoning.append(
-                    "Dimension {} of boundary variable (for {}) must have at least {} elements to form a simplex/closed cell with previous dimensions {}.".format(
-                        boundary_variable.name,
-                        variable.name,
-                        len(variable.dimensions) + 1,
-                        boundary_variable.dimensions[:-1],
-                    ),
+                    f"Dimension {boundary_variable.name} of boundary variable (for {variable.name}) must have at least {len(variable.dimensions) + 1} elements to form a simplex/closed cell with previous dimensions {boundary_variable.dimensions[:-1]}.",
                 )
 
             # 7.1 Required 3/5:
@@ -318,10 +291,7 @@ class CF1_7Check(CF1_6Check):
             if boundary_variable.dtype.kind not in "biufc":
                 valid = False
                 reasoning.append(
-                    "Boundary variable {} specified by {}".format(
-                        boundary_variable.name,
-                        variable.name,
-                    )
+                    f"Boundary variable {boundary_variable.name} specified by {variable.name}"
                     + "must be a numeric data type ",
                 )
 
@@ -334,15 +304,9 @@ class CF1_7Check(CF1_6Check):
                         if getattr(variable, item) != getattr(boundary_variable, item):
                             valid = False
                             reasoning.append(
-                                "'{}' has attr '{}' with value '{}' that does not agree "
-                                "with its associated variable ('{}')'s attr value '{}'"
-                                "".format(
-                                    boundary_variable_name,
-                                    item,
-                                    getattr(boundary_variable, item),
-                                    variable.name,
-                                    getattr(variable, item),
-                                ),
+                                f"'{boundary_variable_name}' has attr '{item}' with value '{getattr(boundary_variable, item)}' that does not agree "
+                                f"with its associated variable ('{variable.name}')'s attr value '{getattr(variable, item)}'"
+                                "",
                             )
 
             # 7.1 Required 5/5:
@@ -352,10 +316,7 @@ class CF1_7Check(CF1_6Check):
                 if not hasattr(boundary_variable, "formula_terms"):
                     valid = False
                     reasoning.append(
-                        "'{}' has 'formula_terms' attr, bounds variable '{}' must also have 'formula_terms'".format(
-                            variable_name,
-                            boundary_variable_name,
-                        ),
+                        f"'{variable_name}' has 'formula_terms' attr, bounds variable '{boundary_variable_name}' must also have 'formula_terms'",
                     )
 
             # 7.1 Recommendations 2/2
@@ -380,10 +341,7 @@ class CF1_7Check(CF1_6Check):
                 if unwanted_attributes:
                     valid = False
                     reasoning.append(
-                        "The Boundary variables '{}' should not have the attributes: '{}'".format(
-                            boundary_variable_name,
-                            unwanted_attributes,
-                        ),
+                        f"The Boundary variables '{boundary_variable_name}' should not have the attributes: '{unwanted_attributes}'",
                     )
 
             result = Result(
@@ -421,14 +379,9 @@ class CF1_7Check(CF1_6Check):
                     ):
                         valid = False
                         reasoning.append(
-                            "The points specified by the coordinate variable {} ({})"
+                            f"The points specified by the coordinate variable {variable_name} ({variable[ii]})"
                             " lie outside the boundary of the cell specified by the "
-                            "associated boundary variable {} ({})".format(
-                                variable_name,
-                                variable[ii],
-                                boundary_variable_name,
-                                boundary_variable[ii],
-                            ),
+                            f"associated boundary variable {boundary_variable_name} ({boundary_variable[ii]})",
                         )
 
                 result = Result(
@@ -794,8 +747,6 @@ class CF1_7Check(CF1_6Check):
             return (True, msg)
 
     def check_grid_mapping(self, ds):
-        # FIXME: Looks like this is not needed.
-        # super().check_grid_mapping.__doc__
         prev_return = super().check_grid_mapping(ds)
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
         for var_name in sorted(grid_mapping_variables):
@@ -820,9 +771,7 @@ class CF1_7Check(CF1_6Check):
                         pyproj.CRS.from_wkt(crs_wkt)
                     except pyproj.exceptions.CRSError as crs_error:
                         test_ctx.messages.append(
-                            "Cannot parse crs_wkt attribute to CRS using Proj4. Proj4 error: {}".format(
-                                str(crs_error),
-                            ),
+                            f"Cannot parse crs_wkt attribute to CRS using Proj4. Proj4 error: {str(crs_error)}",
                         )
                     else:
                         test_ctx.score += 1
@@ -848,7 +797,7 @@ class CF1_7Check(CF1_6Check):
                 test_ctx.messages.append(
                     "Cannot have both 'geoid_name' and "
                     "'geopotential_datum_name' attributes in "
-                    "grid mapping variable '{}'".format(var.name),
+                    f"grid mapping variable '{var.name}'",
                 )
             elif len_vdatum_name_attrs == 1:
                 # should be one or zero attrs
@@ -863,20 +812,16 @@ class CF1_7Check(CF1_6Check):
                         )
 
                         invalid_msg = (
-                            "Vertical datum value '{}' for "
-                            "attribute '{}' in grid mapping "
-                            "variable '{}' is not valid".format(
-                                v_datum_value,
-                                v_datum_attr,
-                                var.name,
-                            )
+                            f"Vertical datum value '{v_datum_value}' for "
+                            f"attribute '{v_datum_attr}' in grid mapping "
+                            f"variable '{var.name}' is not valid"
                         )
                         test_ctx.assert_true(v_datum_str_valid, invalid_msg)
                 except sqlite3.Error as e:
                     # if we hit an error, skip the check
                     warn(
                         "Error occurred while trying to query "
-                        "Proj4 SQLite database at {}: {}".format(proj_db_path, str(e)),
+                        f"Proj4 SQLite database at {proj_db_path}: {str(e)}",
                         stacklevel=2,
                     )
             prev_return[var.name] = test_ctx.to_result()
@@ -945,10 +890,7 @@ class CF1_7Check(CF1_6Check):
         _comp_std_name = dim_vert_coords_dict[standard_name][1]
         correct_computed_std_name_ctx.assert_true(
             getattr(variable, "computed_standard_name", None) in _comp_std_name,
-            "§4.3.3 The standard_name of `{}` must map to the correct computed_standard_name, `{}`".format(
-                vname,
-                sorted(_comp_std_name),
-            ),
+            f"§4.3.3 The standard_name of `{vname}` must map to the correct computed_standard_name, `{sorted(_comp_std_name)}`",
         )
         ret_val.append(correct_computed_std_name_ctx.to_result())
 

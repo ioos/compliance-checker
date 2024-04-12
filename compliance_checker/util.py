@@ -1,6 +1,7 @@
 """
 General purpose utility functions to aid in compliance checking tasks
 """
+
 from collections import OrderedDict
 
 import isodate

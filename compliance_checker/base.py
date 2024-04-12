@@ -20,7 +20,7 @@ from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 
 import compliance_checker.cfutil as cfutil
-from compliance_checker import MemoizedDataset, __version__
+from compliance_checker import __version__
 from compliance_checker.util import kvp_convert
 
 # Python 3.5+ should work, also have a fallback
@@ -201,7 +201,7 @@ class BaseNCCheck:
     Base Class for NetCDF Dataset supporting Check Suites.
     """
 
-    supported_ds = {Dataset, MemoizedDataset}
+    supported_ds = [Dataset]
 
     @classmethod
     def std_check_in(cls, dataset, name, allowed_vals):
@@ -480,10 +480,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
             msgs.append(f"{display_name} not present")
         elif res == 1:
             msgs.append(
-                "{} present, but not in expected value list ({})".format(
-                    display_name,
-                    sorted(other),
-                ),
+                f"{display_name} present, but not in expected value list ({sorted(other)})",
             )
 
         ret_val.append(

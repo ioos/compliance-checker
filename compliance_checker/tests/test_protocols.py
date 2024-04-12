@@ -28,7 +28,7 @@ def test_erddap():
     """
     Tests that a connection can be made to ERDDAP's GridDAP
     """
-    url = "https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom"
+    url = "https://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest"
     cs = CheckSuite()
     ds = cs.load_dataset(url)
     assert ds is not None

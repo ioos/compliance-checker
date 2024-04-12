@@ -185,8 +185,8 @@ class CFBaseCheck(BaseCheck):
             )
             defines_grid_mapping.assert_true(
                 (isinstance(grid_mapping, str) and grid_mapping),
-                "{}'s grid_mapping attribute must be a "
-                "space-separated non-empty string".format(variable.name),
+                f"{variable.name}'s grid_mapping attribute must be a "
+                "space-separated non-empty string",
             )
             if isinstance(grid_mapping, str):
                 # TODO (badams): refactor functionality to split functionality
@@ -206,26 +206,19 @@ class CFBaseCheck(BaseCheck):
                         for grid_var_name, coord_var_str in re_all:
                             defines_grid_mapping.assert_true(
                                 grid_var_name in ds.variables,
-                                "grid mapping variable {} must exist in this dataset".format(
-                                    grid_var_name,
-                                ),
+                                f"grid mapping variable {grid_var_name} must exist in this dataset",
                             )
                             for ref_var in coord_var_str.split():
                                 defines_grid_mapping.assert_true(
                                     ref_var in ds.variables,
-                                    "Coordinate-related variable {} referenced by grid_mapping variable {} must exist in this dataset".format(
-                                        ref_var,
-                                        grid_var_name,
-                                    ),
+                                    f"Coordinate-related variable {ref_var} referenced by grid_mapping variable {grid_var_name} must exist in this dataset",
                                 )
 
                 else:
                     for grid_var_name in grid_mapping.split():
                         defines_grid_mapping.assert_true(
                             grid_var_name in ds.variables,
-                            "grid mapping variable {} must exist in this dataset".format(
-                                grid_var_name,
-                            ),
+                            f"grid mapping variable {grid_var_name} must exist in this dataset",
                         )
             ret_val[variable.name] = defines_grid_mapping.to_result()
 
@@ -264,10 +257,7 @@ class CFBaseCheck(BaseCheck):
             for req in required_attrs:
                 valid_grid_mapping.assert_true(
                     hasattr(grid_var, req),
-                    "{} is a required attribute for grid mapping {}".format(
-                        req,
-                        grid_mapping_name,
-                    ),
+                    f"{req} is a required attribute for grid mapping {grid_mapping_name}",
                 )
 
             # Make sure that exactly one of the exclusive attributes exist
@@ -313,10 +303,7 @@ class CFBaseCheck(BaseCheck):
 
         valid = False
         reasoning = []
-        correct_version_string = "{}-{}".format(
-            self._cc_spec,
-            self._cc_spec_version,
-        ).upper()
+        correct_version_string = f"{self._cc_spec}-{self._cc_spec_version}".upper()
         if hasattr(ds, "Conventions"):
             conventions = regex.split(r",|\s+", getattr(ds, "Conventions", ""))
             for convention in conventions:
@@ -326,7 +313,7 @@ class CFBaseCheck(BaseCheck):
             else:
                 reasoning = [
                     "§2.6.1 Conventions global attribute does not contain "
-                    '"{}"'.format(correct_version_string),
+                    f'"{correct_version_string}"',
                 ]
         else:
             valid = False
@@ -388,8 +375,8 @@ class CFBaseCheck(BaseCheck):
 
         valid_formula_terms.assert_true(
             isinstance(formula_terms, str) and formula_terms,
-            "§4.3.2: {}'s formula_terms is a required attribute and must be a non-empty string"
-            "".format(coord),
+            f"§4.3.2: {coord}'s formula_terms is a required attribute and must be a non-empty string"
+            "",
         )
         # We can't check any more
         if not formula_terms:
@@ -430,16 +417,16 @@ class CFBaseCheck(BaseCheck):
 
         valid_formula_terms.assert_true(
             standard_name in dimless_coords_dict,
-            "unknown standard_name '{}' for dimensionless vertical coordinate {}"
-            "".format(standard_name, coord),
+            f"unknown standard_name '{standard_name}' for dimensionless vertical coordinate {coord}"
+            "",
         )
         if standard_name not in dimless_coords_dict:
             return valid_formula_terms.to_result()
 
         valid_formula_terms.assert_true(
             no_missing_terms(standard_name, terms, dimless_coords_dict),
-            "{}'s formula_terms are invalid for {}, please see appendix D of CF 1.6"
-            "".format(coord, standard_name),
+            f"{coord}'s formula_terms are invalid for {standard_name}, please see appendix D of CF 1.6"
+            "",
         )
 
         return valid_formula_terms.to_result()
@@ -489,13 +476,8 @@ class CFBaseCheck(BaseCheck):
 
         ctx.assert_true(
             type_match,
-            "Attribute '{}' (type: {}) and parent variable '{}' (type: {}) "
-            "must have equivalent datatypes".format(
-                attr_name,
-                val_type,
-                var.name,
-                var.dtype.type,
-            ),
+            f"Attribute '{attr_name}' (type: {val_type}) and parent variable '{var.name}' (type: {var.dtype.type}) "
+            "must have equivalent datatypes",
         )
 
     def _find_aux_coord_vars(self, ds, refresh=False):
@@ -567,7 +549,7 @@ class CFBaseCheck(BaseCheck):
         # Invalidate the cache at all costs
         self._ancillary_vars[ds] = []
 
-        for _name, var in ds.variables.items():
+        for var in ds.variables.values():
             if hasattr(var, "ancillary_variables"):
                 for anc_name in var.ancillary_variables.split(" "):
                     if anc_name in ds.variables:
@@ -682,10 +664,7 @@ class CFBaseCheck(BaseCheck):
                 )
             else:
                 print(
-                    "Using cached standard name table v{} from {}".format(
-                        version,
-                        location,
-                    ),
+                    f"Using cached standard name table v{version} from {location}",
                     file=sys.stderr,
                 )
 
@@ -1056,16 +1035,14 @@ class CFBaseCheck(BaseCheck):
             if att_loc_len == 1:
                 valid_loc = att_loc_print_helper(loc_sort[0])
             elif att_loc_len == 2:
-                valid_loc = "{} and {}".format(
-                    att_loc_print_helper(loc_sort[0]),
-                    att_loc_print_helper(loc_sort[1]),
-                )
+                valid_loc = f"{att_loc_print_helper(loc_sort[0])} and {att_loc_print_helper(loc_sort[1])}"
             # shouldn't be reached under normal circumstances, as any attribute
             # should be either G, C, or D but if another
             # category is added, this will be useful.
             else:
-                valid_loc = ", ".join(loc_sort[:-1]) + ", and {}".format(
-                    att_loc_print_helper(loc_sort[-1]),
+                valid_loc = (
+                    ", ".join(loc_sort[:-1])
+                    + f", and {att_loc_print_helper(loc_sort[-1])}"
                 )
             return f"This attribute may only appear in {valid_loc}."
 
@@ -1088,8 +1065,8 @@ class CFBaseCheck(BaseCheck):
             test_ctx.out_of += 1
             if "G" not in att_loc:
                 test_ctx.messages.append(
-                    '[Appendix A] Attribute "{}" should not be present in global (G) '
-                    "attributes. {}".format(global_att_name, valid_loc_warn),
+                    f'[Appendix A] Attribute "{global_att_name}" should not be present in global (G) '
+                    f"attributes. {valid_loc_warn}",
                 )
             else:
                 result = self._handle_dtype_check(global_att, global_att_name, att_dict)
@@ -1127,13 +1104,8 @@ class CFBaseCheck(BaseCheck):
                     test_ctx.out_of += 1
                     if coord_letter not in att_loc:
                         test_ctx.messages.append(
-                            '[Appendix A] Attribute "{}" should not be present in {} '
-                            'variable "{}". {}'.format(
-                                att_name,
-                                att_loc_print_helper(coord_letter),
-                                var_name,
-                                valid_loc_warn,
-                            ),
+                            f'[Appendix A] Attribute "{att_name}" should not be present in {att_loc_print_helper(coord_letter)} '
+                            f'variable "{var_name}". {valid_loc_warn}',
                         )
                     else:
                         result = self._handle_dtype_check(att, att_name, att_dict, var)
@@ -1188,10 +1160,7 @@ class CFBaseCheck(BaseCheck):
                 if temp_ctx.messages:
                     return (
                         False,
-                        "{} must be numeric and must be equivalent to {} dtype".format(
-                            attr_name,
-                            var_dtype,
-                        ),
+                        f"{attr_name} must be numeric and must be equivalent to {var_dtype} dtype",
                     )
             else:
                 # If we reached here, we fell off with an unrecognized type

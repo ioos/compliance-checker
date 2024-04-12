@@ -165,3 +165,8 @@ texinfo_documents = [
         "Miscellaneous",
     ),
 ]
+
+linkcheck_ignore = [
+    # TODO: check again in the future
+    r"https://mmisw.org/ont/ioos/platform",  # 2023-09-05 site non-responsive
+]

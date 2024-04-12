@@ -5,9 +5,9 @@ from pkgutil import get_data
 
 import requests
 from cf_units import Unit
+from importlib_resources import files
 from lxml import etree
 from netCDF4 import Dataset
-from pkg_resources import resource_filename
 
 # copied from paegan
 # paegan may depend on these later
@@ -73,7 +73,6 @@ _possiblex = {
     "xlon",
     "XLON",
     "lonx",
-    "lonx",
     "lon_u",
     "LON_U",
     "lon_v",
@@ -96,7 +95,6 @@ _possibley = {
     "LAT",
     "ylat",
     "YLAT",
-    "laty",
     "laty",
     "lat_u",
     "LAT_U",
@@ -169,7 +167,7 @@ def get_safe(dict_instance, keypath, default=None):
     """
     try:
         obj = dict_instance
-        keylist = keypath if type(keypath) is list else keypath.split(".")
+        keylist = keypath if isinstance(keypath, list) else keypath.split(".")
         for key in keylist:
             obj = obj[key]
         return obj
@@ -286,26 +284,18 @@ def download_cf_standard_name_table(version, location=None):
     if (
         location is None
     ):  # This case occurs when updating the packaged version from command line
-        location = resource_filename(
-            "compliance_checker",
-            "data/cf-standard-name-table.xml",
-        )
+        location = files("compliance_checker") / "data/cf-standard-name-table.xml"
 
     if version == "latest":
         url = "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml"
     else:
-        url = "http://cfconventions.org/Data/cf-standard-names/{}/src/cf-standard-name-table.xml".format(
-            version,
-        )
+        url = f"http://cfconventions.org/Data/cf-standard-names/{version}/src/cf-standard-name-table.xml"
 
     r = requests.get(url, allow_redirects=True)
     r.raise_for_status()
 
     print(
-        "Downloading cf-standard-names table version {} from: {}".format(
-            version,
-            url,
-        ),
+        f"Downloading cf-standard-names table version {version} from: {url}",
         file=sys.stderr,
     )
     with open(location, "wb") as f:

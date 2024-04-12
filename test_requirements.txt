@@ -11,3 +11,5 @@ pytest>=2.9.0
 pytest-cov>=3.0.0
 pytest-vcr
 requests-mock>=1.7.0
+# We need this pin until a new version of vcrpy is out.
+urllib3<2

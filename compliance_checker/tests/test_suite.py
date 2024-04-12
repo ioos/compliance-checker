@@ -3,33 +3,21 @@ import unittest
 from pathlib import Path
 
 import numpy as np
-from pkg_resources import resource_filename
+from importlib_resources import files
 
 from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.base import BaseCheck, GenericFile, Result
 from compliance_checker.suite import CheckSuite
 
 static_files = {
-    "2dim": resource_filename("compliance_checker", "tests/data/2dim-grid.nc"),
-    "bad_region": resource_filename("compliance_checker", "tests/data/bad_region.nc"),
-    "bad_data_type": resource_filename(
-        "compliance_checker",
-        "tests/data/bad_data_type.nc",
-    ),
-    "test_cdl": resource_filename("compliance_checker", "tests/data/test_cdl.cdl"),
-    "test_cdl_nc": resource_filename(
-        "compliance_checker",
-        "tests/data/test_cdl_nc_file.nc",
-    ),
-    "empty": resource_filename("compliance_checker", "tests/data/non-comp/empty.file"),
-    "ru07": resource_filename(
-        "compliance_checker",
-        "tests/data/ru07-20130824T170228_rt0.nc",
-    ),
-    "netCDF4": resource_filename(
-        "compliance_checker",
-        "tests/data/test_cdl_nc4_file.cdl",
-    ),
+    "2dim": files("compliance_checker") / "tests/data/2dim-grid.nc",
+    "bad_region": files("compliance_checker") / "tests/data/bad_region.nc",
+    "bad_data_type": files("compliance_checker") / "tests/data/bad_data_type.nc",
+    "test_cdl": files("compliance_checker") / "tests/data/test_cdl.cdl",
+    "test_cdl_nc": files("compliance_checker") / "tests/data/test_cdl_nc_file.nc",
+    "empty": files("compliance_checker") / "tests/data/non-comp/empty.file",
+    "ru07": files("compliance_checker") / "tests/data/ru07-20130824T170228_rt0.nc",
+    "netCDF4": files("compliance_checker") / "tests/data/test_cdl_nc4_file.cdl",
 }
 
 
@@ -95,9 +83,9 @@ class TestSuite(unittest.TestCase):
         # create netCDF4 file
         ds_name = self.cs.generate_dataset(static_files["netCDF4"])
         # check if correct name is return
-        assert ds_name == static_files["netCDF4"].replace(".cdl", ".nc")
+        assert ds_name == static_files["netCDF4"].with_suffix(".nc")
         # check if netCDF4 file was created
-        assert os.path.isfile(static_files["netCDF4"].replace(".cdl", ".nc"))
+        assert os.path.isfile(static_files["netCDF4"].with_suffix(".nc"))
 
     def test_include_checks(self):
         ds = self.cs.load_dataset(static_files["bad_data_type"])
@@ -145,7 +133,6 @@ class TestSuite(unittest.TestCase):
         expected_excluded_names = {
             "§3.5 flag_meanings for lat",
             "§3.5 flag_meanings for lon",
-            "§3.5 lat is a valid flags variable",
             "§3.5 lat is a valid flags variable",
             "§3.5 lon is a valid flags variable",
         }
@@ -243,7 +230,7 @@ class TestSuite(unittest.TestCase):
             )
         ds.close()
 
-        nc_file_path = static_files["test_cdl"].replace(".cdl", ".nc")
+        nc_file_path = static_files["test_cdl"].with_suffix(".nc")
         self.addCleanup(os.remove, nc_file_path)
 
         # Ok the scores should be equal!

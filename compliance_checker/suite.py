@@ -13,7 +13,6 @@ import textwrap
 import warnings
 from collections import defaultdict
 from datetime import datetime, timezone
-from distutils.version import StrictVersion
 from operator import itemgetter
 from pathlib import Path
 from urllib.parse import urlparse
@@ -23,9 +22,10 @@ from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
+from packaging.version import parse
 from pkg_resources import working_set
 
-from compliance_checker import MemoizedDataset, __version__, tempnc
+from compliance_checker import __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.protocols import cdl, netcdf, opendap
 
@@ -186,9 +186,8 @@ class CheckSuite:
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
             version_nums = [v[-1] for v in versions]
             try:
-                latest_version = str(max(StrictVersion(v) for v in version_nums))
-            # if the version can't be parsed as a StrictVersion, parse
-            # according to character collation
+                latest_version = str(max(parse(v) for v in version_nums))
+            # if the version can't be parsed, do it according to character collation
             except ValueError:
                 latest_version = max(version_nums)
             cls.checkers[spec] = cls.checkers[spec + ":latest"] = cls.checkers[
@@ -346,11 +345,8 @@ class CheckSuite:
                     check_max_level = check_lookup[split_check_spec[1]]
                 except KeyError:
                     warnings.warn(
-                        "Skip specifier '{}' on check '{}' not found,"
-                        " defaulting to skip entire check".format(
-                            split_check_spec[1],
-                            check_name,
-                        ),
+                        f"Skip specifier '{split_check_spec[1]}' on check '{check_name}' not found,"
+                        " defaulting to skip entire check",
                         stacklevel=2,
                     )
                     check_max_level = BaseCheck.HIGH
@@ -644,11 +640,7 @@ class CheckSuite:
             print("Corrective Actions".center(width))
             plural = "" if issue_count == 1 else "s"
             print(
-                "{} has {} potential issue{}".format(
-                    os.path.basename(ds),
-                    issue_count,
-                    plural,
-                ),
+                f"{os.path.basename(ds)} has {issue_count} potential issue{plural}",
             )
 
         return [groups, points, out_of]
@@ -772,12 +764,9 @@ class CheckSuite:
 
         :param str cdl_path: Absolute path to cdl file that is used to generate netCDF file
         """
-        if (
-            ".cdl" in cdl_path
-        ):  # it's possible the filename doesn't have the .cdl extension
-            ds_str = cdl_path.replace(".cdl", ".nc")
-        else:
-            ds_str = cdl_path + ".nc"
+        if isinstance(cdl_path, str):
+            cdl_path = Path(cdl_path)
+        ds_str = cdl_path.with_suffix(".nc")
 
         # generate netCDF-4 file
         iostat = subprocess.run(
@@ -828,7 +817,7 @@ class CheckSuite:
         if netcdf.is_remote_netcdf(ds_str):
             response = requests.get(ds_str, allow_redirects=True, timeout=60)
             try:
-                return MemoizedDataset(
+                return Dataset(
                     urlparse(response.url).path,
                     memory=response.content,
                 )
@@ -836,7 +825,7 @@ class CheckSuite:
                 # handle case when netCDF C libs weren't compiled with
                 # in-memory support by using tempfile
                 with tempnc(response.content) as _nc:
-                    return MemoizedDataset(_nc)
+                    return Dataset(_nc)
 
     def load_remote_dataset(self, ds_str):
         """
@@ -893,7 +882,7 @@ class CheckSuite:
             ds_str = self.generate_dataset(ds_str)
 
         if netcdf.is_netcdf(ds_str):
-            return MemoizedDataset(ds_str)
+            return Dataset(ds_str)
 
         # Assume this is just a Generic File if it exists
         if os.path.isfile(ds_str):

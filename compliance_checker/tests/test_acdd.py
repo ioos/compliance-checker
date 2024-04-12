@@ -439,7 +439,7 @@ class TestACDD1_3(BaseTestCase):
             if result.variable_name == "geospatial_bounds":
                 assert (
                     "Could not parse WKT from geospatial_bounds,"
-                    ' possible bad value: "{}"'.format(empty_ds.geospatial_bounds)
+                    f' possible bad value: "{empty_ds.geospatial_bounds}"'
                     in result.msgs
                 )
 

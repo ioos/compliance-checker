@@ -9,7 +9,7 @@ from collections import defaultdict
 from functools import lru_cache, partial
 
 from cf_units import Unit
-from pkg_resources import resource_filename
+from importlib_resources import files
 
 _UNITLESS_DB = None
 _SEA_NAMES = None
@@ -128,7 +128,7 @@ def get_sea_names():
     if _SEA_NAMES is None:
         buf = {}
         with open(
-            resource_filename("compliance_checker", "data/seanames.csv"),
+            files("compliance_checker") / "data/seanames.csv",
         ) as f:
             reader = csv.reader(f)
             for code, sea_name in reader:
@@ -277,7 +277,7 @@ def get_auxiliary_coordinate_variables(ds):
     :param netCDf4.Dataset ds: An open netCDF dataset
     """
     aux_vars = []
-    # get any variables referecned by the coordinates attribute
+    # get any variables referenced by the coordinates attribute
     for ncvar in ds.get_variables_by_attributes(
         coordinates=lambda x: isinstance(x, str),
     ):
