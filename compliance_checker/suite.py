@@ -23,7 +23,7 @@ from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
-if sys.version_info >= (3, 9):
+if sys.version_info >= (3, 10):
     import importlib.metadata as impmd
 else:
     import importlib_metadata as impmd
