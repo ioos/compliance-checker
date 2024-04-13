@@ -5,11 +5,7 @@ from pkgutil import get_data
 
 import requests
 from cf_units import Unit
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
-
+from importlib_resources import files
 from lxml import etree
 from netCDF4 import Dataset
 

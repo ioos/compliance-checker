@@ -9,10 +9,7 @@ from collections import defaultdict
 from functools import lru_cache, partial
 
 from cf_units import Unit
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+from importlib_resources import files
 
 _UNITLESS_DB = None
 _SEA_NAMES = None

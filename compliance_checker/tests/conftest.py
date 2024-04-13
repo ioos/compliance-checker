@@ -3,10 +3,7 @@ import subprocess
 from itertools import chain
 
 import pytest
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+from importlib_resources import files
 from netCDF4 import Dataset
 
 from compliance_checker.cf import util

@@ -3,11 +3,7 @@ import unittest
 from pathlib import Path
 
 import numpy as np
-
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+from importlib_resources import files
 
 from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.base import BaseCheck, GenericFile, Result
@@ -87,7 +83,7 @@ class TestSuite(unittest.TestCase):
         # create netCDF4 file
         ds_name = self.cs.generate_dataset(static_files["netCDF4"])
         # check if correct name is return
-        assert ds_name == str(static_files["netCDF4"].with_suffix(".nc"))
+        assert ds_name == static_files["netCDF4"].with_suffix(".nc")
         # check if netCDF4 file was created
         assert os.path.isfile(static_files["netCDF4"].with_suffix(".nc"))
 

@@ -191,10 +191,9 @@ class BaseCheck:
         are cleared before the next checker uses it. Some caches were
         inadvertently mutated by other functions.
         """
-        # odd errors -- module getting deleted before this object?
-        if cfutil is not None:
-            cfutil.get_geophysical_variables.cache_clear()
-            cfutil.get_time_variables.cache_clear()
+
+        cfutil.get_geophysical_variables.cache_clear()
+        cfutil.get_time_variables.cache_clear()
 
 
 class BaseNCCheck:
