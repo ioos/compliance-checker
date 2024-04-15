@@ -436,7 +436,7 @@ class TestCF1_6(BaseTestCase):
         ]
 
         assert result.msgs == expected_msgs
-        assert result.value[0] == result.value[1]
+        assert result.value[0] < result.value[1]
 
     def test_check_fill_value_outside_valid_range(self):
         """
