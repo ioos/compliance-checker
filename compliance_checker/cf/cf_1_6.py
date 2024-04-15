@@ -443,8 +443,7 @@ class CF1_6Check(CFNCCheck):
         total = 0
 
         for variable in ds.variables.values():
-            if (hasattr(variable, "valid_max") or
-                hasattr(variable, "valid_min")):
+            if hasattr(variable, "valid_max") or hasattr(variable, "valid_min"):
                 total += 1
                 # if there's also valid_range in addition to
                 # valid_min/valid_max, this is not compliant
