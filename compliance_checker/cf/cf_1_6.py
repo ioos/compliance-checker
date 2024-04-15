@@ -430,7 +430,7 @@ class CF1_6Check(CFNCCheck):
             msgs=fails,
         )
 
-    def check_valid_range_or_valid_min_max_present(self, ds):
+    def check_valid_range_and_valid_min_max_present(self, ds):
         """
         The valid_range attribute must not be present if the valid_min
         and/or valid_max attributes are present. This according to 2.5.1 Requirements.
