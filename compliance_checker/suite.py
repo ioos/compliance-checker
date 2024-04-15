@@ -74,7 +74,7 @@ class CheckSuite:
 
         if not hasattr(cls, "suite_generators"):
             gens = importlib_metadata.entry_points(
-                groups="compliance_checker.generators",
+                group="compliance_checker.generators",
             )
             cls.suite_generators = [x.load() for x in gens]
 
