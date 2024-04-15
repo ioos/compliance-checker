@@ -1794,7 +1794,8 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["ints64"])
         suite = CheckSuite()
         suite.checkers = {"cf": CF1_6Check}
-        suite.run(dataset, "cf")
+        # suite.run(dataset, "cf")
+        suite.run_all(dataset, ["cf"], skip_checks=["cf"])
 
     def test_variable_feature_check(self):
         # non-compliant dataset -- 1/1 fail
