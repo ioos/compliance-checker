@@ -77,7 +77,7 @@ CF1_7Check
       ~CF1_7Check.check_standard_name_deprecated_modifiers
       ~CF1_7Check.check_time_coordinate
       ~CF1_7Check.check_units
-      ~CF1_7Check.check_valid_range_or_valid_min_max_present
+      ~CF1_7Check.check_valid_range_and_valid_min_max_present
       ~CF1_7Check.check_variable_features
       ~CF1_7Check.get_test_ctx
       ~CF1_7Check.setup
@@ -157,7 +157,7 @@ CF1_7Check
    .. automethod:: check_standard_name_deprecated_modifiers
    .. automethod:: check_time_coordinate
    .. automethod:: check_units
-   .. automethod:: check_valid_range_or_valid_min_max_present
+   .. automethod:: check_valid_range_and_valid_min_max_present
    .. automethod:: check_variable_features
    .. automethod:: get_test_ctx
    .. automethod:: setup

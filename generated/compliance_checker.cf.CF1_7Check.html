@@ -1,15 +1,14 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>CF1_7Check &#8212; compliance_checker 5.1.0 documentation</title>
+    <title>CF1_7Check &#8212; compliance_checker 5.1.1 documentation</title>
   
   
   
@@ -19,25 +18,26 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/documentation_options.js?v=1bd908e2"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/compliance_checker.cf.CF1_7Check';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -55,7 +55,15 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -96,8 +104,11 @@
 
     <div class="container-fluid" id="banner"></div>
 
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -108,13 +119,8 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
                     <li class="nav-item">
@@ -134,6 +140,13 @@
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../faq.html">
                         Frequently Asked Questions
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../development.html">
+                        Developer Notes
                       </a>
                     </li>
                 
@@ -182,8 +195,8 @@
           
           
           
-          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square"></i></span>
-            <label class="sr-only">GitHub</label></a>
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
         </li>
 </ul></div>
         
@@ -193,10 +206,11 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.1.0
+  Version 5.1.1
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
-        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
@@ -363,8 +377,8 @@
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../index.html" class="nav-link" aria-label="Home">
@@ -392,13 +406,13 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="cf1-7check">
-<h1>CF1_7Check<a class="headerlink" href="#cf1-7check" title="Permalink to this heading">#</a></h1>
+<h1>CF1_7Check<a class="headerlink" href="#cf1-7check" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">compliance_checker.cf.</span></span><span class="sig-name descname"><span class="pre">CF1_7Check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">compliance_checker.cf.</span></span><span class="sig-name descname"><span class="pre">CF1_7Check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check" title="Link to this definition">#</a></dt>
 <dd><p>Implementation for CF v1.7. Inherits from CF1_6Check as most of the
 checks are the same.</p>
 <p class="rubric">Methods</p>
@@ -542,7 +556,7 @@ checks are the same.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.cf.CF1_7Check.check_units" title="compliance_checker.cf.CF1_7Check.check_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_units</span></code></a>(ds)</p></td>
 <td><p>Check the units attribute for all variables to ensure they are CF compliant under CF §3.1</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.cf.CF1_7Check.check_valid_range_or_valid_min_max_present" title="compliance_checker.cf.CF1_7Check.check_valid_range_or_valid_min_max_present"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_valid_range_or_valid_min_max_present</span></code></a>(ds)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.cf.CF1_7Check.check_valid_range_and_valid_min_max_present" title="compliance_checker.cf.CF1_7Check.check_valid_range_and_valid_min_max_present"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_valid_range_and_valid_min_max_present</span></code></a>(ds)</p></td>
 <td><p>The valid_range attribute must not be present if the valid_min and/or valid_max attributes are present.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.cf.CF1_7Check.check_variable_features" title="compliance_checker.cf.CF1_7Check.check_variable_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_variable_features</span></code></a>(ds)</p></td>
@@ -736,7 +750,7 @@ checks are the same.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.cf.CF1_7Check.check_units" title="compliance_checker.cf.CF1_7Check.check_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_units</span></code></a>(ds)</p></td>
 <td><p>Check the units attribute for all variables to ensure they are CF compliant under CF §3.1</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.cf.CF1_7Check.check_valid_range_or_valid_min_max_present" title="compliance_checker.cf.CF1_7Check.check_valid_range_or_valid_min_max_present"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_valid_range_or_valid_min_max_present</span></code></a>(ds)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#compliance_checker.cf.CF1_7Check.check_valid_range_and_valid_min_max_present" title="compliance_checker.cf.CF1_7Check.check_valid_range_and_valid_min_max_present"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_valid_range_and_valid_min_max_present</span></code></a>(ds)</p></td>
 <td><p>The valid_range attribute must not be present if the valid_min and/or valid_max attributes are present.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#compliance_checker.cf.CF1_7Check.check_variable_features" title="compliance_checker.cf.CF1_7Check.check_variable_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_variable_features</span></code></a>(ds)</p></td>
@@ -759,48 +773,48 @@ checks are the same.</p>
 <p class="rubric">Attributes Documentation</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.HIGH">
-<span class="sig-name descname"><span class="pre">HIGH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.HIGH" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">HIGH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.HIGH" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.LOW">
-<span class="sig-name descname"><span class="pre">LOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.LOW" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">LOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.LOW" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.MEDIUM">
-<span class="sig-name descname"><span class="pre">MEDIUM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.MEDIUM" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">MEDIUM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.MEDIUM" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.appendix_a">
-<span class="sig-name descname"><span class="pre">appendix_a</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'Conventions':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'_FillValue':</span> <span class="pre">{'Type':</span> <span class="pre">'D',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'actual_range':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.5.1'},</span> <span class="pre">'add_offset':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'8.1'},</span> <span class="pre">'ancillary_variables':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.4'},</span> <span class="pre">'axis':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4'},</span> <span class="pre">'bounds':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'7.1'},</span> <span class="pre">'calendar':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4.4.1'},</span> <span class="pre">'cell_measures':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'7.2'},</span> <span class="pre">'cell_methods':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'7.3'},</span> <span class="pre">'cf_role':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'9.5'},</span> <span class="pre">'climatology':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'7.4'},</span> <span class="pre">'comment':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D',</span> <span class="pre">'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.6.2'},</span> <span class="pre">'compress':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'8.2'},</span> <span class="pre">'coordinates':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'5'},</span> <span class="pre">'external_variables':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.6.3'},</span> <span class="pre">'featureType':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'9.4'},</span> <span class="pre">'flag_masks':</span> <span class="pre">{'Type':</span> <span class="pre">'D',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.5'},</span> <span class="pre">'flag_meanings':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.5'},</span> <span class="pre">'flag_values':</span> <span class="pre">{'Type':</span> <span class="pre">'D',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.5'},</span> <span class="pre">'formula_terms':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4.3.2'},</span> <span class="pre">'grid_mapping':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'5.6'},</span> <span class="pre">'history':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'institution':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D',</span> <span class="pre">'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.6.2'},</span> <span class="pre">'leap_month':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4.4.1'},</span> <span class="pre">'leap_year':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4.4.1'},</span> <span class="pre">'long_name':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.2'},</span> <span class="pre">'missing_value':</span> <span class="pre">{'Type':</span> <span class="pre">'D',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.5.1'},</span> <span class="pre">'month_lengths':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4.4.1'},</span> <span class="pre">'positive':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'references':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D',</span> <span class="pre">'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.6.2'},</span> <span class="pre">'scale_factor':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'8.1'},</span> <span class="pre">'source':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D',</span> <span class="pre">'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.6.2'},</span> <span class="pre">'standard_error_multiplier':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'standard_name':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.3'},</span> <span class="pre">'title':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'units':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.1'},</span> <span class="pre">'valid_max':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'valid_min':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'valid_range':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">None}}</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.appendix_a" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">appendix_a</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'Conventions':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'_FillValue':</span> <span class="pre">{'Type':</span> <span class="pre">'D',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'actual_range':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.5.1'},</span> <span class="pre">'add_offset':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'8.1'},</span> <span class="pre">'ancillary_variables':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.4'},</span> <span class="pre">'axis':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4'},</span> <span class="pre">'bounds':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'7.1'},</span> <span class="pre">'calendar':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4.4.1'},</span> <span class="pre">'cell_measures':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'7.2'},</span> <span class="pre">'cell_methods':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'7.3'},</span> <span class="pre">'cf_role':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'9.5'},</span> <span class="pre">'climatology':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'7.4'},</span> <span class="pre">'comment':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D',</span> <span class="pre">'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.6.2'},</span> <span class="pre">'compress':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'8.2'},</span> <span class="pre">'coordinates':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'5'},</span> <span class="pre">'external_variables':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.6.3'},</span> <span class="pre">'featureType':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'9.4'},</span> <span class="pre">'flag_masks':</span> <span class="pre">{'Type':</span> <span class="pre">'D',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.5'},</span> <span class="pre">'flag_meanings':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.5'},</span> <span class="pre">'flag_values':</span> <span class="pre">{'Type':</span> <span class="pre">'D',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.5'},</span> <span class="pre">'formula_terms':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4.3.2'},</span> <span class="pre">'grid_mapping':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'5.6'},</span> <span class="pre">'history':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'institution':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D',</span> <span class="pre">'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.6.2'},</span> <span class="pre">'leap_month':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4.4.1'},</span> <span class="pre">'leap_year':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4.4.1'},</span> <span class="pre">'long_name':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.2'},</span> <span class="pre">'missing_value':</span> <span class="pre">{'Type':</span> <span class="pre">'D',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.5.1'},</span> <span class="pre">'month_lengths':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">'4.4.1'},</span> <span class="pre">'positive':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'references':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D',</span> <span class="pre">'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.6.2'},</span> <span class="pre">'scale_factor':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'8.1'},</span> <span class="pre">'source':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D',</span> <span class="pre">'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">'2.6.2'},</span> <span class="pre">'standard_error_multiplier':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'standard_name':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.3'},</span> <span class="pre">'title':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'G'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'units':</span> <span class="pre">{'Type':</span> <span class="pre">'S',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">'3.1'},</span> <span class="pre">'valid_max':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'valid_min':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">None},</span> <span class="pre">'valid_range':</span> <span class="pre">{'Type':</span> <span class="pre">'N',</span> <span class="pre">'attr_loc':</span> <span class="pre">{'C',</span> <span class="pre">'D'},</span> <span class="pre">'cf_section':</span> <span class="pre">None}}</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.appendix_a" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.appendix_d_parametric_coords">
-<span class="sig-name descname"><span class="pre">appendix_d_parametric_coords</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'atmosphere_hybrid_height_coordinate':</span> <span class="pre">({'b',</span> <span class="pre">'a',</span> <span class="pre">'orog'},</span> <span class="pre">{'height_above_geopotential_datum',</span> <span class="pre">'altitude'}),</span> <span class="pre">'atmosphere_hybrid_sigma_pressure_coordinate':</span> <span class="pre">(({'b',</span> <span class="pre">'a',</span> <span class="pre">'ps'},</span> <span class="pre">{'ap',</span> <span class="pre">'b',</span> <span class="pre">'ps'}),</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_ln_pressure_coordinate':</span> <span class="pre">({'p0',</span> <span class="pre">'lev'},</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_sigma_coordinate':</span> <span class="pre">({'ptop',</span> <span class="pre">'ps',</span> <span class="pre">'sigma'},</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_sleve_coordinate':</span> <span class="pre">({'zsurf1',</span> <span class="pre">'ztop',</span> <span class="pre">'b2',</span> <span class="pre">'b1',</span> <span class="pre">'a',</span> <span class="pre">'zsurf2'},</span> <span class="pre">{'height_above_geopotential_datum',</span> <span class="pre">'altitude'}),</span> <span class="pre">'ocean_double_sigma_coordinate':</span> <span class="pre">({'href',</span> <span class="pre">'z2',</span> <span class="pre">'depth',</span> <span class="pre">'a',</span> <span class="pre">'k_c',</span> <span class="pre">'z1',</span> <span class="pre">'sigma'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'zlev':</span> <span class="pre">'altitude',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geoid'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level'}}),</span> <span class="pre">'ocean_s_coordinate':</span> <span class="pre">({'b',</span> <span class="pre">'depth',</span> <span class="pre">'eta',</span> <span class="pre">'depth_c',</span> <span class="pre">'a',</span> <span class="pre">'s'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'zlev':</span> <span class="pre">'altitude',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geoid'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level'}}),</span> <span class="pre">'ocean_sigma_coordinate':</span> <span class="pre">({'depth',</span> <span class="pre">'eta',</span> <span class="pre">'sigma'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'zlev':</span> <span class="pre">'altitude',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geoid'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level'}}),</span> <span class="pre">'ocean_sigma_z_coordinate':</span> <span class="pre">({'zlev',</span> <span class="pre">'depth',</span> <span class="pre">'eta',</span> <span class="pre">'depth_c',</span> <span class="pre">'sigma'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'zlev':</span> <span class="pre">'altitude',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geoid'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level'}})}</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.appendix_d_parametric_coords" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">appendix_d_parametric_coords</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'atmosphere_hybrid_height_coordinate':</span> <span class="pre">({'a',</span> <span class="pre">'b',</span> <span class="pre">'orog'},</span> <span class="pre">{'altitude',</span> <span class="pre">'height_above_geopotential_datum'}),</span> <span class="pre">'atmosphere_hybrid_sigma_pressure_coordinate':</span> <span class="pre">(({'a',</span> <span class="pre">'b',</span> <span class="pre">'ps'},</span> <span class="pre">{'ap',</span> <span class="pre">'b',</span> <span class="pre">'ps'}),</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_ln_pressure_coordinate':</span> <span class="pre">({'lev',</span> <span class="pre">'p0'},</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_sigma_coordinate':</span> <span class="pre">({'ps',</span> <span class="pre">'ptop',</span> <span class="pre">'sigma'},</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_sleve_coordinate':</span> <span class="pre">({'a',</span> <span class="pre">'b1',</span> <span class="pre">'b2',</span> <span class="pre">'zsurf1',</span> <span class="pre">'zsurf2',</span> <span class="pre">'ztop'},</span> <span class="pre">{'altitude',</span> <span class="pre">'height_above_geopotential_datum'}),</span> <span class="pre">'ocean_double_sigma_coordinate':</span> <span class="pre">({'a',</span> <span class="pre">'depth',</span> <span class="pre">'href',</span> <span class="pre">'k_c',</span> <span class="pre">'sigma',</span> <span class="pre">'z1',</span> <span class="pre">'z2'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'zlev':</span> <span class="pre">'altitude'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_geopotential_datum'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_mean_sea_level'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_reference_ellipsoid'}}),</span> <span class="pre">'ocean_s_coordinate':</span> <span class="pre">({'a',</span> <span class="pre">'b',</span> <span class="pre">'depth',</span> <span class="pre">'depth_c',</span> <span class="pre">'eta',</span> <span class="pre">'s'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'zlev':</span> <span class="pre">'altitude'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_geopotential_datum'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_mean_sea_level'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_reference_ellipsoid'}}),</span> <span class="pre">'ocean_sigma_coordinate':</span> <span class="pre">({'depth',</span> <span class="pre">'eta',</span> <span class="pre">'sigma'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'zlev':</span> <span class="pre">'altitude'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_geopotential_datum'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_mean_sea_level'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_reference_ellipsoid'}}),</span> <span class="pre">'ocean_sigma_z_coordinate':</span> <span class="pre">({'depth',</span> <span class="pre">'depth_c',</span> <span class="pre">'eta',</span> <span class="pre">'sigma',</span> <span class="pre">'zlev'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'zlev':</span> <span class="pre">'altitude'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_geopotential_datum'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_mean_sea_level'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_reference_ellipsoid'}})}</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.appendix_d_parametric_coords" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.register_checker">
-<span class="sig-name descname"><span class="pre">register_checker</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.register_checker" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">register_checker</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.register_checker" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.supported_ds">
-<span class="sig-name descname"><span class="pre">supported_ds</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{&lt;class</span> <span class="pre">'netCDF4._netCDF4.Dataset'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'compliance_checker.MemoizedDataset'&gt;}</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.supported_ds" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">supported_ds</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;class</span> <span class="pre">'netCDF4._netCDF4.Dataset'&gt;]</span></em><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.supported_ds" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods Documentation</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_actual_range">
-<span class="sig-name descname"><span class="pre">check_actual_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_actual_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_actual_range" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_actual_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_actual_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_actual_range" title="Link to this definition">#</a></dt>
 <dd><p>Check the actual_range attribute of variables. As stated in
 section 2.5.1 of version 1.7, this convention defines a two-element
 vector attribute designed to describe the actual minimum and actual
@@ -823,7 +837,7 @@ high-priority.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_add_offset_scale_factor_type">
-<span class="sig-name descname"><span class="pre">check_add_offset_scale_factor_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_add_offset_scale_factor_type" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_add_offset_scale_factor_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_add_offset_scale_factor_type" title="Link to this definition">#</a></dt>
 <dd><p>If a variable has the attributes add_offset and scale_factor,
 check that the variables and attributes are of the same type
 OR that the variable is of type byte, short or int and the
@@ -832,7 +846,7 @@ attributes are of type float or double.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_ancillary_variables">
-<span class="sig-name descname"><span class="pre">check_ancillary_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_ancillary_variables" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_ancillary_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_ancillary_variables" title="Link to this definition">#</a></dt>
 <dd><p>Checks the ancillary_variable attribute for all variables to ensure
 they are CF compliant.</p>
 <p>CF §3.4 It is a string attribute whose value is a blank separated list
@@ -857,7 +871,7 @@ the relationship.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_appendix_a">
-<span class="sig-name descname"><span class="pre">check_appendix_a</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_appendix_a" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_appendix_a</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_appendix_a" title="Link to this definition">#</a></dt>
 <dd><p>Validates a CF dataset against the contents of its Appendix A table for
 attribute types and locations. Returns a list of results with the
 outcomes of the Appendix A validation results against the existing
@@ -880,7 +894,7 @@ attributes in the docstring.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_aux_coordinates">
-<span class="sig-name descname"><span class="pre">check_aux_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_aux_coordinates" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_aux_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_aux_coordinates" title="Link to this definition">#</a></dt>
 <dd><p>Chapter 5 paragraph 3</p>
 <p>The dimensions of an auxiliary coordinate variable must be a subset of
 the dimensions of the variable with which the coordinate is associated,
@@ -904,7 +918,7 @@ coordinates.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_calendar">
-<span class="sig-name descname"><span class="pre">check_calendar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_calendar" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_calendar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_calendar" title="Link to this definition">#</a></dt>
 <dd><p>Check the calendar attribute for variables defining time and ensure it
 is a valid calendar prescribed by CF.</p>
 <p>CF §4.4.1 In order to calculate a new date and time given a base date, base
@@ -948,7 +962,7 @@ using the appropriate attributes is required.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_cell_boundaries">
-<span class="sig-name descname"><span class="pre">check_cell_boundaries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_cell_boundaries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_cell_boundaries" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_cell_boundaries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_cell_boundaries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_cell_boundaries" title="Link to this definition">#</a></dt>
 <dd><p>Checks the dimensions of cell boundary variables to ensure they are CF compliant
 per section 7.1.</p>
 <p>This method extends the CF1_6Check method; please see the original method for the
@@ -967,7 +981,7 @@ that bounds variable must also have a formula_terms attribute.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_cell_boundaries_interval">
-<span class="sig-name descname"><span class="pre">check_cell_boundaries_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_cell_boundaries_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_cell_boundaries_interval" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_cell_boundaries_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_cell_boundaries_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_cell_boundaries_interval" title="Link to this definition">#</a></dt>
 <dd><p>7.1 Cell Boundaries
 Recommendations: (1/2)
 The points specified by a coordinate or auxiliary coordinate variable
@@ -977,7 +991,7 @@ associated boundary variable.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_cell_measures">
-<span class="sig-name descname"><span class="pre">check_cell_measures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_cell_measures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_cell_measures" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_cell_measures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_cell_measures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_cell_measures" title="Link to this definition">#</a></dt>
 <dd><p>A method to over-ride the CF1_6Check method. In CF 1.7, it is specified
 that variable referenced by cell_measures must be in the dataset OR
 referenced by the global attribute “external_variables”, which represent
@@ -1009,7 +1023,7 @@ such as a standard_name.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_cell_methods">
-<span class="sig-name descname"><span class="pre">check_cell_methods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_cell_methods" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_cell_methods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_cell_methods" title="Link to this definition">#</a></dt>
 <dd><p>7.3 To describe the characteristic of a field that is represented by cell values, we define the cell_methods attribute
 of the variable. This is a string attribute comprising a list of blank-separated words of the form “name: method”. Each
 “name: method” pair indicates that for an axis identified by name, the cell values representing the field have been
@@ -1038,7 +1052,7 @@ spatio-temporal dimension and each spatio-temporal scalar coordinate variable.</
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_cf_role">
-<span class="sig-name descname"><span class="pre">check_cf_role</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_cf_role" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_cf_role</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_cf_role" title="Link to this definition">#</a></dt>
 <dd><p>Check variables defining cf_role for legal cf_role values.</p>
 <p>§9.5 The only acceptable values of cf_role for Discrete Geometry CF
 data sets are timeseries_id, profile_id, and trajectory_id</p>
@@ -1054,7 +1068,7 @@ data sets are timeseries_id, profile_id, and trajectory_id</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_child_attr_data_types">
-<span class="sig-name descname"><span class="pre">check_child_attr_data_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_child_attr_data_types" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_child_attr_data_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_child_attr_data_types" title="Link to this definition">#</a></dt>
 <dd><dl class="simple">
 <dt>For any variables which contain any of the following attributes:</dt><dd><ul class="simple">
 <li><p>valid_min/valid_max</p></li>
@@ -1066,7 +1080,7 @@ data sets are timeseries_id, profile_id, and trajectory_id</p>
 </dd>
 </dl>
 <p>the data type of the attribute must match the type of its parent variable as specified in the
-NetCDF User Guide (NUG) <a class="reference external" href="https://www.unidata.ucar.edu/software/netcdf/docs/attribute_conventions.html">https://www.unidata.ucar.edu/software/netcdf/docs/attribute_conventions.html</a>,
+NetCDF User Guide (NUG) <a class="reference external" href="https://docs.unidata.ucar.edu/netcdf-c/current/attribute_conventions.html">https://docs.unidata.ucar.edu/netcdf-c/current/attribute_conventions.html</a>,
 referenced in the CF Conventions in Section 2.5.2
 (<a class="reference external" href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#missing-data">http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#missing-data</a>)</p>
 <dl class="field-list simple">
@@ -1081,7 +1095,7 @@ referenced in the CF Conventions in Section 2.5.2
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_climatological_statistics">
-<span class="sig-name descname"><span class="pre">check_climatological_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_climatological_statistics" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_climatological_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_climatological_statistics" title="Link to this definition">#</a></dt>
 <dd><p>7.4 A climatological time coordinate variable does not have a bounds attribute. Instead, it has a climatology
 attribute, which names a variable with dimensions (n,2), n being the dimension of the climatological time axis.
 Using the units and calendar of the time coordinate variable, element (i,0) of the climatology variable specifies
@@ -1111,7 +1125,7 @@ attribute must be in one of the following forms:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_compression_gathering">
-<span class="sig-name descname"><span class="pre">check_compression_gathering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_compression_gathering" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_compression_gathering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_compression_gathering" title="Link to this definition">#</a></dt>
 <dd><p>At the current time the netCDF interface does not provide for packing
 data. However a simple packing may be achieved through the use of the
 optional NUG defined attributes scale_factor and add_offset . After the
@@ -1158,7 +1172,7 @@ offset.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_convention_globals">
-<span class="sig-name descname"><span class="pre">check_convention_globals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_convention_globals" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_convention_globals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_convention_globals" title="Link to this definition">#</a></dt>
 <dd><p>Check the common global attributes are strings if they exist.</p>
 <p>CF §2.6.2 title/history global attributes, must be strings. Do not need
 to exist.</p>
@@ -1177,7 +1191,7 @@ to exist.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_convention_possibly_var_attrs">
-<span class="sig-name descname"><span class="pre">check_convention_possibly_var_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_convention_possibly_var_attrs" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_convention_possibly_var_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_convention_possibly_var_attrs" title="Link to this definition">#</a></dt>
 <dd><p>Check variable and global attributes are strings for recommended attributes under CF §2.6.2</p>
 <p>CF §2.6.2 institution, source, references, and comment, either global
 or assigned to individual variables.  When an attribute appears both
@@ -1198,7 +1212,7 @@ precedence.  Must be strings.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_conventions_version">
-<span class="sig-name descname"><span class="pre">check_conventions_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_conventions_version" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_conventions_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_conventions_version" title="Link to this definition">#</a></dt>
 <dd><p>CF §2.6.1 the NUG defined global attribute Conventions to the string
 value “CF-&lt;version_number&gt;”; check the Conventions attribute contains
 the appropriate string.</p>
@@ -1214,7 +1228,7 @@ the appropriate string.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_coordinate_types">
-<span class="sig-name descname"><span class="pre">check_coordinate_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_coordinate_types" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_coordinate_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_coordinate_types" title="Link to this definition">#</a></dt>
 <dd><p>Check the axis attribute of coordinate variables</p>
 <p>CF §4 The attribute axis may be attached to a coordinate variable and
 given one of the values X, Y, Z or T which stand for a longitude,
@@ -1235,14 +1249,14 @@ standard_name attribute may be used for direct identification.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_coordinate_variables_strict_monotonicity">
-<span class="sig-name descname"><span class="pre">check_coordinate_variables_strict_monotonicity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_coordinate_variables_strict_monotonicity" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_coordinate_variables_strict_monotonicity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_coordinate_variables_strict_monotonicity" title="Link to this definition">#</a></dt>
 <dd><p>Checks that data in coordinate variables is either monotonically
 increasing or decreasing</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_data_types">
-<span class="sig-name descname"><span class="pre">check_data_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_data_types" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_data_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_data_types" title="Link to this definition">#</a></dt>
 <dd><p>Checks the data type of all netCDF variables to ensure they are valid
 data types under CF.</p>
 <p>CF §2.2 The netCDF data types char, byte, short, int, float or real, and
@@ -1259,7 +1273,7 @@ double are all acceptable</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_dimension_names">
-<span class="sig-name descname"><span class="pre">check_dimension_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_dimension_names" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_dimension_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_dimension_names" title="Link to this definition">#</a></dt>
 <dd><p>Checks variables contain no duplicate dimension names.</p>
 <p>CF §2.4 A variable may have any number of dimensions, including zero,
 and the dimensions must all have different names.</p>
@@ -1275,7 +1289,7 @@ and the dimensions must all have different names.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_dimension_order">
-<span class="sig-name descname"><span class="pre">check_dimension_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_dimension_order" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_dimension_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_dimension_order" title="Link to this definition">#</a></dt>
 <dd><p>Checks each variable’s dimension order to ensure that the order is
 consistent and in order under CF §2.4</p>
 <p>CF §2.4 If any or all of the dimensions of a variable have the
@@ -1297,7 +1311,7 @@ dimensions.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_dimensional_vertical_coordinate">
-<span class="sig-name descname"><span class="pre">check_dimensional_vertical_coordinate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimless_vertical_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'atmosphere_hybrid_height_coordinate':</span> <span class="pre">({'b',</span> <span class="pre">'a',</span> <span class="pre">'orog'},</span> <span class="pre">{'height_above_geopotential_datum',</span> <span class="pre">'altitude'}),</span> <span class="pre">'atmosphere_hybrid_sigma_pressure_coordinate':</span> <span class="pre">(({'b',</span> <span class="pre">'a',</span> <span class="pre">'ps'},</span> <span class="pre">{'ap',</span> <span class="pre">'b',</span> <span class="pre">'ps'}),</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_ln_pressure_coordinate':</span> <span class="pre">({'p0',</span> <span class="pre">'lev'},</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_sigma_coordinate':</span> <span class="pre">({'ptop',</span> <span class="pre">'ps',</span> <span class="pre">'sigma'},</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_sleve_coordinate':</span> <span class="pre">({'zsurf1',</span> <span class="pre">'ztop',</span> <span class="pre">'b2',</span> <span class="pre">'b1',</span> <span class="pre">'a',</span> <span class="pre">'zsurf2'},</span> <span class="pre">{'height_above_geopotential_datum',</span> <span class="pre">'altitude'}),</span> <span class="pre">'ocean_double_sigma_coordinate':</span> <span class="pre">({'href',</span> <span class="pre">'z2',</span> <span class="pre">'depth',</span> <span class="pre">'a',</span> <span class="pre">'k_c',</span> <span class="pre">'z1',</span> <span class="pre">'sigma'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'zlev':</span> <span class="pre">'altitude',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geoid'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level'}}),</span> <span class="pre">'ocean_s_coordinate':</span> <span class="pre">({'b',</span> <span class="pre">'depth',</span> <span class="pre">'eta',</span> <span class="pre">'depth_c',</span> <span class="pre">'a',</span> <span class="pre">'s'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'zlev':</span> <span class="pre">'altitude',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geoid'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level'}}),</span> <span class="pre">'ocean_sigma_coordinate':</span> <span class="pre">({'depth',</span> <span class="pre">'eta',</span> <span class="pre">'sigma'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'zlev':</span> <span class="pre">'altitude',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geoid'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level'}}),</span> <span class="pre">'ocean_sigma_z_coordinate':</span> <span class="pre">({'zlev',</span> <span class="pre">'depth',</span> <span class="pre">'eta',</span> <span class="pre">'depth_c',</span> <span class="pre">'sigma'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'zlev':</span> <span class="pre">'altitude',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geoid'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'zlev':</span> <span class="pre">'height_above_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level'}})}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_dimensional_vertical_coordinate" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_dimensional_vertical_coordinate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimless_vertical_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'atmosphere_hybrid_height_coordinate':</span> <span class="pre">({'a',</span> <span class="pre">'b',</span> <span class="pre">'orog'},</span> <span class="pre">{'altitude',</span> <span class="pre">'height_above_geopotential_datum'}),</span> <span class="pre">'atmosphere_hybrid_sigma_pressure_coordinate':</span> <span class="pre">(({'a',</span> <span class="pre">'b',</span> <span class="pre">'ps'},</span> <span class="pre">{'ap',</span> <span class="pre">'b',</span> <span class="pre">'ps'}),</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_ln_pressure_coordinate':</span> <span class="pre">({'lev',</span> <span class="pre">'p0'},</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_sigma_coordinate':</span> <span class="pre">({'ps',</span> <span class="pre">'ptop',</span> <span class="pre">'sigma'},</span> <span class="pre">{'air_pressure'}),</span> <span class="pre">'atmosphere_sleve_coordinate':</span> <span class="pre">({'a',</span> <span class="pre">'b1',</span> <span class="pre">'b2',</span> <span class="pre">'zsurf1',</span> <span class="pre">'zsurf2',</span> <span class="pre">'ztop'},</span> <span class="pre">{'altitude',</span> <span class="pre">'height_above_geopotential_datum'}),</span> <span class="pre">'ocean_double_sigma_coordinate':</span> <span class="pre">({'a',</span> <span class="pre">'depth',</span> <span class="pre">'href',</span> <span class="pre">'k_c',</span> <span class="pre">'sigma',</span> <span class="pre">'z1',</span> <span class="pre">'z2'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'zlev':</span> <span class="pre">'altitude'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_geopotential_datum'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_mean_sea_level'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_reference_ellipsoid'}}),</span> <span class="pre">'ocean_s_coordinate':</span> <span class="pre">({'a',</span> <span class="pre">'b',</span> <span class="pre">'depth',</span> <span class="pre">'depth_c',</span> <span class="pre">'eta',</span> <span class="pre">'s'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'zlev':</span> <span class="pre">'altitude'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_geopotential_datum'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_mean_sea_level'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_reference_ellipsoid'}}),</span> <span class="pre">'ocean_sigma_coordinate':</span> <span class="pre">({'depth',</span> <span class="pre">'eta',</span> <span class="pre">'sigma'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'zlev':</span> <span class="pre">'altitude'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_geopotential_datum'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_mean_sea_level'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_reference_ellipsoid'}}),</span> <span class="pre">'ocean_sigma_z_coordinate':</span> <span class="pre">({'depth',</span> <span class="pre">'depth_c',</span> <span class="pre">'eta',</span> <span class="pre">'sigma',</span> <span class="pre">'zlev'},</span> <span class="pre">{'altitude':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geoid',</span> <span class="pre">'zlev':</span> <span class="pre">'altitude'},</span> <span class="pre">'height_above_geopotential_datum':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_geopotential_datum',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_geopotential_datum',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_geopotential_datum'},</span> <span class="pre">'height_above_mean_sea_level':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_mean_sea_level',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_mean_sea_level',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_mean_sea_level'},</span> <span class="pre">'height_above_reference_ellipsoid':</span> <span class="pre">{'depth':</span> <span class="pre">'sea_floor_depth_below_reference_ellipsoid',</span> <span class="pre">'eta':</span> <span class="pre">'sea_surface_height_above_reference_ellipsoid',</span> <span class="pre">'zlev':</span> <span class="pre">'height_above_reference_ellipsoid'}})}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_dimensional_vertical_coordinate" title="Link to this definition">#</a></dt>
 <dd><p>Check units for variables defining vertical position are valid under
 CF.</p>
 <p>CF §4.3.1 The units attribute for dimensional coordinates will be a string
@@ -1333,7 +1347,7 @@ temperature.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_dimensionless_vertical_coordinates">
-<span class="sig-name descname"><span class="pre">check_dimensionless_vertical_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_dimensionless_vertical_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_dimensionless_vertical_coordinates" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_dimensionless_vertical_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_dimensionless_vertical_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_dimensionless_vertical_coordinates" title="Link to this definition">#</a></dt>
 <dd><p>Check the validity of dimensionless coordinates under CF</p>
 <p>CF §4.3.2 The units attribute is not required for dimensionless
 coordinates.</p>
@@ -1361,7 +1375,7 @@ but is strongly recommended.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_duplicate_axis">
-<span class="sig-name descname"><span class="pre">check_duplicate_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_duplicate_axis" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_duplicate_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_duplicate_axis" title="Link to this definition">#</a></dt>
 <dd><p>Checks that no variable contains two coordinates defining the same</p>
 <p>Chapter 5 paragraph 6</p>
 <p>If an axis attribute is attached to an auxiliary coordinate variable,
@@ -1387,7 +1401,7 @@ value e.g. there must be no more than one axis attribute for X for any
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_external_variables">
-<span class="sig-name descname"><span class="pre">check_external_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_external_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_external_variables" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_external_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_external_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_external_variables" title="Link to this definition">#</a></dt>
 <dd><p>The global external_variables attribute is a blank-separated list of the
 names of variables which are named by attributes in the file but which
 are not present in the file. These variables are to be found in other
@@ -1406,7 +1420,7 @@ standardises the use of external variables is cell_measures.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_feature_type">
-<span class="sig-name descname"><span class="pre">check_feature_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_feature_type" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_feature_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_feature_type" title="Link to this definition">#</a></dt>
 <dd><p>Check the global attribute featureType for valid CF featureTypes</p>
 <p>9.4 A global attribute, featureType, is required for all Discrete Geometry representations except the orthogonal
 multidimensional array representation, for which it is highly recommended.</p>
@@ -1423,13 +1437,13 @@ multidimensional array representation, for which it is highly recommended.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_filename">
-<span class="sig-name descname"><span class="pre">check_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_filename" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_filename" title="Link to this definition">#</a></dt>
 <dd><p>Checks that the filename ends with .nc</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_fill_value_equal_missing_value">
-<span class="sig-name descname"><span class="pre">check_fill_value_equal_missing_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_fill_value_equal_missing_value" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_fill_value_equal_missing_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_fill_value_equal_missing_value" title="Link to this definition">#</a></dt>
 <dd><p>If both missing_value and _FillValue be used, they should have the same value.
 This according to CF §2.5.1 Recommendations:</p>
 <dl class="field-list simple">
@@ -1447,7 +1461,7 @@ This according to CF §2.5.1 Recommendations:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_fill_value_outside_valid_range">
-<span class="sig-name descname"><span class="pre">check_fill_value_outside_valid_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_fill_value_outside_valid_range" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_fill_value_outside_valid_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_fill_value_outside_valid_range" title="Link to this definition">#</a></dt>
 <dd><p>Checks each variable’s _FillValue to ensure that it’s in valid_range or
 between valid_min and valid_max according to CF §2.5.1</p>
 <p>CF §2.5.1 The _FillValue should be outside the range specified by
@@ -1467,7 +1481,7 @@ valid_range (if used) for a variable.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_flags">
-<span class="sig-name descname"><span class="pre">check_flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_flags" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_flags" title="Link to this definition">#</a></dt>
 <dd><p>Check the flag_values, flag_masks and flag_meanings attributes for
 variables to ensure they are CF compliant.</p>
 <p>CF §3.5 The attributes flag_values, flag_masks and flag_meanings are
@@ -1504,7 +1518,7 @@ matches the flag_values value indicates a true condition.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_geographic_region">
-<span class="sig-name descname"><span class="pre">check_geographic_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_geographic_region" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_geographic_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_geographic_region" title="Link to this definition">#</a></dt>
 <dd><p>6.1.1 When data is representative of geographic regions which can be identified by names but which have complex
 boundaries that cannot practically be specified using longitude and latitude boundary coordinates, a labeled
 axis should be used to identify the regions.</p>
@@ -1526,7 +1540,7 @@ attribute with the value region.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_grid_coordinates">
-<span class="sig-name descname"><span class="pre">check_grid_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_grid_coordinates" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_grid_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_grid_coordinates" title="Link to this definition">#</a></dt>
 <dd><p>5.6 When the coordinate variables for a horizontal grid are not
 longitude and latitude, it is required that the true latitude and
 longitude coordinates be supplied via the coordinates attribute.</p>
@@ -1545,7 +1559,7 @@ longitude coordinates be supplied via the coordinates attribute.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_grid_mapping">
-<span class="sig-name descname"><span class="pre">check_grid_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_grid_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_grid_mapping" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_grid_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_grid_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_grid_mapping" title="Link to this definition">#</a></dt>
 <dd><p>5.6 When the coordinate variables for a horizontal grid are not
 longitude and latitude, it is required that the true latitude and
 longitude coordinates be supplied via the coordinates attribute. If in
@@ -1590,7 +1604,7 @@ Appendix F, Grid Mappings.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_hints">
-<span class="sig-name descname"><span class="pre">check_hints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_hints" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_hints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_hints" title="Link to this definition">#</a></dt>
 <dd><p>Checks for potentially mislabeled metadata and makes suggestions for how to correct</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1607,7 +1621,7 @@ Appendix F, Grid Mappings.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_latitude">
-<span class="sig-name descname"><span class="pre">check_latitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_latitude" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_latitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_latitude" title="Link to this definition">#</a></dt>
 <dd><p>Check variable(s) that define latitude and are defined correctly according to CF.</p>
 <p>CF §4.1 Variables representing latitude must always explicitly include
 the units attribute; there is no default value.  The recommended unit
@@ -1650,7 +1664,7 @@ the axis attribute with the value Y.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_longitude">
-<span class="sig-name descname"><span class="pre">check_longitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_longitude" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_longitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_longitude" title="Link to this definition">#</a></dt>
 <dd><p>Check variable(s) that define longitude and are defined correctly according to CF.</p>
 <p>CF §4.2 Variables representing longitude must always explicitly include
 the units attribute; there is no default value.  The recommended unit
@@ -1693,7 +1707,7 @@ the axis attribute with the value X.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_multi_dimensional_coords">
-<span class="sig-name descname"><span class="pre">check_multi_dimensional_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_multi_dimensional_coords" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_multi_dimensional_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_multi_dimensional_coords" title="Link to this definition">#</a></dt>
 <dd><p>Checks that no multidimensional coordinate shares a name with its
 dimensions.</p>
 <p>Chapter 5 paragraph 4</p>
@@ -1714,7 +1728,7 @@ not match the name of any of its dimensions.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_names_unique">
-<span class="sig-name descname"><span class="pre">check_names_unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_names_unique" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_names_unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_names_unique" title="Link to this definition">#</a></dt>
 <dd><p>Checks the variable names for uniqueness regardless of case.</p>
 <p>CF §2.3 names should not be distinguished purely by case, i.e., if case
 is disregarded, no two names should be the same.</p>
@@ -1730,7 +1744,7 @@ is disregarded, no two names should be the same.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_naming_conventions">
-<span class="sig-name descname"><span class="pre">check_naming_conventions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_naming_conventions" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_naming_conventions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_naming_conventions" title="Link to this definition">#</a></dt>
 <dd><p>Checks the variable names to ensure they are valid CF variable names under CF.</p>
 <p>CF §2.3 Variable, dimension and attribute names should begin with a letter
 and be composed of letters, digits, and underscores.</p>
@@ -1746,7 +1760,7 @@ and be composed of letters, digits, and underscores.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_packed_data">
-<span class="sig-name descname"><span class="pre">check_packed_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_packed_data" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_packed_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_packed_data" title="Link to this definition">#</a></dt>
 <dd><p>8.1 Simple packing may be achieved through the use of the optional NUG defined attributes scale_factor and
 add_offset. After the data values of a variable have been read, they are to be multiplied by the scale_factor,
 and have add_offset added to them.</p>
@@ -1774,7 +1788,7 @@ valid_max, valid_range) must be of the same data type as the packed data.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_reduced_horizontal_grid">
-<span class="sig-name descname"><span class="pre">check_reduced_horizontal_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_reduced_horizontal_grid" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_reduced_horizontal_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_reduced_horizontal_grid" title="Link to this definition">#</a></dt>
 <dd><p>5.3 A “reduced” longitude-latitude grid is one in which the points are
 arranged along constant latitude lines with the number of points on a
 latitude line decreasing toward the poles.</p>
@@ -1797,7 +1811,7 @@ identified by the coordinates attribute.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_standard_name">
-<span class="sig-name descname"><span class="pre">check_standard_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_standard_name" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_standard_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_standard_name" title="Link to this definition">#</a></dt>
 <dd><p>Check a variables’s standard_name attribute to ensure that it meets CF
 compliance.</p>
 <p>CF §3.3 A standard name is associated with a variable via the attribute
@@ -1818,7 +1832,7 @@ optionally followed by one or more blanks and a standard name modifier</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_standard_name_deprecated_modifiers">
-<span class="sig-name descname"><span class="pre">check_standard_name_deprecated_modifiers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_standard_name_deprecated_modifiers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_standard_name_deprecated_modifiers" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_standard_name_deprecated_modifiers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/compliance_checker/cf/cf_1_7.html#CF1_7Check.check_standard_name_deprecated_modifiers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_standard_name_deprecated_modifiers" title="Link to this definition">#</a></dt>
 <dd><p>Not a standard check in that it won’t raise pass/fail values,
 but instead warns upon finding deprecated CF standard name modifiers.
 :param netCDF4.Dataset ds: netCDF dataset</p>
@@ -1826,7 +1840,7 @@ but instead warns upon finding deprecated CF standard name modifiers.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_time_coordinate">
-<span class="sig-name descname"><span class="pre">check_time_coordinate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_time_coordinate" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_time_coordinate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_time_coordinate" title="Link to this definition">#</a></dt>
 <dd><p>Check variables defining time are valid under CF</p>
 <p>CF §4.4 Variables representing time must always explicitly include the
 units attribute; there is no default value.</p>
@@ -1861,7 +1875,7 @@ the axis attribute with the value T.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_units">
-<span class="sig-name descname"><span class="pre">check_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_units" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_units" title="Link to this definition">#</a></dt>
 <dd><p>Check the units attribute for all variables to ensure they are CF
 compliant under CF §3.1</p>
 <p>CF §3.1 The units attribute is required for all variables that represent dimensional quantities
@@ -1890,8 +1904,8 @@ specified cell_methods attribute if present</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_valid_range_or_valid_min_max_present">
-<span class="sig-name descname"><span class="pre">check_valid_range_or_valid_min_max_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_valid_range_or_valid_min_max_present" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_valid_range_and_valid_min_max_present">
+<span class="sig-name descname"><span class="pre">check_valid_range_and_valid_min_max_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_valid_range_and_valid_min_max_present" title="Link to this definition">#</a></dt>
 <dd><p>The valid_range attribute must not be present if the valid_min
 and/or valid_max attributes are present. This according to 2.5.1 Requirements.</p>
 <dl class="field-list simple">
@@ -1909,7 +1923,7 @@ and/or valid_max attributes are present. This according to 2.5.1 Requirements.</
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.check_variable_features">
-<span class="sig-name descname"><span class="pre">check_variable_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_variable_features" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">check_variable_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.check_variable_features" title="Link to this definition">#</a></dt>
 <dd><p>Checks the variable feature types match the dataset featureType attribute.
 If more than one unique feature type is found, report this as an error.</p>
 <dl class="field-list simple">
@@ -1927,7 +1941,7 @@ If more than one unique feature type is found, report this as an error.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.get_test_ctx">
-<span class="sig-name descname"><span class="pre">get_test_ctx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">severity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.get_test_ctx" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_test_ctx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">severity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.get_test_ctx" title="Link to this definition">#</a></dt>
 <dd><p>Creates an existing TestCtx object in _defined_results dict if it does
 not exist for the current checker instance, or an returns the existing
 TestCtx for modification. Takes a severity level and name and uses the
@@ -1950,7 +1964,7 @@ instance’s _defined_results dict</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.setup">
-<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.setup" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.setup" title="Link to this definition">#</a></dt>
 <dd><p>Initialize various special variable types within the class.
 Mutates a number of instance variables.</p>
 <dl class="field-list simple">
@@ -1962,12 +1976,12 @@ Mutates a number of instance variables.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.std_check">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.std_check" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.std_check" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="compliance_checker.cf.CF1_7Check.std_check_in">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std_check_in</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_vals</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.std_check_in" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std_check_in</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_vals</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compliance_checker.cf.CF1_7Check.std_check_in" title="Link to this definition">#</a></dt>
 <dd><p>Returns 0 if attr not present, 1 if present but not in correct value, 2 if good</p>
 </dd></dl>
 
@@ -1980,11 +1994,10 @@ Mutates a number of instance variables.</p>
               
               
               
-                <footer class="bd-footer-article">
+              
+              
+                <footer class="prev-next-footer">
                   
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="compliance_checker.cf.CF1_6Check.html"
@@ -2004,10 +2017,7 @@ Mutates a number of instance variables.</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -2016,11 +2026,14 @@ Mutates a number of instance variables.</p>
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
   <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cf.CF1_7Check"><code class="docutils literal notranslate"><span class="pre">CF1_7Check</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cf.CF1_7Check.HIGH"><code class="docutils literal notranslate"><span class="pre">CF1_7Check.HIGH</span></code></a></li>
@@ -2077,7 +2090,7 @@ Mutates a number of instance variables.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cf.CF1_7Check.check_standard_name_deprecated_modifiers"><code class="docutils literal notranslate"><span class="pre">CF1_7Check.check_standard_name_deprecated_modifiers()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cf.CF1_7Check.check_time_coordinate"><code class="docutils literal notranslate"><span class="pre">CF1_7Check.check_time_coordinate()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cf.CF1_7Check.check_units"><code class="docutils literal notranslate"><span class="pre">CF1_7Check.check_units()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cf.CF1_7Check.check_valid_range_or_valid_min_max_present"><code class="docutils literal notranslate"><span class="pre">CF1_7Check.check_valid_range_or_valid_min_max_present()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cf.CF1_7Check.check_valid_range_and_valid_min_max_present"><code class="docutils literal notranslate"><span class="pre">CF1_7Check.check_valid_range_and_valid_min_max_present()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cf.CF1_7Check.check_variable_features"><code class="docutils literal notranslate"><span class="pre">CF1_7Check.check_variable_features()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cf.CF1_7Check.get_test_ctx"><code class="docutils literal notranslate"><span class="pre">CF1_7Check.get_test_ctx()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance_checker.cf.CF1_7Check.setup"><code class="docutils literal notranslate"><span class="pre">CF1_7Check.setup()</span></code></a></li>
@@ -2089,6 +2102,7 @@ Mutates a number of instance variables.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
+
   <div class="tocsection sourcelink">
     <a href="../_sources/generated/compliance_checker.cf.CF1_7Check.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
@@ -2109,8 +2123,8 @@ Mutates a number of instance variables.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2118,17 +2132,19 @@ Mutates a number of instance variables.</p>
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
-      © Copyright 2023, Dave Foster.
+      © Copyright 2024, Dave Foster.
       <br/>
     
   </p>
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -2136,10 +2152,12 @@ Mutates a number of instance variables.</p>
     </div>
   
   
+  
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
 </p></div>
       
     </div>

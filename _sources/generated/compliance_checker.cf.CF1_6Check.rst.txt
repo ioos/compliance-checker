@@ -73,7 +73,7 @@ CF1_6Check
       ~CF1_6Check.check_standard_name
       ~CF1_6Check.check_time_coordinate
       ~CF1_6Check.check_units
-      ~CF1_6Check.check_valid_range_or_valid_min_max_present
+      ~CF1_6Check.check_valid_range_and_valid_min_max_present
       ~CF1_6Check.check_variable_features
       ~CF1_6Check.get_test_ctx
       ~CF1_6Check.setup
@@ -149,7 +149,7 @@ CF1_6Check
    .. automethod:: check_standard_name
    .. automethod:: check_time_coordinate
    .. automethod:: check_units
-   .. automethod:: check_valid_range_or_valid_min_max_present
+   .. automethod:: check_valid_range_and_valid_min_max_present
    .. automethod:: check_variable_features
    .. automethod:: get_test_ctx
    .. automethod:: setup

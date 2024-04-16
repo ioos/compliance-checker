@@ -1,14 +1,13 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="../../" >
 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.base &#8212; compliance_checker 5.1.0 documentation</title>
+    <title>compliance_checker.base &#8212; compliance_checker 5.1.1 documentation</title>
   
   
   
@@ -18,25 +17,26 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/documentation_options.js?v=1bd908e2"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/base';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -52,7 +52,15 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -93,8 +101,13 @@
 
     <div class="container-fluid" id="banner"></div>
 
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -105,13 +118,8 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
                     <li class="nav-item">
@@ -131,6 +139,13 @@
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../faq.html">
                         Frequently Asked Questions
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../development.html">
+                        Developer Notes
                       </a>
                     </li>
                 
@@ -179,8 +194,8 @@
           
           
           
-          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square"></i></span>
-            <label class="sr-only">GitHub</label></a>
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
         </li>
 </ul></div>
         
@@ -190,7 +205,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.1.0
+  Version 5.1.1
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
@@ -219,8 +234,8 @@
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../index.html" class="nav-link" aria-label="Home">
@@ -230,7 +245,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">compliance_checker.base</li>
+    <li class="breadcrumb-item active" aria-current="page">compliance_c...</li>
   </ul>
 </nav>
 </div>
@@ -245,7 +260,7 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <h1>Source code for compliance_checker.base</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
@@ -270,7 +285,7 @@
 <span class="kn">from</span> <span class="nn">owslib.swe.sensor.sml</span> <span class="kn">import</span> <span class="n">SensorML</span>
 
 <span class="kn">import</span> <span class="nn">compliance_checker.cfutil</span> <span class="k">as</span> <span class="nn">cfutil</span>
-<span class="kn">from</span> <span class="nn">compliance_checker</span> <span class="kn">import</span> <span class="n">MemoizedDataset</span><span class="p">,</span> <span class="n">__version__</span>
+<span class="kn">from</span> <span class="nn">compliance_checker</span> <span class="kn">import</span> <span class="n">__version__</span>
 <span class="kn">from</span> <span class="nn">compliance_checker.util</span> <span class="kn">import</span> <span class="n">kvp_convert</span>
 
 <span class="c1"># Python 3.5+ should work, also have a fallback</span>
@@ -282,14 +297,19 @@
     <span class="n">re_pattern_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
 
 
-<div class="viewcode-block" id="get_namespaces"><a class="viewcode-back" href="../../generated/compliance_checker.base.get_namespaces.html#compliance_checker.base.get_namespaces">[docs]</a><span class="k">def</span> <span class="nf">get_namespaces</span><span class="p">():</span>
+<div class="viewcode-block" id="get_namespaces">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.get_namespaces.html#compliance_checker.base.get_namespaces">[docs]</a>
+<span class="k">def</span> <span class="nf">get_namespaces</span><span class="p">():</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">Namespaces</span><span class="p">()</span>
     <span class="n">ns</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">get_namespaces</span><span class="p">([</span><span class="s2">&quot;ogc&quot;</span><span class="p">,</span> <span class="s2">&quot;sml&quot;</span><span class="p">,</span> <span class="s2">&quot;gml&quot;</span><span class="p">,</span> <span class="s2">&quot;sos&quot;</span><span class="p">,</span> <span class="s2">&quot;swe&quot;</span><span class="p">,</span> <span class="s2">&quot;xlink&quot;</span><span class="p">])</span>
     <span class="n">ns</span><span class="p">[</span><span class="s2">&quot;ows&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">(</span><span class="s2">&quot;ows110&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ns</span></div>
 
 
-<div class="viewcode-block" id="csv_splitter"><a class="viewcode-back" href="../../generated/compliance_checker.base.csv_splitter.html#compliance_checker.base.csv_splitter">[docs]</a><span class="k">def</span> <span class="nf">csv_splitter</span><span class="p">(</span><span class="n">input_string</span><span class="p">):</span>
+
+<div class="viewcode-block" id="csv_splitter">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.csv_splitter.html#compliance_checker.base.csv_splitter">[docs]</a>
+<span class="k">def</span> <span class="nf">csv_splitter</span><span class="p">(</span><span class="n">input_string</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    csv_splitter(input_string)</span>
 
@@ -309,17 +329,25 @@
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">csv_contents</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="ValidationObject"><a class="viewcode-back" href="../../generated/compliance_checker.base.ValidationObject.html#compliance_checker.base.ValidationObject">[docs]</a><span class="k">class</span> <span class="nc">ValidationObject</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ValidationObject">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.ValidationObject.html#compliance_checker.base.ValidationObject">[docs]</a>
+<span class="k">class</span> <span class="nc">ValidationObject</span><span class="p">:</span>
     <span class="n">validator_fail_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">expected_type</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="ValidationObject.__init__"><a class="viewcode-back" href="../../generated/compliance_checker.base.ValidationObject.html#compliance_checker.base.ValidationObject.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ValidationObject.__init__">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.ValidationObject.html#compliance_checker.base.ValidationObject.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">split_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">split_func</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">split_func</span> <span class="o">=</span> <span class="n">split_func</span></div>
 
-<div class="viewcode-block" id="ValidationObject.validator_func"><a class="viewcode-back" href="../../generated/compliance_checker.base.ValidationObject.html#compliance_checker.base.ValidationObject.validator_func">[docs]</a>    <span class="k">def</span> <span class="nf">validator_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ValidationObject.validator_func">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.ValidationObject.html#compliance_checker.base.ValidationObject.validator_func">[docs]</a>
+    <span class="k">def</span> <span class="nf">validator_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        validator_func(self, input_value)</span>
 
@@ -327,7 +355,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
-<div class="viewcode-block" id="ValidationObject.validate"><a class="viewcode-back" href="../../generated/compliance_checker.base.ValidationObject.html#compliance_checker.base.ValidationObject.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_name</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ValidationObject.validate">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.ValidationObject.html#compliance_checker.base.ValidationObject.validate">[docs]</a>
+    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_name</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">type_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_type</span><span class="p">(</span><span class="n">input_name</span><span class="p">,</span> <span class="n">input_value</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">type_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -339,7 +370,10 @@
         <span class="c1"># if all pass, then we&#39;re good.</span>
         <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="ValidationObject.validate_type"><a class="viewcode-back" href="../../generated/compliance_checker.base.ValidationObject.html#compliance_checker.base.ValidationObject.validate_type">[docs]</a>    <span class="k">def</span> <span class="nf">validate_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_name</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ValidationObject.validate_type">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.ValidationObject.html#compliance_checker.base.ValidationObject.validate_type">[docs]</a>
+    <span class="k">def</span> <span class="nf">validate_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_name</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_type</span><span class="p">):</span>
             <span class="n">expected_type_fmt</span> <span class="o">=</span> <span class="s2">&quot;Attribute </span><span class="si">{}</span><span class="s2"> should be instance of type </span><span class="si">{}</span><span class="s2">&quot;</span>
             <span class="k">return</span> <span class="p">(</span>
@@ -347,48 +381,79 @@
                 <span class="p">[</span><span class="n">expected_type_fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected_type</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)],</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span></div></div>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span></div>
+</div>
 
 
-<div class="viewcode-block" id="EmailValidator"><a class="viewcode-back" href="../../generated/compliance_checker.base.EmailValidator.html#compliance_checker.base.EmailValidator">[docs]</a><span class="k">class</span> <span class="nc">EmailValidator</span><span class="p">(</span><span class="n">ValidationObject</span><span class="p">):</span>
+
+<div class="viewcode-block" id="EmailValidator">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.EmailValidator.html#compliance_checker.base.EmailValidator">[docs]</a>
+<span class="k">class</span> <span class="nc">EmailValidator</span><span class="p">(</span><span class="n">ValidationObject</span><span class="p">):</span>
     <span class="n">validator_fail_msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must be a valid email address&quot;</span>
     <span class="n">expected_type</span> <span class="o">=</span> <span class="nb">str</span>
 
-<div class="viewcode-block" id="EmailValidator.validator_func"><a class="viewcode-back" href="../../generated/compliance_checker.base.EmailValidator.html#compliance_checker.base.EmailValidator.validator_func">[docs]</a>    <span class="k">def</span> <span class="nf">validator_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">validators</span><span class="o">.</span><span class="n">email</span><span class="p">(</span><span class="n">input_value</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="EmailValidator.validator_func">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.EmailValidator.html#compliance_checker.base.EmailValidator.validator_func">[docs]</a>
+    <span class="k">def</span> <span class="nf">validator_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">validators</span><span class="o">.</span><span class="n">email</span><span class="p">(</span><span class="n">input_value</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="RegexValidator"><a class="viewcode-back" href="../../generated/compliance_checker.base.RegexValidator.html#compliance_checker.base.RegexValidator">[docs]</a><span class="k">class</span> <span class="nc">RegexValidator</span><span class="p">(</span><span class="n">ValidationObject</span><span class="p">):</span>
+
+<div class="viewcode-block" id="RegexValidator">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.RegexValidator.html#compliance_checker.base.RegexValidator">[docs]</a>
+<span class="k">class</span> <span class="nc">RegexValidator</span><span class="p">(</span><span class="n">ValidationObject</span><span class="p">):</span>
     <span class="n">expected_type</span> <span class="o">=</span> <span class="nb">str</span>
     <span class="n">validator_regex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^.+$&quot;</span>
     <span class="n">validator_fail_msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must not be an empty string&quot;</span>
 
-<div class="viewcode-block" id="RegexValidator.validator_func"><a class="viewcode-back" href="../../generated/compliance_checker.base.RegexValidator.html#compliance_checker.base.RegexValidator.validator_func">[docs]</a>    <span class="k">def</span> <span class="nf">validator_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validator_regex</span><span class="p">,</span> <span class="n">input_value</span><span class="p">))</span></div></div>
+<div class="viewcode-block" id="RegexValidator.validator_func">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.RegexValidator.html#compliance_checker.base.RegexValidator.validator_func">[docs]</a>
+    <span class="k">def</span> <span class="nf">validator_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validator_regex</span><span class="p">,</span> <span class="n">input_value</span><span class="p">))</span></div>
+</div>
 
 
-<div class="viewcode-block" id="UrlValidator"><a class="viewcode-back" href="../../generated/compliance_checker.base.UrlValidator.html#compliance_checker.base.UrlValidator">[docs]</a><span class="k">class</span> <span class="nc">UrlValidator</span><span class="p">(</span><span class="n">ValidationObject</span><span class="p">):</span>
+
+<div class="viewcode-block" id="UrlValidator">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.UrlValidator.html#compliance_checker.base.UrlValidator">[docs]</a>
+<span class="k">class</span> <span class="nc">UrlValidator</span><span class="p">(</span><span class="n">ValidationObject</span><span class="p">):</span>
     <span class="n">validator_fail_msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must be a valid URL&quot;</span>
     <span class="n">expected_type</span> <span class="o">=</span> <span class="nb">str</span>
 
-<div class="viewcode-block" id="UrlValidator.validator_func"><a class="viewcode-back" href="../../generated/compliance_checker.base.UrlValidator.html#compliance_checker.base.UrlValidator.validator_func">[docs]</a>    <span class="k">def</span> <span class="nf">validator_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">validators</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="n">input_value</span><span class="p">))</span></div></div>
+<div class="viewcode-block" id="UrlValidator.validator_func">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.UrlValidator.html#compliance_checker.base.UrlValidator.validator_func">[docs]</a>
+    <span class="k">def</span> <span class="nf">validator_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">validators</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="n">input_value</span><span class="p">))</span></div>
+</div>
+
 
 
 <span class="c1"># Simple class for Generic File type (default to this if file not recognised)</span>
-<div class="viewcode-block" id="GenericFile"><a class="viewcode-back" href="../../generated/compliance_checker.base.GenericFile.html#compliance_checker.base.GenericFile">[docs]</a><span class="k">class</span> <span class="nc">GenericFile</span><span class="p">:</span>
+<div class="viewcode-block" id="GenericFile">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.GenericFile.html#compliance_checker.base.GenericFile">[docs]</a>
+<span class="k">class</span> <span class="nc">GenericFile</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple class for any file. Has same path lookup as netCDF4.Dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="GenericFile.__init__"><a class="viewcode-back" href="../../generated/compliance_checker.base.GenericFile.html#compliance_checker.base.GenericFile.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpath</span><span class="p">):</span>
+<div class="viewcode-block" id="GenericFile.__init__">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.GenericFile.html#compliance_checker.base.GenericFile.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpath</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fpath</span> <span class="o">=</span> <span class="n">fpath</span></div>
 
-<div class="viewcode-block" id="GenericFile.filepath"><a class="viewcode-back" href="../../generated/compliance_checker.base.GenericFile.html#compliance_checker.base.GenericFile.filepath">[docs]</a>    <span class="k">def</span> <span class="nf">filepath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fpath</span></div></div>
+
+<div class="viewcode-block" id="GenericFile.filepath">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.GenericFile.html#compliance_checker.base.GenericFile.filepath">[docs]</a>
+    <span class="k">def</span> <span class="nf">filepath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fpath</span></div>
+</div>
 
 
-<div class="viewcode-block" id="BaseCheck"><a class="viewcode-back" href="../../generated/compliance_checker.base.BaseCheck.html#compliance_checker.base.BaseCheck">[docs]</a><span class="k">class</span> <span class="nc">BaseCheck</span><span class="p">:</span>
+
+<div class="viewcode-block" id="BaseCheck">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.BaseCheck.html#compliance_checker.base.BaseCheck">[docs]</a>
+<span class="k">class</span> <span class="nc">BaseCheck</span><span class="p">:</span>
     <span class="n">HIGH</span> <span class="o">=</span> <span class="mi">3</span>
     <span class="n">MEDIUM</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="n">LOW</span> <span class="o">=</span> <span class="mi">1</span>
@@ -398,21 +463,29 @@
 
     <span class="n">supported_ds</span> <span class="o">=</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="BaseCheck.setup"><a class="viewcode-back" href="../../generated/compliance_checker.base.BaseCheck.html#compliance_checker.base.BaseCheck.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseCheck.setup">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.BaseCheck.html#compliance_checker.base.BaseCheck.setup">[docs]</a>
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Common setup method for a Checker.</span>
 
 <span class="sd">        Automatically run when running a CheckSuite. Define this method in your Checker class.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="BaseCheck.__init__"><a class="viewcode-back" href="../../generated/compliance_checker.base.BaseCheck.html#compliance_checker.base.BaseCheck.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BaseCheck.__init__">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.BaseCheck.html#compliance_checker.base.BaseCheck.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_defined_results</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span></div>
 
-<div class="viewcode-block" id="BaseCheck.get_test_ctx"><a class="viewcode-back" href="../../generated/compliance_checker.base.BaseCheck.html#compliance_checker.base.BaseCheck.get_test_ctx">[docs]</a>    <span class="k">def</span> <span class="nf">get_test_ctx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">severity</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BaseCheck.get_test_ctx">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.BaseCheck.html#compliance_checker.base.BaseCheck.get_test_ctx">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_test_ctx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">severity</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an existing TestCtx object in _defined_results dict if it does</span>
 <span class="sd">        not exist for the current checker instance, or an returns the existing</span>
@@ -435,6 +508,7 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defined_results</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">variable</span><span class="p">][</span><span class="n">severity</span><span class="p">]</span></div>
 
+
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finalizer. Ensure any caches shared by multiple checkers</span>
@@ -442,18 +516,24 @@
 <span class="sd">        inadvertently mutated by other functions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">cfutil</span><span class="o">.</span><span class="n">get_geophysical_variables</span><span class="o">.</span><span class="n">cache_clear</span><span class="p">()</span>
-        <span class="n">cfutil</span><span class="o">.</span><span class="n">get_time_variables</span><span class="o">.</span><span class="n">cache_clear</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="n">cfutil</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cfutil</span><span class="o">.</span><span class="n">get_geophysical_variables</span><span class="o">.</span><span class="n">cache_clear</span><span class="p">()</span>
+            <span class="n">cfutil</span><span class="o">.</span><span class="n">get_time_variables</span><span class="o">.</span><span class="n">cache_clear</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="BaseNCCheck"><a class="viewcode-back" href="../../generated/compliance_checker.base.BaseNCCheck.html#compliance_checker.base.BaseNCCheck">[docs]</a><span class="k">class</span> <span class="nc">BaseNCCheck</span><span class="p">:</span>
+
+<div class="viewcode-block" id="BaseNCCheck">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.BaseNCCheck.html#compliance_checker.base.BaseNCCheck">[docs]</a>
+<span class="k">class</span> <span class="nc">BaseNCCheck</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base Class for NetCDF Dataset supporting Check Suites.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">supported_ds</span> <span class="o">=</span> <span class="p">{</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">MemoizedDataset</span><span class="p">}</span>
+    <span class="n">supported_ds</span> <span class="o">=</span> <span class="p">[</span><span class="n">Dataset</span><span class="p">]</span>
 
-<div class="viewcode-block" id="BaseNCCheck.std_check_in"><a class="viewcode-back" href="../../generated/compliance_checker.base.BaseNCCheck.html#compliance_checker.base.BaseNCCheck.std_check_in">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="BaseNCCheck.std_check_in">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.BaseNCCheck.html#compliance_checker.base.BaseNCCheck.std_check_in">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">std_check_in</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">allowed_vals</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns 0 if attr not present, 1 if present but not in correct value, 2 if good</span>
@@ -467,12 +547,19 @@
 
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
-<div class="viewcode-block" id="BaseNCCheck.std_check"><a class="viewcode-back" href="../../generated/compliance_checker.base.BaseNCCheck.html#compliance_checker.base.BaseNCCheck.std_check">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="BaseNCCheck.std_check">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.BaseNCCheck.html#compliance_checker.base.BaseNCCheck.std_check">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">std_check</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">()</span></div>
+</div>
 
 
-<div class="viewcode-block" id="BaseSOSGCCheck"><a class="viewcode-back" href="../../generated/compliance_checker.base.BaseSOSGCCheck.html#compliance_checker.base.BaseSOSGCCheck">[docs]</a><span class="k">class</span> <span class="nc">BaseSOSGCCheck</span><span class="p">:</span>
+
+<div class="viewcode-block" id="BaseSOSGCCheck">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.BaseSOSGCCheck.html#compliance_checker.base.BaseSOSGCCheck">[docs]</a>
+<span class="k">class</span> <span class="nc">BaseSOSGCCheck</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for SOS-GetCapabilities supporting Check Suites.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -480,7 +567,10 @@
     <span class="n">supported_ds</span> <span class="o">=</span> <span class="p">[</span><span class="n">SensorObservationService_1_0_0</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="BaseSOSDSCheck"><a class="viewcode-back" href="../../generated/compliance_checker.base.BaseSOSDSCheck.html#compliance_checker.base.BaseSOSDSCheck">[docs]</a><span class="k">class</span> <span class="nc">BaseSOSDSCheck</span><span class="p">:</span>
+
+<div class="viewcode-block" id="BaseSOSDSCheck">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.BaseSOSDSCheck.html#compliance_checker.base.BaseSOSDSCheck">[docs]</a>
+<span class="k">class</span> <span class="nc">BaseSOSDSCheck</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for SOS-DescribeSensor supporting Check Suites.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -488,7 +578,10 @@
     <span class="n">supported_ds</span> <span class="o">=</span> <span class="p">[</span><span class="n">SensorML</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="Result"><a class="viewcode-back" href="../../generated/compliance_checker.base.Result.html#compliance_checker.base.Result">[docs]</a><span class="k">class</span> <span class="nc">Result</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Result">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.Result.html#compliance_checker.base.Result">[docs]</a>
+<span class="k">class</span> <span class="nc">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Holds the result of a check method.</span>
 
@@ -499,7 +592,9 @@
 <span class="sd">    Stores the checker instance and the check method that produced this result.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Result.__init__"><a class="viewcode-back" href="../../generated/compliance_checker.base.Result.html#compliance_checker.base.Result.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="Result.__init__">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.Result.html#compliance_checker.base.Result.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">weight</span><span class="o">=</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
         <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -528,6 +623,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">check_method</span> <span class="o">=</span> <span class="n">check_method</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable_name</span> <span class="o">=</span> <span class="n">variable_name</span></div>
 
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (*</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
 
@@ -543,7 +639,9 @@
 
         <span class="k">return</span> <span class="n">ret</span>
 
-<div class="viewcode-block" id="Result.serialize"><a class="viewcode-back" href="../../generated/compliance_checker.base.Result.html#compliance_checker.base.Result.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Result.serialize">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.Result.html#compliance_checker.base.Result.serialize">[docs]</a>
+    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a serializable dictionary that represents the result object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -555,16 +653,22 @@
             <span class="s2">&quot;children&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">],</span>
         <span class="p">}</span></div>
 
+
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="TestCtx"><a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx">[docs]</a><span class="k">class</span> <span class="nc">TestCtx</span><span class="p">:</span>
+
+<div class="viewcode-block" id="TestCtx">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx">[docs]</a>
+<span class="k">class</span> <span class="nc">TestCtx</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple struct object that holds score values and messages to compile into a result</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TestCtx.__init__"><a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="TestCtx.__init__">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">category</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
@@ -580,7 +684,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable</span> <span class="o">=</span> <span class="n">variable</span></div>
 
-<div class="viewcode-block" id="TestCtx.to_result"><a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx.to_result">[docs]</a>    <span class="k">def</span> <span class="nf">to_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestCtx.to_result">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx.to_result">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">category</span><span class="p">,</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_of</span><span class="p">),</span>
@@ -589,7 +696,10 @@
             <span class="n">variable_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestCtx.assert_true"><a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx.assert_true">[docs]</a>    <span class="k">def</span> <span class="nf">assert_true</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestCtx.assert_true">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx.assert_true">[docs]</a>
+    <span class="k">def</span> <span class="nf">assert_true</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Increments score if test is true otherwise appends a message</span>
 <span class="sd">        :rtype: bool</span>
@@ -604,22 +714,32 @@
 
         <span class="k">return</span> <span class="n">test</span></div>
 
-<div class="viewcode-block" id="TestCtx.add_failure"><a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx.add_failure">[docs]</a>    <span class="k">def</span> <span class="nf">add_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestCtx.add_failure">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx.add_failure">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a failure along with a message</span>
 <span class="sd">        :rtype: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestCtx.add_pass"><a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx.add_pass">[docs]</a>    <span class="k">def</span> <span class="nf">add_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestCtx.add_pass">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.TestCtx.html#compliance_checker.base.TestCtx.add_pass">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a pass condition</span>
 <span class="sd">        :rtype: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="std_check_in"><a class="viewcode-back" href="../../generated/compliance_checker.base.std_check_in.html#compliance_checker.base.std_check_in">[docs]</a><span class="k">def</span> <span class="nf">std_check_in</span><span class="p">(</span><span class="n">base_context</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">allowed_vals</span><span class="p">):</span>
+
+<div class="viewcode-block" id="std_check_in">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.std_check_in.html#compliance_checker.base.std_check_in">[docs]</a>
+<span class="k">def</span> <span class="nf">std_check_in</span><span class="p">(</span><span class="n">base_context</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">allowed_vals</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check that a value is contained within an iterable</span>
 
@@ -652,7 +772,10 @@
     <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-<div class="viewcode-block" id="std_check"><a class="viewcode-back" href="../../generated/compliance_checker.base.std_check.html#compliance_checker.base.std_check">[docs]</a><span class="k">def</span> <span class="nf">std_check</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+
+<div class="viewcode-block" id="std_check">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.std_check.html#compliance_checker.base.std_check">[docs]</a>
+<span class="k">def</span> <span class="nf">std_check</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="nb">getattr</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
@@ -660,12 +783,18 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="xpath_check"><a class="viewcode-back" href="../../generated/compliance_checker.base.xpath_check.html#compliance_checker.base.xpath_check">[docs]</a><span class="k">def</span> <span class="nf">xpath_check</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">xpath</span><span class="p">):</span>
+
+<div class="viewcode-block" id="xpath_check">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.xpath_check.html#compliance_checker.base.xpath_check">[docs]</a>
+<span class="k">def</span> <span class="nf">xpath_check</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">xpath</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks whether tree contains one or more elements matching xpath&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">xpath</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="maybe_get_global_attr"><a class="viewcode-back" href="../../generated/compliance_checker.base.maybe_get_global_attr.html#compliance_checker.base.maybe_get_global_attr">[docs]</a><span class="k">def</span> <span class="nf">maybe_get_global_attr</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="maybe_get_global_attr">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.maybe_get_global_attr.html#compliance_checker.base.maybe_get_global_attr">[docs]</a>
+<span class="k">def</span> <span class="nf">maybe_get_global_attr</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">():</span>
         <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">getncattr</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -673,7 +802,10 @@
         <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[</span><span class="n">err_msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)]</span></div>
 
 
-<div class="viewcode-block" id="attr_check"><a class="viewcode-back" href="../../generated/compliance_checker.base.attr_check.html#compliance_checker.base.attr_check">[docs]</a><span class="k">def</span> <span class="nf">attr_check</span><span class="p">(</span><span class="n">kvp</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">ret_val</span><span class="p">,</span> <span class="n">gname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="attr_check">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.attr_check.html#compliance_checker.base.attr_check">[docs]</a>
+<span class="k">def</span> <span class="nf">attr_check</span><span class="p">(</span><span class="n">kvp</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">ret_val</span><span class="p">,</span> <span class="n">gname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Handles attribute checks for simple presence of an attribute, presence of</span>
 <span class="sd">    one of several attributes, and passing a validation function.  Returns a</span>
@@ -730,10 +862,7 @@
             <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">display_name</span><span class="si">}</span><span class="s2"> not present&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">res</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> present, but not in expected value list (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">display_name</span><span class="p">,</span>
-                    <span class="nb">sorted</span><span class="p">(</span><span class="n">other</span><span class="p">),</span>
-                <span class="p">),</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">display_name</span><span class="si">}</span><span class="s2"> present, but not in expected value list (</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="n">ret_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -829,7 +958,10 @@
     <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-<div class="viewcode-block" id="check_has"><a class="viewcode-back" href="../../generated/compliance_checker.base.check_has.html#compliance_checker.base.check_has">[docs]</a><span class="k">def</span> <span class="nf">check_has</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="n">gname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="check_has">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.check_has.html#compliance_checker.base.check_has">[docs]</a>
+<span class="k">def</span> <span class="nf">check_has</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="n">gname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator to wrap a function to check if a dataset has given attributes.</span>
 <span class="sd">    :param function func: function to wrap&quot;&quot;&quot;</span>
 
@@ -850,7 +982,10 @@
     <span class="k">return</span> <span class="n">_inner</span></div>
 
 
-<div class="viewcode-block" id="fix_return_value"><a class="viewcode-back" href="../../generated/compliance_checker.base.fix_return_value.html#compliance_checker.base.fix_return_value">[docs]</a><span class="k">def</span> <span class="nf">fix_return_value</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checker</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="fix_return_value">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.fix_return_value.html#compliance_checker.base.fix_return_value">[docs]</a>
+<span class="k">def</span> <span class="nf">fix_return_value</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checker</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transforms scalar return values into Result.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -867,12 +1002,18 @@
     <span class="k">return</span> <span class="n">v</span></div>
 
 
-<div class="viewcode-block" id="ratable_result"><a class="viewcode-back" href="../../generated/compliance_checker.base.ratable_result.html#compliance_checker.base.ratable_result">[docs]</a><span class="k">def</span> <span class="nf">ratable_result</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msgs</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ratable_result">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.ratable_result.html#compliance_checker.base.ratable_result">[docs]</a>
+<span class="k">def</span> <span class="nf">ratable_result</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msgs</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a partial function with a Result that has not been weighted.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="k">lambda</span> <span class="n">w</span><span class="p">:</span> <span class="n">Result</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msgs</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="n">variable_name</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="score_group"><a class="viewcode-back" href="../../generated/compliance_checker.base.score_group.html#compliance_checker.base.score_group">[docs]</a><span class="k">def</span> <span class="nf">score_group</span><span class="p">(</span><span class="n">group_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="score_group">
+<a class="viewcode-back" href="../../generated/compliance_checker.base.score_group.html#compliance_checker.base.score_group">[docs]</a>
+<span class="k">def</span> <span class="nf">score_group</span><span class="p">(</span><span class="n">group_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Warning this is deprecated as of Compliance Checker v3.2!</span>
 
@@ -915,27 +1056,26 @@
         <span class="k">return</span> <span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)(</span><span class="n">_dec</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">_inner</span></div>
+
 </pre></div>
 
                 </article>
               
               
               
-                <footer class="bd-footer-article">
+              
+              
+                <footer class="prev-next-footer">
                   
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
               
             
           </div>
@@ -948,8 +1088,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -957,17 +1097,19 @@
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
-      © Copyright 2023, Dave Foster.
+      © Copyright 2024, Dave Foster.
       <br/>
     
   </p>
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -975,10 +1117,12 @@
     </div>
   
   
+  
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
 </p></div>
       
     </div>

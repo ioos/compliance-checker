@@ -1,14 +1,13 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="../../" >
 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.suite &#8212; compliance_checker 5.1.0 documentation</title>
+    <title>compliance_checker.suite &#8212; compliance_checker 5.1.1 documentation</title>
   
   
   
@@ -18,25 +17,26 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/documentation_options.js?v=1bd908e2"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/suite';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -52,7 +52,15 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -93,8 +101,13 @@
 
     <div class="container-fluid" id="banner"></div>
 
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -105,13 +118,8 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
                     <li class="nav-item">
@@ -131,6 +139,13 @@
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../faq.html">
                         Frequently Asked Questions
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../development.html">
+                        Developer Notes
                       </a>
                     </li>
                 
@@ -179,8 +194,8 @@
           
           
           
-          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square"></i></span>
-            <label class="sr-only">GitHub</label></a>
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
         </li>
 </ul></div>
         
@@ -190,7 +205,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.1.0
+  Version 5.1.1
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
@@ -219,8 +234,8 @@
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../index.html" class="nav-link" aria-label="Home">
@@ -230,7 +245,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">compliance_checker.suite</li>
+    <li class="breadcrumb-item active" aria-current="page">compliance_c...</li>
   </ul>
 </nav>
 </div>
@@ -245,7 +260,7 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <h1>Source code for compliance_checker.suite</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
@@ -263,19 +278,19 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
-<span class="kn">from</span> <span class="nn">distutils.version</span> <span class="kn">import</span> <span class="n">StrictVersion</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span>
 
+<span class="kn">import</span> <span class="nn">importlib_metadata</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span> <span class="k">as</span> <span class="n">ET</span>
 <span class="kn">from</span> <span class="nn">netCDF4</span> <span class="kn">import</span> <span class="n">Dataset</span>
 <span class="kn">from</span> <span class="nn">owslib.sos</span> <span class="kn">import</span> <span class="n">SensorObservationService</span>
 <span class="kn">from</span> <span class="nn">owslib.swe.sensor.sml</span> <span class="kn">import</span> <span class="n">SensorML</span>
-<span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">working_set</span>
+<span class="kn">from</span> <span class="nn">packaging.version</span> <span class="kn">import</span> <span class="n">parse</span>
 
-<span class="kn">from</span> <span class="nn">compliance_checker</span> <span class="kn">import</span> <span class="n">MemoizedDataset</span><span class="p">,</span> <span class="n">__version__</span><span class="p">,</span> <span class="n">tempnc</span>
+<span class="kn">from</span> <span class="nn">compliance_checker</span> <span class="kn">import</span> <span class="n">__version__</span><span class="p">,</span> <span class="n">tempnc</span>
 <span class="kn">from</span> <span class="nn">compliance_checker.base</span> <span class="kn">import</span> <span class="n">BaseCheck</span><span class="p">,</span> <span class="n">GenericFile</span><span class="p">,</span> <span class="n">Result</span><span class="p">,</span> <span class="n">fix_return_value</span>
 <span class="kn">from</span> <span class="nn">compliance_checker.protocols</span> <span class="kn">import</span> <span class="n">cdl</span><span class="p">,</span> <span class="n">netcdf</span><span class="p">,</span> <span class="n">opendap</span>
 
@@ -286,7 +301,9 @@
     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getwriter</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="extract_docstring_summary"><a class="viewcode-back" href="../../generated/compliance_checker.suite.extract_docstring_summary.html#compliance_checker.suite.extract_docstring_summary">[docs]</a><span class="k">def</span> <span class="nf">extract_docstring_summary</span><span class="p">(</span><span class="n">docstring</span><span class="p">):</span>
+<div class="viewcode-block" id="extract_docstring_summary">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.extract_docstring_summary.html#compliance_checker.suite.extract_docstring_summary">[docs]</a>
+<span class="k">def</span> <span class="nf">extract_docstring_summary</span><span class="p">(</span><span class="n">docstring</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a dedented docstring without parameter information</span>
 <span class="sd">    :param docstring: A docstring</span>
@@ -305,15 +322,21 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CheckSuite"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite">[docs]</a><span class="k">class</span> <span class="nc">CheckSuite</span><span class="p">:</span>
+
+<div class="viewcode-block" id="CheckSuite">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite">[docs]</a>
+<span class="k">class</span> <span class="nc">CheckSuite</span><span class="p">:</span>
     <span class="n">checkers</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">{}</span>
     <span class="p">)</span>  <span class="c1"># Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation</span>
     <span class="n">templates_root</span> <span class="o">=</span> <span class="s2">&quot;compliance_checker&quot;</span>  <span class="c1"># modify to load alternative Jinja2 templates</span>
 
-<div class="viewcode-block" id="CheckSuite.__init__"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CheckSuite.__init__">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">col_width</span> <span class="o">=</span> <span class="mi">40</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">{}</span></div>
+
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_get_generator_plugins</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -323,8 +346,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;suite_generators&quot;</span><span class="p">):</span>
-            <span class="n">gens</span> <span class="o">=</span> <span class="n">working_set</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="s2">&quot;compliance_checker.generators&quot;</span><span class="p">)</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">suite_generators</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">gens</span><span class="p">]</span>
+            <span class="n">gens</span> <span class="o">=</span> <span class="n">importlib_metadata</span><span class="o">.</span><span class="n">entry_points</span><span class="p">(</span>
+                <span class="n">group</span><span class="o">=</span><span class="s2">&quot;compliance_checker.generators&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">suite_generators</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">load</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">gens</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">suite_generators</span>
 
@@ -361,7 +386,9 @@
                 <span class="n">u_doc</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="vm">__doc__</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">extract_docstring_summary</span><span class="p">(</span><span class="n">u_doc</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CheckSuite.add_plugin_args"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.add_plugin_args">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="CheckSuite.add_plugin_args">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.add_plugin_args">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">add_plugin_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add command line arguments for external plugins that generate checker</span>
@@ -370,7 +397,10 @@
         <span class="k">for</span> <span class="n">gen</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_generator_plugins</span><span class="p">():</span>
             <span class="n">gen</span><span class="o">.</span><span class="n">add_arguments</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.load_generated_checkers"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.load_generated_checkers">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="CheckSuite.load_generated_checkers">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.load_generated_checkers">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_generated_checkers</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load checker classes from generator plugins</span>
@@ -380,13 +410,19 @@
             <span class="n">checkers</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_checkers</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">checkers</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.load_all_available_checkers"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.load_all_available_checkers">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="CheckSuite.load_all_available_checkers">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.load_all_available_checkers">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_all_available_checkers</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper method to retrieve all sub checker classes derived from various</span>
 <span class="sd">        base classes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_load_checkers</span><span class="p">(</span><span class="n">working_set</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="s2">&quot;compliance_checker.suites&quot;</span><span class="p">))</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_load_checkers</span><span class="p">(</span>
+            <span class="n">importlib_metadata</span><span class="o">.</span><span class="n">entry_points</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s2">&quot;compliance_checker.suites&quot;</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_load_checkers</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkers</span><span class="p">):</span>
@@ -397,7 +433,7 @@
 
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">checkers</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">check_obj</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+                <span class="n">check_obj</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">check_obj</span><span class="p">,</span> <span class="s2">&quot;_cc_spec&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
                     <span class="n">check_obj</span><span class="p">,</span>
                     <span class="s2">&quot;_cc_spec_version&quot;</span><span class="p">,</span>
@@ -436,9 +472,8 @@
         <span class="k">for</span> <span class="n">spec</span><span class="p">,</span> <span class="n">versions</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">ver_checkers</span><span class="p">,</span> <span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
             <span class="n">version_nums</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">]</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">latest_version</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">StrictVersion</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">version_nums</span><span class="p">))</span>
-            <span class="c1"># if the version can&#39;t be parsed as a StrictVersion, parse</span>
-            <span class="c1"># according to character collation</span>
+                <span class="n">latest_version</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">version_nums</span><span class="p">))</span>
+            <span class="c1"># if the version can&#39;t be parsed, do it according to character collation</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="n">latest_version</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">version_nums</span><span class="p">)</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot;:latest&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span>
@@ -596,11 +631,8 @@
                     <span class="n">check_max_level</span> <span class="o">=</span> <span class="n">check_lookup</span><span class="p">[</span><span class="n">split_check_spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="s2">&quot;Skip specifier &#39;</span><span class="si">{}</span><span class="s2">&#39; on check &#39;</span><span class="si">{}</span><span class="s2">&#39; not found,&quot;</span>
-                        <span class="s2">&quot; defaulting to skip entire check&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                            <span class="n">split_check_spec</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                            <span class="n">check_name</span><span class="p">,</span>
-                        <span class="p">),</span>
+                        <span class="sa">f</span><span class="s2">&quot;Skip specifier &#39;</span><span class="si">{</span><span class="n">split_check_spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; on check &#39;</span><span class="si">{</span><span class="n">check_name</span><span class="si">}</span><span class="s2">&#39; not found,&quot;</span>
+                        <span class="s2">&quot; defaulting to skip entire check&quot;</span><span class="p">,</span>
                         <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">check_max_level</span> <span class="o">=</span> <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span>
@@ -609,14 +641,19 @@
 
         <span class="k">return</span> <span class="n">check_dict</span>
 
-<div class="viewcode-block" id="CheckSuite.run"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">skip_checks</span><span class="p">,</span> <span class="o">*</span><span class="n">checker_names</span><span class="p">):</span>
+<div class="viewcode-block" id="CheckSuite.run">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">skip_checks</span><span class="p">,</span> <span class="o">*</span><span class="n">checker_names</span><span class="p">):</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;suite.run is deprecated, use suite.run_all in calls instead&quot;</span><span class="p">,</span>
             <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_all</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">checker_names</span><span class="p">,</span> <span class="n">skip_checks</span><span class="o">=</span><span class="n">skip_checks</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.run_all"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.run_all">[docs]</a>    <span class="k">def</span> <span class="nf">run_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">checker_names</span><span class="p">,</span> <span class="n">include_checks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip_checks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.run_all">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.run_all">[docs]</a>
+    <span class="k">def</span> <span class="nf">run_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">checker_names</span><span class="p">,</span> <span class="n">include_checks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip_checks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Runs this CheckSuite on the dataset with all the passed Checker instances.</span>
 
@@ -682,7 +719,10 @@
 
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
-<div class="viewcode-block" id="CheckSuite.passtree"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.passtree">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="CheckSuite.passtree">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.passtree">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">passtree</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
@@ -695,7 +735,10 @@
 
         <span class="k">return</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="CheckSuite.build_structure"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.build_structure">[docs]</a>    <span class="k">def</span> <span class="nf">build_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_name</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">source_name</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.build_structure">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.build_structure">[docs]</a>
+    <span class="k">def</span> <span class="nf">build_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_name</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">source_name</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compiles the checks, results and scores into an aggregate structure which looks like:</span>
 
@@ -779,7 +822,10 @@
         <span class="n">aggregates</span><span class="p">[</span><span class="s2">&quot;cc_version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">__version__</span>
         <span class="k">return</span> <span class="n">aggregates</span></div>
 
-<div class="viewcode-block" id="CheckSuite.dict_output"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.dict_output">[docs]</a>    <span class="k">def</span> <span class="nf">dict_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_name</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">source_name</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.dict_output">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.dict_output">[docs]</a>
+    <span class="k">def</span> <span class="nf">dict_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_name</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">source_name</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Builds the results into a JSON structure and writes it to the file buffer.</span>
 
@@ -792,7 +838,10 @@
         <span class="n">aggregates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_structure</span><span class="p">(</span><span class="n">check_name</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">source_name</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">aggregates</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.serialize"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.serialize">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.serialize">[docs]</a>
+    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a safe serializable object that can be serialized into JSON.</span>
 
@@ -808,7 +857,10 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">serialize</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">o</span></div>
 
-<div class="viewcode-block" id="CheckSuite.checker_html_output"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.checker_html_output">[docs]</a>    <span class="k">def</span> <span class="nf">checker_html_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_name</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">source_name</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.checker_html_output">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.checker_html_output">[docs]</a>
+    <span class="k">def</span> <span class="nf">checker_html_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_name</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">source_name</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Renders the HTML output for a single test using Jinja2 and returns it</span>
 <span class="sd">        as a string.</span>
@@ -828,7 +880,10 @@
         <span class="n">template_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_structure</span><span class="p">(</span><span class="n">check_name</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">source_name</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">**</span><span class="n">template_vars</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.html_output"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.html_output">[docs]</a>    <span class="k">def</span> <span class="nf">html_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkers_html</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.html_output">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.html_output">[docs]</a>
+    <span class="k">def</span> <span class="nf">html_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkers_html</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Renders the HTML output for multiple tests and returns it as a string.</span>
 
@@ -840,7 +895,10 @@
         <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">j2</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s2">&quot;ccheck_wrapper.html.j2&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">checkers</span><span class="o">=</span><span class="n">checkers_html</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.get_points"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.get_points">[docs]</a>    <span class="k">def</span> <span class="nf">get_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.get_points">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.get_points">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
         <span class="n">score_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">score_only_list</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -857,7 +915,10 @@
 
         <span class="k">return</span> <span class="n">score_list</span><span class="p">,</span> <span class="n">all_passed</span><span class="p">,</span> <span class="n">out_of</span></div>
 
-<div class="viewcode-block" id="CheckSuite.standard_output"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.standard_output">[docs]</a>    <span class="k">def</span> <span class="nf">standard_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">check_name</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.standard_output">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.standard_output">[docs]</a>
+    <span class="k">def</span> <span class="nf">standard_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">check_name</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the Terminal Output for Standard cases</span>
 
@@ -894,16 +955,15 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Corrective Actions&quot;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">width</span><span class="p">))</span>
             <span class="n">plural</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">issue_count</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;s&quot;</span>
             <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> has </span><span class="si">{}</span><span class="s2"> potential issue</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">ds</span><span class="p">),</span>
-                    <span class="n">issue_count</span><span class="p">,</span>
-                    <span class="n">plural</span><span class="p">,</span>
-                <span class="p">),</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="n">issue_count</span><span class="si">}</span><span class="s2"> potential issue</span><span class="si">{</span><span class="n">plural</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="p">[</span><span class="n">groups</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">out_of</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="CheckSuite.standard_output_generation"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.standard_output_generation">[docs]</a>    <span class="k">def</span> <span class="nf">standard_output_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">out_of</span><span class="p">,</span> <span class="n">check</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.standard_output_generation">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.standard_output_generation">[docs]</a>
+    <span class="k">def</span> <span class="nf">standard_output_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">out_of</span><span class="p">,</span> <span class="n">check</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the Terminal Output</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -912,7 +972,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;All tests passed!&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.reasoning_routine"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.reasoning_routine">[docs]</a>    <span class="k">def</span> <span class="nf">reasoning_routine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">check</span><span class="p">,</span> <span class="n">priority_flag</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">_top_level</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.reasoning_routine">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.reasoning_routine">[docs]</a>
+    <span class="k">def</span> <span class="nf">reasoning_routine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">check</span><span class="p">,</span> <span class="n">priority_flag</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">_top_level</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        print routine performed</span>
 <span class="sd">        @param list groups: the Result groups</span>
@@ -995,7 +1058,10 @@
                     <span class="n">has_printed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">proc_strs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.process_doc"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.process_doc">[docs]</a>    <span class="k">def</span> <span class="nf">process_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.process_doc">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.process_doc">[docs]</a>
+    <span class="k">def</span> <span class="nf">process_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Attempt to parse an xml string conforming to either an SOS or SensorML</span>
 <span class="sd">        dataset and return the results</span>
@@ -1013,7 +1079,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized XML root element: </span><span class="si">{</span><span class="n">xml_doc</span><span class="o">.</span><span class="n">tag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ds</span></div>
 
-<div class="viewcode-block" id="CheckSuite.generate_dataset"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.generate_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">generate_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cdl_path</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.generate_dataset">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.generate_dataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cdl_path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use ncgen to generate a netCDF file from a .cdl file</span>
 <span class="sd">        Returns the path to the generated netcdf file. If ncgen fails, uses</span>
@@ -1022,12 +1091,9 @@
 
 <span class="sd">        :param str cdl_path: Absolute path to cdl file that is used to generate netCDF file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="s2">&quot;.cdl&quot;</span> <span class="ow">in</span> <span class="n">cdl_path</span>
-        <span class="p">):</span>  <span class="c1"># it&#39;s possible the filename doesn&#39;t have the .cdl extension</span>
-            <span class="n">ds_str</span> <span class="o">=</span> <span class="n">cdl_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.cdl&quot;</span><span class="p">,</span> <span class="s2">&quot;.nc&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">ds_str</span> <span class="o">=</span> <span class="n">cdl_path</span> <span class="o">+</span> <span class="s2">&quot;.nc&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cdl_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">cdl_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cdl_path</span><span class="p">)</span>
+        <span class="n">ds_str</span> <span class="o">=</span> <span class="n">cdl_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.nc&quot;</span><span class="p">)</span>
 
         <span class="c1"># generate netCDF-4 file</span>
         <span class="n">iostat</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
@@ -1056,7 +1122,10 @@
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ds_str</span></div>
 
-<div class="viewcode-block" id="CheckSuite.load_dataset"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.load_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.load_dataset">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.load_dataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an instantiated instance of either a netCDF file or an SOS</span>
 <span class="sd">        mapped DS object.</span>
@@ -1074,11 +1143,14 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_local_dataset</span><span class="p">(</span><span class="n">ds_str</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.check_remote_netcdf"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.check_remote_netcdf">[docs]</a>    <span class="k">def</span> <span class="nf">check_remote_netcdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.check_remote_netcdf">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.check_remote_netcdf">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_remote_netcdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_str</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">netcdf</span><span class="o">.</span><span class="n">is_remote_netcdf</span><span class="p">(</span><span class="n">ds_str</span><span class="p">):</span>
             <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ds_str</span><span class="p">,</span> <span class="n">allow_redirects</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">MemoizedDataset</span><span class="p">(</span>
+                <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span>
                     <span class="n">urlparse</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
                     <span class="n">memory</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -1086,9 +1158,12 @@
                 <span class="c1"># handle case when netCDF C libs weren&#39;t compiled with</span>
                 <span class="c1"># in-memory support by using tempfile</span>
                 <span class="k">with</span> <span class="n">tempnc</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span> <span class="k">as</span> <span class="n">_nc</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">MemoizedDataset</span><span class="p">(</span><span class="n">_nc</span><span class="p">)</span></div>
+                    <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">_nc</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.load_remote_dataset"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.load_remote_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_remote_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.load_remote_dataset">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.load_remote_dataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_remote_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a dataset instance for the remote resource, either OPeNDAP or SOS</span>
 
@@ -1128,12 +1203,20 @@
         <span class="n">content_type</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content-type&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">content_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;text/xml&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_doc</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">content_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;application/x-netcdf&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span>
+                <span class="n">urlparse</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                <span class="n">memory</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Unknown service with content-type: </span><span class="si">{</span><span class="n">content_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.load_local_dataset"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.load_local_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">load_local_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.load_local_dataset">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.load_local_dataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_local_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a dataset instance for the local resource</span>
 
@@ -1143,7 +1226,7 @@
             <span class="n">ds_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_dataset</span><span class="p">(</span><span class="n">ds_str</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">netcdf</span><span class="o">.</span><span class="n">is_netcdf</span><span class="p">(</span><span class="n">ds_str</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">MemoizedDataset</span><span class="p">(</span><span class="n">ds_str</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">ds_str</span><span class="p">)</span>
 
         <span class="c1"># Assume this is just a Generic File if it exists</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ds_str</span><span class="p">):</span>
@@ -1151,13 +1234,17 @@
 
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;File is an unknown format&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CheckSuite.scores"><a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.scores">[docs]</a>    <span class="k">def</span> <span class="nf">scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_scores</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CheckSuite.scores">
+<a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite.scores">[docs]</a>
+    <span class="k">def</span> <span class="nf">scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_scores</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transforms raw scores from a single checker into a fully tallied and grouped scoreline.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">grouped</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_raw</span><span class="p">(</span><span class="n">raw_scores</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">grouped</span></div>
+
 
     <span class="k">def</span> <span class="nf">_group_raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_scores</span><span class="p">,</span> <span class="n">cur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1257,27 +1344,26 @@
             <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">val</span></div>
+
 </pre></div>
 
                 </article>
               
               
               
-                <footer class="bd-footer-article">
+              
+              
+                <footer class="prev-next-footer">
                   
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
               
             
           </div>
@@ -1290,8 +1376,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1299,17 +1385,19 @@
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
-      © Copyright 2023, Dave Foster.
+      © Copyright 2024, Dave Foster.
       <br/>
     
   </p>
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -1317,10 +1405,12 @@
     </div>
   
   
+  
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
 </p></div>
       
     </div>

@@ -10,6 +10,7 @@ Python tool to check your datasets against compliance standards.
    quickintro
    compliance_checker_api
    faq
+   development
 
 Indices and tables
 ==================

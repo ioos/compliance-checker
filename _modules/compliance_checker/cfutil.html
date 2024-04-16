@@ -1,14 +1,13 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="../../" >
 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.cfutil &#8212; compliance_checker 5.1.0 documentation</title>
+    <title>compliance_checker.cfutil &#8212; compliance_checker 5.1.1 documentation</title>
   
   
   
@@ -18,25 +17,26 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/documentation_options.js?v=1bd908e2"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/cfutil';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -52,7 +52,15 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -93,8 +101,13 @@
 
     <div class="container-fluid" id="banner"></div>
 
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -105,13 +118,8 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
                     <li class="nav-item">
@@ -131,6 +139,13 @@
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../faq.html">
                         Frequently Asked Questions
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../development.html">
+                        Developer Notes
                       </a>
                     </li>
                 
@@ -179,8 +194,8 @@
           
           
           
-          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square"></i></span>
-            <label class="sr-only">GitHub</label></a>
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
         </li>
 </ul></div>
         
@@ -190,7 +205,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.1.0
+  Version 5.1.1
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
@@ -219,8 +234,8 @@
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../index.html" class="nav-link" aria-label="Home">
@@ -230,7 +245,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">compliance_checker.cfutil</li>
+    <li class="breadcrumb-item active" aria-current="page">compliance_c...</li>
   </ul>
 </nav>
 </div>
@@ -245,7 +260,7 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <h1>Source code for compliance_checker.cfutil</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
@@ -259,7 +274,7 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span><span class="p">,</span> <span class="n">partial</span>
 
 <span class="kn">from</span> <span class="nn">cf_units</span> <span class="kn">import</span> <span class="n">Unit</span>
-<span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">resource_filename</span>
+<span class="kn">from</span> <span class="nn">importlib_resources</span> <span class="kn">import</span> <span class="n">files</span>
 
 <span class="n">_UNITLESS_DB</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">_SEA_NAMES</span> <span class="o">=</span> <span class="kc">None</span>
@@ -298,7 +313,9 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="attr_membership"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.attr_membership.html#compliance_checker.cfutil.attr_membership">[docs]</a><span class="k">def</span> <span class="nf">attr_membership</span><span class="p">(</span><span class="n">attr_val</span><span class="p">,</span> <span class="n">value_set</span><span class="p">,</span> <span class="n">attr_type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">modifier_fn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="attr_membership">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.attr_membership.html#compliance_checker.cfutil.attr_membership">[docs]</a>
+<span class="k">def</span> <span class="nf">attr_membership</span><span class="p">(</span><span class="n">attr_val</span><span class="p">,</span> <span class="n">value_set</span><span class="p">,</span> <span class="n">attr_type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">modifier_fn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper function passed to netCDF4.Dataset.get_attributes_by_value</span>
 <span class="sd">    Checks that `attr_val` exists, has the same type as `attr_type`,</span>
@@ -346,7 +363,10 @@
     <span class="k">return</span> <span class="n">is_in_set</span></div>
 
 
-<div class="viewcode-block" id="is_dimensionless_standard_name"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_dimensionless_standard_name.html#compliance_checker.cfutil.is_dimensionless_standard_name">[docs]</a><span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+
+<div class="viewcode-block" id="is_dimensionless_standard_name">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_dimensionless_standard_name.html#compliance_checker.cfutil.is_dimensionless_standard_name">[docs]</a>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">is_dimensionless_standard_name</span><span class="p">(</span><span class="n">standard_name_table</span><span class="p">,</span> <span class="n">standard_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if the units for the associated standard name are</span>
@@ -368,7 +388,10 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="get_sea_names"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_sea_names.html#compliance_checker.cfutil.get_sea_names">[docs]</a><span class="k">def</span> <span class="nf">get_sea_names</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_sea_names">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_sea_names.html#compliance_checker.cfutil.get_sea_names">[docs]</a>
+<span class="k">def</span> <span class="nf">get_sea_names</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of NODC sea names</span>
 
@@ -378,7 +401,7 @@
     <span class="k">if</span> <span class="n">_SEA_NAMES</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">buf</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
-            <span class="n">resource_filename</span><span class="p">(</span><span class="s2">&quot;compliance_checker&quot;</span><span class="p">,</span> <span class="s2">&quot;data/seanames.csv&quot;</span><span class="p">),</span>
+            <span class="n">files</span><span class="p">(</span><span class="s2">&quot;compliance_checker&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;data/seanames.csv&quot;</span><span class="p">,</span>
         <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">sea_name</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
@@ -387,7 +410,10 @@
     <span class="k">return</span> <span class="n">_SEA_NAMES</span></div>
 
 
-<div class="viewcode-block" id="is_unitless"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_unitless.html#compliance_checker.cfutil.is_unitless">[docs]</a><span class="k">def</span> <span class="nf">is_unitless</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_unitless">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_unitless.html#compliance_checker.cfutil.is_unitless">[docs]</a>
+<span class="k">def</span> <span class="nf">is_unitless</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is unitless</span>
 
@@ -401,7 +427,10 @@
     <span class="k">return</span> <span class="n">units</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="is_geophysical"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_geophysical.html#compliance_checker.cfutil.is_geophysical">[docs]</a><span class="k">def</span> <span class="nf">is_geophysical</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_geophysical">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_geophysical.html#compliance_checker.cfutil.is_geophysical">[docs]</a>
+<span class="k">def</span> <span class="nf">is_geophysical</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the dataset&#39;s variable is likely a geophysical variable</span>
 
@@ -491,7 +520,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="get_coordinate_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_coordinate_variables.html#compliance_checker.cfutil.get_coordinate_variables">[docs]</a><span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_coordinate_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_coordinate_variables.html#compliance_checker.cfutil.get_coordinate_variables">[docs]</a>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_coordinate_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of variable names that identify as coordinate variables.</span>
@@ -516,7 +548,10 @@
     <span class="k">return</span> <span class="n">coord_vars</span></div>
 
 
-<div class="viewcode-block" id="get_auxiliary_coordinate_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_auxiliary_coordinate_variables.html#compliance_checker.cfutil.get_auxiliary_coordinate_variables">[docs]</a><span class="k">def</span> <span class="nf">get_auxiliary_coordinate_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_auxiliary_coordinate_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_auxiliary_coordinate_variables.html#compliance_checker.cfutil.get_auxiliary_coordinate_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_auxiliary_coordinate_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of auxiliary coordinate variables</span>
 
@@ -527,7 +562,7 @@
 <span class="sd">    :param netCDf4.Dataset ds: An open netCDF dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">aux_vars</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1"># get any variables referecned by the coordinates attribute</span>
+    <span class="c1"># get any variables referenced by the coordinates attribute</span>
     <span class="k">for</span> <span class="n">ncvar</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">get_variables_by_attributes</span><span class="p">(</span>
         <span class="n">coordinates</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
     <span class="p">):</span>
@@ -574,7 +609,10 @@
     <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-<div class="viewcode-block" id="get_forecast_metadata_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_forecast_metadata_variables.html#compliance_checker.cfutil.get_forecast_metadata_variables">[docs]</a><span class="k">def</span> <span class="nf">get_forecast_metadata_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_forecast_metadata_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_forecast_metadata_variables.html#compliance_checker.cfutil.get_forecast_metadata_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_forecast_metadata_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of variables that represent forecast reference time</span>
 <span class="sd">    metadata.</span>
@@ -594,7 +632,10 @@
     <span class="k">return</span> <span class="n">forecast_metadata_variables</span></div>
 
 
-<div class="viewcode-block" id="get_cell_boundary_map"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_cell_boundary_map.html#compliance_checker.cfutil.get_cell_boundary_map">[docs]</a><span class="k">def</span> <span class="nf">get_cell_boundary_map</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_cell_boundary_map">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_cell_boundary_map.html#compliance_checker.cfutil.get_cell_boundary_map">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cell_boundary_map</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a dictionary mapping a variable to its boundary variable. The</span>
 <span class="sd">    returned dictionary maps a string variable name to the name of the boundary</span>
@@ -609,7 +650,10 @@
     <span class="k">return</span> <span class="n">boundary_map</span></div>
 
 
-<div class="viewcode-block" id="get_cell_boundary_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_cell_boundary_variables.html#compliance_checker.cfutil.get_cell_boundary_variables">[docs]</a><span class="k">def</span> <span class="nf">get_cell_boundary_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_cell_boundary_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_cell_boundary_variables.html#compliance_checker.cfutil.get_cell_boundary_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cell_boundary_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of variable names for variables that represent cell</span>
 <span class="sd">    boundaries through the `bounds` attribute</span>
@@ -624,13 +668,19 @@
     <span class="k">return</span> <span class="n">boundary_variables</span></div>
 
 
-<div class="viewcode-block" id="get_bounds_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_bounds_variables.html#compliance_checker.cfutil.get_bounds_variables">[docs]</a><span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_bounds_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_bounds_variables.html#compliance_checker.cfutil.get_bounds_variables">[docs]</a>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_bounds_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
     <span class="n">contains_bounds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">get_variables_by_attributes</span><span class="p">(</span><span class="n">bounds</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">{</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">parent_var</span><span class="o">.</span><span class="n">bounds</span><span class="p">]</span> <span class="k">for</span> <span class="n">parent_var</span> <span class="ow">in</span> <span class="n">contains_bounds</span><span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="get_geophysical_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_geophysical_variables.html#compliance_checker.cfutil.get_geophysical_variables">[docs]</a><span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_geophysical_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_geophysical_variables.html#compliance_checker.cfutil.get_geophysical_variables">[docs]</a>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_geophysical_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of variable names for the variables detected as geophysical</span>
@@ -645,7 +695,10 @@
     <span class="k">return</span> <span class="n">parameters</span></div>
 
 
-<div class="viewcode-block" id="get_z_variable"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_z_variable.html#compliance_checker.cfutil.get_z_variable">[docs]</a><span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_z_variable">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_z_variable.html#compliance_checker.cfutil.get_z_variable">[docs]</a>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_z_variable</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the name of the variable that defines the Z axis or height/depth</span>
@@ -674,7 +727,10 @@
     <span class="k">return</span> <span class="n">z_variables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="get_z_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_z_variables.html#compliance_checker.cfutil.get_z_variables">[docs]</a><span class="k">def</span> <span class="nf">get_z_variables</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_z_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_z_variables.html#compliance_checker.cfutil.get_z_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_z_variables</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of all variables matching definitions for Z</span>
 
@@ -722,7 +778,10 @@
     <span class="k">return</span> <span class="n">z_variables</span></div>
 
 
-<div class="viewcode-block" id="get_lat_variable"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_lat_variable.html#compliance_checker.cfutil.get_lat_variable">[docs]</a><span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_lat_variable">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_lat_variable.html#compliance_checker.cfutil.get_lat_variable">[docs]</a>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_lat_variable</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the first variable matching latitude</span>
@@ -735,7 +794,10 @@
     <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="get_latitude_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_latitude_variables.html#compliance_checker.cfutil.get_latitude_variables">[docs]</a><span class="k">def</span> <span class="nf">get_latitude_variables</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_latitude_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_latitude_variables.html#compliance_checker.cfutil.get_latitude_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_latitude_variables</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of all variables matching definitions for latitude</span>
 
@@ -763,7 +825,10 @@
     <span class="k">return</span> <span class="n">latitude_variables</span></div>
 
 
-<div class="viewcode-block" id="get_true_latitude_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_true_latitude_variables.html#compliance_checker.cfutil.get_true_latitude_variables">[docs]</a><span class="k">def</span> <span class="nf">get_true_latitude_variables</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_true_latitude_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_true_latitude_variables.html#compliance_checker.cfutil.get_true_latitude_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_true_latitude_variables</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of variables defining true latitude.</span>
 
@@ -789,7 +854,10 @@
     <span class="k">return</span> <span class="n">true_lats</span></div>
 
 
-<div class="viewcode-block" id="get_lon_variable"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_lon_variable.html#compliance_checker.cfutil.get_lon_variable">[docs]</a><span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_lon_variable">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_lon_variable.html#compliance_checker.cfutil.get_lon_variable">[docs]</a>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_lon_variable</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the variable for longitude</span>
@@ -802,7 +870,10 @@
     <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="get_longitude_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_longitude_variables.html#compliance_checker.cfutil.get_longitude_variables">[docs]</a><span class="k">def</span> <span class="nf">get_longitude_variables</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_longitude_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_longitude_variables.html#compliance_checker.cfutil.get_longitude_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_longitude_variables</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of all variables matching definitions for longitude</span>
 
@@ -830,7 +901,10 @@
     <span class="k">return</span> <span class="n">longitude_variables</span></div>
 
 
-<div class="viewcode-block" id="get_true_longitude_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_true_longitude_variables.html#compliance_checker.cfutil.get_true_longitude_variables">[docs]</a><span class="k">def</span> <span class="nf">get_true_longitude_variables</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_true_longitude_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_true_longitude_variables.html#compliance_checker.cfutil.get_true_longitude_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_true_longitude_variables</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of variables defining true longitude.</span>
 
@@ -856,7 +930,10 @@
     <span class="k">return</span> <span class="n">true_lons</span></div>
 
 
-<div class="viewcode-block" id="get_platform_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_platform_variables.html#compliance_checker.cfutil.get_platform_variables">[docs]</a><span class="k">def</span> <span class="nf">get_platform_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_platform_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_platform_variables.html#compliance_checker.cfutil.get_platform_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_platform_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of platform variable NAMES</span>
 
@@ -876,7 +953,10 @@
     <span class="k">return</span> <span class="n">candidates</span></div>
 
 
-<div class="viewcode-block" id="get_instrument_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_instrument_variables.html#compliance_checker.cfutil.get_instrument_variables">[docs]</a><span class="k">def</span> <span class="nf">get_instrument_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_instrument_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_instrument_variables.html#compliance_checker.cfutil.get_instrument_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_instrument_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of instrument variables</span>
 
@@ -896,7 +976,10 @@
     <span class="k">return</span> <span class="n">candidates</span></div>
 
 
-<div class="viewcode-block" id="get_time_variable"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_time_variable.html#compliance_checker.cfutil.get_time_variable">[docs]</a><span class="k">def</span> <span class="nf">get_time_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_time_variable">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_time_variable.html#compliance_checker.cfutil.get_time_variable">[docs]</a>
+<span class="k">def</span> <span class="nf">get_time_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the likeliest variable to be the time coordinate variable</span>
 
@@ -926,7 +1009,10 @@
     <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="get_time_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_time_variables.html#compliance_checker.cfutil.get_time_variables">[docs]</a><span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_time_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_time_variables.html#compliance_checker.cfutil.get_time_variables">[docs]</a>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_time_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of variables describing the time coordinate</span>
@@ -949,7 +1035,10 @@
     <span class="k">return</span> <span class="n">time_variables</span></div>
 
 
-<div class="viewcode-block" id="get_axis_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_axis_variables.html#compliance_checker.cfutil.get_axis_variables">[docs]</a><span class="k">def</span> <span class="nf">get_axis_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_axis_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_axis_variables.html#compliance_checker.cfutil.get_axis_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_axis_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of variables that define an axis of the dataset</span>
 
@@ -961,7 +1050,10 @@
     <span class="k">return</span> <span class="n">axis_variables</span></div>
 
 
-<div class="viewcode-block" id="get_climatology_variable"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_climatology_variable.html#compliance_checker.cfutil.get_climatology_variable">[docs]</a><span class="k">def</span> <span class="nf">get_climatology_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_climatology_variable">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_climatology_variable.html#compliance_checker.cfutil.get_climatology_variable">[docs]</a>
+<span class="k">def</span> <span class="nf">get_climatology_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the variable describing climatology bounds if it exists.</span>
 
@@ -983,6 +1075,7 @@
         <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">time</span><span class="p">]</span><span class="o">.</span><span class="n">climatology</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">time</span><span class="p">]</span><span class="o">.</span><span class="n">climatology</span>
     <span class="k">return</span> <span class="kc">None</span></div>
+
 
 
 <span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
@@ -1007,7 +1100,9 @@
     <span class="p">]</span>
 
 
-<div class="viewcode-block" id="get_flag_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_flag_variables.html#compliance_checker.cfutil.get_flag_variables">[docs]</a><span class="k">def</span> <span class="nf">get_flag_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+<div class="viewcode-block" id="get_flag_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_flag_variables.html#compliance_checker.cfutil.get_flag_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_flag_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of variables that are defined as flag variables</span>
 
@@ -1023,7 +1118,10 @@
     <span class="k">return</span> <span class="n">flag_variables</span></div>
 
 
-<div class="viewcode-block" id="get_grid_mapping_variables"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_grid_mapping_variables.html#compliance_checker.cfutil.get_grid_mapping_variables">[docs]</a><span class="k">def</span> <span class="nf">get_grid_mapping_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_grid_mapping_variables">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_grid_mapping_variables.html#compliance_checker.cfutil.get_grid_mapping_variables">[docs]</a>
+<span class="k">def</span> <span class="nf">get_grid_mapping_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a list of grid mapping variables</span>
 
@@ -1036,7 +1134,10 @@
     <span class="k">return</span> <span class="n">grid_mapping_variables</span></div>
 
 
-<div class="viewcode-block" id="get_axis_map"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_axis_map.html#compliance_checker.cfutil.get_axis_map">[docs]</a><span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_axis_map">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.get_axis_map.html#compliance_checker.cfutil.get_axis_map">[docs]</a>
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_axis_map</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns an axis_map dictionary that contains an axis key and the coordinate</span>
@@ -1095,7 +1196,10 @@
     <span class="k">return</span> <span class="n">axis_map</span></div>
 
 
-<div class="viewcode-block" id="is_coordinate_variable"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_coordinate_variable.html#compliance_checker.cfutil.is_coordinate_variable">[docs]</a><span class="k">def</span> <span class="nf">is_coordinate_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_coordinate_variable">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_coordinate_variable.html#compliance_checker.cfutil.is_coordinate_variable">[docs]</a>
+<span class="k">def</span> <span class="nf">is_coordinate_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if the variable is a coordinate variable</span>
 
@@ -1107,7 +1211,10 @@
     <span class="k">return</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="p">(</span><span class="n">variable</span><span class="p">,)</span></div>
 
 
-<div class="viewcode-block" id="is_compression_coordinate"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_compression_coordinate.html#compliance_checker.cfutil.is_compression_coordinate">[docs]</a><span class="k">def</span> <span class="nf">is_compression_coordinate</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_compression_coordinate">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_compression_coordinate.html#compliance_checker.cfutil.is_compression_coordinate">[docs]</a>
+<span class="k">def</span> <span class="nf">is_compression_coordinate</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if the variable is a coordinate variable that defines a</span>
 <span class="sd">    compression scheme.</span>
@@ -1134,7 +1241,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="coordinate_dimension_matrix"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.coordinate_dimension_matrix.html#compliance_checker.cfutil.coordinate_dimension_matrix">[docs]</a><span class="k">def</span> <span class="nf">coordinate_dimension_matrix</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+
+<div class="viewcode-block" id="coordinate_dimension_matrix">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.coordinate_dimension_matrix.html#compliance_checker.cfutil.coordinate_dimension_matrix">[docs]</a>
+<span class="k">def</span> <span class="nf">coordinate_dimension_matrix</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a dictionary of coordinates mapped to their dimensions</span>
 
@@ -1158,7 +1268,10 @@
     <span class="k">return</span> <span class="n">retval</span></div>
 
 
-<div class="viewcode-block" id="is_dataset_valid_ragged_array_repr_featureType"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_dataset_valid_ragged_array_repr_featureType.html#compliance_checker.cfutil.is_dataset_valid_ragged_array_repr_featureType">[docs]</a><span class="k">def</span> <span class="nf">is_dataset_valid_ragged_array_repr_featureType</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">feature_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_dataset_valid_ragged_array_repr_featureType">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_dataset_valid_ragged_array_repr_featureType.html#compliance_checker.cfutil.is_dataset_valid_ragged_array_repr_featureType">[docs]</a>
+<span class="k">def</span> <span class="nf">is_dataset_valid_ragged_array_repr_featureType</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">feature_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if a data set is a valid representation of a ragged</span>
 <span class="sd">    array structure. See inline comments.</span>
@@ -1282,7 +1395,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="is_variable_valid_ragged_array_repr_featureType"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_variable_valid_ragged_array_repr_featureType.html#compliance_checker.cfutil.is_variable_valid_ragged_array_repr_featureType">[docs]</a><span class="k">def</span> <span class="nf">is_variable_valid_ragged_array_repr_featureType</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+<div class="viewcode-block" id="is_variable_valid_ragged_array_repr_featureType">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_variable_valid_ragged_array_repr_featureType.html#compliance_checker.cfutil.is_variable_valid_ragged_array_repr_featureType">[docs]</a>
+<span class="k">def</span> <span class="nf">is_variable_valid_ragged_array_repr_featureType</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method returns a boolean indicating whether the variable</span>
 <span class="sd">    is a valid member of a contiguous ragged array representation</span>
@@ -1316,7 +1432,10 @@
     <span class="k">return</span> <span class="n">nc</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">dim</span></div>
 
 
-<div class="viewcode-block" id="is_point"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_point.html#compliance_checker.cfutil.is_point">[docs]</a><span class="k">def</span> <span class="nf">is_point</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_point">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_point.html#compliance_checker.cfutil.is_point">[docs]</a>
+<span class="k">def</span> <span class="nf">is_point</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a point feature type</span>
 
@@ -1366,7 +1485,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="is_timeseries"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries.html#compliance_checker.cfutil.is_timeseries">[docs]</a><span class="k">def</span> <span class="nf">is_timeseries</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_timeseries">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries.html#compliance_checker.cfutil.is_timeseries">[docs]</a>
+<span class="k">def</span> <span class="nf">is_timeseries</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a time series feature type.</span>
 
@@ -1399,7 +1521,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="is_multi_timeseries_orthogonal"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_multi_timeseries_orthogonal.html#compliance_checker.cfutil.is_multi_timeseries_orthogonal">[docs]</a><span class="k">def</span> <span class="nf">is_multi_timeseries_orthogonal</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_multi_timeseries_orthogonal">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_multi_timeseries_orthogonal.html#compliance_checker.cfutil.is_multi_timeseries_orthogonal">[docs]</a>
+<span class="k">def</span> <span class="nf">is_multi_timeseries_orthogonal</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a orthogonal multidimensional array</span>
 <span class="sd">    representation of time series. For more information on what this means see</span>
@@ -1435,7 +1560,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_multi_timeseries_incomplete"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_multi_timeseries_incomplete.html#compliance_checker.cfutil.is_multi_timeseries_incomplete">[docs]</a><span class="k">def</span> <span class="nf">is_multi_timeseries_incomplete</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_multi_timeseries_incomplete">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_multi_timeseries_incomplete.html#compliance_checker.cfutil.is_multi_timeseries_incomplete">[docs]</a>
+<span class="k">def</span> <span class="nf">is_multi_timeseries_incomplete</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is an incomplete multidimensional array</span>
 <span class="sd">    representation of time series. For more information on what this means see</span>
@@ -1472,7 +1600,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="isTimeSeries"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.isTimeSeries.html#compliance_checker.cfutil.isTimeSeries">[docs]</a><span class="k">def</span> <span class="nf">isTimeSeries</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="isTimeSeries">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.isTimeSeries.html#compliance_checker.cfutil.isTimeSeries">[docs]</a>
+<span class="k">def</span> <span class="nf">isTimeSeries</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempt to consolidate all of the disparate timeseries checks.</span>
 <span class="sd">    Is this being pragmatic or lazy? I&#39;ll argue pragmatic.</span>
@@ -1491,7 +1622,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_cf_trajectory"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_cf_trajectory.html#compliance_checker.cfutil.is_cf_trajectory">[docs]</a><span class="k">def</span> <span class="nf">is_cf_trajectory</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_cf_trajectory">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_cf_trajectory.html#compliance_checker.cfutil.is_cf_trajectory">[docs]</a>
+<span class="k">def</span> <span class="nf">is_cf_trajectory</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a CF trajectory feature type</span>
 
@@ -1519,7 +1653,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_single_trajectory"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_single_trajectory.html#compliance_checker.cfutil.is_single_trajectory">[docs]</a><span class="k">def</span> <span class="nf">is_single_trajectory</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_single_trajectory">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_single_trajectory.html#compliance_checker.cfutil.is_single_trajectory">[docs]</a>
+<span class="k">def</span> <span class="nf">is_single_trajectory</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a single trajectory feature</span>
 
@@ -1553,7 +1690,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="isTrajectory"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.isTrajectory.html#compliance_checker.cfutil.isTrajectory">[docs]</a><span class="k">def</span> <span class="nf">isTrajectory</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="isTrajectory">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.isTrajectory.html#compliance_checker.cfutil.isTrajectory">[docs]</a>
+<span class="k">def</span> <span class="nf">isTrajectory</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapper method for checking if a variable is detected as</span>
 <span class="sd">    a trajectory featureType.</span>
@@ -1565,7 +1705,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_profile_orthogonal"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_profile_orthogonal.html#compliance_checker.cfutil.is_profile_orthogonal">[docs]</a><span class="k">def</span> <span class="nf">is_profile_orthogonal</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_profile_orthogonal">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_profile_orthogonal.html#compliance_checker.cfutil.is_profile_orthogonal">[docs]</a>
+<span class="k">def</span> <span class="nf">is_profile_orthogonal</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a orthogonal profile feature type</span>
 
@@ -1598,7 +1741,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_profile_incomplete"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_profile_incomplete.html#compliance_checker.cfutil.is_profile_incomplete">[docs]</a><span class="k">def</span> <span class="nf">is_profile_incomplete</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_profile_incomplete">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_profile_incomplete.html#compliance_checker.cfutil.is_profile_incomplete">[docs]</a>
+<span class="k">def</span> <span class="nf">is_profile_incomplete</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a incomplete profile feature type</span>
 
@@ -1633,7 +1779,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="isProfile"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.isProfile.html#compliance_checker.cfutil.isProfile">[docs]</a><span class="k">def</span> <span class="nf">isProfile</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="isProfile">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.isProfile.html#compliance_checker.cfutil.isProfile">[docs]</a>
+<span class="k">def</span> <span class="nf">isProfile</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Per Ch 9 of the CF spec, profiles are a part of the CF Discrete</span>
 <span class="sd">    Sampling Geometries. Profile data can be logically represented</span>
@@ -1668,7 +1817,10 @@
         <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="is_timeseries_profile_single_station"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_single_station.html#compliance_checker.cfutil.is_timeseries_profile_single_station">[docs]</a><span class="k">def</span> <span class="nf">is_timeseries_profile_single_station</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_timeseries_profile_single_station">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_single_station.html#compliance_checker.cfutil.is_timeseries_profile_single_station">[docs]</a>
+<span class="k">def</span> <span class="nf">is_timeseries_profile_single_station</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a time-series profile that represents a</span>
 <span class="sd">    single station and each profile is the same length.</span>
@@ -1702,7 +1854,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_timeseries_profile_multi_station"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_multi_station.html#compliance_checker.cfutil.is_timeseries_profile_multi_station">[docs]</a><span class="k">def</span> <span class="nf">is_timeseries_profile_multi_station</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_timeseries_profile_multi_station">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_multi_station.html#compliance_checker.cfutil.is_timeseries_profile_multi_station">[docs]</a>
+<span class="k">def</span> <span class="nf">is_timeseries_profile_multi_station</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a time-series profile that represents multiple stations with orthogonal time and depth</span>
 
@@ -1735,7 +1890,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_timeseries_profile_single_ortho_time"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_single_ortho_time.html#compliance_checker.cfutil.is_timeseries_profile_single_ortho_time">[docs]</a><span class="k">def</span> <span class="nf">is_timeseries_profile_single_ortho_time</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_timeseries_profile_single_ortho_time">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_single_ortho_time.html#compliance_checker.cfutil.is_timeseries_profile_single_ortho_time">[docs]</a>
+<span class="k">def</span> <span class="nf">is_timeseries_profile_single_ortho_time</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a time-series profile that represents a</span>
 <span class="sd">    single station with orthogonal time only.</span>
@@ -1774,7 +1932,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_timeseries_profile_multi_ortho_time"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_multi_ortho_time.html#compliance_checker.cfutil.is_timeseries_profile_multi_ortho_time">[docs]</a><span class="k">def</span> <span class="nf">is_timeseries_profile_multi_ortho_time</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_timeseries_profile_multi_ortho_time">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_multi_ortho_time.html#compliance_checker.cfutil.is_timeseries_profile_multi_ortho_time">[docs]</a>
+<span class="k">def</span> <span class="nf">is_timeseries_profile_multi_ortho_time</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a time-series profile that represents a</span>
 <span class="sd">    multi station with orthogonal time only.</span>
@@ -1816,7 +1977,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_timeseries_profile_ortho_depth"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_ortho_depth.html#compliance_checker.cfutil.is_timeseries_profile_ortho_depth">[docs]</a><span class="k">def</span> <span class="nf">is_timeseries_profile_ortho_depth</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_timeseries_profile_ortho_depth">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_ortho_depth.html#compliance_checker.cfutil.is_timeseries_profile_ortho_depth">[docs]</a>
+<span class="k">def</span> <span class="nf">is_timeseries_profile_ortho_depth</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a time-series profile with orthogonal depth</span>
 <span class="sd">    only.</span>
@@ -1856,7 +2020,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_timeseries_profile_incomplete"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_incomplete.html#compliance_checker.cfutil.is_timeseries_profile_incomplete">[docs]</a><span class="k">def</span> <span class="nf">is_timeseries_profile_incomplete</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_timeseries_profile_incomplete">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_timeseries_profile_incomplete.html#compliance_checker.cfutil.is_timeseries_profile_incomplete">[docs]</a>
+<span class="k">def</span> <span class="nf">is_timeseries_profile_incomplete</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a time-series profile incomplete depth and</span>
 <span class="sd">    incomplete time.</span>
@@ -1898,7 +2065,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="isTimeSeriesProfile"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.isTimeSeriesProfile.html#compliance_checker.cfutil.isTimeSeriesProfile">[docs]</a><span class="k">def</span> <span class="nf">isTimeSeriesProfile</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="isTimeSeriesProfile">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.isTimeSeriesProfile.html#compliance_checker.cfutil.isTimeSeriesProfile">[docs]</a>
+<span class="k">def</span> <span class="nf">isTimeSeriesProfile</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapper method.</span>
 <span class="sd">    Verify if a variable matches with the timeSeriesProfile</span>
@@ -1921,7 +2091,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_trajectory_profile_orthogonal"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_trajectory_profile_orthogonal.html#compliance_checker.cfutil.is_trajectory_profile_orthogonal">[docs]</a><span class="k">def</span> <span class="nf">is_trajectory_profile_orthogonal</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_trajectory_profile_orthogonal">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_trajectory_profile_orthogonal.html#compliance_checker.cfutil.is_trajectory_profile_orthogonal">[docs]</a>
+<span class="k">def</span> <span class="nf">is_trajectory_profile_orthogonal</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a trajectory profile with orthogonal</span>
 <span class="sd">    depths.</span>
@@ -1956,7 +2129,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_trajectory_profile_incomplete"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_trajectory_profile_incomplete.html#compliance_checker.cfutil.is_trajectory_profile_incomplete">[docs]</a><span class="k">def</span> <span class="nf">is_trajectory_profile_incomplete</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_trajectory_profile_incomplete">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_trajectory_profile_incomplete.html#compliance_checker.cfutil.is_trajectory_profile_incomplete">[docs]</a>
+<span class="k">def</span> <span class="nf">is_trajectory_profile_incomplete</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the variable is a trajectory profile with incomplete</span>
 <span class="sd">    depths.</span>
@@ -1997,7 +2173,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="isTrajectoryProfile"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.isTrajectoryProfile.html#compliance_checker.cfutil.isTrajectoryProfile">[docs]</a><span class="k">def</span> <span class="nf">isTrajectoryProfile</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="isTrajectoryProfile">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.isTrajectoryProfile.html#compliance_checker.cfutil.isTrajectoryProfile">[docs]</a>
+<span class="k">def</span> <span class="nf">isTrajectoryProfile</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapper method</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2013,7 +2192,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_2d_regular_grid"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_2d_regular_grid.html#compliance_checker.cfutil.is_2d_regular_grid">[docs]</a><span class="k">def</span> <span class="nf">is_2d_regular_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_2d_regular_grid">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_2d_regular_grid.html#compliance_checker.cfutil.is_2d_regular_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">is_2d_regular_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if the variable is a 2D Regular grid.</span>
 
@@ -2051,7 +2233,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_2d_static_grid"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_2d_static_grid.html#compliance_checker.cfutil.is_2d_static_grid">[docs]</a><span class="k">def</span> <span class="nf">is_2d_static_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_2d_static_grid">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_2d_static_grid.html#compliance_checker.cfutil.is_2d_static_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">is_2d_static_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if the variable is a 2D Regular grid that does not vary with</span>
 <span class="sd">    time.</span>
@@ -2087,7 +2272,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="is_3d_regular_grid"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_3d_regular_grid.html#compliance_checker.cfutil.is_3d_regular_grid">[docs]</a><span class="k">def</span> <span class="nf">is_3d_regular_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_3d_regular_grid">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_3d_regular_grid.html#compliance_checker.cfutil.is_3d_regular_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">is_3d_regular_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if the variable is a 3D Regular grid.</span>
 
@@ -2128,7 +2316,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_3d_static_grid"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_3d_static_grid.html#compliance_checker.cfutil.is_3d_static_grid">[docs]</a><span class="k">def</span> <span class="nf">is_3d_static_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_3d_static_grid">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_3d_static_grid.html#compliance_checker.cfutil.is_3d_static_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">is_3d_static_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if the variable is a 2D Regular grid that does not vary with</span>
 <span class="sd">    time.</span>
@@ -2168,7 +2359,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="is_mapped_grid"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_mapped_grid.html#compliance_checker.cfutil.is_mapped_grid">[docs]</a><span class="k">def</span> <span class="nf">is_mapped_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_mapped_grid">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_mapped_grid.html#compliance_checker.cfutil.is_mapped_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">is_mapped_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns true if the feature-type of variable corresponds to a mapped grid</span>
 <span class="sd">    type. Characterized by Appedix F of CF-1.6</span>
@@ -2224,7 +2418,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="is_reduced_grid"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_reduced_grid.html#compliance_checker.cfutil.is_reduced_grid">[docs]</a><span class="k">def</span> <span class="nf">is_reduced_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="is_reduced_grid">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.is_reduced_grid.html#compliance_checker.cfutil.is_reduced_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">is_reduced_grid</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if the feature-type of the variable corresponds to a reduced</span>
 <span class="sd">    horizontal grid.</span>
@@ -2251,7 +2448,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="guess_feature_type"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.guess_feature_type.html#compliance_checker.cfutil.guess_feature_type">[docs]</a><span class="k">def</span> <span class="nf">guess_feature_type</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="guess_feature_type">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.guess_feature_type.html#compliance_checker.cfutil.guess_feature_type">[docs]</a>
+<span class="k">def</span> <span class="nf">guess_feature_type</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">variable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a string describing the feature type for this variable</span>
 
@@ -2287,7 +2487,10 @@
         <span class="k">return</span> <span class="s2">&quot;reduced-grid&quot;</span></div>
 
 
-<div class="viewcode-block" id="units_convertible"><a class="viewcode-back" href="../../generated/compliance_checker.cfutil.units_convertible.html#compliance_checker.cfutil.units_convertible">[docs]</a><span class="k">def</span> <span class="nf">units_convertible</span><span class="p">(</span><span class="n">units1</span><span class="p">,</span> <span class="n">units2</span><span class="p">,</span> <span class="n">reftimeistime</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="units_convertible">
+<a class="viewcode-back" href="../../generated/compliance_checker.cfutil.units_convertible.html#compliance_checker.cfutil.units_convertible">[docs]</a>
+<span class="k">def</span> <span class="nf">units_convertible</span><span class="p">(</span><span class="n">units1</span><span class="p">,</span> <span class="n">units2</span><span class="p">,</span> <span class="n">reftimeistime</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return True if a Unit representing the string units1 can be converted</span>
 <span class="sd">    to a Unit representing the string units2, else False.</span>
@@ -2301,27 +2504,26 @@
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="n">u1</span><span class="o">.</span><span class="n">is_convertible</span><span class="p">(</span><span class="n">u2</span><span class="p">)</span></div>
+
 </pre></div>
 
                 </article>
               
               
               
-                <footer class="bd-footer-article">
+              
+              
+                <footer class="prev-next-footer">
                   
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
               
             
           </div>
@@ -2334,8 +2536,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2343,17 +2545,19 @@
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
-      © Copyright 2023, Dave Foster.
+      © Copyright 2024, Dave Foster.
       <br/>
     
   </p>
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -2361,10 +2565,12 @@
     </div>
   
   
+  
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
 </p></div>
       
     </div>
