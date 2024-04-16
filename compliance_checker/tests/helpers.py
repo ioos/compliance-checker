@@ -31,6 +31,7 @@ class MockNetCDF(Dataset):
         except AttributeError:
             pass
 
+
 class MockTimeSeries(MockNetCDF):
     """
     Mock time series with time dimension and time, lon, lat, and depth
