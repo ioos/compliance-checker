@@ -23,6 +23,10 @@ class MockNetCDF(Dataset):
             persist=False,
         )
 
+    # suppress usual dealloc routine to prevent caught exception messages
+    # from printing
+    def __dealloc__(self):
+        pass
 
 class MockTimeSeries(MockNetCDF):
     """
