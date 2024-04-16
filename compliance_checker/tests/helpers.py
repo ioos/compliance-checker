@@ -1,6 +1,6 @@
 import tempfile
 
-from netCDF4 import Dataset
+from netCDF4._netCDF4 import Dataset
 
 
 class MockNetCDF(Dataset):
@@ -26,7 +26,10 @@ class MockNetCDF(Dataset):
     # suppress usual dealloc routine to prevent caught exception messages
     # from printing
     def __dealloc__(self):
-        pass
+        try:
+            super().__dealloc__()
+        except AttributeError:
+            pass
 
 class MockTimeSeries(MockNetCDF):
     """
