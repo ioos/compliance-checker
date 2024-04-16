@@ -1300,9 +1300,7 @@ class TestCF1_6(BaseTestCase):
         # NB: >= 60 seconds is nonstandard, but isn't actually a CF requirement
         # until CF 1.9 onwards
         dataset.variables["time"].units = "months since 0-1-1 23:00:60"
-        dataset.variables[
-            "time"
-        ].climatology = (
+        dataset.variables["time"].climatology = (
             "nonexistent_variable_reference_only_used_to_test_year_zero_failure"
         )
         results = self.cf.check_time_coordinate(dataset)
@@ -2953,9 +2951,9 @@ class TestCF1_8(BaseTestCase):
             messages = results[0].msgs
             assert results[0].value[0] < results[0].value[1]
             assert len(messages) == 1
-            taxon_lsid[
-                0
-            ] = "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999"
+            taxon_lsid[0] = (
+                "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999"
+            )
             results = self.cf.check_taxa(dataset)
             assert messages[0].startswith(
                 "Taxon id must match one of the following forms:",
