@@ -17,13 +17,13 @@ from operator import itemgetter
 from pathlib import Path
 from urllib.parse import urlparse
 
+import importlib_metadata
 import requests
 from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
 from packaging.version import parse
-from pkg_resources import working_set
 
 from compliance_checker import __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
@@ -73,8 +73,10 @@ class CheckSuite:
         """
 
         if not hasattr(cls, "suite_generators"):
-            gens = working_set.iter_entry_points("compliance_checker.generators")
-            cls.suite_generators = [x.resolve() for x in gens]
+            gens = importlib_metadata.entry_points(
+                group="compliance_checker.generators",
+            )
+            cls.suite_generators = [x.load() for x in gens]
 
         return cls.suite_generators
 
@@ -136,7 +138,9 @@ class CheckSuite:
         Helper method to retrieve all sub checker classes derived from various
         base classes.
         """
-        cls._load_checkers(working_set.iter_entry_points("compliance_checker.suites"))
+        cls._load_checkers(
+            importlib_metadata.entry_points(group="compliance_checker.suites"),
+        )
 
     @classmethod
     def _load_checkers(cls, checkers):
@@ -147,7 +151,7 @@ class CheckSuite:
 
         for c in checkers:
             try:
-                check_obj = c.resolve()
+                check_obj = c.load()
                 if hasattr(check_obj, "_cc_spec") and hasattr(
                     check_obj,
                     "_cc_spec_version",
@@ -867,6 +871,11 @@ class CheckSuite:
         content_type = response.headers.get("content-type")
         if content_type.split(";")[0] == "text/xml":
             return self.process_doc(response.content)
+        elif content_type.split(";")[0] == "application/x-netcdf":
+            return Dataset(
+                urlparse(response.url).path,
+                memory=response.content,
+            )
         else:
             raise ValueError(
                 f"Unknown service with content-type: {content_type}",

@@ -396,7 +396,7 @@ class TestCF1_6(BaseTestCase):
 
         assert result.msgs == expected_msgs
 
-    def test_check_valid_range_or_valid_min_max_present(self):
+    def test_check_valid_range_and_valid_min_max_present(self):
         """
         2.5.1 Missing data, valid and actual range of data
         Requirements:
@@ -426,7 +426,7 @@ class TestCF1_6(BaseTestCase):
         dataset.variables["c"][1] = 2
         dataset.variables["c"].setncattr("valid_range", [-10, 10])
 
-        result = self.cf.check_valid_range_or_valid_min_max_present(dataset)
+        result = self.cf.check_valid_range_and_valid_min_max_present(dataset)
 
         # check if the test fails when when variable "a" is checked.
         expected_msgs = [
@@ -436,7 +436,7 @@ class TestCF1_6(BaseTestCase):
         ]
 
         assert result.msgs == expected_msgs
-        assert result.value[0] == result.value[1]
+        assert result.value[0] < result.value[1]
 
     def test_check_fill_value_outside_valid_range(self):
         """
@@ -1794,7 +1794,8 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["ints64"])
         suite = CheckSuite()
         suite.checkers = {"cf": CF1_6Check}
-        suite.run(dataset, "cf")
+        # suite.run(dataset, "cf")
+        suite.run_all(dataset, ["cf"], skip_checks=["cf"])
 
     def test_variable_feature_check(self):
         # non-compliant dataset -- 1/1 fail

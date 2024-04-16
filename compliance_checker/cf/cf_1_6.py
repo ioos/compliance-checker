@@ -425,12 +425,12 @@ class CF1_6Check(CFNCCheck):
 
         return Result(
             BaseCheck.MEDIUM,
-            (len(fails), total),
+            (total - len(fails), total),
             self.section_titles["2.5"],
             msgs=fails,
         )
 
-    def check_valid_range_or_valid_min_max_present(self, ds):
+    def check_valid_range_and_valid_min_max_present(self, ds):
         """
         The valid_range attribute must not be present if the valid_min
         and/or valid_max attributes are present. This according to 2.5.1 Requirements.
@@ -443,19 +443,22 @@ class CF1_6Check(CFNCCheck):
         total = 0
 
         for variable in ds.variables.values():
-            if hasattr(variable, "valid_max") and (
-                hasattr(variable, "valid_min") or hasattr(variable, "valid_range")
-            ):
-                total = total + 1
-
-                fails.append(
-                    f"For the variable {variable.name} the valid_range attribute must not be present "
-                    "if the valid_min and/or valid_max attributes are present",
-                )
+            if hasattr(variable, "valid_max") or hasattr(variable, "valid_min"):
+                total += 1
+                # if there's also valid_range in addition to
+                # valid_min/valid_max, this is not compliant
+                if hasattr(variable, "valid_range"):
+                    fails.append(
+                        f"For the variable {variable.name} the valid_range attribute must not be present "
+                        "if the valid_min and/or valid_max attributes are present",
+                    )
+            # *Just* valid_range should be added to total as well
+            elif hasattr(variable, "valid_range"):
+                total += 1
 
         return Result(
             BaseCheck.MEDIUM,
-            (len(fails), total),
+            (total - len(fails), total),
             self.section_titles["2.5"],
             msgs=fails,
         )
