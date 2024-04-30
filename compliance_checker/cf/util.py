@@ -293,7 +293,7 @@ def download_cf_standard_name_table(version, location=None):
             url = version
             version = '"url specified"'
         else:
-            url = f"http://cfconventions.org/Data/cf-standard-names/{}/src/cf-standard-name-table.xml".format(
+            url = "http://cfconventions.org/Data/cf-standard-names/{}/src/cf-standard-name-table.xml".format(
                 version
             )
 
