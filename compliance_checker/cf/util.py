@@ -289,7 +289,13 @@ def download_cf_standard_name_table(version, location=None):
     if version == "latest":
         url = "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml"
     else:
-        url = f"http://cfconventions.org/Data/cf-standard-names/{version}/src/cf-standard-name-table.xml"
+        if version.startswith('http'):
+            url = version
+            version = '"url specified"'
+        else:
+            url = f"http://cfconventions.org/Data/cf-standard-names/{}/src/cf-standard-name-table.xml".format(
+                version
+            )
 
     r = requests.get(url, allow_redirects=True)
     r.raise_for_status()
