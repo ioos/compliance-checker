@@ -11,7 +11,15 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         os: [windows-latest, ubuntu-latest, macos-latest]
+        experimental: [false]
+        include:
+          - python-version: "3.12"
+            os: "ubuntu-latest"
+            experimental: true
       fail-fast: false
+    defaults:
+      run:
+        shell: bash -l {0}
 
     steps:
     - uses: actions/checkout@v4
@@ -27,11 +35,14 @@ jobs:
           --file test_requirements.txt
           --channel conda-forge
 
+    - name: Install unstable dependencies
+      if: matrix.experimental == true
+      run: |
+        micromamba install conda-forge/label/numpy_dev::numpy
+
     - name: Install compliance-checker
-      shell: bash -l {0}
       run: |
         python -m pip install -e . --no-deps --force-reinstall
 
     - name: Default Tests
-      shell: bash -l {0}
       run: python -m pytest -s -rxs -v -k "not integration" compliance_checker
