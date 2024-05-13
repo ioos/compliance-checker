@@ -19,7 +19,6 @@ from owslib.namespaces import Namespaces
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
 
-import compliance_checker.cfutil as cfutil
 from compliance_checker import __version__
 from compliance_checker.util import kvp_convert
 
@@ -184,17 +183,6 @@ class BaseCheck:
                 variable=variable,
             )
         return self._defined_results[name][variable][severity]
-
-    def __del__(self):
-        """
-        Finalizer. Ensure any caches shared by multiple checkers
-        are cleared before the next checker uses it. Some caches were
-        inadvertently mutated by other functions.
-        """
-
-        if cfutil is not None:
-            cfutil.get_geophysical_variables.cache_clear()
-            cfutil.get_time_variables.cache_clear()
 
 
 class BaseNCCheck:
