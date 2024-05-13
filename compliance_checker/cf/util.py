@@ -199,9 +199,9 @@ class StandardNameTable:
         def _get(self, entrynode, attrname, required=False):
             vals = entrynode.xpath(attrname)
             if len(vals) > 1:
-                raise Exception("Multiple attrs (%s) found" % attrname)
+                raise Exception(f"Multiple attrs ({attrname}) found")
             elif required and len(vals) == 0:
-                raise Exception("Required attr (%s) not found" % attrname)
+                raise Exception(f"Required attr ({attrname}) not found")
 
             return vals[0].text
 
@@ -236,7 +236,7 @@ class StandardNameTable:
 
     def __getitem__(self, key):
         if not (key in self._names or key in self._aliases):
-            raise KeyError("%s not found in standard name table" % key)
+            raise KeyError(f"{key} not found in standard name table")
 
         if key in self._aliases:
             idx = self._aliases.index(key)
@@ -244,14 +244,13 @@ class StandardNameTable:
 
             if len(entryids) != 1:
                 raise Exception(
-                    "Inconsistency in standard name table, could not lookup alias for %s"
-                    % key,
+                    f"Inconsistency in standard name table, could not lookup alias for {key}"
                 )
 
             key = entryids[0].text
 
         if key not in self._names:
-            raise KeyError("%s not found in standard name table" % key)
+            raise KeyError(f"{key} not found in standard name table")
 
         idx = self._names.index(key)
         entry = self.NameEntry(self._root.xpath("entry")[idx])
@@ -293,9 +292,7 @@ def download_cf_standard_name_table(version, location=None):
             url = version
             version = '"url specified"'
         else:
-            url = "http://cfconventions.org/Data/cf-standard-names/{}/src/cf-standard-name-table.xml".format(
-                version
-            )
+            url = f"http://cfconventions.org/Data/cf-standard-names/{version}/src/cf-standard-name-table.xml"
 
     r = requests.get(url, allow_redirects=True)
     r.raise_for_status()

@@ -626,7 +626,7 @@ class ACDDBaseCheck(BaseCheck):
                 BaseCheck.MEDIUM,
                 False,
                 "time_coverage_extents_match",
-                ["Failed to retrieve and convert times for variables %s." % timevar],
+                [f"Failed to retrieve and convert times for variables {timevar}."],
             )
 
         start_dt = abs(time0 - t_min)

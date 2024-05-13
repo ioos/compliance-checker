@@ -302,7 +302,7 @@ class CF1_6Check(CFNCCheck):
             names[k.lower()] += 1
 
         fails = [
-            "Variables are not case sensitive. Duplicate variables named: %s" % k
+            f"Variables are not case sensitive. Duplicate variables named: {k}"
             for k, v in names.items()
             if v > 1
         ]
@@ -1822,7 +1822,7 @@ class CF1_6Check(CFNCCheck):
                     BaseCheck.HIGH,
                     False,
                     self.section_titles["4.4"],
-                    ["%s does not have units" % name],
+                    [f"{name} does not have units"],
                 )
                 ret_val.append(result)
                 continue
@@ -1833,7 +1833,7 @@ class CF1_6Check(CFNCCheck):
             correct_units = util.units_temporal(variable.units)
             reasoning = None
             if not correct_units:
-                reasoning = ["%s does not have correct time units" % name]
+                reasoning = [f"{name} does not have correct time units"]
                 result = Result(
                     BaseCheck.HIGH,
                     correct_units,
