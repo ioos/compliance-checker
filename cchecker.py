@@ -232,7 +232,7 @@ def main():
     check_suite.load_generated_checkers(args)
 
     if args.version:
-        print("IOOS compliance checker version %s" % __version__)
+        print(f"IOOS compliance checker version {__version__}")
         sys.exit(0)
 
     options_dict = parse_options(args.option) if args.option else defaultdict(set)
