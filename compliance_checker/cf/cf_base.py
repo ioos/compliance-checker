@@ -495,11 +495,12 @@ class CFBaseCheck(BaseCheck):
         :return: List of variable names (str) that are defined to be auxiliary
                  coordinate variables.
         """
+        ds_str = ds.__str__()
         if self._aux_coords.get(ds, None) and refresh is False:
-            return self._aux_coords[ds]
+            return self._aux_coords[ds_str]
 
-        self._aux_coords[ds] = cfutil.get_auxiliary_coordinate_variables(ds)
-        return self._aux_coords[ds]
+        self._aux_coords[ds_str] = cfutil.get_auxiliary_coordinate_variables(ds)
+        return self._aux_coords[ds_str]
 
     def _find_boundary_vars(self, ds, refresh=False):
         """
@@ -512,12 +513,13 @@ class CFBaseCheck(BaseCheck):
         :rtype: list
         :return: A list containing strings with boundary variable names.
         """
+        ds_str = ds.__str__()
         if self._boundary_vars.get(ds, None) and refresh is False:
-            return self._boundary_vars[ds]
+            return self._boundary_vars[ds_str]
 
-        self._boundary_vars[ds] = cfutil.get_cell_boundary_variables(ds)
+        self._boundary_vars[ds_str] = cfutil.get_cell_boundary_variables(ds)
 
-        return self._boundary_vars[ds]
+        return self._boundary_vars[ds_str]
 
     def _find_ancillary_vars(self, ds, refresh=False):
         """
@@ -541,26 +543,26 @@ class CFBaseCheck(BaseCheck):
         :return: List of variable names (str) that are defined as ancillary
                  variables in the dataset ds.
         """
-
+        ds_str = ds.__str__()
         # Used the cached version if it exists and is not empty
         if self._ancillary_vars.get(ds, None) and refresh is False:
-            return self._ancillary_vars[ds]
+            return self._ancillary_vars[ds_str]
 
         # Invalidate the cache at all costs
-        self._ancillary_vars[ds] = []
+        self._ancillary_vars[ds_str] = []
 
         for var in ds.variables.values():
             if hasattr(var, "ancillary_variables"):
                 for anc_name in var.ancillary_variables.split(" "):
                     if anc_name in ds.variables:
-                        self._ancillary_vars[ds].append(anc_name)
+                        self._ancillary_vars[ds_str].append(anc_name)
 
             if hasattr(var, "grid_mapping"):
                 gm_name = var.grid_mapping
                 if gm_name in ds.variables:
-                    self._ancillary_vars[ds].append(gm_name)
+                    self._ancillary_vars[ds_str].append(gm_name)
 
-        return self._ancillary_vars[ds]
+        return self._ancillary_vars[ds_str]
 
     def _find_clim_vars(self, ds, refresh=False):
         """
@@ -573,15 +575,15 @@ class CFBaseCheck(BaseCheck):
         :return: A list containing strings with geophysical variable
                  names.
         """
-
+        ds_str = ds.__str__()
         if self._clim_vars.get(ds, None) and refresh is False:
-            return self._clim_vars[ds]
+            return self._clim_vars[ds_str]
 
         climatology_variable = cfutil.get_climatology_variable(ds)
         if climatology_variable:
-            self._clim_vars[ds].append(climatology_variable)
+            self._clim_vars[ds_str].append(climatology_variable)
 
-        return self._clim_vars[ds]
+        return self._clim_vars[ds_str]
 
     def _find_cf_standard_name_table(self, ds):
         """
@@ -693,12 +695,13 @@ class CFBaseCheck(BaseCheck):
         :return: A list of variables names (str) that are defined as coordinate
                  variables in the dataset ds.
         """
-        if ds in self._coord_vars and refresh is False:
-            return self._coord_vars[ds]
+        ds_str = ds.__str__()
+        if ds_str in self._coord_vars and refresh is False:
+            return self._coord_vars[ds_str]
 
-        self._coord_vars[ds] = cfutil.get_coordinate_variables(ds)
+        self._coord_vars[ds_str] = cfutil.get_coordinate_variables(ds)
 
-        return self._coord_vars[ds]
+        return self._coord_vars[ds_str]
 
     def _find_geophysical_vars(self, ds, refresh=False):
         """
@@ -712,12 +715,13 @@ class CFBaseCheck(BaseCheck):
         :return: A list containing strings with geophysical variable
                  names.
         """
+        ds_str = ds.__str__()
         if self._geophysical_vars.get(ds, None) and refresh is False:
-            return self._geophysical_vars[ds]
+            return self._geophysical_vars[ds_str]
 
-        self._geophysical_vars[ds] = cfutil.get_geophysical_variables(ds)
+        self._geophysical_vars[ds_str] = cfutil.get_geophysical_variables(ds)
 
-        return self._geophysical_vars[ds]
+        return self._geophysical_vars[ds_str]
 
     def _find_metadata_vars(self, ds, refresh=False):
         """
@@ -731,10 +735,11 @@ class CFBaseCheck(BaseCheck):
                    variable candidates.
 
         """
+        ds_str = ds.__str__()
         if self._metadata_vars.get(ds, None) and refresh is False:
-            return self._metadata_vars[ds]
+            return self._metadata_vars[ds_str]
 
-        self._metadata_vars[ds] = []
+        self._metadata_vars[ds_str] = []
         for name, var in ds.variables.items():
             if name in self._find_ancillary_vars(ds) or name in self._find_coord_vars(
                 ds,
@@ -749,17 +754,17 @@ class CFBaseCheck(BaseCheck):
                 "platform_id",
                 "surface_altitude",
             ):
-                self._metadata_vars[ds].append(name)
+                self._metadata_vars[ds_str].append(name)
 
             elif getattr(var, "cf_role", "") != "":
-                self._metadata_vars[ds].append(name)
+                self._metadata_vars[ds_str].append(name)
 
             elif (
                 getattr(var, "standard_name", None) is None and len(var.dimensions) == 0
             ):
-                self._metadata_vars[ds].append(name)
+                self._metadata_vars[ds_str].append(name)
 
-        return self._metadata_vars[ds]
+        return self._metadata_vars[ds_str]
 
     def _get_coord_axis_map(self, ds):
         """
