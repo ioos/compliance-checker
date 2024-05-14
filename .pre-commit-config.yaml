@@ -16,7 +16,9 @@ repos:
     - id: requirements-txt-fixer
       args:
         - requirements.txt
-        - test_requirements.txt
+        - requirements-dev.txt
+        - requirements-docs.txt
+        - requirements-test.txt
 
 - repo: https://github.com/psf/black
   rev: 24.4.0

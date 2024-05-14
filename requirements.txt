@@ -3,12 +3,12 @@ importlib-metadata   # drop this when dropping Python 3.8
 importlib-resources  # drop this when dropping Python 3.8
 isodate
 lxml
+netcdf4
 owslib
 packaging
 pendulum
 pygeoif
 pyproj
-netcdf4
 regex
 requests
 shapely
