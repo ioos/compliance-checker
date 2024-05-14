@@ -288,7 +288,7 @@ def download_cf_standard_name_table(version, location=None):
     if version == "latest":
         url = "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml"
     else:
-        if version.startswith('http'):
+        if version.startswith("http"):
             url = version
             version = '"url specified"'
         else:
