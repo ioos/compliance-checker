@@ -24,7 +24,7 @@ jobs:
         create-args: >-
           python=${{ matrix.python-version }} pip
           --file requirements.txt
-          --file test_requirements.txt
+          --file requirements-test.txt
           --channel conda-forge
 
     - name: Install compliance-checker

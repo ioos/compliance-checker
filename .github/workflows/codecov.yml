@@ -19,7 +19,7 @@ jobs:
         create-args: >-
           python=3 pip
           --file requirements.txt
-          --file test_requirements.txt
+          --file requirements-test.txt
           --channel conda-forge
 
     - name: Install compliance-checker
