@@ -1,18 +1,15 @@
-cf-units>=2
-cftime>=1.1.0
+cf-units
 importlib-metadata   # drop this when dropping Python 3.8
 importlib-resources  # drop this when dropping Python 3.8
-isodate>=0.6.1
-jinja2>=2.7.3
-lxml>=3.2.1
-netcdf4>=1.6.4
-owsLib>=0.8.3
+isodate
+lxml
+owslib
 packaging
-pendulum>=1.2.4
-pygeoif>=0.6
-pyproj>=2.2.1
-regex>=2017.07.28
-requests>=2.2.1
-setuptools>=15.0
-shapely>=1.7.1
-validators>=0.14.2
+pendulum
+pygeoif
+pyproj
+netcdf4
+regex
+requests
+shapely
+validators

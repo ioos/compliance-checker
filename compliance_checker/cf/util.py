@@ -244,7 +244,7 @@ class StandardNameTable:
 
             if len(entryids) != 1:
                 raise Exception(
-                    f"Inconsistency in standard name table, could not lookup alias for {key}"
+                    f"Inconsistency in standard name table, could not lookup alias for {key}",
                 )
 
             key = entryids[0].text
