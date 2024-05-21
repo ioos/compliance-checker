@@ -28,7 +28,7 @@ It currently supports the following sources and standards:
 | IOOS SOS                                                                                                                   | Built-in                                                          | -                | GetCapabilities, DescribeSensor |
 | [IOOS (1.1)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes) | Built-in                                                          | X                | -                               |
 | [IOOS (1.2)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html)                                         | Built-in                                                          | X                | -                               |
-| [Glider DAC](https://github.com/ioos/ioosngdac/wiki/NetCDF-Specification)                                                  | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | X                | -                               |
+| [Glider DAC](https://ioos.github.io/glider-dac/ngdac-netcdf-file-format-version-2.html)                                    | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | X                | -                               |
 | [NCEI (1.1, 2.0)](https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html)                               | [ioos/cc-plugin-ncei](https://github.com/ioos/cc-plugin-ncei)     | X                | -                               |
 
 
@@ -262,7 +262,7 @@ Ensure to supply the URL *without* the format extension at the end (no `.nc`, `.
 
 Some examples of ERDDAP datasets:
 
-  - https://pae-paha.pacioos.hawaii.edu/erddap/tabledap/AWS-HIMB
+  - https://pae-paha.pacioos.hawaii.edu/erddap/tabledap/aws_himb
   - http://erddap.secoora.org/erddap/tabledap/edu_usf_marine_comps_1407d550
   - http://erddap.cencoos.org/erddap/tabledap/bodega-bay-bml_wts
   - http://erddap.cencoos.org/erddap/tabledap/fort-point
@@ -380,7 +380,7 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
 
 - [GliderDAC](https://github.com/ioos/cc-plugin-glider/releases)
 
-This is a checker for [GliderDAC](https://github.com/ioos/ioosngdac/wiki/NetCDF-Specification) files
+This is a checker for [GliderDAC](https://ioos.github.io/glider-dac/ngdac-netcdf-file-format-version-2.html) files
 
 - [NCEI](https://github.com/ioos/cc-plugin-ncei/releases) - [link](https://github.com/ioos/cc-plugin-ncei)
 
