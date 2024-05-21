@@ -787,8 +787,8 @@ def get_grid_mapping_variables(ds):
             if ncvar.grid_mapping in ds.variables:               
                 grid_mapping_variables.add(ncvar.grid_mapping)
     
-    for ncvar in nc.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
-        if ncvar.grid_mapping in nc.variables:
+    for ncvar in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
+        if ncvar.grid_mapping in ds.variables:
             grid_mapping_variables.add(ncvar.grid_mapping)
     return grid_mapping_variables
 
