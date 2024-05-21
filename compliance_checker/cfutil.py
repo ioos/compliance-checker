@@ -137,28 +137,28 @@ def get_sea_names():
     return _SEA_NAMES
 
 
-def is_unitless(ds, variable):
+def is_unitless(nc, variable):
     """
     Returns true if the variable is unitless
 
     Note units of '1' are considered whole numbers or parts but still represent
     physical units and not the absence of units.
 
-    :param netCDF4.Dataset ds: An open netCDF dataset
+    :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: Name of the variable
     """
-    units = getattr(ds.variables[variable], "units", None)
+    units = getattr(nc.variables[variable], "units", None)
     return units is None or units == ""
 
 
-def is_geophysical(ds, variable):
+def is_geophysical(nc, variable):
     """
     Returns true if the dataset's variable is likely a geophysical variable
 
-    :param netCDF4.Dataset ds: An open netCDF dataset
+    :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: Name of the variable
     """
-    ncvar = ds.variables[variable]
+    ncvar = nc.variables[variable]
 
     if getattr(ncvar, "cf_role", None):
         return False
@@ -168,7 +168,7 @@ def is_geophysical(ds, variable):
         return False
 
     standard_name_test = getattr(ncvar, "standard_name", "")
-    unitless = is_unitless(ds, variable)
+    unitless = is_unitless(nc, variable)
 
     if not isinstance(standard_name_test, str):
         warnings.warn(
@@ -196,13 +196,13 @@ def is_geophysical(ds, variable):
     }:
         return False
 
-    if variable in get_coordinate_variables(ds):
+    if variable in get_coordinate_variables(nc):
         return False
 
-    if variable in get_auxiliary_coordinate_variables(ds):
+    if variable in get_auxiliary_coordinate_variables(nc):
         return False
 
-    if variable in get_forecast_metadata_variables(ds):
+    if variable in get_forecast_metadata_variables(nc):
         return False
 
     # Is it dimensionless and unitless?
@@ -214,10 +214,10 @@ def is_geophysical(ds, variable):
         return False
 
     # Is it a §7.1 Cell Boundaries variable
-    if variable in get_cell_boundary_variables(ds):
+    if variable in get_cell_boundary_variables(nc):
         return False
 
-    if variable == get_climatology_variable(ds):
+    if variable == get_climatology_variable(nc):
         return False
 
     # Is it a string but with no defined units?
@@ -227,11 +227,11 @@ def is_geophysical(ds, variable):
         return False
 
     # Is it an instrument descriptor?
-    if variable in get_instrument_variables(ds):
+    if variable in get_instrument_variables(nc):
         return False
 
     # What about a platform descriptor?
-    if variable in get_platform_variables(ds):
+    if variable in get_platform_variables(nc):
         return False
 
     # Skip count/index variables too
@@ -241,8 +241,7 @@ def is_geophysical(ds, variable):
     return True
 
 
-@lru_cache(128)
-def get_coordinate_variables(ds):
+def get_coordinate_variables(nc):
     """
     Returns a list of variable names that identify as coordinate variables.
 
@@ -256,17 +255,17 @@ def get_coordinate_variables(ds):
     ordered monotonically. Missing values are not allowed in coordinate
     variables.
 
-    :param netCDF4.Dataset ds: An open netCDF dataset
+    :param netCDF4.Dataset nc: An open netCDF dataset
     """
     coord_vars = []
-    for dimension in ds.dimensions:
-        if dimension in ds.variables:
-            if ds.variables[dimension].dimensions == (dimension,):
+    for dimension in nc.dimensions:
+        if dimension in nc.variables:
+            if nc.variables[dimension].dimensions == (dimension,):
                 coord_vars.append(dimension)
     return coord_vars
 
 
-def get_auxiliary_coordinate_variables(ds):
+def get_auxiliary_coordinate_variables(nc):
     """
     Returns a list of auxiliary coordinate variables
 
@@ -274,11 +273,11 @@ def get_auxiliary_coordinate_variables(ds):
     coordinate data, but is not a coordinate variable (in the sense of the term
     defined by CF).
 
-    :param netCDf4.Dataset ds: An open netCDF dataset
+    :param netCDf4.Dataset nc: An open netCDF dataset
     """
     aux_vars = []
     # get any variables referenced by the coordinates attribute
-    for ncvar in ds.get_variables_by_attributes(
+    for ncvar in nc.get_variables_by_attributes(
         coordinates=lambda x: isinstance(x, str),
     ):
         # split the coordinates into individual variable names
@@ -286,13 +285,13 @@ def get_auxiliary_coordinate_variables(ds):
         # if the variable names exist, add them
         for referenced_variable in referenced_variables:
             if (
-                referenced_variable in ds.variables
+                referenced_variable in nc.variables
                 and referenced_variable not in aux_vars
             ):
                 aux_vars.append(referenced_variable)
 
     # axis variables are automatically in
-    for variable in get_axis_variables(ds):
+    for variable in get_axis_variables(nc):
         if variable not in aux_vars:
             aux_vars.append(variable)
 
@@ -308,7 +307,7 @@ def get_auxiliary_coordinate_variables(ds):
     coordinate_standard_names += DIMENSIONLESS_VERTICAL_COORDINATES
 
     # Some datasets like ROMS use multiple variables to define coordinates
-    for ncvar in ds.get_variables_by_attributes(
+    for ncvar in nc.get_variables_by_attributes(
         standard_name=lambda x: x in coordinate_standard_names,
     ):
         if ncvar.name not in aux_vars:
@@ -317,19 +316,19 @@ def get_auxiliary_coordinate_variables(ds):
     # Remove any that are purely coordinate variables
     ret_val = []
     for aux_var in aux_vars:
-        if ds.variables[aux_var].dimensions == (aux_var,):
+        if nc.variables[aux_var].dimensions == (aux_var,):
             continue
         ret_val.append(aux_var)
 
     return ret_val
 
 
-def get_forecast_metadata_variables(ds):
+def get_forecast_metadata_variables(nc):
     """
     Returns a list of variables that represent forecast reference time
     metadata.
 
-    :param netCDF4.Dataset ds: An open netCDF4 Dataset.
+    :param netCDF4.Dataset nc: An open netCDF4 Dataset.
     :rtype: list
     """
     forecast_metadata_standard_names = {
@@ -337,14 +336,14 @@ def get_forecast_metadata_variables(ds):
         "forecast_reference_time",
     }
     forecast_metadata_variables = []
-    for varname in ds.variables:
-        standard_name = getattr(ds.variables[varname], "standard_name", None)
+    for varname in nc.variables:
+        standard_name = getattr(nc.variables[varname], "standard_name", None)
         if standard_name in forecast_metadata_standard_names:
             forecast_metadata_variables.append(varname)
     return forecast_metadata_variables
 
 
-def get_cell_boundary_map(ds):
+def get_cell_boundary_map(nc):
     """
     Returns a dictionary mapping a variable to its boundary variable. The
     returned dictionary maps a string variable name to the name of the boundary
@@ -353,13 +352,13 @@ def get_cell_boundary_map(ds):
     :param netCDF4.Dataset nc: netCDF dataset
     """
     boundary_map = {}
-    for variable in ds.get_variables_by_attributes(bounds=lambda x: x is not None):
-        if variable.bounds in ds.variables:
+    for variable in nc.get_variables_by_attributes(bounds=lambda x: x is not None):
+        if variable.bounds in nc.variables:
             boundary_map[variable.name] = variable.bounds
     return boundary_map
 
 
-def get_cell_boundary_variables(ds):
+def get_cell_boundary_variables(nc):
     """
     Returns a list of variable names for variables that represent cell
     boundaries through the `bounds` attribute
@@ -367,21 +366,19 @@ def get_cell_boundary_variables(ds):
     :param netCDF4.Dataset nc: netCDF dataset
     """
     boundary_variables = []
-    has_bounds = ds.get_variables_by_attributes(bounds=lambda x: x is not None)
+    has_bounds = nc.get_variables_by_attributes(bounds=lambda x: x is not None)
     for var in has_bounds:
-        if var.bounds in ds.variables:
+        if var.bounds in nc.variables:
             boundary_variables.append(var.bounds)
     return boundary_variables
 
 
-@lru_cache(128)
-def get_bounds_variables(ds):
-    contains_bounds = ds.get_variables_by_attributes(bounds=lambda s: s in ds.variables)
-    return {ds.variables[parent_var.bounds] for parent_var in contains_bounds}
+def get_bounds_variables(nc):
+    contains_bounds = nc.get_variables_by_attributes(bounds=lambda s: s in nc.variables)
+    return {nc.variables[parent_var.bounds] for parent_var in contains_bounds}
 
 
-@lru_cache(128)
-def get_geophysical_variables(ds):
+def get_geophysical_variables(nc):
     """
     Returns a list of variable names for the variables detected as geophysical
     variables.
@@ -389,13 +386,12 @@ def get_geophysical_variables(ds):
     :param netCDF4.Dataset nc: An open netCDF dataset
     """
     parameters = []
-    for variable in ds.variables:
-        if is_geophysical(ds, variable) and variable not in get_bounds_variables(ds):
+    for variable in nc.variables:
+        if is_geophysical(nc, variable) and variable not in get_bounds_variables(nc):
             parameters.append(variable)
     return parameters
 
 
-@lru_cache(128)
 def get_z_variable(nc):
     """
     Returns the name of the variable that defines the Z axis or height/depth
@@ -472,7 +468,6 @@ def get_z_variables(nc):
     return z_variables
 
 
-@lru_cache(128)
 def get_lat_variable(nc):
     """
     Returns the first variable matching latitude
@@ -539,7 +534,6 @@ def get_true_latitude_variables(nc):
     return true_lats
 
 
-@lru_cache(128)
 def get_lon_variable(nc):
     """
     Returns the variable for longitude
@@ -606,57 +600,57 @@ def get_true_longitude_variables(nc):
     return true_lons
 
 
-def get_platform_variables(ds):
+def get_platform_variables(nc):
     """
     Returns a list of platform variable NAMES
 
-    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    :param netCDF4.Dataset nc: An open netCDF4 Dataset
     """
     candidates = []
-    for variable in ds.variables:
-        platform = getattr(ds.variables[variable], "platform", "")
-        if platform and platform in ds.variables:
+    for variable in nc.variables:
+        platform = getattr(nc.variables[variable], "platform", "")
+        if platform and platform in nc.variables:
             if platform not in candidates:
                 candidates.append(platform)
 
-    platform = getattr(ds, "platform", "")
-    if platform and platform in ds.variables:
+    platform = getattr(nc, "platform", "")
+    if platform and platform in nc.variables:
         if platform not in candidates:
             candidates.append(platform)
     return candidates
 
 
-def get_instrument_variables(ds):
+def get_instrument_variables(nc):
     """
     Returns a list of instrument variables
 
-    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    :param netCDF4.Dataset nc: An open netCDF4 Dataset
     """
     candidates = []
-    for variable in ds.variables:
-        instrument = getattr(ds.variables[variable], "instrument", "")
-        if instrument and instrument in ds.variables:
+    for variable in nc.variables:
+        instrument = getattr(nc.variables[variable], "instrument", "")
+        if instrument and instrument in nc.variables:
             if instrument not in candidates:
                 candidates.append(instrument)
 
-    instrument = getattr(ds, "instrument", "")
-    if instrument and instrument in ds.variables:
+    instrument = getattr(nc, "instrument", "")
+    if instrument and instrument in nc.variables:
         if instrument not in candidates:
             candidates.append(instrument)
     return candidates
 
 
-def get_time_variable(ds):
+def get_time_variable(nc):
     """
     Returns the likeliest variable to be the time coordinate variable
 
-    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    :param netCDF4.Dataset nc: An open netCDF4 Dataset
     """
-    for var in ds.variables:
-        if getattr(ds.variables[var], "axis", "") == "T":
+    for var in nc.variables:
+        if getattr(nc.variables[var], "axis", "") == "T":
             return var
     else:
-        candidates = ds.get_variables_by_attributes(standard_name="time")
+        candidates = nc.get_variables_by_attributes(standard_name="time")
         if len(candidates) == 1:
             return candidates[0].name
         else:  # Look for a coordinate variable time
@@ -665,78 +659,76 @@ def get_time_variable(ds):
                     return candidate.name
 
     # If we still haven't found the candidate
-    time_variables = set(get_time_variables(ds))
-    coordinate_variables = set(get_coordinate_variables(ds))
+    time_variables = set(get_time_variables(nc))
+    coordinate_variables = set(get_coordinate_variables(nc))
     if len(time_variables.intersection(coordinate_variables)) == 1:
         return list(time_variables.intersection(coordinate_variables))[0]
 
-    auxiliary_coordinates = set(get_auxiliary_coordinate_variables(ds))
+    auxiliary_coordinates = set(get_auxiliary_coordinate_variables(nc))
     if len(time_variables.intersection(auxiliary_coordinates)) == 1:
         return list(time_variables.intersection(auxiliary_coordinates))[0]
     return None
 
 
-@lru_cache(128)
-def get_time_variables(ds):
+def get_time_variables(nc):
     """
     Returns a list of variables describing the time coordinate
 
-    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    :param netCDF4.Dataset nc: An open netCDF4 Dataset
     """
     time_variables = set()
-    for variable in ds.get_variables_by_attributes(standard_name="time"):
+    for variable in nc.get_variables_by_attributes(standard_name="time"):
         time_variables.add(variable.name)
 
-    for variable in ds.get_variables_by_attributes(axis="T"):
+    for variable in nc.get_variables_by_attributes(axis="T"):
         if variable.name not in time_variables:
             time_variables.add(variable.name)
 
     regx = r"^(?:day|d|hour|hr|h|minute|min|second|s)s? since .*$"
-    for variable in ds.get_variables_by_attributes(units=lambda x: isinstance(x, str)):
+    for variable in nc.get_variables_by_attributes(units=lambda x: isinstance(x, str)):
         if re.match(regx, variable.units) and variable.name not in time_variables:
             time_variables.add(variable.name)
 
     return time_variables
 
 
-def get_axis_variables(ds):
+def get_axis_variables(nc):
     """
     Returns a list of variables that define an axis of the dataset
 
-    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    :param netCDF4.Dataset nc: An open netCDF4 Dataset
     """
     axis_variables = []
-    for ncvar in ds.get_variables_by_attributes(axis=lambda x: x is not None):
+    for ncvar in nc.get_variables_by_attributes(axis=lambda x: x is not None):
         axis_variables.append(ncvar.name)
     return axis_variables
 
 
-def get_climatology_variable(ds):
+def get_climatology_variable(nc):
     """
     Returns the variable describing climatology bounds if it exists.
 
     Climatology variables are similar to cell boundary variables that describe
-    the climatology bounds.
+    the climatology bounnc.
 
     See Example 7.8 in CF 1.6
 
-    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    :param netCDF4.Dataset nc: An open netCDF4 Dataset
     :rtype: str or None
     """
-    time = get_time_variable(ds)
+    time = get_time_variable(nc)
     # If there's no time dimension there's no climatology bounds
     if not time:
         return None
     # Climatology variable is simply whatever time points to under the
     # `climatology` attribute.
-    if hasattr(ds.variables[time], "climatology"):
-        if ds.variables[time].climatology in ds.variables:
-            return ds.variables[time].climatology
+    if hasattr(nc.variables[time], "climatology"):
+        if nc.variables[time].climatology in nc.variables:
+            return nc.variables[time].climatology
     return None
 
 
-@lru_cache(128)
-def _find_standard_name_modifier_variables(ds, return_deprecated=False):
+def _find_standard_name_modifier_variables(nc, return_deprecated=False):
     def match_modifier_variables(standard_name_str):
         if standard_name_str is None:
             return False
@@ -751,20 +743,20 @@ def _find_standard_name_modifier_variables(ds, return_deprecated=False):
 
     return [
         var.name
-        for var in ds.get_variables_by_attributes(
+        for var in nc.get_variables_by_attributes(
             standard_name=match_modifier_variables,
         )
     ]
 
 
-def get_flag_variables(ds):
+def get_flag_variables(nc):
     """
     Returns a list of variables that are defined as flag variables
 
-    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    :param netCDF4.Dataset nc: An open netCDF4 Dataset
     """
     flag_variables = []
-    for name, ncvar in ds.variables.items():
+    for name, ncvar in nc.variables.items():
         standard_name = getattr(ncvar, "standard_name", None)
         if isinstance(standard_name, str) and "status_flag" in standard_name:
             flag_variables.append(name)
@@ -773,21 +765,20 @@ def get_flag_variables(ds):
     return flag_variables
 
 
-def get_grid_mapping_variables(ds):
+def get_grid_mapping_variables(nc):
     """
     Returns a list of grid mapping variables
 
-    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    :param netCDF4.Dataset nc: An open netCDF4 Dataset
     """
     grid_mapping_variables = set()
-    for ncvar in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
-        if ncvar.grid_mapping in ds.variables:
+    for ncvar in nc.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
+        if ncvar.grid_mapping in nc.variables:
             grid_mapping_variables.add(ncvar.grid_mapping)
     return grid_mapping_variables
 
 
-@lru_cache(128)
-def get_axis_map(ds, variable):
+def get_axis_map(nc, variable):
     """
     Returns an axis_map dictionary that contains an axis key and the coordinate
     names as values.
@@ -803,14 +794,14 @@ def get_axis_map(ds, variable):
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: Variable name
     """
-    all_coords = get_coordinate_variables(ds) + get_auxiliary_coordinate_variables(ds)
+    all_coords = get_coordinate_variables(nc) + get_auxiliary_coordinate_variables(nc)
 
-    latitudes = get_latitude_variables(ds)
-    longitudes = get_longitude_variables(ds)
-    times = get_time_variables(ds)
-    heights = get_z_variables(ds)
+    latitudes = get_latitude_variables(nc)
+    longitudes = get_longitude_variables(nc)
+    times = get_time_variables(nc)
+    heights = get_z_variables(nc)
 
-    coordinates = getattr(ds.variables[variable], "coordinates", None)
+    coordinates = getattr(nc.variables[variable], "coordinates", None)
     if not isinstance(coordinates, str):
         coordinates = []
     else:
@@ -820,9 +811,9 @@ def get_axis_map(ds, variable):
     # {'x': ['longitude'], 'y': ['latitude'], 't': ['time']}
     axis_map = defaultdict(list)
     for coord_name in all_coords:
-        axis = getattr(ds.variables[coord_name], "axis", None)
+        axis = getattr(nc.variables[coord_name], "axis", None)
         if not axis or axis not in ("X", "Y", "Z", "T"):
-            if is_compression_coordinate(ds, coord_name):
+            if is_compression_coordinate(nc, coord_name):
                 axis = "C"
             elif coord_name in times:
                 axis = "T"
@@ -835,7 +826,7 @@ def get_axis_map(ds, variable):
             else:
                 axis = "U"
 
-        if coord_name in ds.variables[variable].dimensions:
+        if coord_name in nc.variables[variable].dimensions:
             if coord_name not in axis_map[axis]:
                 axis_map[axis].append(coord_name)
 
@@ -845,19 +836,19 @@ def get_axis_map(ds, variable):
     return axis_map
 
 
-def is_coordinate_variable(ds, variable):
+def is_coordinate_variable(nc, variable):
     """
     Returns True if the variable is a coordinate variable
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: Variable name
     """
-    if variable not in ds.variables:
+    if variable not in nc.variables:
         return False
-    return ds.variables[variable].dimensions == (variable,)
+    return nc.variables[variable].dimensions == (variable,)
 
 
-def is_compression_coordinate(ds, variable):
+def is_compression_coordinate(nc, variable):
     """
     Returns True if the variable is a coordinate variable that defines a
     compression scheme.
@@ -866,10 +857,10 @@ def is_compression_coordinate(ds, variable):
     :param str variable: Variable name
     """
     # Must be a coordinate variable
-    if not is_coordinate_variable(ds, variable):
+    if not is_coordinate_variable(nc, variable):
         return False
     # must have a string attribute compress
-    compress = getattr(ds.variables[variable], "compress", None)
+    compress = getattr(nc.variables[variable], "compress", None)
     if not isinstance(compress, str):
         return False
     if not compress:
@@ -879,7 +870,7 @@ def is_compression_coordinate(ds, variable):
         return False
     # Must point to dimensions
     for dim in compress.split():
-        if dim not in ds.dimensions:
+        if dim not in nc.dimensions:
             return False
     return True
 

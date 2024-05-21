@@ -65,7 +65,7 @@ class TestBase(TestCase):
             priority,
             (1, 2),
             "test",
-            ["test present, but not in expected value list (%s)" % valid_choices],
+            [f"test present, but not in expected value list ({valid_choices})"],
         )
         self.ds.test = "a"
         base.attr_check(attr, self.ds, priority, rv3)

@@ -86,7 +86,7 @@ class TestCF1_6(BaseTestCase):
         """
         nc_file_path = os.path.join(gettempdir(), "example.nc")
         if os.path.exists(nc_file_path):
-            raise OSError("File Exists: %s" % nc_file_path)
+            raise OSError(f"File Exists: {nc_file_path}")
         nc = Dataset(nc_file_path, "w")
         self.addCleanup(os.remove, nc_file_path)
         self.addCleanup(nc.close)

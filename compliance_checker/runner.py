@@ -125,7 +125,7 @@ class ComplianceChecker:
                 cls.json_output(cs, score_dict, output_filename, ds_loc, limit, out_fmt)
 
             else:
-                raise TypeError("Invalid format %s" % out_fmt)
+                raise TypeError(f"Invalid format {out_fmt}")
 
             errors_occurred = cls.check_errors(score_groups, verbose)
 
@@ -259,8 +259,7 @@ class ComplianceChecker:
             if len(errors):
                 errors_occurred = True
                 print(
-                    "WARNING: The following exceptions occurred during the %s checker (possibly indicate compliance checker issues):"
-                    % checker,
+                    f"WARNING: The following exceptions occurred during the {checker} checker (possibly indicate compliance checker issues):",
                     file=sys.stderr,
                 )
                 for check_name, epair in errors.items():
