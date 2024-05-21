@@ -17,6 +17,7 @@ def is_netcdf(url):
     :param str url: Location of file on the file system
     """
     # Try an obvious exclusion of remote resources
+    url = str(url)
     if url.startswith("http"):
         return False
 
@@ -83,12 +84,17 @@ def is_remote_netcdf(ds_str):
         head_req.raise_for_status()
     except requests.exceptions.RequestException as e:
         warnings.warn(
-            "Received exception when making HEAD request to {}: {}".format(ds_str, e)
+            f"Received exception when making HEAD request to {ds_str}: {e}",
+            stacklevel=2,
         )
         content_type = None
     else:
         content_type = head_req.headers.get("content-type")
 
+    if content_type is None:
+        return False
+
     # if the Content-Type header returned was "application/x-netcdf",
     # or a netCDF file (not OPeNDAP) we can open this into a Dataset
-    return content_type == "application/x-netcdf"
+    # Add support for application/x-netcdf;ver=4
+    return content_type.split(";")[0] == "application/x-netcdf"

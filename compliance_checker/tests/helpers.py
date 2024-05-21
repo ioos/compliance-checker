@@ -16,8 +16,11 @@ class MockNetCDF(Dataset):
             temp_filename = tempfile.NamedTemporaryFile(suffix=".nc", delete=True).name
         else:
             temp_filename = filename
-        super(MockNetCDF, self).__init__(
-            temp_filename, "w", diskless=True, persist=False
+        super().__init__(
+            temp_filename,
+            "w",
+            diskless=True,
+            persist=False,
         )
 
 
@@ -28,34 +31,30 @@ class MockTimeSeries(MockNetCDF):
     """
 
     def __init__(self, filename=None, default_fill_value=None):
-        super(MockTimeSeries, self).__init__(filename)
+        super().__init__(filename)
         self.createDimension("time", 500)
         for name, std_name, units, axis in (
-            ("time", "time", "seconds since 1970-01-01", "T"),
+            ("time", "time", "seconds since 1970-01-01 00:00:00", "T"),
             ("lon", "longitude", "degrees_east", "X"),
             ("lat", "latitude", "degrees_north", "Y"),
             ("depth", "depth", "m", "Z"),
         ):
             var = self.createVariable(
-                name, "d", ("time",), fill_value=default_fill_value
+                name,
+                "d",
+                ("time",),
+                fill_value=default_fill_value,
             )
             var.standard_name = std_name
             var.units = units
             var.axis = axis
 
         # give some applicable units
-        self.variables["time"].units = "seconds since 2019-04-11T00:00:00"
-        self.variables["time"].axis = "T"
-        self.variables["lat"].units = "degree_north"
-        self.variables["lat"].axis = "Y"
-        self.variables["lon"].units = "degree_east"
-        self.variables["lon"].axis = "X"
-        self.variables["depth"].units = "meters"
-        self.variables["depth"].axis = "Z"
+        self.variables["time"].calendar = "standard"
         self.variables["depth"].positive = "down"
 
 
-class MockVariable(object):
+class MockVariable:
     """
     For mocking a dataset variable. Constructor optionally takes a NetCDF
     variable, the NetCDF attributes of which will be copied over to this
@@ -127,7 +126,7 @@ class MockRaggedArrayRepr(MockNetCDF):
     """
 
     def __init__(self, feature_type: str, structure="contiguous"):
-        super(MockRaggedArrayRepr, self).__init__()
+        super().__init__()
 
         if structure.lower() not in ("contiguous", "indexed"):
             raise ValueError("Must initialize MockRaggedArray as contiguous or indexed")
@@ -162,30 +161,38 @@ class MockRaggedArrayRepr(MockNetCDF):
             # has the station dimension and cf_role
             _var_name = feature_type.lower().split("profile")[0]
             self.createVariable(
-                "{}_id_variable".format(_var_name),
+                f"{_var_name}_id_variable",
                 str,
                 ("STATION_DIMENSION",),
                 fill_value=None,
             )
 
             # set the cf_role
-            self.variables["{}_id_variable".format(_var_name)].setncattr(
-                "cf_role", "{}_id".format(_var_name)
+            self.variables[f"{_var_name}_id_variable"].setncattr(
+                "cf_role",
+                f"{_var_name}_id",
             )
 
             # there will be one for the profile
             self.createVariable(
-                "profile_id_variable", str, ("INSTANCE_DIMENSION",), fill_value=None
+                "profile_id_variable",
+                str,
+                ("INSTANCE_DIMENSION",),
+                fill_value=None,
             )
             self.variables["profile_id_variable"].setncattr("cf_role", "profile_id")
 
             # will need a station index variable
             self.createVariable(
-                "station_index_variable", int, ("INSTANCE_DIMENSION",), fill_value=None
+                "station_index_variable",
+                int,
+                ("INSTANCE_DIMENSION",),
+                fill_value=None,
             )
 
             self.variables["station_index_variable"].setncattr(
-                "instance_dimension", "STATION_DIMENSION"
+                "instance_dimension",
+                "STATION_DIMENSION",
             )
 
             # also need counter variable, as compound featureTypes
@@ -200,23 +207,24 @@ class MockRaggedArrayRepr(MockNetCDF):
             )
 
             self.variables["counter_var"].setncattr(
-                "sample_dimension", "SAMPLE_DIMENSION"
+                "sample_dimension",
+                "SAMPLE_DIMENSION",
             )
 
         else:  # just a single featureType
             self.createVariable(
-                "{}_id_variable".format(feature_type),
+                f"{feature_type}_id_variable",
                 str,
                 ("INSTANCE_DIMENSION",),
                 fill_value=None,
             )
 
-            self.variables["{}_id_variable".format(feature_type)].setncattr(
-                "cf_role", "{}_id".format(feature_type)
+            self.variables[f"{feature_type}_id_variable"].setncattr(
+                "cf_role",
+                f"{feature_type}_id",
             )
 
             if structure == "contiguous":
-
                 # create count variable
                 self.createVariable(
                     "counter_var",
@@ -226,11 +234,11 @@ class MockRaggedArrayRepr(MockNetCDF):
                 )
 
                 self.variables["counter_var"].setncattr(
-                    "sample_dimension", "SAMPLE_DIMENSION"
+                    "sample_dimension",
+                    "SAMPLE_DIMENSION",
                 )
 
             else:
-
                 # create index variable
                 self.createVariable(
                     "index_var",
@@ -239,5 +247,6 @@ class MockRaggedArrayRepr(MockNetCDF):
                     fill_value=None,
                 )
                 self.variables["index_var"].setncattr(
-                    "instance_dimension", "INSTANCE_DIMENSION"
+                    "instance_dimension",
+                    "INSTANCE_DIMENSION",
                 )

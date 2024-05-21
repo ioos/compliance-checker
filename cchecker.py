@@ -34,7 +34,7 @@ def parse_options(opts):
         try:
             checker_type, checker_opt = opt_str.split(":", 1)
         except ValueError:
-            warnings.warn("Could not split option {}, ignoring".format(opt_str))
+            warnings.warn(f"Could not split option {opt_str}, ignoring", stacklevel=2)
         else:
             options_dict[checker_type].add(checker_opt)
     return options_dict
@@ -112,7 +112,7 @@ def main():
                                     both high and medium priority issues, while
                                     skipping low priority issues.  Cannot be
                                     used with `-i`/`--include-checks` option.
-                                    """
+                                    """,
         ),
         action="append",
     )
@@ -125,7 +125,7 @@ def main():
                                     Specifies checks to include. Can only take the form
                                     of `<check_name>`.  Cannot be specified along with
                                     `-s`/`skip_checks`.
-                                    """
+                                    """,
         ),
         action="append",
     )
@@ -181,7 +181,7 @@ def main():
                                     'cf:enable_appendix_a_checks' - Allow check
                                     results against CF Appendix A for attribute
                                     location and data types.
-                                    """
+                                    """,
         ),
     )
 
@@ -206,7 +206,10 @@ def main():
     )
 
     parser.add_argument(
-        "-l", "--list-tests", action="store_true", help="List the available tests"
+        "-l",
+        "--list-tests",
+        action="store_true",
+        help="List the available tests",
     )
 
     parser.add_argument(
@@ -229,7 +232,7 @@ def main():
     check_suite.load_generated_checkers(args)
 
     if args.version:
-        print("IOOS compliance checker version %s" % __version__)
+        print(f"IOOS compliance checker version {__version__}")
         sys.exit(0)
 
     options_dict = parse_options(args.option) if args.option else defaultdict(set)
@@ -250,8 +253,8 @@ def main():
         for checker_name in sorted(checker_names):
             if checker_name not in check_suite.checkers:
                 print(
-                    "Cannot find checker '{}' with which to "
-                    "describe checks".format(checker_name),
+                    f"Cannot find checker '{checker_name}' with which to "
+                    "describe checks",
                     file=sys.stderr,
                 )
                 error_stat = 1
@@ -290,9 +293,7 @@ def main():
     if output_len == 1:
         if args.format != "json":
             print(
-                "Running Compliance Checker on the datasets from: {}".format(
-                    args.dataset_location
-                ),
+                f"Running Compliance Checker on the datasets from: {args.dataset_location}",
                 file=sys.stderr,
             )
         return_value, errors = ComplianceChecker.run_checker(
@@ -312,9 +313,7 @@ def main():
         for output, dataset in zip(args.output, args.dataset_location):
             if args.format != "json":
                 print(
-                    "Running Compliance Checker on the dataset from: {}".format(
-                        dataset
-                    ),
+                    f"Running Compliance Checker on the dataset from: {dataset}",
                     file=sys.stderr,
                 )
             return_value, errors = ComplianceChecker.run_checker(

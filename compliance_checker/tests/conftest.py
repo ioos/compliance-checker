@@ -1,11 +1,10 @@
 import os
 import subprocess
 from itertools import chain
-from pathlib import Path
 
 import pytest
+from importlib_resources import files
 from netCDF4 import Dataset
-from pkg_resources import resource_filename
 
 from compliance_checker.cf import util
 from compliance_checker.suite import CheckSuite
@@ -27,7 +26,7 @@ def static_files(cdl_stem):
     Returns the Path to a valid nc dataset\n
     replaces the old STATIC_FILES dict
     """
-    datadir = Path(resource_filename("compliance_checker", "tests/data")).resolve()
+    datadir = files("compliance_checker").joinpath("tests/data").resolve()
     assert datadir.exists(), f"{datadir} not found"
 
     cdl_paths = glob_down(datadir, f"{cdl_stem}.cdl", 3)
@@ -92,7 +91,7 @@ def new_nc_file(tmpdir):
     """
     nc_file_path = os.path.join(tmpdir, "example.nc")
     if os.path.exists(nc_file_path):
-        raise IOError("File Exists: %s" % nc_file_path)
+        raise OSError(f"File Exists: {nc_file_path}")
     nc = Dataset(nc_file_path, "w")
     # no need for cleanup, built-in tmpdir fixture will handle it
     return nc
@@ -102,7 +101,7 @@ def new_nc_file(tmpdir):
 def tmp_txt_file(tmpdir):
     file_path = os.path.join(tmpdir, "output.txt")
     if os.path.exists(file_path):
-        raise IOError("File Exists: %s" % file_path)
+        raise OSError(f"File Exists: {file_path}")
 
     return file_path
 

@@ -1,15 +1,22 @@
-name: Code coverage report
+
+name: Documentation
 
 on:
   pull_request:
   push:
+  release:
+    types:
+      - published
 
 jobs:
-  run:
+  build-docs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Setup Micromamba
       uses: mamba-org/setup-micromamba@v1
@@ -27,16 +34,18 @@ jobs:
       run: |
         python -m pip install -e . --no-deps --force-reinstall
 
-    - name: Run tests with coverage
+    - name: Build documentation
       shell: bash -l {0}
       run: |
-        python -m pytest --cov=compliance_checker --cov-report=xml compliance_checker/tests
-      # pass this step even if there are individual test failures, we are
-      # interested in the overall level of coverage and other checks can
-      # report on test failures.
-      continue-on-error: true
+        set -e
+        pushd docs
+        cp  ../README.md source/quickintro.md
+        make clean html linkcheck
+        popd
 
-    - name: Upload to codecov
-      uses: codecov/codecov-action@v4
+    - name: Deploy
+      if: success() && github.event_name == 'release'
+      uses: peaceiris/actions-gh-pages@v4
       with:
-        files: coverage.xml
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/build/html

@@ -89,7 +89,6 @@ ENV/
 # IDE project settings
 .spyderproject
 .vscode
-pyrightconfig.json
 
 # Rope project settings
 .ropeproject
@@ -111,3 +110,7 @@ activate
 # coverage output
 coverage/
 coverage.xml
+
+# shpinx docs
+docs/source/generated/
+docs/source/quickintro.md

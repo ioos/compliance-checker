@@ -1,18 +1,13 @@
-import io
 import itertools
 import os
 import sys
-from collections import defaultdict
-from copy import deepcopy
 from pkgutil import get_data
-from urllib.parse import urljoin
 
-import lxml.html
 import requests
 from cf_units import Unit
+from importlib_resources import files
 from lxml import etree
-from netCDF4 import Dataset, Dimension, Variable
-from pkg_resources import resource_filename
+from netCDF4 import Dataset
 
 # copied from paegan
 # paegan may depend on these later
@@ -78,7 +73,6 @@ _possiblex = {
     "xlon",
     "XLON",
     "lonx",
-    "lonx",
     "lon_u",
     "LON_U",
     "lon_v",
@@ -101,7 +95,6 @@ _possibley = {
     "LAT",
     "ylat",
     "YLAT",
-    "laty",
     "laty",
     "lat_u",
     "LAT_U",
@@ -166,57 +159,6 @@ _possibletunits = {
 _possibleaxisunits = _possiblexunits | _possibleyunits | _possibletunits
 
 
-class DotDict(dict):
-    """
-    Subclass of dict that will recursively look up attributes with dot notation.
-    This is primarily for working with JSON-style data in a cleaner way like javascript.
-    Note that this will instantiate a number of child DotDicts when you first access attributes;
-    do not use in performance-critical parts of your code.
-    """
-
-    def __dir__(self):
-        return list(self.__dict__.keys()) + list(self.keys())
-
-    def __getattr__(self, key):
-        """Make attempts to lookup by nonexistent attributes also attempt key lookups."""
-        if key in self:
-            return self[key]
-        import dis
-        import sys
-
-        frame = sys._getframe(1)
-        if "\x00%c" % dis.opmap["STORE_ATTR"] in frame.f_code.co_code:
-            self[key] = DotDict()
-            return self[key]
-
-        raise AttributeError(key)
-
-    def __setattr__(self, key, value):
-        if key in dir(dict):
-            raise AttributeError("%s conflicts with builtin." % key)
-        if isinstance(value, dict):
-            self[key] = DotDict(value)
-        else:
-            self[key] = value
-
-    def copy(self):
-        return deepcopy(self)
-
-    def get_safe(self, qual_key, default=None):
-        """
-        @brief Returns value of qualified key, such as "system.name" or None if not exists.
-                If default is given, returns the default. No exception thrown.
-        """
-        value = get_safe(self, qual_key)
-        if value is None:
-            value = default
-        return value
-
-    @classmethod
-    def fromkeys(cls, seq, value=None):
-        return DotDict(dict.fromkeys(seq, value))
-
-
 def get_safe(dict_instance, keypath, default=None):
     """
     Returns a value with in a nested dict structure from a dot separated
@@ -225,7 +167,7 @@ def get_safe(dict_instance, keypath, default=None):
     """
     try:
         obj = dict_instance
-        keylist = keypath if type(keypath) is list else keypath.split(".")
+        keylist = keypath if isinstance(keypath, list) else keypath.split(".")
         for key in keylist:
             obj = obj[key]
         return obj
@@ -246,94 +188,8 @@ class VariableReferenceError(Exception):
         )
 
 
-class NCGraph(object):
-    def __init__(
-        self, ds, name, nc_object, self_reference_variables, reference_map=None
-    ):
-
-        self.ds = ds
-        self.name = name
-        self.coords = DotDict()
-        self.dims = DotDict()
-        self.grid_mapping = DotDict()
-        self.obj = nc_object
-
-        self.reference_variables = self_reference_variables
-        self.reference_map = reference_map or {}
-
-        self.reference_map[name] = self
-
-        if isinstance(nc_object, Dimension):
-            self._type = "dim"
-
-        elif isinstance(nc_object, Variable):
-            self._type = "var"
-
-            self.get_references()
-
-        else:
-            raise TypeError("unknown type %s" % repr(type(nc_object)))
-
-    def get_references(self):
-        for dim in self.obj.dimensions:
-            self.dims[dim] = self.get_dimension(dim)
-
-        if hasattr(self.obj, "coordinates"):
-            coords = self.obj.coordinates.split(" ")
-            for coord in coords:
-                self.coords[coord] = self.get_coordinate(coord)
-
-        if hasattr(self.obj, "grid_mapping"):
-            gm = self.obj.grid_mapping
-            self.grid_mapping[gm] = self.get_grid_mapping(gm)
-
-    def get_dimension(self, dim):
-        if dim in self.reference_map:
-            return self.reference_map[dim]
-        return NCGraph(
-            self.ds,
-            dim,
-            self.ds.dimensions[dim],
-            self.reference_variables,
-            self.reference_map,
-        )
-
-    def get_coordinate(self, coord):
-        if coord not in self.ds.variables:
-            return
-        if coord in self.reference_map:
-            if self.name == coord:
-                self.reference_variables.add(self.name)
-            return self.reference_map[coord]
-        return NCGraph(
-            self.ds,
-            coord,
-            self.ds.variables[coord],
-            self.reference_variables,
-            self.reference_map,
-        )
-
-    def get_grid_mapping(self, gm):
-        if gm not in self.ds.variables:
-            return
-        if gm in self.reference_map:
-            return self.reference_map[gm]
-        return NCGraph(
-            self.ds,
-            gm,
-            self.ds.variables[gm],
-            self.reference_variables,
-            self.reference_map,
-        )
-
-    def __getattr__(self, key):
-        if key in self.__dict__:
-            return self.__dict__[key]
-        return getattr(self.obj, key)
-
-
-class StandardNameTable(object):
-    class NameEntry(object):
+class StandardNameTable:
+    class NameEntry:
         def __init__(self, entrynode):
             self.canonical_units = self._get(entrynode, "canonical_units", True)
             self.grib = self._get(entrynode, "grib")
@@ -343,26 +199,28 @@ class StandardNameTable(object):
         def _get(self, entrynode, attrname, required=False):
             vals = entrynode.xpath(attrname)
             if len(vals) > 1:
-                raise Exception("Multiple attrs (%s) found" % attrname)
+                raise Exception(f"Multiple attrs ({attrname}) found")
             elif required and len(vals) == 0:
-                raise Exception("Required attr (%s) not found" % attrname)
+                raise Exception(f"Required attr ({attrname}) not found")
 
             return vals[0].text
 
     def __init__(self, cached_location=None):
         if cached_location:
-            with io.open(cached_location, "r", encoding="utf-8") as fp:
+            with open(cached_location, encoding="utf-8") as fp:
                 resource_text = fp.read()
         elif os.environ.get("CF_STANDARD_NAME_TABLE") and os.path.exists(
-            os.environ["CF_STANDARD_NAME_TABLE"]
+            os.environ["CF_STANDARD_NAME_TABLE"],
         ):
-            with io.open(
-                os.environ["CF_STANDARD_NAME_TABLE"], "r", encoding="utf-8"
+            with open(
+                os.environ["CF_STANDARD_NAME_TABLE"],
+                encoding="utf-8",
             ) as fp:
                 resource_text = fp.read()
         else:
             resource_text = get_data(
-                "compliance_checker", "data/cf-standard-name-table.xml"
+                "compliance_checker",
+                "data/cf-standard-name-table.xml",
             )
 
         parser = etree.XMLParser(remove_blank_text=True)
@@ -378,7 +236,7 @@ class StandardNameTable(object):
 
     def __getitem__(self, key):
         if not (key in self._names or key in self._aliases):
-            raise KeyError("%s not found in standard name table" % key)
+            raise KeyError(f"{key} not found in standard name table")
 
         if key in self._aliases:
             idx = self._aliases.index(key)
@@ -386,14 +244,13 @@ class StandardNameTable(object):
 
             if len(entryids) != 1:
                 raise Exception(
-                    "Inconsistency in standard name table, could not lookup alias for %s"
-                    % key
+                    f"Inconsistency in standard name table, could not lookup alias for {key}",
                 )
 
             key = entryids[0].text
 
         if key not in self._names:
-            raise KeyError("%s not found in standard name table" % key)
+            raise KeyError(f"{key} not found in standard name table")
 
         idx = self._names.index(key)
         entry = self.NameEntry(self._root.xpath("entry")[idx])
@@ -426,33 +283,18 @@ def download_cf_standard_name_table(version, location=None):
     if (
         location is None
     ):  # This case occurs when updating the packaged version from command line
-        location = resource_filename(
-            "compliance_checker", "data/cf-standard-name-table.xml"
-        )
+        location = files("compliance_checker") / "data/cf-standard-name-table.xml"
 
     if version == "latest":
-        tables_tree = lxml.html.parse("http://cfconventions.org/documents.html")
-        end_str = "cf-standard-name-table.xml"
-        xpath_expr = (
-            "//a[substring(@href, string-length(@href) - "
-            "string-length('{0}') +1) "
-            " = '{0}'][1]".format(end_str)
-        )
-        latest_vers = tables_tree.xpath(xpath_expr)[0]
-
-        url = urljoin("http://cfconventions.org", latest_vers.attrib["href"])
+        url = "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml"
     else:
-        url = "http://cfconventions.org/Data/cf-standard-names/{0}/src/cf-standard-name-table.xml".format(
-            version
-        )
+        url = f"http://cfconventions.org/Data/cf-standard-names/{version}/src/cf-standard-name-table.xml"
 
     r = requests.get(url, allow_redirects=True)
     r.raise_for_status()
 
     print(
-        "Downloading cf-standard-names table version {0} from: {1}".format(
-            version, url
-        ),
+        f"Downloading cf-standard-names table version {version} from: {url}",
         file=sys.stderr,
     )
     with open(location, "wb") as f:
@@ -466,7 +308,8 @@ def create_cached_data_dir():
     """
     writable_directory = os.path.join(os.path.expanduser("~"), ".local", "share")
     data_directory = os.path.join(
-        os.environ.get("XDG_DATA_HOME", writable_directory), "compliance-checker"
+        os.environ.get("XDG_DATA_HOME", writable_directory),
+        "compliance-checker",
     )
     if not os.path.isdir(data_directory):
         os.makedirs(data_directory)
@@ -507,29 +350,6 @@ def units_temporal(units):
     return u.is_time_reference()
 
 
-def map_axes(dim_vars, reverse_map=False):
-    """
-    axis name       -> [dimension names]
-    dimension name  -> [axis_name], length 0 if reverse_map
-    """
-    ret_val = defaultdict(list)
-    axes = ["X", "Y", "Z", "T"]
-
-    for k, v in dim_vars.items():
-        axis = getattr(v, "axis", "")
-        if not axis:
-            continue
-
-        axis = axis.upper()
-        if axis in axes:
-            if reverse_map:
-                ret_val[k].append(axis)
-            else:
-                ret_val[axis].append(k)
-
-    return dict(ret_val)
-
-
 def find_coord_vars(ncds):
     """
     Finds all coordinate variables in a dataset.
@@ -553,7 +373,8 @@ def is_time_variable(varname, var):
     satisfied |= getattr(var, "standard_name", "") == "time"
     satisfied |= getattr(var, "axis", "") == "T"
     satisfied |= units_convertible(
-        "seconds since 1900-01-01", getattr(var, "units", "")
+        "seconds since 1900-01-01",
+        getattr(var, "units", ""),
     )
     return satisfied
 
@@ -619,12 +440,14 @@ def string_from_var_type(variable):
     else:
         raise TypeError(
             f"Variable '{variable.name} has non-string/character' "
-            f"dtype {variable.dtype}"
+            f"dtype {variable.dtype}",
         )
 
 
 def reference_attr_variables(
-    dataset: Dataset, attributes_string: str, split_by: str = None
+    dataset: Dataset,
+    attributes_string: str,
+    split_by: str = None,
 ):
     """
     Attempts to reference variables in the string, optionally splitting by
@@ -634,7 +457,8 @@ def reference_attr_variables(
         return None
     elif split_by is None:
         return dataset.variables.get(
-            attributes_string, VariableReferenceError(attributes_string)
+            attributes_string,
+            VariableReferenceError(attributes_string),
         )
     else:
         string_proc = attributes_string.split(split_by)

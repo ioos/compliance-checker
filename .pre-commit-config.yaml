@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.3.0
+  rev: v4.6.0
   hooks:
     - id: trailing-whitespace
       exclude: compliance_checker/tests/data
@@ -10,38 +10,47 @@ repos:
       exclude: compliance_checker/tests/data
     - id: check-docstring-first
     - id: check-added-large-files
+    - id: check-json
+    - id: check-merge-conflict
+    - id: check-yaml
     - id: requirements-txt-fixer
-
-- repo: https://github.com/PyCQA/flake8
-  rev: 5.0.4
-  hooks:
-    - id: flake8
-      exclude: docs/source/conf.py
-      args: [--max-line-length=200, "--ignore=E203,E501,W503", "--select=select=C,E,F,W,B,B950"]
-
-- repo: https://github.com/pycqa/isort
-  rev: 5.10.1
-  hooks:
-  - id: isort
-    additional_dependencies: [toml]
-    args: ["--profile", "black", "--filter-files"]
+      args:
+        - requirements.txt
+        - test_requirements.txt
 
 - repo: https://github.com/psf/black
-  rev: 22.8.0
+  rev: 24.4.2
   hooks:
   - id: black
     language_version: python3
 
+- repo: https://github.com/asottile/add-trailing-comma
+  rev: v3.1.0
+  hooks:
+    - id: add-trailing-comma
+
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.4.4
+  hooks:
+    - id: ruff
+
+- repo: https://github.com/tox-dev/pyproject-fmt
+  rev: 2.0.4
+  hooks:
+    - id: pyproject-fmt
+
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.1
+  rev: v2.2.6
   hooks:
     - id: codespell
       args:
-        - --ignore-words-list=degreee,varn,poit,uint,sur,herat,claus
+        - --ignore-words-list=degreeE,degreee,varn,poit,uint,sur,herat,claus,tung,messsages
       exclude: >
           (?x)^(
               .*\.xml|
               .*\.cdl|
+              .*\.yaml|
               .*_version.py|
               .*versioneer.py
           )$

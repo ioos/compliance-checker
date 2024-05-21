@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Tests for base compliance checker class"""
 
 import os
@@ -33,13 +32,19 @@ class TestBase(TestCase):
         self.ds.test = ""
         base.attr_check(attr, self.ds, priority, rv2)
         assert rv2[0] == base.Result(
-            priority, False, "test", ["test is empty or completely whitespace"]
+            priority,
+            False,
+            "test",
+            ["test is empty or completely whitespace"],
         )
         # test with whitespace in the form of a space and a tab
         self.ds.test = " 	"
         base.attr_check(attr, self.ds, priority, rv3)
         assert rv3[0] == base.Result(
-            priority, False, "test", ["test is empty or completely whitespace"]
+            priority,
+            False,
+            "test",
+            ["test is empty or completely whitespace"],
         )
         # test with actual string contents
         self.ds.test = "abc 123"
@@ -60,7 +65,7 @@ class TestBase(TestCase):
             priority,
             (1, 2),
             "test",
-            ["test present, but not in expected value list (%s)" % valid_choices],
+            [f"test present, but not in expected value list ({valid_choices})"],
         )
         self.ds.test = "a"
         base.attr_check(attr, self.ds, priority, rv3)

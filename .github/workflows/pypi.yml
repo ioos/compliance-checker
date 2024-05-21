@@ -1,10 +1,8 @@
-name: PyPI
+name: Publish to PyPI
 
 on:
   pull_request:
   push:
-    branches:
-      - master
   release:
     types:
       - published
@@ -17,7 +15,7 @@ jobs:
   packages:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         # Should be enough for setuptools-scm
         fetch-depth: 100
@@ -27,10 +25,9 @@ jobs:
       run: git fetch origin 'refs/tags/*:refs/tags/*'
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
-        # no cf_untis wheels for 3.10 yet
-        python-version: "3.9"
+        python-version: "3.11"
 
     - name: Install build tools
       run: |
@@ -50,7 +47,7 @@ jobs:
 
     - name: Publish a Python distribution to PyPI
       if: success() && github.event_name == 'release'
-      uses: pypa/gh-action-pypi-publish@v1.5.0
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_ACCESS_TOKEN }}

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Tests for command line output and parsing
 
@@ -92,7 +91,7 @@ class TestCLI:
         def checker_2():
             return Namespace(_cc_spec="checker_2", _cc_spec_version="2.2")
 
-        mock_checkers = [Namespace(resolve=checker_1), Namespace(resolve=checker_2)]
+        mock_checkers = [Namespace(load=checker_1), Namespace(load=checker_2)]
         with pytest.warns(DeprecationWarning):
             CheckSuite._load_checkers(mock_checkers)
 

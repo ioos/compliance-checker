@@ -11,7 +11,7 @@ interactions:
       User-Agent:
       - python-requests/2.27.1
     method: HEAD
-    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom
+    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom
   response:
     body:
       string: ''
@@ -25,7 +25,7 @@ interactions:
       Last-Modified:
       - Tue, 24 May 2022 11:35:37 GMT
       Location:
-      - https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom.html
+      - https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom.html
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains
       Transfer-Encoding:
@@ -49,7 +49,7 @@ interactions:
       User-Agent:
       - python-requests/2.27.1
     method: HEAD
-    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom.html
+    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom.html
   response:
     body:
       string: ''
@@ -87,7 +87,7 @@ interactions:
       User-Agent:
       - python-requests/2.27.1
     method: HEAD
-    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom
+    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom
   response:
     body:
       string: ''
@@ -101,7 +101,7 @@ interactions:
       Last-Modified:
       - Tue, 24 May 2022 11:35:59 GMT
       Location:
-      - https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom.html
+      - https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom.html
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains
       Transfer-Encoding:
@@ -125,7 +125,7 @@ interactions:
       User-Agent:
       - python-requests/2.27.1
     method: HEAD
-    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom.html
+    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom.html
   response:
     body:
       string: ''
@@ -163,7 +163,7 @@ interactions:
       User-Agent:
       - python-requests/2.27.1
     method: GET
-    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osuChlaAnom.das
+    uri: https://coastwatch.pfeg.noaa.gov/erddap/griddap/osu2ChlaAnom.das
   response:
     body:
       string: !!binary |
@@ -235,4 +235,262 @@ interactions:
     status:
       code: 200
       message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.31.0
+    method: HEAD
+    uri: https://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 7efe624eb969a4c9-GRU
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/plain
+      Date:
+      - Tue, 01 Aug 2023 13:21:24 GMT
+      Last-Modified:
+      - Tue, 01 Aug 2023 13:21:24 GMT
+      Location:
+      - http://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest.html
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=viFC4Bf5eGlUkkeMsFQWDFwYf5ZHPxQk%2BosYpxTON6ysF7qwAvm48YPwpGBfcdwFtB10N5RtEvlB%2FMR3JMGTzwGub%2Fxz1BVqAMrzYtXCIPX7aAgm7NIYWtxS%2FCd4JOf5vEg%3D"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      erddap-server:
+      - '1.82'
+      xdods-server:
+      - dods/3.7
+    status:
+      code: 302
+      message: Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.31.0
+    method: HEAD
+    uri: http://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest.html
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 7efe6250bfeba6a0-GRU
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - text/html;charset=UTF-8
+      Date:
+      - Tue, 01 Aug 2023 13:21:24 GMT
+      Last-Modified:
+      - Tue, 01 Aug 2023 13:21:24 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=Q00158RZNE%2BKAQjfwcwy2tfC2LjllIghoAsK3G4CUs896HjG6euAyLq6IjMCA2hWGT6zvvxcSJkeOyXscutlR99zZ3ocSALXeNYjddkQlW597IEYvCvIdkP8az8o%2F7BdKSU%3D"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      erddap-server:
+      - '1.82'
+      xdods-server:
+      - dods/3.7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.31.0
+    method: HEAD
+    uri: https://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 7efe62530ea2a507-GRU
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/plain
+      Date:
+      - Tue, 01 Aug 2023 13:21:25 GMT
+      Last-Modified:
+      - Tue, 01 Aug 2023 13:21:25 GMT
+      Location:
+      - http://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest.html
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=hmDpyHvmx5hrFB01AslIWEzp3Hl%2FubqT8Dr%2FoRriX9%2FkBnjpjEXWFvrlKPRoNNqJtNRMZku7TZrfY6XehkaqgfLfZHXf5exSFwOy7RKPQ%2FCwGMLgC2atVzMLfkdKKUd2A0s%3D"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      erddap-server:
+      - '1.82'
+      xdods-server:
+      - dods/3.7
+    status:
+      code: 302
+      message: Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.31.0
+    method: HEAD
+    uri: http://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest.html
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 7efe6254ea801ac9-GRU
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - text/html;charset=UTF-8
+      Date:
+      - Tue, 01 Aug 2023 13:21:25 GMT
+      Last-Modified:
+      - Tue, 01 Aug 2023 13:21:25 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=DQoHrp0kk2O6M%2BjNZy8EjrWe631YF8jIZJSXighA8gBWEnVLfcBQcZoLKCVDueG%2B08qYO4KL1rsEWsQP5tm04Xa%2Fd%2FvPf4jTjCFFmij2FNzNF6h3gEalkcC8SaAE48jHr5A%3D"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      erddap-server:
+      - '1.82'
+      xdods-server:
+      - dods/3.7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.31.0
+    method: GET
+    uri: https://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest.das
+  response:
+    body:
+      string: !!binary |
+        g5UHAMQvm/Xe53J6xclBxI2s4+b8M9UfNUyXQRpLzQSHo3FUiIztIpgvXmq7O3MgGr07JyBJ0Yhw
+        yUaon8rbGlrXvjYkiLjozCsm7oc6Vf68yhH/zgCVkV8vBHjWIK5Hc+x9sOJI+XAt8WWzYCQvMnLy
+        C+lLzgZPursNanWioVk068JltrO9tV1X+/xzbX4zw+7uzi7/XP/Cf0ZaS0TykvwhUryPjYzq5gTR
+        XAfv+sbRyASQM3HWWyNVRm6ivq2PpCjTq8O7tKz3ChTFwRciSdLJiUYkE6p7REzhv2hZ7xVpUaZF
+        +VKktPm0pcf8/wwYSEUnq8oW35DeblkVWWmws5OVYnHNGfwjGCyRIVl7djeSEjmmNFj8QCjUgvP8
+        u8dmQnpJA23jXX+HMmZ/vl1ab2WlQbqzkxX1p8LbpcRVYpwfQHSCitRJDiiplwimqDfbed0S2fwL
+        WxWaMxmGNxomRlpnda0EiFXwUY4o3NJaxmlEWWQFlY44vAltU8bw8J6n0FHLeKclRxXM9yy9k05a
+        cko9Glyw9HNNQxlIF5GpCbEyQrOiJTcjqqpr5jyEqhxGe2l9XC0UlG+5oyWdexf474lduxFQI5rb
+        SnCva93ThSOKr2VbuwXZf/OCyxbGR4yZQZt7rj56oL6xqVUDD200TIhwN//PgLvj5vzm/ujwxmvM
+        09qxsaTUaE3v4jyILSJ5x0Sv06l4F5Ec3x8+nTwbHJ+lZbZr8OrEkhJOSCmy4kRidI+hNliWGUBD
+        gAw3H2ro8R6CuFYWNODSLTmq9KQ+fEl+PwkZmhTj8MAhCLM6whQGJHPVxUGer1ar7Lv4rG+zlvI8
+        QFlKiyR+mG70UZtTiiquhyowgB/s2ccFqdDQDKTNSGt4zxGhizhPkPOzR+CBf51RZJWpUCxzht45
+        EMLFO0nzLncu3gnO8Dvn3PNCcjO9Q4jFqgMjTv/NSKqi2kqL/bQoX8qtg6o8qHY+4YfBtzSgk4Hj
+        jzMyudz36zhQ633MfOhzDtbSIu+DfO/z/r5V5G917ClqM5By1MwSAA0lrvOv1qRwJlOERhUtwZmT
+        I7adDxZtykT3LZPzgWko3Nr2L96sfLARiSUlg1rsZ2CBYRqDUwo6x5F5CG0Zv7O0jz9wfGkJfocX
+        yBseDICGe14w2/xEFARcezPu2MWgRBIa+JbJfRsnGkSmewKvs/Eq2REq8FXRwBEdwiD6KbScGcQF
+        szVwBvhDXKxoydHc81sJopYLNK3yJEjOj29PlGJ3TUXYAYyrjoPkZc6AtMQjbfCdEf5pBHIWgcPw
+        XDFbdD6gC8z4PikkwnmFOGVn2c46HzBwTwOmyKYZ6iLKdonWOyVxEBe1+OatcMxwx6JzDnuwm86S
+        0uzYu6b+xj4YnD6dGNzdHx4aOE9IhBwb7llJOaK7wh87ktvMDulFAwlY43Qc5ggfRMgaqFUfokHQ
+        rIHkNljt3WwH3RjELbpL+DCTcTEI2//MELSJhSN8h66bHGXpBuQsOlHHccHY/jRbRDOKnAYKGEg9
+        wMAHHDoJsXmuLPdBGNl1uRQq8t+YWXcoxHGMLBJMkbtp+NXwHXQuER2kIrIqHnLLSh4unz0ZoKO6
+        YgfwKewXzYjr2/7cohm8qLhGccQx+bpIngTOSqtAtfGhjs/SsmpC+Ezj+Pd5jy7v8f6Oy8tL3GDg
+        PDjzgVuKGj2jDfCRqBCs18X8+LrUc8POIqmKcj8tKyQuVHWicpIQYmjBgwXLtKrbUgcWFZwUDPEv
+        PHp28GXB/8/+nxkD
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 7efe62577bcc011e-GRU
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - br
+      Content-Type:
+      - text/plain;charset=ISO-8859-1
+      Date:
+      - Tue, 01 Aug 2023 13:21:25 GMT
+      Last-Modified:
+      - Tue, 01 Aug 2023 13:21:25 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=d1lok8SZWJNI1nACRaycX0%2B1YmNtOjflDeTI2QaKJx2Fj2dgrCIzgLl9tG%2B0hQzTS7p43sjGBPgPtyDVLG4Iaw37wW8GyZU5f70NwBVA0dew%2BEQRdM0nNMNpJYOfXx9BJ6U%3D"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      content-description:
+      - dods_das
+      erddap-server:
+      - '1.82'
+      xdods-server:
+      - dods/3.7
+    status:
+      code: 200
+      message: OK
 version: 1

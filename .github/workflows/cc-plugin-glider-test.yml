@@ -3,40 +3,35 @@ name: Glider Plugin Tests
 on:
   pull_request:
   push:
-    branches: [master]
 
 jobs:
   run:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-    - name: Setup Conda
-      uses: s-weigand/setup-conda@v1
+    - name: Setup Micromamba
+      uses: mamba-org/setup-micromamba@v1
       with:
-        activate-conda: false
-        conda-channels: conda-forge
+        environment-name: TEST
+        init-shell: bash
+        create-args: >-
+          python=3 pip
+          --file requirements.txt
+          --file test_requirements.txt
+          --channel conda-forge
 
-    - name: Python ${{ matrix.python-version }}
+    - name: Install compliance-checker
       shell: bash -l {0}
       run: |
-        conda create --name TEST python=${{ matrix.python-version }} python=3 pip --file requirements.txt --file test_requirements.txt --strict-channel-priority
-        source activate TEST
-        pip install -e . --no-deps --force-reinstall
-
-    - name: Conda Info
-      shell: bash -l {0}
-      run: |
-        source activate TEST
-        conda info --all
-        conda list
+        python -m pip install -v -e . --no-deps --force-reinstall
 
     - name: cc-plugin-glider tests
       shell: bash -l {0}
-      run: |
-        source activate TEST
+      run: >
         git clone https://github.com/ioos/cc-plugin-glider.git
-        cd cc-plugin-glider
-        conda install --file requirements.txt --file requirements-dev.txt ;
-        pytest -s -rxs -v cc_plugin_glider
+        && cd cc-plugin-glider
+        && micromamba install --file requirements.txt --file requirements-dev.txt --channel conda-forge
+        && python -m pip install -e . --no-deps --force-reinstall
+        && python -m pytest -s -rxs -v cc_plugin_glider

@@ -1,6 +1,7 @@
 """
 Check for IOOS-approved attributes
 """
+
 import re
 from numbers import Number
 
@@ -46,9 +47,7 @@ class IOOSBaseCheck(BaseCheck):
 
         if not val:
             msgs.append(
-                "Attr '{}' (IOOS concept: '{}') not found in dataset".format(
-                    attr, concept_name
-                )
+                f"Attr '{attr}' (IOOS concept: '{concept_name}') not found in dataset",
             )
 
         return Result(priority, val, concept_name, msgs)
@@ -63,18 +62,14 @@ class IOOSBaseCheck(BaseCheck):
         if vname not in dataset.variables:
             val = False
             msgs.append(
-                "Variable '{}' not present while checking for attr '{}' for IOOS concept: '{}'".format(
-                    vname, attr, concept_name
-                )
+                f"Variable '{vname}' not present while checking for attr '{attr}' for IOOS concept: '{concept_name}'",
             )
         else:
             v = dataset.variables[vname]
             if attr not in v.ncattrs():
                 val = False
                 msgs.append(
-                    "Attr '{}' not present on var '{}' while checking for IOOS concept: '{}'".format(
-                        attr, vname, concept_name
-                    )
+                    f"Attr '{attr}' not present on var '{vname}' while checking for IOOS concept: '{concept_name}'",
                 )
 
         return Result(priority, val, concept_name, msgs)
@@ -151,19 +146,34 @@ class IOOS0_1Check(IOOSNCCheck):
             self._has_attr(ds, "acknowledgement", "Platform Sponsor"),
             self._has_attr(ds, "publisher_email", "Station Publisher Email"),
             self._has_attr(
-                ds, "publisher_email", "Service Contact Email", BaseCheck.MEDIUM
+                ds,
+                "publisher_email",
+                "Service Contact Email",
+                BaseCheck.MEDIUM,
             ),
             self._has_attr(
-                ds, "institution", "Service Provider Name", BaseCheck.MEDIUM
+                ds,
+                "institution",
+                "Service Provider Name",
+                BaseCheck.MEDIUM,
             ),
             self._has_attr(
-                ds, "publisher_name", "Service Contact Name", BaseCheck.MEDIUM
+                ds,
+                "publisher_name",
+                "Service Contact Name",
+                BaseCheck.MEDIUM,
             ),
             self._has_attr(
-                ds, "Conventions", "Data Format Template Version", BaseCheck.MEDIUM
+                ds,
+                "Conventions",
+                "Data Format Template Version",
+                BaseCheck.MEDIUM,
             ),
             self._has_attr(
-                ds, "publisher_name", "Station Publisher Name", BaseCheck.HIGH
+                ds,
+                "publisher_name",
+                "Station Publisher Name",
+                BaseCheck.HIGH,
             ),
         ]
 
@@ -193,10 +203,13 @@ class IOOS0_1Check(IOOSNCCheck):
             if "standard_name" in v.ncattrs():
                 count += 1
             else:
-                msgs.append("Variable '{}' missing standard_name attr".format(k))
+                msgs.append(f"Variable '{k}' missing standard_name attr")
 
         return Result(
-            BaseCheck.MEDIUM, (count, len(ds.variables)), "Variable Names", msgs
+            BaseCheck.MEDIUM,
+            (count, len(ds.variables)),
+            "Variable Names",
+            msgs,
         )
 
     def check_altitude_units(self, ds):
@@ -214,7 +227,10 @@ class IOOS0_1Check(IOOSNCCheck):
             return Result(BaseCheck.LOW, val, "Altitude Units", msgs)
 
         return Result(
-            BaseCheck.LOW, (0, 0), "Altitude Units", ["Dataset has no 'z' variable"]
+            BaseCheck.LOW,
+            (0, 0),
+            "Altitude Units",
+            ["Dataset has no 'z' variable"],
         )
 
     def check_variable_units(self, ds):
@@ -228,10 +244,13 @@ class IOOS0_1Check(IOOSNCCheck):
             if "units" in v.ncattrs():
                 count += 1
             else:
-                msgs.append("Variable '{}' missing units attr".format(k))
+                msgs.append(f"Variable '{k}' missing units attr")
 
         return Result(
-            BaseCheck.MEDIUM, (count, len(ds.variables)), "Variable Units", msgs
+            BaseCheck.MEDIUM,
+            (count, len(ds.variables)),
+            "Variable Units",
+            msgs,
         )
 
 
@@ -329,7 +348,7 @@ class IOOS1_1Check(IOOSNCCheck):
                     "which contains the details of the platform. If multiple platforms are "
                     "involved, a variable should be defined for each platform and referenced "
                     "from the geophysical variable in a space separated string."
-                )
+                ),
             ]
         return [Result(BaseCheck.HIGH, val, "platform variables", msgs)]
 
@@ -351,7 +370,10 @@ class IOOS1_1Check(IOOSNCCheck):
                 results += [
                     self._has_var_attr(ds, platform, "long_name", "Platform Long Name"),
                     self._has_var_attr(
-                        ds, platform, "short_name", "Platform Short Name"
+                        ds,
+                        platform,
+                        "short_name",
+                        "Platform Short Name",
                     ),
                     self._has_var_attr(ds, platform, "ioos_code", "Platform IOOS Code"),
                     self._has_var_attr(ds, platform, "type", "Platform Type"),
@@ -368,7 +390,11 @@ class IOOS1_1Check(IOOSNCCheck):
         for geo_var in get_geophysical_variables(ds):
             results.append(
                 self._has_var_attr(
-                    ds, geo_var, "_FillValue", "_FillValue", BaseCheck.MEDIUM
+                    ds,
+                    geo_var,
+                    "_FillValue",
+                    "_FillValue",
+                    BaseCheck.MEDIUM,
                 ),
             )
         return results
@@ -383,7 +409,10 @@ class IOOS1_1Check(IOOSNCCheck):
         for geo_var in get_geophysical_variables(ds):
             results.append(
                 self._has_var_attr(
-                    ds, geo_var, "standard_name", "geophysical variables standard_name"
+                    ds,
+                    geo_var,
+                    "standard_name",
+                    "geophysical variables standard_name",
                 ),
             )
         return results
@@ -440,7 +469,6 @@ class IOOS1_2Check(IOOSNCCheck):
     register_checker = True
 
     def __init__(self):
-
         # instantiate objects used for delegation
         self.acdd1_6 = ACDD1_3Check()
         self.cf1_7 = CF1_7Check()
@@ -462,64 +490,56 @@ class IOOS1_2Check(IOOSNCCheck):
         ]
         self.cf1_7._std_names._names.extend(self._qartod_std_names)
 
-        self._default_check_var_attrs = set(
-            [
-                ("_FillValue", BaseCheck.MEDIUM),
-                ("missing_value", BaseCheck.MEDIUM),
-                # ( "standard_name", BaseCheck.HIGH # already checked in CF1_7Check.check_standard_name()
-                # ( "units", BaseCheck.HIGH # already checked in CF1_7Check.check_units()
-            ]
-        )
+        self._default_check_var_attrs = {
+            ("_FillValue", BaseCheck.MEDIUM),
+            ("missing_value", BaseCheck.MEDIUM),
+            # ( "standard_name", BaseCheck.HIGH # already checked in CF1_7Check.check_standard_name()
+            # ( "units", BaseCheck.HIGH # already checked in CF1_7Check.check_units()
+        }
 
         # geophysical variables must have the following attrs:
         self.geophys_check_var_attrs = self._default_check_var_attrs.union(
-            set(
-                [
-                    ("standard_name_url", BaseCheck.MEDIUM),
-                    # ( "platform", BaseCheck.HIGH) # checked under check_single_platform()
-                    # ( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
-                    # ( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest()
-                    # ("accuracy", BaseCheck.MEDIUM), see check_accuracy
-                    ("precision", BaseCheck.MEDIUM),
-                    ("resolution", BaseCheck.MEDIUM),
-                ]
-            )
+            {
+                ("standard_name_url", BaseCheck.MEDIUM),
+                # ( "platform", BaseCheck.HIGH) # checked under check_single_platform()
+                # ( "wmo_platform_code", BaseCheck.HIGH) # only "if applicable", see check_wmo_platform_code()
+                # ( "ancillary_variables", BaseCheck.HIGH) # only "if applicable", see _check_var_gts_ingest()
+                # ("accuracy", BaseCheck.MEDIUM), see check_accuracy
+                ("precision", BaseCheck.MEDIUM),
+                ("resolution", BaseCheck.MEDIUM),
+            },
         )
 
         # valid contributor_role values
-        self.valid_contributor_roles = set(
-            [  # NERC and NOAA
-                "author",
-                "coAuthor",
-                "collaborator",
-                "contributor",
-                "custodian",
-                "distributor",
-                "editor",
-                "funder",
-                "mediator",
-                "originator",
-                "owner",
-                "pointOfContact",
-                "principalInvestigator",
-                "processor",
-                "publisher",
-                "resourceProvider",
-                "rightsHolder",
-                "sponsor",
-                "stakeholder",
-                "user",
-            ]
-        )
+        self.valid_contributor_roles = {  # NERC and NOAA
+            "author",
+            "coAuthor",
+            "collaborator",
+            "contributor",
+            "custodian",
+            "distributor",
+            "editor",
+            "funder",
+            "mediator",
+            "originator",
+            "owner",
+            "pointOfContact",
+            "principalInvestigator",
+            "processor",
+            "publisher",
+            "resourceProvider",
+            "rightsHolder",
+            "sponsor",
+            "stakeholder",
+            "user",
+        }
 
-        self.valid_contributor_role_vocabs = set(
-            [
-                "http://vocab.nerc.ac.uk/collection/G04/current/",
-                "https://vocab.nerc.ac.uk/collection/G04/current/",
-                "http://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
-                "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
-            ]
-        )
+        self.valid_contributor_role_vocabs = {
+            "http://vocab.nerc.ac.uk/collection/G04/current/",
+            "https://vocab.nerc.ac.uk/collection/G04/current/",
+            "http://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
+            "https://www.ngdc.noaa.gov/wiki/index.php?title=ISO_19115_and_19115-2_CodeList_Dictionaries#CI_RoleCode",
+        }
 
         self.required_atts = [
             ("Conventions", IOOS1_2_ConventionsValidator()),
@@ -610,7 +630,7 @@ class IOOS1_2Check(IOOSNCCheck):
             Set of variables which are platform variables.
         """
         plat_vars = ds.get_variables_by_attributes(
-            platform=lambda p: isinstance(p, str)
+            platform=lambda p: isinstance(p, str),
         )
         return {
             ds.variables[var.platform]
@@ -724,7 +744,7 @@ class IOOS1_2Check(IOOSNCCheck):
                             role_val,
                             "contributor_role",
                             None if role_val else [role_msg.format(_role)],
-                        )
+                        ),
                     )
             except TypeError:
                 role_results.append(
@@ -732,8 +752,8 @@ class IOOS1_2Check(IOOSNCCheck):
                         BaseCheck.MEDIUM,
                         False,
                         "contributor_role",
-                        ["contributor_role '{}' must be of type 'string'".format(role)],
-                    )
+                        [f"contributor_role '{role}' must be of type 'string'"],
+                    ),
                 )
         else:
             role_results.append(
@@ -742,7 +762,7 @@ class IOOS1_2Check(IOOSNCCheck):
                     False,
                     "contributor_role",
                     ["contributor_role should be present"],
-                )
+                ),
             )
 
         vocb_results = []
@@ -757,7 +777,7 @@ class IOOS1_2Check(IOOSNCCheck):
                             vocb_val,
                             "contributor_role_vocabulary",
                             None if vocb_val else [vocb_msg.format(_vocb)],
-                        )
+                        ),
                     )
             except TypeError:
                 vocb_results.append(
@@ -766,11 +786,9 @@ class IOOS1_2Check(IOOSNCCheck):
                         False,
                         "contributor_role_vocabulary",
                         [
-                            "contributor_role_vocabulary '{}' must be of type 'string'".format(
-                                vocb
-                            )
+                            f"contributor_role_vocabulary '{vocb}' must be of type 'string'",
                         ],
-                    )
+                    ),
                 )
         else:
             vocb_results.append(
@@ -779,7 +797,7 @@ class IOOS1_2Check(IOOSNCCheck):
                     False,
                     "contributor_role_vocabulary",
                     ["contributor_role_vocabulary should be present"],
-                )
+                ),
             )
 
         return role_results + vocb_results
@@ -800,7 +818,9 @@ class IOOS1_2Check(IOOSNCCheck):
         # get geophysical variables
         geophys_vars = get_geophysical_variables(ds)  # list of str
         results = self._check_vars_have_attrs(  # list
-            ds, geophys_vars, self.geophys_check_var_attrs
+            ds,
+            geophys_vars,
+            self.geophys_check_var_attrs,
         )
 
         return results
@@ -842,7 +862,7 @@ class IOOS1_2Check(IOOSNCCheck):
                     r,
                     "geophysical_variable:accuracy",
                     [msg.format(v=v)],
-                )
+                ),
             )
 
         return results
@@ -871,7 +891,7 @@ class IOOS1_2Check(IOOSNCCheck):
                         attr_tuple[0],  # attribute name
                         attr_tuple[0],  # attribute name used as 'concept_name'
                         attr_tuple[1],  # priority level
-                    )
+                    ),
                 )
         return results
 
@@ -911,7 +931,7 @@ class IOOS1_2Check(IOOSNCCheck):
                     (
                         f"Invalid featureType '{feature_type_attr}'; please see the "
                         "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
-                    )
+                    ),
                 ],
             )
 
@@ -934,7 +954,9 @@ class IOOS1_2Check(IOOSNCCheck):
 
         elif feature_type == "point":
             return Result(
-                BaseCheck.MEDIUM, True, "CF DSG: featureType=trajectoryProfile"
+                BaseCheck.MEDIUM,
+                True,
+                "CF DSG: featureType=trajectoryProfile",
             )
 
         else:
@@ -947,12 +969,11 @@ class IOOS1_2Check(IOOSNCCheck):
                         f"Invalid featureType '{feature_type_attr}'; "
                         "please see the IOOS 1.2 Profile and CF-1.7 "
                         "Conformance documents for valid featureType"
-                    )
+                    ),
                 ],
             )
 
     def _check_feattype_timeseries_cf_role(self, ds):
-
         ts_msg = (
             "Dimension length of variable with cf_role={cf_role} "
             "(the '{dim_type}' dimension) is {dim_len}. "
@@ -970,7 +991,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 (
                     "The IOOS-1.2 Profile specifies a single variable "
                     "must be present with attribute cf_role=timeseries_id"
-                )
+                ),
             ]
 
         else:
@@ -985,8 +1006,10 @@ class IOOS1_2Check(IOOSNCCheck):
             _val = _dimsize == 1
             msgs = [
                 ts_msg.format(
-                    cf_role="timeseries_id", dim_type="station", dim_len=_dimsize
-                )
+                    cf_role="timeseries_id",
+                    dim_type="station",
+                    dim_len=_dimsize,
+                ),
             ]
 
         return Result(
@@ -997,7 +1020,6 @@ class IOOS1_2Check(IOOSNCCheck):
         )
 
     def _check_feattype_timeseriesprof_cf_role(self, ds):
-
         ts_prof_msg = (
             "Dimension length of non-platform variable with cf_role={cf_role} "
             " (the '{dim_type}' dimension) is {dim_len}. "
@@ -1017,7 +1039,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 (
                     "Datasets of featureType=timeSeriesProfile must have variables "
                     "containing cf_role=timeseries_id and cf_role=profile_id"
-                )
+                ),
             ]
 
         else:
@@ -1037,12 +1059,17 @@ class IOOS1_2Check(IOOSNCCheck):
             _val = _ts_id_dimsize == 1 and _pf_id_dimsize >= 1
             msgs = [
                 ts_prof_msg.format(
-                    cf_role="timeseries_id", dim_type="station", dim_len=_ts_id_dimsize
-                )
+                    cf_role="timeseries_id",
+                    dim_type="station",
+                    dim_len=_ts_id_dimsize,
+                ),
             ]
 
         return Result(
-            BaseCheck.HIGH, _val, "CF DSG: featureType=timeSeriesProfile", msgs
+            BaseCheck.HIGH,
+            _val,
+            "CF DSG: featureType=timeSeriesProfile",
+            msgs,
         )
 
     def _check_feattype_trajectory_cf_role(self, ds):
@@ -1061,7 +1088,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 (
                     "Datasets of featureType=trajectory must have a variable "
                     "containing cf_role=trajectory_id"
-                )
+                ),
             ]
 
         else:
@@ -1076,8 +1103,10 @@ class IOOS1_2Check(IOOSNCCheck):
             _val = _dimsize == 1
             msgs = [
                 trj_msg.format(
-                    cf_role="trajectory_id", dim_type="station", dim_len=_dimsize
-                )
+                    cf_role="trajectory_id",
+                    dim_type="station",
+                    dim_len=_dimsize,
+                ),
             ]
 
         return Result(BaseCheck.HIGH, _val, "CF DSG: featureType=trajectory", msgs)
@@ -1102,7 +1131,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 (
                     "Datasets of featureType=trajectoryProfile must have variables "
                     "containing cf_role=trajectory_id and cf_role=profile_id"
-                )
+                ),
             ]
 
         else:
@@ -1123,12 +1152,17 @@ class IOOS1_2Check(IOOSNCCheck):
             _val = _trj_id_dimsize == 1 and _prf_id_dimsize >= 1
             msgs = [
                 trj_prof_msg.format(
-                    cf_role="trajectory_id", dim_type="station", dim_len=_trj_id_dimsize
-                )
+                    cf_role="trajectory_id",
+                    dim_type="station",
+                    dim_len=_trj_id_dimsize,
+                ),
             ]
 
         return Result(
-            BaseCheck.HIGH, _val, "CF DSG: featureType=trajectoryProfile", msgs
+            BaseCheck.HIGH,
+            _val,
+            "CF DSG: featureType=trajectoryProfile",
+            msgs,
         )
 
     def _check_feattype_profile_cf_role(self, ds):
@@ -1144,7 +1178,7 @@ class IOOS1_2Check(IOOSNCCheck):
         if (not cf_role_vars) or (len(cf_role_vars) > 1):
             _val = False
             msgs = [
-                "None or multiple variables found with cf_role=profile_id; only one is allowed"
+                "None or multiple variables found with cf_role=profile_id; only one is allowed",
             ]
 
         else:
@@ -1159,8 +1193,10 @@ class IOOS1_2Check(IOOSNCCheck):
             _val = _dimsize == 1
             msgs = [
                 prof_msg.format(
-                    cf_role="profile_id", dim_type="profile", dim_len=_dimsize
-                )
+                    cf_role="profile_id",
+                    dim_type="profile",
+                    dim_len=_dimsize,
+                ),
             ]
 
         return Result(BaseCheck.HIGH, _val, "CF DSG: featureType=profile", msgs)
@@ -1197,12 +1233,12 @@ class IOOS1_2Check(IOOSNCCheck):
                 else:
                     pass_stat = False
                     messages.append(
-                        "If specified, {} must be in value list "
-                        "({})".format(global_att_name, sorted(expected_types))
+                        f"If specified, {global_att_name} must be in value list "
+                        f"({sorted(expected_types)})",
                     )
 
             result_list.append(
-                Result(BaseCheck.MEDIUM, pass_stat, global_att_name, messages)
+                Result(BaseCheck.MEDIUM, pass_stat, global_att_name, messages),
             )
 
         return result_list
@@ -1254,9 +1290,7 @@ class IOOS1_2Check(IOOSNCCheck):
 
         num_platforms = len(platform_set)
         if num_platforms > 1 and glb_platform:
-            msg = "A dataset may only have one platform; {} found".format(
-                len(platform_set)
-            )
+            msg = f"A dataset may only have one platform; {len(platform_set)} found"
             val = False
 
         elif (not glb_platform) and num_platforms > 0:
@@ -1279,8 +1313,8 @@ class IOOS1_2Check(IOOSNCCheck):
     def check_platform_vocabulary(self, ds):
         """
         The platform_vocabulary attribute is recommended to be a URL to
-        http://mmisw.org/ont/ioos/platform or
-        http://vocab.nerc.ac.uk/collection/L06/current/. However,
+        https://mmisw.org/ont/ioos/platform or
+        https://vocab.nerc.ac.uk/collection/L06/current/. However,
         it is required to at least be a URL.
 
         Args:
@@ -1294,7 +1328,10 @@ class IOOS1_2Check(IOOSNCCheck):
         pvocab = getattr(ds, "platform_vocabulary", "")
         val = bool(validators.url(pvocab))
         return Result(
-            BaseCheck.MEDIUM, val, "platform_vocabulary", None if val else [m]
+            BaseCheck.MEDIUM,
+            val,
+            "platform_vocabulary",
+            None if val else [m],
         )
 
     def _check_gts_ingest_val(self, val):
@@ -1354,14 +1391,14 @@ class IOOS1_2Check(IOOSNCCheck):
 
             valid_vertical_coord = TestCtx(BaseCheck.HIGH, "Vertical coordinates")
             units_set_msg = (
-                "{}'s units attribute {} is not equivalent to one "
-                "of {}".format(name, units_str, expected_unit_strs)
+                f"{name}'s units attribute {units_str} is not equivalent to one "
+                f"of {expected_unit_strs}"
             )
             valid_vertical_coord.assert_true(pass_stat, units_set_msg)
 
             pos_msg = (
-                "{}: vertical coordinates must include a positive "
-                "attribute that is either 'up' or 'down'".format(name)
+                f"{name}: vertical coordinates must include a positive "
+                "attribute that is either 'up' or 'down'"
             )
             valid_vertical_coord.assert_true(positive in ("up", "down"), pos_msg)
 
@@ -1390,7 +1427,7 @@ class IOOS1_2Check(IOOSNCCheck):
             is_valid_string = self._check_gts_ingest_val(gts_ingest_value)
 
         fail_message = [
-            'Global attribute "gts_ingest" must be a string "true" or "false"'
+            'Global attribute "gts_ingest" must be a string "true" or "false"',
         ]
         return Result(
             BaseCheck.HIGH,
@@ -1455,7 +1492,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
         Check which variables qualify for ingest.
 
-        According to https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#requirements-for-ioos-dataset-gts-ingest,
+        According to https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#requirements-for-ioos-dataset-ndbcgts-ingest,
         the gts_ingest is "required, if applicable". Any variables which a user
         would like ingested must also contain the gts_ingest attribute with a
         value of true. The variable must:
@@ -1491,30 +1528,30 @@ class IOOS1_2Check(IOOSNCCheck):
         var_passed_ingest_reqs = set()
         for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x == "true"):
             var_passed_ingest_reqs.add(
-                (v.name, self._var_qualifies_for_gts_ingest(ds, v))
+                (v.name, self._var_qualifies_for_gts_ingest(ds, v)),
             )
 
         # always show which variables have passed
-        _var_passed = map(
-            lambda y: y[0], filter(lambda x: x[1], var_passed_ingest_reqs)
-        )
+        _var_passed = (y[0] for y in filter(lambda x: x[1], var_passed_ingest_reqs))
 
-        all_passed_ingest_reqs = all(map(lambda x: x[1], var_passed_ingest_reqs))
+        all_passed_ingest_reqs = all(x[1] for x in var_passed_ingest_reqs)
         if not all_passed_ingest_reqs:
-            _var_failed = map(
-                lambda y: y[0], filter(lambda x: not x[1], var_passed_ingest_reqs)
+            _var_failed = (
+                y[0] for y in filter(lambda x: not x[1], var_passed_ingest_reqs)
             )
 
         return Result(
             BaseCheck.HIGH,
             False,  # always fail
             "NDBC/GTS Ingest Requirements",
-            [var_passed_ingest_msg.format(", ".join(_var_passed))]
-            if all_passed_ingest_reqs
-            else [
-                var_passed_ingest_msg.format(", ".join(_var_passed)),
-                var_failed_ingest_msg.format(", ".join(_var_failed)),
-            ],
+            (
+                [var_passed_ingest_msg.format(", ".join(_var_passed))]
+                if all_passed_ingest_reqs
+                else [
+                    var_passed_ingest_msg.format(", ".join(_var_passed)),
+                    var_failed_ingest_msg.format(", ".join(_var_failed)),
+                ]
+            ),
         )
 
     def check_instrument_variables(self, ds):
@@ -1537,9 +1574,7 @@ class IOOS1_2Check(IOOSNCCheck):
             if instr in ds.variables:
                 compnt = getattr(ds.variables[instr], "component", None)
                 m = [
-                    "component attribute of {} ({}) must be a string".format(
-                        instr, compnt
-                    )
+                    f"component attribute of {instr} ({compnt}) must be a string",
                 ]
                 if compnt:
                     results.append(
@@ -1548,18 +1583,16 @@ class IOOS1_2Check(IOOSNCCheck):
                             isinstance(compnt, str),
                             "instrument_variable",
                             m,
-                        )
+                        ),
                     )
                 else:
                     results.append(
-                        Result(BaseCheck.MEDIUM, True, "instrument_variable", m)
+                        Result(BaseCheck.MEDIUM, True, "instrument_variable", m),
                     )
 
                 disct = getattr(ds.variables[instr], "discriminant", None)
                 m = [
-                    "discriminant attribute of {} ({}) must be a string".format(
-                        instr, disct
-                    )
+                    f"discriminant attribute of {instr} ({disct}) must be a string",
                 ]
                 if disct:
                     results.append(
@@ -1568,11 +1601,11 @@ class IOOS1_2Check(IOOSNCCheck):
                             isinstance(disct, str),
                             "instrument_variable",
                             m,
-                        )
+                        ),
                     )
                 else:
                     results.append(
-                        Result(BaseCheck.MEDIUM, True, "instrument_variable", m)
+                        Result(BaseCheck.MEDIUM, True, "instrument_variable", m),
                     )
 
         return results
@@ -1596,9 +1629,8 @@ class IOOS1_2Check(IOOSNCCheck):
         results = []
         # get qartod variables
         for v in ds.get_variables_by_attributes(
-            standard_name=lambda x: x in self._qartod_std_names
+            standard_name=lambda x: x in self._qartod_std_names,
         ):
-
             missing_msg = "flag_{} not present on {}"
 
             # check if each has flag_values, flag_meanings
@@ -1610,7 +1642,7 @@ class IOOS1_2Check(IOOSNCCheck):
                         False,
                         "qartod_variables flags",
                         missing_msg.format("values", v.name),
-                    )
+                    ),
                 )
 
             else:  # if exist, test
@@ -1623,7 +1655,7 @@ class IOOS1_2Check(IOOSNCCheck):
                         False,
                         "qartod_variables flags",
                         missing_msg.format("meanings", v.name),
-                    )
+                    ),
                 )
 
             else:  # if exist, test
@@ -1651,19 +1683,17 @@ class IOOS1_2Check(IOOSNCCheck):
 
         results = []
         for v in ds.get_variables_by_attributes(
-            standard_name=lambda x: x in self._qartod_std_names
+            standard_name=lambda x: x in self._qartod_std_names,
         ):
             attval = getattr(v, "references", None)
             if attval is None:
                 msg = (
-                    '"references" attribute not present for variable {}.'
+                    f'"references" attribute not present for variable {v.name}.'
                     "If present, it should be a valid URL."
-                ).format(v.name)
+                )
                 val = False
             else:
-                msg = '"references" attribute for variable "{}" must be a valid URL'.format(
-                    v.name
-                )
+                msg = f'"references" attribute for variable "{v.name}" must be a valid URL'
                 val = bool(validators.url(attval))
 
             results.append(
@@ -1672,7 +1702,7 @@ class IOOS1_2Check(IOOSNCCheck):
                     val,
                     "qartod_variable:references",
                     None if val else [msg],
-                )
+                ),
             )
 
         return results
@@ -1737,10 +1767,12 @@ class IOOS1_2Check(IOOSNCCheck):
                     BaseCheck.MEDIUM,
                     valid,
                     "instrument_variable:make_model",
-                    None
-                    if valid
-                    else [f"Attribute {v}:make_model ({mm}) should be a string"],
-                )
+                    (
+                        None
+                        if valid
+                        else [f"Attribute {v}:make_model ({mm}) should be a string"]
+                    ),
+                ),
             )
 
             # calibration_date
@@ -1750,19 +1782,21 @@ class IOOS1_2Check(IOOSNCCheck):
                 re.match(
                     r"^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$",
                     cd,
-                )
+                ),
             )
             results.append(
                 Result(
                     BaseCheck.MEDIUM,
                     valid,
                     "instrument_variable:calibration_date",
-                    None
-                    if valid
-                    else [
-                        f"Attribute {v}:calibration_date ({cd}) should be an ISO-8601 string"
-                    ],
-                )
+                    (
+                        None
+                        if valid
+                        else [
+                            f"Attribute {v}:calibration_date ({cd}) should be an ISO-8601 string",
+                        ]
+                    ),
+                ),
             )
 
         return results
@@ -1781,7 +1815,6 @@ class IOOSBaseSOSCheck(BaseCheck):
 
 
 class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseSOSCheck):
-
     # set up namespaces for XPath
     ns = Namespaces().get_namespaces(["sos", "gml", "xlink"])
     ns["ows"] = Namespaces().get_namespace("ows110")
@@ -1860,7 +1893,6 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseSOSCheck):
 
 
 class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseSOSCheck):
-
     # set up namespaces for XPath
     ns = Namespaces().get_namespaces(["sml", "swe", "gml", "xlink"])
 

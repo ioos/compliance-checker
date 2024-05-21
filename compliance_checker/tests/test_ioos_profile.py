@@ -314,7 +314,6 @@ class TestIOOS1_2(BaseTestCase):
         self.ioos = IOOS1_2Check()
 
     def test_check_geophysical_vars_have_attrs(self):
-
         # create geophysical variable
         ds = MockTimeSeries()  # time, lat, lon, depth
         temp = ds.createVariable("temp", np.float64, dimensions=("time",))
@@ -327,7 +326,9 @@ class TestIOOS1_2(BaseTestCase):
         # set the necessary attributes
         ds = MockTimeSeries(default_fill_value=9999999999.0)  # time, lat, lon, depth
         temp = ds.createVariable(
-            "temp", np.float64, fill_value=9999999999.0
+            "temp",
+            np.float64,
+            fill_value=9999999999.0,
         )  # _FillValue
         temp.setncattr("missing_value", 9999999999.0)
         temp.setncattr("standard_name", "sea_surface_temperature")
@@ -349,7 +350,10 @@ class TestIOOS1_2(BaseTestCase):
 
         ds = MockTimeSeries()  # time, lat, lon, depth
         temp = ds.createVariable(
-            "temp", np.float64, dimensions=("time",), fill_value=9999999999.0
+            "temp",
+            np.float64,
+            dimensions=("time",),
+            fill_value=9999999999.0,
         )  # _FillValue
         temp.setncattr("standard_name", "sea_water_temperature")
         results = self.ioos.check_accuracy(ds)
@@ -380,11 +384,13 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(scored, out_of)
 
     def test_check_geospatial_vars_have_attrs(self):
-
         # create geophysical variable
         ds = MockTimeSeries()  # time, lat, lon, depth
         temp = ds.createVariable(
-            "temp", np.float64, dimensions=("time",), fill_value=9999999999.0
+            "temp",
+            np.float64,
+            dimensions=("time",),
+            fill_value=9999999999.0,
         )  # _FillValue
         temp.setncattr("standard_name", "sea_water_temperature")
         results = self.ioos.check_accuracy(ds)
@@ -525,11 +531,11 @@ class TestIOOS1_2(BaseTestCase):
         result = self.ioos.check_gts_ingest_requirements(ds)
         self.assertFalse(result.value)
         self.assertIn(
-            "The following variables qualified for NDBC/GTS Ingest: time\n", result.msgs
+            "The following variables qualified for NDBC/GTS Ingest: time\n",
+            result.msgs,
         )
 
     def test_check_instrument_variables(self):
-
         ds = MockTimeSeries()  # time, lat, lon, depth
 
         # no instrument variable, should pass
@@ -646,7 +652,7 @@ class TestIOOS1_2(BaseTestCase):
             bad_result[1],
             [
                 "naming_authority should either be a URL or a "
-                'reversed DNS name (e.g "edu.ucar.unidata")'
+                'reversed DNS name (e.g "edu.ucar.unidata")',
             ],
         )
 
@@ -689,7 +695,6 @@ class TestIOOS1_2(BaseTestCase):
         self.assertEqual(res.msgs, [])
 
     def test_check_single_platform(self):
-
         ds = MockTimeSeries()  # time, lat, lon, depth
 
         # no global attr but also no platform variables, should pass
@@ -800,7 +805,8 @@ class TestIOOS1_2(BaseTestCase):
 
         # QARTOD variable with bad references (fail)
         qr.setncattr(
-            "references", r"p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht"
+            "references",
+            r"p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht",
         )
         results = self.ioos.check_qartod_variables_references(ds)
         self.assertFalse(all(r.value for r in results))
@@ -943,7 +949,6 @@ class TestIOOS1_2(BaseTestCase):
         self.assertLess(scored, out_of)
 
     def test_check_feattype_timeseries_cf_role(self):
-
         # featureType: timeseries and timeseries - msingle station require same tests
 
         # for ftype in ("timeseries", "timeseries - single station", "timeseries - multiple station"):
@@ -1195,7 +1200,9 @@ class TestIOOS1_2(BaseTestCase):
         temp = ds.createVariable("temperature", "d", dimensions=("time",))
         temp.setncattr("instrument", "inst")
         inst = ds.createVariable(
-            "inst", "d", dimensions=()
+            "inst",
+            "d",
+            dimensions=(),
         )  # no make_model or calibration_date
         results = self.ioos.check_instrument_make_model_calib_date(ds)
         scored, out_of, messages = get_results(results)
