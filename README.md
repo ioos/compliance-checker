@@ -262,7 +262,7 @@ Ensure to supply the URL *without* the format extension at the end (no `.nc`, `.
 
 Some examples of ERDDAP datasets:
 
-  - https://pae-paha.pacioos.hawaii.edu/erddap/tabledap/AWS-HIMB
+  - https://pae-paha.pacioos.hawaii.edu/erddap/tabledap/aws_himb
   - http://erddap.secoora.org/erddap/tabledap/edu_usf_marine_comps_1407d550
   - http://erddap.cencoos.org/erddap/tabledap/bodega-bay-bml_wts
   - http://erddap.cencoos.org/erddap/tabledap/fort-point
