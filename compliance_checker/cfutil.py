@@ -766,7 +766,7 @@ def get_flag_variables(nc):
     return flag_variables
 
 
-def get_grid_mapping_variables(nc):
+def get_grid_mapping_variables(ds):
     """
     Returns a list of grid mapping variables
 
