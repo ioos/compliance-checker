@@ -87,16 +87,6 @@ write_to_template = "__version__ = '{version}'"
 tag_regex = "^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$"
 
 [tool.ruff]
-lint.select = [
-  "A",  # flake8-builtins
-  "B",  # flake8-bugbear
-  "C4", # flake8-comprehensions
-  "E",  # pycodecstyle
-  "F",  # flakes
-  "I",  # import sorting
-  "W",  # pydocstyle
-  "UP", # upgrade
-]
 target-version = "py38"
 line-length = 200
 
@@ -104,21 +94,30 @@ exclude = [
   "compliance_checker/cf/cf.py",
 ]
 
+lint.select = [
+  "A",  # flake8-builtins
+  "B",  # flake8-bugbear
+  "C4", # flake8-comprehensions
+  "E",  # pycodecstyle
+  "F",  # flakes
+  "I",  # import sorting
+  "UP", # upgrade
+  "W",  # pydocstyle
+]
 lint.ignore = [
   "E501",
 ]
 
-[tool.ruff.lint.per-file-ignores]
-"docs/source/conf.py" = [
-  "E402",
-  "A001",
-]
-"compliance_checker/cfutil.py" = [
-  "B028",
-]
-"compliance_checker/cf/appendix_f.py" = [
+lint.per-file-ignores."compliance_checker/cf/appendix_f.py" = [
   "B033",
 ] # ignore duplicates items in the set
+lint.per-file-ignores."compliance_checker/cfutil.py" = [
+  "B028",
+]
+lint.per-file-ignores."docs/source/conf.py" = [
+  "A001",
+  "E402",
+]
 
 [tool.pytest.ini_options]
 markers = [
