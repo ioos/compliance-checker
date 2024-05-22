@@ -25,17 +25,25 @@ def is_netcdf(url):
     if url.endswith("nc"):
         return True
 
-    # Brute force
-    with open(url, "rb") as f:
-        magic_number = f.read(4)
-        if len(magic_number) < 4:
-            return False
-        if is_classic_netcdf(magic_number):
-            return True
-        elif is_hdf5(magic_number):
-            return True
-
+    try:
+        # Brute force
+        with open(url, "rb") as f:
+            magic_number = f.read(4)
+            if len(magic_number) < 4:
+                return False
+            if is_classic_netcdf(magic_number):
+                return True
+            elif is_hdf5(magic_number):
+                return True
+    except PermissionError:
+        # open will fail for both a directory or a local url, either of which may be pointing to a Zarr dataset
+        # directory
         return False
+    except OSError:
+        # local file url
+        return False
+
+    return False
 
 
 def is_classic_netcdf(file_buffer):

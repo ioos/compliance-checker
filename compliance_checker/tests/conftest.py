@@ -9,6 +9,8 @@ from netCDF4 import Dataset
 from compliance_checker.cf import util
 from compliance_checker.suite import CheckSuite
 
+datadir = files("compliance_checker").joinpath("tests/data").resolve()
+
 
 def glob_down(pth, suffix, lvls):
     """globs down up to (lvls: int) levels of subfolders\n

@@ -6,6 +6,8 @@ Tests for command line output and parsing
 import io
 import json
 import os
+import platform
+import subprocess
 import sys
 from argparse import Namespace
 
@@ -13,7 +15,7 @@ import pytest
 
 from compliance_checker.runner import CheckSuite, ComplianceChecker
 
-from .conftest import static_files
+from .conftest import datadir, static_files
 
 
 @pytest.mark.usefixtures("checksuite_setup")
@@ -214,3 +216,55 @@ class TestCLI:
             output_format="text",
         )
         assert not return_value
+
+    def _check_libnetcdf_version():
+        if platform.system() == "Linux":
+            # nc-config doesn't work on windows... and neither does NCZarr so this skipif is mutually exclusive to the OS check skipif
+            return (
+                float(
+                    subprocess.check_output(
+                        ["nc-config", "--version"],
+                        encoding="UTF-8",
+                    )[9:12],
+                )
+                < 8.0
+            )
+        else:
+            return True
+
+    # TODO uncomment the third parameter once S3 support is working
+    @pytest.mark.skipif(
+        _check_libnetcdf_version(),
+        reason="NCZarr support was not available until netCDF version 4.8.0. Please upgrade to the latest libnetcdf version to test this functionality",
+    )
+    @pytest.mark.skipif(
+        platform.system() != "Linux",
+        reason="NCZarr is not officially supported for your OS as of when this API was written",
+    )
+    @pytest.mark.parametrize(
+        "zarr_url",
+        [
+            f"{(datadir / 'trajectory.zarr').as_uri()}#mode=nczarr,file",
+            str(datadir / "zip.zarr"),
+            # "s3://hrrrzarr/sfc/20210408/20210408_10z_anl.zarr#mode=nczarr,s3"
+        ],
+        ids=["local_file", "zip_file"],  # ,'s3_url'
+    )
+    def test_nczarr_pass_through(self, zarr_url):
+        """
+        Test that the url's with #mode=nczarr option pass through to ncgen
+        https://www.unidata.ucar.edu/blogs/developer/entry/overview-of-zarr-support-in
+        """
+        skip_checks = [
+            "check_filename",  # .zarr cannot pass a test that requires it to be named .nc
+            "check_coordinate_variables_strict_monotonicity",  # FIXME: I believe there is a real problem with the original test data!
+        ]
+        return_value, errors = ComplianceChecker.run_checker(
+            skip_checks=skip_checks,
+            ds_loc=zarr_url,
+            verbose=0,
+            criteria="strict",
+            checker_names=["cf:1.6"],
+            output_format="text",
+        )
+        assert not errors
