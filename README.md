@@ -101,7 +101,7 @@ The computer-readable name field controls how Results are aggregated together - 
 it is possible to *group* Results together via the name property.
 Grouped results will only add up to a single top-level entry.
 
-See the [Development](//github.com/ioos/compliance-checker/wiki/Development) wiki page for more details on implementation.
+See the [Development](https://github.com/ioos/compliance-checker/wiki/Development) wiki page for more details on implementation.
 
 ## Installation
 

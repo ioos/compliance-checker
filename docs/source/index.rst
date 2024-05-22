@@ -7,7 +7,7 @@ Python tool to check your datasets against compliance standards.
    :maxdepth: 3
    :caption: Contents:
 
-   quickintro
+   readme_link
    compliance_checker_api
    faq
    development
