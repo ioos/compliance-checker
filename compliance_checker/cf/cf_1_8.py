@@ -93,7 +93,7 @@ class CF1_8Check(CF1_7Check):
             for attr in ginstance.ncattrs():
                 if attr in CF1_8Check.ROOT_GROUP_ONLY_ATTRS:
                     ctx_hi.messages.append(
-                        f'§2.7.2 Attribute "{ attr }" MAY ONLY be used in the root group '
+                        f'§2.7.2 Attribute "{attr}" MAY ONLY be used in the root group '
                         "and SHALL NOT be duplicated or overridden in child groups.",
                     )
 
@@ -101,7 +101,7 @@ class CF1_8Check(CF1_7Check):
 
                 elif attr in CF1_8Check.NON_ROOT_GROUP_OPT:
                     ctx_lo.messages.append(
-                        f"§2.7.2 Note: attribute '{ attr }' found on non-root group '{ gname }'. "
+                        f'§2.7.2 Note: attribute "{attr}" found on non-root group "{gname}". '
                         "This is optional for non-root groups. It is allowed in order to provide additional "
                         "provenance and description of the subsidiary data. It does not override "
                         "attributes from parent groups.",
