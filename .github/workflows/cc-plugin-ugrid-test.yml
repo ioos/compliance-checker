@@ -33,5 +33,6 @@ jobs:
         git clone https://github.com/ioos/cc-checker-ugrid.git
         && cd cc-checker-ugrid
         && micromamba install --file requirements.txt --file requirements-dev.txt --channel conda-forge
+        && micromamba remove compliance-checker --no-prune --force
         && python -m pip install -e . --no-deps --force-reinstall
         && python -m pytest -s -rxs -v cc_plugin_ugrid
