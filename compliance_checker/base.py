@@ -254,7 +254,10 @@ class Result:
         if value is None:
             self.value = None
         elif isinstance(value, tuple):
-            assert len(value) == 2, "Result value must be 2-tuple or boolean!"
+            if len(value) != 2:
+                raise ValueError(
+                    f"Result value must be 2-tuple or boolean! Got {value}",
+                )
             self.value = value
         else:
             self.value = bool(value)
