@@ -299,7 +299,8 @@ class CheckSuite:
         the user selected names.
         """
 
-        assert len(self.checkers) > 0, "No checkers could be found."
+        if len(self.checkers) <= 0:
+            raise ValueError("No checkers could be found.")
 
         if len(checker_names) == 0:
             checker_names = list(self.checkers.keys())
