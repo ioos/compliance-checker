@@ -204,9 +204,10 @@ optional arguments:
 
 ### Check a local file against CF 1.6
 ```
-$ compliance-checker --test=cf:1.6 compliance_checker/tests/data/examples/hycom_global.nc
+compliance-checker --test=cf:1.6 compliance_checker/tests/data/examples/hycom_global.nc
+```
 
-
+```
 --------------------------------------------------------------------------------
                          IOOS Compliance Checker Report
                                   cf:1.6 check
@@ -247,7 +248,7 @@ contains valid packing:                are not of type float or double.
 The remote dataset url is taken from the Data URL section of an OPeNDAP endpoint.
 
 ```shell
-$ compliance-checker --test=acdd:1.3 "http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml"
+compliance-checker --test=acdd:1.3 "http://sos.maracoos.org/stable/dodsC/hrecos/stationHRMARPH-agg.ncml"
 ```
 
 ### Checking against remote ERDDAP Datasets
@@ -255,7 +256,7 @@ $ compliance-checker --test=acdd:1.3 "http://sos.maracoos.org/stable/dodsC/hreco
 ERDDAP datasets are becoming a popular way to access data. Supply an ERDDAP `TableDAP` or `GridDAP` URL to the checker:
 
 ```shell
-$ compliance-checker --test ioos:1.2 "https://pae-paha.pacioos.hawaii.edu/erddap/griddap/pibhmc_bathy_60m_guam"
+compliance-checker --test ioos:1.2 "https://pae-paha.pacioos.hawaii.edu/erddap/griddap/pibhmc_bathy_60m_guam"
 ```
 
 Ensure to supply the URL *without* the format extension at the end (no `.nc`, `.ncCF`, etc.).
@@ -276,37 +277,37 @@ Some examples of ERDDAP datasets:
 ### Write results to text file
 
 ```shell
-$ compliance-checker --test=acdd:1.3 --format=text --output=/tmp/report.txt compliance_checker/tests/data/examples/hycom_global.nc
+compliance-checker --test=acdd:1.3 --format=text --output=/tmp/report.txt compliance_checker/tests/data/examples/hycom_global.nc
 ```
 
 ### Write results to JSON file
 
 ```shell
-$ compliance-checker --test=acdd:1.3 --format=json --output=/tmp/report.json compliance_checker/tests/data/examples/hycom_global.nc
+compliance-checker --test=acdd:1.3 --format=json --output=/tmp/report.json compliance_checker/tests/data/examples/hycom_global.nc
 ```
 
 ### Write results to HTML file
 
 ```shell
-$ compliance-checker --test=acdd:1.3 --format=html --output=/tmp/report.html compliance_checker/tests/data/examples/hycom_global.nc
+compliance-checker --test=acdd:1.3 --format=html --output=/tmp/report.html compliance_checker/tests/data/examples/hycom_global.nc
 ```
 
 ### Output text from multiple input files to one output file
 
 ```
-$ compliance-checker --test=cf:1.6 --format text --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
+compliance-checker --test=cf:1.6 --format text --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
 ```
 
 ### Output html and text files from multiple input files (part 1)
 In this case you'll get 2 files ```/tmp/combined_output.txt``` and ```/tmp/combined_output.html``` that contain cf check results for both input files because you only specified 1 output filename.
 ```
-$ compliance-checker --test=cf:1.6 --format text --format html --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
+compliance-checker --test=cf:1.6 --format text --format html --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
 ```
 
 ### Output html and text files from multiple input files (part 2)
 In this case you'll get 4 files ```/tmp/hycom.txt```, ```/tmp/hycom.html```, ```/tmp/ww3.txt```, and ```/tmp/ww3.html``` that contain cf check results because you specified as many output filenames as input filenames.
 ```
-$ compliance-checker --test=cf:1.6 --format text --format html --output=/tmp/hycom.txt --output=/tmp/ww3.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
+compliance-checker --test=cf:1.6 --format text --format html --output=/tmp/hycom.txt --output=/tmp/ww3.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
 ```
 
 ### Download a particular CF standard names table for use in the test
@@ -317,7 +318,8 @@ During the CF test, if a file has a particular version of the cf standard name t
 try to download the specified version. If it fails, it will fall back to packaged version.
 
 ```
-$ compliance-checker -d 35
+compliance-checker -d 35
+```
 
 Downloading cf-standard-names table version 35 from: http://cfconventions.org/Data/cf-standard-names/35/src/cf-standard-name-table.xml
 ```
