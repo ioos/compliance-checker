@@ -355,6 +355,7 @@ def get_cell_boundary_map(nc):
     for variable in nc.get_variables_by_attributes(bounds=lambda x: x is not None):
         if variable.bounds in nc.variables:
             boundary_map[variable.name] = variable.bounds
+    
     return boundary_map
 
 
@@ -765,18 +766,52 @@ def get_flag_variables(nc):
     return flag_variables
 
 
-def get_grid_mapping_variables(nc):
+def get_grid_mapping_variables(ds):
     """
     Returns a list of grid mapping variables
 
     :param netCDF4.Dataset nc: An open netCDF4 Dataset
     """
     grid_mapping_variables = set()
-    for ncvar in nc.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
-        if ncvar.grid_mapping in nc.variables:
+    for ncvar in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None and isinstance(x, str)):
+        
+        if ' ' in ncvar.grid_mapping:
+            grid_mapping_list = [
+                x.split(':')[0] for x in ncvar.grid_mapping.split(' ') if ':' in x
+                ]             
+            if grid_mapping_list:
+                for item in grid_mapping_list:
+                    if item in ds.variables:
+                        grid_mapping_variables.add(item)
+        else:
+            if ncvar.grid_mapping in ds.variables:               
+                grid_mapping_variables.add(ncvar.grid_mapping)
+    
+    for ncvar in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
+        if ncvar.grid_mapping in ds.variables:
             grid_mapping_variables.add(ncvar.grid_mapping)
     return grid_mapping_variables
 
+def get_grid_mapping_variables_coordinates(ds):
+    """
+    Returns a list of grid mapping variables' coordinates
+
+    :param netCDF4.Dataset ds: An open netCDF4 Dataset
+    """
+    
+    grid_mapping_variables_coordinates = set()
+    for ncvar in ds.get_variables_by_attributes(grid_mapping=lambda x: x is not None and isinstance(x, str)):
+        
+        if ' ' in ncvar.grid_mapping: 
+            coord_mapping_list = [
+            x.split(':')[0] for x in ncvar.grid_mapping.split(' ') if not ':' in x
+                ] 
+            if coord_mapping_list:       
+                for coord_item in coord_mapping_list:                                                   
+                    if coord_item in ds.variables:
+                        grid_mapping_variables_coordinates.add(coord_item)      
+    
+    return grid_mapping_variables_coordinates
 
 def get_axis_map(nc, variable):
     """
