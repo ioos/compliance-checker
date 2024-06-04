@@ -113,8 +113,9 @@ class CF1_9Check(CF1_8Check):
             for var in ds.get_variables_by_attributes(
                 coordinates=lambda c: c is not None,
             )
-            # IMPLICIT
-            if not var.dimensions
+            # IMPLICIT CONFORMANCE REQUIRED 1/4
+            # all variables have dimensions attribute, but should be scalar
+            if var.dimensions == ()
         ):
             domain_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["5.8"])
             domain_valid.out_of += 1
@@ -149,7 +150,7 @@ class CF1_9Check(CF1_8Check):
                     continue
                 appendix_a_not_recommended_attrs = []
                 for attr_name in domain_var.ncattrs():
-                    if "D" not in self.appendix_a[attr_name]["attr_loc"]:
+                    if attr_name in self.appendix_a and "D" not in self.appendix_a[attr_name]["attr_loc"]:
                         appendix_a_not_recommended_attrs.append(attr_name)
 
                 if appendix_a_not_recommended_attrs:
@@ -161,6 +162,22 @@ class CF1_9Check(CF1_8Check):
 
                 # no errors occurred
                 domain_valid.score += 1
+
+
+            # IMPLEMENTATION CONFORMANCE 5.8 REQUIRED 4/4
+            if hasattr(domain_var, "cell_measures"):
+                cell_measures_var_names = regex.findall(r"\b(?:area|volume):\s+(\w+)", domain_var.cell_measures)
+                # check exist
+                for var_name in cell_measures_var_names:
+                    try:
+                        cell_measures_variable = ds.variables[var_name]
+                    except ValueError:
+                        # TODO: what to do here?
+                        continue
+                    domain_coord_var_names = {var_like.name for var_like in domain_coord_vars}
+                    domain_valid.assert_true(set(cell_measures_variable.dimensions).issubset(domain_coord_var_names),
+                                             "Variables named in the cell_measures attributes must have a dimensions attribute with "
+                                             "values that are a subset of the referring domain variable's dimension attribute")
 
             results.append(domain_valid.to_result())
 

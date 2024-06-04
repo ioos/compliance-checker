@@ -3241,7 +3241,29 @@ class TestCF1_9(BaseTestCase):
             "coordinates attribute from domain variable domain: "
             "xyxz, abc",
         )
-
+        # TEST CONFORMANCE 5.8 REQUIRED 4/4
+        # check reference cell measures
+        domain_var.cell_measures = "volume: cube"
+        domain_var.coordinates = "lon lat depth"
+        # reset to good domain var coordinates
+        dataset.createDimension("lon", 20)
+        dataset.createDimension("lat", 20)
+        dataset.createDimension("depth", 20)
+        domain_var.setncattr("dimensions", "lon lat depth")
+        cube = dataset.createVariable("cube", "f8", ("lon", "lat", "depth"))
+        # OK, coordinates in cell_measures are subset of coordinates of
+        # referring domain variable's coordinates attribute
+        results = self.cf.check_domain_variables(dataset)
+        assert not results[0].msgs
+        # failing example, coordinates for cell_measures variable are no longer subset
+        #cube.dimensions = "virtlon virtlat height time"
+        domain_var.cell_measures = "volume: cube_bad"
+        dataset.createVariable("cube_bad", "f8", ("lon", "lat", "depth", "time"))
+        results = self.cf.check_domain_variables(dataset)
+        self.assertTrue("Variables named in the cell_measures attributes must "
+                        "have a dimensions attribute with values that are a "
+                        "subset of the referring domain variable's dimension "
+                        "attribute" in results[0].msgs)
         del dataset
         dataset = MockTimeSeries()
         # domain should be dimensionless -- currently not an error in
