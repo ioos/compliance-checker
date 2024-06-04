@@ -3256,7 +3256,6 @@ class TestCF1_9(BaseTestCase):
         results = self.cf.check_domain_variables(dataset)
         assert not results[0].msgs
         # failing example, coordinates for cell_measures variable are no longer subset
-        #cube.dimensions = "virtlon virtlat height time"
         domain_var.cell_measures = "volume: cube_bad"
         dataset.createVariable("cube_bad", "f8", ("lon", "lat", "depth", "time"))
         results = self.cf.check_domain_variables(dataset)
