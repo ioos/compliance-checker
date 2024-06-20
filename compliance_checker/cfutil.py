@@ -8,8 +8,9 @@ import warnings
 from collections import defaultdict
 from functools import lru_cache, partial
 
-from cf_units import Unit
 from importlib_resources import files
+
+from compliance_checker.units import UndefinedUnitError, units
 
 _UNITLESS_DB = None
 _SEA_NAMES = None
@@ -111,8 +112,8 @@ def is_dimensionless_standard_name(standard_name_table, standard_name):
         f".//entry[@id='{standard_name}']",
     )
     if found_standard_name is not None:
-        canonical_units = Unit(found_standard_name.find("canonical_units").text)
-        return canonical_units.is_dimensionless()
+        canonical_units = units(found_standard_name.find("canonical_units").text)
+        return canonical_units.dimensionless
     # if the standard name is not found, assume we need units for the time being
     else:
         return False
@@ -2037,8 +2038,8 @@ def units_convertible(units1, units2, reftimeistime=True):
     :param str units2: A string representing the units
     """
     try:
-        u1 = Unit(units1)
-        u2 = Unit(units2)
-    except ValueError:
+        u1 = units(units1)
+        u2 = units(units2)
+    except UndefinedUnitError:
         return False
-    return u1.is_convertible(u2)
+    return u1.is_compatible_with(u2)
