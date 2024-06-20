@@ -9,6 +9,8 @@ from importlib_resources import files
 from lxml import etree
 from netCDF4 import Dataset
 
+from compliance_checker.cfutil import units_convertible
+
 # copied from paegan
 # paegan may depend on these later
 _possiblet = {
@@ -323,17 +325,6 @@ def units_known(units):
     except ValueError:
         return False
     return True
-
-
-def units_convertible(units1, units2, reftimeistime=True):
-    """Return True if a Unit representing the string units1 can be converted
-    to a Unit representing the string units2, else False."""
-    try:
-        u1 = Unit(units1)
-        u2 = Unit(units2)
-    except ValueError:
-        return False
-    return u1.is_convertible(u2)
 
 
 def units_temporal(units):

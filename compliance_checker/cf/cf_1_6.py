@@ -925,7 +925,7 @@ class CF1_6Check(CFNCCheck):
         # IMPLEMENTATION CONFORMANCE 4.4 REQUIRED 1/2
         elif standard_name == "time":
             valid_standard_units.assert_true(
-                util.units_convertible(units, "seconds since 1970-01-01"),
+                cfutil.units_convertible(units, "seconds since 1970-01-01"),
                 "time must be in a valid units format <unit> since <epoch> "
                 f"not {units}",
             )
@@ -1694,7 +1694,7 @@ class CF1_6Check(CFNCCheck):
                 "there is no default",
             )
 
-            if not util.units_convertible("bar", units):
+            if not cfutil.units_convertible("bar", units):
                 valid_vertical_coord.assert_true(
                     positive in ("up", "down"),
                     f"{name}: vertical coordinates not defining pressure must include "
