@@ -9,6 +9,7 @@ netcdf4>=1.6.4
 owslib>=0.8.3
 packaging
 pendulum>=1.2.4
+pint
 pygeoif>=0.6
 pyproj>=2.2.1
 regex>=2017.07.28
