@@ -40,6 +40,30 @@ def parse_options(opts):
     return options_dict
 
 
+def parse_inputs(inputs):
+    """
+    Helper function to parse possible inputs.  Splits input after the first
+    and second colon to split into checker/key/value triplets.
+
+    :param inputs: Iterable of strings with inputs
+    :rtype: dict
+    :return: Dictionary of dictionaries, with first level keys as checker
+             type (i.e. "cf", "acdd") and second level keys as options.
+    """
+    inputs_dict = {}
+    for input_str in inputs:
+        try:
+            checker_type, checker_opt, checker_val = input_str.split(":", 2)
+        except ValueError:
+            warnings.warn(f"Could not split input {input_str}, ignoring", stacklevel=2)
+        else:
+            try:
+                inputs_dict[checker_type].update({checker_opt: checker_val})
+            except KeyError:
+                inputs_dict[checker_type] = {checker_opt: checker_val}
+    return inputs_dict
+
+
 def main():
     # Load all available checker classes
     check_suite = CheckSuite()
@@ -186,6 +210,26 @@ def main():
     )
 
     parser.add_argument(
+        "-I",
+        "--input",
+        default=[],
+        action="append",
+        help=dedent(
+            """
+                                    Additional input options to be passed to the
+                                    checkers.  Multiple input options can be specified
+                                    via multiple invocations of this switch.
+                                    Input options should be prefixed with a the
+                                    checker name followed by the input name and the value , e.g.
+                                    '<checker>:<input_name>:<input_value>'
+
+                                    For now this switch exists to support more complex command line options
+                                    for plugins.
+                                    """,
+        ),
+    )
+
+    parser.add_argument(
         "-V",
         "--version",
         action="store_true",
@@ -236,6 +280,7 @@ def main():
         sys.exit(0)
 
     options_dict = parse_options(args.option) if args.option else defaultdict(set)
+    inputs_dict = parse_inputs(args.input) if args.input else {}
 
     if args.describe_checks:
         error_stat = 0
@@ -306,6 +351,7 @@ def main():
             args.output[0],
             args.format or ["text"],
             options=options_dict,
+            inputs=inputs_dict,
         )
         return_values.append(return_value)
         had_errors.append(errors)
@@ -326,6 +372,7 @@ def main():
                 output,
                 args.format or ["text"],
                 options=options_dict,
+                inputs=inputs_dict,
             )
             return_values.append(return_value)
             had_errors.append(errors)
