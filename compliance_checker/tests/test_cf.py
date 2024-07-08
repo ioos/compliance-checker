@@ -29,7 +29,6 @@ from compliance_checker.cf.util import (
     download_cf_standard_name_table,
     is_time_variable,
     is_vertical_coordinate,
-    units_convertible,
     units_temporal,
 )
 from compliance_checker.suite import CheckSuite
@@ -1903,8 +1902,8 @@ class TestCF1_6(BaseTestCase):
     # --------------------------------------------------------------------------------
 
     def test_temporal_unit_conversion(self):
-        self.assertTrue(units_convertible("hours", "seconds"))
-        self.assertFalse(units_convertible("hours", "hours since 2000-01-01"))
+        self.assertTrue(cfutil.units_convertible("hours", "seconds"))
+        self.assertFalse(cfutil.units_convertible("hours", "hours since 2000-01-01"))
 
     def test_units_temporal(self):
         self.assertTrue(units_temporal("hours since 2000-01-01"))
