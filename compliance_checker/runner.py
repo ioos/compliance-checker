@@ -42,7 +42,6 @@ class ComplianceChecker:
         output_filename="-",
         output_format="text",
         options=None,
-        inputs=None,
     ):
         """
         Static check runner.
@@ -59,7 +58,7 @@ class ComplianceChecker:
         @returns                If the tests failed (based on the criteria)
         """
         all_groups = []
-        cs = CheckSuite(options=options or {}, inputs=inputs or {})
+        cs = CheckSuite(options=options or {})
         # using OrderedDict is important here to preserve the order
         # of multiple datasets which may be passed in
         score_dict = OrderedDict()

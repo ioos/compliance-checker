@@ -154,16 +154,12 @@ class BaseCheck:
         Automatically run when running a CheckSuite. Define this method in your Checker class.
         """
 
-    def __init__(self, options=None, inputs=None):
+    def __init__(self, options=None):
         self._defined_results = defaultdict(lambda: defaultdict(dict))
         if options is None:
-            self.options = set()
+            self.options = {}
         else:
             self.options = options
-        if inputs is None:
-            self.inputs = {}
-        else:
-            self.inputs = inputs
 
     def get_test_ctx(self, severity, name, variable=None):
         """

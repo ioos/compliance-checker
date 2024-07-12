@@ -240,7 +240,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         # Ordinarily, options would be specified in the checker constructor, but
         # we set them manually here so we don't have to monkey patch `setUp`
-        self.cf.options = {"enable_appendix_a_checks"}
+        self.cf.options = {"enable_appendix_a_checks": None}
         new_check = copy.deepcopy(self.cf)
         self.cf.setup(dataset)
         aa_results = self.cf.check_appendix_a(dataset)

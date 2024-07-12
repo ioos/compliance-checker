@@ -62,10 +62,9 @@ class CheckSuite:
     )  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
     templates_root = "compliance_checker"  # modify to load alternative Jinja2 templates
 
-    def __init__(self, options=None, inputs=None):
+    def __init__(self, options=None):
         self.col_width = 40
         self.options = options or {}
-        self.inputs = inputs or {}
 
     @classmethod
     def _get_generator_plugins(cls):
@@ -402,12 +401,11 @@ class CheckSuite:
             #       use some kind of checker object with checker type and
             #       version baked in
             checker_type_name = checker_name.split(":")[0]
-            checker_opts = self.options.get(checker_type_name, set())
-            checker_inpts = self.inputs.get(checker_type_name, {})
+            checker_opts = self.options.get(checker_type_name, {})
 
             # instantiate a Checker object
             try:
-                checker = checker_class(options=checker_opts, inputs=checker_inpts)
+                checker = checker_class(options=checker_opts)
             # hacky fix for no options in constructor
             except TypeError:
                 checker = checker_class()
