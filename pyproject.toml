@@ -48,6 +48,7 @@ entry-points."compliance_checker.suites"."acdd-1.3" = "compliance_checker.acdd:A
 entry-points."compliance_checker.suites"."cf-1.6" = "compliance_checker.cf.cf:CF1_6Check"
 entry-points."compliance_checker.suites"."cf-1.7" = "compliance_checker.cf.cf:CF1_7Check"
 entry-points."compliance_checker.suites"."cf-1.8" = "compliance_checker.cf.cf:CF1_8Check"
+entry-points."compliance_checker.suites"."cf-1.9" = "compliance_checker.cf.cf:CF1_9Check"
 entry-points."compliance_checker.suites"."ioos-0.1" = "compliance_checker.ioos:IOOS0_1Check"
 entry-points."compliance_checker.suites"."ioos-1.1" = "compliance_checker.ioos:IOOS1_1Check"
 entry-points."compliance_checker.suites"."ioos-1.2" = "compliance_checker.ioos:IOOS1_2Check"
