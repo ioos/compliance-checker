@@ -22,21 +22,25 @@ def _print_checker_name_header(checker_str):
 
 def parse_options(opts):
     """
-    Helper function to parse possible options.  Splits option after the first
-    colon to split into key/value pairs.
+    Helper function to parse possible options. Splits option into key/value
+    pairs and optionally a value for the checker option. The separator
+    is a colon.
 
     :param opts: Iterable of strings with options
     :rtype: dict
-    :return: Dictionary with keys as checker type (i.e. "cf", "acdd")
+    :return: Dictionary with keys as checker type (i.e. "cf", "acdd").
+             Each value is a dictionary where keys are checker options and values
+             are checker option values or None if not provided.
     """
-    options_dict = defaultdict(set)
+    options_dict = defaultdict(dict)
     for opt_str in opts:
         try:
-            checker_type, checker_opt = opt_str.split(":", 1)
+            checker_type, checker_opt, *checker_val = opt_str.split(":", 2)
+            checker_val = checker_val[0] if checker_val else None
         except ValueError:
             warnings.warn(f"Could not split option {opt_str}, ignoring", stacklevel=2)
         else:
-            options_dict[checker_type].add(checker_opt)
+            options_dict[checker_type][checker_opt] = checker_val
     return options_dict
 
 
@@ -174,8 +178,9 @@ def main():
                                     checkers.  Multiple options can be specified
                                     via multiple invocations of this switch.
                                     Options should be prefixed with a the
-                                    checker name followed by the option, e.g.
-                                    '<checker>:<option_name>'
+                                    checker name followed by the option,
+                                    potentially followed by a value, e.g.
+                                    '<checker>:<option_name>[:<option_value>]'
 
                                     Available options:
                                     'cf:enable_appendix_a_checks' - Allow check
@@ -235,7 +240,7 @@ def main():
         print(f"IOOS compliance checker version {__version__}")
         sys.exit(0)
 
-    options_dict = parse_options(args.option) if args.option else defaultdict(set)
+    options_dict = parse_options(args.option) if args.option else defaultdict(dict)
 
     if args.describe_checks:
         error_stat = 0

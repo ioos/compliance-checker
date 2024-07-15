@@ -157,7 +157,7 @@ class BaseCheck:
     def __init__(self, options=None):
         self._defined_results = defaultdict(lambda: defaultdict(dict))
         if options is None:
-            self.options = set()
+            self.options = {}
         else:
             self.options = options
 

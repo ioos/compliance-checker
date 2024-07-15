@@ -401,7 +401,7 @@ class CheckSuite:
             #       use some kind of checker object with checker type and
             #       version baked in
             checker_type_name = checker_name.split(":")[0]
-            checker_opts = self.options.get(checker_type_name, set())
+            checker_opts = self.options.get(checker_type_name, {})
 
             # instantiate a Checker object
             try:
