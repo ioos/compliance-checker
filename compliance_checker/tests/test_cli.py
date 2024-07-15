@@ -7,9 +7,12 @@ import io
 import json
 import os
 import platform
+import shutil
 import subprocess
 import sys
 from argparse import Namespace
+from collections import defaultdict
+from importlib.machinery import SourceFileLoader
 
 import pytest
 
@@ -268,3 +271,23 @@ class TestCLI:
             output_format="text",
         )
         assert not errors
+
+
+def test_parse_options():
+    """Test the option parser of cchecker.py"""
+    # Load cchecker.py
+    cchecker = SourceFileLoader("cchecker", shutil.which("cchecker.py")).load_module()
+    # Simple test checker_type:checker_opt
+    opt_dict = cchecker.parse_options(["cf:enable_appendix_a_checks"])
+    assert opt_dict == defaultdict(dict, {"cf": {"enable_appendix_a_checks": None}})
+    # Test case checker_type:checker_opt:checker_val
+    opt_dict = cchecker.parse_options(
+        ["type:opt:val", "type:opt2:val:2", "cf:enable_appendix_a_checks"],
+    )
+    assert opt_dict == defaultdict(
+        dict,
+        {
+            "type": {"opt": "val", "opt2": "val:2"},
+            "cf": {"enable_appendix_a_checks": None},
+        },
+    )
