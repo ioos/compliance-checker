@@ -3,6 +3,7 @@
 Tests for command line output and parsing
 
 """
+import importlib.util
 import io
 import json
 import os
@@ -11,7 +12,6 @@ import subprocess
 import sys
 from argparse import Namespace
 from collections import defaultdict
-import importlib.util
 from importlib.machinery import SourceFileLoader
 
 import pytest
@@ -281,7 +281,10 @@ def test_parse_options():
     """Test the option parser of cchecker.py"""
     # Load cchecker.py
     cchecker_file_path = os.path.join(
-        os.path.dirname(__file__), "..", "..", "cchecker.py"
+        os.path.dirname(__file__),
+        "..",
+        "..",
+        "cchecker.py",
     )
     spec = importlib.util.spec_from_file_location("cchecker", cchecker_file_path)
     module = importlib.util.module_from_spec(spec)
