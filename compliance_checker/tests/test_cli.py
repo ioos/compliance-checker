@@ -12,6 +12,7 @@ import subprocess
 import sys
 from argparse import Namespace
 from collections import defaultdict
+import importlib.util
 from importlib.machinery import SourceFileLoader
 
 import pytest
@@ -276,12 +277,17 @@ class TestCLI:
 def test_parse_options():
     """Test the option parser of cchecker.py"""
     # Load cchecker.py
-    cchecker = SourceFileLoader("cchecker", shutil.which("cchecker.py")).load_module()
+    cchecker_file_path = os.path.join(os.path.dirname(__file__), "..", "..",
+                                      "cchecker.py")
+    spec = importlib.util.spec_from_file_location("cchecker",
+                                                  cchecker_file_path)
+    module = importlib.util.module_from_spec(spec)
+    SourceFileLoader(spec.name, spec.origin).exec_module(module)
     # Simple test checker_type:checker_opt
-    opt_dict = cchecker.parse_options(["cf:enable_appendix_a_checks"])
+    opt_dict = module.parse_options(["cf:enable_appendix_a_checks"])
     assert opt_dict == defaultdict(dict, {"cf": {"enable_appendix_a_checks": None}})
     # Test case checker_type:checker_opt:checker_val
-    opt_dict = cchecker.parse_options(
+    opt_dict = module.parse_options(
         ["type:opt:val", "type:opt2:val:2", "cf:enable_appendix_a_checks"],
     )
     assert opt_dict == defaultdict(
