@@ -276,10 +276,10 @@ class TestCLI:
 def test_parse_options():
     """Test the option parser of cchecker.py"""
     # Load cchecker.py
-    cchecker_file_path = os.path.join(os.path.dirname(__file__), "..", "..",
-                                      "cchecker.py")
-    spec = importlib.util.spec_from_file_location("cchecker",
-                                                  cchecker_file_path)
+    cchecker_file_path = os.path.join(
+        os.path.dirname(__file__), "..", "..", "cchecker.py"
+    )
+    spec = importlib.util.spec_from_file_location("cchecker", cchecker_file_path)
     module = importlib.util.module_from_spec(spec)
     SourceFileLoader(spec.name, spec.origin).exec_module(module)
     # Simple test checker_type:checker_opt
