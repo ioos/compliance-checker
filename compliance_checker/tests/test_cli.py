@@ -244,6 +244,10 @@ class TestCLI:
         platform.system() != "Linux",
         reason="NCZarr is not officially supported for your OS as of when this API was written",
     )
+    @pytest.mark.skipif(
+        subprocess.check_output(["nc-config", "--has-nczarr"]) != b"yes\n",
+        reason="NCZarr support was not built with this netCDF version",
+    )
     @pytest.mark.parametrize(
         "zarr_url",
         [
