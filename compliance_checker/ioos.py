@@ -6,7 +6,6 @@ import re
 from numbers import Number
 
 import validators
-from cf_units import Unit
 from lxml.etree import XPath
 from owslib.namespaces import Namespaces
 
@@ -28,6 +27,7 @@ from compliance_checker.cfutil import (
     get_instrument_variables,
     get_z_variables,
 )
+from compliance_checker.units import units
 
 
 class IOOSBaseCheck(BaseCheck):
@@ -1379,12 +1379,12 @@ class IOOS1_2Check(IOOSNCCheck):
             )
 
             unit_def_set = {
-                Unit(unit_str).definition for unit_str in expected_unit_strs
+                str(units(unit_str).to_root_units()) for unit_str in expected_unit_strs
             }
 
             try:
-                units = Unit(units_str)
-                pass_stat = units.definition in unit_def_set
+                u = units(units_str)
+                pass_stat = str(u.to_root_units()) in unit_def_set
             # unknown unit not convertible to UDUNITS
             except ValueError:
                 pass_stat = False
