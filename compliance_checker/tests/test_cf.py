@@ -3258,10 +3258,12 @@ class TestCF1_9(BaseTestCase):
         domain_var.cell_measures = "volume: cube_bad"
         dataset.createVariable("cube_bad", "f8", ("lon", "lat", "depth", "time"))
         results = self.cf.check_domain_variables(dataset)
-        self.assertTrue("Variables named in the cell_measures attributes must "
-                        "have a dimensions attribute with values that are a "
-                        "subset of the referring domain variable's dimension "
-                        "attribute" in results[0].msgs)
+        self.assertTrue(
+            "Variables named in the cell_measures attributes must "
+            "have a dimensions attribute with values that are a "
+            "subset of the referring domain variable's dimension "
+            "attribute" in results[0].msgs,
+        )
         del dataset
         dataset = MockTimeSeries()
         # domain should be dimensionless -- currently not an error in
