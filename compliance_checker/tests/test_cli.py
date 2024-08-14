@@ -20,6 +20,11 @@ from compliance_checker.runner import CheckSuite, ComplianceChecker
 
 from .conftest import datadir, static_files
 
+if platform.system() == "Windows":
+    ncconfig = ["bash", f"{os.environ['CONDA_PREFIX']}\\Library\\bin\\nc-config"]
+else:
+    ncconfig = ["nc-config"]
+
 
 @pytest.mark.usefixtures("checksuite_setup")
 class TestCLI:
@@ -221,19 +226,15 @@ class TestCLI:
         assert not return_value
 
     def _check_libnetcdf_version():
-        if platform.system() == "Linux":
-            # nc-config doesn't work on windows... and neither does NCZarr so this skipif is mutually exclusive to the OS check skipif
-            return (
-                float(
-                    subprocess.check_output(
-                        ["nc-config", "--version"],
-                        encoding="UTF-8",
-                    )[9:12],
-                )
-                < 8.0
+        return (
+            float(
+                subprocess.check_output(
+                    ncconfig + ["--version"],
+                    encoding="UTF-8",
+                )[9:12],
             )
-        else:
-            return True
+            < 8.0
+        )
 
     # TODO uncomment the third parameter once S3 support is working
     @pytest.mark.skipif(
@@ -241,7 +242,7 @@ class TestCLI:
         reason="NCZarr support was not available until netCDF version 4.8.0. Please upgrade to the latest libnetcdf version to test this functionality",
     )
     @pytest.mark.skipif(
-        platform.system() != "Linux",
+        subprocess.check_output([ncconfig, "--has-nczarr"]) != b"yes\n",
         reason="NCZarr is not officially supported for your OS as of when this API was written",
     )
     @pytest.mark.skipif(
