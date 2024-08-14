@@ -242,7 +242,7 @@ class TestCLI:
         reason="NCZarr support was not available until netCDF version 4.8.0. Please upgrade to the latest libnetcdf version to test this functionality",
     )
     @pytest.mark.skipif(
-        subprocess.check_output([ncconfig, "--has-nczarr"]) != b"yes\n",
+        subprocess.check_output(ncconfig + ["--has-nczarr"]) != b"yes\n",
         reason="NCZarr is not officially supported for your OS as of when this API was written",
     )
     @pytest.mark.skipif(
