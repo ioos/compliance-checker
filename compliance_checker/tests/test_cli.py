@@ -20,8 +20,10 @@ from compliance_checker.runner import CheckSuite, ComplianceChecker
 
 from .conftest import datadir, static_files
 
-if platform.system() == "Windows":
-    ncconfig = ["bash", f"{os.environ['CONDA_PREFIX']}\\Library\\bin\\nc-config"]
+on_windows = platform.system() == "Windows"
+
+if on_windows:
+    ncconfig = ["sh", f"{os.environ['CONDA_PREFIX']}\\Library\\bin\\nc-config"]
 else:
     ncconfig = ["nc-config"]
 
@@ -236,18 +238,9 @@ class TestCLI:
             < 8.0
         )
 
-    # TODO uncomment the third parameter once S3 support is working
-    @pytest.mark.skipif(
-        _check_libnetcdf_version(),
-        reason="NCZarr support was not available until netCDF version 4.8.0. Please upgrade to the latest libnetcdf version to test this functionality",
-    )
     @pytest.mark.skipif(
         subprocess.check_output(ncconfig + ["--has-nczarr"]) != b"yes\n",
-        reason="NCZarr is not officially supported for your OS as of when this API was written",
-    )
-    @pytest.mark.skipif(
-        subprocess.check_output(["nc-config", "--has-nczarr"]) != b"yes\n",
-        reason="NCZarr support was not built with this netCDF version",
+        reason="NCZarr is not available.",
     )
     @pytest.mark.parametrize(
         "zarr_url",
@@ -256,7 +249,12 @@ class TestCLI:
             str(datadir / "zip.zarr"),
             # "s3://hrrrzarr/sfc/20210408/20210408_10z_anl.zarr#mode=nczarr,s3"
         ],
-        ids=["local_file", "zip_file"],  # ,'s3_url'
+        ids=[
+            "local_file",
+            "zip_file",
+            # TODO uncomment once S3 support is working.
+            # "s3_url",
+        ],
     )
     def test_nczarr_pass_through(self, zarr_url):
         """
