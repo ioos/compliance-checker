@@ -6,7 +6,6 @@ import codecs
 import inspect
 import itertools
 import os
-import platform
 import re
 import subprocess
 import sys
@@ -893,10 +892,6 @@ class CheckSuite:
             ds_str = self.generate_dataset(ds_str)
 
         if zarr.is_zarr(ds_str):
-            if platform.system() != "Linux":
-                print(
-                    f"WARNING: {platform.system()} OS detected. NCZarr is not officially supported for your OS as of when this API was written. Your mileage may vary.",
-                )
             return Dataset(zarr.as_zarr(ds_str))
 
         if netcdf.is_netcdf(ds_str):

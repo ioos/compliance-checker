@@ -1,3 +1,4 @@
+import platform
 import zipfile
 from pathlib import Path
 from urllib.parse import urlparse
@@ -6,7 +7,11 @@ from zipfile import ZipFile
 
 from compliance_checker.protocols import netcdf
 
-#
+
+def _fix_windows_slashes(zarr_url):
+    if platform.system() == "Windows":
+        zarr_url = zarr_url.replace("///", "//")
+    return zarr_url
 
 
 def is_zarr(url):
@@ -55,10 +60,9 @@ def as_zarr(url):
     pr = urlparse(str(url))
 
     if "mode=nczarr" in pr.fragment:
-        if pr.netloc:
-            return str(url)  # already valid nczarr url
-        elif pr.scheme == "file":
-            return str(url)  # already valid nczarr url
+        if pr.netloc or pr.scheme == "file":
+            url = _fix_windows_slashes(url)
+        return url
 
     zarr_url = Path(
         url2pathname(pr.path),
@@ -78,4 +82,5 @@ def as_zarr(url):
     url_base = url if mode == "s3" else zarr_url.as_uri()
 
     zarr_url = f"{url_base}#mode=nczarr,{mode}"
+    zarr_url = _fix_windows_slashes(zarr_url)
     return zarr_url

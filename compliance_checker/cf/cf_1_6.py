@@ -3340,7 +3340,7 @@ class CF1_6Check(CFNCCheck):
 
             # IMPLEMENTATION CONFORMANCE 8.1 REQUIRED 1/3
             # scale_factor and add_offset same type
-            if type(add_offset) != type(scale_factor):
+            if not isinstance(add_offset, type(scale_factor)):
                 valid = False
                 reasoning.append(
                     "Attributes add_offset and scale_factor have different data type.",
@@ -3350,7 +3350,7 @@ class CF1_6Check(CFNCCheck):
             # if not the same type
             # FIXME: Check add_offset too.
 
-            elif type(scale_factor) != var.dtype.type:
+            elif not isinstance(scale_factor, var.dtype.type):
                 # Check both attributes are type float or double
                 if not isinstance(scale_factor, (float, np.floating)):
                     valid = False
