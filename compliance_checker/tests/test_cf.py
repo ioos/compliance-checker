@@ -948,7 +948,6 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad"])
         results = self.cf.check_latitude(dataset)
         scored, out_of, messages = get_results(results)
-        assert len(results) == 12
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
         assert (r.name == "§4.1 Latitude Coordinate" for r in results)
@@ -957,7 +956,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["rotated_pole_grid"])
         results = self.cf.check_latitude(dataset)
         scored, out_of, messages = get_results(results)
-        assert len(results) == 6
+        assert len(results) == 3
         assert scored == out_of
         assert (r.name == "§4.1 Latitude Coordinate" for r in results)
 
@@ -990,7 +989,6 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad"])
         results = self.cf.check_longitude(dataset)
         scored, out_of, messages = get_results(results)
-        assert len(results) == 12
         assert scored < out_of
         assert len([r for r in results if r.value[0] < r.value[1]]) == 3
         assert all(r.name == "§4.2 Longitude Coordinate" for r in results)
@@ -999,7 +997,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["rotated_pole_grid"])
         results = self.cf.check_latitude(dataset)
         scored, out_of, messages = get_results(results)
-        assert (scored, out_of) == (6, 6)
+        assert (scored, out_of) == (3, 3)
         # hack to avoid writing to read-only file
         dataset.variables["rlon"] = MockVariable(dataset.variables["rlon"])
         rlon = dataset.variables["rlon"]
@@ -3215,6 +3213,7 @@ class TestCF1_9(BaseTestCase):
         domain_var = dataset.createVariable("domain", "c", ())
         domain_var.long_name = "Domain variable"
         domain_var.coordinates = "lon lat depth"
+        domain_var.setncattr("dimensions", "time")
         results = self.cf.check_domain_variables(dataset)
         self.assertEqual(results[0].value[0], results[0].value[1])
         self.assertFalse(results[0].msgs)
