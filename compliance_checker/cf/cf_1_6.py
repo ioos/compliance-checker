@@ -116,8 +116,13 @@ class CF1_6Check(CFNCCheck):
         """
 
         ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles["2.5"])
-        special_attrs = ("actual_range", "valid_min", "valid_max",
-                         "valid_range", "_FillValue")
+        special_attrs = (
+            "actual_range",
+            "valid_min",
+            "valid_max",
+            "valid_range",
+            "_FillValue",
+        )
 
         for _var_name, var in ds.variables.items():
             for att_name in special_attrs:
