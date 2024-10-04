@@ -33,6 +33,6 @@ jobs:
         git clone https://github.com/ioos/cc-plugin-ncei.git
         && cd cc-plugin-ncei
         && micromamba install --file requirements.txt --file requirements-dev.txt --channel conda-forge
-        && micromamba remove compliance-checker --no-prune --force
+        && micromamba remove compliance-checker --no-prune-deps --force
         && python -m pip install -e . --no-deps --force-reinstall
         && python -m pytest -s -rxs -v cc_plugin_ncei
