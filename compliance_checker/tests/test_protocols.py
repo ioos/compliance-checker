@@ -32,7 +32,6 @@ def test_netcdf_content_type(cs):
     assert ds is not None
 
 
-@pytest.mark.vcr()
 def test_erddap(cs):
     """
     Tests that a connection can be made to ERDDAP's GridDAP
