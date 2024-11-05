@@ -8,7 +8,7 @@ import itertools
 import pprint
 import re
 import warnings
-from collections.abc import defaultdict
+from collections import defaultdict
 from functools import wraps
 from io import StringIO
 
