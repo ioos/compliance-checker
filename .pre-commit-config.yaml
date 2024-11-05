@@ -34,6 +34,7 @@ repos:
   rev: v0.7.2
   hooks:
     - id: ruff
+      args: ["--fix", "--show-fixes"]
 
 - repo: https://github.com/tox-dev/pyproject-fmt
   rev: v2.5.0
