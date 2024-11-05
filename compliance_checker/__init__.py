@@ -1,6 +1,7 @@
+from collections.abc import Generator
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
-from typing import BinaryIO, Generator
+from typing import BinaryIO
 
 try:
     from ._version import __version__

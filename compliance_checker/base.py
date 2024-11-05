@@ -24,7 +24,7 @@ from compliance_checker.util import kvp_convert
 
 # Python 3.5+ should work, also have a fallback
 try:
-    from typing import Pattern
+    from re import Pattern
 
     re_pattern_type = Pattern
 except ImportError:
