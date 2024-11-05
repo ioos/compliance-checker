@@ -34,6 +34,7 @@ jobs:
 
     - name: Install compliance-checker
       run: |
+        pip install git+https://github.com/pelson/pyudunits2.git@5ed17a6a2893c978b797db6e8041f32e537cd432
         python -m pip install -e . --no-deps --force-reinstall
 
     - name: Default Tests
