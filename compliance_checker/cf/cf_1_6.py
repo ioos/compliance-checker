@@ -1864,8 +1864,7 @@ class CF1_6Check(CFNCCheck):
                     ret_val.append(result)
             # IMPLEMENTATION CONFORMANCE 4.4 RECOMMENDED 2/2
             # catch non-recommended months or years time interval
-            unit = Unit(variable.units)
-            if unit.is_long_time_interval():
+            if any(unit in variable.units for unit in ("months", "years")):
                 message = f"Using relative time interval of months or years is not recommended for coordinate variable {variable.name}"
                 result = Result(
                     BaseCheck.MEDIUM,
