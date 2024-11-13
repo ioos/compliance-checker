@@ -1296,7 +1296,7 @@ class TestCF1_6(BaseTestCase):
             assert "time does not have correct time units" in messages
         # NB: >= 60 seconds is nonstandard, but isn't actually a CF requirement
         # until CF 1.9 onwards
-        dataset.variables["time"].units = "months since 0-1-1 23:00:59"
+        dataset.variables["time"].units = "months since 0-1-1 23:00:60"
         dataset.variables["time"].climatology = (
             "nonexistent_variable_reference_only_used_to_test_year_zero_failure"
         )
