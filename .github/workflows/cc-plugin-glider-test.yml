@@ -30,7 +30,7 @@ jobs:
     - name: Install compliance-checker
       shell: bash -l {0}
       run: |
-        pip install git+https://github.com/pelson/pyudunits2.git@5ed17a6a2893c978b797db6e8041f32e537cd432
+        pip install git+https://github.com/pelson/pyudunits2.git@864e339d622656d060d910381510f9bfe7b17aab
         python -m pip install -v -e . --no-deps --force-reinstall
 
     - name: cc-plugin-glider tests
