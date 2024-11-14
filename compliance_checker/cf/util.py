@@ -1,11 +1,11 @@
 import itertools
 import os
 import sys
+from importlib.resources import files
 from pkgutil import get_data
 
 import requests
 from cf_units import Unit
-from importlib_resources import files
 from lxml import etree
 from netCDF4 import Dataset
 

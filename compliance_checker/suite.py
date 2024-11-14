@@ -13,11 +13,11 @@ import textwrap
 import warnings
 from collections import defaultdict
 from datetime import datetime, timezone
+from importlib.metadata import entry_points
 from operator import itemgetter
 from pathlib import Path
 from urllib.parse import urlparse
 
-import importlib_metadata
 import requests
 from lxml import etree as ET
 from netCDF4 import Dataset
@@ -73,7 +73,7 @@ class CheckSuite:
         """
 
         if not hasattr(cls, "suite_generators"):
-            gens = importlib_metadata.entry_points(
+            gens = entry_points(
                 group="compliance_checker.generators",
             )
             cls.suite_generators = [x.load() for x in gens]
@@ -139,7 +139,7 @@ class CheckSuite:
         base classes.
         """
         cls._load_checkers(
-            importlib_metadata.entry_points(group="compliance_checker.suites"),
+            entry_points(group="compliance_checker.suites"),
         )
 
     @classmethod

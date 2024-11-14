@@ -7,9 +7,9 @@ import re
 import warnings
 from collections import defaultdict
 from functools import lru_cache, partial
+from importlib.resources import files
 
 from cf_units import Unit
-from importlib_resources import files
 
 _UNITLESS_DB = None
 _SEA_NAMES = None

@@ -1,9 +1,9 @@
 import os
 import unittest
+from importlib.resources import files
 from pathlib import Path
 
 import numpy as np
-from importlib_resources import files
 
 from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.base import BaseCheck, GenericFile, Result
