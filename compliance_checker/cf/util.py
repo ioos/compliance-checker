@@ -12,13 +12,13 @@ from pkgutil import get_data
 from typing import Union
 
 import requests
-from cf_units import Unit
 from lxml import etree
 from netCDF4 import Dataset, Dimension, Group, Variable
 
 _UNITLESS_DB = None
 _SEA_NAMES = None
 from compliance_checker.cfutil import _units, units_convertible
+from compliance_checker.cfunits import Unit
 
 # copied from paegan
 # paegan may depend on these later
@@ -2381,7 +2381,7 @@ def create_cached_data_dir():
 
 def units_known(units):
     try:
-        _units(units)
+        Unit(units)
     except ValueError:
         return False
     return True
@@ -2389,7 +2389,7 @@ def units_known(units):
 
 def units_temporal(units):
     try:
-        u = _units(units)
+        u = Unit(units)
     except ValueError:
         return False
     # IMPLEMENTATION CONFORMANCE REQUIRED 4.4 1/3
@@ -2398,7 +2398,7 @@ def units_temporal(units):
     # IMPLEMENTATION CONFORMANCE REQUIRED 4.4 3/3
     # check that reference time seconds is not greater than or
     # equal to 60
-    return u.is_time_reference
+    return u.is_time_reference()
 
 
 def find_coord_vars(ncds):

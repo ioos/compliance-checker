@@ -9,7 +9,7 @@ from collections import defaultdict
 from functools import lru_cache, partial
 from importlib.resources import files
 
-from cf_units import Unit
+from compliance_checker.cfunits import Unit
 
 _UNITLESS_DB = None
 _SEA_NAMES = None
@@ -111,7 +111,7 @@ def is_dimensionless_standard_name(standard_name_table, standard_name):
         f".//entry[@id='{standard_name}']",
     )
     if found_standard_name is not None:
-        canonical_units = _units(
+        canonical_units = Unit(
             found_standard_name.find("canonical_units").text,
         )
         return canonical_units.is_dimensionless()
@@ -2038,22 +2038,9 @@ def units_convertible(units1, units2):
     :param str units1: A string representing the units
     :param str units2: A string representing the units
     """
-    convertible = False
     try:
-        u1 = _units(units1)
-        u2 = _units(units2)
+        u1 = Unit(units1)
+        u2 = Unit(units2)
     except ValueError:
         return False
-    # FIXME: Workaround for unknown units in cf_units.
-    if "" in (u1.expanded(), u2.expanded()):
-        return False
-
-    convertible = u1.is_convertible_to(u2)
-    # FIXME: Workaround for is_time_reference vs time in cf_units.
-    # Both are time reference confirm.
-    if u1.is_time_reference and u2.is_time_reference:
-        convertible = True
-    # One is time, the other is not, change it to False.
-    if sum((u1.is_time_reference, u2.is_time_reference)) == 1:
-        convertible = False
-    return convertible
+    return u1.is_convertible(u2)

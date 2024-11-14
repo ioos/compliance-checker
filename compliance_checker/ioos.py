@@ -22,8 +22,8 @@ from compliance_checker.base import (
     check_has,
 )
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
+from compliance_checker.cfunits import Unit
 from compliance_checker.cfutil import (
-    _units,
     get_geophysical_variables,
     get_instrument_variables,
     get_z_variables,
@@ -1378,12 +1378,12 @@ class IOOS1_2Check(IOOSNCCheck):
                 "fathom",
             )
             unit_def_set = {
-                _units(unit_str).expanded() for unit_str in expected_unit_strs
+                Unit(unit_str).definition for unit_str in expected_unit_strs
             }
 
             try:
-                units = _units(units_str)
-                pass_stat = units.expanded() in unit_def_set
+                units = Unit(units_str)
+                pass_stat = units.definition in unit_def_set
             # unknown unit not convertible to UDUNITS
             except ValueError:
                 pass_stat = False
