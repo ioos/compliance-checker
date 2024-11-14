@@ -17,6 +17,7 @@ from compliance_checker.cf.appendix_f import (
     grid_mapping_dict16,
 )
 from compliance_checker.cf.cf_base import CFNCCheck, appendix_a_base
+from compliance_checker.cfunits import Unit
 
 logger = logging.getLogger(__name__)
 
@@ -811,7 +812,7 @@ class CF1_6Check(CFNCCheck):
         )
 
         try:
-            units_conv = cfutil._units(units)
+            units_conv = Unit(units)
         except ValueError:
             valid_units.messages.append(
                 f'Unit string "{units}" is not recognized by UDUnits',
@@ -827,7 +828,7 @@ class CF1_6Check(CFNCCheck):
         # being expressed as "s"/seconds
         if standard_name not in {"time", "forecast_reference_time"}:
             valid_units.assert_true(
-                units_conv.is_convertible_to(cfutil._units(reference)),
+                units_conv.is_convertible(Unit(reference)),
                 f'Units "{units}" for variable '
                 f"{variable_name} must be convertible to "
                 f'canonical units "{reference}"',
@@ -1493,8 +1494,7 @@ class CF1_6Check(CFNCCheck):
                 # check that the units aren't in east and north degrees units,
                 # but are convertible to angular units
                 allowed_units.assert_true(
-                    units not in e_n_units
-                    and cfutil._units(units) == cfutil._units("degree"),
+                    units not in e_n_units and Unit(units) == Unit("degree"),
                     f"Grid latitude variable '{latitude}' should use degree equivalent units without east or north components. "
                     f"Current units are {units}",
                 )
@@ -1603,8 +1603,7 @@ class CF1_6Check(CFNCCheck):
                 # check that the units aren't in east and north degrees units,
                 # but are convertible to angular units
                 allowed_units.assert_true(
-                    units not in e_n_units
-                    and cfutil._units(units) == cfutil._units("degree"),
+                    units not in e_n_units and Unit(units) == Unit("degree"),
                     f"Grid longitude variable '{longitude}' should use degree equivalent units without east or north components. "
                     f"Current units are {units}",
                 )
@@ -2844,13 +2843,13 @@ class CF1_6Check(CFNCCheck):
                         f'cell_methods attribute with a measure type of "{cell_measure_type}".'
                     )
                     try:
-                        cell_measure_units = cfutil._units(cell_measure_var.units)
+                        cell_measure_units = Unit(cell_measure_var.units)
                     except ValueError:
                         valid = False
                         reasoning.append(conversion_failure_msg)
                     else:
-                        if not cell_measure_units.is_convertible_to(
-                            cfutil._units(f"m{exponent}"),
+                        if not cell_measure_units.is_convertible(
+                            Unit(f"m{exponent}"),
                         ):
                             valid = False
                             reasoning.append(conversion_failure_msg)
@@ -3044,7 +3043,7 @@ class CF1_6Check(CFNCCheck):
 
                     # then the units
                     try:
-                        cfutil._units(interval_matches.group("interval_units"))
+                        Unit(interval_matches.group("interval_units"))
                     except ValueError:
                         valid_info.messages.append(
                             '§7.3.3 {}:cell_methods interval units "{}" is not parsable by UDUNITS.'.format(
