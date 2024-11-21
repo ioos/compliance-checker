@@ -1,6 +1,5 @@
 import subprocess
-
-from importlib_resources import files
+from importlib.resources import files
 
 
 def get_filename(path):

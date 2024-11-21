@@ -1,9 +1,9 @@
 import os
 import subprocess
+from importlib.resources import files
 from itertools import chain
 
 import pytest
-from importlib_resources import files
 from netCDF4 import Dataset
 
 from compliance_checker.cf import util
