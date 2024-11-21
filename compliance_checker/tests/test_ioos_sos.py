@@ -1,7 +1,8 @@
 import os
 import unittest
 
-import httpretty
+from mocket.mocket import mocketize
+from mocket.mockhttp import Entry
 
 from compliance_checker.runner import ComplianceChecker
 from compliance_checker.suite import CheckSuite
@@ -21,20 +22,20 @@ class TestIOOSSOSGetCapabilities(unittest.TestCase):
         # classes will show up
         CheckSuite().load_all_available_checkers()
 
-    @httpretty.activate
+    @mocketize
     def test_retrieve_getcaps(self):
         """Method that simulates retrieving SOS GetCapabilities"""
         url = "http://data.oceansmap.com/thredds/sos/caricoos_ag/VIA/VIA.ncml"
-        httpretty.register_uri(
-            httpretty.GET,
-            url,
-            content_type="text/xml",
+        Entry.single_register(
+            method=Entry.GET,
+            uri=url,
             body=self.resp,
+            headers={"content-type": "text/xml"},
         )
-        httpretty.register_uri(
-            httpretty.HEAD,
+        Entry.single_register(
+            Entry.HEAD,
             url,
-            content_type="text/xml",
+            headers={"content-type": "text/xml"},
             body="HTTP/1.1 200",
         )
         ComplianceChecker.run_checker(url, ["ioos_sos"], 1, "normal")
@@ -53,7 +54,7 @@ class TestIOOSSOSDescribeSensor(unittest.TestCase):
         # classes will show up
         CheckSuite().load_all_available_checkers()
 
-    @httpretty.activate
+    @mocketize
     def test_retrieve_describesensor(self):
         """Method that simulates retrieving SOS DescribeSensor"""
         url = (
@@ -64,17 +65,17 @@ class TestIOOSSOSDescribeSensor(unittest.TestCase):
             "&outputFormat=text/xml%3Bsubtype%3D%22sensorML/1.0.1/profiles/ioos_sos/1.0%22"
             "&version=1.0.0"
         )
-        httpretty.register_uri(
-            httpretty.GET,
-            url,
-            content_type="text/xml",
+        Entry.single_register(
+            method=Entry.GET,
+            uri=url,
             body=self.resp,
+            headers={"content-type": "text/xml"},
         )
-        httpretty.register_uri(
-            httpretty.HEAD,
-            url,
-            content_type="text/xml",
+        Entry.single_register(
+            method=Entry.HEAD,
+            uri=url,
             body="HTTP/1.1 200",
+            headers={"content-type": "text/xml"},
         )
         # need to mock out the HEAD response so that compliance checker
         # recognizes this as some sort of XML doc instead of an OPeNDAP

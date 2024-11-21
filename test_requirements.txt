@@ -1,7 +1,7 @@
 codecov
 codespell
 flake8
-httpretty
+mocket
 mypy
 myst-parser
 numpydoc
