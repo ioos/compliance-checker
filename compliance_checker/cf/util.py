@@ -4,10 +4,15 @@ import sys
 from importlib.resources import files
 from pkgutil import get_data
 
+from functools import lru_cache
 import requests
 from cf_units import Unit
 from lxml import etree
-from netCDF4 import Dataset
+from netCDF4 import Variable, Dimension, Dataset, Group
+
+import posixpath
+
+from typing import Tuple, Union
 
 from compliance_checker.cfutil import units_convertible
 
@@ -413,6 +418,47 @@ def get_possible_label_variable_dimensions(variable: Variable) -> Tuple[int, ...
     if variable.kind == "C" and len(variable.dimensions) > 0:
         return variable.dimensions[:-1]
     return variable.dimensions
+
+@lru_cache()
+def maybe_lateral_reference_variable_or_dimension(group: Union[Group, Dataset],
+                                                  name: str,
+                                                  reference_type: Union[Variable, Dimension]):
+
+    def can_lateral_search(name):
+        return (not name.startswith(".") and posixpath.split(name)[0] == "")
+
+    if reference_type == "variable":
+        # first try to fetch any
+        # can't set to None with .get
+        try:
+            maybe_var = group[name]
+        except IndexError:
+            maybe_var = None
+        else:
+            if isinstance(maybe_var, Variable):
+                return maybe_var
+
+        # alphanumeric string by itself, not a relative or absolute
+        # search by proximity
+        if (posixpath.split(name)[0] == "" and
+            not (name.startswith(".") or name.startswith("/"))):
+            group_traverse = group
+            while group_traverse.parent:
+                group_traverse = group_traverse.parent
+                check_target = posixpath.join(group_traverse.path, name)
+                try:
+                    maybe_var = group_traverse[name]
+                except IndexError:
+                    maybe_var = None
+                else:
+                    if isinstance(maybe_var, Variable):
+                        return maybe_var
+        else:
+            return VariableReferenceError(name)
+
+            # can't find path relative to current group or absolute path
+            # perform lateral search if we aren't in the root group
+
 
 def reference_attr_variables(
     dataset: Dataset,
