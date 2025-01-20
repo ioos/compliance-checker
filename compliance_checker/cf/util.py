@@ -420,7 +420,9 @@ def get_possible_label_variable_dimensions(variable: Variable) -> Tuple[int, ...
 
 @lru_cache
 def maybe_lateral_reference_variable_or_dimension(
-    group: Union[Group, Dataset], name: str, reference_type: Union[Variable, Dimension],
+    group: Union[Group, Dataset],
+    name: str,
+    reference_type: Union[Variable, Dimension],
 ):
 
     def can_lateral_search(name):
