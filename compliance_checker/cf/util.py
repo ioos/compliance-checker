@@ -210,7 +210,7 @@ class StandardNameTable:
             elif required and len(vals) == 0:
                 raise Exception(f"Required attr ({attrname}) not found")
 
-            return vals[0].text
+            return vals[0].text if len(vals) > 0 else None
 
     def __init__(self, cached_location=None):
         if cached_location:
