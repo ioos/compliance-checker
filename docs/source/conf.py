@@ -165,3 +165,6 @@ texinfo_documents = [
         "Miscellaneous",
     ),
 ]
+
+# GitHub issuecomment anchors are returning as broken for some reason.
+linkcheck_ignore = ["https://github.com/ioos/compliance-checker/issues/.*"]
