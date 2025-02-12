@@ -37,14 +37,13 @@ jobs:
           --file test_requirements.txt
           --channel conda-forge
 
-    - name: Test with cf-units (faster)
+    - name: Test with cf-units (optional)
       if: matrix.cf_units == true
       run: >-
         micromamba install cf-units --channel conda-forge
 
     - name: Install compliance-checker
       run: |
-        pip install git+https://github.com/pelson/pyudunits2.git@864e339d622656d060d910381510f9bfe7b17aab
         python -m pip install -e . --no-deps --force-reinstall
 
     - name: Default Tests
