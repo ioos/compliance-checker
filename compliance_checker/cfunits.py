@@ -1,9 +1,11 @@
-from pyudunits2 import UnitSystem, UnresolvableUnitException
+import pyudunits2
 
 try:
     import cf_units
 except ImportError:
     cf_units = False
+
+UT_SYSTEM = None
 
 
 class PyUdunits2:
@@ -16,16 +18,20 @@ class PyUdunits2:
     3/4 Add a definition object that is ust units.expanded()
     """
 
-    def __init__(self, units):
+    def __init__(self, units: str | None):
         """Keep unit system so we can convert from string later."""
-        self.ut_system = UnitSystem.from_udunits2_xml()
+        global UT_SYSTEM
+        if UT_SYSTEM is None:
+            UT_SYSTEM = pyudunits2.UnitSystem.from_udunits2_xml()
+
+        self.ut_system = UT_SYSTEM
 
         if units is None:
             units = ""
 
         try:
             self.units = self.ut_system.unit(units)
-        except (SyntaxError, UnresolvableUnitException) as err:
+        except (SyntaxError, pyudunits2.UnresolvableUnitException) as err:
             raise ValueError from err
         self.definition = self.units.expanded()
 
@@ -34,6 +40,9 @@ class PyUdunits2:
 
     def is_dimensionless(self):
         return self.units.is_dimensionless()
+
+    def is_time_reference(self):
+        return isinstance(self.units, pyudunits2.DateUnit)
 
     def is_convertible(self, other):
         if isinstance(other, str):
@@ -52,33 +61,13 @@ class PyUdunits2:
         # FIXME: cf-units Workaround 2/4 -> time is not convertible to time reference.
 
         # Both are time reference confirm.
-        if _is_time_reference(self.units) and _is_time_reference(other):
+        if self.is_time_reference() and isinstance(other, pyudunits2.DateUnit):
             convertible = True
         # One is time, the other is not, change it to False.
-        if sum((_is_time_reference(self.units), _is_time_reference(other))) == 1:
+        if sum((self.is_time_reference(), isinstance(other, pyudunits2.DateUnit))) == 1:
             convertible = False
 
         return convertible
-
-    def is_time_reference(self):
-        return _is_time_reference(self.units)
-
-
-def _is_time_reference(self):
-    # FIXME: cf-units Workaround 4/4 -> cf_units can differentiante between time reference and time units.
-    is_time_reference = False
-    try:
-        if hasattr(self._definition, "shift_from"):
-            is_time_reference = True
-    except KeyError:
-        # FIXME: hasattr should return None in that case.
-        # pyudunits2/_expr_graph.py:27, in Node.__getattr__(self, name)
-        #      25 def __getattr__(self, name):
-        #      26     # Allow the dictionary to raise KeyError if the key doesn't exist.
-        # ---> 27     return self._attrs[name]
-        # KeyError: 'shift_from'
-        pass
-    return is_time_reference
 
 
 if cf_units:
