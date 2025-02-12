@@ -6,7 +6,6 @@ import re
 from numbers import Number
 
 import validators
-from cf_units import Unit
 from lxml.etree import XPath
 from owslib.namespaces import Namespaces
 
@@ -23,6 +22,7 @@ from compliance_checker.base import (
 )
 from compliance_checker.cf import util as cf_util  # not to be confused with cfutil.py
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
+from compliance_checker.cfunits import Unit
 from compliance_checker.cfutil import (
     get_geophysical_variables,
     get_instrument_variables,
@@ -1377,7 +1377,6 @@ class IOOS1_2Check(IOOSNCCheck):
                 "mile",
                 "fathom",
             )
-
             unit_def_set = {
                 Unit(unit_str).definition for unit_str in expected_unit_strs
             }

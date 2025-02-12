@@ -8,10 +8,10 @@ from pkgutil import get_data
 from typing import Union
 
 import requests
-from cf_units import Unit
 from lxml import etree
 from netCDF4 import Dataset, Dimension, Group, Variable
 
+from compliance_checker.cfunits import Unit
 from compliance_checker.cfutil import units_convertible
 
 # copied from paegan
