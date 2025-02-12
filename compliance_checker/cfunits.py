@@ -63,9 +63,6 @@ class PyUdunits2:
         # Both are time reference confirm.
         if self.is_time_reference() and isinstance(other, pyudunits2.DateUnit):
             convertible = True
-        # One is time, the other is not, change it to False.
-        if sum((self.is_time_reference(), isinstance(other, pyudunits2.DateUnit))) == 1:
-            convertible = False
 
         return convertible
 
