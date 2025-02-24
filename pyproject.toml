@@ -125,7 +125,7 @@ markers = [
   "slowtest: marks slow tests (deselect with '-m \"not slowtest\"')",
 ]
 filterwarnings = [
-  "error:::compliance-checker.*",
-  "ignore::UserWarning",
-  "ignore::RuntimeWarning",
+  "error",
+  "ignore:this date/calendar/year zero convention is not supported by CF", # CFtime warning, probably harmless here?
+  "ignore:Received exception when making HEAD request to",                 # In compliance_checker/protocols/netcdf.py::is_remote_netcdfWe can still tell if it is remote without the handshake.
 ]
