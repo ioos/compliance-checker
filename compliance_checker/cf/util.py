@@ -417,13 +417,14 @@ def get_possible_label_variable_dimensions(variable: Variable) -> tuple[int, ...
         return variable.dimensions[:-1]
     return variable.dimensions
 
-
+  
 @lru_cache
 def maybe_lateral_reference_variable_or_dimension(
     group: Union[Group, Dataset],
     name: str,
     reference_type: Union[Variable, Dimension],
 ):
+
 
     def can_lateral_search(name):
         return not name.startswith(".") and posixpath.split(name)[0] == ""
@@ -466,21 +467,27 @@ def reference_attr_variables(
     dataset: Dataset,
     attributes_string: str,
     split_by: str = None,
+    reference_type: str = "variable",
+    group: Union[Group, Dataset] = None
 ):
     """
     Attempts to reference variables in the string, optionally splitting by
     a string
     """
+    references, errors = [], []
     if attributes_string is None:
         return None
-    elif split_by is None:
-        return dataset.variables.get(
-            attributes_string,
-            VariableReferenceError(attributes_string),
-        )
-    else:
-        string_proc = attributes_string.split(split_by)
-        return [
-            dataset.variables.get(var_name, VariableReferenceError(var_name))
-            for var_name in string_proc
-        ]
+    elif reference_type == "variable":
+        if split_by is None:
+            return dataset.variables.get(
+                attributes_string,
+                VariableReferenceError(attributes_string),
+            )
+        else:
+            string_proc = attributes_string.split(split_by)
+            for var_name in string_proc:
+                if var_name in dataset.variables:
+                    references.append(dataset.variables[var_name])
+                else:
+                    errors.append(VariableReferenceError(var_name))
+            return references, errors
