@@ -148,12 +148,21 @@ class ComplianceChecker:
         """
 
         for ds, score_groups in score_dict.items():
-            for checker, (groups, errors) in score_groups.items():
+            for checker, (groups, _errors) in score_groups.items():
                 score_list, points, out_of = cs.standard_output(
-                    ds, limit, checker, groups)
+                    ds,
+                    limit,
+                    checker,
+                    groups,
+                )
                 # send list of grouped result objects to stdout & reasoning_routine
                 cs.standard_output_generation(
-                    groups, limit, points, out_of, check=checker)
+                    groups,
+                    limit,
+                    points,
+                    out_of,
+                    check=checker,
+                )
         return groups
 
     @classmethod

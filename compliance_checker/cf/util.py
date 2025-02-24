@@ -1,18 +1,16 @@
 import itertools
 import os
+import posixpath
 import sys
+from functools import lru_cache
 from importlib.resources import files
 from pkgutil import get_data
+from typing import Union
 
-from functools import lru_cache
 import requests
 from cf_units import Unit
 from lxml import etree
-from netCDF4 import Variable, Dimension, Dataset, Group
-
-import posixpath
-
-from typing import Tuple, Union
+from netCDF4 import Dataset, Dimension, Group, Variable
 
 from compliance_checker.cfutil import units_convertible
 
@@ -210,7 +208,7 @@ class StandardNameTable:
             elif required and len(vals) == 0:
                 raise Exception(f"Required attr ({attrname}) not found")
 
-            return vals[0].text
+            return vals[0].text if len(vals) > 0 else None
 
     def __init__(self, cached_location=None):
         if cached_location:
@@ -410,7 +408,7 @@ def string_from_var_type(variable):
         )
 
 
-def get_possible_label_variable_dimensions(variable: Variable) -> Tuple[int, ...]:
+def get_possible_label_variable_dimensions(variable: Variable) -> tuple[int, ...]:
     """
     Return dimensions if non-char variable, or return variable dimensions
     without trailing dimension if char variable, treating it as a label variable.
@@ -419,13 +417,17 @@ def get_possible_label_variable_dimensions(variable: Variable) -> Tuple[int, ...
         return variable.dimensions[:-1]
     return variable.dimensions
 
-@lru_cache()
-def maybe_lateral_reference_variable_or_dimension(group: Union[Group, Dataset],
-                                                  name: str,
-                                                  reference_type: Union[Variable, Dimension]):
+  
+@lru_cache
+def maybe_lateral_reference_variable_or_dimension(
+    group: Union[Group, Dataset],
+    name: str,
+    reference_type: Union[Variable, Dimension],
+):
+
 
     def can_lateral_search(name):
-        return (not name.startswith(".") and posixpath.split(name)[0] == "")
+        return not name.startswith(".") and posixpath.split(name)[0] == ""
 
     if reference_type == "variable":
         # first try to fetch any
@@ -440,12 +442,13 @@ def maybe_lateral_reference_variable_or_dimension(group: Union[Group, Dataset],
 
         # alphanumeric string by itself, not a relative or absolute
         # search by proximity
-        if (posixpath.split(name)[0] == "" and
-            not (name.startswith(".") or name.startswith("/"))):
+        if posixpath.split(name)[0] == "" and not (
+            name.startswith(".") or name.startswith("/")
+        ):
             group_traverse = group
             while group_traverse.parent:
                 group_traverse = group_traverse.parent
-                check_target = posixpath.join(group_traverse.path, name)
+                # check_target = posixpath.join(group_traverse.path, name)
                 try:
                     maybe_var = group_traverse[name]
                 except IndexError:
