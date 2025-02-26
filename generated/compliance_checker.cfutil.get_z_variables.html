@@ -8,35 +8,38 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>get_z_variables &#8212; compliance_checker 5.1.1 documentation</title>
+    <title>get_z_variables &#8212; compliance_checker 5.1.2 documentation</title>
   
   
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
   
-  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
-
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
-  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=1bd908e2"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/documentation_options.js?v=2c218288"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'generated/compliance_checker.cfutil.get_z_variables';</script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -46,6 +49,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="5.1.2" />
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/generated/compliance_checker.cfutil.get_z_variables.html" />
 
   </head>
@@ -55,31 +59,16 @@
 
   
   
-  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -87,7 +76,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -95,8 +83,13 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
   <nav class="navbar navbar-dark navbar-expand-lg bg-unidata fixed-top bd-navbar shadow" id="navbar-main">
   </nav>
@@ -110,7 +103,8 @@
       
       
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -119,46 +113,49 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../quickintro.html">
-                        IOOS Compliance Checker
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../readme_link.html">
+    IOOS Compliance Checker
+  </a>
+</li>
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../compliance_checker_api.html">
-                        API
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../faq.html">
-                        Frequently Asked Questions
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../compliance_checker_api.html">
+    API
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../development.html">
-                        Developer Notes
-                      </a>
-                    </li>
-                
 
-                <li class="nav-item">
-                  <a class="nav-link nav-external" href="https://github.com/ioos/compliance-checker/releases">
-                    Release Notes
-                  </a>
-                </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../faq.html">
+    Frequently Asked Questions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../development.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/ioos/compliance-checker/releases">
+    Release Notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -174,7 +171,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -184,7 +180,7 @@
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form></div>
         
-          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+          <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -195,7 +191,7 @@
           
           
           
-          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
 </ul></div>
@@ -206,7 +202,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.1.1
+  Version 5.1.2
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
         <div class="sidebar-primary-item">
@@ -214,20 +210,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.cf.html">Cf <code class="docutils literal notranslate"><span class="pre">(compliance_checker.cf)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.cf.html">Cf <code class="docutils literal notranslate"><span class="pre">(compliance_checker.cf)</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.cf.CF1_6Check.html">CF1_6Check</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.cf.CF1_7Check.html">CF1_7Check</a></li>
 </ul>
-</li>
+</details></li>
 <li class="toctree-l1"><a class="reference internal" href="compliance_checker.protocols.html">Protocols <code class="docutils literal notranslate"><span class="pre">(compliance_checker.protocols)</span></code></a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.acdd.html">Acdd <code class="docutils literal notranslate"><span class="pre">(compliance_checker.acdd)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.acdd.html">Acdd <code class="docutils literal notranslate"><span class="pre">(compliance_checker.acdd)</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDD1_1Check.html">ACDD1_1Check</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDD1_3Check.html">ACDD1_3Check</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDDBaseCheck.html">ACDDBaseCheck</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.acdd.ACDDNCCheck.html">ACDDNCCheck</a></li>
 </ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.base.html">Base <code class="docutils literal notranslate"><span class="pre">(compliance_checker.base)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.base.html">Base <code class="docutils literal notranslate"><span class="pre">(compliance_checker.base)</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.attr_check.html">attr_check</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.check_has.html">check_has</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.csv_splitter.html">csv_splitter</a></li>
@@ -251,8 +247,8 @@
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.UrlValidator.html">UrlValidator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.base.ValidationObject.html">ValidationObject</a></li>
 </ul>
-</li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="compliance_checker.cfutil.html">Cfutil <code class="docutils literal notranslate"><span class="pre">(compliance_checker.cfutil)</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="compliance_checker.cfutil.html">Cfutil <code class="docutils literal notranslate"><span class="pre">(compliance_checker.cfutil)</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.attr_membership.html">attr_membership</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.coordinate_dimension_matrix.html">coordinate_dimension_matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.get_auxiliary_coordinate_variables.html">get_auxiliary_coordinate_variables</a></li>
@@ -315,10 +311,11 @@
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_trajectory_profile_orthogonal.html">is_trajectory_profile_orthogonal</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_unitless.html">is_unitless</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.is_variable_valid_ragged_array_repr_featureType.html">is_variable_valid_ragged_array_repr_featureType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.resolve_ragged_array_dimension.html">resolve_ragged_array_dimension</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.cfutil.units_convertible.html">units_convertible</a></li>
 </ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.ioos.html">Ioos <code class="docutils literal notranslate"><span class="pre">(compliance_checker.ioos)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.ioos.html">Ioos <code class="docutils literal notranslate"><span class="pre">(compliance_checker.ioos)</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS0_1Check.html">IOOS0_1Check</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS1_1Check.html">IOOS1_1Check</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOS1_2Check.html">IOOS1_2Check</a></li>
@@ -331,23 +328,23 @@
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.IOOSSOSGCCheck.html">IOOSSOSGCCheck</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.ioos.NamingAuthorityValidator.html">NamingAuthorityValidator</a></li>
 </ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.runner.html">Runner <code class="docutils literal notranslate"><span class="pre">(compliance_checker.runner)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.runner.html">Runner <code class="docutils literal notranslate"><span class="pre">(compliance_checker.runner)</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.runner.stdout_redirector.html">stdout_redirector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.runner.ComplianceChecker.html">ComplianceChecker</a></li>
 </ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.suite.html">Suite <code class="docutils literal notranslate"><span class="pre">(compliance_checker.suite)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.suite.html">Suite <code class="docutils literal notranslate"><span class="pre">(compliance_checker.suite)</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.suite.extract_docstring_summary.html">extract_docstring_summary</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.suite.CheckSuite.html">CheckSuite</a></li>
 </ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.util.html">Util <code class="docutils literal notranslate"><span class="pre">(compliance_checker.util)</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="compliance_checker.util.html">Util <code class="docutils literal notranslate"><span class="pre">(compliance_checker.util)</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.util.dateparse.html">dateparse</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.util.datetime_is_iso.html">datetime_is_iso</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compliance_checker.util.kvp_convert.html">kvp_convert</a></li>
 </ul>
-</li>
+</details></li>
 </ul>
 </div>
 </nav></div>
@@ -355,29 +352,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -391,7 +391,7 @@
     
     <li class="breadcrumb-item"><a href="compliance_checker.cfutil.html" class="nav-link">Cfutil <code class="docutils literal notranslate"><span class="pre">(compliance_checker.cfutil)</span></code></a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">get_z_variables</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">get_z_variables</span></li>
   </ul>
 </nav>
 </div>
@@ -430,7 +430,7 @@
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -458,7 +458,8 @@
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -474,13 +475,13 @@
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/generated/compliance_checker.cfutil.get_z_variables.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/generated/compliance_checker.cfutil.get_z_variables.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -495,8 +496,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -507,7 +508,7 @@
 
   <p class="copyright">
     
-      © Copyright 2024, Dave Foster.
+      © Copyright 2025, Dave Foster.
       <br/>
     
   </p>
@@ -516,7 +517,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.1.
     <br/>
   </p>
 </div>
@@ -529,7 +530,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

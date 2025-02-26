@@ -7,35 +7,38 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.cf.cf_1_6 &#8212; compliance_checker 5.1.1 documentation</title>
+    <title>compliance_checker.cf.cf_1_6 &#8212; compliance_checker 5.1.2 documentation</title>
   
   
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
   
-  <link href="../../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
-
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
-  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
-  <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=1bd908e2"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/documentation_options.js?v=2c218288"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/cf/cf_1_6';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -43,6 +46,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="5.1.2" />
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/_modules/compliance_checker/cf/cf_1_6.html" />
 
   </head>
@@ -52,31 +56,16 @@
 
   
   
-  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -84,7 +73,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -92,8 +80,13 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
   <nav class="navbar navbar-dark navbar-expand-lg bg-unidata fixed-top bd-navbar shadow" id="navbar-main">
   </nav>
@@ -109,7 +102,8 @@
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -118,46 +112,49 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../quickintro.html">
-                        IOOS Compliance Checker
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../readme_link.html">
+    IOOS Compliance Checker
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../compliance_checker_api.html">
-                        API
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../faq.html">
-                        Frequently Asked Questions
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../compliance_checker_api.html">
+    API
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../development.html">
-                        Developer Notes
-                      </a>
-                    </li>
-                
 
-                <li class="nav-item">
-                  <a class="nav-link nav-external" href="https://github.com/ioos/compliance-checker/releases">
-                    Release Notes
-                  </a>
-                </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../faq.html">
+    Frequently Asked Questions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../development.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/ioos/compliance-checker/releases">
+    Release Notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -173,7 +170,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -183,7 +179,7 @@
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form></div>
         
-          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+          <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -194,7 +190,7 @@
           
           
           
-          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
 </ul></div>
@@ -205,36 +201,39 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.1.1
+  Version 5.1.2
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -245,7 +244,7 @@
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">compliance_c...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">compliance_checker.cf.cf_1_6</span></li>
   </ul>
 </nav>
 </div>
@@ -263,33 +262,33 @@
                 <article class="bd-article">
                   
   <h1>Source code for compliance_checker.cf.cf_1_6</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">difflib</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
 
-<span class="kn">import</span> <span class="nn">cftime</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">regex</span>
-<span class="kn">from</span> <span class="nn">cf_units</span> <span class="kn">import</span> <span class="n">Unit</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cftime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">regex</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cf_units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Unit</span>
 
-<span class="kn">from</span> <span class="nn">compliance_checker</span> <span class="kn">import</span> <span class="n">cfutil</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.base</span> <span class="kn">import</span> <span class="n">BaseCheck</span><span class="p">,</span> <span class="n">Result</span><span class="p">,</span> <span class="n">TestCtx</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.cf</span> <span class="kn">import</span> <span class="n">util</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.cf.appendix_c</span> <span class="kn">import</span> <span class="n">valid_modifiers</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.cf.appendix_d</span> <span class="kn">import</span> <span class="n">dimless_vertical_coordinates_1_6</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.cf.appendix_e</span> <span class="kn">import</span> <span class="n">cell_methods16</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.cf.appendix_f</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">cfutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseCheck</span><span class="p">,</span> <span class="n">Result</span><span class="p">,</span> <span class="n">TestCtx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf</span><span class="w"> </span><span class="kn">import</span> <span class="n">util</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf.appendix_c</span><span class="w"> </span><span class="kn">import</span> <span class="n">valid_modifiers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf.appendix_d</span><span class="w"> </span><span class="kn">import</span> <span class="n">dimless_vertical_coordinates_1_6</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf.appendix_e</span><span class="w"> </span><span class="kn">import</span> <span class="n">cell_methods16</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf.appendix_f</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">grid_mapping_attr_types16</span><span class="p">,</span>
     <span class="n">grid_mapping_dict16</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.cf.cf_base</span> <span class="kn">import</span> <span class="n">CFNCCheck</span><span class="p">,</span> <span class="n">appendix_a_base</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf.cf_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">CFNCCheck</span><span class="p">,</span> <span class="n">appendix_a_base</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="CF1_6Check">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check">[docs]</a>
-<span class="k">class</span> <span class="nc">CF1_6Check</span><span class="p">(</span><span class="n">CFNCCheck</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CF1_6Check</span><span class="p">(</span><span class="n">CFNCCheck</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CF-1.6-specific implementation of CFBaseCheck; supports checking</span>
 <span class="sd">    netCDF datasets.</span>
 <span class="sd">    These checks are translated documents:</span>
@@ -315,7 +314,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.__init__">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  <span class="c1"># initialize with parent methods and data</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  <span class="c1"># initialize with parent methods and data</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">cell_methods</span> <span class="o">=</span> <span class="n">cell_methods16</span>
@@ -328,20 +327,21 @@
     <span class="c1">###############################################################################</span>
 <div class="viewcode-block" id="CF1_6Check.check_filename">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_filename">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks that the filename ends with .nc&quot;&quot;&quot;</span>
         <span class="c1"># IMPLEMENTS CONFORMANCE 2.1</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">filepath</span><span class="p">()</span>
         <span class="n">filename_suffix</span> <span class="o">=</span> <span class="n">TestCtx</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;2.1&quot;</span><span class="p">])</span>
         <span class="n">filename_suffix</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
-            <span class="n">ds</span><span class="o">.</span><span class="n">filepath</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;nc&quot;</span><span class="p">),</span>
-            <span class="sa">f</span><span class="s1">&#39;Dataset path </span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">filepath</span><span class="si">}</span><span class="s1"> must end with &quot;.nc&quot;&#39;</span><span class="p">,</span>
+            <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;nc&quot;</span><span class="p">),</span>
+            <span class="sa">f</span><span class="s1">&#39;Dataset path </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s1"> must end with &quot;.nc&quot;&#39;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">filename_suffix</span><span class="o">.</span><span class="n">to_result</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="CF1_6Check.check_data_types">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_data_types">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_data_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_data_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks the data type of all netCDF variables to ensure they are valid</span>
 <span class="sd">        data types under CF.</span>
@@ -375,7 +375,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_child_attr_data_types">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_child_attr_data_types">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_child_attr_data_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_child_attr_data_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        For any variables which contain any of the following attributes:</span>
 <span class="sd">            - valid_min/valid_max</span>
@@ -393,23 +393,24 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">ctx</span> <span class="o">=</span> <span class="n">TestCtx</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;2.5&quot;</span><span class="p">])</span>
-        <span class="n">special_attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">special_attrs</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s2">&quot;actual_range&quot;</span><span class="p">,</span>
             <span class="s2">&quot;valid_min&quot;</span><span class="p">,</span>
             <span class="s2">&quot;valid_max&quot;</span><span class="p">,</span>
             <span class="s2">&quot;valid_range&quot;</span><span class="p">,</span>
             <span class="s2">&quot;_FillValue&quot;</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">_var_name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">att_name</span> <span class="ow">in</span> <span class="n">special_attrs</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">()):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_parent_var_attr_type_check</span><span class="p">(</span><span class="n">att_name</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">att_name</span> <span class="ow">in</span> <span class="n">special_attrs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">att_name</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_parent_var_attr_type_check</span><span class="p">(</span><span class="n">att_name</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ctx</span><span class="o">.</span><span class="n">to_result</span><span class="p">()</span></div>
 
 
     <span class="c1"># TODO: consider renaming to avoid confusion with non-underscore</span>
     <span class="c1">#       primary function version</span>
-    <span class="k">def</span> <span class="nf">_check_add_offset_scale_factor_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_add_offset_scale_factor_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reusable function for checking both add_offset and scale_factor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -439,7 +440,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_add_offset_scale_factor_type">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_add_offset_scale_factor_type">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_add_offset_scale_factor_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_add_offset_scale_factor_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If a variable has the attributes add_offset and scale_factor,</span>
 <span class="sd">        check that the variables and attributes are of the same type</span>
@@ -492,7 +493,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_naming_conventions">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_naming_conventions">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_naming_conventions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_naming_conventions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks the variable names to ensure they are valid CF variable names under CF.</span>
 
@@ -570,7 +571,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_names_unique">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_names_unique">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_names_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_names_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks the variable names for uniqueness regardless of case.</span>
 
@@ -589,7 +590,7 @@
             <span class="n">names</span><span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">fails</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;Variables are not case sensitive. Duplicate variables named: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">k</span>
+            <span class="sa">f</span><span class="s2">&quot;Variables are not case sensitive. Duplicate variables named: </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">names</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="mi">1</span>
         <span class="p">]</span>
@@ -603,7 +604,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_dimension_names">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_dimension_names">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_dimension_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_dimension_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks variables contain no duplicate dimension names.</span>
 
@@ -638,7 +639,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_dimension_order">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_dimension_order">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_dimension_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_dimension_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks each variable&#39;s dimension order to ensure that the order is</span>
 <span class="sd">        consistent and in order under CF §2.4</span>
@@ -697,7 +698,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_fill_value_equal_missing_value">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_fill_value_equal_missing_value">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_fill_value_equal_missing_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_fill_value_equal_missing_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If both missing_value and _FillValue be used, they should have the same value.</span>
 <span class="sd">        This according to CF §2.5.1 Recommendations:</span>
@@ -729,7 +730,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_valid_range_and_valid_min_max_present">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_valid_range_and_valid_min_max_present">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_valid_range_and_valid_min_max_present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_valid_range_and_valid_min_max_present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The valid_range attribute must not be present if the valid_min</span>
 <span class="sd">        and/or valid_max attributes are present. This according to 2.5.1 Requirements.</span>
@@ -765,7 +766,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_fill_value_outside_valid_range">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_fill_value_outside_valid_range">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_fill_value_outside_valid_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_fill_value_outside_valid_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks each variable&#39;s _FillValue to ensure that it&#39;s in valid_range or</span>
 <span class="sd">        between valid_min and valid_max according to CF §2.5.1</span>
@@ -838,7 +839,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_convention_globals">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_convention_globals">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_convention_globals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_convention_globals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the common global attributes are strings if they exist.</span>
 
@@ -867,7 +868,7 @@
     <span class="c1"># IMPLEMENTATION</span>
 <div class="viewcode-block" id="CF1_6Check.check_coordinate_variables_strict_monotonicity">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_coordinate_variables_strict_monotonicity">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_coordinate_variables_strict_monotonicity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_coordinate_variables_strict_monotonicity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks that data in coordinate variables is either monotonically</span>
 <span class="sd">        increasing or decreasing</span>
@@ -889,7 +890,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_convention_possibly_var_attrs">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_convention_possibly_var_attrs">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_convention_possibly_var_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_convention_possibly_var_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check variable and global attributes are strings for recommended attributes under CF §2.6.2</span>
 
@@ -942,7 +943,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_units">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_units">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the units attribute for all variables to ensure they are CF</span>
 <span class="sd">        compliant under CF §3.1</span>
@@ -1040,7 +1041,7 @@
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_valid_cf_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_valid_cf_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks that the variable contains units attribute, the attribute is a</span>
 <span class="sd">        string and the value is not deprecated by CF</span>
@@ -1149,7 +1150,7 @@
 
         <span class="k">return</span> <span class="n">valid_units</span><span class="o">.</span><span class="n">to_result</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_check_valid_udunits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_valid_udunits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks that the variable&#39;s units are contained in UDUnits</span>
 
@@ -1181,7 +1182,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">valid_udunits</span><span class="o">.</span><span class="n">to_result</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_check_valid_standard_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_valid_standard_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks that the variable&#39;s units are appropriate for the standard name</span>
 <span class="sd">        according to the CF standard name table and coordinate sections in CF</span>
@@ -1239,7 +1240,7 @@
         <span class="c1"># IMPLEMENTATION CONFORMANCE 4.4 REQUIRED 1/2</span>
         <span class="k">elif</span> <span class="n">standard_name</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
             <span class="n">valid_standard_units</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
-                <span class="n">util</span><span class="o">.</span><span class="n">units_convertible</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="s2">&quot;seconds since 1970-01-01&quot;</span><span class="p">),</span>
+                <span class="n">cfutil</span><span class="o">.</span><span class="n">units_convertible</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="s2">&quot;seconds since 1970-01-01&quot;</span><span class="p">),</span>
                 <span class="s2">&quot;time must be in a valid units format &lt;unit&gt; since &lt;epoch&gt; &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;not </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="p">)</span>
@@ -1269,7 +1270,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_standard_name">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_standard_name">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_standard_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_standard_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check a variables&#39;s standard_name attribute to ensure that it meets CF</span>
 <span class="sd">        compliance.</span>
@@ -1384,7 +1385,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_ancillary_variables">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_ancillary_variables">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_ancillary_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_ancillary_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks the ancillary_variable attribute for all variables to ensure</span>
 <span class="sd">        they are CF compliant.</span>
@@ -1433,7 +1434,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_flags">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_flags">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the flag_values, flag_masks and flag_meanings attributes for</span>
 <span class="sd">        variables to ensure they are CF compliant.</span>
@@ -1516,7 +1517,7 @@
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_flag_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_flag_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks a variable&#39;s flag_values attribute for compliance under CF</span>
 
@@ -1568,7 +1569,7 @@
 
         <span class="k">return</span> <span class="n">valid_values</span><span class="o">.</span><span class="n">to_result</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_check_flag_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_flag_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check a variable&#39;s flag_masks attribute for compliance under CF</span>
 
@@ -1623,7 +1624,7 @@
 
         <span class="k">return</span> <span class="n">valid_masks</span><span class="o">.</span><span class="n">to_result</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_check_flag_meanings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_flag_meanings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check a variable&#39;s flag_meanings attribute for compliance under CF</span>
 
@@ -1676,7 +1677,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_coordinate_types">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_coordinate_types">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_coordinate_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_coordinate_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the axis attribute of coordinate variables</span>
 
@@ -1722,7 +1723,7 @@
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks that the axis attribute is a string and an allowed value, namely</span>
 <span class="sd">        one of &#39;T&#39;, &#39;X&#39;, &#39;Y&#39;, or &#39;Z&#39;.</span>
@@ -1755,7 +1756,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_latitude">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_latitude">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_latitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_latitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check variable(s) that define latitude and are defined correctly according to CF.</span>
 
@@ -1864,7 +1865,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_longitude">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_longitude">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_longitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_longitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check variable(s) that define longitude and are defined correctly according to CF.</span>
 
@@ -1976,7 +1977,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_dimensional_vertical_coordinate">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_dimensional_vertical_coordinate">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_dimensional_vertical_coordinate</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_dimensional_vertical_coordinate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ds</span><span class="p">,</span>
         <span class="n">dimless_vertical_coordinates</span><span class="o">=</span><span class="n">dimless_vertical_coordinates_1_6</span><span class="p">,</span>
@@ -2028,7 +2029,7 @@
                 <span class="s2">&quot;there is no default&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">util</span><span class="o">.</span><span class="n">units_convertible</span><span class="p">(</span><span class="s2">&quot;bar&quot;</span><span class="p">,</span> <span class="n">units</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">units_convertible</span><span class="p">(</span><span class="s2">&quot;bar&quot;</span><span class="p">,</span> <span class="n">units</span><span class="p">):</span>
                 <span class="n">valid_vertical_coord</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
                     <span class="n">positive</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;down&quot;</span><span class="p">),</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: vertical coordinates not defining pressure must include &quot;</span>
@@ -2043,7 +2044,7 @@
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_dimensionless_vertical_coordinate_1_6</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_dimensionless_vertical_coordinate_1_6</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ds</span><span class="p">,</span>
         <span class="n">vname</span><span class="p">,</span>
@@ -2081,7 +2082,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_dimensionless_vertical_coordinates">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_dimensionless_vertical_coordinates">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_dimensionless_vertical_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_dimensionless_vertical_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the validity of dimensionless coordinates under CF</span>
 
@@ -2121,7 +2122,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_time_coordinate">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_time_coordinate">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_time_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_time_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check variables defining time are valid under CF</span>
 
@@ -2163,7 +2164,7 @@
                     <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span>
                     <span class="kc">False</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;4.4&quot;</span><span class="p">],</span>
-                    <span class="p">[</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> does not have units&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">],</span>
+                    <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> does not have units&quot;</span><span class="p">],</span>
                 <span class="p">)</span>
                 <span class="n">ret_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
                 <span class="k">continue</span>
@@ -2174,7 +2175,7 @@
             <span class="n">correct_units</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">units_temporal</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
             <span class="n">reasoning</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">correct_units</span><span class="p">:</span>
-                <span class="n">reasoning</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> does not have correct time units&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">]</span>
+                <span class="n">reasoning</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> does not have correct time units&quot;</span><span class="p">]</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
                     <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span>
                     <span class="n">correct_units</span><span class="p">,</span>
@@ -2203,8 +2204,7 @@
                     <span class="n">ret_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
             <span class="c1"># IMPLEMENTATION CONFORMANCE 4.4 RECOMMENDED 2/2</span>
             <span class="c1"># catch non-recommended months or years time interval</span>
-            <span class="n">unit</span> <span class="o">=</span> <span class="n">Unit</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">unit</span><span class="o">.</span><span class="n">is_long_time_interval</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="ow">in</span> <span class="n">variable</span><span class="o">.</span><span class="n">units</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;months&quot;</span><span class="p">,</span> <span class="s2">&quot;years&quot;</span><span class="p">)):</span>
                 <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Using relative time interval of months or years is not recommended for coordinate variable </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
                     <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
@@ -2218,7 +2218,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_calendar">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_calendar">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_calendar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_calendar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the calendar attribute for variables defining time and ensure it</span>
 <span class="sd">        is a valid calendar prescribed by CF.</span>
@@ -2275,7 +2275,7 @@
 
         <span class="n">ret_val</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">def</span> <span class="nf">check_standard_calendar_no_cross</span><span class="p">(</span><span class="n">time_var</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">check_standard_calendar_no_cross</span><span class="p">(</span><span class="n">time_var</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Check that the time variable does not cross the date</span>
 <span class="sd">            1582-10-15 when standard or gregorian calendars are used</span>
@@ -2372,7 +2372,7 @@
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_leap_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_variable</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_leap_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_variable</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper method to handle checking custom calendar leap time specifications</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2433,7 +2433,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_aux_coordinates">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_aux_coordinates">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_aux_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_aux_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Chapter 5 paragraph 3</span>
 
@@ -2521,7 +2521,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_duplicate_axis">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_duplicate_axis">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_duplicate_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_duplicate_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks that no variable contains two coordinates defining the same</span>
 
@@ -2569,7 +2569,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_multi_dimensional_coords">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_multi_dimensional_coords">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_multi_dimensional_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_multi_dimensional_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks that no multidimensional coordinate shares a name with its</span>
 <span class="sd">        dimensions.</span>
@@ -2606,8 +2606,7 @@
     <span class="c1"># ***************</span>
 <div class="viewcode-block" id="CF1_6Check.check_grid_coordinates">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_grid_coordinates">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_grid_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
-        <span class="c1"># def _check_grid_coordinates(self, ds):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_grid_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        5.6 When the coordinate variables for a horizontal grid are not</span>
 <span class="sd">        longitude and latitude, it is required that the true latitude and</span>
@@ -2621,7 +2620,7 @@
         <span class="n">latitudes</span> <span class="o">=</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_true_latitude_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
         <span class="n">longitudes</span> <span class="o">=</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_true_longitude_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
 
-        <span class="n">check_featues</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">check_features</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;2d-regular-grid&quot;</span><span class="p">,</span>
             <span class="s2">&quot;2d-static-grid&quot;</span><span class="p">,</span>
             <span class="s2">&quot;3d-regular-grid&quot;</span><span class="p">,</span>
@@ -2642,7 +2641,7 @@
             <span class="c1"># dimensions</span>
             <span class="n">dimensions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
             <span class="c1"># If it&#39;s not a grid, skip it</span>
-            <span class="k">if</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">guess_feature_type</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">check_featues</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">guess_feature_type</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">variable</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">check_features</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">has_coords</span> <span class="o">=</span> <span class="n">TestCtx</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;5.6&quot;</span><span class="p">])</span>
 
@@ -2699,7 +2698,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_reduced_horizontal_grid">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_reduced_horizontal_grid">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_reduced_horizontal_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_reduced_horizontal_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        5.3 A &quot;reduced&quot; longitude-latitude grid is one in which the points are</span>
 <span class="sd">        arranged along constant latitude lines with the number of points on a</span>
@@ -2774,7 +2773,7 @@
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_grid_mapping_attr_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_grid_mapping_attr_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate a condition (or series of conditions) for a particular</span>
 <span class="sd">        attribute. Implementation for CF-1.6.</span>
@@ -2814,7 +2813,7 @@
                 <span class="sa">f</span><span class="s2">&quot;Evaluation for </span><span class="si">{</span><span class="n">attr_name</span><span class="si">}</span><span class="s2"> not yet implemented&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_evaluate_latitude_of_projection_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_latitude_of_projection_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate the condition for `latitude_of_projection_origin` attribute.</span>
 <span class="sd">        Return result. Value must be -90 &lt;= x &lt;= 90.</span>
@@ -2829,7 +2828,7 @@
             <span class="s2">&quot;latitude_of_projection_origin must satisfy (-90 &lt;= x &lt;= 90)&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_evaluate_longitude_of_projection_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_longitude_of_projection_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate the condition for `longitude_of_projection_origin` attribute.</span>
 <span class="sd">        Return result.</span>
@@ -2844,7 +2843,7 @@
             <span class="s2">&quot;longitude_of_projection_origin must satisfy (-180 &lt;= x &lt;= 180)&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_evaluate_longitude_of_central_meridian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_longitude_of_central_meridian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate the condition for `longitude_of_central_meridian` attribute.</span>
 <span class="sd">        Return result.</span>
@@ -2859,7 +2858,7 @@
             <span class="s2">&quot;longitude_of_central_meridian must satisfy (-180 &lt;= x &lt;= 180)&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_evaluate_longitude_of_prime_meridian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_longitude_of_prime_meridian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate the condition for `longitude_of_prime_meridian` attribute.</span>
 <span class="sd">        Return result.</span>
@@ -2874,7 +2873,7 @@
             <span class="s2">&quot;longitude_of_prime_meridian must satisfy (-180 &lt;= x &lt;= 180)&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_evaluate_scale_factor_at_central_meridian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_scale_factor_at_central_meridian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate the condition for `scale_factor_at_central_meridian` attribute.</span>
 <span class="sd">        Return result.</span>
@@ -2886,7 +2885,7 @@
 
         <span class="k">return</span> <span class="p">(</span><span class="n">val</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;scale_factor_at_central_meridian must be &gt; 0.0&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_evaluate_scale_factor_at_projection_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_scale_factor_at_projection_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate the condition for `scale_factor_at_projection_origin` attribute.</span>
 <span class="sd">        Return result.</span>
@@ -2898,7 +2897,7 @@
 
         <span class="k">return</span> <span class="p">(</span><span class="n">val</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;scale_factor_at_projection_origin must be &gt; 0.0&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_evaluate_standard_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_standard_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate the condition for `standard_parallel` attribute. Return result.</span>
 
@@ -2912,7 +2911,7 @@
             <span class="s2">&quot;standard_parallel must satisfy (-90 &lt;= x &lt;= 90)&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_evaluate_straight_vertical_longitude_from_pole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_straight_vertical_longitude_from_pole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate the condition for `straight_vertical_longitude_from_pole`</span>
 <span class="sd">        attribute. Return result.</span>
@@ -2933,7 +2932,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_geographic_region">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_geographic_region">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_geographic_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_geographic_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        6.1.1 When data is representative of geographic regions which can be identified by names but which have complex</span>
 <span class="sd">        boundaries that cannot practically be specified using longitude and latitude boundary coordinates, a labeled</span>
@@ -3043,7 +3042,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_cell_boundaries">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_cell_boundaries">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_cell_boundaries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_cell_boundaries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks the dimensions of cell boundary variables to ensure they are CF compliant.</span>
 
@@ -3144,7 +3143,7 @@
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_cell_measures_core</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">external_set</span><span class="p">,</span> <span class="n">variable_template</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cell_measures_core</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">external_set</span><span class="p">,</span> <span class="n">variable_template</span><span class="p">):</span>
         <span class="c1"># IMPLEMENTATION CONFORMANCE REQUIRED 1/2</span>
         <span class="n">reasoning</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">search_str</span> <span class="o">=</span> <span class="p">(</span>
@@ -3228,7 +3227,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_cell_measures">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_cell_measures">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_cell_measures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_cell_measures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        7.2 To indicate extra information about the spatial properties of a</span>
 <span class="sd">        variable&#39;s grid cells, a cell_measures attribute may be defined for a</span>
@@ -3262,7 +3261,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_cell_methods">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_cell_methods">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_cell_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_cell_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        7.3 To describe the characteristic of a field that is represented by cell values, we define the cell_methods attribute</span>
 <span class="sd">        of the variable. This is a string attribute comprising a list of blank-separated words of the form &quot;name: method&quot;. Each</span>
@@ -3363,7 +3362,7 @@
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_cell_methods_paren_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paren_contents</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_cell_methods_paren_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paren_contents</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks that the spacing and/or comment info contained inside the</span>
 <span class="sd">        parentheses in cell_methods is well-formed</span>
@@ -3458,7 +3457,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_climatological_statistics">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_climatological_statistics">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_climatological_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_climatological_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        7.4 A climatological time coordinate variable does not have a bounds attribute. Instead, it has a climatology</span>
 <span class="sd">        attribute, which names a variable with dimensions (n,2), n being the dimension of the climatological time axis.</span>
@@ -3675,7 +3674,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_packed_data">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_packed_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_packed_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_packed_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        8.1 Simple packing may be achieved through the use of the optional NUG defined attributes scale_factor and</span>
 <span class="sd">        add_offset. After the data values of a variable have been read, they are to be multiplied by the scale_factor,</span>
@@ -3716,7 +3715,7 @@
 
             <span class="c1"># IMPLEMENTATION CONFORMANCE 8.1 REQUIRED 1/3</span>
             <span class="c1"># scale_factor and add_offset same type</span>
-            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">add_offset</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">add_offset</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">)):</span>
                 <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="s2">&quot;Attributes add_offset and scale_factor have different data type.&quot;</span><span class="p">,</span>
@@ -3726,7 +3725,7 @@
             <span class="c1"># if not the same type</span>
             <span class="c1"># FIXME: Check add_offset too.</span>
 
-            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">)</span> <span class="o">!=</span> <span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
                 <span class="c1"># Check both attributes are type float or double</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">)):</span>
                     <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
@@ -3798,7 +3797,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_compression_gathering">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_compression_gathering">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_compression_gathering</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_compression_gathering</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        At the current time the netCDF interface does not provide for packing</span>
 <span class="sd">        data. However a simple packing may be achieved through the use of the</span>
@@ -3906,7 +3905,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_feature_type">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_feature_type">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_feature_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_feature_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the global attribute featureType for valid CF featureTypes</span>
 
@@ -3944,7 +3943,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_cf_role">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_cf_role">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check variables defining cf_role for legal cf_role values.</span>
 
@@ -3976,7 +3975,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_variable_features">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_variable_features">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_variable_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_variable_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks the variable feature types match the dataset featureType attribute.</span>
 <span class="sd">        If more than one unique feature type is found, report this as an error.</span>
@@ -4038,7 +4037,7 @@
 
 <div class="viewcode-block" id="CF1_6Check.check_hints">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_hints">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_hints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_hints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks for potentially mislabeled metadata and makes suggestions for how to correct</span>
 
@@ -4053,7 +4052,7 @@
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_hint_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_hint_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks for variables ending with _bounds, if they are not cell methods,</span>
 <span class="sd">        make the recommendation</span>
@@ -4083,7 +4082,7 @@
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
 </div>
@@ -4092,8 +4091,6 @@
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"></div>
               
             
           </div>
@@ -4106,8 +4103,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -4118,7 +4115,7 @@
 
   <p class="copyright">
     
-      © Copyright 2024, Dave Foster.
+      © Copyright 2025, Dave Foster.
       <br/>
     
   </p>
@@ -4127,7 +4124,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.1.
     <br/>
   </p>
 </div>
@@ -4140,7 +4137,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

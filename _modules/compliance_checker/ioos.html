@@ -7,35 +7,38 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.ioos &#8212; compliance_checker 5.1.1 documentation</title>
+    <title>compliance_checker.ioos &#8212; compliance_checker 5.1.2 documentation</title>
   
   
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
   
-  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
-
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
-  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=1bd908e2"></script>
-    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/documentation_options.js?v=2c218288"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/ioos';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -43,6 +46,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="5.1.2" />
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/_modules/compliance_checker/ioos.html" />
 
   </head>
@@ -52,31 +56,16 @@
 
   
   
-  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -84,7 +73,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -92,8 +80,13 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
   <nav class="navbar navbar-dark navbar-expand-lg bg-unidata fixed-top bd-navbar shadow" id="navbar-main">
   </nav>
@@ -109,7 +102,8 @@
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -118,46 +112,49 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../quickintro.html">
-                        IOOS Compliance Checker
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../readme_link.html">
+    IOOS Compliance Checker
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../compliance_checker_api.html">
-                        API
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../faq.html">
-                        Frequently Asked Questions
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../compliance_checker_api.html">
+    API
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../development.html">
-                        Developer Notes
-                      </a>
-                    </li>
-                
 
-                <li class="nav-item">
-                  <a class="nav-link nav-external" href="https://github.com/ioos/compliance-checker/releases">
-                    Release Notes
-                  </a>
-                </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../faq.html">
+    Frequently Asked Questions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../development.html">
+    Developer Notes
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/ioos/compliance-checker/releases">
+    Release Notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -173,7 +170,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -183,7 +179,7 @@
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form></div>
         
-          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+          <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -194,7 +190,7 @@
           
           
           
-          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fab fa-github-square fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/ioos/compliance-checker" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
         </li>
 </ul></div>
@@ -205,36 +201,39 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.1.1
+  Version 5.1.2
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -245,7 +244,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">compliance_c...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">compliance_checker.ioos</span></li>
   </ul>
 </nav>
 </div>
@@ -267,17 +266,17 @@
 <span class="sd">Check for IOOS-approved attributes</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
 
-<span class="kn">import</span> <span class="nn">validators</span>
-<span class="kn">from</span> <span class="nn">cf_units</span> <span class="kn">import</span> <span class="n">Unit</span>
-<span class="kn">from</span> <span class="nn">lxml.etree</span> <span class="kn">import</span> <span class="n">XPath</span>
-<span class="kn">from</span> <span class="nn">owslib.namespaces</span> <span class="kn">import</span> <span class="n">Namespaces</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">validators</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cf_units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Unit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lxml.etree</span><span class="w"> </span><span class="kn">import</span> <span class="n">XPath</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">owslib.namespaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">Namespaces</span>
 
-<span class="kn">from</span> <span class="nn">compliance_checker</span> <span class="kn">import</span> <span class="n">base</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.acdd</span> <span class="kn">import</span> <span class="n">ACDD1_3Check</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.base</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.acdd</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACDD1_3Check</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.base</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BaseCheck</span><span class="p">,</span>
     <span class="n">BaseNCCheck</span><span class="p">,</span>
     <span class="n">BaseSOSDSCheck</span><span class="p">,</span>
@@ -286,9 +285,9 @@
     <span class="n">TestCtx</span><span class="p">,</span>
     <span class="n">check_has</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.cf</span> <span class="kn">import</span> <span class="n">util</span> <span class="k">as</span> <span class="n">cf_util</span>  <span class="c1"># not to be confused with cfutil.py</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.cf.cf</span> <span class="kn">import</span> <span class="n">CF1_6Check</span><span class="p">,</span> <span class="n">CF1_7Check</span>
-<span class="kn">from</span> <span class="nn">compliance_checker.cfutil</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf</span><span class="w"> </span><span class="kn">import</span> <span class="n">util</span> <span class="k">as</span> <span class="n">cf_util</span>  <span class="c1"># not to be confused with cfutil.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf.cf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CF1_6Check</span><span class="p">,</span> <span class="n">CF1_7Check</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cfutil</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_geophysical_variables</span><span class="p">,</span>
     <span class="n">get_instrument_variables</span><span class="p">,</span>
     <span class="n">get_z_variables</span><span class="p">,</span>
@@ -297,7 +296,7 @@
 
 <div class="viewcode-block" id="IOOSBaseCheck">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSBaseCheck.html#compliance_checker.ioos.IOOSBaseCheck">[docs]</a>
-<span class="k">class</span> <span class="nc">IOOSBaseCheck</span><span class="p">(</span><span class="n">BaseCheck</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOOSBaseCheck</span><span class="p">(</span><span class="n">BaseCheck</span><span class="p">):</span>
     <span class="n">_cc_spec</span> <span class="o">=</span> <span class="s2">&quot;ioos&quot;</span>
     <span class="n">_cc_spec_version</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
     <span class="n">_cc_description</span> <span class="o">=</span> <span class="s2">&quot;IOOS Inventory Metadata&quot;</span>
@@ -305,7 +304,7 @@
     <span class="n">_cc_display_headers</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;Highly Recommended&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Recommended&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Suggested&quot;</span><span class="p">}</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_has_attr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">concept_name</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_has_attr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">concept_name</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks for the existence of attr in ds, with the name/message using concept_name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -320,7 +319,7 @@
         <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">priority</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">concept_name</span><span class="p">,</span> <span class="n">msgs</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_has_var_attr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">vname</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">concept_name</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_has_var_attr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">vname</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">concept_name</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks for the existence of an attr on variable vname in dataset, with the name/message using concept_name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -345,10 +344,10 @@
 
 <div class="viewcode-block" id="IOOSNCCheck">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSNCCheck.html#compliance_checker.ioos.IOOSNCCheck">[docs]</a>
-<span class="k">class</span> <span class="nc">IOOSNCCheck</span><span class="p">(</span><span class="n">BaseNCCheck</span><span class="p">,</span> <span class="n">IOOSBaseCheck</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOOSNCCheck</span><span class="p">(</span><span class="n">BaseNCCheck</span><span class="p">,</span> <span class="n">IOOSBaseCheck</span><span class="p">):</span>
 <div class="viewcode-block" id="IOOSNCCheck.check_time_period">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSNCCheck.html#compliance_checker.ioos.IOOSNCCheck.check_time_period">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_time_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_time_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check that time period attributes are both set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -369,7 +368,7 @@
 
 <div class="viewcode-block" id="IOOSNCCheck.check_station_location_lat">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSNCCheck.html#compliance_checker.ioos.IOOSNCCheck.check_station_location_lat">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_station_location_lat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_station_location_lat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks station lat attributes are set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -390,7 +389,7 @@
 
 <div class="viewcode-block" id="IOOSNCCheck.check_station_location_lon">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSNCCheck.html#compliance_checker.ioos.IOOSNCCheck.check_station_location_lon">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_station_location_lon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_station_location_lon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks station lon attributes are set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -413,14 +412,14 @@
 
 <div class="viewcode-block" id="IOOS0_1Check">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS0_1Check.html#compliance_checker.ioos.IOOS0_1Check">[docs]</a>
-<span class="k">class</span> <span class="nc">IOOS0_1Check</span><span class="p">(</span><span class="n">IOOSNCCheck</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOOS0_1Check</span><span class="p">(</span><span class="n">IOOSNCCheck</span><span class="p">):</span>
     <span class="n">_cc_spec_version</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
     <span class="n">_cc_description</span> <span class="o">=</span> <span class="s2">&quot;IOOS Inventory Metadata&quot;</span>
     <span class="n">register_checker</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="IOOS0_1Check.check_global_attributes">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS0_1Check.html#compliance_checker.ioos.IOOS0_1Check.check_global_attributes">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_global_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_global_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check all global NC attributes for existence.</span>
 
@@ -464,7 +463,7 @@
 
 <div class="viewcode-block" id="IOOS0_1Check.check_variable_attributes">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS0_1Check.html#compliance_checker.ioos.IOOS0_1Check.check_variable_attributes">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_variable_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_variable_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check IOOS concepts that come from NC variable attributes.</span>
 
@@ -482,7 +481,7 @@
 
 <div class="viewcode-block" id="IOOS0_1Check.check_variable_names">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS0_1Check.html#compliance_checker.ioos.IOOS0_1Check.check_variable_names">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_variable_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_variable_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ensures all variables have a standard_name set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -505,7 +504,7 @@
 
 <div class="viewcode-block" id="IOOS0_1Check.check_altitude_units">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS0_1Check.html#compliance_checker.ioos.IOOS0_1Check.check_altitude_units">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_altitude_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_altitude_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If there&#39;s a variable named z, it must have units.</span>
 
@@ -529,7 +528,7 @@
 
 <div class="viewcode-block" id="IOOS0_1Check.check_variable_units">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS0_1Check.html#compliance_checker.ioos.IOOS0_1Check.check_variable_units">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_variable_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_variable_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ensures all variables have units.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -554,7 +553,7 @@
 
 <div class="viewcode-block" id="IOOS1_1Check">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_1Check.html#compliance_checker.ioos.IOOS1_1Check">[docs]</a>
-<span class="k">class</span> <span class="nc">IOOS1_1Check</span><span class="p">(</span><span class="n">IOOSNCCheck</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOOS1_1Check</span><span class="p">(</span><span class="n">IOOSNCCheck</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compliance checker implementation of IOOS Metadata Profile, Version 1.1</span>
 
@@ -571,7 +570,7 @@
 
 <div class="viewcode-block" id="IOOS1_1Check.__init__">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_1Check.html#compliance_checker.ioos.IOOS1_1Check.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Define the global attributes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">required_atts</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;contributor_name&quot;</span><span class="p">,</span>
@@ -615,7 +614,7 @@
 <div class="viewcode-block" id="IOOS1_1Check.check_high">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_1Check.html#compliance_checker.ioos.IOOS1_1Check.check_high">[docs]</a>
     <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">check_high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs a check on each highly recommended attributes&#39; existence in the dataset</span>
 
@@ -627,7 +626,7 @@
 <div class="viewcode-block" id="IOOS1_1Check.check_recommended">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_1Check.html#compliance_checker.ioos.IOOS1_1Check.check_recommended">[docs]</a>
     <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">check_recommended</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_recommended</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs a check on each recommended attributes&#39; existence in the dataset</span>
 
@@ -638,7 +637,7 @@
 
 <div class="viewcode-block" id="IOOS1_1Check.check_platform_variables">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_1Check.html#compliance_checker.ioos.IOOS1_1Check.check_platform_variables">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_platform_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_platform_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The value of platform attribute should be set to another variable which</span>
 <span class="sd">        contains the details of the platform. There can be multiple platforms</span>
@@ -666,7 +665,7 @@
 
 <div class="viewcode-block" id="IOOS1_1Check.check_platform_variable_attributes">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_1Check.html#compliance_checker.ioos.IOOS1_1Check.check_platform_variable_attributes">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_platform_variable_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_platform_variable_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Platform variables must contain the following attributes:</span>
 <span class="sd">            ioos_code</span>
@@ -697,7 +696,7 @@
 
 <div class="viewcode-block" id="IOOS1_1Check.check_geophysical_vars_fill_value">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_1Check.html#compliance_checker.ioos.IOOS1_1Check.check_geophysical_vars_fill_value">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_geophysical_vars_fill_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_geophysical_vars_fill_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check that geophysical variables contain fill values.</span>
 
@@ -719,7 +718,7 @@
 
 <div class="viewcode-block" id="IOOS1_1Check.check_geophysical_vars_standard_name">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_1Check.html#compliance_checker.ioos.IOOS1_1Check.check_geophysical_vars_standard_name">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_geophysical_vars_standard_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_geophysical_vars_standard_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check that geophysical variables contain standard names.</span>
 
@@ -740,7 +739,7 @@
 
 <div class="viewcode-block" id="IOOS1_1Check.check_units">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_1Check.html#compliance_checker.ioos.IOOS1_1Check.check_units">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Required for most all variables that represent dimensional quantities.</span>
 <span class="sd">        The value should come from udunits authoritative vocabulary, which is</span>
@@ -757,7 +756,7 @@
 
 <div class="viewcode-block" id="IOOS1_2_ConventionsValidator">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2_ConventionsValidator.html#compliance_checker.ioos.IOOS1_2_ConventionsValidator">[docs]</a>
-<span class="k">class</span> <span class="nc">IOOS1_2_ConventionsValidator</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">RegexValidator</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOOS1_2_ConventionsValidator</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">RegexValidator</span><span class="p">):</span>
     <span class="n">validator_regex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\bIOOS-1.2\b&quot;</span>
     <span class="n">validator_fail_msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must contain the string &quot;IOOS 1.2&quot;&#39;</span></div>
 
@@ -765,7 +764,7 @@
 
 <div class="viewcode-block" id="IOOS1_2_PlatformIDValidator">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2_PlatformIDValidator.html#compliance_checker.ioos.IOOS1_2_PlatformIDValidator">[docs]</a>
-<span class="k">class</span> <span class="nc">IOOS1_2_PlatformIDValidator</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">RegexValidator</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOOS1_2_PlatformIDValidator</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">RegexValidator</span><span class="p">):</span>
     <span class="n">validator_regex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^[a-zA-Z0-9]+$&quot;</span>
     <span class="n">validator_fail_msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must be alphanumeric&quot;</span></div>
 
@@ -773,7 +772,7 @@
 
 <div class="viewcode-block" id="NamingAuthorityValidator">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.NamingAuthorityValidator.html#compliance_checker.ioos.NamingAuthorityValidator">[docs]</a>
-<span class="k">class</span> <span class="nc">NamingAuthorityValidator</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">UrlValidator</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NamingAuthorityValidator</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">UrlValidator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to check for URL or reversed DNS strings contained within</span>
 <span class="sd">    naming_authority</span>
@@ -785,7 +784,7 @@
 
 <div class="viewcode-block" id="NamingAuthorityValidator.validator_func">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.NamingAuthorityValidator.html#compliance_checker.ioos.NamingAuthorityValidator.validator_func">[docs]</a>
-    <span class="k">def</span> <span class="nf">validator_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validator_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_value</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="c1"># also check for reverse DNS strings</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">validator_func</span><span class="p">(</span><span class="n">input_value</span><span class="p">)</span>
@@ -797,7 +796,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check">[docs]</a>
-<span class="k">class</span> <span class="nc">IOOS1_2Check</span><span class="p">(</span><span class="n">IOOSNCCheck</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOOS1_2Check</span><span class="p">(</span><span class="n">IOOSNCCheck</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to implement the IOOS Metadata 1.2 Specification</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -809,7 +808,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.__init__">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># instantiate objects used for delegation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">acdd1_6</span> <span class="o">=</span> <span class="n">ACDD1_3Check</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cf1_7</span> <span class="o">=</span> <span class="n">CF1_7Check</span><span class="p">()</span>
@@ -955,11 +954,11 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.setup">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.setup">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">platform_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_platform_vars</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_find_platform_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_platform_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds any variables referenced by &#39;platform&#39; attribute which exist in</span>
 <span class="sd">        the dataset.</span>
@@ -986,7 +985,7 @@
 <div class="viewcode-block" id="IOOS1_2Check.check_high">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_high">[docs]</a>
     <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">check_high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs a check on each highly recommended attributes&#39; existence in the dataset</span>
 
@@ -998,7 +997,7 @@
 <div class="viewcode-block" id="IOOS1_2Check.check_recommended">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_recommended">[docs]</a>
     <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">check_recommended</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_recommended</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs a check on each recommended attributes&#39; existence in the dataset</span>
 
@@ -1009,7 +1008,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_standard_name">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_standard_name">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_standard_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_standard_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrapper for checking standard names using the CF module.</span>
 <span class="sd">        Extends the StandardNameTable to include QARTOD variable</span>
@@ -1021,7 +1020,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_feature_type">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_feature_type">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_feature_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_feature_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrapper for checking featureType global attribute using the CF module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1030,7 +1029,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_units">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_units">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrapper to check units with the CF module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1040,7 +1039,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_ioos_ingest">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_ioos_ingest">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_ioos_ingest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_ioos_ingest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If a dataset contains the global attribute ioos_ingest,</span>
 <span class="sd">        its value must be &quot;false&quot;. All datasets are assumed to be</span>
@@ -1072,7 +1071,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_contributor_role_and_vocabulary">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_contributor_role_and_vocabulary">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_contributor_role_and_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_contributor_role_and_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the dataset has global attributes contributor_role and</span>
 <span class="sd">        contributor_role_vocabulary. It is recommended to come from</span>
@@ -1170,7 +1169,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_geophysical_vars_have_attrs">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_geophysical_vars_have_attrs">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_geophysical_vars_have_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_geophysical_vars_have_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        All geophysical variables must have certain attributes.</span>
 
@@ -1196,7 +1195,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_accuracy">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_accuracy">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_accuracy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_accuracy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Special check for accuracy when in the salinity context.</span>
 <span class="sd">        https://github.com/ioos/compliance-checker/issues/839</span>
@@ -1239,7 +1238,7 @@
         <span class="k">return</span> <span class="n">results</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_vars_have_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">vars_to_check</span><span class="p">,</span> <span class="n">atts_to_check</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_vars_have_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">vars_to_check</span><span class="p">,</span> <span class="n">atts_to_check</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check that the variables in vars_to_check have the attributes in</span>
 <span class="sd">        atts_to_check.</span>
@@ -1269,7 +1268,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_cf_role_variables">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_cf_role_variables">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_cf_role_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_cf_role_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The IOOS-1.2 specification details the following requirements regarding</span>
 <span class="sd">        the cf_role attribute and its relation to variable dimensionality:</span>
@@ -1348,7 +1347,7 @@
             <span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_feattype_timeseries_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_feattype_timeseries_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="n">ts_msg</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s2">&quot;Dimension length of variable with cf_role=</span><span class="si">{cf_role}</span><span class="s2"> &quot;</span>
             <span class="s2">&quot;(the &#39;</span><span class="si">{dim_type}</span><span class="s2">&#39; dimension) is </span><span class="si">{dim_len}</span><span class="s2">. &quot;</span>
@@ -1394,7 +1393,7 @@
             <span class="n">msgs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_check_feattype_timeseriesprof_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_feattype_timeseriesprof_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="n">ts_prof_msg</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s2">&quot;Dimension length of non-platform variable with cf_role=</span><span class="si">{cf_role}</span><span class="s2"> &quot;</span>
             <span class="s2">&quot; (the &#39;</span><span class="si">{dim_type}</span><span class="s2">&#39; dimension) is </span><span class="si">{dim_len}</span><span class="s2">. &quot;</span>
@@ -1447,7 +1446,7 @@
             <span class="n">msgs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_check_feattype_trajectory_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_feattype_trajectory_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="n">trj_msg</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s2">&quot;Dimension length of non-platform variable with cf_role=</span><span class="si">{cf_role}</span><span class="s2"> &quot;</span>
             <span class="s2">&quot; (the &#39;</span><span class="si">{dim_type}</span><span class="s2">&#39; dimension) is </span><span class="si">{dim_len}</span><span class="s2">. &quot;</span>
@@ -1486,7 +1485,7 @@
 
         <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="n">_val</span><span class="p">,</span> <span class="s2">&quot;CF DSG: featureType=trajectory&quot;</span><span class="p">,</span> <span class="n">msgs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_check_feattype_trajectoryprof_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_feattype_trajectoryprof_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="n">trj_prof_msg</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s2">&quot;Dimension length of non-platform variable with cf_role=</span><span class="si">{cf_role}</span><span class="s2"> &quot;</span>
             <span class="s2">&quot;(the &#39;</span><span class="si">{dim_type}</span><span class="s2">&#39; dimension) is </span><span class="si">{dim_len}</span><span class="s2">. &quot;</span>
@@ -1540,7 +1539,7 @@
             <span class="n">msgs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_check_feattype_profile_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_feattype_profile_cf_role</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="n">prof_msg</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s2">&quot;Dimension length of non-platform variable with cf_role=</span><span class="si">{cf_role}</span><span class="s2"> &quot;</span>
             <span class="s2">&quot; (the &#39;</span><span class="si">{dim_type}</span><span class="s2">&#39; dimension) is </span><span class="si">{dim_len}</span><span class="s2">. &quot;</span>
@@ -1578,7 +1577,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_creator_and_publisher_type">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_creator_and_publisher_type">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_creator_and_publisher_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_creator_and_publisher_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if global attribute creator_type and publisher_type</span>
 <span class="sd">        are contained within the values &quot;person&quot;, &quot;group&quot;, &quot;institution&quot;, or</span>
@@ -1623,7 +1622,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_platform_global">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_platform_global">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_platform_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_platform_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The &quot;platform&quot; attribute must be a single string containing</span>
 <span class="sd">        no blank characters.</span>
@@ -1652,7 +1651,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_single_platform">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_single_platform">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_single_platform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_single_platform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Verify that a dataset only has a single platform attribute, and thus</span>
 <span class="sd">        a single platform variable. Gridded model datasets are not required</span>
@@ -1696,7 +1695,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_platform_vocabulary">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_platform_vocabulary">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_platform_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_platform_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The platform_vocabulary attribute is recommended to be a URL to</span>
 <span class="sd">        https://mmisw.org/ont/ioos/platform or</span>
@@ -1721,7 +1720,7 @@
         <span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_check_gts_ingest_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_gts_ingest_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check that `val` is a str and is equal to &quot;true&quot; or &quot;false&quot;</span>
 
@@ -1738,7 +1737,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_vertical_coordinates">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_vertical_coordinates">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_vertical_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_vertical_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check that vertical units (corresponding to axis &quot;Z&quot;) are a unit</span>
 <span class="sd">        equivalent to one of &quot;meter&quot;, &quot;inch&quot;, &quot;foot&quot;, &quot;yard&quot;, &quot;US_survey_foot&quot;,</span>
@@ -1798,7 +1797,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_gts_ingest_global">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_global">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_gts_ingest_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_gts_ingest_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if a dataset has the global attribute &quot;gts_ingest&quot; and that</span>
 <span class="sd">        it matches &quot;true&quot; or &quot;false&quot;. This attribute is &quot;required, if applicable&quot;.</span>
@@ -1829,7 +1828,7 @@
         <span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_var_qualifies_for_gts_ingest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_var_qualifies_for_gts_ingest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Examine a variable to see if it qualifies for GTS Ingest.</span>
 <span class="sd">        Check that a given variable</span>
@@ -1883,7 +1882,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_gts_ingest_requirements">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_gts_ingest_requirements">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_gts_ingest_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_gts_ingest_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check which variables qualify for ingest.</span>
 
@@ -1952,7 +1951,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_instrument_variables">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_instrument_variables">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_instrument_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_instrument_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If present, the instrument_variable is one that contains additional</span>
 <span class="sd">        metadata about the instrument the data was collected with.</span>
@@ -2011,7 +2010,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_qartod_variables_flags">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_flags">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_qartod_variables_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_qartod_variables_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html#quality-controlqartod</span>
 
@@ -2072,7 +2071,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_qartod_variables_references">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_qartod_variables_references">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_qartod_variables_references</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_qartod_variables_references</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        For any variables that are deemed QARTOD variables, check that they</span>
 <span class="sd">        contain the &quot;references&quot; attribute and that the value of the attribute</span>
@@ -2114,7 +2113,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_wmo_platform_code">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_wmo_platform_code">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_wmo_platform_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_wmo_platform_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Per the spec:</span>
 
@@ -2154,7 +2153,7 @@
 
 <div class="viewcode-block" id="IOOS1_2Check.check_instrument_make_model_calib_date">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOS1_2Check.html#compliance_checker.ioos.IOOS1_2Check.check_instrument_make_model_calib_date">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_instrument_make_model_calib_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_instrument_make_model_calib_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Instrument variables should have attributes make_model and</span>
 <span class="sd">        calibration_date. Both should be strings, with calibration_date</span>
@@ -2216,7 +2215,7 @@
 
 <div class="viewcode-block" id="IOOSBaseSOSCheck">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSBaseSOSCheck.html#compliance_checker.ioos.IOOSBaseSOSCheck">[docs]</a>
-<span class="k">class</span> <span class="nc">IOOSBaseSOSCheck</span><span class="p">(</span><span class="n">BaseCheck</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOOSBaseSOSCheck</span><span class="p">(</span><span class="n">BaseCheck</span><span class="p">):</span>
     <span class="n">_cc_spec</span> <span class="o">=</span> <span class="s2">&quot;ioos_sos&quot;</span>
     <span class="n">_cc_spec_version</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
     <span class="n">_cc_description</span> <span class="o">=</span> <span class="p">(</span>
@@ -2231,7 +2230,7 @@
 
 <div class="viewcode-block" id="IOOSSOSGCCheck">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSSOSGCCheck.html#compliance_checker.ioos.IOOSSOSGCCheck">[docs]</a>
-<span class="k">class</span> <span class="nc">IOOSSOSGCCheck</span><span class="p">(</span><span class="n">BaseSOSGCCheck</span><span class="p">,</span> <span class="n">IOOSBaseSOSCheck</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOOSSOSGCCheck</span><span class="p">(</span><span class="n">BaseSOSGCCheck</span><span class="p">,</span> <span class="n">IOOSBaseSOSCheck</span><span class="p">):</span>
     <span class="c1"># set up namespaces for XPath</span>
     <span class="n">ns</span> <span class="o">=</span> <span class="n">Namespaces</span><span class="p">()</span><span class="o">.</span><span class="n">get_namespaces</span><span class="p">([</span><span class="s2">&quot;sos&quot;</span><span class="p">,</span> <span class="s2">&quot;gml&quot;</span><span class="p">,</span> <span class="s2">&quot;xlink&quot;</span><span class="p">])</span>
     <span class="n">ns</span><span class="p">[</span><span class="s2">&quot;ows&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Namespaces</span><span class="p">()</span><span class="o">.</span><span class="n">get_namespace</span><span class="p">(</span><span class="s2">&quot;ows110&quot;</span><span class="p">)</span>
@@ -2239,14 +2238,14 @@
 <div class="viewcode-block" id="IOOSSOSGCCheck.check_high">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSSOSGCCheck.html#compliance_checker.ioos.IOOSSOSGCCheck.check_high">[docs]</a>
     <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">check_high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[]</span></div>
 
 
 <div class="viewcode-block" id="IOOSSOSGCCheck.check_recommended">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSSOSGCCheck.html#compliance_checker.ioos.IOOSSOSGCCheck.check_recommended">[docs]</a>
     <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">check_recommended</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_recommended</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span>
             <span class="p">(</span>
                 <span class="s2">&quot;service_contact_email&quot;</span><span class="p">,</span>
@@ -2313,7 +2312,7 @@
 <div class="viewcode-block" id="IOOSSOSGCCheck.check_suggested">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSSOSGCCheck.html#compliance_checker.ioos.IOOSSOSGCCheck.check_suggested">[docs]</a>
     <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">LOW</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">check_suggested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_suggested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;altitude_units&quot;</span><span class="p">]</span></div>
 </div>
 
@@ -2321,14 +2320,14 @@
 
 <div class="viewcode-block" id="IOOSSOSDSCheck">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSSOSDSCheck.html#compliance_checker.ioos.IOOSSOSDSCheck">[docs]</a>
-<span class="k">class</span> <span class="nc">IOOSSOSDSCheck</span><span class="p">(</span><span class="n">BaseSOSDSCheck</span><span class="p">,</span> <span class="n">IOOSBaseSOSCheck</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOOSSOSDSCheck</span><span class="p">(</span><span class="n">BaseSOSDSCheck</span><span class="p">,</span> <span class="n">IOOSBaseSOSCheck</span><span class="p">):</span>
     <span class="c1"># set up namespaces for XPath</span>
     <span class="n">ns</span> <span class="o">=</span> <span class="n">Namespaces</span><span class="p">()</span><span class="o">.</span><span class="n">get_namespaces</span><span class="p">([</span><span class="s2">&quot;sml&quot;</span><span class="p">,</span> <span class="s2">&quot;swe&quot;</span><span class="p">,</span> <span class="s2">&quot;gml&quot;</span><span class="p">,</span> <span class="s2">&quot;xlink&quot;</span><span class="p">])</span>
 
 <div class="viewcode-block" id="IOOSSOSDSCheck.check_high">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSSOSDSCheck.html#compliance_checker.ioos.IOOSSOSDSCheck.check_high">[docs]</a>
     <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">check_high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span>
             <span class="p">(</span>
                 <span class="s2">&quot;platform_sponsor&quot;</span><span class="p">,</span>
@@ -2428,7 +2427,7 @@
 <div class="viewcode-block" id="IOOSSOSDSCheck.check_recommended">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSSOSDSCheck.html#compliance_checker.ioos.IOOSSOSDSCheck.check_recommended">[docs]</a>
     <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">check_recommended</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_recommended</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span>
             <span class="p">(</span>
                 <span class="s2">&quot;sensor_descriptions&quot;</span><span class="p">,</span>
@@ -2492,7 +2491,7 @@
 <div class="viewcode-block" id="IOOSSOSDSCheck.check_suggested">
 <a class="viewcode-back" href="../../generated/compliance_checker.ioos.IOOSSOSDSCheck.html#compliance_checker.ioos.IOOSSOSDSCheck.check_suggested">[docs]</a>
     <span class="nd">@check_has</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">LOW</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">check_suggested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_suggested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[]</span></div>
 </div>
 
@@ -2504,7 +2503,7 @@
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
 </div>
@@ -2513,8 +2512,6 @@
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"></div>
               
             
           </div>
@@ -2527,8 +2524,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2539,7 +2536,7 @@
 
   <p class="copyright">
     
-      © Copyright 2024, Dave Foster.
+      © Copyright 2025, Dave Foster.
       <br/>
     
   </p>
@@ -2548,7 +2545,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.1.
     <br/>
   </p>
 </div>
@@ -2561,7 +2558,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

@@ -80,6 +80,7 @@ Cfutil ``(compliance_checker.cfutil)``
       is_trajectory_profile_orthogonal
       is_unitless
       is_variable_valid_ragged_array_repr_featureType
+      resolve_ragged_array_dimension
       units_convertible
    
    
