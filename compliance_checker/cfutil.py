@@ -493,7 +493,10 @@ def get_latitude_variables(nc):
 
     # Then axis
     for variable in nc.get_variables_by_attributes(axis="Y"):
-        if variable.name not in latitude_variables:
+        if not (variable.name in latitude_variables or
+           getattr(variable, "standard_name", None) in
+                {"projection_y_coordinate",
+                 "projection_y_angular_coordinate"}):
             latitude_variables.append(variable.name)
 
     check_fn = partial(
@@ -559,7 +562,10 @@ def get_longitude_variables(nc):
 
     # Then axis
     for variable in nc.get_variables_by_attributes(axis="X"):
-        if variable.name not in longitude_variables:
+        if not (variable.name in longitude_variables or
+           getattr(variable, "standard_name", None) in
+                {"projection_x_coordinate",
+                 "projection_x_angular_coordinate"}):
             longitude_variables.append(variable.name)
 
     check_fn = partial(
