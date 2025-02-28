@@ -1,4 +1,4 @@
-# IOOS Compliance Checker
+# TEST
 
 [![Tests](https://github.com/ioos/compliance-checker/actions/workflows/default-tests.yml/badge.svg)](https://github.com/ioos/compliance-checker/actions/workflows/default-tests.yml)
 [![codecov](https://codecov.io/gh/ioos/compliance-checker/branch/develop/graph/badge.svg)](https://app.codecov.io/gh/ioos/compliance-checker)
