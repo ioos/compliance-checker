@@ -169,17 +169,17 @@ class CF1_8Check(CF1_7Check):
                 results.append(geom_valid.to_result())
                 continue
 
-            node_count, node_count_errors = reference_attr_variables(
+            node_count = reference_attr_variables(
                 ds,
                 getattr(geometry_var, "node_count", None),
             )
             # multipart lines and polygons only
-            part_node_count, part_node_count_errors = reference_attr_variables(
+            part_node_count = reference_attr_variables(
                 ds,
                 getattr(geometry_var, "part_node_count", None),
             )
             # polygons with interior geometry only
-            interior_ring, interior_ring_errors = reference_attr_variables(
+            interior_ring = reference_attr_variables(
                 ds,
                 getattr(geometry_var, "interior_ring", None),
             )

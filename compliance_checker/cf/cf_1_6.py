@@ -2252,6 +2252,7 @@ class CF1_6Check(CFNCCheck):
     # IS THIS EVEN NEEDED ANYMORE?
     # ***************
     def check_grid_coordinates(self, ds):
+        # def _check_grid_coordinates(self, ds):
         """
         5.6 When the coordinate variables for a horizontal grid are not
         longitude and latitude, it is required that the true latitude and
@@ -2265,7 +2266,7 @@ class CF1_6Check(CFNCCheck):
         latitudes = cfutil.get_true_latitude_variables(ds)
         longitudes = cfutil.get_true_longitude_variables(ds)
 
-        check_features = [
+        check_featues = [
             "2d-regular-grid",
             "2d-static-grid",
             "3d-regular-grid",
@@ -2286,7 +2287,7 @@ class CF1_6Check(CFNCCheck):
             # dimensions
             dimensions = set(ds.variables[variable].dimensions)
             # If it's not a grid, skip it
-            if cfutil.guess_feature_type(ds, variable) not in check_features:
+            if cfutil.guess_feature_type(ds, variable) not in check_featues:
                 continue
             has_coords = TestCtx(BaseCheck.HIGH, self.section_titles["5.6"])
 
