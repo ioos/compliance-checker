@@ -929,7 +929,7 @@ def is_dataset_valid_ragged_array_repr_featureType(nc, feature_type: str):
             return False
     else:
         ftype = feature_type.lower()
-        if len(cf_role_vars) > 1:
+        if len(cf_role_vars) > 1 or not ftype:
             return False
 
     cf_role_var = nc.get_variables_by_attributes(cf_role=f"{ftype}_id")[0]

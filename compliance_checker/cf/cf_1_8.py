@@ -545,7 +545,7 @@ class LineGeometry(GeometryStorage):
             )
         # if a multipart
         if self.node_count is not None:
-            same_length = len(self.coord_vars[0]) == self.node_count[:].sum()
+            same_length = len(self.coord_vars[0]) == np.atleast_1d(self.node_count)[:].sum()
             if not same_length:
                 geom_errors.append(
                     "Coordinate variables must be the same "

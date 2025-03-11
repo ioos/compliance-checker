@@ -75,6 +75,7 @@ class CF1_7Check(CF1_6Check):
         external_vars_ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles["2.6.3"])
         # IMPLEMENTATION CONFORMANCE 2.6.3 REQUIRED 2/2
         try:
+            # Should external variables be stored in dataset state?
             external_var_names = set(ds.external_variables.strip().split())
 
             bad_external_var_names = external_var_names.intersection(ds.variables)

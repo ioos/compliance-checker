@@ -28,7 +28,7 @@ dataset_stem__expected_messages = [
     ),
     (
         "usgs_dem_saipan",
-        ['§2.6.1 Conventions global attribute does not contain "CF-1.8"'],
+        ['§2.6.1 Conventions global attribute does not contain "CF-1.9"'],
     ),
     (
         "l01-met",
@@ -86,7 +86,7 @@ dataset_stem__expected_messages = [
         "swan",
         [
             "global attribute _CoordSysBuilder should begin with a letter and be composed of letters, digits, and underscores",
-            '§2.6.1 Conventions global attribute does not contain "CF-1.8"',
+            '§2.6.1 Conventions global attribute does not contain "CF-1.9"',
             'Units "hours since 2013-02-18T00:00:00Z" for variable time_offset must be convertible to canonical units "s"',
             "lon's axis attribute must be T, X, Y, or Z, currently x",
             "lat's axis attribute must be T, X, Y, or Z, currently y",

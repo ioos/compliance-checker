@@ -113,14 +113,10 @@ class CF1_9Check(CF1_8Check):
             for var in ds.get_variables_by_attributes(
                 coordinates=lambda c: c is not None,
         )):
-            # all variables have dimensions attribute, but should be scalar
-            if not ds.dimensions == ():
-                continue
-
             # IMPLICIT CONFORMANCE REQUIRED 1/4
             # Has a dimensions *NetCDF* attribute
             try:
-                dim_nc_attr = var.getncattr(dimensions)
+                dim_nc_attr = domain_var.getncattr("dimensions")
             # most variables are unlikely to be domain variables, so don't treat this
             # as a failure
             except AttributeError:
@@ -133,8 +129,7 @@ class CF1_9Check(CF1_8Check):
             domain_dims, dim_errors = reference_attr_variables(
                 ds,
                 domain_var.getncattr("dimensions"),
-                " ",
-                "dimensions"
+                " "
             )
             if dim_errors:
                 errors_str = ", ".join(dim_errors)
@@ -151,7 +146,8 @@ class CF1_9Check(CF1_8Check):
                 ds, domain_var.coordinates, " "
             )
             if domain_coord_var_errors:
-                errors_str = ", ".join(var_errors)
+                errors_str = ", ".join(err.name for err in
+                                       domain_coord_var_errors)
                 domain_valid.messages.append(
                     "Could not find the following "
                     "variables referenced in "
@@ -163,11 +159,11 @@ class CF1_9Check(CF1_8Check):
                 domain_valid.score += 1
 
             coord_var_dim_failures = []
-            is_ragged_array_repr = is_dataset_valid_ragged_array_repr_featureType(ds, getattr(ds, "featureType", ""))
+            is_ragged_array_repr = cfutil.is_dataset_valid_ragged_array_repr_featureType(ds, getattr(ds, "featureType", ""))
             if is_ragged_array_repr:
                 for var in domain_coord_vars:
                     domain_valid.out_of += 1
-                    ragged_array_dim_variable, ragged_attr_name = resolve_ragged_array_dimension(ds)
+                    ragged_array_dim_variable, ragged_attr_name = cfutil.resolve_ragged_array_dimension(ds)
                     dim_name = getattr(ragged_array_dim_variable, ragged_attr_name)
                     referenced_dim = reference_attr_variables(ds, dim_name, reference_type="dimension")
                     if isinstance(referenced_dim, VariableReferenceError):
@@ -184,23 +180,35 @@ class CF1_9Check(CF1_8Check):
                             f"Referenced coordinate variable {coord_var} does not exist in file")
                             continue
                         # TODO: check for label variables
-                        if not util.get_possible_label_variable_dimensions(coord_var).issubset({referenced_dim}):
+                        if not set(util.get_possible_label_variable_dimensions(coord_var)).issubset({referenced_dim}):
                             domain_valid.messages.append(
                             f"Found ragged array variable {ragged_array_dim_variable.name}, "
                             f"but dimension {dim_name} referenced from {attr_name} does not exist in file"
                             )
                         else:
-                            domain_valid.scored += 1
+                            domain_valid.score += 1
                     pass
             else:
-                for var in domain_coord_vars:
+                for coord_var in domain_coord_vars:
                     domain_valid.out_of += 1
-                    if not util.get_possible_label_variable_dimensions(coord_var).issubset(domain_dims):
-                        domain_valid.messages.append("Domain dimension failure")
+                    domain_dims_names = {var.name for var in domain_dims}
+                    variable_dim = util.get_possible_label_variable_dimensions(
+                                          coord_var)
+                    if not (set(util.get_possible_label_variable_dimensions(
+                                  coord_var))
+                           .issubset(domain_dims_names)):
+                        domain_valid.messages.append(
+                            "Could not find the following "
+                            "variables referenced in "
+                            "coordinates attribute from "
+                            "domain variable "
+                            f"{variable_dim}: {domain_dims_names}",
+                        )
                     else:
-                        domain_valid.scored += 1
+                        domain_valid.score += 1
 
             # not in conformance docs, but mentioned as recommended anyways
+            domain_valid.out_of += 1
             long_name = getattr(domain_var, "long_name", None)
             if long_name is None or not isinstance(long_name, str):
                 domain_valid.messages.append(
@@ -208,21 +216,23 @@ class CF1_9Check(CF1_8Check):
                     f"it is recommended that attribute long_name be present and a string",
                 )
                 results.append(domain_valid.to_result())
-                continue
+            else:
+                domain_valid.score += 1
             appendix_a_not_recommended_attrs = []
             for attr_name in domain_var.ncattrs():
                 if attr_name in self.appendix_a and "D" not in self.appendix_a[attr_name]["attr_loc"]:
                     appendix_a_not_recommended_attrs.append(attr_name)
 
+            domain_valid.out_of += 1
             if appendix_a_not_recommended_attrs:
                 domain_valid.messages.append(
                     f"The following attributes appear in variable {domain_var.name} "
                     "and CF Appendix A, but are not for use in domain variables: "
                     f"{appendix_a_not_recommended_attrs}",
                 )
-
-            # no errors occurred
-            domain_valid.score += 1
+            else:
+                # no errors occurred
+                domain_valid.score += 1
 
 
             # IMPLEMENTATION CONFORMANCE 5.8 REQUIRED 4/4
