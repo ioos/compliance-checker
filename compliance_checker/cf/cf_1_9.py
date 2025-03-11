@@ -112,7 +112,8 @@ class CF1_9Check(CF1_8Check):
             var
             for var in ds.get_variables_by_attributes(
                 coordinates=lambda c: c is not None,
-        )):
+            )
+        ):
             # IMPLICIT CONFORMANCE REQUIRED 1/4
             # Has a dimensions *NetCDF* attribute
             try:
@@ -127,9 +128,7 @@ class CF1_9Check(CF1_8Check):
             domain_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["5.8"])
             domain_valid.out_of += 2
             domain_dims, dim_errors = reference_attr_variables(
-                ds,
-                domain_var.getncattr("dimensions"),
-                " "
+                ds, domain_var.getncattr("dimensions"), " ",
             )
             if dim_errors:
                 errors_str = ", ".join(dim_errors)
@@ -143,11 +142,10 @@ class CF1_9Check(CF1_8Check):
             else:
                 domain_valid.score += 1
             domain_coord_vars, domain_coord_var_errors = reference_attr_variables(
-                ds, domain_var.coordinates, " "
+                ds, domain_var.coordinates, " ",
             )
             if domain_coord_var_errors:
-                errors_str = ", ".join(err.name for err in
-                                       domain_coord_var_errors)
+                errors_str = ", ".join(err.name for err in domain_coord_var_errors)
                 domain_valid.messages.append(
                     "Could not find the following "
                     "variables referenced in "
@@ -159,17 +157,25 @@ class CF1_9Check(CF1_8Check):
                 domain_valid.score += 1
 
             coord_var_dim_failures = []
-            is_ragged_array_repr = cfutil.is_dataset_valid_ragged_array_repr_featureType(ds, getattr(ds, "featureType", ""))
+            is_ragged_array_repr = (
+                cfutil.is_dataset_valid_ragged_array_repr_featureType(
+                    ds, getattr(ds, "featureType", ""),
+                )
+            )
             if is_ragged_array_repr:
                 for var in domain_coord_vars:
                     domain_valid.out_of += 1
-                    ragged_array_dim_variable, ragged_attr_name = cfutil.resolve_ragged_array_dimension(ds)
+                    ragged_array_dim_variable, ragged_attr_name = (
+                        cfutil.resolve_ragged_array_dimension(ds)
+                    )
                     dim_name = getattr(ragged_array_dim_variable, ragged_attr_name)
-                    referenced_dim = reference_attr_variables(ds, dim_name, reference_type="dimension")
+                    referenced_dim = reference_attr_variables(
+                        ds, dim_name, reference_type="dimension",
+                    )
                     if isinstance(referenced_dim, VariableReferenceError):
                         domain_valid.messages.append(
-                        f"Found ragged array variable {ragged_array_dim_variable.name}, "
-                        f"but dimension {dim_name} referenced from {attr_name} does not exist in file"
+                            f"Found ragged array variable {ragged_array_dim_variable.name}, "
+                            f"but dimension {dim_name} referenced from {attr_name} does not exist in file",
                         )
 
                     coord_var_reference_failures = []
@@ -177,13 +183,16 @@ class CF1_9Check(CF1_8Check):
                         if isinstance(coord_var, VariableReferenceError):
                             coord_var_reference_failures.append(coord_var)
                             domain_valid.messages.append(
-                            f"Referenced coordinate variable {coord_var} does not exist in file")
+                                f"Referenced coordinate variable {coord_var} does not exist in file",
+                            )
                             continue
                         # TODO: check for label variables
-                        if not set(util.get_possible_label_variable_dimensions(coord_var)).issubset({referenced_dim}):
+                        if not set(
+                            util.get_possible_label_variable_dimensions(coord_var),
+                        ).issubset({referenced_dim}):
                             domain_valid.messages.append(
-                            f"Found ragged array variable {ragged_array_dim_variable.name}, "
-                            f"but dimension {dim_name} referenced from {attr_name} does not exist in file"
+                                f"Found ragged array variable {ragged_array_dim_variable.name}, "
+                                f"but dimension {dim_name} referenced from {attr_name} does not exist in file",
                             )
                         else:
                             domain_valid.score += 1
@@ -193,10 +202,13 @@ class CF1_9Check(CF1_8Check):
                     domain_valid.out_of += 1
                     domain_dims_names = {var.name for var in domain_dims}
                     variable_dim = util.get_possible_label_variable_dimensions(
-                                          coord_var)
-                    if not (set(util.get_possible_label_variable_dimensions(
-                                  coord_var))
-                           .issubset(domain_dims_names)):
+                        coord_var,
+                    )
+                    if not (
+                        set(
+                            util.get_possible_label_variable_dimensions(coord_var),
+                        ).issubset(domain_dims_names)
+                    ):
                         domain_valid.messages.append(
                             "Could not find the following "
                             "variables referenced in "
@@ -220,7 +232,10 @@ class CF1_9Check(CF1_8Check):
                 domain_valid.score += 1
             appendix_a_not_recommended_attrs = []
             for attr_name in domain_var.ncattrs():
-                if attr_name in self.appendix_a and "D" not in self.appendix_a[attr_name]["attr_loc"]:
+                if (
+                    attr_name in self.appendix_a
+                    and "D" not in self.appendix_a[attr_name]["attr_loc"]
+                ):
                     appendix_a_not_recommended_attrs.append(attr_name)
 
             domain_valid.out_of += 1
@@ -233,7 +248,6 @@ class CF1_9Check(CF1_8Check):
             else:
                 # no errors occurred
                 domain_valid.score += 1
-
 
             # IMPLEMENTATION CONFORMANCE 5.8 REQUIRED 4/4
             # variables named by domain variable's cell_measures attributes must themselves be a subset

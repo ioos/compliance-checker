@@ -9,8 +9,8 @@ from collections import defaultdict
 from functools import lru_cache, partial
 from importlib.resources import files
 
-from netCDF4 import Dataset
 from cf_units import Unit
+from netCDF4 import Dataset
 
 _UNITLESS_DB = None
 _SEA_NAMES = None
@@ -242,7 +242,7 @@ def is_geophysical(nc, variable):
     return True
 
 
-@lru_cache()
+@lru_cache
 def get_coordinate_variables(nc):
     """
     Returns a list of variable names that identify as coordinate variables.
@@ -496,10 +496,11 @@ def get_latitude_variables(nc):
 
     # Then axis
     for variable in nc.get_variables_by_attributes(axis="Y"):
-        if not (variable.name in latitude_variables or
-           getattr(variable, "standard_name", None) in
-                {"projection_y_coordinate",
-                 "projection_y_angular_coordinate"}):
+        if not (
+            variable.name in latitude_variables
+            or getattr(variable, "standard_name", None)
+            in {"projection_y_coordinate", "projection_y_angular_coordinate"}
+        ):
             latitude_variables.append(variable.name)
 
     check_fn = partial(
@@ -565,10 +566,11 @@ def get_longitude_variables(nc):
 
     # Then axis
     for variable in nc.get_variables_by_attributes(axis="X"):
-        if not (variable.name in longitude_variables or
-           getattr(variable, "standard_name", None) in
-                {"projection_x_coordinate",
-                 "projection_x_angular_coordinate"}):
+        if not (
+            variable.name in longitude_variables
+            or getattr(variable, "standard_name", None)
+            in {"projection_x_coordinate", "projection_x_angular_coordinate"}
+        ):
             longitude_variables.append(variable.name)
 
     check_fn = partial(
@@ -1028,13 +1030,18 @@ def is_dataset_valid_ragged_array_repr_featureType(nc, feature_type: str):
 
     return True
 
+
 def resolve_ragged_array_dimension(ds: Dataset):
     # TODO: put in loop?
-    ragged_variable = ds.get_variables_by_attributes(sample_dimension=lambda s: isinstance(s, str))
+    ragged_variable = ds.get_variables_by_attributes(
+        sample_dimension=lambda s: isinstance(s, str),
+    )
     if ragged_variable:
-        ragged_type = 'sample_dimension'
+        ragged_type = "sample_dimension"
     else:
-        ragged_variable = ds.get_variables_by_attributes(instance_dimension=lambda s: isinstance(s, str))
+        ragged_variable = ds.get_variables_by_attributes(
+            instance_dimension=lambda s: isinstance(s, str),
+        )
         ragged_type = "instance_dimension"
     if ragged_variable is None:
         raise ValueError("Could not find a ragged array related variable")

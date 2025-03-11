@@ -3228,8 +3228,7 @@ class TestCF1_9(BaseTestCase):
         domain_var.coordinates = "lon lat depth xyxz abc"
         domain_var.long_name = "Domain variable"
         results = self.cf.check_domain_variables(dataset)
-        self.assertNotEqual(results[0].value[0],
-                            results[0].value[1])
+        self.assertNotEqual(results[0].value[0], results[0].value[1])
         self.assertTrue(
             results[0].msgs[0]
             == "Could not find the following variables referenced in "
