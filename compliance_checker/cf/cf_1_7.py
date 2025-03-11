@@ -542,17 +542,6 @@ class CF1_7Check(CF1_6Check):
         else:
             return (True, msg)
 
-    def _get_projdb_conn(self):
-        """
-        Return a SQLite Connection to the PROJ database.
-
-        Returns:
-            sqlite3.Connection
-        """
-
-        proj_db_path = os.path.join(pyproj.datadir.get_data_dir(), "proj.db")
-        return sqlite3.connect(proj_db_path)
-
     def _exec_query_str_with_params(self, qstr, argtuple):
         """
         Execute a query string in a database connection with the given argument
@@ -563,8 +552,9 @@ class CF1_7Check(CF1_6Check):
         :rtype set
         """
 
-        conn = self._get_projdb_conn()
-        return conn.execute(qstr, argtuple)
+        proj_db_path = os.path.join(pyproj.datadir.get_data_dir(), "proj.db")
+        with sqlite3.connect(proj_db_path) as conn:
+            return conn.execute(qstr, argtuple)
 
     def _evaluate_geographic_crs_name(self, val):
         """
