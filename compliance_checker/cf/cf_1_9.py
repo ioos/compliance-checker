@@ -159,7 +159,8 @@ class CF1_9Check(CF1_8Check):
 
             is_ragged_array_repr = (
                 cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                    ds, getattr(ds, "featureType", ""),
+                    ds,
+                    getattr(ds, "featureType", ""),
                 )
             )
             if is_ragged_array_repr:
@@ -169,7 +170,9 @@ class CF1_9Check(CF1_8Check):
                 )
                 dim_name = getattr(ragged_array_dim_variable, ragged_attr_name)
                 referenced_dim = reference_attr_variables(
-                    ds, dim_name, reference_type="dimension",
+                    ds,
+                    dim_name,
+                    reference_type="dimension",
                 )
                 if isinstance(referenced_dim, VariableReferenceError):
                     domain_valid.messages.append(
