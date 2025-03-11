@@ -417,14 +417,13 @@ def get_possible_label_variable_dimensions(variable: Variable) -> tuple[int, ...
         return variable.dimensions[:-1]
     return variable.dimensions
 
-  
+
 @lru_cache
 def maybe_lateral_reference_variable_or_dimension(
     group: Union[Group, Dataset],
     name: str,
     reference_type: Union[Variable, Dimension],
 ):
-
 
     def can_lateral_search(name):
         return not name.startswith(".") and posixpath.split(name)[0] == ""
@@ -468,7 +467,7 @@ def reference_attr_variables(
     attributes_string: str,
     split_by: str = None,
     reference_type: str = "variable",
-    group: Union[Group, Dataset] = None
+    group: Union[Group, Dataset] = None,
 ):
     """
     Attempts to reference variables in the string, optionally splitting by
