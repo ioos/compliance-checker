@@ -114,6 +114,7 @@ class CF1_9Check(CF1_8Check):
                 coordinates=lambda c: c is not None,
             )
         ):
+
             # IMPLICIT CONFORMANCE REQUIRED 1/4
             # Has a dimensions *NetCDF* attribute
             try:
@@ -140,9 +141,7 @@ class CF1_9Check(CF1_8Check):
             else:
                 domain_valid.score += 1
             domain_coord_vars, domain_coord_var_errors = reference_attr_variables(
-                ds,
-                domain_var.coordinates,
-                " ",
+                ds, domain_var.coordinates, " ",
             )
             if domain_coord_var_errors:
                 errors_str = ", ".join(err.name for err in domain_coord_var_errors)
