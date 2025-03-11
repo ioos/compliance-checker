@@ -1045,6 +1045,7 @@ def resolve_ragged_array_dimension(ds: Dataset):
         ragged_type = "instance_dimension"
     if ragged_variable is None:
         raise ValueError("Could not find a ragged array related variable")
+    return ragged_type
 
 
 def is_variable_valid_ragged_array_repr_featureType(nc, variable: str) -> bool:

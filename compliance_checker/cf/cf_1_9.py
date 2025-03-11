@@ -128,7 +128,9 @@ class CF1_9Check(CF1_8Check):
             domain_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["5.8"])
             domain_valid.out_of += 2
             domain_dims, dim_errors = reference_attr_variables(
-                ds, domain_var.getncattr("dimensions"), " ",
+                ds,
+                dim_nc_attr,
+                " "
             )
             if dim_errors:
                 errors_str = ", ".join(dim_errors)
@@ -156,47 +158,33 @@ class CF1_9Check(CF1_8Check):
             else:
                 domain_valid.score += 1
 
-            coord_var_dim_failures = []
-            is_ragged_array_repr = (
-                cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                    ds, getattr(ds, "featureType", ""),
-                )
-            )
+            is_ragged_array_repr = cfutil.is_dataset_valid_ragged_array_repr_featureType(ds, getattr(ds, "featureType", ""))
             if is_ragged_array_repr:
-                for var in domain_coord_vars:
-                    domain_valid.out_of += 1
-                    ragged_array_dim_variable, ragged_attr_name = (
-                        cfutil.resolve_ragged_array_dimension(ds)
+                domain_valid.out_of += 1
+                ragged_array_dim_variable, ragged_attr_name = cfutil.resolve_ragged_array_dimension(ds)
+                dim_name = getattr(ragged_array_dim_variable, ragged_attr_name)
+                referenced_dim = reference_attr_variables(ds, dim_name, reference_type="dimension")
+                if isinstance(referenced_dim, VariableReferenceError):
+                    domain_valid.messages.append(
+                    f"Found ragged array variable {ragged_array_dim_variable.name}, "
+                    f"but dimension {dim_name} referenced from {ragged_attr_name} does not exist in file"
                     )
-                    dim_name = getattr(ragged_array_dim_variable, ragged_attr_name)
-                    referenced_dim = reference_attr_variables(
-                        ds, dim_name, reference_type="dimension",
-                    )
-                    if isinstance(referenced_dim, VariableReferenceError):
-                        domain_valid.messages.append(
-                            f"Found ragged array variable {ragged_array_dim_variable.name}, "
-                            f"but dimension {dim_name} referenced from {attr_name} does not exist in file",
-                        )
 
-                    coord_var_reference_failures = []
-                    for coord_var in reference_attr_variables(ds, dim_name, " "):
-                        if isinstance(coord_var, VariableReferenceError):
-                            coord_var_reference_failures.append(coord_var)
-                            domain_valid.messages.append(
-                                f"Referenced coordinate variable {coord_var} does not exist in file",
-                            )
-                            continue
-                        # TODO: check for label variables
-                        if not set(
-                            util.get_possible_label_variable_dimensions(coord_var),
-                        ).issubset({referenced_dim}):
-                            domain_valid.messages.append(
-                                f"Found ragged array variable {ragged_array_dim_variable.name}, "
-                                f"but dimension {dim_name} referenced from {attr_name} does not exist in file",
-                            )
-                        else:
-                            domain_valid.score += 1
-                    pass
+                coord_var_reference_failures = []
+                for coord_var in reference_attr_variables(ds, dim_name, " "):
+                    if isinstance(coord_var, VariableReferenceError):
+                        coord_var_reference_failures.append(coord_var)
+                        domain_valid.messages.append(
+                        f"Referenced coordinate variable {coord_var} does not exist in file")
+                        continue
+                    # TODO: check for label variables
+                    if not set(util.get_possible_label_variable_dimensions(coord_var)).issubset({referenced_dim}):
+                        domain_valid.messages.append(
+                        f"Found ragged array variable {ragged_array_dim_variable.name}, "
+                        f"but dimension {dim_name} referenced from {ragged_attr_name} does not exist in file"
+                        )
+                    else:
+                        domain_valid.score += 1
             else:
                 for coord_var in domain_coord_vars:
                     domain_valid.out_of += 1
