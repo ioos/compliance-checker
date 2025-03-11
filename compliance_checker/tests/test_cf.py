@@ -2283,6 +2283,7 @@ class TestCF1_7(BaseTestCase):
         self.assertTrue(self.cf._process_v_datum_str("Ordnance Datum Newlyn", conn))
         # NAD83 isn't a vertical datum to begin with, expect failure
         self.assertFalse(self.cf._process_v_datum_str("NAD83", conn))
+        conn.close()
 
     def test_check_grid_mapping_crs_wkt(self):
         dataset = self.load_dataset(STATIC_FILES["mapping"])
