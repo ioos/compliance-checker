@@ -563,7 +563,6 @@ def get_longitude_variables(nc):
     for variable in nc.get_variables_by_attributes(standard_name="longitude"):
         longitude_variables.append(variable.name)
 
-    
     # Then axis
     for variable in nc.get_variables_by_attributes(axis="X"):
         if not (variable.name in longitude_variables or

@@ -417,7 +417,7 @@ def get_possible_label_variable_dimensions(variable: Variable) -> tuple[int, ...
         return variable.dimensions[:-1]
     return variable.dimensions
 
-  
+
 @lru_cache
 def maybe_lateral_reference_variable_or_dimension(
     group: Union[Group, Dataset],
