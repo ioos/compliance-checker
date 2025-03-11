@@ -158,7 +158,7 @@ class CF1_9Check(CF1_8Check):
 
             is_ragged_array_repr = (
                 cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                    ds, getattr(ds, "featureType", ""),
+                    ds, getattr(ds, "featureType", "")
                 )
             )
             if is_ragged_array_repr:
@@ -168,12 +168,12 @@ class CF1_9Check(CF1_8Check):
                 )
                 dim_name = getattr(ragged_array_dim_variable, ragged_attr_name)
                 referenced_dim = reference_attr_variables(
-                    ds, dim_name, reference_type="dimension",
+                    ds, dim_name, reference_type="dimension"
                 )
                 if isinstance(referenced_dim, VariableReferenceError):
                     domain_valid.messages.append(
                         f"Found ragged array variable {ragged_array_dim_variable.name}, "
-                        f"but dimension {dim_name} referenced from {ragged_attr_name} does not exist in file",
+                        f"but dimension {dim_name} referenced from {ragged_attr_name} does not exist in file"
                     )
 
                 coord_var_reference_failures = []
@@ -181,16 +181,16 @@ class CF1_9Check(CF1_8Check):
                     if isinstance(coord_var, VariableReferenceError):
                         coord_var_reference_failures.append(coord_var)
                         domain_valid.messages.append(
-                            f"Referenced coordinate variable {coord_var} does not exist in file",
+                            f"Referenced coordinate variable {coord_var} does not exist in file"
                         )
                         continue
                     # TODO: check for label variables
                     if not set(
-                        util.get_possible_label_variable_dimensions(coord_var),
+                        util.get_possible_label_variable_dimensions(coord_var)
                     ).issubset({referenced_dim}):
                         domain_valid.messages.append(
                             f"Found ragged array variable {ragged_array_dim_variable.name}, "
-                            f"but dimension {dim_name} referenced from {ragged_attr_name} does not exist in file",
+                            f"but dimension {dim_name} referenced from {ragged_attr_name} does not exist in file"
                         )
                     else:
                         domain_valid.score += 1
