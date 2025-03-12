@@ -742,6 +742,11 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_climatological_statistics(dataset)
         score, out_of, messages = get_results(results)
         self.assertEqual(score, out_of)
+        # two time expression
+        temp_var.cell_methods = "time: mean within years time: mean over years"
+        results = self.cf.check_climatological_statistics(dataset)
+        score, out_of, messages = get_results(results)
+        self.assertEqual(score, out_of)
 
         # TEST CONFORMANCE 7.4 REQUIRED 5/6
         dataset.variables["climatology_bounds"] = MockVariable(
