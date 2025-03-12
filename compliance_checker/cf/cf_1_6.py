@@ -3266,7 +3266,7 @@ class CF1_6Check(CFNCCheck):
         re_string = (
             rf"^time: {meth_regex} within (years|days)"  # regex string to test
             rf" time: {meth_regex} over \1(:?(?<=days) time: {meth_regex} over years)?"
-            r"(?: \([^)]+\))?$" # parenthesized comment section
+            r"(?: \([^)]+\))?$"  # parenthesized comment section
         )
 
         # find any variables with a valid climatological cell_methods
