@@ -413,7 +413,7 @@ def get_possible_label_variable_dimensions(variable: Variable) -> tuple[int, ...
     Return dimensions if non-char variable, or return variable dimensions
     without trailing dimension if char variable, treating it as a label variable.
     """
-    if variable.kind == "C" and len(variable.dimensions) > 0:
+    if variable.dtype.kind == "C" and len(variable.dimensions) > 0:
         return variable.dimensions[:-1]
     return variable.dimensions
 
@@ -475,13 +475,17 @@ def reference_attr_variables(
     """
     references, errors = [], []
     if attributes_string is None:
-        return None
+        return None, None
     elif reference_type == "variable":
         if split_by is None:
-            return dataset.variables.get(
+            return_val = dataset.variables.get(
                 attributes_string,
                 VariableReferenceError(attributes_string),
             )
+            if not isinstance(return_val, VariableReferenceError):
+                return return_val, None
+            else:
+                return None, return_val
         else:
             string_proc = attributes_string.split(split_by)
             for var_name in string_proc:

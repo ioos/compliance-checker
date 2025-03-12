@@ -494,6 +494,15 @@ def get_latitude_variables(nc):
     for variable in nc.get_variables_by_attributes(standard_name="latitude"):
         latitude_variables.append(variable.name)
 
+    # Then axis
+    for variable in nc.get_variables_by_attributes(axis="Y"):
+        if not (
+            variable.name in latitude_variables
+            or getattr(variable, "standard_name", None)
+            in {"projection_y_coordinate", "projection_y_angular_coordinate"}
+        ):
+            latitude_variables.append(variable.name)
+
     check_fn = partial(
         attr_membership,
         value_set=VALID_LAT_UNITS,
@@ -554,6 +563,15 @@ def get_longitude_variables(nc):
     # standard_name takes precedence
     for variable in nc.get_variables_by_attributes(standard_name="longitude"):
         longitude_variables.append(variable.name)
+
+    # Then axis
+    for variable in nc.get_variables_by_attributes(axis="X"):
+        if not (
+            variable.name in longitude_variables
+            or getattr(variable, "standard_name", None)
+            in {"projection_x_coordinate", "projection_x_angular_coordinate"}
+        ):
+            longitude_variables.append(variable.name)
 
     check_fn = partial(
         attr_membership,
@@ -912,7 +930,7 @@ def is_dataset_valid_ragged_array_repr_featureType(nc, feature_type: str):
             return False
     else:
         ftype = feature_type.lower()
-        if len(cf_role_vars) > 1:
+        if len(cf_role_vars) > 1 or not ftype:
             return False
 
     cf_role_var = nc.get_variables_by_attributes(cf_role=f"{ftype}_id")[0]
@@ -1027,6 +1045,7 @@ def resolve_ragged_array_dimension(ds: Dataset):
         ragged_type = "instance_dimension"
     if ragged_variable is None:
         raise ValueError("Could not find a ragged array related variable")
+    return ragged_type
 
 
 def is_variable_valid_ragged_array_repr_featureType(nc, variable: str) -> bool:

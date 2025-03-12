@@ -75,6 +75,7 @@ class CF1_7Check(CF1_6Check):
         external_vars_ctx = TestCtx(BaseCheck.MEDIUM, self.section_titles["2.6.3"])
         # IMPLEMENTATION CONFORMANCE 2.6.3 REQUIRED 2/2
         try:
+            # Should external variables be stored in dataset state?
             external_var_names = set(ds.external_variables.strip().split())
 
             bad_external_var_names = external_var_names.intersection(ds.variables)
@@ -541,17 +542,6 @@ class CF1_7Check(CF1_6Check):
         else:
             return (True, msg)
 
-    def _get_projdb_conn(self):
-        """
-        Return a SQLite Connection to the PROJ database.
-
-        Returns:
-            sqlite3.Connection
-        """
-
-        proj_db_path = os.path.join(pyproj.datadir.get_data_dir(), "proj.db")
-        return sqlite3.connect(proj_db_path)
-
     def _exec_query_str_with_params(self, qstr, argtuple):
         """
         Execute a query string in a database connection with the given argument
@@ -562,8 +552,9 @@ class CF1_7Check(CF1_6Check):
         :rtype set
         """
 
-        conn = self._get_projdb_conn()
-        return conn.execute(qstr, argtuple)
+        proj_db_path = os.path.join(pyproj.datadir.get_data_dir(), "proj.db")
+        with sqlite3.connect(proj_db_path) as conn:
+            return conn.execute(qstr, argtuple)
 
     def _evaluate_geographic_crs_name(self, val):
         """

@@ -13,7 +13,10 @@ class MockNetCDF(Dataset):
         # even though we aren't persisting data to disk, the constructor
         # requires a filename not currently in use by another Dataset object..
         if filename is None:
-            temp_filename = tempfile.NamedTemporaryFile(suffix=".nc", delete=True).name
+            temp_file = tempfile.NamedTemporaryFile(suffix=".nc", delete=True)
+            temp_filename = temp_file.name
+            # close temp file so that resources are released after tests
+            temp_file.close()
         else:
             temp_filename = filename
         super().__init__(
