@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.cf.cf_1_7 &#8212; compliance_checker 5.1.2 documentation</title>
+    <title>compliance_checker.cf.cf_1_7 &#8212; compliance_checker 5.2.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=2c218288"></script>
+    <script src="../../../_static/documentation_options.js?v=2dde5210"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/cf/cf_1_7';</script>
@@ -46,7 +46,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="5.1.2" />
+  <meta name="docsearch:version" content="5.2.0" />
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/_modules/compliance_checker/cf/cf_1_7.html" />
 
   </head>
@@ -201,7 +201,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.1.2
+  Version 5.2.0
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
@@ -346,6 +346,7 @@
         <span class="n">external_vars_ctx</span> <span class="o">=</span> <span class="n">TestCtx</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;2.6.3&quot;</span><span class="p">])</span>
         <span class="c1"># IMPLEMENTATION CONFORMANCE 2.6.3 REQUIRED 2/2</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Should external variables be stored in dataset state?</span>
             <span class="n">external_var_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">external_variables</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
 
             <span class="n">bad_external_var_names</span> <span class="o">=</span> <span class="n">external_var_names</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
@@ -825,17 +826,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_projdb_conn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return a SQLite Connection to the PROJ database.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            sqlite3.Connection</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">proj_db_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pyproj</span><span class="o">.</span><span class="n">datadir</span><span class="o">.</span><span class="n">get_data_dir</span><span class="p">(),</span> <span class="s2">&quot;proj.db&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">proj_db_path</span><span class="p">)</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">_exec_query_str_with_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qstr</span><span class="p">,</span> <span class="n">argtuple</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute a query string in a database connection with the given argument</span>
@@ -846,8 +836,9 @@
 <span class="sd">        :rtype set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_projdb_conn</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">qstr</span><span class="p">,</span> <span class="n">argtuple</span><span class="p">)</span>
+        <span class="n">proj_db_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pyproj</span><span class="o">.</span><span class="n">datadir</span><span class="o">.</span><span class="n">get_data_dir</span><span class="p">(),</span> <span class="s2">&quot;proj.db&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">proj_db_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">qstr</span><span class="p">,</span> <span class="n">argtuple</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_geographic_crs_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1284,7 +1275,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>
