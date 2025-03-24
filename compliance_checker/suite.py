@@ -383,7 +383,7 @@ class CheckSuite:
             skip_check_dict = defaultdict(lambda: None)
 
         if include_checks:
-            include_dict = {check_name: 0 for check_name in include_checks}
+            include_dict = dict.fromkeys(include_checks, 0)
         else:
             include_dict = {}
 
