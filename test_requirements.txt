@@ -1,4 +1,4 @@
-mocket
+mocket>=3.13.3
 myst-parser
 numpydoc
 pydata-sphinx-theme
