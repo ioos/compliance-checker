@@ -10,6 +10,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: Setup Micromamba
       uses: mamba-org/setup-micromamba@v2
@@ -40,3 +42,5 @@ jobs:
       uses: codecov/codecov-action@v5
       with:
         files: coverage.xml
+    permissions:
+      actions: read
