@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from mocket.mocket import mocketize
+from mocket import mocketize
 from mocket.mockhttp import Entry
 
 from compliance_checker.runner import ComplianceChecker
