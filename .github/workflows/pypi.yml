@@ -7,13 +7,15 @@ on:
     types:
       - published
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
-  packages:
+  pypi-publish:
+    name: Upload release to PyPI
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/compliance-checker
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
     - uses: actions/checkout@v4
       with:
@@ -45,9 +47,6 @@ jobs:
         cd dist && python -m pip install compliance_checker*.whl
         python -m twine check *
 
-    - name: Publish a Python distribution to PyPI
+    - name: Publish package distributions to PyPI
       if: success() && github.event_name == 'release'
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_ACCESS_TOKEN }}

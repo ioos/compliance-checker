@@ -7,9 +7,14 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: Setup Micromamba
       uses: mamba-org/setup-micromamba@v2
@@ -36,3 +41,5 @@ jobs:
         && micromamba remove compliance-checker --no-prune-deps --force
         && python -m pip install -e . --no-deps --force-reinstall
         && python -m pytest -s -rxs -v cc_plugin_glider
+    permissions:
+      actions: none
