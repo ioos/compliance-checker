@@ -31,7 +31,10 @@ class ACDDBaseCheck(BaseCheck):
     _cc_url = "http://wiki.esipfed.org/index.php?title=Category:Attribute_Conventions_Dataset_Discovery"
     _cc_display_headers = {3: "Highly Recommended", 2: "Recommended", 1: "Suggested"}
 
-    def __init__(self):
+    def __init__(self, ds):
+        super().__init__()
+
+        self.ds = ds
         self.high_rec_atts = ["title", "keywords", "summary"]
 
         self.rec_atts = [
@@ -83,29 +86,23 @@ class ACDDBaseCheck(BaseCheck):
 
     # set up attributes according to version
     @check_has(BaseCheck.HIGH, gname="Global Attributes")
-    def check_high(self, ds):
+    def check_high(self):
         """
         Performs a check on each highly recommended attributes' existence in the dataset
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
         """
         return self.high_rec_atts
 
     @check_has(BaseCheck.MEDIUM, gname="Global Attributes")
-    def check_recommended(self, ds):
+    def check_recommended(self):
         """
         Performs a check on each recommended attributes' existence in the dataset
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
         """
         return self.rec_atts
 
     @check_has(BaseCheck.LOW, gname="Global Attributes")
-    def check_suggested(self, ds):
+    def check_suggested(self):
         """
         Performs a check on each suggested attributes' existence in the dataset
-
-        :param netCDF4.Dataset ds: An open netCDF dataset
         """
         return self.sug_atts
 
@@ -135,7 +132,7 @@ class ACDDBaseCheck(BaseCheck):
 
         return self.applicable_variables
 
-    def check_var_long_name(self, ds):
+    def check_var_long_name(self):
         """
         Checks each applicable variable for the long_name attribute
 
@@ -146,9 +143,9 @@ class ACDDBaseCheck(BaseCheck):
         # ACDD Variable Metadata applies to all coordinate variables and
         # geophysical variables only.
 
-        for variable in self.get_applicable_variables(ds):
+        for variable in self.get_applicable_variables(self.ds):
             msgs = []
-            long_name = getattr(ds.variables[variable], "long_name", None)
+            long_name = getattr(self.ds.variables[variable], "long_name", None)
             check = long_name is not None
             if not check:
                 msgs.append("long_name")
@@ -158,16 +155,16 @@ class ACDDBaseCheck(BaseCheck):
 
         return results
 
-    def check_var_standard_name(self, ds):
+    def check_var_standard_name(self):
         """
         Checks each applicable variable for the standard_name attribute
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
         results = []
-        for variable in self.get_applicable_variables(ds):
+        for variable in self.get_applicable_variables(self.ds):
             msgs = []
-            std_name = getattr(ds.variables[variable], "standard_name", None)
+            std_name = getattr(self.ds.variables[variable], "standard_name", None)
             check = std_name is not None
             if not check:
                 msgs.append("standard_name")
@@ -177,18 +174,18 @@ class ACDDBaseCheck(BaseCheck):
 
         return results
 
-    def check_var_units(self, ds):
+    def check_var_units(self):
         """
         Checks each applicable variable for the units attribute
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
         results = []
-        for variable in self.get_applicable_variables(ds):
+        for variable in self.get_applicable_variables(self.ds):
             msgs = []
             # Check units and dims for variable
-            unit_check = hasattr(ds.variables[variable], "units")
-            no_dim_check = ds.variables[variable].dimensions == ()
+            unit_check = hasattr(self.ds.variables[variable], "units")
+            no_dim_check = self.ds.variables[variable].dimensions == ()
             # Check if we have no dimensions.  If no dims, skip test
             if no_dim_check:
                 continue
@@ -206,7 +203,7 @@ class ACDDBaseCheck(BaseCheck):
 
         return results
 
-    def check_acknowledgment(self, ds):
+    def check_acknowledgment(self):
         """
         Check if acknowledgment/acknowledgment attribute is present. Because
         acknowledgement has its own check, we are keeping it out of the Global
@@ -216,7 +213,7 @@ class ACDDBaseCheck(BaseCheck):
         """
         check = False
         messages = []
-        if hasattr(ds, "acknowledgment") or hasattr(ds, "acknowledgement"):
+        if hasattr(self.ds, "acknowledgment") or hasattr(self.ds, "acknowledgement"):
             check = True
         else:
             messages.append("acknowledgment/acknowledgement not present")
@@ -224,7 +221,7 @@ class ACDDBaseCheck(BaseCheck):
         # name="Global Attributes" so gets grouped with Global Attributes
         return Result(BaseCheck.MEDIUM, check, "Global Attributes", msgs=messages)
 
-    def check_lat_extents(self, ds):
+    def check_lat_extents(self):
         """
         Check that the values of geospatial_lat_min/geospatial_lat_max
         approximately match the data.
@@ -232,7 +229,10 @@ class ACDDBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
 
-        if not (hasattr(ds, "geospatial_lat_min") or hasattr(ds, "geospatial_lat_max")):
+        if not (
+            hasattr(self.ds, "geospatial_lat_min")
+            or hasattr(self.ds, "geospatial_lat_max")
+        ):
             return Result(
                 BaseCheck.MEDIUM,
                 False,
@@ -241,22 +241,22 @@ class ACDDBaseCheck(BaseCheck):
             )
 
         try:  # type cast
-            lat_min = float(ds.geospatial_lat_min)
-            lat_max = float(ds.geospatial_lat_max)
+            lat_min = float(self.ds.geospatial_lat_min)
+            lat_max = float(self.ds.geospatial_lat_max)
         except ValueError:
             return Result(
                 BaseCheck.MEDIUM,
                 False,
                 "geospatial_lat_extents_match",
                 [
-                    f"Could not convert one of geospatial_lat_min ({ds.geospatial_lat_min}) or max ({ds.geospatial_lat_max}) to float see CF-1.6 spec chapter 4.1"
+                    f"Could not convert one of geospatial_lat_min ({self.ds.geospatial_lat_min}) or max ({self.ds.geospatial_lat_max}) to float see CF-1.6 spec chapter 4.1"
                     "",
                 ],
             )
 
         # identify lat var(s) as per CF 4.1
         lat_vars = {}  # var -> number of criteria passed
-        for var in ds.variables.values():
+        for var in self.ds.variables.values():
             # must have units
             if not hasattr(var, "units"):
                 continue
@@ -320,7 +320,7 @@ class ACDDBaseCheck(BaseCheck):
             msgs,
         )
 
-    def check_lon_extents(self, ds):
+    def check_lon_extents(self):
         """
         Check that the values of geospatial_lon_min/geospatial_lon_max
         approximately match the data.
@@ -329,7 +329,8 @@ class ACDDBaseCheck(BaseCheck):
         """
 
         if not (
-            hasattr(ds, "geospatial_lon_min") and hasattr(ds, "geospatial_lon_max")
+            hasattr(self.ds, "geospatial_lon_min")
+            and hasattr(self.ds, "geospatial_lon_max")
         ):
             return Result(
                 BaseCheck.MEDIUM,
@@ -339,22 +340,22 @@ class ACDDBaseCheck(BaseCheck):
             )
 
         try:  # type cast
-            lon_min = float(ds.geospatial_lon_min)
-            lon_max = float(ds.geospatial_lon_max)
+            lon_min = float(self.ds.geospatial_lon_min)
+            lon_max = float(self.ds.geospatial_lon_max)
         except ValueError:
             return Result(
                 BaseCheck.MEDIUM,
                 False,
                 "geospatial_lon_extents_match",
                 [
-                    f"Could not convert one of geospatial_lon_min ({ds.geospatial_lon_min}) or max ({ds.geospatial_lon_max}) to float see CF-1.6 spec chapter 4.1"
+                    f"Could not convert one of geospatial_lon_min ({self.ds.geospatial_lon_min}) or max ({self.ds.geospatial_lon_max}) to float see CF-1.6 spec chapter 4.1"
                     "",
                 ],
             )
 
         # identify lon var(s) as per CF 4.2
         lon_vars = {}  # var -> number of criteria passed
-        for var in ds.variables.values():
+        for var in self.ds.variables.values():
             # must have units
             if not hasattr(var, "units"):
                 continue
@@ -418,9 +419,9 @@ class ACDDBaseCheck(BaseCheck):
             msgs,
         )
 
-    def verify_geospatial_bounds(self, ds):
+    def verify_geospatial_bounds(self):
         """Checks that the geospatial bounds is well formed OGC WKT"""
-        var = getattr(ds, "geospatial_bounds", None)
+        var = getattr(self.ds, "geospatial_bounds", None)
         check = var is not None
         if not check:
             return ratable_result(
@@ -432,7 +433,7 @@ class ACDDBaseCheck(BaseCheck):
         try:
             # TODO: verify that WKT is valid given CRS (defaults to EPSG:4326
             #       in ACDD.
-            from_wkt(ds.geospatial_bounds)
+            from_wkt(self.ds.geospatial_bounds)
         except AttributeError:
             return ratable_result(
                 False,
@@ -440,7 +441,7 @@ class ACDDBaseCheck(BaseCheck):
                 [
                     (
                         "Could not parse WKT from geospatial_bounds,"
-                        f' possible bad value: "{ds.geospatial_bounds}"'
+                        f' possible bad value: "{self.ds.geospatial_bounds}"'
                     ),
                 ],
                 variable_name="geospatial_bounds",
@@ -448,6 +449,8 @@ class ACDDBaseCheck(BaseCheck):
         # parsed OK
         else:
             return ratable_result(True, "Global Attributes", ())
+
+    # temp
 
     def _check_total_z_extents(self, ds, z_variable):
         """

@@ -1,5 +1,4 @@
 import json
-import os
 import sys
 import traceback
 from collections import OrderedDict
@@ -29,7 +28,6 @@ class ComplianceChecker:
     the command line or can be used via import.
     """
 
-    # Consider using __init__ instead of so many classmethods
     @classmethod
     def run_checker(
         cls,
@@ -97,42 +95,33 @@ class ComplianceChecker:
             limit = 1
         elif criteria == "lenient":
             limit = 3
+        else:
+            raise ValueError(
+                f"Invalid criteria: {criteria}. Must be one of: normal, strict, lenient",
+            )
 
-        for out_fmt in output_format:
-            if out_fmt == "text":
-                if output_filename == "-":
-                    cls.stdout_output(cs, score_dict, verbose, limit)
-                # need to redirect output from stdout since print functions are
-                # presently used to generate the standard report output
-                else:
-                    if len(output_format) > 1:
-                        # Update file name if needed
-                        output_filename = f"{os.path.splitext(output_filename)[0]}.txt"
-                    with open(output_filename, "w", encoding="utf-8") as f:
-                        with stdout_redirector(f):
-                            cls.stdout_output(cs, score_dict, verbose, limit)
-
-            elif out_fmt == "html":
-                # Update file name if needed
-                if len(output_format) > 1 and output_filename != "-":
-                    output_filename = f"{os.path.splitext(output_filename)[0]}.html"
+        # Output the results in the requested format(s)
+        for fmt in output_format:
+            if fmt == "text":
+                cls.text_output(cs, score_dict, output_filename, ds_loc, limit)
+            elif fmt == "html":
                 cls.html_output(cs, score_dict, output_filename, ds_loc, limit)
-
-            elif out_fmt in {"json", "json_new"}:
-                # Update file name if needed
-                if len(output_format) > 1 and output_filename != "-":
-                    output_filename = f"{os.path.splitext(output_filename)[0]}.json"
-                cls.json_output(cs, score_dict, output_filename, ds_loc, limit, out_fmt)
-
+            elif fmt == "json":
+                cls.json_output(cs, score_dict, output_filename, ds_loc, limit)
+            elif fmt == "json_new":
+                cls.json_output(
+                    cs,
+                    score_dict,
+                    output_filename,
+                    ds_loc,
+                    limit,
+                    "json_new",
+                )
             else:
-                raise TypeError(f"Invalid format {out_fmt}")
+                raise ValueError(f"Invalid output format: {fmt}")
 
-            errors_occurred = cls.check_errors(score_groups, verbose)
-
-        return (
-            all(cs.passtree(groups, limit) for groups in all_groups),
-            errors_occurred,
-        )
+        # Return True if all checks passed, False otherwise
+        return all(group.value[0] == group.value[1] for group in all_groups)
 
     @classmethod
     def stdout_output(cls, cs, score_dict, verbose, limit):

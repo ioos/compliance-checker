@@ -153,6 +153,7 @@ class BaseCheck:
 
         Automatically run when running a CheckSuite. Define this method in your Checker class.
         """
+        self.ds = ds
 
     def __init__(self, options=None):
         self._defined_results = defaultdict(lambda: defaultdict(dict))
@@ -160,6 +161,7 @@ class BaseCheck:
             self.options = {}
         else:
             self.options = options
+        self.ds = None
 
     def get_test_ctx(self, severity, name, variable=None):
         """

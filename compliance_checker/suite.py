@@ -57,13 +57,21 @@ def extract_docstring_summary(docstring):
 
 class CheckSuite:
     checkers = (
-        {}
-    )  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
+        # ("acdd", ACDDBaseCheck),
+        # ("cf", CFBaseCheck),
+        # ("ioos_sos", SOSBaseCheck),
+        # ("ioos_sos_get_capabilities", SOSGCCheck),
+        # ("ioos_sos_describe_sensor", SOSDSCheck),
+    )
+
     templates_root = "compliance_checker"  # modify to load alternative Jinja2 templates
 
     def __init__(self, options=None):
         self.col_width = 40
         self.options = options or {}
+        self.checkers = {}
+        for name, checker in self.__class__.checkers:
+            self.checkers[name] = checker
 
     @classmethod
     def _get_generator_plugins(cls):
@@ -367,71 +375,62 @@ class CheckSuite:
         )
         return self.run_all(ds, checker_names, skip_checks=skip_checks)
 
-    def run_all(self, ds, checker_names, include_checks=None, skip_checks=None):
+    def run_all(self, ds, checker_names=None, include_checks=None, skip_checks=None):
         """
-        Runs this CheckSuite on the dataset with all the passed Checker instances.
+        Run all checks in the suite on the given dataset.
 
-        Returns a dictionary mapping checker names to a 2-tuple of their grouped scores and errors/exceptions while running checks.
+        :param ds: Dataset to check
+        :param checker_names: List of checker names to run
+        :param include_checks: List of check names to include
+        :param skip_checks: List of check names to skip
+        :return: Dictionary of results
         """
+        checker_names = checker_names or []
+        include_checks = include_checks or []
+        skip_checks = skip_checks or []
 
-        ret_val = {}
-        checkers = self._get_valid_checkers(ds, checker_names)
+        valid_checkers = self._get_valid_checkers(ds, checker_names)
+        results = {}
 
-        if skip_checks is not None:
-            skip_check_dict = CheckSuite._process_skip_checks(skip_checks)
-        else:
-            skip_check_dict = defaultdict(lambda: None)
-
-        if include_checks:
-            include_dict = {check_name: 0 for check_name in include_checks}
-        else:
-            include_dict = {}
-
-        if len(checkers) == 0:
-            print(
-                "No valid checkers found for tests '{}'".format(
-                    ",".join(checker_names),
-                ),
-            )
-
-        for checker_name, checker_class in checkers:
-            # TODO: maybe this a little more reliable than depending on
-            #       a string to determine the type of the checker -- perhaps
-            #       use some kind of checker object with checker type and
-            #       version baked in
-            checker_type_name = checker_name.split(":")[0]
-            checker_opts = self.options.get(checker_type_name, {})
-
-            # instantiate a Checker object
-            try:
-                checker = checker_class(options=checker_opts)
-            # hacky fix for no options in constructor
-            except TypeError:
-                checker = checker_class()
-            # TODO? : Why is setup(ds) called at all instead of just moving the
-            #         checker setup into the constructor?
-            # setup method to prep
+        for name, checker_class in valid_checkers:
+            checker = checker_class(options=self.options)
             checker.setup(ds)
+            results[name] = self.run_checker(checker, include_checks, skip_checks)
 
-            checks = self._get_checks(checker, include_dict, skip_check_dict)
-            vals = []
-            errs = {}  # check method name -> (exc, traceback)
+        return results
 
-            for c, max_level in checks:
-                try:
-                    vals.extend(self._run_check(c, ds, max_level))
-                except Exception as e:
-                    errs[c.__func__.__name__] = (e, sys.exc_info()[2])
+    def run_checker(self, checker, include_checks=None, skip_checks=None):
+        """
+        Run all checks in a checker.
 
-            # score the results we got back
-            groups = self.scores(vals)
+        :param checker: Checker instance to run
+        :param include_checks: List of check names to include
+        :param skip_checks: List of check names to skip
+        :return: Tuple of (results, errors)
+        """
+        include_checks = include_checks or []
+        skip_checks = skip_checks or []
 
-            # invoke finalizer explicitly
-            del checker
+        results = []
+        errors = []
 
-            ret_val[checker_name] = groups, errs
+        for check_name in dir(checker):
+            if check_name.startswith("check_"):
+                if include_checks and check_name not in include_checks:
+                    continue
+                if skip_checks and check_name in skip_checks:
+                    continue
 
-        return ret_val
+                check_method = getattr(checker, check_name)
+                if callable(check_method):
+                    try:
+                        result = check_method()
+                        if result:
+                            results.extend(result)
+                    except Exception as e:
+                        errors.append((check_name, str(e)))
+
+        return results, errors
 
     @classmethod
     def passtree(cls, groups, limit):
