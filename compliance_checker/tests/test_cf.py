@@ -3210,6 +3210,18 @@ class TestCF1_9(BaseTestCase):
                 "variable as in COARDS is deprecated in CF." in messages
             )
 
+        # test less than year zero for Julian and Gregorian, which should fail
+        dataset = MockTimeSeries()
+        dataset.variables["time"].units = "seconds since -1-12-31 23:59:59"
+        for calendar_name in ("standard", "julian", "gregorian"):
+            dataset.variables["time"].calendar = calendar_name
+            results = self.cf.check_time_coordinate_variable_has_calendar(dataset)
+            scored, out_of, messages = get_results(results)
+            assert (
+                'For time variable "time", when using the Gregorian or Julian '
+                "calendars, negative years are not allowed." in messages
+            )
+
     def test_domain(self):
         dataset = MockTimeSeries()
         domain_var = dataset.createVariable("domain", "c", ())

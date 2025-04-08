@@ -71,8 +71,22 @@ class CF1_9Check(CF1_8Check):
                         self.section_titles["4.4.1"],
                         [reasoning],
                     )
+                elif reference_year < 0:
+                    reasoning = (
+                        f'For time variable "{time_var.name}", when using '
+                        "the Gregorian or Julian calendars, negative "
+                        "years are not allowed."
+                    )
+                    result = Result(
+                        BaseCheck.MEDIUM,
+                        False,
+                        self.section_titles["4.4.1"],
+                        [reasoning],
+                    )
+                else:
+                    return ret_val
 
-                    ret_val.append(result)
+                ret_val.append(result)
         return ret_val
 
     def check_time_coordinate(self, ds):
