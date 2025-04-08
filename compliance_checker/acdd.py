@@ -694,7 +694,7 @@ class ACDD1_1Check(ACDDNCCheck):
                 "publisher_name",  # publisher,dataCenter
                 "publisher_url",  # publisher
                 "publisher_email",  # publisher
-                ("geospatial_vertical_positive", ["up", "down"])
+                ("geospatial_vertical_positive", ["up", "down"]),
             ],
         )
 
