@@ -466,7 +466,7 @@ def reference_attr_variables(
     dataset: Dataset,
     attributes_string: str,
     split_by: str = None,
-    reference_type: str = "variable",
+    reference_type: str = "variables",
     group: Union[Group, Dataset] = None,
 ):
     """
@@ -476,21 +476,23 @@ def reference_attr_variables(
     references, errors = [], []
     if attributes_string is None:
         return None, None
-    elif reference_type == "variable":
-        if split_by is None:
-            return_val = dataset.variables.get(
-                attributes_string,
-                VariableReferenceError(attributes_string),
-            )
-            if not isinstance(return_val, VariableReferenceError):
-                return return_val, None
-            else:
-                return None, return_val
+    if reference_type not in {"variables", "dimensions"}:
+        raise ValueError("reference_type must be one of 'variables' or 'dimensions'")
+    reference_attr = getattr(dataset, reference_type)
+    if split_by is None:
+        return_val = reference_attr.get(
+            attributes_string,
+            VariableReferenceError(attributes_string),
+        )
+        if not isinstance(return_val, VariableReferenceError):
+            return return_val, None
         else:
-            string_proc = attributes_string.split(split_by)
-            for var_name in string_proc:
-                if var_name in dataset.variables:
-                    references.append(dataset.variables[var_name])
-                else:
-                    errors.append(VariableReferenceError(var_name))
-            return references, errors
+            return None, return_val
+    else:
+        string_proc = attributes_string.split(split_by)
+        for var_name in string_proc:
+            if var_name in reference_attr:
+                references.append(reference_attr[var_name])
+            else:
+                errors.append(VariableReferenceError(var_name))
+        return references, errors
