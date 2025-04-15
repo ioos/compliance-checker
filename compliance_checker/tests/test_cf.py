@@ -3266,27 +3266,31 @@ class TestCF1_9(BaseTestCase):
         # OK, coordinates in cell_measures are subset of coordinates of
         # referring domain variable's coordinates attribute
         results = self.cf.check_domain_variables(dataset)
-        # "time" dimension named in domain variable not in dataset dimensions
-        assert results[0].msgs
+        assert not results[0].msgs
         # failing example, coordinates for cell_measures variable are no longer subset
+        # "time" dimension named in domain variable not in dataset dimensions
         domain_var.cell_measures = "volume: cube_bad"
         dataset.createVariable("cube_bad", "f8", ("lon", "lat", "depth", "time"))
         results = self.cf.check_domain_variables(dataset)
         self.assertTrue(
-            "Variables named in the cell_measures attributes must "
-            "have a dimensions attribute with values that are a "
-            "subset of the referring domain variable's dimension "
-            "attribute" in results[0].msgs,
+            "Variables named in the cell_measures attributes must have "
+            "dimensions with values that are a subset of the referring domain "
+            "variable's dimensions attribute"
+            in results[0].msgs
         )
         del dataset
         dataset = MockTimeSeries()
-        # domain should be dimensionless -- currently not an error in
-        # compliance checker, but not detected as a domain variable either
+        # domain should be dimensionless in terms of variable dimensions
         domain_var = dataset.createVariable("domain", "c", ("time",))
+        domain_var.setncattr("dimensions", "time")
         domain_var.long_name = "Domain variable"
-        domain_var.coordinates = "lon lat depth"
         results = self.cf.check_domain_variables(dataset)
-        assert len(results) == 0
+        assert ("Domain variable domain should not have non-scalar/"
+                "non-empty variable dimensions" in results[0].msgs)
+        # check ragged array results
+        dataset = Dataset(STATIC_FILES["indexed_ragged_domain"])
+        results = self.cf.check_domain_variables(dataset)
+        assert results[0].value[0] == results[0].value[1]
 
 
 class TestCFUtil(BaseTestCase):
