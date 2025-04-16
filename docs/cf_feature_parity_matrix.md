@@ -43,7 +43,7 @@ Most CF features are supported, but several are either partially implemented or 
 | 5.6. Horizontal Coordinate Reference Systems, Grid Mappings, and Projections | partial | Needs implementation of a few more sections | https://github.com/ioos/compliance-checker/issues/950
 | 5.6.1. Use of the CRS Well-known Text Format | yes |
 | 5.7. Scalar Coordinate Variables | yes |
-| 5.8. Domain Variables | partial | Needs ragged array support | https://github.com/ioos/compliance-checker/issues/951
+| 5.8. Domain Variables | yes |
 | 6. Labels and Alternative Coordinates | yes
 | 6.1. Labels | yes
 | 6.1.1. Geographic Regions | partial | Implicit from handling of standard names - does not check region names
