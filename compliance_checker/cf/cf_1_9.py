@@ -191,7 +191,10 @@ class CF1_9Check(CF1_8Check):
                 # dimension names which must exist in the file
 
                 domain_dims, dim_errors = reference_attr_variables(
-                    ds, dim_nc_attr, " ", "dimensions",
+                    ds,
+                    dim_nc_attr,
+                    " ",
+                    "dimensions",
                 )
                 if dim_errors:
                     errors_str = ", ".join(dim_errors)
