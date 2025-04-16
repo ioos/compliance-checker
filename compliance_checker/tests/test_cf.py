@@ -3275,8 +3275,7 @@ class TestCF1_9(BaseTestCase):
         self.assertTrue(
             "Variables named in the cell_measures attributes must have "
             "dimensions with values that are a subset of the referring domain "
-            "variable's dimensions attribute"
-            in results[0].msgs
+            "variable's dimensions attribute" in results[0].msgs,
         )
         del dataset
         dataset = MockTimeSeries()
@@ -3285,8 +3284,10 @@ class TestCF1_9(BaseTestCase):
         domain_var.setncattr("dimensions", "time")
         domain_var.long_name = "Domain variable"
         results = self.cf.check_domain_variables(dataset)
-        assert ("Domain variable domain should not have non-scalar/"
-                "non-empty variable dimensions" in results[0].msgs)
+        assert (
+            "Domain variable domain should not have non-scalar/"
+            "non-empty variable dimensions" in results[0].msgs
+        )
         # check ragged array results
         dataset = Dataset(STATIC_FILES["indexed_ragged_domain"])
         results = self.cf.check_domain_variables(dataset)

@@ -123,11 +123,9 @@ class CF1_9Check(CF1_8Check):
 
         results = []
         domain_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["5.8"])
-        is_ragged_array_repr = (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                ds,
-                getattr(ds, "featureType", ""),
-            )
+        is_ragged_array_repr = cfutil.is_dataset_valid_ragged_array_repr_featureType(
+            ds,
+            getattr(ds, "featureType", ""),
         )
         if is_ragged_array_repr:
             domain_valid.out_of += 1
@@ -147,8 +145,7 @@ class CF1_9Check(CF1_8Check):
                 )
 
             coord_var_reference_failures = []
-            for coord_var in reference_attr_variables(ds, dim_name, " ",
-                                                      "dimensions"):
+            for coord_var in reference_attr_variables(ds, dim_name, " ", "dimensions"):
                 if isinstance(coord_var, VariableReferenceError):
                     coord_var_reference_failures.append(coord_var)
                     domain_valid.messages.append(
@@ -168,8 +165,11 @@ class CF1_9Check(CF1_8Check):
         else:
             # IMPLICIT CONFORMANCE REQUIRED 1/4
             # Domain variables must have a dimensions attribute
-            for domain_var in (ds.variables[var] for var in ds.variables if
-                               "dimensions" in ds.variables[var].ncattrs()):
+            for domain_var in (
+                ds.variables[var]
+                for var in ds.variables
+                if "dimensions" in ds.variables[var].ncattrs()
+            ):
                 # store NetCDF variable attribute named "dimensions"
                 dim_nc_attr = domain_var.getncattr("dimensions")
                 # Every variable should have dimensionality (not to be confused with
@@ -178,9 +178,11 @@ class CF1_9Check(CF1_8Check):
 
                 domain_valid.out_of += 3
                 if domain_var.dimensions:
-                    domain_valid.messages.append("Domain variable "
-                         f"{domain_var.name} should not have non-scalar/"
-                         "non-empty variable dimensions")
+                    domain_valid.messages.append(
+                        "Domain variable "
+                        f"{domain_var.name} should not have non-scalar/"
+                        "non-empty variable dimensions",
+                    )
                 else:
                     domain_valid.score += 1
 
@@ -188,8 +190,9 @@ class CF1_9Check(CF1_8Check):
                 # Aforementioned dimensions attribute is comprised of space separated
                 # dimension names which must exist in the file
 
-                domain_dims, dim_errors = reference_attr_variables(ds, dim_nc_attr, " ",
-                                                                   "dimensions")
+                domain_dims, dim_errors = reference_attr_variables(
+                    ds, dim_nc_attr, " ", "dimensions",
+                )
                 if dim_errors:
                     errors_str = ", ".join(dim_errors)
                     domain_valid.messages.append(
@@ -202,10 +205,13 @@ class CF1_9Check(CF1_8Check):
                 else:
                     domain_valid.score += 1
                 if "coordinates" in domain_var.ncattrs():
-                    domain_coord_vars, domain_coord_var_errors = reference_attr_variables(
-                                        ds, domain_var.coordinates, " ")
+                    domain_coord_vars, domain_coord_var_errors = (
+                        reference_attr_variables(ds, domain_var.coordinates, " ")
+                    )
                     if domain_coord_var_errors:
-                        errors_str = ", ".join(err.name for err in domain_coord_var_errors)
+                        errors_str = ", ".join(
+                            err.name for err in domain_coord_var_errors
+                        )
                         domain_valid.messages.append(
                             "Could not find the following "
                             "variables referenced in "
@@ -225,7 +231,9 @@ class CF1_9Check(CF1_8Check):
                             )
                             if not (
                                 set(
-                                    util.get_possible_label_variable_dimensions(coord_var),
+                                    util.get_possible_label_variable_dimensions(
+                                        coord_var,
+                                    ),
                                 ).issubset(domain_dims_names)
                             ):
                                 domain_valid.messages.append(
@@ -285,7 +293,7 @@ class CF1_9Check(CF1_8Check):
                             continue
                         domain_valid.assert_true(
                             set(cell_measures_variable.dimensions).issubset(
-                                {dd.name for dd in domain_dims}
+                                {dd.name for dd in domain_dims},
                             ),
                             "Variables named in the cell_measures attributes must have dimensions with "
                             "values that are a subset of the referring domain variable's dimensions attribute",
