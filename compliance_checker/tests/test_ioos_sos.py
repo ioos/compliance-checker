@@ -9,8 +9,8 @@ from compliance_checker.suite import CheckSuite
 
 
 # TODO: Use inheritance to eliminate redundant code in test setup, etc
-class TestIOOSSOSGetCapabilities(unittest.TestCase):
-    def setUp(self):
+class TestIOOSSOSGetCapabilities:
+    def setup_method(self):
         with open(
             os.path.join(
                 os.path.dirname(__file__),
@@ -41,8 +41,8 @@ class TestIOOSSOSGetCapabilities(unittest.TestCase):
         ComplianceChecker.run_checker(url, ["ioos_sos"], 1, "normal")
 
 
-class TestIOOSSOSDescribeSensor(unittest.TestCase):
-    def setUp(self):
+class TestIOOSSOSDescribeSensor:
+    def setup_method(self):
         with open(
             os.path.join(
                 os.path.dirname(__file__),
