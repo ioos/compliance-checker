@@ -45,15 +45,3 @@ class BaseTestCase:
         # TODO: Fix cleanup
         # self.addCleanup(nc_dataset.close)
         return nc_dataset
-
-    def assert_result_is_good(self, result):
-        if isinstance(result.value, bool):
-            assert result.value
-        else:
-            assert result.value[0] == result.value[1]
-
-    def assert_result_is_bad(self, result):
-        if isinstance(result.value, bool):
-            assert not result.value
-        else:
-            assert result.value[0] != result.value[1]
