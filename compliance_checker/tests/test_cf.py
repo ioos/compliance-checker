@@ -1223,16 +1223,19 @@ class TestCF1_6(BaseTestCase):
         # canonical_units are K, should be False
         assert not (
             cfutil.is_dimensionless_standard_name(
-                std_names_xml_root, "sea_water_temperature",
+                std_names_xml_root,
+                "sea_water_temperature",
             )
         )
         # canonical_units are 1, should be True
         assert cfutil.is_dimensionless_standard_name(
-            std_names_xml_root, "sea_water_practical_salinity",
+            std_names_xml_root,
+            "sea_water_practical_salinity",
         )
         # canonical_units are 1e-3, should be True
         assert cfutil.is_dimensionless_standard_name(
-            std_names_xml_root, "sea_water_salinity",
+            std_names_xml_root,
+            "sea_water_salinity",
         )
 
     def test_check_time_coordinate(self):
@@ -3409,7 +3412,8 @@ class TestCFUtil(BaseTestCase):
         # has no geophysical vars, so should (?) (will) fail
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "timeseriesprofile",
+                nc,
+                "timeseriesprofile",
             )
         )
 
@@ -3418,7 +3422,8 @@ class TestCFUtil(BaseTestCase):
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1.setncattr("standard_name", "pressure")
         assert cfutil.is_dataset_valid_ragged_array_repr_featureType(
-            nc, "timeseriesprofile",
+            nc,
+            "timeseriesprofile",
         )
 
         nc = MockRaggedArrayRepr("timeSeriesProfile")
@@ -3433,7 +3438,8 @@ class TestCFUtil(BaseTestCase):
         v.setncattr("cf_role", "yeetyeet_id")
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "timeseriesprofile",
+                nc,
+                "timeseriesprofile",
             )
         )
 
@@ -3444,7 +3450,8 @@ class TestCFUtil(BaseTestCase):
 
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "timeseriesprofile",
+                nc,
+                "timeseriesprofile",
             )
         )
 
@@ -3455,7 +3462,8 @@ class TestCFUtil(BaseTestCase):
 
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "timeseriesprofile",
+                nc,
+                "timeseriesprofile",
             )
         )
 
@@ -3470,7 +3478,8 @@ class TestCFUtil(BaseTestCase):
         )
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "timeseriesprofile",
+                nc,
+                "timeseriesprofile",
             )
         )
 
@@ -3481,7 +3490,8 @@ class TestCFUtil(BaseTestCase):
         # has no geophysical vars, so should (?) (will) fail
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "trajectoryprofile",
+                nc,
+                "trajectoryprofile",
             )
         )
 
@@ -3490,7 +3500,8 @@ class TestCFUtil(BaseTestCase):
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1.setncattr("standard_name", "pressure")
         assert cfutil.is_dataset_valid_ragged_array_repr_featureType(
-            nc, "trajectoryprofile",
+            nc,
+            "trajectoryprofile",
         )
 
         nc = MockRaggedArrayRepr("trajectoryProfile")
@@ -3505,7 +3516,8 @@ class TestCFUtil(BaseTestCase):
         v.setncattr("cf_role", "yeetyeet_id")
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "trajectoryprofile",
+                nc,
+                "trajectoryprofile",
             )
         )
 
@@ -3516,7 +3528,8 @@ class TestCFUtil(BaseTestCase):
 
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "trajectoryprofile",
+                nc,
+                "trajectoryprofile",
             )
         )
 
@@ -3527,7 +3540,8 @@ class TestCFUtil(BaseTestCase):
 
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "trajectoryprofile",
+                nc,
+                "trajectoryprofile",
             )
         )
 
@@ -3542,6 +3556,7 @@ class TestCFUtil(BaseTestCase):
         )
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "trajectoryprofile",
+                nc,
+                "trajectoryprofile",
             )
         )
