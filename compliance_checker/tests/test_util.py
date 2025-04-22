@@ -2,7 +2,6 @@
 """
 compliance_checker/tests/test_util.py
 """
-import unittest
 
 from compliance_checker import util
 

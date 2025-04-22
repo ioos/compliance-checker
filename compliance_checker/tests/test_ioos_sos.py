@@ -1,5 +1,4 @@
 import os
-import unittest
 
 from mocket import mocketize
 from mocket.mockhttp import Entry

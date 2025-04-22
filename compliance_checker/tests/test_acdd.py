@@ -376,7 +376,7 @@ class TestACDD1_3(BaseTestCase):
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
         empty_ds = Dataset(os.devnull, "w", diskless=True, memory=True)
-        #self.addCleanup(empty_ds.close)
+        # self.addCleanup(empty_ds.close)
 
         # The dataset needs at least one variable to check that it's missing
         # all the required attributes.

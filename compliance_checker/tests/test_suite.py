@@ -1,15 +1,13 @@
 import os
-import unittest
 from importlib.resources import files
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.base import BaseCheck, GenericFile, Result
 from compliance_checker.suite import CheckSuite
-
-import pytest
 
 static_files = {
     "2dim": files("compliance_checker") / "tests/data/2dim-grid.nc",
@@ -195,7 +193,7 @@ class TestSuite:
             nc_file_path = static_files["test_cdl"].with_suffix(".nc")
             if os.path.exists(nc_file_path):
                 os.remove(nc_file_path)
-        
+
         # Register the cleanup function to be called after the test
         request.addfinalizer(remove_nc_file)
 

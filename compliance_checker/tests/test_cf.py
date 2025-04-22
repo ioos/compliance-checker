@@ -6,12 +6,11 @@ import os
 import re
 import sqlite3
 from itertools import chain
-from tempfile import gettempdir
 
 import numpy as np
 import pytest
 import requests_mock
-from netCDF4 import Dataset, stringtoarr
+from netCDF4 import stringtoarr
 
 from compliance_checker import cfutil
 from compliance_checker.cf.appendix_d import no_missing_terms
@@ -74,7 +73,6 @@ class TestCF1_6(BaseTestCase):
         """Initialize a CF1_6Check object."""
 
         self.cf = CF1_6Check()
-
 
     def test_extension(self):
         # TEST CONFORMANCE 2.1
@@ -1196,8 +1194,10 @@ class TestCF1_6(BaseTestCase):
         # blank string is not valid and won't match, ensure this is caught
         lev2.formula_terms = ""
         results = self.cf.check_dimensionless_vertical_coordinates(dataset)
-        assert ("§4.3.2: lev2's formula_terms is a required attribute and must be a non-empty string"
-                 in results[-1].msgs[0])
+        assert (
+            "§4.3.2: lev2's formula_terms is a required attribute and must be a non-empty string"
+            in results[-1].msgs[0]
+        )
 
     def test_is_time_variable(self):
         var1 = MockVariable()
@@ -1223,16 +1223,16 @@ class TestCF1_6(BaseTestCase):
         # canonical_units are K, should be False
         assert not (
             cfutil.is_dimensionless_standard_name(
-                std_names_xml_root, "sea_water_temperature"
+                std_names_xml_root, "sea_water_temperature",
             )
         )
         # canonical_units are 1, should be True
         assert cfutil.is_dimensionless_standard_name(
-            std_names_xml_root, "sea_water_practical_salinity"
+            std_names_xml_root, "sea_water_practical_salinity",
         )
         # canonical_units are 1e-3, should be True
         assert cfutil.is_dimensionless_standard_name(
-            std_names_xml_root, "sea_water_salinity"
+            std_names_xml_root, "sea_water_salinity",
         )
 
     def test_check_time_coordinate(self):
@@ -1542,8 +1542,7 @@ class TestCF1_6(BaseTestCase):
         res = self.cf._check_attr_type(att_name, att_type, att, _var)
         assert not res[0]
         assert (
-            res[1] ==
-            "test_att must be numeric and must be equivalent to float64 dtype"
+            res[1] == "test_att must be numeric and must be equivalent to float64 dtype"
         )
 
     def test_check_grid_mapping_attr_condition(self):
@@ -2776,10 +2775,12 @@ class TestCF1_7(BaseTestCase):
             # are same type should be false
             assert not r[0].value
             # TEST CONFORMANCE 8.1 REQUIRED 1/3
-            assert (r[0].msgs[0] ==
-                    "When both scale_factor and add_offset are supplied for "
-                    f"variable coarse_temp_{var_bytes}, they must have the "
-                    "same type")
+            assert (
+                r[0].msgs[0]
+                == "When both scale_factor and add_offset are supplied for "
+                f"variable coarse_temp_{var_bytes}, they must have the "
+                "same type"
+            )
             # Individual checks for scale_factor/add_offset should be OK,
             # however
             assert r[-1].value
@@ -2848,7 +2849,7 @@ class TestCF1_8(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["polygon_geometry"])
         self.cf.check_geometry(dataset)
         dataset.variables["interior_ring"] = MockVariable(
-            dataset.variables["interior_ring"]
+            dataset.variables["interior_ring"],
         )
         # Flip sign indicator for interior rings.  Should cause failure
         flip_ring_bits = (dataset.variables["interior_ring"][:] == 0).astype(int)
@@ -2895,7 +2896,7 @@ class TestCF1_8(BaseTestCase):
             )
             results = self.cf.check_taxa(dataset)
             assert messages[0].startswith(
-                "Taxon id must match one of the following forms:"
+                "Taxon id must match one of the following forms:",
             )
             assert results[0].value[0] < results[0].value[1]
 
@@ -3026,7 +3027,7 @@ class TestCF1_8(BaseTestCase):
             assert result.msgs == [
                 "Supplied taxon name and ITIS scientific name do not match. "
                 "Supplied taxon name is 'Morone saxitilis', ITIS scientific name "
-                "for TSN 162139 is 'Esox lucius.'"
+                "for TSN 162139 is 'Esox lucius.'",
             ]
 
     def test_taxonomy_skip_lsid(self):
@@ -3408,7 +3409,7 @@ class TestCFUtil(BaseTestCase):
         # has no geophysical vars, so should (?) (will) fail
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "timeseriesprofile"
+                nc, "timeseriesprofile",
             )
         )
 
@@ -3417,7 +3418,7 @@ class TestCFUtil(BaseTestCase):
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1.setncattr("standard_name", "pressure")
         assert cfutil.is_dataset_valid_ragged_array_repr_featureType(
-            nc, "timeseriesprofile"
+            nc, "timeseriesprofile",
         )
 
         nc = MockRaggedArrayRepr("timeSeriesProfile")
@@ -3432,7 +3433,7 @@ class TestCFUtil(BaseTestCase):
         v.setncattr("cf_role", "yeetyeet_id")
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "timeseriesprofile"
+                nc, "timeseriesprofile",
             )
         )
 
@@ -3443,7 +3444,7 @@ class TestCFUtil(BaseTestCase):
 
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "timeseriesprofile"
+                nc, "timeseriesprofile",
             )
         )
 
@@ -3454,7 +3455,7 @@ class TestCFUtil(BaseTestCase):
 
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "timeseriesprofile"
+                nc, "timeseriesprofile",
             )
         )
 
@@ -3469,7 +3470,7 @@ class TestCFUtil(BaseTestCase):
         )
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "timeseriesprofile"
+                nc, "timeseriesprofile",
             )
         )
 
@@ -3480,7 +3481,7 @@ class TestCFUtil(BaseTestCase):
         # has no geophysical vars, so should (?) (will) fail
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "trajectoryprofile"
+                nc, "trajectoryprofile",
             )
         )
 
@@ -3489,7 +3490,7 @@ class TestCFUtil(BaseTestCase):
         v1 = nc.createVariable("data1", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v1.setncattr("standard_name", "pressure")
         assert cfutil.is_dataset_valid_ragged_array_repr_featureType(
-            nc, "trajectoryprofile"
+            nc, "trajectoryprofile",
         )
 
         nc = MockRaggedArrayRepr("trajectoryProfile")
@@ -3504,7 +3505,7 @@ class TestCFUtil(BaseTestCase):
         v.setncattr("cf_role", "yeetyeet_id")
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "trajectoryprofile"
+                nc, "trajectoryprofile",
             )
         )
 
@@ -3515,7 +3516,7 @@ class TestCFUtil(BaseTestCase):
 
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "trajectoryprofile"
+                nc, "trajectoryprofile",
             )
         )
 
@@ -3526,7 +3527,7 @@ class TestCFUtil(BaseTestCase):
 
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "trajectoryprofile"
+                nc, "trajectoryprofile",
             )
         )
 
@@ -3541,5 +3542,6 @@ class TestCFUtil(BaseTestCase):
         )
         assert not (
             cfutil.is_dataset_valid_ragged_array_repr_featureType(
-                nc, "trajectoryprofile")
+                nc, "trajectoryprofile",
+            )
         )

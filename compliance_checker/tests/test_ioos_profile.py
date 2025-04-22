@@ -1,9 +1,7 @@
-import os
-
-import numpy as np
-from netCDF4 import Dataset
 
 import re
+
+import numpy as np
 
 from compliance_checker.ioos import (
     IOOS0_1Check,
@@ -632,12 +630,10 @@ class TestIOOS1_2(BaseTestCase):
         # email address is neither of the above, so should fail
         bad_result = validator.validate(test_attr_name, "webmaster.ioos.us@noaa.gov")
         assert not bad_result[0]
-        assert (
-            bad_result[1] ==
-            [
-                "naming_authority should either be a URL or a "
-                'reversed DNS name (e.g "edu.ucar.unidata")',
-            ])
+        assert bad_result[1] == [
+            "naming_authority should either be a URL or a "
+            'reversed DNS name (e.g "edu.ucar.unidata")',
+        ]
 
     def test_platform_id_validation(self):
         attn = "platform_id"
@@ -844,7 +840,33 @@ class TestIOOS1_2(BaseTestCase):
         )
         assert result.msgs[0] == expected_msg
         assert result.value[0] < result.value[1]
-        accepted_units = ( "meter", "meters", "inch", "foot", "yard", "mile", "miles", "US_survey_foot", "US_survey_feet", "fathom", "fathoms", "international_inch", "international_inches", "international_foot", "international_feet", "international_yard", "international_yards", "international_mile", "international_miles", "inches", "in", "feet", "ft", "yd", "mi",)
+        accepted_units = (
+            "meter",
+            "meters",
+            "inch",
+            "foot",
+            "yard",
+            "mile",
+            "miles",
+            "US_survey_foot",
+            "US_survey_feet",
+            "fathom",
+            "fathoms",
+            "international_inch",
+            "international_inches",
+            "international_foot",
+            "international_feet",
+            "international_yard",
+            "international_yards",
+            "international_mile",
+            "international_miles",
+            "inches",
+            "in",
+            "feet",
+            "ft",
+            "yd",
+            "mi",
+        )
         for units in accepted_units:
             nc_obj.variables["depth"].units = units
             result = self.ioos.check_vertical_coordinates(nc_obj)[0]

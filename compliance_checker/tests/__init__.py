@@ -32,8 +32,8 @@ class BaseTestCase:
         else:
             assert result.value[0] != result.value[1]
 
-    #@pytest.fixture
-    #def _nc_cleanup(self, request)
+    # @pytest.fixture
+    # def _nc_cleanup(self, request)
 
     def load_dataset(self, nc_dataset):
         """
@@ -44,7 +44,7 @@ class BaseTestCase:
 
         nc_dataset = Dataset(nc_dataset, "r", diskless=True)
         # TODO: Fix cleanup
-        #self.addCleanup(nc_dataset.close)
+        # self.addCleanup(nc_dataset.close)
         return nc_dataset
 
     def assert_result_is_good(self, result):
