@@ -3,7 +3,6 @@
 compliance_checker/tests/test_feature_detection.py
 """
 
-
 from netCDF4 import Dataset
 
 from compliance_checker import cfutil as util

@@ -1,4 +1,3 @@
-import unittest
 from pathlib import Path
 
 from netCDF4 import Dataset
