@@ -2,23 +2,22 @@
 """Tests for base compliance checker class"""
 
 import os
-from unittest import TestCase
 
 from netCDF4 import Dataset
 
 from compliance_checker import base
 
 
-class TestBase(TestCase):
+class TestBase:
     """
     Tests functionality of the base compliance checker class
     """
 
-    def setUp(self):
+    def setup_method(self):
         self.acdd = base.BaseCheck()
         self.ds = Dataset(filename=os.devnull, mode="w", diskless=True)
 
-    def tearDown(self):
+    def teardown_method(self):
         self.ds.close()
 
     def test_attr_presence(self):
@@ -103,37 +102,34 @@ class TestBase(TestCase):
         # should reflect that?
         ctx = self.acdd.get_test_ctx(base.BaseCheck.HIGH, "Dummy Name")
         ctx.assert_true(1 + 1 == 2, "One plus one equals two")
-        self.assertEqual(ctx.out_of, 1)
-        self.assertEqual(ctx.messages, [])
+        assert ctx.out_of == 1
+        assert ctx.messages == []
 
         # ctx2 should be receive the same test context
         ctx2 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, "Dummy Name")
-        self.assertIs(ctx, ctx2)
+        assert ctx is ctx2
         # will fail, obviously
         ctx2.assert_true(1 + 1 == 3, "One plus one equals three")
-        self.assertEqual(ctx.out_of, 2)
-        self.assertEqual(ctx2.out_of, 2)
-        self.assertEqual(ctx2.messages, ["One plus one equals three"])
+        assert ctx.out_of == 2
+        assert ctx2.out_of == 2
+        assert ctx2.messages == ["One plus one equals three"]
 
         ctx2 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, "Test Name", "test_var_name")
         ctx3 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, "Test Name", "test_var_name")
         # check that variable cache is working
-        self.assertIs(
-            ctx3,
-            (
-                self.acdd._defined_results["Test Name"]["test_var_name"][
-                    base.BaseCheck.HIGH
-                ]
-            ),
+        assert ctx3 is (
+            self.acdd._defined_results["Test Name"]["test_var_name"][
+                base.BaseCheck.HIGH
+            ]
         )
 
     def test_email_validation(self):
         test_attr_name = "test"
         validator = base.EmailValidator()
-        self.assertTrue(validator.validate(test_attr_name, "foo@bar.com")[0])
+        assert validator.validate(test_attr_name, "foo@bar.com")[0]
         bad_result = validator.validate(test_attr_name, "foo@@bar.com")
-        self.assertFalse(bad_result[0])
-        self.assertEqual(bad_result[1], ["test must be a valid email address"])
+        assert not bad_result[0]
+        assert bad_result[1] == ["test must be a valid email address"]
 
     def test_url_validation(self):
         """
@@ -144,33 +140,33 @@ class TestBase(TestCase):
         test_url = "ssh://invalid_url"
         validator = base.UrlValidator()
         bad_result = validator.validate(test_attr_name, test_url)
-        self.assertFalse(bad_result[0])
-        self.assertEqual(bad_result[1], ["test must be a valid URL"])
+        assert not bad_result[0]
+        assert bad_result[1] == ["test must be a valid URL"]
         # valid URL
         test_url = "https://ioos.us"
-        self.assertTrue(validator.validate(test_attr_name, test_url)[0])
+        assert validator.validate(test_attr_name, test_url)[0]
         # test with CSV splitting rules, including checks with embedded commas,
         # which can appear in parts of URLs
         validator = base.UrlValidator(base.csv_splitter)
         url_multi_string = '"http://some-scientific-site.com/depth,temp",https://ioos.us/,http://google.com'
-        self.assertTrue(validator.validate(test_attr_name, url_multi_string)[0])
+        assert validator.validate(test_attr_name, url_multi_string)[0]
         # add something that's invalid as a URL and check
         url_multi_string += ",noaa.ioos.webmaster@noaa.gov"
         bad_result = validator.validate(test_attr_name, url_multi_string)
-        self.assertFalse(bad_result[0])
-        self.assertEqual(bad_result[1], ["test must be a valid URL"])
+        assert not bad_result[0]
+        assert bad_result[1] == ["test must be a valid URL"]
 
 
-class TestGenericFile(TestCase):
+class TestGenericFile:
     """
     Tests the GenericFile class.
     """
 
-    def test_create_GenericFile_success(self):
+    def test_create_generic_file_success(self):
         path = "/tmp/test.txt"
         gf = base.GenericFile(path)
-        self.assertEqual(gf.filepath(), path)
+        assert gf.filepath() == path
 
-    def test_create_GenericFile_failure(self):
+    def test_create_generic_file_failure(self):
         gf = base.GenericFile("will not match")
-        self.assertNotEqual(gf.filepath(), "do NOT MATCH")
+        assert gf.filepath() != "do NOT MATCH"

@@ -88,10 +88,9 @@ class TestACDD1_1(BaseTestCase):
         ],
     }
 
-    def setUp(self):
+    def setup_method(self):
         # Use the NCEI Gold Standard Point dataset for ACDD checks
         self.ds = self.load_dataset(STATIC_FILES["ncei_gold_point_1"])
-
         self.acdd = ACDD1_1Check()
         self.acdd_highly_recommended = to_singleton_var(self.acdd.high_rec_atts)
         self.acdd_recommended = to_singleton_var(self.acdd.rec_atts)
@@ -121,11 +120,12 @@ class TestACDD1_1(BaseTestCase):
 
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        empty_ds = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(empty_ds.close)
+        # TODO: DRY these dataset open/close, possibly with pytest features
+        empty_ds = Dataset(os.devnull, "w", memory=True, diskless=True)
         results = self.acdd.check_high(empty_ds)
         for result in results:
             self.assert_result_is_bad(result)
+        empty_ds.close()
 
     def test_recommended(self):
         """
@@ -155,12 +155,12 @@ class TestACDD1_1(BaseTestCase):
 
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        empty_ds = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(empty_ds.close)
+        empty_ds = Dataset(os.devnull, "w", diskless=True, memory=True)
 
         results = self.acdd.check_recommended(empty_ds)
         for result in results:
             self.assert_result_is_bad(result)
+        empty_ds.close()
 
     def test_suggested(self):
         """
@@ -190,18 +190,18 @@ class TestACDD1_1(BaseTestCase):
 
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        empty_ds = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(empty_ds.close)
+        empty_ds = Dataset(os.devnull, "w", diskless=True, memory=True)
 
         results = self.acdd.check_recommended(empty_ds)
         for result in results:
             self.assert_result_is_bad(result)
+        empty_ds.close()
 
     def test_acknowldegement_check(self):
-        """Check both the British- and American-English spellings of 'acknowledgement'"""
+        """Check both the British and American English spellings of 'acknowledgement'"""
         # Check British Spelling
         try:
-            empty0 = Dataset(os.devnull, "w", diskless=True)
+            empty0 = Dataset(os.devnull, "w", diskless=True, memory=True)
             result = self.acdd.check_acknowledgment(empty0)
             self.assert_result_is_bad(result)
 
@@ -213,7 +213,7 @@ class TestACDD1_1(BaseTestCase):
 
         try:
             # Check American spelling
-            empty1 = Dataset(os.devnull, "w", diskless=True)
+            empty1 = Dataset(os.devnull, "w", diskless=True, memory=True)
             result = self.acdd.check_acknowledgment(empty1)
             self.assert_result_is_bad(result)
 
@@ -296,11 +296,10 @@ class TestACDD1_3(BaseTestCase):
         ],
     }
 
-    def setUp(self):
+    def setup_method(self):
         # Use the NCEI Gold Standard Point dataset for ACDD checks
         self.ds = self.load_dataset(STATIC_FILES["ncei_gold_point_2"])
         self.acdd = ACDD1_3Check()
-
         self.acdd_highly_recommended = to_singleton_var(self.acdd.high_rec_atts)
         self.acdd_recommended = to_singleton_var(self.acdd.rec_atts)
         self.acdd_suggested = to_singleton_var(self.acdd.sug_atts)
@@ -376,8 +375,8 @@ class TestACDD1_3(BaseTestCase):
         """
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        empty_ds = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(empty_ds.close)
+        empty_ds = Dataset(os.devnull, "w", diskless=True, memory=True)
+        # self.addCleanup(empty_ds.close)
 
         # The dataset needs at least one variable to check that it's missing
         # all the required attributes.
@@ -414,6 +413,8 @@ class TestACDD1_3(BaseTestCase):
         for result in results:
             self.assert_result_is_bad(result)
 
+        empty_ds.close()
+
     def test_vertical_extents(self):
         """
         Test vertical extents are being checked
@@ -429,7 +430,6 @@ class TestACDD1_3(BaseTestCase):
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
         empty_ds = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(empty_ds.close)
 
         # Misspelled WKT. Error message should include the attribute checked
         # and the value that was provided for easy troubleshooting
@@ -442,6 +442,7 @@ class TestACDD1_3(BaseTestCase):
                     f' possible bad value: "{empty_ds.geospatial_bounds}"'
                     in result.msgs
                 )
+        empty_ds.close()
 
     def test_time_extents(self):
         """
@@ -451,7 +452,6 @@ class TestACDD1_3(BaseTestCase):
         self.assert_result_is_good(result)
 
         empty_ds = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(empty_ds.close)
 
         # The dataset needs at least one variable to check that it's missing
         # all the required attributes.
@@ -469,6 +469,7 @@ class TestACDD1_3(BaseTestCase):
         empty_ds.time_coverage_end = "20160102T000000-1000"
         result = self.acdd.check_time_extents(empty_ds)
         self.assert_result_is_good(result)
+        empty_ds.close()
 
     def test_check_lat_extents(self):
         """Test the check_lat_extents() method behaves expectedly"""
