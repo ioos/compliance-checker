@@ -10,7 +10,7 @@ from itertools import chain
 import numpy as np
 import pytest
 import requests_mock
-from netCDF4 import stringtoarr
+from netCDF4 import Dataset, stringtoarr
 
 from compliance_checker import cfutil
 from compliance_checker.cf.appendix_d import no_missing_terms
@@ -3217,10 +3217,9 @@ class TestCF1_9(BaseTestCase):
         dataset.createVariable("cube_bad", "f8", ("lon", "lat", "depth", "time"))
         results = self.cf.check_domain_variables(dataset)
         assert (
-            "Variables named in the cell_measures attributes must "
-            "have a dimensions attribute with values that are a "
-            "subset of the referring domain variable's dimension "
-            "attribute" in results[0].msgs
+            "Variables named in the cell_measures attributes must have "
+            "dimensions with values that are a subset of the referring domain "
+            "variable's dimensions attribute" in results[0].msgs
         )
         del dataset
         dataset = MockTimeSeries()
