@@ -13,6 +13,7 @@ What's new in CF-1.8
 import itertools
 import re
 import warnings
+from collections import defaultdict
 
 import numpy as np
 import requests
@@ -119,19 +120,46 @@ class CF1_8Check(CF1_7Check):
             geometry=lambda g: g is not None,
         )
         results = []
-        unique_geometry_var_names = {var.geometry for var in vars_with_geometry}
+        unique_geometry_var_names = defaultdict(list)
+        for var in vars_with_geometry:
+            unique_geometry_var_names[var.geometry].append(var)
+
         if unique_geometry_var_names:
             geom_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.5"])
             geom_valid.out_of += 1
         for geometry_var_name in unique_geometry_var_names:
             if geometry_var_name not in ds.variables:
                 geom_valid.messages.append(
-                    "Cannot find geometry variable " f"named {geometry_var_name}",
+                    f"Cannot find geometry variable named {geometry_var_name}",
                 )
                 results.append(geom_valid.to_result())
                 continue
-            else:
-                geometry_var = ds.variables[geometry_var_name]
+            geometry_var = ds.variables[geometry_var_name]
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 10/20
+            # The grid_mapping and coordinates attributes can be carried by the
+            # geometry container variable provided they are also carried by the
+            # data variables associated with the container.
+            if hasattr(geometry_var, "coordinates") or hasattr(
+                geometry_var,
+                "grid_mapping",
+            ):
+                for parent_var in vars_with_geometry:
+                    for check_attribute in ("coordinates", "grid_mapping"):
+                        if hasattr(geometry_var, check_attribute):
+                            geom_valid.out_of += 1
+                            if getattr(geometry_var, check_attribute, None) != getattr(
+                                parent_var,
+                                check_attribute,
+                            ):
+                                geom_valid.messages.append(
+                                    f"Geometry variable {geometry_var_name} has "
+                                    f"attribute {check_attribute} which is "
+                                    "either not present or does not have the "
+                                    "same value as referring parent variable "
+                                    f"{parent_var.name}",
+                                )
+                            else:
+                                geom_valid.out_of += 1
 
             geometry_type = geometry_var.geometry_type
             try:

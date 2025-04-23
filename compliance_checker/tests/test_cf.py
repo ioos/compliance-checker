@@ -2811,7 +2811,15 @@ class TestCF1_8(BaseTestCase):
 
     def test_point_geometry_simple(self):
         dataset = MockTimeSeries()
-        fake_data = dataset.createVariable("someData", "f8", ("time",))
+        dataset.createDimension("instance", 1)
+        fake_data = dataset.createVariable(
+            "someData",
+            "f8",
+            (
+                "instance",
+                "time",
+            ),
+        )
         fake_data.geometry = "geometry"
         x = dataset.createVariable("x", "f8", ())
         y = dataset.createVariable("y", "f8", ())
@@ -2822,10 +2830,73 @@ class TestCF1_8(BaseTestCase):
         y[:] = 1
         self.cf.check_geometry(dataset)
 
+    @pytest.fixture
+    def geometry_ds(self):
+        dataset = MockTimeSeries()
+        dataset.createDimension("point_count", 3)
+        dataset.createDimension("instance", 1)
+        fake_data = dataset.createVariable("someData", "f8", ("instance", "time"))
+        fake_data.geometry = "geometry"
+        x = dataset.createVariable("x", "f8", ("point_count",))
+        y = dataset.createVariable("y", "f8", ("point_count",))
+        geom_var = dataset.createVariable("geometry", "i4", ())
+        geom_var.geometry_type = "point"
+        geom_var.node_coordinates = "x y"
+        x[:] = np.array([10, 20, 30])
+        y[:] = np.array([30, 35, 21])
+        return dataset
+
+    # TEST CONFORMANCE 7.5 REQUIRED 10/20
+    @pytest.mark.parametrize(
+        "geom_grid_mapping,geom_coordinates",
+        [(None, None), ("datum", None), (None, "x y"), ("datum", "x y")],
+    )
+    def test_coordinate_grid_mapping_geometry_ds_pass(
+        self,
+        geometry_ds,
+        geom_grid_mapping,
+        geom_coordinates,
+    ):
+        geometry_ds.variables["someData"].grid_mapping = "datum"
+        geom_gm_none = geom_grid_mapping is None
+        if not geom_gm_none:
+            geometry_ds.variables["geometry"].grid_mapping = geom_grid_mapping
+
+        geometry_ds.variables["someData"].coordinates = "x y"
+        geom_coords_none = geom_coordinates is None
+        if not geom_coords_none:
+            geometry_ds.variables["geometry"].coordinates = geom_coordinates
+        msg_template = (
+            "Geometry variable geometry has "
+            "attribute {} which is either not present or "
+            "does not have the same value as referring "
+            "parent variable someData"
+        )
+        results = self.cf.check_geometry(geometry_ds)
+        assert msg_template.format("grid_mapping") not in results[0].msgs
+        assert msg_template.format("coordinates") not in results[0].msgs
+
+        # try with possibly invalid data
+        # mismatch between parent variable coordinates/grid_mapping
+        # and geometry variable
+        if not geom_gm_none:
+            geometry_ds.variables["someData"].grid_mapping = "other_datum"
+            results = self.cf.check_geometry(geometry_ds)
+            assert msg_template.format("grid_mapping") in results[0].msgs
+        if not geom_coords_none:
+            geometry_ds.variables["someData"].coordinates = "u v"
+            results = self.cf.check_geometry(geometry_ds)
+            assert msg_template.format("coordinates") in results[0].msgs
+
     def test_point_geometry_multiple(self):
         dataset = MockTimeSeries()
         dataset.createDimension("point_count", 3)
-        fake_data = dataset.createVariable("someData", "f8", ("time",))
+        dataset.createDimension("instance", 1)
+        fake_data = dataset.createVariable(
+            "someData",
+            "f8",
+            ("instance", "time"),
+        )
         fake_data.geometry = "geometry"
         x = dataset.createVariable("x", "f8", ("point_count",))
         y = dataset.createVariable("y", "f8", ("point_count",))
