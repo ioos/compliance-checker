@@ -1,9 +1,9 @@
 import os
-import unittest
 from importlib.resources import files
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.base import BaseCheck, GenericFile, Result
@@ -21,11 +21,11 @@ static_files = {
 }
 
 
-class TestSuite(unittest.TestCase):
+class TestSuite:
     # @see
     # http://www.saltycrane.com/blog/2012/07/how-prevent-nose-unittest-using-docstring-when-verbosity-2/
 
-    def setUp(self):
+    def setup_method(self):
         self.cs = CheckSuite()
         self.cs.load_all_available_checkers()
 
@@ -78,7 +78,7 @@ class TestSuite(unittest.TestCase):
             # output
             self.cs.standard_output_generation(groups, limit, points, out_of, checker)
 
-    def test_generate_dataset_netCDF4(self):
+    def test_generate_dataset_net_cdf4(self):
         """
         Tests that suite.generate_dataset works with cdl file with netCDF4
         features.
@@ -114,7 +114,7 @@ class TestSuite(unittest.TestCase):
             att + " not present" for att in ACDDBaseCheck().high_rec_atts
         }
         # none of the skipped messages should be in the result set
-        self.assertTrue(len(msg_set & skipped_messages) == 0)
+        assert len(msg_set & skipped_messages) == 0
 
     def test_skip_check_level(self):
         """Checks level limited skip checks"""
@@ -140,15 +140,15 @@ class TestSuite(unittest.TestCase):
             "§3.5 lon is a valid flags variable",
         }
 
-        self.assertTrue(len(expected_excluded_names & name_set) == 0)
+        assert len(expected_excluded_names & name_set) == 0
 
         # should skip references
         ref_msg = "references global attribute should be a non-empty string"
-        self.assertTrue(ref_msg not in msg_set)
+        assert ref_msg not in msg_set
         # check_standard_name is high priority, but we requested only low,
         # so the standard_name check should still exist
         standard_name_hdr = "§3.3 Standard Name"
-        self.assertTrue(standard_name_hdr in name_set)
+        assert standard_name_hdr in name_set
 
     def test_group_func(self):
         # This is checking for issue #183, where group_func results in
@@ -181,12 +181,23 @@ class TestSuite(unittest.TestCase):
             Result(BaseCheck.MEDIUM, np.isnan(1), "two"),  # value is type numpy.bool_
         ]
         score = self.cs.scores(res)
-        self.assertEqual(score[0].name, "one")
-        self.assertEqual(score[0].value, (2, 4))
-        self.assertEqual(score[1].name, "two")
-        self.assertEqual(score[1].value, (1, 2))
+        assert score[0].name == "one"
+        assert score[0].value == (2, 4)
+        assert score[1].name == "two"
+        assert score[1].value == (1, 2)
 
-    def test_cdl_file(self):
+    @pytest.fixture
+    def cleanup_nc_file(self, request):
+        # Define the cleanup function
+        def remove_nc_file():
+            nc_file_path = static_files["test_cdl"].with_suffix(".nc")
+            if os.path.exists(nc_file_path):
+                os.remove(nc_file_path)
+
+        # Register the cleanup function to be called after the test
+        request.addfinalizer(remove_nc_file)
+
+    def test_cdl_file(self, cleanup_nc_file):
         # Testing whether you can run compliance checker on a .cdl file
         # Load the cdl file
         ds = self.cs.load_dataset(static_files["test_cdl"])
@@ -236,14 +247,11 @@ class TestSuite(unittest.TestCase):
             )
         ds.close()
 
-        nc_file_path = static_files["test_cdl"].with_suffix(".nc")
-        self.addCleanup(os.remove, nc_file_path)
-
         # Ok the scores should be equal!
-        self.assertEqual(nc_points, cdl_points)
-        self.assertEqual(nc_out_of, cdl_out_of)
+        assert nc_points == cdl_points
+        assert nc_out_of == cdl_out_of
 
-    def test_load_local_dataset_GenericFile(self):
+    def test_load_local_dataset_generic_file(self):
         resp = self.cs.load_local_dataset(static_files["empty"])
         assert isinstance(resp, GenericFile)
 
@@ -265,7 +273,7 @@ class TestSuite(unittest.TestCase):
         )
         assert all_passed < out_of
 
-    def test_netCDF4_features(self):
+    def test_net_cdf4_features(self):
         """
         Check if a proper netCDF4 file with netCDF4-datatypes is created.
         """

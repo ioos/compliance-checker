@@ -1,7 +1,6 @@
-import os
+import re
 
 import numpy as np
-from netCDF4 import Dataset
 
 from compliance_checker.ioos import (
     IOOS0_1Check,
@@ -21,7 +20,7 @@ class TestIOOS0_1(BaseTestCase):
     Tests for the IOOS Inventory Metadata v0.1
     """
 
-    def setUp(self):
+    def setup_method(self):
         # Use the NCEI Gold Standard Point dataset for IOOS checks
         self.ds = self.load_dataset(STATIC_FILES["ncei_gold_point_1"])
 
@@ -38,8 +37,7 @@ class TestIOOS0_1(BaseTestCase):
 
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        nc_obj = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(nc_obj.close)
+        nc_obj = MockTimeSeries()
 
         results = self.ioos.check_global_attributes(nc_obj)
         for result in results:
@@ -66,12 +64,10 @@ class TestIOOS0_1(BaseTestCase):
 
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        nc_obj = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(nc_obj.close)
+        nc_obj = MockTimeSeries()
 
         # The dataset needs at least one variable to check that it's missing
         # all the required attributes.
-        nc_obj.createDimension("time", 1)
         nc_obj.createVariable("platform", "S1", ())
 
         platform = nc_obj.variables["platform"]
@@ -100,12 +96,10 @@ class TestIOOS0_1(BaseTestCase):
 
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        nc_obj = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(nc_obj.close)
+        nc_obj = MockTimeSeries()
 
         # The dataset needs at least one variable to check that it's missing
         # all the required attributes.
-        nc_obj.createDimension("time", 1)
         nc_obj.createVariable("sample_var", "d", ("time",))
 
         sample_var = nc_obj.variables["sample_var"]
@@ -130,12 +124,10 @@ class TestIOOS0_1(BaseTestCase):
         # Now test an nc file with a 'z' variable without units
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        nc_obj = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(nc_obj.close)
+        nc_obj = MockTimeSeries()
 
         # The dataset needs at least one variable to check that it's missing
         # all the required attributes.
-        nc_obj.createDimension("time", 1)
         nc_obj.createVariable("z", "d", ("time",))
         z = nc_obj.variables["z"]
         z.short_name = "sample_var"
@@ -150,7 +142,7 @@ class TestIOOS1_1(BaseTestCase):
     for NetCDF, Version 1.1
     """
 
-    def setUp(self):
+    def setup_method(self):
         # Use the IOOS 1_1 dataset for testing
         self.ds = self.load_dataset(STATIC_FILES["ioos_gold_1_1"])
 
@@ -183,14 +175,10 @@ class TestIOOS1_1(BaseTestCase):
         Tests that the platform variable attributes check is working
         """
 
-        # Create an empty dataset that writes to /dev/null This acts as a
-        # temporary netCDF file in-memory that never gets written to disk.
-        nc_obj = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(nc_obj.close)
+        nc_obj = MockTimeSeries()
 
         # The dataset needs at least one variable to check that it's missing
         # all the required attributes.
-        nc_obj.createDimension("time", 1)
         nc_obj.platform = "platform"
         # global attribute 'platform' points to variable that does not exist in dataset
 
@@ -214,12 +202,9 @@ class TestIOOS1_1(BaseTestCase):
 
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        nc_obj = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(nc_obj.close)
-
+        nc_obj = MockTimeSeries()
         # The dataset needs at least one variable to check that it's missing
         # all the required attributes.
-        nc_obj.createDimension("time", 1)
         nc_obj.createVariable("sample_var", "d", ("time",))
         # Define some variable attributes but don't specify _FillValue
         sample_var = nc_obj.variables["sample_var"]
@@ -246,12 +231,10 @@ class TestIOOS1_1(BaseTestCase):
 
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        nc_obj = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(nc_obj.close)
+        nc_obj = MockTimeSeries()
 
         # The dataset needs at least one variable to check that it's missing
         # all the required attributes.
-        nc_obj.createDimension("time", 1)
         nc_obj.createVariable("sample_var", "d", ("time",))
         # Define some variable attributes but don't specify _FillValue
         sample_var = nc_obj.variables["sample_var"]
@@ -278,12 +261,10 @@ class TestIOOS1_1(BaseTestCase):
 
         # Create an empty dataset that writes to /dev/null This acts as a
         # temporary netCDF file in-memory that never gets written to disk.
-        nc_obj = Dataset(os.devnull, "w", diskless=True)
-        self.addCleanup(nc_obj.close)
+        nc_obj = MockTimeSeries()
 
         # The dataset needs at least one variable to check that it's missing
         # all the required attributes.
-        nc_obj.createDimension("time", 1)
         nc_obj.createVariable("temperature", "d", ("time",))
         # Define some variable attributes but don't specify _FillValue
         sample_var = nc_obj.variables["temperature"]
@@ -310,7 +291,7 @@ class TestIOOS1_2(BaseTestCase):
     for NetCDF, Version 1.1
     """
 
-    def setUp(self):
+    def setup_method(self):
         self.ioos = IOOS1_2Check()
 
     def test_check_geophysical_vars_have_attrs(self):
@@ -321,7 +302,7 @@ class TestIOOS1_2(BaseTestCase):
         # should fail here
         results = self.ioos.check_geophysical_vars_have_attrs(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # set the necessary attributes
         ds = MockTimeSeries(default_fill_value=9999999999.0)  # time, lat, lon, depth
@@ -343,7 +324,7 @@ class TestIOOS1_2(BaseTestCase):
 
         results = self.ioos.check_geophysical_vars_have_attrs(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
     def test_check_accuracy_precision_resolution(self):
         # doesn't have accuracy, precision, resolution, should fail
@@ -358,14 +339,14 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("standard_name", "sea_water_temperature")
         results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # add non-numeric vals for accuracy
         # no gts_ingest attr, so only existence tested
         temp.setncattr("accuracy", "bad")
         results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         # add gts_ingest, accuracy should be numeric
         temp.setncattr("gts_ingest", "true")
@@ -373,7 +354,7 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("accuracy", "45")
         results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # add numeric for accuracy
         temp.setncattr("gts_ingest", "true")
@@ -381,7 +362,7 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("accuracy", 45)
         results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
     def test_check_geospatial_vars_have_attrs(self):
         # create geophysical variable
@@ -395,14 +376,14 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("standard_name", "sea_water_temperature")
         results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # add non-numeric vals for accuracy
         # no gts_ingest attr, so only existence tested
         temp.setncattr("accuracy", "bad")
         results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         # add gts_ingest, accuracy should be numeric
         temp.setncattr("gts_ingest", "true")
@@ -410,7 +391,7 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("accuracy", "45")
         results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # add numeric for accuracy
         temp.setncattr("gts_ingest", "true")
@@ -418,7 +399,7 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("accuracy", 45)
         results = self.ioos.check_accuracy(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
     def test_check_creator_and_publisher_type(self):
         """
@@ -432,7 +413,7 @@ class TestIOOS1_2(BaseTestCase):
         ds = MockTimeSeries()
         # values which are not set/specified default to person, which is valid
         result_list = self.ioos.check_creator_and_publisher_type(ds)
-        self.assertTrue(all(res.value for res in result_list))
+        assert all(res.value for res in result_list)
         # create invalid values for attribute
         ds.setncattr("creator_type", "PI")
         ds.setncattr("publisher_type", "Funder")
@@ -442,35 +423,35 @@ class TestIOOS1_2(BaseTestCase):
             r"\(\['group', 'institution', 'person', 'position'\]\)$"
         )
         for res in result_list:
-            self.assertFalse(res.value)
-            self.assertRegex(res.msgs[0], err_regex)
+            assert not res.value
+            assert re.match(err_regex, res.msgs[0])
         # good values
         ds.setncattr("creator_type", "person")
         ds.setncattr("publisher_type", "institution")
         result_list = self.ioos.check_creator_and_publisher_type(ds)
-        self.assertTrue(all(res.value for res in result_list))
+        assert all(res.value for res in result_list)
 
     def test_check_gts_ingest_global(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
 
         # no gts_ingest_requirements, should pass
         result = self.ioos.check_gts_ingest_global(ds)
-        self.assertTrue(result.value)
-        self.assertEqual(result.msgs, [])
+        assert result.value
+        assert result.msgs == []
 
         # passing value
         ds.setncattr("gts_ingest", "true")
         result = self.ioos.check_gts_ingest_global(ds)
-        self.assertTrue(result.value)
-        self.assertEqual(result.msgs, [])
+        assert result.value
+        assert result.msgs == []
 
         ds.setncattr("gts_ingest", "false")
         result = self.ioos.check_gts_ingest_global(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
         ds.setncattr("gts_ingest", "notgood")
         result = self.ioos.check_gts_ingest_global(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
     def test_check_gts_ingest_requirements(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -481,27 +462,27 @@ class TestIOOS1_2(BaseTestCase):
 
         # no gts_ingest_requirements, should pass
         result = self.ioos.check_gts_ingest_requirements(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # flag for ingest, no variables flagged - default pass
         ds.setncattr("gts_ingest", "true")
         result = self.ioos.check_gts_ingest_requirements(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # give one variable the gts_ingest attribute
         # no standard_name or ancillary vars, should fail
         ds.variables["time"].setncattr("gts_ingest", "true")
         result = self.ioos.check_gts_ingest_requirements(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # no ancillary vars, should fail
         ds.variables["time"].setncattr("gts_ingest", "true")
         ds.variables["time"].setncattr("standard_name", "time")
         result = self.ioos.check_gts_ingest_requirements(ds)
-        self.assertFalse(result.value)
-        self.assertIn(
-            "The following variables did not qualify for NDBC/GTS Ingest: time\n",
-            result.msgs,
+        assert not result.value
+        assert (
+            "The following variables did not qualify for NDBC/GTS Ingest: time\n"
+            in result.msgs
         )
 
         # set ancillary var with bad standard name
@@ -509,30 +490,30 @@ class TestIOOS1_2(BaseTestCase):
         tmp.setncattr("standard_name", "bad")
         ds.variables["time"].setncattr("ancillary_variables", "tmp")
         result = self.ioos.check_gts_ingest_requirements(ds)
-        self.assertFalse(result.value)
-        self.assertIn(
-            "The following variables did not qualify for NDBC/GTS Ingest: time\n",
-            result.msgs,
+        assert not result.value
+        assert (
+            "The following variables did not qualify for NDBC/GTS Ingest: time\n"
+            in result.msgs
         )
 
         # good ancillary var standard name, time units are bad
         tmp.setncattr("standard_name", "aggregate_quality_flag")
         ds.variables["time"].setncattr("units", "bad since bad")
         result = self.ioos.check_gts_ingest_requirements(ds)
-        self.assertFalse(result.value)
-        self.assertIn(
-            "The following variables did not qualify for NDBC/GTS Ingest: time\n",
-            result.msgs,
+        assert not result.value
+        assert (
+            "The following variables did not qualify for NDBC/GTS Ingest: time\n"
+            in result.msgs
         )
 
         # good ancillary var stdname, good units, pass
         tmp.setncattr("standard_name", "aggregate_quality_flag")
         ds.variables["time"].setncattr("units", "seconds since 1970-01-01T00:00:00Z")
         result = self.ioos.check_gts_ingest_requirements(ds)
-        self.assertFalse(result.value)
-        self.assertIn(
-            "The following variables qualified for NDBC/GTS Ingest: time\n",
-            result.msgs,
+        assert not result.value
+        assert (
+            "The following variables qualified for NDBC/GTS Ingest: time\n"
+            in result.msgs
         )
 
     def test_check_instrument_variables(self):
@@ -541,7 +522,7 @@ class TestIOOS1_2(BaseTestCase):
         # no instrument variable, should pass
         results = self.ioos.check_instrument_variables(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         temp = ds.createVariable("temp", np.float64, dimensions=("time",))
         temp.setncattr("cf_role", "timeseries")
@@ -556,65 +537,65 @@ class TestIOOS1_2(BaseTestCase):
         instr.setncattr("component", "someComponent")
         results = self.ioos.check_instrument_variables(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         # give discriminant
         instr.setncattr("discriminant", "someDiscriminant")
         results = self.ioos.check_instrument_variables(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         # bad component
         instr.setncattr("component", 45)
         results = self.ioos.check_instrument_variables(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
     def test_check_wmo_platform_code(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
 
         # no wmo_platform_code, pass
         result = self.ioos.check_wmo_platform_code(ds)
-        self.assertTrue(result.value)
-        self.assertEqual(result.msgs, [])
+        assert result.value
+        assert result.msgs == []
 
         # valid code
         ds.setncattr("wmo_platform_code", "12345")
         result = self.ioos.check_wmo_platform_code(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
         # valid code
         ds.setncattr("wmo_platform_code", "7654321")
         result = self.ioos.check_wmo_platform_code(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
         # alphanumeric, valid
         ds.setncattr("wmo_platform_code", "abcd1")
         result = self.ioos.check_wmo_platform_code(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
         # invalid length, fail
         ds.setncattr("wmo_platform_code", "123")
         result = self.ioos.check_wmo_platform_code(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # alphanumeric len 7, fail
         ds.setncattr("wmo_platform_code", "1a2b3c7")
         result = self.ioos.check_wmo_platform_code(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
     def test_check_standard_name(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
         # all standard names on variables
         results = self.ioos.check_standard_name(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         # all standard names except for depth
         del ds.variables["depth"].standard_name
         results = self.ioos.check_standard_name(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # have to recreate here or temperature gives KeyError despite appearing
         # deleted -- why?
@@ -624,103 +605,100 @@ class TestIOOS1_2(BaseTestCase):
         qr.setncattr("flag_meanings", "blah")
         results = self.ioos.check_standard_name(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # bad standard name
         qr.setncattr("standard_name", "blah")
         results = self.ioos.check_standard_name(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # good standard name
         qr.setncattr("standard_name", "spike_test_quality_flag")
         results = self.ioos.check_standard_name(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
     def test_naming_authority_validation(self):
         test_attr_name = "naming_authority"
         validator = NamingAuthorityValidator()
         # check URL - should pass
-        self.assertTrue(validator.validate(test_attr_name, "https://ioos.us")[0])
+        assert validator.validate(test_attr_name, "https://ioos.us"[0])
         # check reverse DNS - should pass
-        self.assertTrue(validator.validate(test_attr_name, "edu.ucar.unidata")[0])
+        assert validator.validate(test_attr_name, "edu.ucar.unidata"[0])
         # email address is neither of the above, so should fail
         bad_result = validator.validate(test_attr_name, "webmaster.ioos.us@noaa.gov")
-        self.assertFalse(bad_result[0])
-        self.assertEqual(
-            bad_result[1],
-            [
-                "naming_authority should either be a URL or a "
-                'reversed DNS name (e.g "edu.ucar.unidata")',
-            ],
-        )
+        assert not bad_result[0]
+        assert bad_result[1] == [
+            "naming_authority should either be a URL or a "
+            'reversed DNS name (e.g "edu.ucar.unidata")',
+        ]
 
     def test_platform_id_validation(self):
         attn = "platform_id"
         attv = "alphaNum3R1C"
         v = IOOS1_2_PlatformIDValidator()
-        self.assertTrue(v.validate(attn, attv)[0])
+        assert v.validate(attn, attv)[0]
 
         attv = "alpha"
         v = IOOS1_2_PlatformIDValidator()
-        self.assertTrue(v.validate(attn, attv)[0])
+        assert v.validate(attn, attv)[0]
 
         attv = "311123331112"
         v = IOOS1_2_PlatformIDValidator()
-        self.assertTrue(v.validate(attn, attv)[0])
+        assert v.validate(attn, attv)[0]
 
         attv = "---fail---"
         v = IOOS1_2_PlatformIDValidator()
-        self.assertFalse(v.validate(attn, attv)[0])
+        assert not v.validate(attn, attv)[0]
 
     def test_check_platform_global(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
 
         # no global attr, fail
-        self.assertFalse(self.ioos.check_platform_global(ds).value)
+        assert not self.ioos.check_platform_global(ds).value
 
         # bad global attr, fail
         ds.setncattr("platform", "bad value")
-        self.assertFalse(self.ioos.check_platform_global(ds).value)
+        assert not self.ioos.check_platform_global(ds).value
 
         # another bad value
         ds.setncattr("platform", " bad")
-        self.assertFalse(self.ioos.check_platform_global(ds).value)
+        assert not self.ioos.check_platform_global(ds).value
 
         # good value
         ds.setncattr("platform", "single_string")
         res = self.ioos.check_platform_global(ds)
-        self.assertTrue(res.value)
-        self.assertEqual(res.msgs, [])
+        assert res.value
+        assert res.msgs == []
 
     def test_check_single_platform(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
 
         # no global attr but also no platform variables, should pass
         result = self.ioos.check_single_platform(ds)
-        self.assertTrue(result.value)
-        self.assertEqual(result.msgs, [])
+        assert result.value
+        assert result.msgs == []
 
         # give platform global, no variables, fail
         ds.setncattr("platform", "buoy")
         result = self.ioos.check_single_platform(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # global platform, one platform variable, pass
         temp = ds.createVariable("temp", "d", ("time"))
         temp.setncattr("platform", "platform_var")
         ds.createVariable("platform_var", np.byte)
         result = self.ioos.check_single_platform(ds)
-        self.assertTrue(result.value)
-        self.assertEqual(result.msgs, [])
+        assert result.value
+        assert result.msgs == []
 
         # two platform variables, fail
         temp2 = ds.createVariable("temp2", "d", ("time"))
         temp2.setncattr("platform", "platform_var2")
         ds.createVariable("platform_var2", np.byte)
         result = self.ioos.check_single_platform(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # no global attr, one variable, fail
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -728,17 +706,17 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("platform", "platform_var")
         ds.createVariable("platform_var", np.byte)
         result = self.ioos.check_single_platform(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
     def test_check_platform_vocabulary(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
         ds.setncattr("platform_vocabulary", "http://google.com")
         result = self.ioos.check_platform_vocabulary(ds)
-        self.assertTrue(result.value)
-        self.assertEqual(result.msgs, [])
+        assert result.value
+        assert result.msgs == []
 
         ds.setncattr("platform_vocabulary", "bad")
-        self.assertFalse(self.ioos.check_platform_vocabulary(ds).value)
+        assert not self.ioos.check_platform_vocabulary(ds).value
 
     def test_check_qartod_variables_flags(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -746,41 +724,41 @@ class TestIOOS1_2(BaseTestCase):
         # no QARTOD variables
         results = self.ioos.check_qartod_variables_flags(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         # QARTOD variable without flag_values, flag_meanings (fail)
         qr = ds.createVariable("depth_qc", np.byte)
         qr.setncattr("standard_name", "spike_test_quality_flag")
         results = self.ioos.check_qartod_variables_flags(ds)
-        self.assertTrue(not any(r.value for r in results))  # all False
+        assert not any(r.value for r in results)  # all False
 
         # QARTOD variable with flag meanings, without flag_meanings
         qr.setncattr("flag_values", np.array([0, 1, 2], dtype=np.byte))
         results = self.ioos.check_qartod_variables_flags(ds)
-        self.assertIn(
-            "Variable depth_qc must have attribute flag_meanings defined when flag_values attribute is present",
-            results[0].msgs,
+        assert (
+            "Variable depth_qc must have attribute flag_meanings defined when flag_values attribute is present"
+            in results[0].msgs
         )
-        self.assertNotEqual(results[0].value[0], results[0].value[1])  # should fail
-        self.assertFalse(results[1].value)  # still fail
+        assert results[0].value[0] != results[0].value[1]  # should fail
+        assert not results[1].value  # still fail
 
         # QARTOD variable with flag meanings, flag_values
         qr.setncattr("flag_meanings", "x y z")  # alphanumeric, space-separated
         results = self.ioos.check_qartod_variables_flags(ds)
-        self.assertEqual(results[0].value[0], results[0].value[1])  # pass
-        self.assertEqual(results[1].value[0], results[1].value[1])  # pass
+        assert results[0].value[0] == results[0].value[1]  # pass
+        assert results[1].value[0] == results[1].value[1]  # pass
 
         # flag_values array not equal to length of flag_meanings
         qr.setncattr("flag_values", np.array([0, 1], dtype=np.byte))
         results = self.ioos.check_qartod_variables_flags(ds)
-        self.assertLess(results[0].value[0], results[0].value[1])  # should fail
-        self.assertEqual(results[1].value[0], results[1].value[1])  # pass
+        assert results[0].value[0] < results[0].value[1]  # should fail
+        assert results[1].value[0] == results[1].value[1]  # pass
 
         # flag_values right length, wrong type
         qr.setncattr("flag_values", np.array([0, 1, 2], dtype=np.float64))
         results = self.ioos.check_qartod_variables_flags(ds)
-        self.assertLess(results[0].value[0], results[0].value[1])  # should fail
-        self.assertEqual(results[1].value[0], results[1].value[1])  # pass
+        assert results[0].value[0] < results[0].value[1]  # should fail
+        assert results[1].value[0] == results[1].value[1]  # pass
 
     def test_check_qartod_variables_references(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -788,20 +766,20 @@ class TestIOOS1_2(BaseTestCase):
         # no QARTOD variables
         results = self.ioos.check_qartod_variables_references(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         # QARTOD variable without references (fail)
         qr = ds.createVariable("depth_qc", np.byte)
         qr.setncattr("flag_meanings", "blah")
         qr.setncattr("standard_name", "spike_test_quality_flag")
         results = self.ioos.check_qartod_variables_references(ds)
-        self.assertFalse(all(r.value for r in results))
+        assert not all(r.value for r in results)
 
         # QARTOD variable with references (pass)
         qr.setncattr("references", "http://services.cormp.org/quality.php")
         results = self.ioos.check_qartod_variables_references(ds)
-        self.assertTrue(all(r.value for r in results))
-        self.assertEqual(results[0].msgs, [])  # only one Result to test
+        assert all(r.value for r in results)
+        assert results[0].msgs == []  # only one Result to test
 
         # QARTOD variable with bad references (fail)
         qr.setncattr(
@@ -809,48 +787,48 @@ class TestIOOS1_2(BaseTestCase):
             r"p9q384ht09q38@@####???????////??//\/\/\/\//\/\74ht",
         )
         results = self.ioos.check_qartod_variables_references(ds)
-        self.assertFalse(all(r.value for r in results))
+        assert not all(r.value for r in results)
 
     def test_check_ioos_ingest(self):
         ds = MockTimeSeries()
 
         # no value, pass
         res = self.ioos.check_ioos_ingest(ds)
-        self.assertTrue(res.value)
-        self.assertEqual(res.msgs, [])
+        assert res.value
+        assert res.msgs == []
 
         # value false
         ds.setncattr("ioos_ingest", "false")
-        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+        assert self.ioos.check_ioos_ingest(ds).value
 
         # value true
         ds.setncattr("ioos_ingest", "true")
-        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+        assert self.ioos.check_ioos_ingest(ds).value
 
         # case insensitive
         ds.setncattr("ioos_ingest", "True")
-        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+        assert self.ioos.check_ioos_ingest(ds).value
         ds.setncattr("ioos_ingest", "False")
-        self.assertTrue(self.ioos.check_ioos_ingest(ds).value)
+        assert self.ioos.check_ioos_ingest(ds).value
 
         # anything else fails
         ds.setncattr("ioos_ingest", "badval")
-        self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
+        assert not self.ioos.check_ioos_ingest(ds).value
         ds.setncattr("ioos_ingest", 0)
-        self.assertFalse(self.ioos.check_ioos_ingest(ds).value)
+        assert not self.ioos.check_ioos_ingest(ds).value
 
     def test_vertical_dimension(self):
         # MockTimeSeries has a depth variable, with axis of 'Z', units of 'm',
         # and positive = 'down'
         nc_obj = MockTimeSeries()
         result = self.ioos.check_vertical_coordinates(nc_obj)[0]
-        self.assertEqual(*result.value)
+        assert result.value[0] == result.value[1]
         nc_obj.variables["depth"].positive = "upwards"
         result = self.ioos.check_vertical_coordinates(nc_obj)[0]
-        self.assertNotEqual(*result.value)
+        assert result.value[0] < result.value[1]
         nc_obj.variables["depth"].positive = "up"
         result = self.ioos.check_vertical_coordinates(nc_obj)[0]
-        self.assertEqual(*result.value)
+        assert result.value[0] == result.value[1]
         # test units
         nc_obj.variables["depth"].units = "furlong"
         result = self.ioos.check_vertical_coordinates(nc_obj)[0]
@@ -859,8 +837,8 @@ class TestIOOS1_2(BaseTestCase):
             "one of ('meter', 'inch', 'foot', 'yard', "
             "'US_survey_foot', 'mile', 'fathom')"
         )
-        self.assertEqual(result.msgs[0], expected_msg)
-        self.assertNotEqual(*result.value)
+        assert result.msgs[0] == expected_msg
+        assert result.value[0] < result.value[1]
         accepted_units = (
             "meter",
             "meters",
@@ -891,7 +869,7 @@ class TestIOOS1_2(BaseTestCase):
         for units in accepted_units:
             nc_obj.variables["depth"].units = units
             result = self.ioos.check_vertical_coordinates(nc_obj)[0]
-            self.assertEqual(*result.value)
+            assert result.value[0] == result.value[1]
 
     def test_check_contributor_role_and_vocabulary(self):
         ds = MockTimeSeries()
@@ -899,13 +877,13 @@ class TestIOOS1_2(BaseTestCase):
         # no values, fail
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # valid role, no vocab, fail
         ds.setncattr("contributor_role", "editor")
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # valid role, valid vocab, pass
         ds.setncattr(
@@ -914,7 +892,7 @@ class TestIOOS1_2(BaseTestCase):
         )
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         # one valid role, one valid vocab, should fail
         ds.setncattr("contributor_role", "editor,notvalid")
@@ -924,7 +902,7 @@ class TestIOOS1_2(BaseTestCase):
         )
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # both valid
         ds.setncattr("contributor_role", "editor,coAuthor")
@@ -934,19 +912,19 @@ class TestIOOS1_2(BaseTestCase):
         )
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         # bad value type
         ds.setncattr("contributor_role", 21)
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         ds.setncattr("contributor_role", "editor,coAuthor")
         ds.setncattr("contributor_role_vocabulary", 64)
         results = self.ioos.check_contributor_role_and_vocabulary(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
     def test_check_feattype_timeseries_cf_role(self):
         # featureType: timeseries and timeseries - msingle station require same tests
@@ -959,7 +937,7 @@ class TestIOOS1_2(BaseTestCase):
 
         # no platform variables or geophys vars with cf_role=timeseries_id, fail
         result = self.ioos._check_feattype_timeseries_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # create dimensionless platform variable, set bad cf_role
         plat = ds.createVariable("station", "|S1", ())
@@ -968,12 +946,12 @@ class TestIOOS1_2(BaseTestCase):
 
         # should still fail as no vars with cf_role=timeseries_id exist
         result = self.ioos._check_feattype_timeseries_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # set correct cf_role on platform var, should fail as dim == 0
         plat.setncattr("cf_role", "timeseries_id")
         result = self.ioos._check_feattype_timeseries_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # remove platform variable, put cf_role on variable "station", should fail as dim = 0
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -982,7 +960,7 @@ class TestIOOS1_2(BaseTestCase):
         plat = ds.createVariable("station", "|S1", dimensions=("timeseries_dim"))
         plat.setncattr("cf_role", "timeseries_id")
         result = self.ioos._check_feattype_timeseries_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # remove cf_role from station variable, put it on another with dim = 1
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -991,7 +969,7 @@ class TestIOOS1_2(BaseTestCase):
         plat = ds.createVariable("station", "|S1", dimensions=("station_dim"))
         plat.setncattr("cf_role", "timeseries_id")
         result = self.ioos._check_feattype_timeseries_cf_role(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
         # featureType = timeseries - multiple station can have cf_role be on a var with dim >= 1
         # but still fails the check so as to display message
@@ -1002,7 +980,7 @@ class TestIOOS1_2(BaseTestCase):
         plat = ds.createVariable("station", "|S1", dimensions=("station_dim"))
         plat.setncattr("cf_role", "timeseries_id")
         result = self.ioos._check_feattype_timeseries_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
     def test_check_feattype_timeseriesprof_cf_role(self):
         ftype = "timeseriesprofile"
@@ -1013,7 +991,7 @@ class TestIOOS1_2(BaseTestCase):
 
         # no platform variables or geophys vars with cf_role=timeseries_id, fail
         result = self.ioos._check_feattype_timeseriesprof_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # create dimensionless platform variable, set bad cf_role
         plat = ds.createVariable("station", "|S1", ("station_dim"))
@@ -1022,19 +1000,19 @@ class TestIOOS1_2(BaseTestCase):
 
         # should still fail as no vars with cf_role=timeseries_id or profile_id exist
         result = self.ioos._check_feattype_timeseriesprof_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # set correct cf_role on platform var, should still fail, no variable with profile_id
         plat.setncattr("cf_role", "timeseries_id")
         result = self.ioos._check_feattype_timeseriesprof_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # add profile_id var with bad dim, fail
         ds.createDimension("profile_dim", 0)
         pf = ds.createVariable("profile", "|S1", ("profile_dim"))
         pf.setncattr("cf_role", "profile_id")
         result = self.ioos._check_feattype_timeseriesprof_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # make the profile dim 1, no platform variable though
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -1047,7 +1025,7 @@ class TestIOOS1_2(BaseTestCase):
         pf = ds.createVariable("profile", "|S1", ("profile_dim"))
         pf.setncattr("cf_role", "profile_id")
         result = self.ioos._check_feattype_timeseriesprof_cf_role(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
         # profile dim > 1, pass
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -1060,7 +1038,7 @@ class TestIOOS1_2(BaseTestCase):
         pf = ds.createVariable("profile", "|S1", ("profile_dim"))
         pf.setncattr("cf_role", "profile_id")
         result = self.ioos._check_feattype_timeseriesprof_cf_role(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
     def test_check_feattype_trajectory_cf_role(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -1068,19 +1046,19 @@ class TestIOOS1_2(BaseTestCase):
 
         # no platform variables or geophys vars with cf_role=trajectory_id, fail
         result = self.ioos._check_feattype_trajectory_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # create dimensionless platform variable, set bad cf_role
         ds.createDimension("trajectory_dim", 0)
         trj = ds.createVariable("trajectory", "|S1", ("trajectory_dim"))
         trj.setncattr("cf_role", "badbadbad")
         result = self.ioos._check_feattype_trajectory_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # set correct cf_role, should still fail as trajectory is not 1
         trj.setncattr("cf_role", "trajectory_id")
         result = self.ioos._check_feattype_trajectory_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # set correct dim size
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -1089,7 +1067,7 @@ class TestIOOS1_2(BaseTestCase):
         trj = ds.createVariable("trajectory", "|S1", ("trajectory_dim"))
         trj.setncattr("cf_role", "trajectory_id")
         result = self.ioos._check_feattype_trajectory_cf_role(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
     def test_check_feattype_trajectoryprof_cf_role(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -1098,7 +1076,7 @@ class TestIOOS1_2(BaseTestCase):
 
         # no platform variables or geophys vars with cf_role=timeseries_id, fail
         result = self.ioos._check_feattype_trajectoryprof_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # create dimensionless platform variable, set bad cf_role
         trj = ds.createVariable("station", "|S1", ("trajectory_dim"))
@@ -1106,19 +1084,19 @@ class TestIOOS1_2(BaseTestCase):
 
         # should still fail as no vars with cf_role=timeseries_id or profile_id exist
         result = self.ioos._check_feattype_trajectoryprof_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # set correct cf_role on platform var, should still fail, no variable with profile_id
         trj.setncattr("cf_role", "trajectory_id")
         result = self.ioos._check_feattype_trajectoryprof_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # add profile_id var with bad dim, fail
         ds.createDimension("profile_dim", 0)
         pf = ds.createVariable("profile", "|S1", ("profile_dim"))
         pf.setncattr("cf_role", "profile_id")
         result = self.ioos._check_feattype_trajectoryprof_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # make the profile dim 1, no platform variable though
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -1131,7 +1109,7 @@ class TestIOOS1_2(BaseTestCase):
         pf = ds.createVariable("profile", "|S1", ("profile_dim"))
         pf.setncattr("cf_role", "profile_id")
         result = self.ioos._check_feattype_trajectoryprof_cf_role(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
         # profile dim > 1, pass
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -1144,7 +1122,7 @@ class TestIOOS1_2(BaseTestCase):
         pf = ds.createVariable("profile", "|S1", ("profile_dim"))
         pf.setncattr("cf_role", "profile_id")
         result = self.ioos._check_feattype_trajectoryprof_cf_role(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
     def test_check_feattype_profile_cf_role(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -1152,19 +1130,19 @@ class TestIOOS1_2(BaseTestCase):
 
         # no platform variables or geophys vars with cf_role=profile_id, fail
         result = self.ioos._check_feattype_profile_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # create dimensionless platform variable, set bad cf_role
         ds.createDimension("profile_dim", 0)
         prf = ds.createVariable("profile", "|S1", ("profile_dim"))
         prf.setncattr("cf_role", "badbadbad")
         result = self.ioos._check_feattype_profile_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # set correct cf_role, should still fail as profile is not 1
         prf.setncattr("cf_role", "profile_id")
         result = self.ioos._check_feattype_profile_cf_role(ds)
-        self.assertFalse(result.value)
+        assert not result.value
 
         # set correct dim size
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -1173,7 +1151,7 @@ class TestIOOS1_2(BaseTestCase):
         prf = ds.createVariable("profile", "|S1", ("profile_dim"))
         prf.setncattr("cf_role", "profile_id")
         result = self.ioos._check_feattype_profile_cf_role(ds)
-        self.assertTrue(result.value)
+        assert result.value
 
     def test_feattype_point(self):
         ds = MockNetCDF()
@@ -1194,7 +1172,7 @@ class TestIOOS1_2(BaseTestCase):
 
         results = self.ioos.check_instrument_make_model_calib_date(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
 
         # make an instrument variable
         temp = ds.createVariable("temperature", "d", dimensions=("time",))
@@ -1206,21 +1184,21 @@ class TestIOOS1_2(BaseTestCase):
         )  # no make_model or calibration_date
         results = self.ioos.check_instrument_make_model_calib_date(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # add make_model
         inst.setncattr("make_model", "yessir")
         results = self.ioos.check_instrument_make_model_calib_date(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         # add calibration_date
         inst.setncattr("calibration_date", "2020-08-19")  # not ISO, fail
         results = self.ioos.check_instrument_make_model_calib_date(ds)
         scored, out_of, messages = get_results(results)
-        self.assertLess(scored, out_of)
+        assert scored < out_of
 
         inst.setncattr("calibration_date", "2020-08-19T00:00:00")  # ISO, pass
         results = self.ioos.check_instrument_make_model_calib_date(ds)
         scored, out_of, messages = get_results(results)
-        self.assertEqual(scored, out_of)
+        assert scored == out_of
