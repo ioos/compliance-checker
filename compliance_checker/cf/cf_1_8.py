@@ -139,27 +139,56 @@ class CF1_8Check(CF1_7Check):
             # The grid_mapping and coordinates attributes can be carried by the
             # geometry container variable provided they are also carried by the
             # data variables associated with the container.
-            if hasattr(geometry_var, "coordinates") or hasattr(
-                geometry_var,
-                "grid_mapping",
-            ):
+            if hasattr(geometry_var, "coordinates"):
+                coord_err_template = (
+                    "Geometry variable {geometry_var_name} has "
+                    "attribute coordinates which is "
+                    "either not present or is not a subset "
+                    "of the coordinates attribute of the "
+                    "referring parent variable {parent_var_name}"
+                )
+                # allow for geometry coordinates attribute to be a subset of
+                # the parent variable's coordinates
+                geom_var_coords = set(re.split(r"\s+", geometry_var.coordinates))
                 for parent_var in vars_with_geometry:
-                    for check_attribute in ("coordinates", "grid_mapping"):
-                        if hasattr(geometry_var, check_attribute):
-                            geom_valid.out_of += 1
-                            if getattr(geometry_var, check_attribute, None) != getattr(
-                                parent_var,
-                                check_attribute,
-                            ):
-                                geom_valid.messages.append(
-                                    f"Geometry variable {geometry_var_name} has "
-                                    f"attribute {check_attribute} which is "
-                                    "either not present or does not have the "
-                                    "same value as referring parent variable "
-                                    f"{parent_var.name}",
-                                )
-                            else:
-                                geom_valid.out_of += 1
+                    geom_valid.out_of += 1
+                    if not hasattr(parent_var, "coordinates"):
+                        parent_var_coords = set()
+                    else:
+                        parent_var_coords = set(
+                            re.split(r"\s+", parent_var.coordinates),
+                        )
+                    if not geom_var_coords.issubset(parent_var_coords):
+                        err_msg = coord_err_template.format(
+                            geometry_var_name=geometry_var_name,
+                            parent_var_name=parent_var.name,
+                        )
+                        geom_valid.messages.append(err_msg)
+                    else:
+                        geom_valid.score += 1
+            # TODO: should grid_mapping checks not be strict equality?
+            if hasattr(geometry_var, "grid_mapping"):
+                for parent_var in vars_with_geometry:
+                    geom_valid.out_of += 1
+                    grid_mapping_err_template = (
+                        "Geometry variable {geometry_var_name} has "
+                        "attribute grid_mapping which is "
+                        "either not present or does not have the "
+                        "same value as the referring parent variable "
+                        "{parent_var_name}"
+                    )
+                    if geometry_var.grid_mapping != getattr(
+                        parent_var,
+                        "grid_mapping",
+                        None,
+                    ):
+                        err_msg = grid_mapping_err_template.format(
+                            geometry_var_name=geometry_var_name,
+                            parent_var_name=parent_var.name,
+                        )
+                        geom_valid.messages.append(err_msg)
+                    else:
+                        geom_valid.score += 1
 
             geometry_type = geometry_var.geometry_type
             try:

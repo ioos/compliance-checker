@@ -2868,13 +2868,24 @@ class TestCF1_8(BaseTestCase):
             geometry_ds.variables["geometry"].coordinates = geom_coordinates
         msg_template = (
             "Geometry variable geometry has "
-            "attribute {} which is either not present or "
-            "does not have the same value as referring "
-            "parent variable someData"
+            "attribute {} the referring parent "
+            "variable someData"
+        )
+        coord_subst = (
+            "coordinates which is either not present or is not a "
+            "subset of the coordinates attribute of"
+        )
+        gm_subst = (
+            "grid_mapping which is either not present or does not have "
+            "the same value as"
         )
         results = self.cf.check_geometry(geometry_ds)
-        assert msg_template.format("grid_mapping") not in results[0].msgs
-        assert msg_template.format("coordinates") not in results[0].msgs
+        assert msg_template.format(gm_subst) not in results[0].msgs
+        assert msg_template.format(coord_subst) not in results[0].msgs
+        # test subset of coordinates
+        geometry_ds.variables["someData"].coordinates = "x y z"
+        results = self.cf.check_geometry(geometry_ds)
+        assert msg_template.format(coord_subst) not in results[0].msgs
 
         # try with possibly invalid data
         # mismatch between parent variable coordinates/grid_mapping
@@ -2882,11 +2893,14 @@ class TestCF1_8(BaseTestCase):
         if not geom_gm_none:
             geometry_ds.variables["someData"].grid_mapping = "other_datum"
             results = self.cf.check_geometry(geometry_ds)
-            assert msg_template.format("grid_mapping") in results[0].msgs
+            assert msg_template.format(gm_subst) in results[0].msgs
         if not geom_coords_none:
             geometry_ds.variables["someData"].coordinates = "u v"
             results = self.cf.check_geometry(geometry_ds)
-            assert msg_template.format("coordinates") in results[0].msgs
+            assert msg_template.format(coord_subst) in results[0].msgs
+            geometry_ds.variables["geometry"].coordinates = "x y z"
+            results = self.cf.check_geometry(geometry_ds)
+            assert msg_template.format(coord_subst) in results[0].msgs
 
     def test_point_geometry_multiple(self):
         dataset = MockTimeSeries()
