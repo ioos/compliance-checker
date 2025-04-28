@@ -13,6 +13,7 @@ What's new in CF-1.8
 import itertools
 import re
 import warnings
+from collections import defaultdict
 
 import numpy as np
 import requests
@@ -119,19 +120,75 @@ class CF1_8Check(CF1_7Check):
             geometry=lambda g: g is not None,
         )
         results = []
-        unique_geometry_var_names = {var.geometry for var in vars_with_geometry}
+        unique_geometry_var_names = defaultdict(list)
+        for var in vars_with_geometry:
+            unique_geometry_var_names[var.geometry].append(var)
+
         if unique_geometry_var_names:
             geom_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.5"])
             geom_valid.out_of += 1
         for geometry_var_name in unique_geometry_var_names:
             if geometry_var_name not in ds.variables:
                 geom_valid.messages.append(
-                    "Cannot find geometry variable " f"named {geometry_var_name}",
+                    f"Cannot find geometry variable named {geometry_var_name}",
                 )
                 results.append(geom_valid.to_result())
                 continue
-            else:
-                geometry_var = ds.variables[geometry_var_name]
+            geometry_var = ds.variables[geometry_var_name]
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 10/20
+            # The grid_mapping and coordinates attributes can be carried by the
+            # geometry container variable provided they are also carried by the
+            # data variables associated with the container.
+            if hasattr(geometry_var, "coordinates"):
+                coord_err_template = (
+                    "Geometry variable {geometry_var_name} has "
+                    "attribute coordinates which is "
+                    "either not present or is not a subset "
+                    "of the coordinates attribute of the "
+                    "referring parent variable {parent_var_name}"
+                )
+                # allow for geometry coordinates attribute to be a subset of
+                # the parent variable's coordinates
+                geom_var_coords = set(re.split(r"\s+", geometry_var.coordinates))
+                for parent_var in vars_with_geometry:
+                    geom_valid.out_of += 1
+                    if not hasattr(parent_var, "coordinates"):
+                        parent_var_coords = set()
+                    else:
+                        parent_var_coords = set(
+                            re.split(r"\s+", parent_var.coordinates),
+                        )
+                    if not geom_var_coords.issubset(parent_var_coords):
+                        err_msg = coord_err_template.format(
+                            geometry_var_name=geometry_var_name,
+                            parent_var_name=parent_var.name,
+                        )
+                        geom_valid.messages.append(err_msg)
+                    else:
+                        geom_valid.score += 1
+            # TODO: should grid_mapping checks not be strict equality?
+            if hasattr(geometry_var, "grid_mapping"):
+                for parent_var in vars_with_geometry:
+                    geom_valid.out_of += 1
+                    grid_mapping_err_template = (
+                        "Geometry variable {geometry_var_name} has "
+                        "attribute grid_mapping which is "
+                        "either not present or does not have the "
+                        "same value as the referring parent variable "
+                        "{parent_var_name}"
+                    )
+                    if geometry_var.grid_mapping != getattr(
+                        parent_var,
+                        "grid_mapping",
+                        None,
+                    ):
+                        err_msg = grid_mapping_err_template.format(
+                            geometry_var_name=geometry_var_name,
+                            parent_var_name=parent_var.name,
+                        )
+                        geom_valid.messages.append(err_msg)
+                    else:
+                        geom_valid.score += 1
 
             geometry_type = geometry_var.geometry_type
             try:
