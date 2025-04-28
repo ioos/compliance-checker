@@ -13,7 +13,7 @@ import pendulum
 from cftime import num2pydate
 from pygeoif import from_wkt
 
-from compliance_checker import cfutil
+import compliance_checker.cf.util as cfutil
 from compliance_checker.base import (
     BaseCheck,
     BaseNCCheck,

@@ -6,7 +6,7 @@ from warnings import warn
 import numpy as np
 import pyproj
 
-from compliance_checker import cfutil
+import compliance_checker.cf.util as cfutil
 from compliance_checker.base import BaseCheck, Result, TestCtx
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates_1_7
 from compliance_checker.cf.appendix_e import cell_methods17

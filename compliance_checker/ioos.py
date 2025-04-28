@@ -10,6 +10,7 @@ from cf_units import Unit
 from lxml.etree import XPath
 from owslib.namespaces import Namespaces
 
+import compliance_checker.cf.util as cfutil
 from compliance_checker import base
 from compliance_checker.acdd import ACDD1_3Check
 from compliance_checker.base import (
@@ -21,13 +22,7 @@ from compliance_checker.base import (
     TestCtx,
     check_has,
 )
-from compliance_checker.cf import util as cf_util  # not to be confused with cfutil.py
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
-from compliance_checker.cfutil import (
-    get_geophysical_variables,
-    get_instrument_variables,
-    get_z_variables,
-)
 
 
 class IOOSBaseCheck(BaseCheck):
@@ -387,7 +382,7 @@ class IOOS1_1Check(IOOSNCCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
         results = []
-        for geo_var in get_geophysical_variables(ds):
+        for geo_var in cfutil.get_geophysical_variables(ds):
             results.append(
                 self._has_var_attr(
                     ds,
@@ -406,7 +401,7 @@ class IOOS1_1Check(IOOSNCCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
         results = []
-        for geo_var in get_geophysical_variables(ds):
+        for geo_var in cfutil.get_geophysical_variables(ds):
             results.append(
                 self._has_var_attr(
                     ds,
@@ -816,7 +811,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         # get geophysical variables
-        geophys_vars = get_geophysical_variables(ds)  # list of str
+        geophys_vars = cfutil.get_geophysical_variables(ds)  # list of str
         results = self._check_vars_have_attrs(  # list
             ds,
             geophys_vars,
@@ -843,7 +838,7 @@ class IOOS1_2Check(IOOSNCCheck):
         msg = (
             "Variable '{v}' attribute 'accuracy' should have the " "same units as '{v}'"
         )
-        for v in get_geophysical_variables(ds):
+        for v in cfutil.get_geophysical_variables(ds):
             _v = ds.variables[v]
             std_name = getattr(_v, "standard_name", None)
             gts_ingest = getattr(_v, "gts_ingest", None)
@@ -1364,7 +1359,7 @@ class IOOS1_2Check(IOOSNCCheck):
         :return: List of results
         """
         ret_val = []
-        for name in get_z_variables(ds):
+        for name in cfutil.get_z_variables(ds):
             variable = ds.variables[name]
             units_str = getattr(variable, "units", None)
             positive = getattr(variable, "positive", None)
@@ -1484,7 +1479,7 @@ class IOOS1_2Check(IOOSNCCheck):
         # CF1_6Check.check_units() method is too tangled to use directly and would cause a huge
         # time increase
         units = getattr(var, "units", None)
-        has_udunits = units is not None and cf_util.units_known(units)
+        has_udunits = units is not None and cfutil.units_known(units)
 
         return avar_val and valid_std_name and has_udunits
 
@@ -1567,7 +1562,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         results = []
-        instr_vars = get_instrument_variables(ds)
+        instr_vars = cfutil.get_instrument_variables(ds)
 
         # check for component, disciminant
         for instr in instr_vars:
@@ -1754,7 +1749,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         results = []
-        ivars = get_instrument_variables(ds)
+        ivars = cfutil.get_instrument_variables(ds)
         for v in ivars:
             _v = ds.variables[v]
 

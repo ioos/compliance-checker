@@ -1,11 +1,8 @@
-#!/usr/bin/env python
-"""
-compliance_checker/tests/test_feature_detection.py
-"""
+#!/usr/bin/env python """ compliance_checker/tests/test_feature_detection.py """
 
 from netCDF4 import Dataset
 
-from compliance_checker import cfutil as util
+from compliance_checker.cf import util
 from compliance_checker.tests import resources
 from compliance_checker.tests.helpers import MockRaggedArrayRepr
 

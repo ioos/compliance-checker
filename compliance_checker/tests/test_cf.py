@@ -12,7 +12,7 @@ import pytest
 import requests_mock
 from netCDF4 import Dataset, stringtoarr
 
-from compliance_checker import cfutil
+import compliance_checker.cf.util as cfutil
 from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.cf import (
     CF1_6Check,

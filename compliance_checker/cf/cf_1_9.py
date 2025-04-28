@@ -3,12 +3,15 @@ import numpy as np
 import regex
 from netCDF4 import Dataset
 
-from compliance_checker import cfutil
+import compliance_checker.cf.util as cfutil
 from compliance_checker.base import BaseCheck, Result, TestCtx
 from compliance_checker.cf import util
 from compliance_checker.cf.cf_1_8 import CF1_8Check
-from compliance_checker.cf.util import VariableReferenceError, reference_attr_variables
-from compliance_checker.cfutil import get_coordinate_variables
+from compliance_checker.cf.util import (
+    VariableReferenceError,
+    get_coordinate_variables,
+    reference_attr_variables,
+)
 
 
 class CF1_9Check(CF1_8Check):

@@ -8,7 +8,7 @@ from warnings import warn
 import numpy as np
 import regex
 
-from compliance_checker import cfutil
+import compliance_checker.cf.util as cfutil
 from compliance_checker.base import BaseCheck, BaseNCCheck, Result, TestCtx
 from compliance_checker.cf import util
 from compliance_checker.cf.appendix_d import no_missing_terms
