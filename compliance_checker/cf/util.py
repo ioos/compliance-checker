@@ -933,11 +933,12 @@ def get_flag_variables(nc):
 def extract_grid_mapping_names(grid_mapping_string):
     """
     Extracts all grid mapping variable names from a grid_mapping string.
-    
+
     :param str grid_mapping_string: The grid_mapping attribute string
     :return list[str]: List of grid mapping variable names
     """
-    return re.findall(r'\b\w+(?=:)|\b\w+(?=\s+\w+:)|\b\w+$', grid_mapping_string)
+    return re.findall(r"\b\w+(?=:)|\b\w+(?=\s+\w+:)|\b\w+$", grid_mapping_string)
+
 
 def get_grid_mapping_variables(nc):
     """
@@ -954,7 +955,7 @@ def get_grid_mapping_variables(nc):
             if name in nc.variables:
                 grid_mapping_variables.add(name)
     return grid_mapping_variables
-    
+
 
 def get_axis_map(nc, variable):
     """
