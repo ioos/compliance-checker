@@ -199,7 +199,7 @@ class CFBaseCheck(BaseCheck):
                     if colon_count != len(re_all):
                         defines_grid_mapping.out_of += 1
                         defines_grid_mapping.messages.append(
-                            "Unable to parse the entire grid mapping expression for variable '{variable.name}'. Please verify that the expression is well-formed.",
+                            "Could not consume entire grid_mapping expression, please check for well-formedness",
                         )
                     else:
                         for grid_var_name, coord_var_str in re_all:
