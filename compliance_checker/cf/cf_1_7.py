@@ -508,37 +508,32 @@ class CF1_7Check(CF1_6Check):
     def _check_gmattr_existence_condition_crs_name(self, var):
         """
         If projected_crs_name is defined then geographic_crs_name must be also.
-        
+
         :param netCDF4.Variable var
         :rtype tuple
         :return two-tuple (bool, str)
         """
-        msg = (
-            "projected_crs_name is defined then geographic_crs_name "
-            "must be also."
-        )
+        msg = "projected_crs_name is defined then geographic_crs_name " "must be also."
 
         _ncattrs = set(var.ncattrs())
-        
+
         if any(
             x in _ncattrs
             for x in [
                 "projected_crs_name",
                 "geographic_crs_name",
-
             ]
         ) and (
             not {
                 "projected_crs_name",
                 "geographic_crs_name",
-
             }.issubset(_ncattrs)
         ):
             return (False, msg)
 
         else:
             return (True, msg)
-    
+
     def _check_gmattr_existence_condition_ell_pmerid_hdatum(self, var):
         """
         If one of reference_ellipsoid_name, prime_meridian_name, or
@@ -775,7 +770,7 @@ class CF1_7Check(CF1_6Check):
     def check_grid_mapping(self, ds):
         prev_return = super().check_grid_mapping(ds)
         grid_mapping_variables = cfutil.get_grid_mapping_variables(ds)
-        
+
         for var_name in sorted(grid_mapping_variables):
             var = ds.variables[var_name]
             test_ctx = self.get_test_ctx(

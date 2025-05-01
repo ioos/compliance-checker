@@ -1455,18 +1455,18 @@ class TestCF1_6(BaseTestCase):
         assert all(r.name == "§5.3 Reduced Horizontal Grid" for r in results)
 
     def test_check_grid_mapping(self):
-        
+
         dataset = MockTimeSeries()
         dataset.createVariable("temp", "d", ("time"))
         dataset.createVariable("crsOSGB", "d")
         dataset.createVariable("crsWGS84", "d")
-        
+
         temp = dataset.variables["temp"]
         temp.standard_name = "air_temperature"
         temp.units = "K"
         temp.coordinates = "lat lon"
         temp.grid_mapping = "crsOSGB: time crsWGS84: lat lon"
-        
+
         # create grid_mapping crsOSGB ;
         crsOSGB = dataset.variables["crsOSGB"]
         crsOSGB.grid_mapping_name = "transverse_mercator"
@@ -1488,14 +1488,13 @@ class TestCF1_6(BaseTestCase):
         crsWGS84.inverse_flattening = 298.257223563
 
         results = self.cf.check_grid_mapping(dataset)
-            
+
         assert len(results) == 3
         assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 2
         expected_name = (
             "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
         )
         assert all(r.name == expected_name for r in results.values())
-        
 
     def test_is_geophysical(self):
         # check whether string type variable, which are not `cf_role`, are
@@ -2720,11 +2719,12 @@ class TestCF1_7(BaseTestCase):
         dataset.createVariable("lev", "d")  # dtype=double, dims=1
         dataset.variables["lev"].setncattr("projected_crs_name", "blah")
         dataset.variables["lev"].setncattr("geographic_crs_name", "blah")
-        res = self.cf._check_gmattr_existence_condition_crs_name(dataset.variables["lev"],
+        res = self.cf._check_gmattr_existence_condition_crs_name(
+            dataset.variables["lev"],
         )
         assert res[0]
         dataset.close()
-        
+
         # test bad (not all)
         dataset = MockTimeSeries()
         dataset.createVariable("lev", "d")  # dtype=double, dims=1
@@ -2734,7 +2734,7 @@ class TestCF1_7(BaseTestCase):
         )
         assert not res[0]
         dataset.close()
-        
+
     def test_check_gmattr_existence_condition_ell_pmerid_hdatum(self):
         # test good (all)
         dataset = MockTimeSeries()

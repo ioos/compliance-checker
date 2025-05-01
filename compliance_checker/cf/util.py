@@ -937,7 +937,11 @@ def extract_grid_mapping_names(grid_mapping_string):
     :param str grid_mapping_string: The grid_mapping attribute string
     :return list[str]: List of grid mapping variable names
     """
-    return re.findall(r'\b(\w+):', grid_mapping_string) if ':' in grid_mapping_string else grid_mapping_string.split()
+    return (
+        re.findall(r"\b(\w+):", grid_mapping_string)
+        if ":" in grid_mapping_string
+        else grid_mapping_string.split()
+    )
 
 
 def get_grid_mapping_variables(nc):
@@ -954,7 +958,7 @@ def get_grid_mapping_variables(nc):
         for name in grid_mapping_names:
             if name in nc.variables:
                 grid_mapping_variables.add(name)
-               
+
     return grid_mapping_variables
 
 

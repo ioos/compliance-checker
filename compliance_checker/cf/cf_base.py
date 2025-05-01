@@ -231,7 +231,8 @@ class CFBaseCheck(BaseCheck):
             grid_var = ds.variables[grid_var_name]
 
             # Grid mapping variables should have 0 dimensions.
-            valid_grid_mapping.assert_true(len(grid_var.dimensions) == 0,
+            valid_grid_mapping.assert_true(
+                len(grid_var.dimensions) == 0,
                 f"Grid mapping variable '{grid_var_name}' has dimensions but should be scalar (0-dimensional).",
             )
             grid_mapping_name = getattr(grid_var, "grid_mapping_name", None)
@@ -256,7 +257,7 @@ class CFBaseCheck(BaseCheck):
 
             grid_mapping = self.grid_mapping_dict[grid_mapping_name]
             required_attrs = grid_mapping[0]
-            
+
             # Make sure all the required attributes are defined
             for req in required_attrs:
                 valid_grid_mapping.assert_true(
@@ -271,7 +272,7 @@ class CFBaseCheck(BaseCheck):
                 for attr in at_least_attr:
                     if hasattr(grid_var, attr):
                         number_found += 1
-                
+
                 valid_grid_mapping.assert_true(
                     number_found == 1,
                     f"Grid mapping variable '{grid_var_name}' with grid_mapping_name '{grid_mapping_name}' must define exactly one of the following attributes:"
@@ -287,7 +288,7 @@ class CFBaseCheck(BaseCheck):
 
                 valid_grid_mapping.assert_true(
                     len(found_vars) == 1,
-                    f"Grid mapping variable '{grid_var_name}' with grid_mapping_name '{grid_mapping_name}' requires exactly one variable with standard_name '{expected_std_name}' to be defined."
+                    f"Grid mapping variable '{grid_var_name}' with grid_mapping_name '{grid_mapping_name}' requires exactly one variable with standard_name '{expected_std_name}' to be defined.",
                 )
 
             ret_val[grid_var_name] = valid_grid_mapping.to_result()
