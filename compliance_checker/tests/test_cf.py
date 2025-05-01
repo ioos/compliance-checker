@@ -2846,6 +2846,26 @@ class TestCF1_8(BaseTestCase):
         y[:] = np.array([30, 35, 21])
         return dataset
 
+    # TEST CONFORMANCE 7.5 REQUIRED 12/20
+    def test_geometry_ds_nodes_grid_mapping(self, geometry_ds):
+        geometry_ds.createDimension("node", 12)
+        x_node = geometry_ds.createVariable("x_node", "i4", ("node",))
+        x = geometry_ds.variables["x"]
+        x.nodes = "x_node"
+        x.grid_mapping = "mercator"
+        # no grid_mapping in nodes referenced variable
+        fail_msg = (
+            "Variable 'x' has referenced nodes "
+            "variable 'x_node' but does not share the same "
+            "grid_mapping"
+        )
+        results = self.cf.check_geometry(geometry_ds)
+        assert fail_msg in results[0].msgs
+        # now matching, should pass
+        x_node.grid_mapping = "mercator"
+        results = self.cf.check_geometry(geometry_ds)
+        assert fail_msg not in results[0].msgs
+
     # TEST CONFORMANCE 7.5 REQUIRED 10/20
     @pytest.mark.parametrize(
         "geom_grid_mapping,geom_coordinates",
