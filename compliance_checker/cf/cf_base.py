@@ -205,12 +205,12 @@ class CFBaseCheck(BaseCheck):
                         for grid_var_name, coord_var_str in re_all:
                             defines_grid_mapping.assert_true(
                                 grid_var_name in ds.variables,
-                                f"Grid mapping variable '{grid_var_name}' must exist in the dataset.",
+                                f"Grid mapping variable {grid_var_name} must exist in the dataset.",
                             )
                             for ref_var in coord_var_str.split():
                                 defines_grid_mapping.assert_true(
                                     ref_var in ds.variables,
-                                    f"Coordinate-related variable '{ref_var}', referenced by grid mapping variable '{grid_var_name}', must exist in the dataset.",
+                                    f"Coordinate-related variable {ref_var} referenced by grid_mapping variable {grid_var_name} must exist in this dataset",
                                 )
 
                 else:
