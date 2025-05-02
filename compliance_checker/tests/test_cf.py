@@ -2946,6 +2946,17 @@ class TestCF1_8(BaseTestCase):
         # There should be messages regarding improper polygon order
         assert results[0].value[0] < results[0].value[1]
         assert results[0].msgs
+        # TEST CONFORMANCE 7.5 REQUIRED 18/20
+        dataset.variables["geometry_container"] = MockVariable(
+            dataset.variables["geometry_container"],
+        )
+        del dataset.variables["geometry_container"].part_node_count
+        results = self.cf.check_geometry(dataset)
+        assert (
+            "For geometry variable 'geometry_container' "
+            "which defines the interior_ring attribute, "
+            "the part_node_count attribute must also be present" in results[0].msgs
+        )
 
     def test_bad_lsid(self):
         """
