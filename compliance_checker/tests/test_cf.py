@@ -2946,6 +2946,38 @@ class TestCF1_8(BaseTestCase):
         # There should be messages regarding improper polygon order
         assert results[0].value[0] < results[0].value[1]
         assert results[0].msgs
+        # TEST CONFORMANCE 7.5 REQUIRED 18/20
+        dataset.variables["geometry_container"] = MockVariable(
+            dataset.variables["geometry_container"],
+        )
+        del dataset.variables["geometry_container"].part_node_count
+        results = self.cf.check_geometry(dataset)
+        assert (
+            "For geometry variable 'geometry_container' "
+            "which defines the interior_ring attribute, "
+            "the part_node_count attribute must also be present" in results[0].msgs
+        )
+        dataset.close()
+        # TEST CONFORMANCE 7.5 REQUIRED 20/20
+        # part_node_count and interior_ring variables should have the same dimensions
+        # need diskless, no persist to make modifications to file without writing to file
+        # to file upon close
+        dataset = Dataset(
+            STATIC_FILES["polygon_geometry"],
+            "a",
+            diskless=True,
+            persist=False,
+        )
+        # we switch to another variable here to avoid name clashes
+        dataset.variables["geometry_container"].part_node_count = "part_node_count_bad"
+        dataset.createVariable("part_node_count_bad", "i4", ("time",))
+        results = self.cf.check_geometry(dataset)
+        assert (
+            "part_node_count variable part_node_count_bad "
+            "must have the same single dimension as interior ring "
+            "variable interior_ring" in results[0].msgs
+        )
+        dataset.close()
 
     def test_bad_lsid(self):
         """

@@ -240,6 +240,27 @@ class CF1_8Check(CF1_7Check):
                 ds,
                 getattr(geometry_var, "interior_ring", None),
             )
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 18/20
+            if interior_ring:
+                geom_valid.out_of += 1
+                if not part_node_count:
+                    geom_valid.messages.append(
+                        f"For geometry variable '{geometry_var_name}' "
+                        "which defines the interior_ring attribute, "
+                        "the part_node_count attribute must also be present",
+                    )
+                # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 20/20
+                elif (
+                    part_node_count.dimensions != interior_ring.dimensions
+                    or not len(part_node_count) == 1
+                ):
+                    geom_valid.messages.append(
+                        f"part_node_count variable {part_node_count.name} "
+                        "must have the same single dimension as interior ring "
+                        f"variable {interior_ring.name}",
+                    )
+                else:
+                    geom_valid.score += 1
 
             if geometry_type == "point":
                 geometry = PointGeometry(node_coord_vars, node_count)
