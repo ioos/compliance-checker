@@ -249,6 +249,16 @@ class CF1_8Check(CF1_7Check):
                         "which defines the interior_ring attribute, "
                         "the part_node_count attribute must also be present",
                     )
+                # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 20/20
+                elif (
+                    part_node_count.dimensions != interior_ring.dimensions
+                    or not len(part_node_count) == 1
+                ):
+                    geom_valid.messages.append(
+                        f"part_node_count variable {part_node_count.name} "
+                        "must have the same single dimension as interior ring "
+                        f"variable {interior_ring.name}",
+                    )
                 else:
                     geom_valid.score += 1
 
