@@ -2846,6 +2846,16 @@ class TestCF1_8(BaseTestCase):
         y[:] = np.array([30, 35, 21])
         return dataset
 
+    def test_geometry_dimension(self, geometry_ds):
+        geometry_ds.createDimension("false_x", 2)
+        false_x = geometry_ds.createVariable("false_x", "i4", ("false_x",))
+        false_x.geometry = "geometry"
+        results = self.cf.check_geometry(geometry_ds)
+        assert (
+            "Geometry containing variable false_x needs at least one "
+            "instance dimension" in results[0].msgs
+        )
+
     # TEST CONFORMANCE 7.5 REQUIRED 10/20
     @pytest.mark.parametrize(
         "geom_grid_mapping,geom_coordinates",

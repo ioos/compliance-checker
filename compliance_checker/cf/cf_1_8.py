@@ -116,17 +116,29 @@ class CF1_8Check(CF1_7Check):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :returns list: List of error messages
         """
+        results = []
         vars_with_geometry = ds.get_variables_by_attributes(
             geometry=lambda g: g is not None,
         )
-        results = []
+        if vars_with_geometry:
+            geom_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.5"])
+        else:
+            return
         unique_geometry_var_names = defaultdict(list)
         for var in vars_with_geometry:
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 1/20
+            geom_valid.out_of += 1
+            # TODO: figure out more robust way of determining instance dimension
+            # need at least one instance dimension for the geometry variable
+            if len(set(var.dimensions) - {var.name}) < 1:
+                geom_valid.messages.append(
+                    f"Geometry containing variable {var.name} "
+                    "needs at least one instance dimension",
+                )
+            else:
+                geom_valid.score += 1
             unique_geometry_var_names[var.geometry].append(var)
 
-        if unique_geometry_var_names:
-            geom_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.5"])
-            geom_valid.out_of += 1
         for geometry_var_name in unique_geometry_var_names:
             if geometry_var_name not in ds.variables:
                 geom_valid.messages.append(
