@@ -295,6 +295,7 @@ class CF1_8Check(CF1_7Check):
                 results.append(geom_valid.to_result())
                 continue
             # check geometry
+            geom_valid.out_of += 1
             messages = geometry.check_geometry()
             if not messages:
                 geom_valid.score += 1
