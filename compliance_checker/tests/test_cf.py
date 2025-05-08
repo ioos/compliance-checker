@@ -19,6 +19,7 @@ from compliance_checker.cf.cf import (
     CF1_7Check,
     CF1_8Check,
     CF1_9Check,
+    CF1_11Check,
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
@@ -3353,6 +3354,37 @@ class TestCF1_9(BaseTestCase):
         dataset = Dataset(STATIC_FILES["indexed_ragged_domain"])
         results = self.cf.check_domain_variables(dataset)
         assert results[0].value[0] == results[0].value[1]
+
+
+class TestCF1_11(BaseTestCase):
+    def setup_method(self):
+        self.cf = CF1_11Check()
+
+    @pytest.fixture
+    def temperature_dataset(self):
+        ds = MockTimeSeries()
+        temperature = ds.createVariable("temperature", "f8", ("time",))
+        temperature.standard_name = "sea_water_temperature"
+        temperature.units = "degC"
+        return ds
+
+    # TEST CONFORMANCE 3.1 RECOMMENDED
+    def test_units_metadata(self, temperature_dataset):
+        results = self.cf.check_temperature_units_metadata(temperature_dataset)
+        expected_msg = (
+            "Variable temperature has a temperature related standard_name "
+            "and it is recommended that the units_metadata attribute is present and has one of the values "
+            "['temperature: difference', 'temperature: on_scale', 'temperature: unknown']"
+        )
+        _, _, messages = get_results(results)
+        assert expected_msg in messages
+        # add units_metadata, should be valid now
+        temperature_dataset.variables["temperature"].units_metadata = (
+            "temperature: on_scale"
+        )
+        results = self.cf.check_temperature_units_metadata(temperature_dataset)
+        scored, out_of, _ = get_results(results)
+        assert scored == out_of
 
 
 class TestCFUtil(BaseTestCase):
