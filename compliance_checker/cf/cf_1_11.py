@@ -9,7 +9,7 @@ def _temperature_standard_names(standard_name_table):
     re_ns = {"re": "http://exslt.org/regular-expressions"}
     return set(
         standard_name_table._root.xpath(
-            "entry[re:test(canonical_units, " r"'K(-?\d+)?$')]/@id",
+            "entry[re:test(canonical_units, " r"'K(-?\d+)?')]/@id",
             namespaces=re_ns,
         ),
     )
