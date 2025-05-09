@@ -1,0 +1,49 @@
+name: CF-Table
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+jobs:
+  update-cftable:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Set git up
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Check for changes
+      run: >
+        wget https://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml
+        mv cf-standard-name-table.xml compliance_checker/data/cf-standard-name-table.xml
+        git diff --quiet origin/main -- "compliance_checker/data/cf-standard-name-table.xml" || echo "changed=true" >> $GITHUB_OUTPUT
+
+    - name: Create PR if file changed
+      if: steps.check_changes.outputs.changed == 'true'
+      run: |
+        BRANCH_NAME="cftable-$(date +%s)"
+        FILE_PATH="compliance_checker/data/cf-standard-name-table.xml"
+
+        git checkout -b "$BRANCH_NAME"
+        git add "$FILE_PATH"
+        git commit -m "Update detected in $FILE_PATH"
+        git push origin "$BRANCH_NAME"
+
+        gh pr create --title "Auto PR: Update to $FILE_PATH" \
+                     --body "This PR was automatically created because $FILE_PATH changed." \
+                     --head "$BRANCH_NAME" \
+                     --base main
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
