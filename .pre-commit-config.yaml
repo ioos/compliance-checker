@@ -3,11 +3,11 @@ repos:
   rev: v5.0.0
   hooks:
     - id: trailing-whitespace
-      exclude: compliance_checker/tests/data
+      files: \.py$
     - id: check-ast
     - id: debug-statements
     - id: end-of-file-fixer
-      exclude: compliance_checker/tests/data
+      files: \.py$
     - id: check-docstring-first
     - id: check-added-large-files
     - id: check-json
