@@ -3385,6 +3385,19 @@ class TestCF1_11(BaseTestCase):
         results = self.cf.check_temperature_units_metadata(temperature_dataset)
         scored, out_of, _ = get_results(results)
         assert scored == out_of
+        temperature_dataset.variables["temperature"].standard_name = (
+            "integral_wrt_depth_of_product_of_potential_temperature_and_sea_water_density"
+        )
+        temperature_dataset.variables["temperature"].units = "lb degree_F ft-2"
+        scored, out_of, _ = get_results(results)
+        assert scored == out_of
+
+        temperature_dataset.variables["temperature"].standard_name = (
+            "square_of_air_temperature"
+        )
+        temperature_dataset.variables["temperature"].units = "degrees_Celsius2"
+        scored, out_of, _ = get_results(results)
+        assert scored == out_of
 
 
 class TestCFUtil(BaseTestCase):
