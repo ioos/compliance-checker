@@ -23,7 +23,10 @@ from shapely.geometry import Polygon
 
 from compliance_checker.base import BaseCheck, TestCtx
 from compliance_checker.cf.cf_1_7 import CF1_7Check
-from compliance_checker.cf.util import reference_attr_variables, string_from_var_type
+from compliance_checker.cf.util import (
+    reference_attr_variables,
+    string_from_var_type,
+)
 
 
 class CF1_8Check(CF1_7Check):
@@ -116,6 +119,35 @@ class CF1_8Check(CF1_7Check):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :returns list: List of error messages
         """
+
+        geom_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.5"])
+        # check nodes attribute
+        for nodes_containing_var in ds.get_variables_by_attributes(
+            nodes=lambda v: v is not None,
+        ):
+            nodes_var, _ = reference_attr_variables(ds, nodes_containing_var.nodes)
+            if not nodes_var:
+                # TODO: add error message if variable referenced in nodes is
+                # not defined
+                continue
+
+            geom_valid.out_of += 1
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 12/20
+            if getattr(nodes_containing_var, "grid_mapping", "") != getattr(
+                nodes_var,
+                "grid_mapping",
+                "",
+            ):
+                fail_msg = (
+                    f"Variable '{nodes_containing_var.name}' "
+                    f"has referenced nodes variable '{nodes_containing_var.nodes}' "
+                    "but does not share the same grid_mapping"
+                )
+                geom_valid.messages.append(fail_msg)
+            else:
+                geom_valid.score += 1
+
         vars_with_geometry = ds.get_variables_by_attributes(
             geometry=lambda g: g is not None,
         )
@@ -123,9 +155,9 @@ class CF1_8Check(CF1_7Check):
         unique_geometry_var_names = defaultdict(list)
         for var in vars_with_geometry:
             unique_geometry_var_names[var.geometry].append(var)
+            # must have one dimension for geometry
 
         if unique_geometry_var_names:
-            geom_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.5"])
             geom_valid.out_of += 1
         for geometry_var_name in unique_geometry_var_names:
             if geometry_var_name not in ds.variables:
