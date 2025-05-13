@@ -3369,7 +3369,7 @@ class TestCF1_11(BaseTestCase):
         return ds
 
     # TEST CONFORMANCE 3.1 RECOMMENDED
-    def test_units_metadata(self, temperature_dataset):
+    def test_temperature_units_metadata(self, temperature_dataset):
         results = self.cf.check_temperature_units_metadata(temperature_dataset)
         expected_msg = (
             "Variable temperature has a temperature related standard_name "

@@ -41,11 +41,11 @@ class CF1_11Check(CF1_10Check):
         )
         for temperature_variable in temperature_variables:
             temperature_units_metadata_ctx.out_of += 1
-            valid_temperature_units_metadata = {
+            valid_temperature_units_metadata = [
                 "temperature: difference",
                 "temperature: on_scale",
                 "temperature: unknown",
-            }
+            ]
             if (
                 getattr(temperature_variable, "units_metadata", None)
                 not in valid_temperature_units_metadata
