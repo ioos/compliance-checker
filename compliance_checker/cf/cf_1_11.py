@@ -41,11 +41,11 @@ class CF1_11Check(CF1_10Check):
         )
         for temperature_variable in temperature_variables:
             temperature_units_metadata_ctx.out_of += 1
-            valid_temperature_units_metadata = [
+            valid_temperature_units_metadata = {
                 "temperature: difference",
                 "temperature: on_scale",
                 "temperature: unknown",
-            ]
+            }
             if (
                 getattr(temperature_variable, "units_metadata", None)
                 not in valid_temperature_units_metadata
@@ -59,3 +59,39 @@ class CF1_11Check(CF1_10Check):
                 temperature_units_metadata_ctx.score += 1
 
         return [temperature_units_metadata_ctx.to_result()]
+
+    def check_time_units_metadata(self, ds):
+        """Checks that units_metadata exists for time coordinates with specific calendar attributes"""
+        time_variables = ds.get_variables_by_attributes(
+            standard_name="time",
+            calendar=lambda c: c in {"standard", "proleptic_gregorian", "julian"},
+        )
+        if not time_variables:
+            return []
+
+        time_units_metadata_ctx = self.get_test_ctx(
+            BaseCheck.MEDIUM,
+            self.section_titles["4.4"],
+        )
+
+        for time_variable in time_variables:
+            time_units_metadata_ctx.out_of += 1
+            valid_time_units_metadata = [
+                "leap_seconds: none",
+                "leap_seconds: utc",
+                "leap_seconds: unknown",
+            ]
+            if (
+                getattr(time_variable, "units_metadata", None)
+                not in valid_time_units_metadata
+            ):
+                time_units_metadata_ctx.messages.append(
+                    f"Variable {time_variable.name} has a calendar attribute of "
+                    f"{time_variable.calendar} and it is recommended that the units_metadata attribute is present "
+                    "and has one of the values "
+                    f"{valid_time_units_metadata}",
+                )
+            else:
+                time_units_metadata_ctx.score += 1
+
+        return [time_units_metadata_ctx.to_result()]

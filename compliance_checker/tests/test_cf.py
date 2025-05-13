@@ -3399,6 +3399,28 @@ class TestCF1_11(BaseTestCase):
         scored, out_of, _ = get_results(results)
         assert scored == out_of
 
+    # IMPLEMENTATION CONFORMANCE
+    def test_time_units_metadata(self):
+        """Time units metadata check"""
+        dataset = MockTimeSeries()
+        results = self.cf.check_time_units_metadata(dataset)
+        expected_msg = (
+            "Variable time has a calendar attribute of standard and it is "
+            "recommended that the units_metadata attribute is present and "
+            "has one of the values "
+            "['leap_seconds: none', 'leap_seconds: utc', 'leap_seconds: unknown']"
+        )
+        _, _, messages = get_results(results)
+        assert expected_msg in messages
+        # add units_metadata, should be valid now
+        dataset.variables["time"].units_metadata = "leap_seconds: utc"
+        results = self.cf.check_time_units_metadata(dataset)
+        # FIXME: test picks up cached version of results from previous run above via
+        # get_test_ctx figure out decent way to get clean slate for test
+        # results while preserving results for a broader section -- 4.4 here
+        scored, out_of, _ = get_results(results)
+        assert scored == 1 and out_of == 2
+
 
 class TestCFUtil(BaseTestCase):
     """
