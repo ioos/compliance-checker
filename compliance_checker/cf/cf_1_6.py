@@ -2172,6 +2172,126 @@ class CF1_6Check(CFNCCheck):
             ret_val.append(valid_aux_coords.to_result())
         return ret_val
 
+    # IMPLEMENTATION Section 5 Coordinate Systems and Domain
+    def check_coordinates_attribute_format(self, ds):
+        """
+        Checks that the `coordinates` attribute is a space-separated list of valid variable names,
+        and all listed variables exist in the dataset.
+        """
+        ret_val = []
+    
+        geophysical_variables = self._find_geophysical_vars(ds)
+    
+        for var_name in geophysical_variables:
+            var = ds.variables[var_name]
+            coord_attr = getattr(var, "coordinates", None)
+    
+            if not coord_attr:
+                continue  # No coordinates attribute, nothing to check
+    
+            check_coords_attrs_format = TestCtx(BaseCheck.HIGH, self.section_titles["5"])
+    
+            # Check that it is a proper string
+            check_coords_attrs_format.assert_true(
+                isinstance(coord_attr, str),
+                f"The 'coordinates' attribute of variable '{var_name}' must be a string.",
+            )
+    
+            # Check for unexpected characters (e.g., commas or brackets)
+            if isinstance(coord_attr, str):
+                has_invalid_chars = any(char in coord_attr for char in [",", "[", "]", "(", ")"])
+                check_coords_attrs_format.assert_true(
+                    not has_invalid_chars,
+                    f"The 'coordinates' attribute of variable '{var_name}' contains invalid characters: {coord_attr}",
+                )
+    
+                # Check that each token is a valid variable name
+                for token in coord_attr.split():
+                    check_coords_attrs_format.assert_true(
+                        token in ds.variables,
+                        f"The 'coordinates' attribute of variable '{var_name}' references non-existent variable '{token}'."
+                    )
+
+        ret_val.append(check_coords_attrs_format.to_result())
+
+    return ret_val
+
+    # IMPLEMENTATION Section 5 Coordinate Systems and Domain
+    def check_spatiotemporal_dims_have_coordinate_vars(self, ds):
+        """
+        Checks that spatial/temporal dimensions (time, lat, lon, height) 
+        used in geophysical variables have proper coordinate variables.
+        """
+    
+        # CF-recognized standard names for coordinate axes
+        expected_standard_names = {
+            "time": "time",
+            "lat": "latitude",
+            "latitude": "latitude",
+            "lon": "longitude",
+            "longitude": "longitude",
+            "height": "height",
+            "depth": "depth",
+            "altitude": "altitude",
+            "pressure": "air_pressure",
+        }
+    
+        ret_val = []
+    
+        geophysical_variables = self._find_geophysical_vars(ds)
+        for var_name in geophysical_variables:
+            var = ds.variables[var_name]
+            check_spatiotemporal_dims_coords = TestCtx(BaseCheck.HIGH, self.section_titles["5"])
+    
+            for dim in var.dimensions:
+                if dim in expected_standard_names:
+                    if dim not in ds.variables:
+                        check_spatiotemporal_dims_coords.assert_true(
+                            False,
+                            f"Dimension '{dim}' in variable '{var_name}' is expected to be a coordinate axis "
+                            f"but no variable with that name exists.",
+                        )
+                        continue
+    
+                    coord_var = ds.variables[dim]
+                    std_name = getattr(coord_var, "standard_name", None)
+    
+                    check_spatiotemporal_dims_coords.assert_true(
+                        std_name == expected_standard_names[dim],
+                        f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', "
+                        f"found: '{std_name}'",
+                    )
+
+        ret_val.append(check_spatiotemporal_dims_coords.to_result())
+
+    return ret_val
+
+    # IMPLEMENTATION Section 5 Coordinate Systems and Domain
+    def check_invalid_coordinate_attr(self, ds):
+        """
+        Checks that a coordinate variable must not have the _FillValue or missing_value attributes.
+        """
+        ret_val = []
+    
+        for coord_var_name in self._find_coord_vars(ds):
+            coord_var = ds.variables[coord_var_name]
+            valid_coords_attr = TestCtx(BaseCheck.HIGH, self.section_titles["5"])
+    
+            valid_coords_attr.assert_true(
+                "_FillValue" not in coord_var.ncattrs(),
+                f"The coordinate variable '{coord_var_name}' must not have the _FillValue attribute."
+            )
+    
+            valid_coords_attr.assert_true(
+                "missing_value" not in coord_var.ncattrs(),
+                f"The coordinate variable '{coord_var_name}' must not have the missing_value attribute."
+            )
+    
+            ret_val.append(valid_coords_attr.to_result())
+    
+    return ret_val
+
+    
     def check_duplicate_axis(self, ds):
         """
         Checks that no variable contains two coordinates defining the same
