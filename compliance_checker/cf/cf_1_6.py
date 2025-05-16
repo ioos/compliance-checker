@@ -2214,7 +2214,7 @@ class CF1_6Check(CFNCCheck):
 
         ret_val.append(check_coords_attrs_format.to_result())
 
-    return ret_val
+        return ret_val
 
     # IMPLEMENTATION Section 5 Coordinate Systems and Domain
     def check_spatiotemporal_dims_have_coordinate_vars(self, ds):
@@ -2264,7 +2264,7 @@ class CF1_6Check(CFNCCheck):
 
         ret_val.append(check_spatiotemporal_dims_coords.to_result())
 
-    return ret_val
+        return ret_val
 
     # IMPLEMENTATION Section 5 Coordinate Systems and Domain
     def check_invalid_coordinate_attr(self, ds):
@@ -2289,7 +2289,7 @@ class CF1_6Check(CFNCCheck):
     
             ret_val.append(valid_coords_attr.to_result())
     
-    return ret_val
+        return ret_val
 
     
     def check_duplicate_axis(self, ds):
