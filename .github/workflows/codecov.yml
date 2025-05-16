@@ -43,4 +43,4 @@ jobs:
       with:
         files: coverage.xml
     permissions:
-      actions: read
+      actions: write
