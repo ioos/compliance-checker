@@ -120,7 +120,7 @@ class TestCF1_6(BaseTestCase):
         # and it is defined as a numeric data type with values that are ordered monotonically.
         # Missing values are not allowed in coordinate variables.
         result = self.cf.check_coordinate_variables_strict_monotonicity(ds)
-                 _, _, messages = get_results(result)
+        _, _, messages = get_results(result)
                  
         assert 'Coordinate variable "time" must be strictly monotonic' in messages
         
