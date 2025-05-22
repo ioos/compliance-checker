@@ -560,7 +560,7 @@ class CF1_6Check(CFNCCheck):
             )
         return valid_globals.to_result()
 
-    # IMPLEMENTATION
+    # IMPLEMENTATION CONFORMANCE 1.2
     def check_coordinate_variables_strict_monotonicity(self, ds):
         """
         Checks that data in coordinate variables is either monotonically
@@ -571,7 +571,7 @@ class CF1_6Check(CFNCCheck):
         for coord_var_name in self._find_coord_vars(ds):
             coord_var = ds.variables[coord_var_name]
             arr_diff = np.diff(coord_var)
-            monotonicity = TestCtx(BaseCheck.HIGH, self.section_titles["5"])
+            monotonicity = TestCtx(BaseCheck.HIGH, self.section_titles["1.2"])
             monotonicity.assert_true(
                 np.all(arr_diff > 0) or np.all(arr_diff < 0),
                 f'Coordinate variable "{coord_var_name}" must be strictly monotonic',
@@ -2220,10 +2220,10 @@ class CF1_6Check(CFNCCheck):
 
         return ret_val
 
-    # IMPLEMENTATION Section 5 Coordinate Systems and Domain
+    # IMPLEMENTATION Section 5.1 Independent Latitude, Longitude, Vertical, and Time Axes,
     def check_spatiotemporal_dims_have_coordinate_vars(self, ds):
         """
-        Checks that spatial/temporal dimensions (time, lat, lon, height)
+        Checks that spatial/temporal dimensions (time, lat, lon, height, ...)
         used in geophysical variables have proper coordinate variables.
         """
 
@@ -2261,7 +2261,7 @@ class CF1_6Check(CFNCCheck):
 
                     coord_var = ds.variables[dim]
                     std_name = getattr(coord_var, "standard_name", None)
-
+                    
                     check_spatiotemporal_dims_coords.assert_true(
                         std_name == expected_standard_names[dim],
                         f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', "
@@ -2269,19 +2269,17 @@ class CF1_6Check(CFNCCheck):
                     )
 
         ret_val.append(check_spatiotemporal_dims_coords.to_result())
-
         return ret_val
 
-    # IMPLEMENTATION Section 5 Coordinate Systems and Domain
+    # IMPLEMENTATION Section 2.5.1 Coordinate Systems and Domain
     def check_invalid_coordinate_attr(self, ds):
         """
         Checks that a coordinate variable must not have the _FillValue or missing_value attributes.
         """
         ret_val = []
-
-        for coord_var_name in self._find_coord_vars(ds):
+        for coord_var_name in cfutil.get_coordinate_variables(ds):
             coord_var = ds.variables[coord_var_name]
-            valid_coords_attr = TestCtx(BaseCheck.HIGH, self.section_titles["5"])
+            valid_coords_attr = TestCtx(BaseCheck.HIGH, self.section_titles["2.5.1"])
 
             valid_coords_attr.assert_true(
                 "_FillValue" not in coord_var.ncattrs(),

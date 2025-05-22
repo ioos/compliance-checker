@@ -432,6 +432,7 @@ def get_auxiliary_coordinate_variables(nc):
 
     :param netCDf4.Dataset nc: An open netCDF dataset
     """
+ 
     aux_vars = []
     # get any variables referenced by the coordinates attribute
     for ncvar in nc.get_variables_by_attributes(
@@ -446,12 +447,10 @@ def get_auxiliary_coordinate_variables(nc):
                 and referenced_variable not in aux_vars
             ):
                 aux_vars.append(referenced_variable)
-
     # axis variables are automatically in
     for variable in get_axis_variables(nc):
         if variable not in aux_vars:
             aux_vars.append(variable)
-
     # Last are any variables that define the common coordinate standard names
     coordinate_standard_names = [
         "time",
@@ -462,14 +461,12 @@ def get_auxiliary_coordinate_variables(nc):
         "altitude",
     ]
     coordinate_standard_names += DIMENSIONLESS_VERTICAL_COORDINATES
-
     # Some datasets like ROMS use multiple variables to define coordinates
     for ncvar in nc.get_variables_by_attributes(
         standard_name=lambda x: x in coordinate_standard_names,
     ):
         if ncvar.name not in aux_vars:
             aux_vars.append(ncvar.name)
-
     # Remove any that are purely coordinate variables
     ret_val = []
     for aux_var in aux_vars:
