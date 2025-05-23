@@ -2216,7 +2216,7 @@ class CF1_6Check(CFNCCheck):
                         f"The 'coordinates' attribute of variable '{var_name}' references non-existent variable '{token}'.",
                     )
 
-        ret_val.append(check_coords_attrs_format.to_result())
+            ret_val.append(check_coords_attrs_format.to_result())
 
         return ret_val
 
@@ -2268,7 +2268,7 @@ class CF1_6Check(CFNCCheck):
                         f"found: '{std_name}'",
                     )
 
-        ret_val.append(check_spatiotemporal_dims_coords.to_result())
+            ret_val.append(check_spatiotemporal_dims_coords.to_result())
         return ret_val
 
     # IMPLEMENTATION Section 2.5.1 Coordinate Systems and Domain
