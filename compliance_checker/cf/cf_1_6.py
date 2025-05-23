@@ -2246,7 +2246,7 @@ class CF1_6Check(CFNCCheck):
         for var_name in geophysical_variables:
             var = ds.variables[var_name]
             check_spatiotemporal_dims_coords = TestCtx(
-                BaseCheck.HIGH, self.section_titles["5"],
+                BaseCheck.HIGH, self.section_titles["5.1"],
             )
 
             for dim in var.dimensions:

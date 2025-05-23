@@ -1451,7 +1451,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["example-grid"])
         results = self.cf.check_invalid_coordinate_attr(dataset)
         result_dict = {result.name: result for result in results}
-        result = result_dict["§2.5.1 Missing data, valid and actual range of data"]
+        result = result_dict["§2.5.1. Missing data, valid and actual range of data"]
         assert result.msgs == []  # shouldn't have any messages
         assert result.value == (2, 2)
     
