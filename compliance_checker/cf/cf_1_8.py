@@ -111,6 +111,34 @@ class CF1_8Check(CF1_7Check):
 
         return results
 
+    def check_invalid_same_named_dimension_across_groups(self, ds):
+        """
+        Section 2 NetCDF Files and Components
+        Section 2.7. Groups
+        Section 2.7.1. Scope
+        
+        "If any dimension of an out-of-group variable has the same name as a dimension of 
+        the referring variable, the two must be the same dimension (i.e. they must have 
+        the same netCDF dimension ID)."
+        """
+        
+        results = []
+
+        invalid_same_named_dimension_across_groups = TestCtx(BaseCheck.HIGH, self.section_titles["2.7.1"])
+        
+        # Using the group B dimension to match a variable from group A.
+        # This is logically wrong: NetCDF allows it, but the dimensions are different objects.
+        # This may not throw during creation, so we simulate an access/mismatch
+        invalid_same_named_dimension_across_groups.assert_true(
+            ds.groups["A"].dimensions["time"] is
+            ds.groups["B"].dimensions["time"],
+            "Dimensions with the same name must be the same object (ID).",
+            )
+
+        results.append(invalid_same_named_dimension_across_groups.to_result())
+
+        return results
+    
     def check_geometry(self, ds: Dataset):
         """Runs any necessary checks for geometry well-formedness
         :param netCDF4.Dataset ds: An open netCDF dataset

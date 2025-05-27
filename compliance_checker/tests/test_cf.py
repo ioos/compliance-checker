@@ -2810,6 +2810,24 @@ class TestCF1_8(BaseTestCase):
         }
         assert bad_messages == set(results[0].msgs)
 
+    def test_check_invalid_same_named_dimension_across_groups(self):
+        dataset = MockTimeSeries()
+        # TEST CONFORMANCE 2.7.1 Scope REQUIRED 2/4
+        # Group A defines its own dimension
+        group_a = dataset.createGroup("A")
+        group_a.createDimension("time", 10)
+        var_a = group_a.createVariable("temperature", "f4", ("time",))
+
+        # Group B defines a separate dimension with the same name
+        group_b = dataset.createGroup("B")
+        group_b.createDimension("time", 10)
+        
+        results = self.cf.check_invalid_same_named_dimension_across_groups(dataset)
+
+        result_dict = {result.name: result for result in results}
+        result = result_dict["§2.7.1. Scope"]
+        assert result.msgs == ["Dimensions with the same name must be the same object (ID)."]
+    
     def test_point_geometry_simple(self):
         dataset = MockTimeSeries()
         dataset.createDimension("instance", 1)
