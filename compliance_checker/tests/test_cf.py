@@ -2819,7 +2819,7 @@ class TestCF1_8(BaseTestCase):
         # Group A defines its own dimension
         group_a = dataset.createGroup("A")
         group_a.createDimension("time", 10)
-        var_a = group_a.createVariable("temperature", "f4", ("time",))
+        #var_a = group_a.createVariable("temperature", "f4", ("time",)) # assigned but never used
 
         # Group B defines a separate dimension with the same name
         group_b = dataset.createGroup("B")

@@ -237,18 +237,18 @@ class CF1_8Check(CF1_7Check):
                     # CF discourages lateral search in this case
                     # ---------------------------------------
                     nug_coord_violation = False
-                    def check_nug_variable(g):
+                    def check_nug_variable(g, coord = coord_ref):
                         nonlocal nug_coord_violation
                         # Step 1: Check this group's variables
                         for vname, v in g.variables.items():
-                            if vname == coord_ref and len(v.dimensions) == 1 and vname == v.dimensions[0]:
+                            if vname == coord and len(v.dimensions) == 1 and vname == v.dimensions[0]:
                                 nug_coord_violation = True
                                 
                         # Step 2: Recursively check child groups
                         for sub in g.groups.values():
-                            check_nug_variable(sub)
+                            check_nug_variable(sub, coord)
 
-                    check_nug_variable(ds)
+                    check_nug_variable(ds, coord_ref)
                     
                     if nug_coord_violation:
                         lo_detect_coordinates_paths.messages.append(f" WARNING: '{coord_ref}' is a NUG coordinate variable used via lateral search. CF Recommendation: Use an absolute or relative path instead.")
