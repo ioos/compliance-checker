@@ -2190,7 +2190,8 @@ class CF1_6Check(CFNCCheck):
                 continue  # No coordinates attribute, nothing to check
 
             check_coords_attrs_format = TestCtx(
-                BaseCheck.HIGH, self.section_titles["5"],
+                BaseCheck.HIGH,
+                self.section_titles["5"],
             )
 
             # Check that it is a proper string
@@ -2246,7 +2247,8 @@ class CF1_6Check(CFNCCheck):
         for var_name in geophysical_variables:
             var = ds.variables[var_name]
             check_spatiotemporal_dims_coords = TestCtx(
-                BaseCheck.HIGH, self.section_titles["5.1"],
+                BaseCheck.HIGH,
+                self.section_titles["5.1"],
             )
 
             for dim in var.dimensions:
@@ -2261,7 +2263,7 @@ class CF1_6Check(CFNCCheck):
 
                     coord_var = ds.variables[dim]
                     std_name = getattr(coord_var, "standard_name", None)
-                    
+
                     check_spatiotemporal_dims_coords.assert_true(
                         std_name == expected_standard_names[dim],
                         f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', "
