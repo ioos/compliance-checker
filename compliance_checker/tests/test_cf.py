@@ -2819,18 +2819,20 @@ class TestCF1_8(BaseTestCase):
         # Group A defines its own dimension
         group_a = dataset.createGroup("A")
         group_a.createDimension("time", 10)
-        #var_a = group_a.createVariable("temperature", "f4", ("time",)) # assigned but never used
+        # var_a = group_a.createVariable("temperature", "f4", ("time",)) # assigned but never used
 
         # Group B defines a separate dimension with the same name
         group_b = dataset.createGroup("B")
         group_b.createDimension("time", 10)
-        
+
         results = self.cf.check_invalid_same_named_dimension_across_groups(dataset)
 
         result_dict = {result.name: result for result in results}
         result = result_dict["§2.7.1. Scope"]
-        assert result.msgs == ["Dimensions with the same name must be the same object (ID)."]
-    
+        assert result.msgs == [
+            "Dimensions with the same name must be the same object (ID).",
+        ]
+
     def test_check_coordinates_with_paths(self):
         """
         TEST CONFORMANCE 2.7.1 Scope REQUIRED 4/4
@@ -2839,8 +2841,13 @@ class TestCF1_8(BaseTestCase):
         results = self.cf.check_coordinates_with_paths(dataset)
 
         result_msgs_list = [result.msgs for result in results]
-        assert result_msgs_list == [["/region1/subgroup1/temperature: 'lat' not found in group or ancestors. It is likely a lateral search, which is discouraged"], []]
-        
+        assert result_msgs_list == [
+            [
+                "/region1/subgroup1/temperature: 'lat' not found in group or ancestors. It is likely a lateral search, which is discouraged",
+            ],
+            [],
+        ]
+
     def test_point_geometry_simple(self):
         dataset = MockTimeSeries()
         dataset.createDimension("instance", 1)

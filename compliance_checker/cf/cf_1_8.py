@@ -116,35 +116,37 @@ class CF1_8Check(CF1_7Check):
         Section 2 NetCDF Files and Components
         Section 2.7. Groups
         Section 2.7.1. Scope
-        
-        "If any dimension of an out-of-group variable has the same name as a dimension of 
-        the referring variable, the two must be the same dimension (i.e. they must have 
+
+        "If any dimension of an out-of-group variable has the same name as a dimension of
+        the referring variable, the two must be the same dimension (i.e. they must have
         the same netCDF dimension ID)."
         """
-        
+
         results = []
 
-        invalid_same_named_dimension_across_groups = TestCtx(BaseCheck.HIGH, self.section_titles["2.7.1"])
-        
+        invalid_same_named_dimension_across_groups = TestCtx(
+            BaseCheck.HIGH,
+            self.section_titles["2.7.1"],
+        )
+
         # Using the group B dimension to match a variable from group A.
         # This is logically wrong: NetCDF allows it, but the dimensions are different objects.
         # This may not throw during creation, so we simulate an access/mismatch
         invalid_same_named_dimension_across_groups.assert_true(
-            ds.groups["A"].dimensions["time"] is
-            ds.groups["B"].dimensions["time"],
+            ds.groups["A"].dimensions["time"] is ds.groups["B"].dimensions["time"],
             "Dimensions with the same name must be the same object (ID).",
-            )
+        )
 
         results.append(invalid_same_named_dimension_across_groups.to_result())
 
         return results
-    
+
     def check_coordinates_with_paths(self, ds):
         """
         Section 2 NetCDF Files and Components
         Section 2.7. Groups
         Section 2.7.1. Scope
-        
+
         Search by absolute path
 
         A variable or dimension specified with an absolute path (i.e., with a leading slash "/") is at the indicated location relative to the root group, as in a UNIX-style file convention. For example, a coordinates attribute of /g1/lat refers to the lat variable in group /g1.
@@ -158,13 +160,19 @@ class CF1_8Check(CF1_7Check):
         A variable or dimension specified with no path (for example, lat) refers to the variable or dimension of that name, if there is one, in the referring group. If not, the ancestors of the referring group are searched for it, starting from the direct ancestor and proceeding toward the root group, until it is found.
 
         A special case exists for coordinate variables. Because coordinate variables must share dimensions with the variables that reference them, the ancestor search is executed only until the local apex group is reached. For coordinate variables that are not found in the referring group or its ancestors, a further strategy is provided, called lateral search. The lateral search proceeds downwards from the local apex group width-wise through each level of groups until the sought coordinate is found. The lateral search algorithm may only be used for NUG coordinate variables; it shall not be used for auxiliary coordinate variables.
-        
+
         """
         results = []
 
-        hi_detect_coordinates_paths = TestCtx(BaseCheck.HIGH, self.section_titles["2.7.1"])
-        lo_detect_coordinates_paths = TestCtx(BaseCheck.LOW, self.section_titles["2.7.1"])
-    
+        hi_detect_coordinates_paths = TestCtx(
+            BaseCheck.HIGH,
+            self.section_titles["2.7.1"],
+        )
+        lo_detect_coordinates_paths = TestCtx(
+            BaseCheck.LOW,
+            self.section_titles["2.7.1"],
+        )
+
         # Walk the group tree from root
         group_stack = [("/", ds)]
 
@@ -172,7 +180,11 @@ class CF1_8Check(CF1_7Check):
             current_path, group = group_stack.pop()
 
             for var_name, var in group.variables.items():
-                coords = var.getncattr('coordinates') if 'coordinates' in var.ncattrs() else ""
+                coords = (
+                    var.getncattr("coordinates")
+                    if "coordinates" in var.ncattrs()
+                    else ""
+                )
                 for coord_ref in coords.split():
 
                     # ---------------------------------------
@@ -185,9 +197,13 @@ class CF1_8Check(CF1_7Check):
                                 coord_var = coord_var.groups[part]
                             coord_var.variables[coord_ref.split("/")[-1]]
                             found = True
-                            hi_detect_coordinates_paths.messages.append(f"{current_path}{var_name}: '{coord_ref}' found found (absolute path)")
+                            hi_detect_coordinates_paths.messages.append(
+                                f"{current_path}{var_name}: '{coord_ref}' found found (absolute path)",
+                            )
                         except Exception:
-                            hi_detect_coordinates_paths.messages.append(f"{current_path}{var_name}: '{coord_ref}' not found at absolute path")
+                            hi_detect_coordinates_paths.messages.append(
+                                f"{current_path}{var_name}: '{coord_ref}' not found at absolute path",
+                            )
 
                     # ---------------------------------------
                     # 2. Relative Path Check: ../group1/lat
@@ -203,9 +219,13 @@ class CF1_8Check(CF1_7Check):
                                 else:
                                     coord_var = coord_var.groups[part]
                             coord_var.variables[coord_ref.split("/")[-1]]
-                            hi_detect_coordinates_paths.messages.append(f"{current_path}{var_name}: '{coord_ref}' found (relative path)")
+                            hi_detect_coordinates_paths.messages.append(
+                                f"{current_path}{var_name}: '{coord_ref}' found (relative path)",
+                            )
                         except Exception:
-                            hi_detect_coordinates_paths.messages.append(f"{current_path}{var_name}: '{coord_ref}' not found at relative path")
+                            hi_detect_coordinates_paths.messages.append(
+                                f"{current_path}{var_name}: '{coord_ref}' not found at relative path",
+                            )
 
                     # ---------------------------------------
                     # 3. No Path (Unqualified name): 'lat'
@@ -214,7 +234,9 @@ class CF1_8Check(CF1_7Check):
                     else:
                         # 3a: Check current group
                         if coord_ref in group.variables:
-                            hi_detect_coordinates_paths.messages.append(f"{current_path}{var_name}: '{coord_ref}' found in same group")
+                            hi_detect_coordinates_paths.messages.append(
+                                f"{current_path}{var_name}: '{coord_ref}' found in same group",
+                            )
                             continue
 
                         # 3b. Search ancestor groups
@@ -223,13 +245,17 @@ class CF1_8Check(CF1_7Check):
                         while hasattr(parent, "parent") and parent.parent is not None:
                             parent = parent.parent
                             if coord_ref in parent.variables:
-                                hi_detect_coordinates_paths.messages.append(f"{current_path}{var_name}: '{coord_ref}' found in ancestor")
+                                hi_detect_coordinates_paths.messages.append(
+                                    f"{current_path}{var_name}: '{coord_ref}' found in ancestor",
+                                )
                                 found = True
                                 break
-                                
+
                         # 3c. Not found by proximity → likely lateral search
                         if not found:
-                           hi_detect_coordinates_paths.messages.append(f"{current_path}{var_name}: '{coord_ref}' not found in group or ancestors. It is likely a lateral search, which is discouraged")
+                            hi_detect_coordinates_paths.messages.append(
+                                f"{current_path}{var_name}: '{coord_ref}' not found in group or ancestors. It is likely a lateral search, which is discouraged",
+                            )
 
                     # ---------------------------------------
                     # Extra Check: Is it a NUG coordinate variable?
@@ -237,31 +263,38 @@ class CF1_8Check(CF1_7Check):
                     # CF discourages lateral search in this case
                     # ---------------------------------------
                     nug_coord_violation = False
-                    def check_nug_variable(g, coord = coord_ref):
+
+                    def check_nug_variable(g, coord=coord_ref):
                         nonlocal nug_coord_violation
                         # Step 1: Check this group's variables
                         for vname, v in g.variables.items():
-                            if vname == coord and len(v.dimensions) == 1 and vname == v.dimensions[0]:
+                            if (
+                                vname == coord
+                                and len(v.dimensions) == 1
+                                and vname == v.dimensions[0]
+                            ):
                                 nug_coord_violation = True
-                                
+
                         # Step 2: Recursively check child groups
                         for sub in g.groups.values():
                             check_nug_variable(sub, coord)
 
                     check_nug_variable(ds, coord_ref)
-                    
+
                     if nug_coord_violation:
-                        lo_detect_coordinates_paths.messages.append(f" WARNING: '{coord_ref}' is a NUG coordinate variable used via lateral search. CF Recommendation: Use an absolute or relative path instead.")
+                        lo_detect_coordinates_paths.messages.append(
+                            f" WARNING: '{coord_ref}' is a NUG coordinate variable used via lateral search. CF Recommendation: Use an absolute or relative path instead.",
+                        )
 
             # Add child groups to the stack to continue walking the tree
             for name, subgroup in group.groups.items():
                 group_stack.append((current_path + name + "/", subgroup))
-                
+
         results.append(hi_detect_coordinates_paths.to_result())
         results.append(lo_detect_coordinates_paths.to_result())
-       
+
         return results
-    
+
     def check_geometry(self, ds: Dataset):
         """Runs any necessary checks for geometry well-formedness
         :param netCDF4.Dataset ds: An open netCDF dataset
