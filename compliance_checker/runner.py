@@ -229,9 +229,9 @@ class ComplianceChecker:
                     )
         elif output_type == "json_new":
             for ds, score_groups in score_dict.items():
+                results[ds] = {}
                 for checker, rpair in score_groups.items():
                     groups, errors = rpair
-                    results[ds] = {}
                     results[ds][checker] = cs.dict_output(checker, groups, ds, limit)
         json_results = json.dumps(results, indent=2, ensure_ascii=False)
 
