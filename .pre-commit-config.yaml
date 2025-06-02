@@ -25,19 +25,19 @@ repos:
     language_version: python3
 
 - repo: https://github.com/asottile/add-trailing-comma
-  rev: v3.1.0
+  rev: v3.2.0
   hooks:
     - id: add-trailing-comma
 
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.11.8
+  rev: v0.11.12
   hooks:
     - id: ruff
       args: ["--fix", "--show-fixes"]
 
 - repo: https://github.com/tox-dev/pyproject-fmt
-  rev: v2.5.1
+  rev: v2.6.0
   hooks:
     - id: pyproject-fmt
 
@@ -57,7 +57,7 @@ repos:
           )$
 
 - repo: https://github.com/woodruffw/zizmor-pre-commit
-  rev: v1.6.0
+  rev: v1.9.0
   hooks:
     - id: zizmor
 
