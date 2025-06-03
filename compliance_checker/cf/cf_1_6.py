@@ -421,8 +421,11 @@ class CF1_6Check(CFNCCheck):
             if hasattr(variable, "_FillValue") and hasattr(variable, "missing_value"):
                 total = total + 1
                 if not (
-                    variable._FillValue == variable.missing_value or
-                    (np.isnan(variable._FillValue) and np.isnan(variable.missing_value))
+                    variable._FillValue == variable.missing_value
+                    or (
+                        np.isnan(variable._FillValue)
+                        and np.isnan(variable.missing_value)
+                    )
                 ):
                     fails.append(
                         f"For the variable {variable.name} the missing_value must be equal to the _FillValue",
