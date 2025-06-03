@@ -369,6 +369,12 @@ class TestCF1_6(BaseTestCase):
         dataset.variables["b"][1] = 2
         dataset.variables["b"].setncattr("missing_value", [9999.9])
 
+        # Case of _FillValue and missing_value are equal but set to NaN
+        dataset.createVariable("c", "d", ("time",), fill_value=float("nan"))
+        dataset.variables["c"][0] = 1
+        dataset.variables["c"][1] = 2
+        dataset.variables["c"].setncattr("missing_value", [float("nan")])
+
         result = self.cf.check_fill_value_equal_missing_value(dataset)
 
         # check if the test fails when when variable "a" is checked.
