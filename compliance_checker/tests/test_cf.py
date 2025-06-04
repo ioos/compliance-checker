@@ -2838,70 +2838,130 @@ class TestCF1_8(BaseTestCase):
         dataset.createDimension("instance", 1)
         fake_data = dataset.createVariable("someData", "f8", ("instance", "time"))
         fake_data.geometry = "geometry"
-        x = dataset.createVariable("x", "f8", ("point_count",))
+        x = dataset.createVariable("x", "f8", ("point_count", "instance"))
         y = dataset.createVariable("y", "f8", ("point_count",))
+        z = dataset.createVariable("z", "f8", ("instance",))
+        w = dataset.createVariable("w", "f8", ("point_count",))
+        x.axis = "X"
+        y.axis = "X"
+        y.nodes = "z"
+        z.axis = "Z"
+        w.axis = "W"
         geom_var = dataset.createVariable("geometry", "i4", ())
-        geom_var.geometry_type = "point"
-        geom_var.node_coordinates = "x y"
-        x[:] = np.array([10, 20, 30])
-        y[:] = np.array([30, 35, 21])
+        geom_var.grid_mapping = "datum"
+
         return dataset
 
     # TEST CONFORMANCE 7.5 REQUIRED 10/20
     @pytest.mark.parametrize(
-        "geom_grid_mapping,geom_coordinates",
-        [(None, None), ("datum", None), (None, "x y"), ("datum", "x y")],
+        "geom_grid_mapping,geom_coordinates,geom_geometry_type,geom_node_coordinates,expected_msg",
+        [
+            (
+                None,
+                None,
+                "pont",
+                None,
+                [
+                    "geometry_type on geometry must be 'point', 'line', or 'polygon'",
+                ],
+            ),
+            (
+                "datum1",
+                None,
+                "point",
+                None,
+                [
+                    "Geometry variable geometry has attribute grid_mapping which is either not present or does not have the same value as the referring parent variable someData",
+                    'Could not find required attribute "node_coordinates" in geometry variable "geometry"',
+                ],
+            ),
+            (
+                None,
+                "lat lon",
+                "point",
+                (3, 2),
+                [
+                    "Geometry variable geometry has attribute coordinates which is either not present or is not a subset of the coordinates attribute of the referring parent variable someData",
+                    'Attribute node_coordinates in geometry variable "geometry" must be a string',
+                ],
+            ),
+            (
+                "datum2",
+                "lat lon",
+                "point",
+                "w n",
+                [
+                    "Geometry variable geometry has attribute coordinates which is either not present or is not a subset of the coordinates attribute of the referring parent variable someData",
+                    "Geometry variable geometry has attribute grid_mapping which is either not present or does not have the same value as the referring parent variable someData",
+                    "The following referenced node coordinate variables for geometry variable geometry were not found: ['n']",
+                ],
+            ),
+            (
+                "datum",
+                "lat lon w",
+                "point",
+                "x y z",
+                [
+                    "Geometry variable geometry has attribute coordinates which is either not present or is not a subset of the coordinates attribute of the referring parent variable someData",
+                    "Geometry variable geometry has attribute grid_mapping which is either not present or does not have the same value as the referring parent variable someData",
+                    "Node coordinate var 'x' must have exactly one dimension",
+                    "Node coordinate var 'z' must share the same single dimension",
+                    "Missing axis attribute on node coord vars: ['z']",
+                    "Duplicate axis values among node coord vars: ['X', 'X']",
+                    "For a point geometry, coordinate variables must be the same length as node_count defined, or must be length 1 if node_count is not set",
+                ],
+            ),
+            (
+                "datum",
+                "lat lon",
+                "point",
+                "x y w",
+                [
+                    "Geometry variable geometry has attribute coordinates which is either not present or is not a subset of the coordinates attribute of the referring parent variable someData",
+                    "Geometry variable geometry has attribute grid_mapping which is either not present or does not have the same value as the referring parent variable someData",
+                    "Node coordinate var 'x' must have exactly one dimension",
+                    "Parent variable 'someData' does not include geometry dimension 'point_count' used in geometry variable 'geometry'",
+                    "Missing axis attribute on node coord vars: ['w']",
+                    "Duplicate axis values among node coord vars: ['X', 'X']",
+                    "'nodes' attr on y must point to one of the node coordinate vars",
+                    "For a point geometry, coordinate variables must be the same length as node_count defined, or must be length 1 if node_count is not set",
+                ],
+            ),
+        ],
     )
     def test_coordinate_grid_mapping_geometry_ds_pass(
         self,
         geometry_ds,
         geom_grid_mapping,
         geom_coordinates,
+        geom_geometry_type,
+        geom_node_coordinates,
+        expected_msg,
     ):
-        geometry_ds.variables["someData"].grid_mapping = "datum"
+
+        # Set up geometry_ds as needed
         geom_gm_none = geom_grid_mapping is None
         if not geom_gm_none:
             geometry_ds.variables["geometry"].grid_mapping = geom_grid_mapping
 
-        geometry_ds.variables["someData"].coordinates = "x y"
         geom_coords_none = geom_coordinates is None
         if not geom_coords_none:
             geometry_ds.variables["geometry"].coordinates = geom_coordinates
-        msg_template = (
-            "Geometry variable geometry has "
-            "attribute {} the referring parent "
-            "variable someData"
-        )
-        coord_subst = (
-            "coordinates which is either not present or is not a "
-            "subset of the coordinates attribute of"
-        )
-        gm_subst = (
-            "grid_mapping which is either not present or does not have "
-            "the same value as"
-        )
-        results = self.cf.check_geometry(geometry_ds)
-        assert msg_template.format(gm_subst) not in results[0].msgs
-        assert msg_template.format(coord_subst) not in results[0].msgs
-        # test subset of coordinates
-        geometry_ds.variables["someData"].coordinates = "x y z"
-        results = self.cf.check_geometry(geometry_ds)
-        assert msg_template.format(coord_subst) not in results[0].msgs
 
-        # try with possibly invalid data
-        # mismatch between parent variable coordinates/grid_mapping
-        # and geometry variable
-        if not geom_gm_none:
-            geometry_ds.variables["someData"].grid_mapping = "other_datum"
-            results = self.cf.check_geometry(geometry_ds)
-            assert msg_template.format(gm_subst) in results[0].msgs
-        if not geom_coords_none:
-            geometry_ds.variables["someData"].coordinates = "u v"
-            results = self.cf.check_geometry(geometry_ds)
-            assert msg_template.format(coord_subst) in results[0].msgs
-            geometry_ds.variables["geometry"].coordinates = "x y z"
-            results = self.cf.check_geometry(geometry_ds)
-            assert msg_template.format(coord_subst) in results[0].msgs
+        geom_geometry_type_none = geom_geometry_type is None
+        if not geom_geometry_type_none:
+            geometry_ds.variables["geometry"].geometry_type = geom_geometry_type
+
+        geom_node_coordinates_none = geom_node_coordinates is None
+        if not geom_node_coordinates_none:
+            geometry_ds.variables["geometry"].node_coordinates = geom_node_coordinates
+
+        results = self.cf.check_geometry(geometry_ds)
+        actual_msgs = results[0].msgs
+        print("ACTUAL MSG \n", actual_msgs, "\n")
+        for msg in expected_msg:
+            print(msg)
+            assert msg in actual_msgs
 
     def test_point_geometry_multiple(self):
         dataset = MockTimeSeries()
