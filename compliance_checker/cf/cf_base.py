@@ -40,11 +40,13 @@ class CFBaseCheck(BaseCheck):
         self._std_names = util.StandardNameTable()
 
         self.section_titles = {  # dict of section headers shared by grouped checks
+            "1.2": "§1.2 Terminology",
             "2.1": "§2.1 Filename",
             "2.2": "§2.2 Data Types",
             "2.3": "§2.3 Naming Conventions",
             "2.4": "§2.4 Dimensions",
             "2.5": "§2.5 Variables",
+            "2.5.1": "§2.5.1. Missing data, valid and actual range of data",
             "2.6": "§2.6 Attributes",
             "2.6.3": "§2.6.3 External Variables",
             "3.1": "§3.1 Units",
