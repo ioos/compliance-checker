@@ -7,12 +7,22 @@ from compliance_checker.cf.cf_1_10 import CF1_10Check
 @lru_cache
 def _temperature_standard_names(standard_name_table):
     re_ns = {"re": "http://exslt.org/regular-expressions"}
-    return set(
+    temp_var_name_set = set(
         standard_name_table._root.xpath(
             "entry[re:test(canonical_units, " r"'(?:K|degree_C)(?:-?\d+)?')]/@id",
             namespaces=re_ns,
         ),
     )
+    # need to include aliases for variable names that match temperature as well
+    aliases = standard_name_table._root.findall("alias")
+    all_names = temp_var_name_set.union(
+        {
+            alias.attrib["id"]
+            for alias in aliases
+            if alias.find("entry_id").text in temp_var_name_set
+        },
+    )
+    return all_names
 
 
 class CF1_11Check(CF1_10Check):
