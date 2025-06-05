@@ -72,7 +72,6 @@ def main():
             "Define the criteria for the checks. "
             "Either Strict, Normal, or Lenient.  Defaults to Normal."
         ),
-        nargs="?",
         default="normal",
         choices=["lenient", "normal", "strict"],
     )
