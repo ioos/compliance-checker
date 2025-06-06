@@ -866,6 +866,9 @@ class TestCF1_6(BaseTestCase):
         # Test with single element.  Will fail, but should not throw exception.
         dataset.variables["conductivity_qc"].flag_values = np.array([1], dtype=np.int8)
         results = self.cf.check_flags(dataset)
+        # Test with wrong type.  Will fail, but should not throw exception.
+        dataset.variables["conductivity_qc"].flag_values = "[1 2]"
+        results = self.cf.check_flags(dataset)
 
     def test_check_flag_masks(self):
         dataset = self.load_dataset(STATIC_FILES["ghrsst"])
@@ -891,6 +894,14 @@ class TestCF1_6(BaseTestCase):
         assert (
             "flag_masks for variable flags must not contain zero as an "
             "element" in messages
+        )
+        # test wrong type for flag_masks
+        flags_var.flag_masks = "[0 1]"
+        results = self.cf.check_flags(dataset)
+        score, out_of, messages = get_results(results)
+        assert (
+            "flag_masks (<class 'str'>) must be the same data type as "
+            "flags (<class 'numpy.float64'>)" in messages
         )
         # IMPLEMENTATION 3.5 REQUIRED 1/1
         flags_var.flag_masks = np.array([1], dtype="i2")
