@@ -1185,12 +1185,9 @@ class CF1_6Check(CFNCCheck):
                 # IMPLEMENTATION CONFORMANCE 3.5 RECOMMENDED 1/1
                 # If shapes aren't equal, we can't do proper elementwise
                 # comparison
-                if (
-                    vals_arr.size != masks_arr.size
-                    or not (
-                        np.issubdtype(vals_arr.dtype, np.integer)
-                        and np.issubdtype(masks_arr.dtype, np.integer)
-                    )
+                if vals_arr.size != masks_arr.size or not (
+                    np.issubdtype(vals_arr.dtype, np.integer)
+                    and np.issubdtype(masks_arr.dtype, np.integer)
                 ):
                     allv = False
                 else:
@@ -1241,7 +1238,11 @@ class CF1_6Check(CFNCCheck):
 
         # IMPLEMENTATION CONFORMANCE 3.5 REQUIRED 1/8
         # the data type for flag_values should be the same as the variable
-        flag_values_type = flag_values.dtype.type if hasattr(flag_values, "dtype") else type(flag_values)
+        flag_values_type = (
+            flag_values.dtype.type
+            if hasattr(flag_values, "dtype")
+            else type(flag_values)
+        )
         valid_values.assert_true(
             variable.dtype.type == flag_values_type,
             f"flag_values ({flag_values_type}) must be the same data type as {name} ({variable.dtype.type})"
@@ -1279,7 +1280,9 @@ class CF1_6Check(CFNCCheck):
 
         valid_masks = TestCtx(BaseCheck.HIGH, self.section_titles["3.5"])
 
-        flag_masks_type = flag_masks.dtype.type if hasattr(flag_masks, "dtype") else type(flag_masks)
+        flag_masks_type = (
+            flag_masks.dtype.type if hasattr(flag_masks, "dtype") else type(flag_masks)
+        )
         valid_masks.assert_true(
             variable.dtype.type == flag_masks_type,
             f"flag_masks ({flag_masks_type}) must be the same data type as {name} ({variable.dtype.type})"
