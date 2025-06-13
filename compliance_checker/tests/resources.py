@@ -79,6 +79,9 @@ STATIC_FILES = {
     "ioos_gold_1_1": get_filename("tests/data/ioos_1_1.cdl"),
     "kibesillah": get_filename("tests/data/examples/kibesillah.cdl"),
     "l01-met": get_filename("tests/data/examples/l01-met.cdl"),
+    "lateral_search_example": get_filename(
+        "tests/data/examples/lateral_search_example",
+    ),
     "line_geometry": get_filename("tests/data/line_geometry.cdl"),
     "mapping": get_filename("tests/data/mapping.cdl"),
     "multi-dim-coordinates": get_filename("tests/data/multi-dim-coordinates.cdl"),

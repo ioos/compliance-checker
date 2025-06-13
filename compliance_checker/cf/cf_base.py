@@ -47,6 +47,7 @@ class CFBaseCheck(BaseCheck):
             "2.5": "§2.5 Variables",
             "2.6": "§2.6 Attributes",
             "2.6.3": "§2.6.3 External Variables",
+            "2.7.1": "§2.7.1. Scope",
             "3.1": "§3.1 Units",
             "3.2": "§3.2 Long Name",
             "3.3": "§3.3 Standard Name",
