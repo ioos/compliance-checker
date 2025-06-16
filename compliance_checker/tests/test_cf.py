@@ -86,6 +86,7 @@ class TestCF1_6(BaseTestCase):
 
     def test_coord_data_vars(self):
         """Check that coordinate data variables are properly handled"""
+
         ds = MockTimeSeries()
         ds.createDimension("siglev", 20)
 
@@ -97,7 +98,9 @@ class TestCF1_6(BaseTestCase):
         )
         temp.coordinates = "sigma noexist"
         ds.createVariable("sigma", np.float64, dimensions=("siglev",))
+
         self.cf.setup(ds)
+
         # time is a NUG coordinate variable, sigma is not, but is referred to in
         # variables, so both should show up in cf_coord_data_vars.
         # noexist does not exist in the dataset's variables, so it is not
@@ -106,8 +109,16 @@ class TestCF1_6(BaseTestCase):
 
         ds = MockTimeSeries()
         ds.variables["time"][:3] = np.array([20, -2, 0])
+
+        # Section 1.2 Terminology:
+        # Coordinate Variable
+        # We use this term precisely as it is defined in the NUG section on coordinate variables.
+        # It is a one-dimensional variable with the same name as its dimension [e.g., time(time)],
+        # and it is defined as a numeric data type with values that are ordered monotonically.
+        # Missing values are not allowed in coordinate variables.
         result = self.cf.check_coordinate_variables_strict_monotonicity(ds)
         _, _, messages = get_results(result)
+
         assert 'Coordinate variable "time" must be strictly monotonic' in messages
 
     # --------------------------------------------------------------------------------
@@ -1424,11 +1435,46 @@ class TestCF1_6(BaseTestCase):
         assert result.msgs == []  # shouldn't have any messages
         assert result.value == (4, 4)
 
+    def test_check_coordinates_attribute_format(self):
+        dataset = self.load_dataset(STATIC_FILES["illegal-aux-coords"])
+        results = self.cf.check_coordinates_attribute_format(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict["§5 Coordinate Systems"]
+        assert result.msgs == []  # shouldn't have any messages
+        assert result.value == (4, 4)
+
+    def test_check_spatiotemporal_dims_have_coordinate_vars(self):
+        """
+        Section 5.1 Independent Latitude, Longitude, Vertical, and Time Axes:
+        When each of a variable’s spatiotemporal dimensions is a latitude, longitude,
+        vertical, or time dimension, then each axis is identified by a coordinate variable.
+        """
+        dataset = self.load_dataset(STATIC_FILES["example-grid"])
+        results = self.cf.check_spatiotemporal_dims_have_coordinate_vars(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[
+            "§5.1 Independent Latitude, Longitude, Vertical, and Time Axes"
+        ]
+        assert result.msgs == []  # shouldn't have any messages
+        assert result.value == (4, 4)
+
+    def test_check_invalid_coordinate_attr(self):
+        """
+        Section 2.5.1. Missing data, valid and actual range of data:
+         "Missing data is not allowed in coordinate variables."
+        _FillValue or missing_value should not be an attributes of the Coordinate variables.
+        """
+        dataset = self.load_dataset(STATIC_FILES["example-grid"])
+        results = self.cf.check_invalid_coordinate_attr(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict["§2.5.1. Missing data, valid and actual range of data"]
+        assert result.msgs == []  # shouldn't have any messages
+        assert result.value == (2, 2)
+
     def test_check_grid_coordinates(self):
         dataset = self.load_dataset(STATIC_FILES["2dim"])
         results = self.cf.check_grid_coordinates(dataset)
         scored, out_of, messages = get_results(results)
-
         result_dict = {result.name: result for result in results}
         result = result_dict[
             "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
