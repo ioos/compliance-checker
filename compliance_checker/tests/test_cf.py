@@ -3500,7 +3500,7 @@ class TestCF1_11(BaseTestCase):
         temperature_dataset.variables["temperature"].units = "degrees_Celsius2"
         scored, out_of, _ = get_results(results)
         assert scored == out_of
-        
+
         # check against aliased temperature names
         temperature_dataset.variables["temperature"].standard_name = (
             "equivalent_temperature"
