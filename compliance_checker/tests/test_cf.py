@@ -86,6 +86,7 @@ class TestCF1_6(BaseTestCase):
 
     def test_coord_data_vars(self):
         """Check that coordinate data variables are properly handled"""
+
         ds = MockTimeSeries()
         ds.createDimension("siglev", 20)
 
@@ -97,7 +98,9 @@ class TestCF1_6(BaseTestCase):
         )
         temp.coordinates = "sigma noexist"
         ds.createVariable("sigma", np.float64, dimensions=("siglev",))
+
         self.cf.setup(ds)
+
         # time is a NUG coordinate variable, sigma is not, but is referred to in
         # variables, so both should show up in cf_coord_data_vars.
         # noexist does not exist in the dataset's variables, so it is not
@@ -106,8 +109,16 @@ class TestCF1_6(BaseTestCase):
 
         ds = MockTimeSeries()
         ds.variables["time"][:3] = np.array([20, -2, 0])
+
+        # Section 1.2 Terminology:
+        # Coordinate Variable
+        # We use this term precisely as it is defined in the NUG section on coordinate variables.
+        # It is a one-dimensional variable with the same name as its dimension [e.g., time(time)],
+        # and it is defined as a numeric data type with values that are ordered monotonically.
+        # Missing values are not allowed in coordinate variables.
         result = self.cf.check_coordinate_variables_strict_monotonicity(ds)
         _, _, messages = get_results(result)
+
         assert 'Coordinate variable "time" must be strictly monotonic' in messages
 
     # --------------------------------------------------------------------------------
@@ -368,6 +379,12 @@ class TestCF1_6(BaseTestCase):
         dataset.variables["b"][0] = 1
         dataset.variables["b"][1] = 2
         dataset.variables["b"].setncattr("missing_value", [9999.9])
+
+        # Case of _FillValue and missing_value are equal but set to NaN
+        dataset.createVariable("c", "d", ("time",), fill_value=float("nan"))
+        dataset.variables["c"][0] = 1
+        dataset.variables["c"][1] = 2
+        dataset.variables["c"].setncattr("missing_value", [float("nan")])
 
         result = self.cf.check_fill_value_equal_missing_value(dataset)
 
@@ -860,6 +877,9 @@ class TestCF1_6(BaseTestCase):
         # Test with single element.  Will fail, but should not throw exception.
         dataset.variables["conductivity_qc"].flag_values = np.array([1], dtype=np.int8)
         results = self.cf.check_flags(dataset)
+        # Test with wrong type.  Will fail, but should not throw exception.
+        dataset.variables["conductivity_qc"].flag_values = "[1 2]"
+        results = self.cf.check_flags(dataset)
 
     def test_check_flag_masks(self):
         dataset = self.load_dataset(STATIC_FILES["ghrsst"])
@@ -885,6 +905,14 @@ class TestCF1_6(BaseTestCase):
         assert (
             "flag_masks for variable flags must not contain zero as an "
             "element" in messages
+        )
+        # test wrong type for flag_masks
+        flags_var.flag_masks = "[0 1]"
+        results = self.cf.check_flags(dataset)
+        score, out_of, messages = get_results(results)
+        assert (
+            "flag_masks (<class 'str'>) must be the same data type as "
+            "flags (<class 'numpy.float64'>)" in messages
         )
         # IMPLEMENTATION 3.5 REQUIRED 1/1
         flags_var.flag_masks = np.array([1], dtype="i2")
@@ -1407,11 +1435,46 @@ class TestCF1_6(BaseTestCase):
         assert result.msgs == []  # shouldn't have any messages
         assert result.value == (4, 4)
 
+    def test_check_coordinates_attribute_format(self):
+        dataset = self.load_dataset(STATIC_FILES["illegal-aux-coords"])
+        results = self.cf.check_coordinates_attribute_format(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict["§5 Coordinate Systems"]
+        assert result.msgs == []  # shouldn't have any messages
+        assert result.value == (4, 4)
+
+    def test_check_spatiotemporal_dims_have_coordinate_vars(self):
+        """
+        Section 5.1 Independent Latitude, Longitude, Vertical, and Time Axes:
+        When each of a variable’s spatiotemporal dimensions is a latitude, longitude,
+        vertical, or time dimension, then each axis is identified by a coordinate variable.
+        """
+        dataset = self.load_dataset(STATIC_FILES["example-grid"])
+        results = self.cf.check_spatiotemporal_dims_have_coordinate_vars(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict[
+            "§5.1 Independent Latitude, Longitude, Vertical, and Time Axes"
+        ]
+        assert result.msgs == []  # shouldn't have any messages
+        assert result.value == (4, 4)
+
+    def test_check_invalid_coordinate_attr(self):
+        """
+        Section 2.5.1. Missing data, valid and actual range of data:
+         "Missing data is not allowed in coordinate variables."
+        _FillValue or missing_value should not be an attributes of the Coordinate variables.
+        """
+        dataset = self.load_dataset(STATIC_FILES["example-grid"])
+        results = self.cf.check_invalid_coordinate_attr(dataset)
+        result_dict = {result.name: result for result in results}
+        result = result_dict["§2.5.1. Missing data, valid and actual range of data"]
+        assert result.msgs == []  # shouldn't have any messages
+        assert result.value == (2, 2)
+
     def test_check_grid_coordinates(self):
         dataset = self.load_dataset(STATIC_FILES["2dim"])
         results = self.cf.check_grid_coordinates(dataset)
         scored, out_of, messages = get_results(results)
-
         result_dict = {result.name: result for result in results}
         result = result_dict[
             "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
@@ -2810,6 +2873,44 @@ class TestCF1_8(BaseTestCase):
         }
         assert bad_messages == set(results[0].msgs)
 
+    def test_check_invalid_same_named_dimension_across_groups(self):
+        """
+        TEST CONFORMANCE 2.7.1 Scope REQUIRED 2/4
+        """
+        dataset = MockTimeSeries()
+
+        # Group A defines its own dimension
+        group_a = dataset.createGroup("A")
+        group_a.createDimension("time", 10)
+        # var_a = group_a.createVariable("temperature", "f4", ("time",)) # assigned but never used
+
+        # Group B defines a separate dimension with the same name
+        group_b = dataset.createGroup("B")
+        group_b.createDimension("time", 10)
+
+        results = self.cf.check_invalid_same_named_dimension_across_groups(dataset)
+
+        result_dict = {result.name: result for result in results}
+        result = result_dict["§2.7.1. Scope"]
+        assert result.msgs == [
+            "Dimensions with the same name must be the same object (ID).",
+        ]
+
+    def test_check_coordinates_with_paths(self):
+        """
+        TEST CONFORMANCE 2.7.1 Scope REQUIRED 4/4
+        """
+        dataset = self.load_dataset(STATIC_FILES["lateral_search_example"])
+        results = self.cf.check_coordinates_with_paths(dataset)
+
+        result_msgs_list = [result.msgs for result in results]
+        assert result_msgs_list == [
+            [
+                "/region1/subgroup1/temperature: 'lat' not found in group or ancestors. It is likely a lateral search, which is discouraged",
+            ],
+            [],
+        ]
+
     def test_point_geometry_simple(self):
         dataset = MockTimeSeries()
         dataset.createDimension("instance", 1)
@@ -3392,10 +3493,19 @@ class TestCF1_11(BaseTestCase):
         scored, out_of, _ = get_results(results)
         assert scored == out_of
 
+        # check against compound temperature units
         temperature_dataset.variables["temperature"].standard_name = (
             "square_of_air_temperature"
         )
         temperature_dataset.variables["temperature"].units = "degrees_Celsius2"
+        scored, out_of, _ = get_results(results)
+        assert scored == out_of
+        
+        # check against aliased temperature names
+        temperature_dataset.variables["temperature"].standard_name = (
+            "equivalent_temperature"
+        )
+        temperature_dataset.variables["temperature"].units = "degrees_Celsius"
         scored, out_of, _ = get_results(results)
         assert scored == out_of
 

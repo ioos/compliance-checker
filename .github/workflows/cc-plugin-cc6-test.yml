@@ -1,0 +1,44 @@
+name: CC6 Plugin Tests
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      with:
+        persist-credentials: false
+
+    - name: Setup Micromamba
+      uses: mamba-org/setup-micromamba@b09ef9b599704322748535812ca03efb2625677b # v2.0.5
+      with:
+        environment-name: TEST
+        init-shell: bash
+        create-args: >-
+          python=3 pip
+          --file requirements.txt
+          --file test_requirements.txt
+          --channel conda-forge
+
+    - name: Install compliance-checker
+      shell: bash -l {0}
+      run: |
+        python -m pip install -v -e . --no-deps --force-reinstall
+
+    - name: cc-plugin-cc6 tests
+      shell: bash -l {0}
+      run: >
+        git clone https://github.com/euro-cordex/cc-plugin-cc6.git
+        && cd cc-plugin-cc6
+        && micromamba install cf_xarray pandas xarray gitpython importlib-metadata pooch --channel conda-forge
+        && python -m pip install -v -e . --no-deps --force-reinstall
+        && python -m pytest -s -rxs -v tests
+    permissions:
+      actions: none
