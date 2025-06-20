@@ -120,4 +120,4 @@ class CF1_11Check(CF1_10Check):
             "There may only be one variable containing the cf_role attribute. "
             f"Currently the following variables have cf_role attributes: {cf_role_var_names}",
         )
-        return test_ctx
+        return test_ctx.to_result()
