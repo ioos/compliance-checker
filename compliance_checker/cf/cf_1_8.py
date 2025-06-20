@@ -402,7 +402,7 @@ class CF1_8Check(CF1_7Check):
             # The single dimension of the part node count variable should equal the total number of parts in all the geometries.
             # polygons with interior geometry only
             if interior_ring is not None and part_node_count is not None:
-                if len(interior_ring) != len(part_node_count):
+                if len(interior_ring[:]) != len(part_node_count[:]):
                     geom_valid.messages.append(
                         f"part_node_count and interior_ring must have same length for '{geometry_var_name}'",
                     )
