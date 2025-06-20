@@ -322,23 +322,14 @@ class CF1_8Check(CF1_7Check):
 
             # MPLEMENTATION CONFORMANCE 7.5 REQUIRED 11–12/20:
             # Validate nodes attribute on coordinate vars
-            print("HERE ", split_coord_names)
             for coord_var in node_coord_vars:
-                print("HERE ", coord_var.name)
                 nodes_attr = getattr(coord_var, "nodes", None)
                 if nodes_attr:
-                    print("IF 1 HERE ME", coord_var.name, nodes_attr)
                     if nodes_attr not in ds.variables:
-                        print("IF 2 HERE ME", coord_var.name, nodes_attr)
                         geom_valid.messages.append(
                             f"'nodes' attr on {coord_var.name} references unknown var {nodes_attr}",
                         )
                     elif nodes_attr not in split_coord_names:
-                        print(
-                            "ELIF 1 HERE ME",
-                            coord_var.name,
-                            ds.variables[coord_var.name].nodes,
-                        )
                         geom_valid.messages.append(
                             f"'nodes' attr on {coord_var.name} must point to one of the node coordinate vars",
                         )
@@ -358,6 +349,7 @@ class CF1_8Check(CF1_7Check):
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 5–6/20
             # For a line geometry_type, each geometry must have a minimum of two node coordinates.
             # For a polygon geometry_type, each geometry must have a minimum of three node coordinates.
+
             if geometry_type == "line" and len(node_coord_vars[0]) < 2:
                 geom_valid.messages.append(
                     f"Line geometry '{geometry_var_name}' must have ≥2 nodes",
@@ -372,7 +364,8 @@ class CF1_8Check(CF1_7Check):
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 14/20:
             # Nodes for polygon exterior rings must be put in anticlockwise order (viewed from above)
             # and polygon interior rings in clockwise order.
-            # This is geometry-specific and may require geometric analysis, so only warning is issued via geometry.check_geometry()
+            # This is geometry-specific and may require geometric analysis,
+            # so only warning is issued via geometry.check_geometry()
 
             # Load attributes
             node_count, node_count_errors = reference_attr_variables(
@@ -459,8 +452,13 @@ class CF1_8Check(CF1_7Check):
 
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 20/20:
             # The interior_ring variable must contain only 0 or 1 values
+
             if interior_ring is not None:
                 unique_vals = np.unique(interior_ring[:])
+                # Handle masked arrays safely
+                if np.ma.isMaskedArray(unique_vals):
+                    unique_vals = unique_vals.compressed()  # removes masked values
+
                 if not set(unique_vals).issubset({0, 1}):
                     geom_valid.messages.append(
                         f"interior_ring variable {interior_ring.name} must contain only 0 (exterior) and 1 (interior) values",
@@ -795,7 +793,10 @@ class LineGeometry(GeometryStorage):
     def __init__(self, coord_vars, node_count, part_node_count):
         super().__init__(coord_vars, node_count)
         self.part_node_count = part_node_count
-        if not np.issubdtype(self.node_count.dtype, np.integer):
+        if self.node_count is None or not np.issubdtype(
+            self.node_count.dtype,
+            np.integer,
+        ):
             raise TypeError("For line geometries, node_count must be an integer")
 
     def check_geometry(self):
