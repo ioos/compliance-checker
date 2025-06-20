@@ -3722,11 +3722,6 @@ class CF1_6Check(CFNCCheck):
                 "".format(cf_role, ", ".join(valid_roles)),
             )
         if variable_count > 0:
-            m = (
-                "§9.5 The only acceptable values of cf_role for Discrete Geometry CF"
-                + " data sets are timeseries_id, profile_id, and trajectory_id"
-            )
-            valid_cf_role.assert_true(variable_count < 3, m)
             return valid_cf_role.to_result()
 
     def check_variable_features(self, ds):
