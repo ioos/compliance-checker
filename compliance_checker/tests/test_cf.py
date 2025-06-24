@@ -3009,7 +3009,6 @@ class TestCF1_8(BaseTestCase):
         geom_interior_ring,
         expected_msg,
     ):
-
         # Set up geometry_ds as needed
         geom_gm_none = geom_grid_mapping is None
         if not geom_gm_none:
@@ -3061,15 +3060,27 @@ class TestCF1_8(BaseTestCase):
         geom_var.node_coordinates = "x y"
         x[:] = np.array([10, 20, 30])
         y[:] = np.array([30, 35, 21])
+
         results = self.cf.check_geometry(dataset)
-        assert results[0].value[0] == results[0].value[1]
+        assert results[0].value[0] != results[0].value[1]
+        assert results[0].msgs == [
+            "Parent variable 'someData' does not include geometry dimension 'point_count' used in geometry variable 'geometry'",
+            "Missing axis attribute on node coord vars: ['x', 'y']",
+        ]
+
         dataset.createDimension("point_count_2", 2)
         # can't recreate y, even with del issued first
         y2 = dataset.createVariable("y2", "f8", ("point_count_2",))
         geom_var.node_coordinates = "x y2"
         y2[:] = np.array([30, 35])
+
         results = self.cf.check_geometry(dataset)
-        assert results[0].value[0] < results[0].value[1]
+        assert results[0].value[0] > results[0].value[1]
+        assert results[0].msgs == [
+            "Node coordinate var 'y2' must share the same single dimension",
+            "Missing axis attribute on node coord vars: ['x', 'y2']",
+            "For a point geometry, coordinate variables must be the same length as node_count defined, or must be length 1 if node_count is not set",
+        ]
 
     def test_line_geometry(self):
         dataset = self.load_dataset(STATIC_FILES["line_geometry"])
@@ -3086,7 +3097,7 @@ class TestCF1_8(BaseTestCase):
         dataset.variables["interior_ring"][:] = flip_ring_bits
         results = self.cf.check_geometry(dataset)
         # There should be messages regarding improper polygon order
-        assert results[0].value[0] < results[0].value[1]
+        assert results[0].value[0] > results[0].value[1]
         assert results[0].msgs
         # TEST CONFORMANCE 7.5 REQUIRED 18/20
         dataset.variables["geometry_container"] = MockVariable(

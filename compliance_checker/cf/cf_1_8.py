@@ -128,6 +128,7 @@ class CF1_8Check(CF1_7Check):
             unique_geometry_var_names[var.geometry].append(var)
 
         for geometry_var_name in unique_geometry_var_names:
+
             geom_valid.out_of += 1
 
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 2/20
@@ -307,12 +308,17 @@ class CF1_8Check(CF1_7Check):
             for coord_var in node_coord_vars:
                 if not hasattr(coord_var, "axis"):
                     missing_axes.append(coord_var.name)
+                elif coord_var.axis not in ["X", "Y", "Z"]:
+                    geom_valid.messages.append(
+                        f"{coord_var.name} has an axis attribute whose allowable values are not X, Y, or Z",
+                    )
                 else:
                     axes.append(coord_var.axis)
             if missing_axes:
                 geom_valid.messages.append(
                     f"Missing axis attribute on node coord vars: {missing_axes}",
                 )
+
             if len(set(axes)) != len(axes):
                 geom_valid.messages.append(
                     f"Duplicate axis values among node coord vars: {axes}",
