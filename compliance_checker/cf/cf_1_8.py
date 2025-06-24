@@ -417,7 +417,13 @@ class CF1_8Check(CF1_7Check):
 
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 16/20:
             # When node_count is missing and >1 node, type must be point
-            if not node_count and len(node_coord_vars[0]) > 1:
+            try:
+                length = len(node_coord_vars[0])
+            except TypeError:
+                length = getattr(node_coord_vars[0], "size", 1)  # fallback
+                print(node_coord_vars[0], "\n", length)
+
+            if not node_count and length > 1:
                 if geometry_type != "point":
                     geom_valid.messages.append(
                         f"'{geometry_var_name}' missing node_count; must be point geometry",
