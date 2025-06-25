@@ -3531,6 +3531,23 @@ class TestCF1_11(BaseTestCase):
         scored, out_of, _ = get_results(results)
         assert scored == 1 and out_of == 2
 
+    def test_single_cf_role(self):
+        ds = MockTimeSeries()
+        ds.createDimension("ts_no")
+        ts = ds.createVariable("ts", "i4", ("ts_no",))
+        ts.cf_role = "timeseries_id"
+        result = self.cf.check_single_cf_role(ds)
+        assert result.value[0] == result.value[1]
+        ts2 = ds.createVariable("ts2", "i4", ("ts_no",))
+        ts2.cf_role = "timeseries_id"
+        result = self.cf.check_single_cf_role(ds)
+        assert result.value[0] < result.value[1]
+        assert (
+            "There may only be one variable containing the cf_role attribute. "
+            "Currently the following variables have cf_role attributes: ['ts', 'ts2']"
+            in result.msgs
+        )
+
 
 class TestCFUtil(BaseTestCase):
     """
