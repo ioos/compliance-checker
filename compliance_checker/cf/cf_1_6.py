@@ -1984,9 +1984,10 @@ class CF1_6Check(CFNCCheck):
 
             # Comparing cftime objects is awfully slow. Converting them toordinal makes this a bit faster.
             # https://github.com/ioos/compliance-checker/issues/1211
-            _times = np.array([time.toordinal() for time in times])
-            crossover_1582 = np.any(_times < crossover_date.toordinal()) and np.any(
-                _times >= crossover_date.toordinal(),
+            _times = np.array([time.toordinal(fractional=True) for time in times])
+            _crossover_date = crossover_date.toordinal(fractional=True)
+            crossover_1582 = np.any(_times < _crossover_date) and np.any(
+                _times >= _crossover_date,
             )
             if not crossover_1582:
                 reasoning = (
