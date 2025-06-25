@@ -1283,6 +1283,17 @@ class TestCF1_6(BaseTestCase):
         assert (scored, out_of) == (1, 2)
         # TEST CONFORMANCE 4.4 REQUIRED 2/2, RECOMMENDED 1, 2/2
         dataset = MockTimeSeries()
+        # CF reference times should contain "since"
+        # The below are all forms are all valid UDUNITS but aren't
+        # supported in CF
+        time_fmt_string = "seconds {} 0-1-1 23:00"
+        for noncompliant_preposition in ("@", "after", "from", "ref"):
+            invalid_ref_time = time_fmt_string.format(noncompliant_preposition)
+            dataset.variables["time"].units = invalid_ref_time
+            results = self.cf.check_time_coordinate(dataset)
+            scored, out_of, messages = get_results(results)
+            assert scored < out_of
+            assert "time does not have correct time units" in messages
         # NB: >= 60 seconds is nonstandard, but isn't actually a CF requirement
         # until CF 1.9 onwards
         dataset.variables["time"].units = "months since 0-1-1 23:00:60"
