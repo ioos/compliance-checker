@@ -1283,6 +1283,12 @@ class TestCF1_6(BaseTestCase):
         assert (scored, out_of) == (1, 2)
         # TEST CONFORMANCE 4.4 REQUIRED 2/2, RECOMMENDED 1, 2/2
         dataset = MockTimeSeries()
+        # CF reference times should contain "since"
+        dataset.variables["time"].units = "seconds after 0-1-1 23:00"
+        results = self.cf.check_time_coordinate(dataset)
+        scored, out_of, messages = get_results(results)
+        assert scored < out_of
+        assert "time does not have correct time units" in messages
         # NB: >= 60 seconds is nonstandard, but isn't actually a CF requirement
         # until CF 1.9 onwards
         dataset.variables["time"].units = "months since 0-1-1 23:00:60"
