@@ -1954,16 +1954,8 @@ class CF1_6Check(CFNCCheck):
             Check that the time variable does not cross the date
             1582-10-15 when standard or gregorian calendars are used
             """
-            # WARNING: might fail here if months_since are used and suppress
-            #          usual warning
-            try:
-                cftime.num2date(
-                    time_var[:].compressed(),
-                    time_var.units,
-                    has_year_zero=True,
-                )
-                time_values = time_var[:]
-            except ValueError:
+            # Short-circuit if using months/years.
+            if any(unit in time_var.units for unit in ("months", "years")):
                 return Result(
                     BaseCheck.LOW,
                     False,
@@ -1972,6 +1964,7 @@ class CF1_6Check(CFNCCheck):
                         "Miscellaneous failure when attempting to calculate crossover, possible malformed date",
                     ],
                 )
+            time_values = time_var[:]
 
             # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED 2/2
             # Only get non-nan/FillValue times, as these are the only things
