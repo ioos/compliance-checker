@@ -3062,7 +3062,7 @@ class TestCF1_8(BaseTestCase):
         y[:] = np.array([30, 35, 21])
 
         results = self.cf.check_geometry(dataset)
-        assert results[0].value[0] != results[0].value[1]
+        assert results[0].value[0] < results[0].value[1]
         assert results[0].msgs == [
             "Parent variable 'someData' does not include geometry dimension 'point_count' used in geometry variable 'geometry'",
             "Missing axis attribute on node coord vars: ['x', 'y']",
@@ -3075,7 +3075,7 @@ class TestCF1_8(BaseTestCase):
         y2[:] = np.array([30, 35])
 
         results = self.cf.check_geometry(dataset)
-        assert results[0].value[0] > results[0].value[1]
+        assert results[0].value[0] < results[0].value[1]
         assert results[0].msgs == [
             "Node coordinate var 'y2' must share the same single dimension",
             "Missing axis attribute on node coord vars: ['x', 'y2']",

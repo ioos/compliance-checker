@@ -128,7 +128,6 @@ class CF1_8Check(CF1_7Check):
             unique_geometry_var_names[var.geometry].append(var)
 
         for geometry_var_name in unique_geometry_var_names:
-
             geom_valid.out_of += 1
 
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 2/20
@@ -306,6 +305,7 @@ class CF1_8Check(CF1_7Check):
             axes = []
             missing_axes = []
             for coord_var in node_coord_vars:
+                geom_valid.out_of += 1
                 if not hasattr(coord_var, "axis"):
                     missing_axes.append(coord_var.name)
                 elif coord_var.axis not in ["X", "Y", "Z"]:
@@ -313,13 +313,19 @@ class CF1_8Check(CF1_7Check):
                         f"{coord_var.name} has an axis attribute whose allowable values are not X, Y, or Z",
                     )
                 else:
+                    geom_valid.score += 1
                     axes.append(coord_var.axis)
+
             if missing_axes:
+                geom_valid.out_of += 1
                 geom_valid.messages.append(
                     f"Missing axis attribute on node coord vars: {missing_axes}",
                 )
+            else:
+                geom_valid.score += 1
 
             if len(set(axes)) != len(axes):
+                geom_valid.out_of += 1
                 geom_valid.messages.append(
                     f"Duplicate axis values among node coord vars: {axes}",
                 )
@@ -331,6 +337,7 @@ class CF1_8Check(CF1_7Check):
             for coord_var in node_coord_vars:
                 nodes_attr = getattr(coord_var, "nodes", None)
                 if nodes_attr:
+                    geom_valid.out_of += 1
                     if nodes_attr not in ds.variables:
                         geom_valid.messages.append(
                             f"'nodes' attr on {coord_var.name} references unknown var {nodes_attr}",
@@ -357,6 +364,7 @@ class CF1_8Check(CF1_7Check):
             # For a polygon geometry_type, each geometry must have a minimum of three node coordinates.
 
             if geometry_type == "line" and len(node_coord_vars[0]) < 2:
+                geom_valid.out_of += 1
                 geom_valid.messages.append(
                     f"Line geometry '{geometry_var_name}' must have ≥2 nodes",
                 )
@@ -408,6 +416,7 @@ class CF1_8Check(CF1_7Check):
             # The single dimension of the part node count variable should equal the total number of parts in all the geometries.
             # polygons with interior geometry only
             if interior_ring is not None and part_node_count is not None:
+                geom_valid.out_of += 1
                 if len(interior_ring[:]) != len(part_node_count[:]):
                     geom_valid.messages.append(
                         f"part_node_count and interior_ring must have same length for '{geometry_var_name}'",
@@ -421,9 +430,9 @@ class CF1_8Check(CF1_7Check):
                 length = len(node_coord_vars[0])
             except TypeError:
                 length = getattr(node_coord_vars[0], "size", 1)  # fallback
-                print(node_coord_vars[0], "\n", length)
 
             if not node_count and length > 1:
+                geom_valid.out_of += 1
                 if geometry_type != "point":
                     geom_valid.messages.append(
                         f"'{geometry_var_name}' missing node_count; must be point geometry",
@@ -434,6 +443,7 @@ class CF1_8Check(CF1_7Check):
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 17/20:
             # If both node_count and part_node_count are present, their sums must match
             if part_node_count is not None and node_count is not None:
+                geom_valid.out_of += 1
                 if np.sum(part_node_count[:]) != np.sum(node_count[:]):
                     geom_valid.messages.append(
                         f"Sum mismatch: node_count = {np.sum(node_count[:])}, part_node_count = {np.sum(part_node_count[:])}",
@@ -464,8 +474,8 @@ class CF1_8Check(CF1_7Check):
 
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 20/20:
             # The interior_ring variable must contain only 0 or 1 values
-
             if interior_ring is not None:
+                geom_valid.out_of += 1
                 unique_vals = np.unique(interior_ring[:])
                 # Handle masked arrays safely
                 if np.ma.isMaskedArray(unique_vals):
