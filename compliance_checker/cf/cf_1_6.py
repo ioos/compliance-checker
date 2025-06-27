@@ -1954,25 +1954,8 @@ class CF1_6Check(CFNCCheck):
             Check that the time variable does not cross the date
             1582-10-15 when standard or gregorian calendars are used
             """
-            # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED 2/2
-            # Only get non-nan/FillValue times, as these are the only things
-            # that make sense for conversion.  Furthermore, non-null checks
-            # should be made for time coordinate variables anyways, so errors
-            # should be caught where implemented there
-            crossover_date = cftime.DatetimeGregorian(1582, 10, 15)
-            # has_year_zero set to true in order to just check crossover,
-            # actual year less than or equal to zero check handled elsewhere
-            # when standard/Gregorian, or Julian calendars used.
-
-            # WARNING: might fail here if months_since are used and suppress
-            #          usual warning
-            try:
-                times = cftime.num2date(
-                    time_var[:].compressed(),
-                    time_var.units,
-                    has_year_zero=True,
-                )
-            except ValueError:
+            # Short-circuit if using months/years.
+            if any(unit in time_var.units for unit in ("months", "years")):
                 return Result(
                     BaseCheck.LOW,
                     False,
@@ -1981,9 +1964,28 @@ class CF1_6Check(CFNCCheck):
                         "Miscellaneous failure when attempting to calculate crossover, possible malformed date",
                     ],
                 )
+            time_values = time_var[:]
 
-            crossover_1582 = np.any(times < crossover_date) and np.any(
-                times >= crossover_date,
+            # IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED 2/2
+            # Only get non-nan/FillValue times, as these are the only things
+            # that make sense for conversion.  Furthermore, non-null checks
+            # should be made for time coordinate variables anyways, so errors
+            # should be caught where implemented there
+            crossover_date = cftime.DatetimeGregorian(1582, 10, 15)
+            crossover_date_value = cftime.date2num(
+                crossover_date,
+                time_var.units,
+                calendar=time_var.calendar,
+                has_year_zero=True,
+            )
+            # has_year_zero set to true in order to just check crossover,
+            # actual year less than or equal to zero check handled elsewhere
+            # when standard/Gregorian, or Julian calendars used.
+
+            # Comparing cftime objects is awfully slow. Converting them toordinal makes this a bit faster.
+            # https://github.com/ioos/compliance-checker/issues/1211
+            crossover_1582 = np.any(time_values < crossover_date_value) and np.any(
+                time_values >= crossover_date_value,
             )
             if not crossover_1582:
                 reasoning = (
