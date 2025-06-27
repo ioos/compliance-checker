@@ -95,6 +95,7 @@ class CF1_9Check(CF1_8Check):
 
     def check_time_coordinate(self, ds):
         prev_return = super().check_time_coordinate(ds)
+        # adds check for < 60 seconds
         seconds_regex = regex.compile(
             r"\w+ since \d{1,4}-\d{1,2}-\d{1,2}[ T]"
             r"\d{1,2}:\d{1,2}:(?P<seconds>\d{1,2})",
@@ -114,12 +115,14 @@ class CF1_9Check(CF1_8Check):
             except AttributeError:
                 # not much can be done if there are no units
                 continue
-            test_ctx.assert_true(
-                match.group("seconds") is None or int(match.group("seconds")) < 60,
-                f'Time coordinate variable "{name}" must have '
-                "units with seconds less than 60",
-            )
-            prev_return.append(test_ctx.to_result())
+            # only check if seconds are present and in a parseable format
+            if match:
+                test_ctx.assert_true(
+                    match.group("seconds") is None or int(match.group("seconds")) < 60,
+                    f'Time coordinate variable "{name}" must have '
+                    "units with seconds less than 60",
+                )
+                prev_return.append(test_ctx.to_result())
         return prev_return
 
     def check_domain_variables(self, ds: Dataset):

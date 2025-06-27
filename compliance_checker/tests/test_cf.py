@@ -3331,6 +3331,12 @@ class TestCF1_9(BaseTestCase):
             'Time coordinate variable "time" must have units with seconds less than 60'
             in messages
         )
+        # For data with no seconds, we skip the less than sixty seconds
+        # check because that component is not present
+        dataset.variables["time"].units = "seconds since 2000-1-1 00:00"
+        results = self.cf.check_time_coordinate(dataset)
+        scored, out_of, messages = get_results(results)
+        assert scored == out_of
 
     def test_time_variable_has_calendar(self):
         self.cf = CF1_9Check()
