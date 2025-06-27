@@ -132,8 +132,14 @@ class CF1_8Check(CF1_7Check):
         # Using the group B dimension to match a variable from group A.
         # This is logically wrong: NetCDF allows it, but the dimensions are different objects.
         # This may not throw during creation, so we simulate an access/mismatch
+        # grab the first group's time‐dim
+        grp_list = list(ds.groups.keys())
+        first_dim = ds.groups[grp_list[0]].dimensions["time"]
+
+        # check that every other group's time‐dim is the very same object
+
         invalid_same_named_dimension_across_groups.assert_true(
-            ds.groups["A"].dimensions["time"] is ds.groups["B"].dimensions["time"],
+            all(ds.groups[g].dimensions["time"] is first_dim for g in grp_list[1:]),
             "Dimensions with the same name must be the same object (ID).",
         )
 
