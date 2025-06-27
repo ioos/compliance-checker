@@ -134,16 +134,17 @@ class CF1_8Check(CF1_7Check):
         # This may not throw during creation, so we simulate an access/mismatch
         # grab the first group's time‐dim
         grp_list = list(ds.groups.keys())
-        first_dim = ds.groups[grp_list[0]].dimensions["time"]
+        # Only run the assertion if there are at least two groups
+        if len(grp_list) >= 2:
+            # compare everyone to the first
+            first_dim = ds.groups[grp_list[0]].dimensions["time"]
 
-        # check that every other group's time‐dim is the very same object
-
-        invalid_same_named_dimension_across_groups.assert_true(
-            all(ds.groups[g].dimensions["time"] is first_dim for g in grp_list[1:]),
-            "Dimensions with the same name must be the same object (ID).",
-        )
-
-        results.append(invalid_same_named_dimension_across_groups.to_result())
+            # check that every other group's time‐dim is the very same object
+            invalid_same_named_dimension_across_groups.assert_true(
+                all(ds.groups[g].dimensions["time"] is first_dim for g in grp_list[1:]),
+                "Dimensions with the same name must be the same object (ID).",
+            )
+            results.append(invalid_same_named_dimension_across_groups.to_result())
 
         return results
 
@@ -154,19 +155,31 @@ class CF1_8Check(CF1_7Check):
         Section 2.7.1. Scope
 
         Search by absolute path
-
-        A variable or dimension specified with an absolute path (i.e., with a leading slash "/") is at the indicated location relative to the root group, as in a UNIX-style file convention. For example, a coordinates attribute of /g1/lat refers to the lat variable in group /g1.
+        A variable or dimension specified with an absolute path (i.e., with a leading slash "/")
+        is at the indicated location relative to the root group, as in a UNIX-style file convention.
+        For example, a coordinates attribute of /g1/lat refers to the lat variable in group /g1.
 
         Search by relative path
-
-        As in a UNIX-style file convention, a variable or dimension specified with a relative path (i.e., containing a slash but not with a leading slash, e.g. child/lat) is at the location obtained by affixing the relative path to the absolute path of the referring attribute. For example, a coordinates attribute of g1/lat refers to the lat variable in subgroup g1 of the current (referring) group. Upward path traversals from the current group are indicated with the UNIX convention. For example, ../g1/lat refers to the lat variable in the sibling group g1 of the current (referring) group.
+        As in a UNIX-style file convention, a variable or dimension specified with a relative path
+        (i.e., containing a slash but not with a leading slash, e.g. child/lat) is at the location
+        obtained by affixing the relative path to the absolute path of the referring attribute.
+        For example, a coordinates attribute of g1/lat refers to the lat variable in subgroup g1
+        of the current (referring) group. Upward path traversals from the current group are indicated
+        with the UNIX convention. For example, ../g1/lat refers to the lat variable in the sibling group
+        g1 of the current (referring) group.
 
         Search by proximity
-
-        A variable or dimension specified with no path (for example, lat) refers to the variable or dimension of that name, if there is one, in the referring group. If not, the ancestors of the referring group are searched for it, starting from the direct ancestor and proceeding toward the root group, until it is found.
-
-        A special case exists for coordinate variables. Because coordinate variables must share dimensions with the variables that reference them, the ancestor search is executed only until the local apex group is reached. For coordinate variables that are not found in the referring group or its ancestors, a further strategy is provided, called lateral search. The lateral search proceeds downwards from the local apex group width-wise through each level of groups until the sought coordinate is found. The lateral search algorithm may only be used for NUG coordinate variables; it shall not be used for auxiliary coordinate variables.
-
+        A variable or dimension specified with no path (for example, lat) refers to the variable or
+        dimension of that name, if there is one, in the referring group. If not, the ancestors of the
+        referring group are searched for it, starting from the direct ancestor and proceeding toward
+        the root group, until it is found.
+        A special case exists for coordinate variables. Because coordinate variables must share dimensions
+        with the variables that reference them, the ancestor search is executed only until the local apex
+        group is reached. For coordinate variables that are not found in the referring group or its ancestors,
+        a further strategy is provided, called lateral search. The lateral search proceeds downwards from the
+        local apex group width-wise through each level of groups until the sought coordinate is found.
+        The lateral search algorithm may only be used for NUG coordinate variables; it shall not be used for
+        auxiliary coordinate variables.
         """
         results = []
 
