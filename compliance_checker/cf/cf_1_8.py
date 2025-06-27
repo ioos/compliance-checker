@@ -319,36 +319,42 @@ class CF1_8Check(CF1_7Check):
         :param netCDF4.Dataset ds: An open netCDF dataset
         :returns list: List of error messages
         """
+        results = []
+        geom_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.5"])
+
         vars_with_geometry = ds.get_variables_by_attributes(
             geometry=lambda g: g is not None,
         )
-        results = []
+
         unique_geometry_var_names = defaultdict(list)
         for var in vars_with_geometry:
             unique_geometry_var_names[var.geometry].append(var)
 
-        if unique_geometry_var_names:
-            geom_valid = TestCtx(BaseCheck.MEDIUM, self.section_titles["7.5"])
-            geom_valid.out_of += 1
         for geometry_var_name in unique_geometry_var_names:
+            geom_valid.out_of += 1
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 2/20
+            # The geometry container variable name must exist in the file.
             if geometry_var_name not in ds.variables:
                 geom_valid.messages.append(
                     f"Cannot find geometry variable named {geometry_var_name}",
                 )
                 results.append(geom_valid.to_result())
+                return results
                 continue
+
             geometry_var = ds.variables[geometry_var_name]
+
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 10/20
             # The grid_mapping and coordinates attributes can be carried by the
             # geometry container variable provided they are also carried by the
             # data variables associated with the container.
             if hasattr(geometry_var, "coordinates"):
                 coord_err_template = (
-                    "Geometry variable {geometry_var_name} has "
-                    "attribute coordinates which is "
-                    "either not present or is not a subset "
-                    "of the coordinates attribute of the "
-                    "referring parent variable {parent_var_name}"
+                    "Geometry variable {geometry_var_name} has attribute "
+                    "coordinates which is either not present or is not a "
+                    "subset of the coordinates attribute of "
+                    "the referring parent variable {parent_var_name}"
                 )
                 # allow for geometry coordinates attribute to be a subset of
                 # the parent variable's coordinates
@@ -369,6 +375,9 @@ class CF1_8Check(CF1_7Check):
                         geom_valid.messages.append(err_msg)
                     else:
                         geom_valid.score += 1
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 10/20:
+            # continued: grid_mapping match
             # TODO: should grid_mapping checks not be strict equality?
             if hasattr(geometry_var, "grid_mapping"):
                 for parent_var in vars_with_geometry:
@@ -393,77 +402,206 @@ class CF1_8Check(CF1_7Check):
                     else:
                         geom_valid.score += 1
 
-            geometry_type = geometry_var.geometry_type
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 3/20
+            # geometry container must have geometry_type
+            geometry_type = getattr(geometry_var, "geometry_type", "").lower()
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 4/20:
+            # only legal values for geometry_type
+            if geometry_type not in ["point", "line", "polygon"]:
+                geom_type_err_template = (
+                    "geometry_type on {geometry_var_name}"
+                    " must be 'point', 'line', or 'polygon'"
+                )
+                err_msg = geom_type_err_template.format(
+                    geometry_var_name=geometry_var_name,
+                )
+                geom_valid.messages.append(err_msg)
+
+                results.append(geom_valid.to_result())
+                return results
+                continue
+
             try:
                 node_coord_var_names = geometry_var.node_coordinates
             except AttributeError:
+                # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 3/20 continued:
+                # geometry container must have node_coordinates
                 geom_valid.messages.append(
                     "Could not find required attribute "
                     '"node_coordinates" in geometry '
                     f'variable "{geometry_var_name}"',
                 )
                 results.append(geom_valid.to_result())
+                return results
+                continue
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 7/20:
+            # node_coordinates must be string
             if not isinstance(node_coord_var_names, str):
                 geom_valid.messages.append(
-                    'Attribute "node_coordinates" in geometry '
+                    "Attribute node_coordinates in geometry "
                     f'variable "{geometry_var_name}" must be '
                     "a string",
                 )
                 results.append(geom_valid.to_result())
+                return results
                 continue
+
             split_coord_names = node_coord_var_names.strip().split(" ")
             node_coord_vars, not_found_node_vars = [], []
+
             for coord_var_name in split_coord_names:
                 try:
                     node_coord_vars.append(ds.variables[coord_var_name])
                 except KeyError:
                     not_found_node_vars.append(coord_var_name)
-            # If any variables weren't found, we can't continue
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 7/20 continued:
+            # all variable names must exist
             if not_found_node_vars:
                 geom_valid.messages.append(
-                    "The following referenced node coordinate"
-                    "variables for geometry variable"
-                    f'"{geometry_var_name}" were not found: '
+                    "The following referenced node coordinate "
+                    "variables for geometry variable "
+                    f"{geometry_var_name} were not found: "
                     f"{not_found_node_vars}",
                 )
                 results.append(geom_valid.to_result())
+                return results
                 continue
 
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 13/20:
+            # All node coordinate variables must share the same single dimension
+            node_coord_dims = set()
+            for coord_var in node_coord_vars:
+                if len(coord_var.dimensions) != 1:
+                    geom_valid.messages.append(
+                        f"Node coordinate var '{coord_var.name}' must have exactly one dimension",
+                    )
+                else:
+                    node_coord_dims.add(coord_var.dimensions[0])
+
+            if len(node_coord_dims) == 1:
+                geom_valid.score += 1
+                shared_geom_dim = list(node_coord_dims)[0]
+            else:
+                geom_valid.messages.append(
+                    f"Node coordinate var '{coord_var.name}' must share the same single dimension",
+                )
+                shared_geom_dim = None
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 1/20:
+            # At least one dim of parent variable must match geom dimension
+            if shared_geom_dim:
+                for parent_var in vars_with_geometry:
+                    geom_valid.out_of += 1
+                    if shared_geom_dim in parent_var.dimensions:
+                        geom_valid.score += 1
+                    else:
+                        geom_valid.messages.append(
+                            f"Parent variable '{parent_var.name}' does not include geometry "
+                            f"dimension '{shared_geom_dim}' used in geometry variable '{geometry_var_name}'",
+                        )
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 8–9/20:
+            # All node coord vars must have axis, and they must be unique
+            axes = []
+            missing_axes = []
+            for coord_var in node_coord_vars:
+                geom_valid.out_of += 1
+                if not hasattr(coord_var, "axis"):
+                    missing_axes.append(coord_var.name)
+                elif coord_var.axis not in ["X", "Y", "Z"]:
+                    geom_valid.messages.append(
+                        f"{coord_var.name} has an axis attribute whose allowable values are not X, Y, or Z",
+                    )
+                else:
+                    geom_valid.score += 1
+                    axes.append(coord_var.axis)
+
+            if missing_axes:
+                geom_valid.out_of += 1
+                geom_valid.messages.append(
+                    f"Missing axis attribute on node coord vars: {missing_axes}",
+                )
+            else:
+                geom_valid.score += 1
+
+            if len(set(axes)) != len(axes):
+                geom_valid.out_of += 1
+                geom_valid.messages.append(
+                    f"Duplicate axis values among node coord vars: {axes}",
+                )
+            elif not missing_axes:
+                geom_valid.score += 1
+
+            # MPLEMENTATION CONFORMANCE 7.5 REQUIRED 11–12/20:
+            # Validate nodes attribute on coordinate vars
+            for coord_var in node_coord_vars:
+                nodes_attr = getattr(coord_var, "nodes", None)
+                if nodes_attr:
+                    geom_valid.out_of += 1
+                    if nodes_attr not in ds.variables:
+                        geom_valid.messages.append(
+                            f"'nodes' attr on {coord_var.name} references unknown var {nodes_attr}",
+                        )
+                    elif nodes_attr not in split_coord_names:
+                        geom_valid.messages.append(
+                            f"'nodes' attr on {coord_var.name} must point to one of the node coordinate vars",
+                        )
+                    else:
+                        nodes_var = ds.variables[nodes_attr]
+                        if (
+                            hasattr(coord_var, "grid_mapping")
+                            and hasattr(nodes_var, "grid_mapping")
+                            and coord_var.grid_mapping != nodes_var.grid_mapping
+                        ):
+                            geom_valid.messages.append(
+                                f"grid_mapping mismatch between {coord_var.name} and {nodes_attr}",
+                            )
+                        else:
+                            geom_valid.score += 1
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 5–6/20
+            # For a line geometry_type, each geometry must have a minimum of two node coordinates.
+            # For a polygon geometry_type, each geometry must have a minimum of three node coordinates.
+
+            if geometry_type == "line" and len(node_coord_vars[0]) < 2:
+                geom_valid.out_of += 1
+                geom_valid.messages.append(
+                    f"Line geometry '{geometry_var_name}' must have ≥2 nodes",
+                )
+            elif geometry_type == "polygon" and len(node_coord_vars[0]) < 3:
+                geom_valid.messages.append(
+                    f"Polygon geometry '{geometry_var_name}' must have ≥3 nodes",
+                )
+            else:
+                geom_valid.score += 1
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 14/20:
+            # Nodes for polygon exterior rings must be put in anticlockwise order (viewed from above)
+            # and polygon interior rings in clockwise order.
+            # This is geometry-specific and may require geometric analysis,
+            # so only warning is issued via geometry.check_geometry()
+
+            # Load attributes
             node_count, node_count_errors = reference_attr_variables(
                 ds,
                 getattr(geometry_var, "node_count", None),
             )
-            # multipart lines and polygons only
             part_node_count, part_node_count_errors = reference_attr_variables(
                 ds,
                 getattr(geometry_var, "part_node_count", None),
             )
-            # polygons with interior geometry only
             interior_ring, interior_ring_errors = reference_attr_variables(
                 ds,
                 getattr(geometry_var, "interior_ring", None),
             )
-            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 18/20
-            if interior_ring:
-                geom_valid.out_of += 1
-                if not part_node_count:
-                    geom_valid.messages.append(
-                        f"For geometry variable '{geometry_var_name}' "
-                        "which defines the interior_ring attribute, "
-                        "the part_node_count attribute must also be present",
-                    )
-                # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 20/20
-                elif (
-                    part_node_count.dimensions != interior_ring.dimensions
-                    or not len(part_node_count) == 1
-                ):
-                    geom_valid.messages.append(
-                        f"part_node_count variable {part_node_count.name} "
-                        "must have the same single dimension as interior ring "
-                        f"variable {interior_ring.name}",
-                    )
-                else:
-                    geom_valid.score += 1
+
+            # Ensure variables are defined even if None is returned
+            node_count = node_count if node_count is not None else None
+            part_node_count = part_node_count if part_node_count is not None else None
+            interior_ring = interior_ring if interior_ring is not None else None
 
             if geometry_type == "point":
                 geometry = PointGeometry(node_coord_vars, node_count)
@@ -476,21 +614,91 @@ class CF1_8Check(CF1_7Check):
                     part_node_count,
                     interior_ring,
                 )
-            else:
-                geom_valid.messages.append(
-                    f'For geometry variable "{geometry_var_name}'
-                    'the attribute "geometry_type" must exist'
-                    "and have one of the following values:"
-                    '"point", "line", "polygon"',
-                )
-                results.append(geom_valid.to_result())
-                continue
-            # check geometry
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 15/20:
+            # The single dimension of the part node count variable should equal the total number of parts in all the geometries.
+            # polygons with interior geometry only
+            if interior_ring is not None and part_node_count is not None:
+                geom_valid.out_of += 1
+                if len(interior_ring[:]) != len(part_node_count[:]):
+                    geom_valid.messages.append(
+                        f"part_node_count and interior_ring must have same length for '{geometry_var_name}'",
+                    )
+                else:
+                    geom_valid.score += 1
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 16/20:
+            # When node_count is missing and >1 node, type must be point
+            try:
+                length = len(node_coord_vars[0])
+            except TypeError:
+                length = getattr(node_coord_vars[0], "size", 1)  # fallback
+
+            if not node_count and length > 1:
+                geom_valid.out_of += 1
+                if geometry_type != "point":
+                    geom_valid.messages.append(
+                        f"'{geometry_var_name}' missing node_count; must be point geometry",
+                    )
+                else:
+                    geom_valid.score += 1
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 17/20:
+            # If both node_count and part_node_count are present, their sums must match
+            if part_node_count is not None and node_count is not None:
+                geom_valid.out_of += 1
+                if np.sum(part_node_count[:]) != np.sum(node_count[:]):
+                    geom_valid.messages.append(
+                        f"Sum mismatch: node_count = {np.sum(node_count[:])}, part_node_count = {np.sum(part_node_count[:])}",
+                    )
+                else:
+                    geom_valid.score += 1
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 18/20:
+            # If interior_ring attribute is present, part_node_count must also be present
+            if interior_ring:
+                geom_valid.out_of += 1
+                if not part_node_count:
+                    geom_valid.messages.append(
+                        f"For geometry variable '{geometry_var_name}' which defines the interior_ring attribute, the part_node_count attribute must also be present",
+                    )
+
+                # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 19/20:
+                # The single dimension of the interior_ring variable must match that of part_node_count
+                elif (
+                    part_node_count.dimensions != interior_ring.dimensions
+                    or not len(part_node_count) == 1
+                ):
+                    geom_valid.messages.append(
+                        f"part_node_count variable {part_node_count.name} must have the same single dimension as interior ring variable {interior_ring.name}",
+                    )
+                else:
+                    geom_valid.score += 1
+
+            # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 20/20:
+            # The interior_ring variable must contain only 0 or 1 values
+            if interior_ring is not None:
+                geom_valid.out_of += 1
+                unique_vals = np.unique(interior_ring[:])
+                # Handle masked arrays safely
+                if np.ma.isMaskedArray(unique_vals):
+                    unique_vals = unique_vals.compressed()  # removes masked values
+
+                if not set(unique_vals).issubset({0, 1}):
+                    geom_valid.messages.append(
+                        f"interior_ring variable {interior_ring.name} must contain only 0 (exterior) and 1 (interior) values",
+                    )
+                else:
+                    geom_valid.score += 1
+
+            # FINAL GEOMETRY VALIDATION:
+            # geometric rules like ring orientation, intersections, etc.
             messages = geometry.check_geometry()
             if not messages:
                 geom_valid.score += 1
             else:
                 geom_valid.messages.extend(messages)
+
             results.append(geom_valid.to_result())
         return results
 
@@ -810,7 +1018,10 @@ class LineGeometry(GeometryStorage):
     def __init__(self, coord_vars, node_count, part_node_count):
         super().__init__(coord_vars, node_count)
         self.part_node_count = part_node_count
-        if not np.issubdtype(self.node_count.dtype, np.integer):
+        if self.node_count is None or not np.issubdtype(
+            self.node_count.dtype,
+            np.integer,
+        ):
             raise TypeError("For line geometries, node_count must be an integer")
 
     def check_geometry(self):
