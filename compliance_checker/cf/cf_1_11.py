@@ -1,7 +1,9 @@
 from functools import lru_cache
 
 from compliance_checker.base import BaseCheck, TestCtx
+from compliance_checker.cf.appendix_a import appendix_a
 from compliance_checker.cf.cf_1_10 import CF1_10Check
+from compliance_checker.cf.util import VariableReferenceError, reference_attr_variables
 
 
 @lru_cache
@@ -105,3 +107,83 @@ class CF1_11Check(CF1_10Check):
                 time_units_metadata_ctx.score += 1
 
         return [time_units_metadata_ctx.to_result()]
+
+    def check_bounds_inherit_attributes(self, ds):
+        """
+        A boundary variable inherits the values of some attributes from its parent coordinate variable.
+        If a coordinate variable has any of the attributes marked "BI" (for "inherit") in the "Use" column of <<attribute-appendix>>, they are assumed to apply to its bounds variable as well.
+        It is recommended that BI attributes not be included on a boundary variable.
+        If a BI attribute is included, it must also be present in the parent variable, and it must exactly match the parent attribute's data type and value.
+        A boundary variable can only have inheritable attributes if they are also present on its parent coordinate variable.
+        A bounds variable may have any of the attributes marked "BO" for ("own") in the "Use" column of <<attribute-appendix>>.
+        These attributes take precedence over any corresponding attributes of the parent variable.
+        In these cases, the parent variable's attribute does not apply to the bounds variable, regardless of whether the latter has its own attribute.
+        """
+        results = []
+
+        appendix_a_bi_attrs = {
+            attribute_name
+            for attribute_name, data_dict in appendix_a.items()
+            if "BI" in data_dict["Use"]
+        }
+        for parent_variable in ds.get_variables_by_attributes(
+            bounds=lambda b: b is not None,
+        ):
+            parent_bi_attrs = set(parent_variable.ncattrs()) & appendix_a_bi_attrs
+            bounds_variable = reference_attr_variables(ds, parent_variable.bounds)[0]
+            # nonexistent bounds variable, skip
+            if isinstance(bounds_variable, VariableReferenceError):
+                continue
+
+            bounds_bi_ctx = self.get_test_ctx(
+                BaseCheck.MEDIUM,
+                self.section_titles["7.1"],
+            )
+            bounds_ncattr_set = set(bounds_variable.ncattrs())
+            # IMPLEMENTATION CONFORMANCE 7.3 REQUIRED 4
+            # A boundary variable can only have inheritable attributes, i.e. any of those marked "BI" in the "Use" column of Appendix A, if they are also present on its parent coordinate variable.
+            bounds_bi_attrs = bounds_ncattr_set & appendix_a_bi_attrs
+            # failure case 1, BI attr is only in bounds variable
+            bounds_bi_only_attrs = bounds_bi_attrs - parent_bi_attrs
+            # If a boundary variable has an inheritable attribute then its data type and its value must be exactly the same as the parent variable’s attribute.
+            bounds_bi_ctx.out_of += 1
+            if bounds_bi_only_attrs:
+                bounds_bi_ctx.messages.append(
+                    f"Bounds variable {bounds_variable.name} has the following attributes which must appear on the parent variable {parent_variable.name}: "
+                    f"{sorted(bounds_bi_only_attrs)}",
+                )
+            else:
+                bounds_bi_ctx.score += 1
+            # failure case 2, BI attrs are in both bounds and parent variable
+            both_bi_attr = bounds_bi_attrs & parent_bi_attrs
+            no_match_attrs, match_attrs = [], []
+            for bi_attr in both_bi_attr:
+                bounds_bi_ctx.out_of += 1
+                parent_attr_val = getattr(parent_variable, bi_attr)
+                bounds_attr_val = getattr(bounds_variable, bi_attr)
+                # IMPLEMENTATION CONFORMANCE 7.3 REQUIRED 5
+                # If a boundary variable has an inheritable attribute then its data type and its value must be exactly the same as the parent variable’s attribute.
+                if (
+                    type(parent_attr_val) is not type(bounds_attr_val)
+                    or parent_attr_val != bounds_attr_val
+                ):
+                    no_match_attrs.append(bi_attr)
+                else:
+                    match_attrs.append(bi_attr)
+
+                pass_bi_both = True
+                if no_match_attrs:
+                    pass_bi_both = False
+                    bounds_bi_ctx.messages.append(
+                        f"Bounds variable {bounds_variable.name} and parent variable {parent_variable.name} have the following non matching boundary related attributes: {sorted(no_match_attrs)}",
+                    )
+
+                if match_attrs:
+                    pass_bi_both = False
+                    bounds_bi_ctx.messages.append(
+                        f"Bounds variable {bounds_variable.name} and parent variable {parent_variable.name} have the following matching attributes {sorted(match_attrs)}.  It is recommended that only the parent variable of the bounds variable contains these attributes",
+                    )
+                bounds_bi_ctx.score += pass_bi_both
+
+            results.append(bounds_bi_ctx.to_result())
+        return results
