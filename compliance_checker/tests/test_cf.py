@@ -3700,6 +3700,36 @@ class TestCF1_11(BaseTestCase):
         scored, out_of, _ = get_results(results)
         assert scored == 1 and out_of == 2
 
+    @pytest.fixture
+    def bounds_ds(self):
+        ds = MockTimeSeries()
+        ds.createDimension("bounds", 2)
+        ds.createVariable("time_bounds", "f8", ("time", "bounds"))
+        ds.variables["time"].bounds = "time_bounds"
+        return ds
+
+    def test_bounds_inherit_attributes(self, bounds_ds):
+        # TEST CONFORMANCE 7.3 REQUIRED 4, 5
+        results = self.cf.check_bounds_inherit_attributes(bounds_ds)
+        scored, out_of, _ = get_results(results)
+        assert scored == out_of
+        time_bounds = bounds_ds.variables["time_bounds"]
+        # expected failure, not in parent variable
+        time_bounds.cf_role = "timeseries_id"
+        # expected failure, differing value of BI attribute (no seconds)
+        time_bounds.calendar = "gregorian"
+        # repeated BI attributes variable aren't recommended
+        time_bounds.axis = "T"
+        results = self.cf.check_bounds_inherit_attributes(bounds_ds)
+        scored, out_of, messages = get_results(results)
+        assert scored < out_of
+        expected_msgs = {
+            "Bounds variable time_bounds has the following attributes which must appear on the parent variable time: ['cf_role']",
+            "Bounds variable time_bounds and parent variable time have the following non matching boundary related attributes: ['calendar']",
+            "Bounds variable time_bounds and parent variable time have the following matching attributes ['axis'].  It is recommended that only the parent variable of the bounds variable contains these attributes",
+        }
+        assert expected_msgs == set(messages)
+
     def test_single_cf_role(self):
         ds = MockTimeSeries()
         ds.createDimension("ts_no")
