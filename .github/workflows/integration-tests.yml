@@ -7,6 +7,15 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cf_units: [ false ]
+        include:
+          - cf_units: true
+      fail-fast: false
+    defaults:
+      run:
+        shell: bash -l {0}
 
     steps:
     - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
@@ -23,6 +32,11 @@ jobs:
           --file requirements.txt
           --file test_requirements.txt
           --channel conda-forge
+
+    - name: Test with cf-units (optional)
+      if: matrix.cf_units == true
+      run: >-
+        micromamba install cf-units --channel conda-forge
 
     - name: Install compliance-checker
       shell: bash -l {0}
