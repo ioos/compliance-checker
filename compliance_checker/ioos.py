@@ -23,11 +23,6 @@ from compliance_checker.base import (
 )
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
 from compliance_checker.cfunits import Unit
-from compliance_checker.cfutil import (
-    get_geophysical_variables,
-    get_instrument_variables,
-    get_z_variables,
-)
 
 
 class IOOSBaseCheck(BaseCheck):
