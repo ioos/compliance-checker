@@ -15,10 +15,10 @@ import requests
 from lxml import etree
 from netCDF4 import Dataset, Dimension, Group, Variable
 
+from compliance_checker.cfunits import Unit
+
 _UNITLESS_DB = None
 _SEA_NAMES = None
-from compliance_checker.cfutil import _units, units_convertible
-from compliance_checker.cfunits import Unit
 
 # copied from paegan
 # paegan may depend on these later
@@ -2216,7 +2216,7 @@ def units_convertible(units1, units2):
     try:
         u1 = Unit(units1)
         u2 = Unit(units2)
-    except ValueError:
+    except (ValueError, NotImplementedError):
         return False
     return u1.is_convertible(u2)
 
