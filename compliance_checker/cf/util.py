@@ -2388,6 +2388,11 @@ def units_known(units):
 
 
 def units_temporal(units):
+    # Short-circuit for pyudunits2 b/c it is not CF strict as cf-units.
+    # Also, this is much faster than creating the units again.
+    for noncompliant_preposition in ("@", "after", "from", "ref"):
+        if noncompliant_preposition in units:
+            return False
     try:
         u = Unit(units)
     except ValueError:
