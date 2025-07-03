@@ -1,4 +1,3 @@
-cf-units>=2
 cftime>=1.1.0
 isodate>=0.6.1
 jinja2>=2.7.3
@@ -9,6 +8,7 @@ packaging
 pendulum>=1.2.4
 pygeoif>=0.6
 pyproj>=2.2.1
+pyudunits2
 regex>=2017.07.28
 requests>=2.2.1
 setuptools>=15.0

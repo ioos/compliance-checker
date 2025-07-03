@@ -9,7 +9,7 @@ requires = [
 [project]
 name = "compliance-checker"
 description = "Checks Datasets and SOS endpoints for standards compliance"
-readme = "README.md"
+readme = { file = "README.md", content-type = "text/markdown" }
 license = { text = "Apache-2.0" }
 maintainers = [
   { name = "Dave Foster", email = "dave@axiomdatascience.com" },
@@ -38,6 +38,7 @@ dynamic = [
   "dependencies",
   "version",
 ]
+optional-dependencies.extras = [ "cf-units>=2" ]
 urls.documentation = "https://ioos.github.io/compliance-checker"
 urls.homepage = "https://compliance.ioos.us/index.html"
 urls.repository = "https://github.com/ioos/compliance-checker"
@@ -81,7 +82,6 @@ compliance_checker = [
 dependencies = { file = [
   "requirements.txt",
 ] }
-readme = { file = "README.md", content-type = "text/markdown" }
 
 [tool.setuptools_scm]
 write_to = "compliance_checker/_version.py"
