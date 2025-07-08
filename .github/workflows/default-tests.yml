@@ -33,7 +33,6 @@ jobs:
         init-shell: bash
         create-args: >-
           python=${{ matrix.python-version }} pip
-          --file requirements.txt
           --file test_requirements.txt
           --channel conda-forge
 

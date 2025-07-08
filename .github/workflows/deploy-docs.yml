@@ -25,7 +25,6 @@ jobs:
         init-shell: bash
         create-args: >-
           python=3 pip
-          --file requirements.txt
           --file test_requirements.txt
           --channel conda-forge
 

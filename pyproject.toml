@@ -35,10 +35,28 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dynamic = [
-  "dependencies",
   "version",
 ]
-optional-dependencies.extras = [ "cf-units>=2" ]
+dependencies = [
+  "cf-units>=2; sys_platform!='emscripten'",
+  "cftime>=1.1",
+  "isodate>=0.6.1",
+  "jinja2>=2.7.3",
+  "lxml>=3.2.1",
+  "netcdf4>=1.6.4",
+  "owslib>=0.8.3",
+  "packaging",
+  "pendulum>=1.2.4",
+  "pygeoif>=0.6",
+  "pyproj>=2.2.1",
+  "pyudunits2; sys_platform=='emscripten'",
+  "regex>=2017.7.28",
+  "requests>=2.2.1",
+  "setuptools>=15",
+  "shapely>=1.7.1",
+  "validators>=0.14.2",
+]
+
 urls.documentation = "https://ioos.github.io/compliance-checker"
 urls.homepage = "https://compliance.ioos.us/index.html"
 urls.repository = "https://github.com/ioos/compliance-checker"

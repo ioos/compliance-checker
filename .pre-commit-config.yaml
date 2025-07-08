@@ -15,7 +15,6 @@ repos:
     - id: check-yaml
     - id: requirements-txt-fixer
       args:
-        - requirements.txt
         - test_requirements.txt
 
 - repo: https://github.com/psf/black
