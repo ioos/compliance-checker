@@ -11,6 +11,11 @@ jobs:
       matrix:
         python-version: [ "3.10", "3.11", "3.12", "3.13" ]
         os: [ windows-latest, ubuntu-latest, macos-latest ]
+        cf_units: [ false ]
+        include:
+          - python-version: "3.10"
+            os: "ubuntu-latest"
+            cf_units: true
       fail-fast: false
     defaults:
       run:
@@ -28,9 +33,13 @@ jobs:
         init-shell: bash
         create-args: >-
           python=${{ matrix.python-version }} pip
-          --file requirements.txt
           --file test_requirements.txt
           --channel conda-forge
+
+    - name: Test with cf-units (optional)
+      if: matrix.cf_units == true
+      run: >-
+        micromamba install cf-units --channel conda-forge
 
     - name: Install compliance-checker
       run: |
