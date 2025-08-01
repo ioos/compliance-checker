@@ -1358,7 +1358,7 @@ class TestCF1_6(BaseTestCase):
 
         # test custom month length calendars
         dataset.variables["time"].calendar = "custom"
-        dataset.variables["time"].month_lengths = np.array([30.3], dtype=np.double)
+        dataset.variables["time"].month_lengths = np.array([30.3], dtype=np.float64)
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
         assert bad_month_msg in messages
@@ -1677,21 +1677,20 @@ class TestCF1_6(BaseTestCase):
             in messages
         )
 
-    def test_check_packed_data(self):
+    def test_check_packed_data_is_same_type_as_variable(self):
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         results = self.cf.check_packed_data(dataset)
         score, out_of, messages = get_results(results)
 
-        msgs = [
-            "Type of tempvalid_min attribute (int32) does not match variable type (int64)",
+        expected_messages = {
+            "Type of temp:valid_min attribute (int32) does not match variable type (int64)",
             "Type of temp:valid_max attribute (int32) does not match variable type (int64)",
-            "Type of salinityvalid_min attribute (int32) does not match variable type (float64)",
+            "Type of salinity:valid_min attribute (int32) does not match variable type (float64)",
             "Type of salinity:valid_max attribute (int32) does not match variable type (float64)",
-        ]
+        }
 
-        assert len(results) == 4
         assert score < out_of
-        assert all(m in messages for m in msgs)
+        assert expected_messages.issubset(set(messages))
 
     def test_compress_packed(self):
         """Tests compressed indexed coordinates"""
@@ -2794,76 +2793,99 @@ class TestCF1_7(BaseTestCase):
     def test_check_add_offset_scale_factor_type(self):
         dataset = MockTimeSeries()  # time lat lon depth
         temp = dataset.createVariable("temp", "d", dimensions=("time",))
+        temp.setncattr("add_offset", 1.2)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        score, out_of, _ = get_results(r)
+        assert score == out_of
 
         # set att bad (str)
         temp.setncattr("add_offset", "foo")
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        assert not r[1].value
+        score, out_of, messages = get_results(r)
         # messages should be non-empty for improper type
-        assert r[1].msgs
+        assert (
+            "Variable temp and add_offset must be equivalent "
+            "data types or temp must be of type byte, short, or int "
+            "and add_offset must be float or double" in messages
+        )
         del temp.add_offset
 
-        temp.setncattr("scale_factor", "foo")
+        # check matching types between variables and attributes
+        temp.setncattr("add_offset", 0.2)
+        temp.setncattr("scale_factor", 1.1)
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        assert not r[1].value
-        assert r[1].msgs
-
-        # set bad np val
-        temp.setncattr("scale_factor", np.float32(5))
-        r = self.cf.check_add_offset_scale_factor_type(dataset)
-        assert not r[1].value
-        assert r[1].msgs
+        score, out_of, _ = get_results(r)
+        assert score == out_of
 
         temp.setncattr("scale_factor", np.uint32(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        assert not r[1].value
-        assert r[1].msgs
+        score, out_of, messages = get_results(r)
+        assert score < out_of
+        assert (
+            "When both scale_factor and add_offset "
+            "are supplied for variable temp, "
+            "they must have the same type" in messages
+        )
 
         # set good
         temp.setncattr("scale_factor", float(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        assert r[1].value
-        assert not r[1].msgs
+        score, out_of, _ = get_results(r)
+        assert score == out_of
 
-        temp.setncattr("scale_factor", np.double(5))
+        temp.setncattr("scale_factor", np.float64(5))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        assert r[1].value
-        assert not r[1].msgs
+        score, out_of, _ = get_results(r)
+        assert score == out_of
 
         # set same dtype
         dataset = MockTimeSeries()  # time lat lon depth
         temp = dataset.createVariable("temp", int, dimensions=("time",))
         temp.setncattr("scale_factor", 5)
         r = self.cf.check_add_offset_scale_factor_type(dataset)
-        assert r[1].value
-        assert not r[1].msgs
+        score, out_of, messages = get_results(r)
+        assert score == out_of
 
         # integer variable type (int8, int16, int32) compared against
         # floating point add_offset/scale_factor
         for var_bytes in ("1", "2", "4"):
+            coarse_temp_name = f"coarse_temp_{var_bytes}"
             coarse_temp = dataset.createVariable(
-                f"coarse_temp_{var_bytes}",
+                coarse_temp_name,
                 f"i{var_bytes}",
                 dimensions=("time",),
             )
             coarse_temp.setncattr("scale_factor", np.float32(23.0))
-            coarse_temp.setncattr("add_offset", np.double(-2.1))
+            coarse_temp.setncattr("add_offset", np.float64(-2.1))
             r = self.cf.check_add_offset_scale_factor_type(dataset)
-            # First value which checks if add_offset and scale_factor
-            # are same type should be false
-            assert not r[0].value
+            score, out_of, messages = get_results(r)
             # TEST CONFORMANCE 8.1 REQUIRED 1/3
             assert (
-                r[0].msgs[0]
-                == "When both scale_factor and add_offset are supplied for "
-                f"variable coarse_temp_{var_bytes}, they must have the "
-                "same type"
+                f"When both scale_factor and add_offset are supplied for variable coarse_temp_{var_bytes}, they must have the same type"
+                in messages
             )
-            # Individual checks for scale_factor/add_offset should be OK,
-            # however
-            assert r[-1].value
-            assert not r[-1].msgs
             del dataset.variables[f"coarse_temp_{var_bytes}"]
+
+        # TEST CONFORMANCE 8.1 RECOMMENDED 1/1
+        int_mismatch_variable = dataset.createVariable(
+            "mismatch",
+            "i4",
+            dimensions=("time",),
+        )
+
+        int_mismatch_variable.scale_factor = np.float32(1.2)
+        int_mismatch_variable.add_offset = np.float32(0.2)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        score, out_of, messages = get_results(r)
+        assert score < out_of
+        assert (
+            "When add_offset is of type float, the variable mismatch must not be an integer type"
+            in messages
+        )
+        assert (
+            "When scale_factor is of type float, the variable mismatch must not be an integer type"
+            in messages
+        )
 
 
 class TestCF1_8(BaseTestCase):
@@ -3745,6 +3767,68 @@ class TestCF1_11(BaseTestCase):
             "There may only be one variable containing the cf_role attribute. "
             "Currently the following variables have cf_role attributes: ['ts', 'ts2']"
             in result.msgs
+        )
+
+    def test_check_add_offset_scale_factor_type(self):
+        # TEST CONFORMANCE 8.1 REQUIRED 1/3
+        # The scale_factor and add_offset attributes must be either type float or type double, and if both are present they must be the same type.
+        dataset = MockTimeSeries()  # time lat lon depth
+        temp = dataset.createVariable("temp", "i2", dimensions=("time",))
+        temp.setncattr("add_offset", 1.0)
+        temp.setncattr("scale_factor", 2.0)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        score, out_of, _ = get_results(r)
+        assert score == out_of
+
+        temp.setncattr("add_offset", np.float32(1.0))
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        score, out_of, messages = get_results(r)
+        assert (
+            "When both scale_factor and add_offset are supplied for variable temp, they must have the same type"
+            in messages
+        )
+        # test improper types
+        temp.setncattr("add_offset", 1)
+        temp.setncattr("scale_factor", 2)
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        score, out_of, messages = get_results(r)
+        assert "Attribute add_offset must be a float or double" in messages
+        assert "Attribute scale_factor must be a float or double" in messages
+
+        del dataset.variables["temp"]
+        # TEST CONFORMANCE 8.1 REQUIRED 2/3
+        # If the scale_factor and add_offset are type float, the data variable must be one of these types: byte, unsigned byte, short, unsigned short.
+        # good float case was already tested
+        bad_float = dataset.createVariable("bad_float", "f8", dimensions=("time",))
+        bad_float.setncattr("add_offset", np.float32(1.0))
+        bad_float.setncattr("scale_factor", np.float32(2.0))
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        score, out_of, messages = get_results(r)
+        assert (
+            "When attribute add_offset is of type float variable bad_float must be of type byte, unsigned byte, short, or unsigned short"
+            in messages
+        )
+
+        del dataset.variables["bad_float"]
+        # TEST CONFORMANCE 8.1 REQUIRED 3/3
+        # If the scale_factor and add_offset are type double, the data variable must be one of these types: byte, unsigned byte, short, unsigned short, int, unsigned int
+        double_test = dataset.createVariable("double_test", "u4", dimensions=("time",))
+        temp.setncattr("add_offset", np.float64(1.0))
+        temp.setncattr("scale_factor", np.float64(2.0))
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        score, out_of, messages = get_results(r)
+        assert score == out_of
+
+        del dataset.variables["double_test"]
+        double_test = dataset.createVariable("bad_double", "f8", dimensions=("time",))
+        double_test.setncattr("add_offset", np.float64(1.0))
+        double_test.setncattr("scale_factor", np.float64(2.0))
+        r = self.cf.check_add_offset_scale_factor_type(dataset)
+        score, out_of, messages = get_results(r)
+        assert score < out_of
+        assert (
+            "When attribute add_offset is of type double variable bad_double must be of type byte, unsigned byte, short, unsigned short, int, or unsigned int"
+            in messages
         )
 
 
