@@ -1,6 +1,8 @@
 from functools import lru_cache
 
-from compliance_checker.base import BaseCheck, TestCtx
+import numpy as np
+
+from compliance_checker.base import BaseCheck, Result, TestCtx
 from compliance_checker.cf.appendix_a import appendix_a
 from compliance_checker.cf.cf_1_10 import CF1_10Check
 from compliance_checker.cf.util import VariableReferenceError, reference_attr_variables
@@ -203,3 +205,101 @@ class CF1_11Check(CF1_10Check):
             f"Currently the following variables have cf_role attributes: {cf_role_var_names}",
         )
         return test_ctx.to_result()
+
+    def check_add_offset_scale_factor_type(self, ds):
+        """
+        If a variable has the attributes add_offset and scale_factor,
+        check that the variables and attributes are of the same type
+        OR that the variable is of type byte, short or int and the
+        attributes are of type float or double.
+        """
+
+        results = []
+        add_offset_vars = ds.get_variables_by_attributes(
+            add_offset=lambda x: x is not None,
+        )
+        scale_factor_vars = ds.get_variables_by_attributes(
+            scale_factor=lambda x: x is not None,
+        )
+
+        both = set(add_offset_vars).intersection(scale_factor_vars)
+        both_msgs = []
+        for both_var in sorted(both, key=lambda var: var.name):
+            if both_var.scale_factor.dtype != both_var.add_offset.dtype:
+                both_msgs.append(
+                    "When both scale_factor and add_offset "
+                    f"are supplied for variable {both_var.name}, "
+                    "they must have the same type",
+                )
+        results.append(
+            Result(
+                BaseCheck.MEDIUM,
+                not bool(both_msgs),
+                self.section_titles["8.1"],
+                both_msgs,
+            ),
+        )
+
+        for _att_vars_tup in (
+            ("add_offset", add_offset_vars),
+            ("scale_factor", scale_factor_vars),
+        ):
+            results.extend(
+                [
+                    self._check_add_offset_scale_factor_type(
+                        var,
+                        _att_vars_tup[0],
+                    )
+                    for var in _att_vars_tup[1]
+                ],
+            )
+
+        return results
+
+    def _check_add_offset_scale_factor_type(self, variable, attr_name):
+        """
+        Reusable function for checking both add_offset and scale_factor.
+        """
+
+        msgs = []
+        error_msg_template = (
+            f"When attribute {attr_name} is of type {{}} variable "
+            f"{variable.name} must be of type {{}}"
+        )
+
+        att = getattr(variable, attr_name, None)
+        float_dtypes = (np.byte, np.ubyte, np.short, np.ushort)
+        passing = True
+        if not isinstance(att, (np.float32, np.float64)):
+            passing = False
+            msgs.append(f"Attribute {attr_name} must be a float or double")
+        elif isinstance(att, np.float32) and variable.dtype not in (
+            np.byte,
+            np.ubyte,
+            np.short,
+            np.ushort,
+        ):
+            passing = False
+            msgs.append(
+                error_msg_template.format(
+                    "float",
+                    "byte, unsigned byte, short, or unsigned short",
+                ),
+            )
+        elif isinstance(att, np.float64) and variable.dtype not in float_dtypes + (
+            np.int32,
+            np.uint32,
+        ):
+            passing = False
+            msgs.append(
+                error_msg_template.format(
+                    "double",
+                    "byte, unsigned byte, short, unsigned short, int, or unsigned int",
+                ),
+            )
+        return Result(
+            BaseCheck.MEDIUM,
+            (int(passing), 1),
+            self.section_titles["8.1"],
+            msgs,
+        )
