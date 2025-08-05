@@ -3709,7 +3709,7 @@ class CF1_6Check(CFNCCheck):
         feature_type = getattr(ds, "featureType", None)
         valid_feature_type = TestCtx(
             BaseCheck.HIGH,
-            "§9.1 Dataset con_nametains a valid featureType",
+            "§9.1 Dataset contains a valid featureType",
         )
         valid_feature_type.assert_true(
             feature_type is None or feature_type.lower() in feature_list,
