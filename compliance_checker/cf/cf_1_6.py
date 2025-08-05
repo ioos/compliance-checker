@@ -137,7 +137,9 @@ class CF1_6Check(CFNCCheck):
         Reusable function for checking both add_offset and scale_factor.
         """
 
+        results = []
         msgs = []
+        float_msg = []
         error_msg = (
             f"Variable {variable.name} and {attr_name} must be equivalent "
             f"data types or {variable.name} must be of type byte, short, or int "
@@ -149,16 +151,32 @@ class CF1_6Check(CFNCCheck):
             val = False
 
         else:
-            val = (
-                att.dtype == variable.dtype
-            ) or (  # will short-circuit or if first condition is true
+            same_type = att.dtype == variable.dtype
+            val = (same_type) or (  # will short-circuit or if first condition is true
                 isinstance(att, (np.float32, np.float64, float))
                 and variable.dtype in (np.byte, np.short, np.int16, np.int32, int)
             )
         if not val:
             msgs.append(error_msg)
 
-        return Result(BaseCheck.MEDIUM, val, self.section_titles["8.1"], msgs)
+        elif not same_type and (type(att) is np.float32 and variable.dtype == np.int32):
+            float_msg = [
+                f"When {attr_name} is of type float, the variable {variable.name} must not be an integer type",
+            ]
+        results.append(
+            Result(
+                BaseCheck.MEDIUM,
+                (not float_msg, 1),
+                self.section_titles["8.1"],
+                float_msg,
+                variable.name,
+            ),
+        )
+
+        results.append(
+            Result(BaseCheck.HIGH, (int(val), 1), self.section_titles["8.1"], msgs),
+        )
+        return results
 
     def check_add_offset_scale_factor_type(self, ds):
         """
@@ -187,7 +205,7 @@ class CF1_6Check(CFNCCheck):
                 )
         results.append(
             Result(
-                BaseCheck.MEDIUM,
+                BaseCheck.HIGH,
                 not bool(both_msgs),
                 self.section_titles["8.1"],
                 both_msgs,
@@ -198,15 +216,13 @@ class CF1_6Check(CFNCCheck):
             ("add_offset", add_offset_vars),
             ("scale_factor", scale_factor_vars),
         ):
-            results.extend(
-                [
+            for var in _att_vars_tup[1]:
+                results.extend(
                     self._check_add_offset_scale_factor_type(
                         var,
                         _att_vars_tup[0],
-                    )
-                    for var in _att_vars_tup[1]
-                ],
-            )
+                    ),
+                )
 
         return results
 
@@ -3537,7 +3553,7 @@ class CF1_6Check(CFNCCheck):
                 if var.valid_min.dtype.type != var.dtype.type:
                     valid = False
                     reasoning.append(
-                        f"Type of {name}valid_min attribute ({var.valid_min.dtype.name}) does not match variable type ({var.dtype.name})",
+                        f"Type of {name}:valid_min attribute ({var.valid_min.dtype.name}) does not match variable type ({var.dtype.name})",
                     )
             if hasattr(var, "valid_max"):
                 if var.valid_max.dtype.type != var.dtype.type:
@@ -3553,7 +3569,7 @@ class CF1_6Check(CFNCCheck):
                     )
 
             result = Result(
-                BaseCheck.MEDIUM,
+                BaseCheck.HIGH,
                 valid,
                 self.section_titles["8.1"],
                 reasoning,
