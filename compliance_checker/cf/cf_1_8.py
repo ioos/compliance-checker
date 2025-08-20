@@ -832,6 +832,7 @@ class CF1_8Check(CF1_7Check):
         for taxon_lsid, taxon_name in zip(
             taxon_lsid_variable[:],
             taxon_name_variable[:],
+            strict=False,
         ):
             # TODO: handle case where LSID is not present.  This can happen
             #       if the species is not present in the database desired.

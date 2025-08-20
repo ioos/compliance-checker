@@ -9,7 +9,6 @@ from collections import defaultdict
 from functools import lru_cache, partial
 from importlib.resources import files
 from pkgutil import get_data
-from typing import Union
 
 import requests
 from cf_units import Unit
@@ -2476,9 +2475,9 @@ def get_possible_label_variable_dimensions(variable: Variable) -> tuple[int, ...
 
 @lru_cache
 def maybe_lateral_reference_variable_or_dimension(
-    group: Union[Group, Dataset],
+    group: Group | Dataset,
     name: str,
-    reference_type: Union[Variable, Dimension],
+    reference_type: Variable | Dimension,
 ):
 
     def can_lateral_search(name):
@@ -2523,7 +2522,7 @@ def reference_attr_variables(
     attributes_string: str,
     split_by: str = None,
     reference_type: str = "variables",
-    group: Union[Group, Dataset] = None,
+    group: Group | Dataset = None,
 ):
     """
     Attempts to reference variables in the string, optionally splitting by

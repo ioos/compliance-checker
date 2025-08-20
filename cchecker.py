@@ -314,7 +314,7 @@ def main():
         return_values.append(return_value)
         had_errors.append(errors)
     else:
-        for output, dataset in zip(args.output, args.dataset_location):
+        for output, dataset in zip(args.output, args.dataset_location, strict=False):
             if args.format != "json":
                 print(
                     f"Running Compliance Checker on the dataset from: {dataset}",

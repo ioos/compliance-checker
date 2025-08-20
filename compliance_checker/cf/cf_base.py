@@ -470,7 +470,7 @@ class CFBaseCheck(BaseCheck):
         """
         attr_val = var.getncattr(attr_name)
 
-        if isinstance(attr_val, (str, bytes)):
+        if isinstance(attr_val, (str | bytes)):
             type_match = (var.dtype is str) or (var.dtype.kind == "S")
             val_type = type(attr_val)
         else:
@@ -935,7 +935,11 @@ class CFBaseCheck(BaseCheck):
         :return: A comma separated string of the variable's dimensions
         """
         dim_names = []
-        for dim, dim_type in zip(ds.variables[name].dimensions, dim_types):
+        for dim, dim_type in zip(
+            ds.variables[name].dimensions,
+            dim_types,
+            strict=False,
+        ):
             dim_name = f"{dim} ({dim_type}"
             if ds.dimensions[dim].isunlimited():
                 dim_name += ", unlimited)"

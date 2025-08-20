@@ -38,7 +38,7 @@ class BaseTestCase:
         """
         Return a loaded NC Dataset for the given path
         """
-        if not isinstance(nc_dataset, (str, Path)):
+        if not isinstance(nc_dataset, (str | Path)):
             raise ValueError("nc_dataset should be a valid path")
 
         nc_dataset = Dataset(nc_dataset, "r", diskless=True)

@@ -549,7 +549,7 @@ class CheckSuite:
 
         @param o Python object to serialize
         """
-        if isinstance(o, (list, tuple)):
+        if isinstance(o, (list | tuple)):
             return [self.serialize(i) for i in o]
         if isinstance(o, dict):
             return {k: self.serialize(v) for k, v in o.items()}
@@ -974,13 +974,23 @@ class CheckSuite:
             if len(cv):
                 # if this node has children, max weight of children + sum of all the scores
                 max_weight = max([x.weight for x in cv])
-                sum_scores = tuple(map(sum, list(zip(*([x.value for x in cv])))))
+                sum_scores = tuple(
+                    map(sum, list(zip(*([x.value for x in cv]), strict=False))),
+                )
                 msgs = []
 
             else:
                 max_weight = max([x.weight for x in v])
                 sum_scores = tuple(
-                    map(sum, list(zip(*([self._translate_value(x.value) for x in v])))),
+                    map(
+                        sum,
+                        list(
+                            zip(
+                                *([self._translate_value(x.value) for x in v]),
+                                strict=False,
+                            ),
+                        ),
+                    ),
                 )
                 msgs = sum([x.msgs for x in v], [])
 
