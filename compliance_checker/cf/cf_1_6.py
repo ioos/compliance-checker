@@ -147,13 +147,13 @@ class CF1_6Check(CFNCCheck):
         )
 
         att = getattr(variable, attr_name, None)
-        if not (isinstance(att, (np.number, float))):  # can't compare dtypes
+        if not (isinstance(att, (np.number | float))):  # can't compare dtypes
             val = False
 
         else:
             same_type = att.dtype == variable.dtype
             val = (same_type) or (  # will short-circuit or if first condition is true
-                isinstance(att, (np.float32, np.float64, float))
+                isinstance(att, (np.float32 | np.float64 | float))
                 and variable.dtype in (np.byte, np.short, np.int16, np.int32, int)
             )
         if not val:
@@ -3511,7 +3511,7 @@ class CF1_6Check(CFNCCheck):
 
             elif not isinstance(scale_factor, var.dtype.type):
                 # Check both attributes are type float or double
-                if not isinstance(scale_factor, (float, np.floating)):
+                if not isinstance(scale_factor, (float | np.floating)):
                     valid = False
                     reasoning.append(
                         "Attributes add_offset and scale_factor are not of type float or double.",

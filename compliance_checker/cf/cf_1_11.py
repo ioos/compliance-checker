@@ -270,7 +270,7 @@ class CF1_11Check(CF1_10Check):
         att = getattr(variable, attr_name, None)
         float_dtypes = (np.byte, np.ubyte, np.short, np.ushort)
         passing = True
-        if not isinstance(att, (np.float32, np.float64)):
+        if not isinstance(att, (np.float32 | np.float64)):
             passing = False
             msgs.append(f"Attribute {attr_name} must be a float or double")
         elif isinstance(att, np.float32) and variable.dtype not in (
