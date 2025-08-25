@@ -389,6 +389,10 @@ This is a checker for [GliderDAC](https://ioos.github.io/glider-dac/ngdac-netcdf
 
 This is a checker for NCEI netCDF Templates [v1.1](https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v1.1/index.html) and [v2.0](https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html) files.
 
+- [UGRID](https://github.com/ioos/cc-plugin-ugrid/releases)
+
+This is a checker for UGRID (https://ugrid-conventions.github.io/ugrid-conventions/)
+
 These plug-ins must be installed separately but work on top of the base compliance checker software.
 
 ```
@@ -436,6 +440,10 @@ compliance-checker -t ncei-trajectory-profile-orthogonal -v ~/data/sample-trajec
 ```
 compliance-checker -t ncei-grid -f json -o ~/Documents/sample_grid_report.json ~/Documents/sample_grid_report.nc
 ```
+
+## UGRID support
+
+Compliance Checker does not support UGRID in the base package, although implicitly required by CF.  If your needs include checking UGRID implementing files, we recommend that you either use an external checker such as the one maintained by the UK Met Office (https://github.com/pp-mo/ugrid-checks) or the Compliance Checker plugin listed above. (https://github.com/ioos/cc-plugin-ugrid)
 
 ## Disclaimer
 
