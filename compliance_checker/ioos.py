@@ -6,7 +6,6 @@ import re
 from numbers import Number
 
 import validators
-from cf_units import Unit
 from lxml.etree import XPath
 from owslib.namespaces import Namespaces
 
@@ -23,6 +22,7 @@ from compliance_checker.base import (
     check_has,
 )
 from compliance_checker.cf.cf import CF1_6Check, CF1_7Check
+from compliance_checker.cfunits import Unit
 
 
 class IOOSBaseCheck(BaseCheck):
@@ -1372,7 +1372,6 @@ class IOOS1_2Check(IOOSNCCheck):
                 "mile",
                 "fathom",
             )
-
             unit_def_set = {
                 Unit(unit_str).definition for unit_str in expected_unit_strs
             }

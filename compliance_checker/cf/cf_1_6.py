@@ -5,7 +5,6 @@ from collections import defaultdict
 import cftime
 import numpy as np
 import regex
-from cf_units import Unit
 
 import compliance_checker.cf.util as cfutil
 from compliance_checker.base import BaseCheck, Result, TestCtx
@@ -18,6 +17,7 @@ from compliance_checker.cf.appendix_f import (
     grid_mapping_dict16,
 )
 from compliance_checker.cf.cf_base import CFNCCheck, appendix_a_base
+from compliance_checker.cfunits import Unit
 
 logger = logging.getLogger(__name__)
 
@@ -3007,7 +3007,9 @@ class CF1_6Check(CFNCCheck):
                         valid = False
                         reasoning.append(conversion_failure_msg)
                     else:
-                        if not cell_measure_units.is_convertible(Unit(f"m{exponent}")):
+                        if not cell_measure_units.is_convertible(
+                            Unit(f"m{exponent}"),
+                        ):
                             valid = False
                             reasoning.append(conversion_failure_msg)
                     if not set(cell_measure_var.dimensions).issubset(var.dimensions):
