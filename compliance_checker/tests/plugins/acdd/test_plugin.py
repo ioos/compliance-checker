@@ -15,6 +15,9 @@ class TestACDDPlugin(TestCase):
                 "1.3_attrs_recommended",
                 "1.3_attrs_suggested",
                 "1.3_attrs_highly_recommended",
+                "1.3_no_blanks_in_id",
+                "1.3_metadata_link",
+                "1.3_dates_iso_format",
             },
             set(plugin.rules.keys()),
         )

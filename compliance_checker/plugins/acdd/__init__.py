@@ -18,6 +18,9 @@ rules_1_3 = {
     "1.3_attrs_highly_recommended": "error",
     "1.3_attrs_recommended": "warn",
     "1.3_attrs_suggested": "warn",
+    "1.3_no_blanks_in_id": "warn",
+    "1.3_metadata_link": "warn",
+    "1.3_dates_iso_format": "warn",
 }
 
 
