@@ -55,6 +55,7 @@ dependencies = [
   "setuptools>=15",
   "shapely>=1.7.1",
   "validators>=0.14.2",
+  "xrlint>=0.5.1,<0.6",
 ]
 
 urls.documentation = "https://ioos.github.io/compliance-checker"
