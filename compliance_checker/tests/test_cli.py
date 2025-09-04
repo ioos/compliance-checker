@@ -238,6 +238,9 @@ class TestCLI:
             < 8.0
         )
 
+    @pytest.mark.skip(
+        reason="This is failing with cconda-forge;s netcdf-c 4.9.3, we need more testing.",
+    )
     @pytest.mark.skipif(
         subprocess.check_output(ncconfig + ["--has-nczarr"]) != b"yes\n",
         reason="NCZarr is not available.",
