@@ -238,9 +238,6 @@ class TestCLI:
             < 8.0
         )
 
-    @pytest.mark.skip(
-        reason="This is failing with cconda-forge;s netcdf-c 4.9.3, we need more testing.",
-    )
     @pytest.mark.skipif(
         subprocess.check_output(ncconfig + ["--has-nczarr"]) != b"yes\n",
         reason="NCZarr is not available.",
@@ -249,7 +246,7 @@ class TestCLI:
         "zarr_url",
         [
             f"{(datadir / 'trajectory.zarr').as_uri()}#mode=nczarr,file",
-            str(datadir / "zip.zarr"),
+            str(datadir / "trajectory.zarr.zip"),
             # "s3://hrrrzarr/sfc/20210408/20210408_10z_anl.zarr#mode=nczarr,s3"
         ],
         ids=[

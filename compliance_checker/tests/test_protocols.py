@@ -76,7 +76,7 @@ def test_thredds(cs):
 str_dir = str(datadir.resolve()).replace("\\", "/")
 file_url = "file://" + str_dir + "/trajectory.zarr#mode=nczarr,file"
 s3_url = "s3://hrrrzarr/sfc/20210408/20210408_10z_anl.zarr#mode=nczarr,s3"
-zip_url = "file://" + str_dir + "/zip.zarr#mode=nczarr,zip"
+zip_url = "file://" + str_dir + "/trajectory.zarr.zip#mode=nczarr,zip"
 # replace slashes for windows compatibility
 url_io = [
     ("s3://hrrrzarr/sfc/20210408/20210408_10z_anl.zarr", s3_url),
@@ -84,8 +84,8 @@ url_io = [
     (datadir / "trajectory.zarr", file_url),
     ("file://" + str_dir + "/trajectory.zarr", file_url),
     (file_url, file_url),
-    (datadir / "zip.zarr", zip_url),
-    ("file://" + str_dir + "/zip.zarr", zip_url),
+    (datadir / "trajectory.zarr.zip", zip_url),
+    ("file://" + str_dir + "/trajectory.zarr.zip", zip_url),
     (zip_url, zip_url),
 ]
 
