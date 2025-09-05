@@ -13,7 +13,6 @@ API
    compliance_checker.protocols
    compliance_checker.acdd
    compliance_checker.base
-   compliance_checker.cfutil
    compliance_checker.ioos
    compliance_checker.runner
    compliance_checker.suite

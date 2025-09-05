@@ -7,9 +7,14 @@ on:
     types:
       - published
 
+# Deny all permissions by default
+permissions: {}
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: checkout
@@ -38,7 +43,6 @@ jobs:
       run: |
         set -e
         pushd docs
-        cp  ../README.md source/quickintro.md
         make clean html linkcheck
         popd
 
@@ -48,5 +52,3 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: docs/build/html
-    permissions:
-      actions: write
