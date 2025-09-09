@@ -3487,10 +3487,15 @@ class TestCF1_9(BaseTestCase):
         self.cf = CF1_9Check()
 
     def test_check_data_types(self):
-        """Check the unsigned int datatypes for variables CF 1.9 added"""
+        """Check the signed and unsigned int datatypes for variables in CF 1.9"""
         dataset = MockTimeSeries()
         for bytes_count in [1, 2, 4, 8]:
-            dataset.createVariable(f"var_{bytes_count}_ubytes", f"u{bytes_count}", ())
+            for signed_type in ["i", "u"]:
+                dataset.createVariable(
+                    f"var_{bytes_count}_{signed_type}bytes",
+                    f"{signed_type}{bytes_count}",
+                    (),
+                )
 
         result = self.cf.check_data_types(dataset)
         assert result.value[0] == result.value[1]
