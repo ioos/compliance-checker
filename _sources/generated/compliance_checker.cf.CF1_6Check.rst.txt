@@ -48,6 +48,7 @@ CF1_6Check
       ~CF1_6Check.check_conventions_version
       ~CF1_6Check.check_coordinate_types
       ~CF1_6Check.check_coordinate_variables_strict_monotonicity
+      ~CF1_6Check.check_coordinates_attribute_format
       ~CF1_6Check.check_data_types
       ~CF1_6Check.check_dimension_names
       ~CF1_6Check.check_dimension_order
@@ -63,6 +64,7 @@ CF1_6Check
       ~CF1_6Check.check_grid_coordinates
       ~CF1_6Check.check_grid_mapping
       ~CF1_6Check.check_hints
+      ~CF1_6Check.check_invalid_coordinate_attr
       ~CF1_6Check.check_latitude
       ~CF1_6Check.check_longitude
       ~CF1_6Check.check_multi_dimensional_coords
@@ -70,6 +72,7 @@ CF1_6Check
       ~CF1_6Check.check_naming_conventions
       ~CF1_6Check.check_packed_data
       ~CF1_6Check.check_reduced_horizontal_grid
+      ~CF1_6Check.check_spatiotemporal_dims_have_coordinate_vars
       ~CF1_6Check.check_standard_name
       ~CF1_6Check.check_time_coordinate
       ~CF1_6Check.check_units
@@ -124,6 +127,7 @@ CF1_6Check
    .. automethod:: check_conventions_version
    .. automethod:: check_coordinate_types
    .. automethod:: check_coordinate_variables_strict_monotonicity
+   .. automethod:: check_coordinates_attribute_format
    .. automethod:: check_data_types
    .. automethod:: check_dimension_names
    .. automethod:: check_dimension_order
@@ -139,6 +143,7 @@ CF1_6Check
    .. automethod:: check_grid_coordinates
    .. automethod:: check_grid_mapping
    .. automethod:: check_hints
+   .. automethod:: check_invalid_coordinate_attr
    .. automethod:: check_latitude
    .. automethod:: check_longitude
    .. automethod:: check_multi_dimensional_coords
@@ -146,6 +151,7 @@ CF1_6Check
    .. automethod:: check_naming_conventions
    .. automethod:: check_packed_data
    .. automethod:: check_reduced_horizontal_grid
+   .. automethod:: check_spatiotemporal_dims_have_coordinate_vars
    .. automethod:: check_standard_name
    .. automethod:: check_time_coordinate
    .. automethod:: check_units

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.cf.cf_1_6 &#8212; compliance_checker 5.2.0 documentation</title>
+    <title>compliance_checker.cf.cf_1_6 &#8212; compliance_checker 5.4.2 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=2dde5210"></script>
+    <script src="../../../_static/documentation_options.js?v=41d0e7f4"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/cf/cf_1_6';</script>
@@ -46,7 +46,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="5.2.0" />
+  <meta name="docsearch:version" content="5.4.2" />
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/_modules/compliance_checker/cf/cf_1_6.html" />
 
   </head>
@@ -201,7 +201,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.2.0
+  Version 5.4.2
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
@@ -269,9 +269,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">cftime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">regex</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">cf_units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Unit</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">cfutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">compliance_checker.cf.util</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cfutil</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseCheck</span><span class="p">,</span> <span class="n">Result</span><span class="p">,</span> <span class="n">TestCtx</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf</span><span class="w"> </span><span class="kn">import</span> <span class="n">util</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf.appendix_c</span><span class="w"> </span><span class="kn">import</span> <span class="n">valid_modifiers</span>
@@ -282,6 +281,7 @@
     <span class="n">grid_mapping_dict16</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cf.cf_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">CFNCCheck</span><span class="p">,</span> <span class="n">appendix_a_base</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.cfunits</span><span class="w"> </span><span class="kn">import</span> <span class="n">Unit</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -415,7 +415,9 @@
 <span class="sd">        Reusable function for checking both add_offset and scale_factor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">float_msg</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Variable </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">attr_name</span><span class="si">}</span><span class="s2"> must be equivalent &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;data types or </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> must be of type byte, short, or int &quot;</span>
@@ -423,20 +425,36 @@
         <span class="p">)</span>
 
         <span class="n">att</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">att</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="nb">float</span><span class="p">))):</span>  <span class="c1"># can&#39;t compare dtypes</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">att</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">number</span> <span class="o">|</span> <span class="nb">float</span><span class="p">))):</span>  <span class="c1"># can&#39;t compare dtypes</span>
             <span class="n">val</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">att</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">variable</span><span class="o">.</span><span class="n">dtype</span>
-            <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>  <span class="c1"># will short-circuit or if first condition is true</span>
-                <span class="nb">isinstance</span><span class="p">(</span><span class="n">att</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+            <span class="n">same_type</span> <span class="o">=</span> <span class="n">att</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">variable</span><span class="o">.</span><span class="n">dtype</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="p">(</span><span class="n">same_type</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>  <span class="c1"># will short-circuit or if first condition is true</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">att</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span> <span class="o">|</span> <span class="nb">float</span><span class="p">))</span>
                 <span class="ow">and</span> <span class="n">variable</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">byte</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">short</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="p">:</span>
             <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Result</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;8.1&quot;</span><span class="p">],</span> <span class="n">msgs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">same_type</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">att</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span> <span class="ow">and</span> <span class="n">variable</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">):</span>
+            <span class="n">float_msg</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;When </span><span class="si">{</span><span class="n">attr_name</span><span class="si">}</span><span class="s2"> is of type float, the variable </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> must not be an integer type&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Result</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="p">(</span><span class="ow">not</span> <span class="n">float_msg</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;8.1&quot;</span><span class="p">],</span>
+                <span class="n">float_msg</span><span class="p">,</span>
+                <span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Result</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;8.1&quot;</span><span class="p">],</span> <span class="n">msgs</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span>
 
 <div class="viewcode-block" id="CF1_6Check.check_add_offset_scale_factor_type">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_add_offset_scale_factor_type">[docs]</a>
@@ -467,7 +485,7 @@
                 <span class="p">)</span>
         <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">Result</span><span class="p">(</span>
-                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span>
                 <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">both_msgs</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;8.1&quot;</span><span class="p">],</span>
                 <span class="n">both_msgs</span><span class="p">,</span>
@@ -478,15 +496,13 @@
             <span class="p">(</span><span class="s2">&quot;add_offset&quot;</span><span class="p">,</span> <span class="n">add_offset_vars</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">&quot;scale_factor&quot;</span><span class="p">,</span> <span class="n">scale_factor_vars</span><span class="p">),</span>
         <span class="p">):</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="p">[</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">_att_vars_tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_check_add_offset_scale_factor_type</span><span class="p">(</span>
                         <span class="n">var</span><span class="p">,</span>
                         <span class="n">_att_vars_tup</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                    <span class="p">)</span>
-                    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">_att_vars_tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="p">],</span>
-            <span class="p">)</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">results</span></div>
 
@@ -715,7 +731,13 @@
 
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="s2">&quot;_FillValue&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="s2">&quot;missing_value&quot;</span><span class="p">):</span>
                 <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">_FillValue</span> <span class="o">!=</span> <span class="n">variable</span><span class="o">.</span><span class="n">missing_value</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+                    <span class="n">variable</span><span class="o">.</span><span class="n">_FillValue</span> <span class="o">==</span> <span class="n">variable</span><span class="o">.</span><span class="n">missing_value</span>
+                    <span class="ow">or</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">_FillValue</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">missing_value</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">):</span>
                     <span class="n">fails</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;For the variable </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> the missing_value must be equal to the _FillValue&quot;</span><span class="p">,</span>
                     <span class="p">)</span>
@@ -865,7 +887,7 @@
         <span class="k">return</span> <span class="n">valid_globals</span><span class="o">.</span><span class="n">to_result</span><span class="p">()</span></div>
 
 
-    <span class="c1"># IMPLEMENTATION</span>
+    <span class="c1"># IMPLEMENTATION CONFORMANCE 1.2</span>
 <div class="viewcode-block" id="CF1_6Check.check_coordinate_variables_strict_monotonicity">
 <a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_coordinate_variables_strict_monotonicity">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">check_coordinate_variables_strict_monotonicity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
@@ -878,7 +900,7 @@
         <span class="k">for</span> <span class="n">coord_var_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_coord_vars</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
             <span class="n">coord_var</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">coord_var_name</span><span class="p">]</span>
             <span class="n">arr_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">coord_var</span><span class="p">)</span>
-            <span class="n">monotonicity</span> <span class="o">=</span> <span class="n">TestCtx</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;5&quot;</span><span class="p">])</span>
+            <span class="n">monotonicity</span> <span class="o">=</span> <span class="n">TestCtx</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;1.2&quot;</span><span class="p">])</span>
             <span class="n">monotonicity</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">arr_diff</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">arr_diff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">),</span>
                 <span class="sa">f</span><span class="s1">&#39;Coordinate variable &quot;</span><span class="si">{</span><span class="n">coord_var_name</span><span class="si">}</span><span class="s1">&quot; must be strictly monotonic&#39;</span><span class="p">,</span>
@@ -1501,7 +1523,10 @@
                 <span class="c1"># IMPLEMENTATION CONFORMANCE 3.5 RECOMMENDED 1/1</span>
                 <span class="c1"># If shapes aren&#39;t equal, we can&#39;t do proper elementwise</span>
                 <span class="c1"># comparison</span>
-                <span class="k">if</span> <span class="n">vals_arr</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">masks_arr</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">vals_arr</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">masks_arr</span><span class="o">.</span><span class="n">size</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">vals_arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">masks_arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
+                <span class="p">):</span>
                     <span class="n">allv</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">allv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">vals_arr</span> <span class="o">&amp;</span> <span class="n">masks_arr</span> <span class="o">==</span> <span class="n">vals_arr</span><span class="p">)</span>
@@ -1552,9 +1577,14 @@
 
         <span class="c1"># IMPLEMENTATION CONFORMANCE 3.5 REQUIRED 1/8</span>
         <span class="c1"># the data type for flag_values should be the same as the variable</span>
+        <span class="n">flag_values_type</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">flag_values</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">flag_values</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">flag_values</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">valid_values</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
-            <span class="n">variable</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">flag_values</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;flag_values (</span><span class="si">{</span><span class="n">flag_values</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">) must be the same data type as </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">variable</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">flag_values_type</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;flag_values (</span><span class="si">{</span><span class="n">flag_values_type</span><span class="si">}</span><span class="s2">) must be the same data type as </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">)&quot;</span>
             <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -1589,9 +1619,12 @@
 
         <span class="n">valid_masks</span> <span class="o">=</span> <span class="n">TestCtx</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;3.5&quot;</span><span class="p">])</span>
 
+        <span class="n">flag_masks_type</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">flag_masks</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">flag_masks</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">flag_masks</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">valid_masks</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
-            <span class="n">variable</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">flag_masks</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;flag_masks (</span><span class="si">{</span><span class="n">flag_masks</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">) must be the same data type as </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">variable</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">flag_masks_type</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;flag_masks (</span><span class="si">{</span><span class="n">flag_masks_type</span><span class="si">}</span><span class="s2">) must be the same data type as </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">)&quot;</span>
             <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -2280,25 +2313,8 @@
 <span class="sd">            Check that the time variable does not cross the date</span>
 <span class="sd">            1582-10-15 when standard or gregorian calendars are used</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="c1"># IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED 2/2</span>
-            <span class="c1"># Only get non-nan/FillValue times, as these are the only things</span>
-            <span class="c1"># that make sense for conversion.  Furthermore, non-null checks</span>
-            <span class="c1"># should be made for time coordinate variables anyways, so errors</span>
-            <span class="c1"># should be caught where implemented there</span>
-            <span class="n">crossover_date</span> <span class="o">=</span> <span class="n">cftime</span><span class="o">.</span><span class="n">DatetimeGregorian</span><span class="p">(</span><span class="mi">1582</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
-            <span class="c1"># has_year_zero set to true in order to just check crossover,</span>
-            <span class="c1"># actual year less than or equal to zero check handled elsewhere</span>
-            <span class="c1"># when standard/Gregorian, or Julian calendars used.</span>
-
-            <span class="c1"># WARNING: might fail here if months_since are used and suppress</span>
-            <span class="c1">#          usual warning</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">times</span> <span class="o">=</span> <span class="n">cftime</span><span class="o">.</span><span class="n">num2date</span><span class="p">(</span>
-                    <span class="n">time_var</span><span class="p">[:]</span><span class="o">.</span><span class="n">compressed</span><span class="p">(),</span>
-                    <span class="n">time_var</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
-                    <span class="n">has_year_zero</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Short-circuit if using months/years.</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">unit</span> <span class="ow">in</span> <span class="n">time_var</span><span class="o">.</span><span class="n">units</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;months&quot;</span><span class="p">,</span> <span class="s2">&quot;years&quot;</span><span class="p">)):</span>
                 <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
                     <span class="n">BaseCheck</span><span class="o">.</span><span class="n">LOW</span><span class="p">,</span>
                     <span class="kc">False</span><span class="p">,</span>
@@ -2307,9 +2323,28 @@
                         <span class="s2">&quot;Miscellaneous failure when attempting to calculate crossover, possible malformed date&quot;</span><span class="p">,</span>
                     <span class="p">],</span>
                 <span class="p">)</span>
+            <span class="n">time_values</span> <span class="o">=</span> <span class="n">time_var</span><span class="p">[:]</span>
 
-            <span class="n">crossover_1582</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">times</span> <span class="o">&lt;</span> <span class="n">crossover_date</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span>
-                <span class="n">times</span> <span class="o">&gt;=</span> <span class="n">crossover_date</span><span class="p">,</span>
+            <span class="c1"># IMPLEMENTATION CONFORMANCE 4.4.1 RECOMMENDED 2/2</span>
+            <span class="c1"># Only get non-nan/FillValue times, as these are the only things</span>
+            <span class="c1"># that make sense for conversion.  Furthermore, non-null checks</span>
+            <span class="c1"># should be made for time coordinate variables anyways, so errors</span>
+            <span class="c1"># should be caught where implemented there</span>
+            <span class="n">crossover_date</span> <span class="o">=</span> <span class="n">cftime</span><span class="o">.</span><span class="n">DatetimeGregorian</span><span class="p">(</span><span class="mi">1582</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+            <span class="n">crossover_date_value</span> <span class="o">=</span> <span class="n">cftime</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span>
+                <span class="n">crossover_date</span><span class="p">,</span>
+                <span class="n">time_var</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+                <span class="n">calendar</span><span class="o">=</span><span class="n">time_var</span><span class="o">.</span><span class="n">calendar</span><span class="p">,</span>
+                <span class="n">has_year_zero</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># has_year_zero set to true in order to just check crossover,</span>
+            <span class="c1"># actual year less than or equal to zero check handled elsewhere</span>
+            <span class="c1"># when standard/Gregorian, or Julian calendars used.</span>
+
+            <span class="c1"># Comparing cftime objects is awfully slow. Converting them toordinal makes this a bit faster.</span>
+            <span class="c1"># https://github.com/ioos/compliance-checker/issues/1211</span>
+            <span class="n">crossover_1582</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">time_values</span> <span class="o">&lt;</span> <span class="n">crossover_date_value</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span>
+                <span class="n">time_values</span> <span class="o">&gt;=</span> <span class="n">crossover_date_value</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">crossover_1582</span><span class="p">:</span>
                 <span class="n">reasoning</span> <span class="o">=</span> <span class="p">(</span>
@@ -2516,6 +2551,140 @@
                     <span class="p">),</span>
                 <span class="p">)</span>
             <span class="n">ret_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">valid_aux_coords</span><span class="o">.</span><span class="n">to_result</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">ret_val</span></div>
+
+
+    <span class="c1"># IMPLEMENTATION Section 5 Coordinate Systems and Domain</span>
+<div class="viewcode-block" id="CF1_6Check.check_coordinates_attribute_format">
+<a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_coordinates_attribute_format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_coordinates_attribute_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks that the `coordinates` attribute is a space-separated list of valid variable names,</span>
+<span class="sd">        and all listed variables exist in the dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret_val</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">geophysical_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_geophysical_vars</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="n">geophysical_variables</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+            <span class="n">coord_attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">coord_attr</span><span class="p">:</span>
+                <span class="k">continue</span>  <span class="c1"># No coordinates attribute, nothing to check</span>
+
+            <span class="n">check_coords_attrs_format</span> <span class="o">=</span> <span class="n">TestCtx</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;5&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Check that it is a proper string</span>
+            <span class="n">check_coords_attrs_format</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">coord_attr</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+                <span class="sa">f</span><span class="s2">&quot;The &#39;coordinates&#39; attribute of variable &#39;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&#39; must be a string.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Check for unexpected characters (e.g., commas or brackets)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coord_attr</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">has_invalid_chars</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span>
+                    <span class="n">char</span> <span class="ow">in</span> <span class="n">coord_attr</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="s2">&quot;]&quot;</span><span class="p">,</span> <span class="s2">&quot;(&quot;</span><span class="p">,</span> <span class="s2">&quot;)&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">check_coords_attrs_format</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
+                    <span class="ow">not</span> <span class="n">has_invalid_chars</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;The &#39;coordinates&#39; attribute of variable &#39;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&#39; contains invalid characters: </span><span class="si">{</span><span class="n">coord_attr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Check that each token is a valid variable name</span>
+                <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">coord_attr</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+                    <span class="n">check_coords_attrs_format</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
+                        <span class="n">token</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot;The &#39;coordinates&#39; attribute of variable &#39;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&#39; references non-existent variable &#39;</span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+            <span class="n">ret_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">check_coords_attrs_format</span><span class="o">.</span><span class="n">to_result</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">ret_val</span></div>
+
+
+    <span class="c1"># IMPLEMENTATION Section 5.1 Independent Latitude, Longitude, Vertical, and Time Axes,</span>
+<div class="viewcode-block" id="CF1_6Check.check_spatiotemporal_dims_have_coordinate_vars">
+<a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_spatiotemporal_dims_have_coordinate_vars">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_spatiotemporal_dims_have_coordinate_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks that spatial/temporal dimensions (time, lat, lon, height, ...)</span>
+<span class="sd">        used in geophysical variables have proper coordinate variables.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># CF-recognized standard names for coordinate axes</span>
+        <span class="n">expected_standard_names</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="s2">&quot;height&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="s2">&quot;depth&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;altitude&quot;</span><span class="p">:</span> <span class="s2">&quot;altitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pressure&quot;</span><span class="p">:</span> <span class="s2">&quot;air_pressure&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">ret_val</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">geophysical_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_geophysical_vars</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="n">geophysical_variables</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+            <span class="n">check_spatiotemporal_dims_coords</span> <span class="o">=</span> <span class="n">TestCtx</span><span class="p">(</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;5.1&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">dimensions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">expected_standard_names</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+                        <span class="n">check_spatiotemporal_dims_coords</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
+                            <span class="kc">False</span><span class="p">,</span>
+                            <span class="sa">f</span><span class="s2">&quot;Dimension &#39;</span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">&#39; in variable &#39;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&#39; is expected to be a coordinate axis &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;but no variable with that name exists.&quot;</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">coord_var</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+                    <span class="n">std_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">coord_var</span><span class="p">,</span> <span class="s2">&quot;standard_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+                    <span class="n">check_spatiotemporal_dims_coords</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
+                        <span class="n">std_name</span> <span class="o">==</span> <span class="n">expected_standard_names</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+                        <span class="sa">f</span><span class="s2">&quot;Coordinate variable &#39;</span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">&#39; should have standard_name=&#39;</span><span class="si">{</span><span class="n">expected_standard_names</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;found: &#39;</span><span class="si">{</span><span class="n">std_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+            <span class="n">ret_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">check_spatiotemporal_dims_coords</span><span class="o">.</span><span class="n">to_result</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">ret_val</span></div>
+
+
+    <span class="c1"># IMPLEMENTATION Section 2.5.1 Coordinate Systems and Domain</span>
+<div class="viewcode-block" id="CF1_6Check.check_invalid_coordinate_attr">
+<a class="viewcode-back" href="../../../generated/compliance_checker.cf.CF1_6Check.html#compliance_checker.cf.CF1_6Check.check_invalid_coordinate_attr">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_invalid_coordinate_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks that a coordinate variable must not have the _FillValue or missing_value attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret_val</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">coord_var_name</span> <span class="ow">in</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_coordinate_variables</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+            <span class="n">coord_var</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">coord_var_name</span><span class="p">]</span>
+            <span class="n">valid_coords_attr</span> <span class="o">=</span> <span class="n">TestCtx</span><span class="p">(</span><span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;2.5.1&quot;</span><span class="p">])</span>
+
+            <span class="n">valid_coords_attr</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
+                <span class="s2">&quot;_FillValue&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coord_var</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">(),</span>
+                <span class="sa">f</span><span class="s2">&quot;The coordinate variable &#39;</span><span class="si">{</span><span class="n">coord_var_name</span><span class="si">}</span><span class="s2">&#39; must not have the _FillValue attribute.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">valid_coords_attr</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
+                <span class="s2">&quot;missing_value&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coord_var</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">(),</span>
+                <span class="sa">f</span><span class="s2">&quot;The coordinate variable &#39;</span><span class="si">{</span><span class="n">coord_var_name</span><span class="si">}</span><span class="s2">&#39; must not have the missing_value attribute.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">ret_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">valid_coords_attr</span><span class="o">.</span><span class="n">to_result</span><span class="p">())</span>
+
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
@@ -3212,7 +3381,9 @@
                         <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">conversion_failure_msg</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">cell_measure_units</span><span class="o">.</span><span class="n">is_convertible</span><span class="p">(</span><span class="n">Unit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;m</span><span class="si">{</span><span class="n">exponent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">cell_measure_units</span><span class="o">.</span><span class="n">is_convertible</span><span class="p">(</span>
+                            <span class="n">Unit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;m</span><span class="si">{</span><span class="n">exponent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+                        <span class="p">):</span>
                             <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
                             <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">conversion_failure_msg</span><span class="p">)</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">cell_measure_var</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
@@ -3727,7 +3898,7 @@
 
             <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
                 <span class="c1"># Check both attributes are type float or double</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">)):</span>
                     <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="s2">&quot;Attributes add_offset and scale_factor are not of type float or double.&quot;</span><span class="p">,</span>
@@ -3769,7 +3940,7 @@
                 <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">valid_min</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
                     <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Type of </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">valid_min attribute (</span><span class="si">{</span><span class="n">var</span><span class="o">.</span><span class="n">valid_min</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">) does not match variable type (</span><span class="si">{</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot;Type of </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">:valid_min attribute (</span><span class="si">{</span><span class="n">var</span><span class="o">.</span><span class="n">valid_min</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">) does not match variable type (</span><span class="si">{</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
                     <span class="p">)</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;valid_max&quot;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">valid_max</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
@@ -3785,7 +3956,7 @@
                     <span class="p">)</span>
 
             <span class="n">result</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
-                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+                <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">,</span>
                 <span class="n">valid</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;8.1&quot;</span><span class="p">],</span>
                 <span class="n">reasoning</span><span class="p">,</span>
@@ -3965,11 +4136,6 @@
                 <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cf_role</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">valid_roles</span><span class="p">)),</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">variable_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">m</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s2">&quot;§9.5 The only acceptable values of cf_role for Discrete Geometry CF&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot; data sets are timeseries_id, profile_id, and trajectory_id&quot;</span>
-            <span class="p">)</span>
-            <span class="n">valid_cf_role</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span><span class="n">variable_count</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">valid_cf_role</span><span class="o">.</span><span class="n">to_result</span><span class="p">()</span></div>
 
 
@@ -4124,7 +4290,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.3.0.
     <br/>
   </p>
 </div>

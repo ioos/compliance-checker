@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>IOOS Compliance Checker &#8212; compliance_checker 5.2.0 documentation</title>
+    <title>IOOS Compliance Checker &#8212; compliance_checker 5.4.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=2dde5210"></script>
+    <script src="_static/documentation_options.js?v=41d0e7f4"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'readme_link';</script>
@@ -49,7 +49,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="5.2.0" />
+  <meta name="docsearch:version" content="5.4.2" />
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/readme_link.html" />
 
   </head>
@@ -202,7 +202,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.2.0
+  Version 5.4.2
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
         <div class="sidebar-primary-item">
@@ -285,60 +285,53 @@ datasets and get the full suite of capabilities that Compliance Checker offers.<
 <thead>
 <tr class="row-odd"><th class="head"><p>Standard</p></th>
 <th class="head"><p>Source</p></th>
-<th class="head"><p>.nc/OPeNDAP/.cdl</p></th>
-<th class="head"><p>SOS</p></th>
+<th class="head"><p>Release Date</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference external" href="https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3">ACDD (1.1, 1.3)</a></p></td>
 <td><p>Built-in</p></td>
 <td><p>X</p></td>
-<td><p>-</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.11/cf-conventions.html">CF (1.11)</a></p></td>
+<td><p>Built-in</p></td>
+<td><p>Aug 25, 2025</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.10/cf-conventions.html">CF (1.10)</a></p></td>
+<td><p>Built-in</p></td>
+<td><p>Apr 29, 2025</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference external" href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.9/cf-conventions.html">CF (1.9)</a></p></td>
 <td><p>Built-in</p></td>
-<td><p>X</p></td>
-<td><p>-</p></td>
+<td><p>May 15, 2023</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference external" href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html">CF (1.8)</a></p></td>
 <td><p>Built-in</p></td>
-<td><p>X</p></td>
-<td><p>-</p></td>
+<td><p>Jan 25, 2022</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference external" href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html">CF (1.7)</a></p></td>
 <td><p>Built-in</p></td>
-<td><p>X</p></td>
-<td><p>-</p></td>
+<td><p>Jan 25, 2022</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html">CF (1.6)</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html">CF (1.6)</a></p></td>
+<td><p>Built-in</p></td>
+<td><p>Jan 20, 2022</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes">IOOS (1.1)</a></p></td>
 <td><p>Built-in</p></td>
 <td><p>X</p></td>
-<td><p>-</p></td>
 </tr>
-<tr class="row-odd"><td><p>IOOS SOS</p></td>
-<td><p>Built-in</p></td>
-<td><p>-</p></td>
-<td><p>GetCapabilities, DescribeSensor</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes">IOOS (1.1)</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html">IOOS (1.2)</a></p></td>
 <td><p>Built-in</p></td>
 <td><p>X</p></td>
-<td><p>-</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html">IOOS (1.2)</a></p></td>
-<td><p>Built-in</p></td>
-<td><p>X</p></td>
-<td><p>-</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://ioos.github.io/glider-dac/ngdac-netcdf-file-format-version-2.html">Glider DAC</a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://ioos.github.io/glider-dac/ngdac-netcdf-file-format-version-2.html">Glider DAC</a></p></td>
 <td><p><a class="reference external" href="https://github.com/ioos/cc-plugin-glider">ioos/cc-plugin-glider</a></p></td>
 <td><p>X</p></td>
-<td><p>-</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html">NCEI (1.1, 2.0)</a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html">NCEI (1.1, 2.0)</a></p></td>
 <td><p><a class="reference external" href="https://github.com/ioos/cc-plugin-ncei">ioos/cc-plugin-ncei</a></p></td>
 <td><p>X</p></td>
-<td><p>-</p></td>
 </tr>
 </tbody>
 </table>
@@ -680,6 +673,10 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
 <li><p><a class="reference external" href="https://github.com/ioos/cc-plugin-ncei/releases">NCEI</a> - <a class="reference external" href="https://github.com/ioos/cc-plugin-ncei">link</a></p></li>
 </ul>
 <p>This is a checker for NCEI netCDF Templates <a class="reference external" href="https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v1.1/index.html">v1.1</a> and <a class="reference external" href="https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html">v2.0</a> files.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/ioos/cc-plugin-ugrid/releases">UGRID</a></p></li>
+</ul>
+<p>This is a checker for UGRID (https://ugrid-conventions.github.io/ugrid-conventions/)</p>
 <p>These plug-ins must be installed separately but work on top of the base compliance checker software.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">cc</span><span class="o">-</span><span class="n">plugin</span><span class="o">-</span><span class="n">ncei</span>
 </pre></div>
@@ -725,9 +722,13 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
 </div>
 </section>
 </section>
+<section id="ugrid-support">
+<h2>UGRID support<a class="headerlink" href="#ugrid-support" title="Link to this heading">#</a></h2>
+<p>Compliance Checker does not support UGRID in the base package, although implicitly required by CF.  If your needs include checking UGRID implementing files, we recommend that you either use an external checker such as the one maintained by the UK Met Office (https://github.com/pp-mo/ugrid-checks) or the Compliance Checker plugin listed above. (https://github.com/ioos/cc-plugin-ugrid)</p>
+</section>
 <section id="disclaimer">
 <h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Link to this heading">#</a></h2>
-<p>The objective of the IOOS Compliance Checker is to check your file against our interpretation of select dataset metadata standards to use as a guideline in generating compliant files. The compliance checker should not be considered the authoritative source on whether your file is 100% “compliant”. Instead, we recommend that users use the results as a guide to work towards compliance.</p>
+<p>The objective of the IOOS Compliance Checker is to check your file against our interpretation of select dataset metadata standards to use as a guideline in generating compliant files. The compliance checker should not be considered the authoritative source on whether your file is 100% “compliant”. Instead, we recommend that users use the results as a guide to work towards compliance.  A table with the current CF feature support documenting implemented portions of CF is located here for reference: <a class="reference internal" href="#docs/cf_feature_parity_matrix.md"><span class="xref myst">Feature Parity Matrix</span></a></p>
 </section>
 <section id="miscellaneous-acknowledgements">
 <h2>Miscellaneous/Acknowledgements<a class="headerlink" href="#miscellaneous-acknowledgements" title="Link to this heading">#</a></h2>
@@ -817,6 +818,7 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-of-how-to-use-the-plug-ins">Examples of how to use the Plug-Ins</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ugrid-support">UGRID support</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#disclaimer">Disclaimer</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#miscellaneous-acknowledgements">Miscellaneous/Acknowledgements</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#contributors">Contributors</a></li>
@@ -871,7 +873,7 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.3.0.
     <br/>
   </p>
 </div>

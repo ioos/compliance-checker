@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.acdd &#8212; compliance_checker 5.2.0 documentation</title>
+    <title>compliance_checker.acdd &#8212; compliance_checker 5.4.2 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../_static/documentation_options.js?v=2dde5210"></script>
+    <script src="../../_static/documentation_options.js?v=41d0e7f4"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/acdd';</script>
@@ -46,7 +46,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="5.2.0" />
+  <meta name="docsearch:version" content="5.4.2" />
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/_modules/compliance_checker/acdd.html" />
 
   </head>
@@ -201,7 +201,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.2.0
+  Version 5.4.2
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
@@ -277,7 +277,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">cftime</span><span class="w"> </span><span class="kn">import</span> <span class="n">num2pydate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pygeoif</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_wkt</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">cfutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">compliance_checker.cf.util</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cfutil</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.base</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BaseCheck</span><span class="p">,</span>
     <span class="n">BaseNCCheck</span><span class="p">,</span>
@@ -1013,7 +1013,7 @@
                 <span class="s2">&quot;publisher_name&quot;</span><span class="p">,</span>  <span class="c1"># publisher,dataCenter</span>
                 <span class="s2">&quot;publisher_url&quot;</span><span class="p">,</span>  <span class="c1"># publisher</span>
                 <span class="s2">&quot;publisher_email&quot;</span><span class="p">,</span>  <span class="c1"># publisher</span>
-                <span class="s2">&quot;geospatial_vertical_positive&quot;</span><span class="p">,</span>
+                <span class="p">(</span><span class="s2">&quot;geospatial_vertical_positive&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;down&quot;</span><span class="p">]),</span>
             <span class="p">],</span>
         <span class="p">)</span></div>
 </div>
@@ -1035,7 +1035,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="s2">&quot;geospatial_vertical_positive&quot;</span><span class="p">,</span>
+                <span class="p">(</span><span class="s2">&quot;geospatial_vertical_positive&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;down&quot;</span><span class="p">]),</span>
                 <span class="s2">&quot;geospatial_bounds_crs&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;geospatial_bounds_vertical_crs&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;publisher_name&quot;</span><span class="p">,</span>  <span class="c1"># publisher,dataCenter</span>
@@ -1229,7 +1229,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.3.0.
     <br/>
   </p>
 </div>
