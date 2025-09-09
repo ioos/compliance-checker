@@ -19,18 +19,19 @@ datasets and get the full suite of capabilities that Compliance Checker offers.
 
 It currently supports the following sources and standards:
 
-| Standard                                                                                                                   | Source                                                            | .nc/OPeNDAP/.cdl | SOS                             |
-| ----------------------------------------------------------------------------------------------------                       | -----------                                                       | ------           | ------------------------------- |
-| [ACDD (1.1, 1.3)](https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3)                                    | Built-in                                                          | X                | -                               |
-| [CF (1.9)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.9/cf-conventions.html)                            | Built-in                                                          | X                | -                               |
-| [CF (1.8)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html)                            | Built-in                                                          | X                | -                               |
-| [CF (1.7)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html)                            | Built-in                                                          | X                | -                               |
-| [CF (1.6)](http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html)                                             | Built-in                                                          | X                | -                               |
-| IOOS SOS                                                                                                                   | Built-in                                                          | -                | GetCapabilities, DescribeSensor |
-| [IOOS (1.1)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes) | Built-in                                                          | X                | -                               |
-| [IOOS (1.2)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html)                                         | Built-in                                                          | X                | -                               |
-| [Glider DAC](https://ioos.github.io/glider-dac/ngdac-netcdf-file-format-version-2.html)                                    | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | X                | -                               |
-| [NCEI (1.1, 2.0)](https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html)                               | [ioos/cc-plugin-ncei](https://github.com/ioos/cc-plugin-ncei)     | X                | -                               |
+| Standard                                                                                                                   | Source                                                            | Release Date |
+| -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------ |
+| [ACDD (1.1, 1.3)](https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3)                                    | Built-in                                                          | X            |
+| [CF (1.11)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.11/cf-conventions.html)                          | Built-in                                                          | Aug 25, 2025 |
+| [CF (1.10)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.10/cf-conventions.html)                          | Built-in                                                          | Apr 29, 2025 |
+| [CF (1.9)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.9/cf-conventions.html)                            | Built-in                                                          | May 15, 2023 |
+| [CF (1.8)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html)                            | Built-in                                                          | Jan 25, 2022 |
+| [CF (1.7)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html)                            | Built-in                                                          | Jan 25, 2022 |
+| [CF (1.6)](https://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html)                                            | Built-in                                                          | Jan 20, 2022 |
+| [IOOS (1.1)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes) | Built-in                                                          | X            |
+| [IOOS (1.2)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html)                                         | Built-in                                                          | X            |
+| [Glider DAC](https://ioos.github.io/glider-dac/ngdac-netcdf-file-format-version-2.html)                                    | [ioos/cc-plugin-glider](https://github.com/ioos/cc-plugin-glider) | X            |
+| [NCEI (1.1, 2.0)](https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html)                               | [ioos/cc-plugin-ncei](https://github.com/ioos/cc-plugin-ncei)     | X            |
 
 
 ## Advice to data providers
