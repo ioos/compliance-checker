@@ -17,7 +17,6 @@ from collections import defaultdict
 
 import numpy as np
 import requests
-from lxml import etree
 from netCDF4 import Dataset
 from shapely.geometry import Polygon
 
@@ -869,8 +868,8 @@ class CF1_8Check(CF1_7Check):
                 # 400 error code indicates something is malformed on client's
                 # end
                 if response.status_code == 400:
-                    tree = etree.HTML(response.text)
-                    problem_text = tree.find("./body/p").text
+                    pattern = re.compile(r"<.*?>")
+                    problem_text = pattern.sub(" ", response.text)
                     messages.append(
                         "http://lsid.info returned an error message "
                         f"for submitted LSID string '{lsid_str}': "
