@@ -10,8 +10,9 @@ from functools import partial
 
 import numpy as np
 import pendulum
-from cftime import num2pydate
+from cftime import num2date
 from pygeoif import from_wkt
+
 
 import compliance_checker.cf.util as cfutil
 from compliance_checker.base import (
@@ -608,18 +609,40 @@ class ACDDBaseCheck(BaseCheck):
 
         # Time should be monotonically increasing, so we make that assumption here so we don't have to download THE ENTIRE ARRAY
         try:
-            # num2date returns as naive date, but with time adjusted to UTC
-            # we need to attach timezone information here, or the date
-            # subtraction from t_min/t_max will assume that a naive timestamp is
-            # in the same time zone and cause erroneous results.
-            # Pendulum uses UTC by default, but we are being explicit here
-            time0 = pendulum.instance(
-                num2pydate(ds.variables[timevar][0], ds.variables[timevar].units),
-                "UTC",
+            # num2date returns cftime objects which work with all calendar types
+            # For non-standard calendars (all_leap, noleap, 360_day, etc.),
+            # we need to use num2date and extract datetime components
+            # to create pendulum datetime objects
+            calendar = getattr(ds.variables[timevar], "calendar", "standard")
+            
+            cftime_obj0 = num2date(
+                ds.variables[timevar][0],
+                ds.variables[timevar].units,
+                calendar=calendar
             )
-            time1 = pendulum.instance(
-                num2pydate(ds.variables[timevar][-1], ds.variables[timevar].units),
-                "UTC",
+            time0 = pendulum.datetime(
+                cftime_obj0.year,
+                cftime_obj0.month,
+                cftime_obj0.day,
+                cftime_obj0.hour,
+                cftime_obj0.minute,
+                cftime_obj0.second,
+                tz='UTC'
+            )
+            
+            cftime_obj1 = num2date(
+                ds.variables[timevar][-1],
+                ds.variables[timevar].units,
+                calendar=calendar
+            )
+            time1 = pendulum.datetime(
+                cftime_obj1.year,
+                cftime_obj1.month,
+                cftime_obj1.day,
+                cftime_obj1.hour,
+                cftime_obj1.minute,
+                cftime_obj1.second,
+                tz='UTC'
             )
         except ValueError:
             return Result(
