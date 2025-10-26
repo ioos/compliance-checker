@@ -13,7 +13,6 @@ import pendulum
 from cftime import num2date
 from pygeoif import from_wkt
 
-
 import compliance_checker.cf.util as cfutil
 from compliance_checker.base import (
     BaseCheck,
@@ -614,11 +613,11 @@ class ACDDBaseCheck(BaseCheck):
             # we need to use num2date and extract datetime components
             # to create pendulum datetime objects
             calendar = getattr(ds.variables[timevar], "calendar", "standard")
-            
+
             cftime_obj0 = num2date(
                 ds.variables[timevar][0],
                 ds.variables[timevar].units,
-                calendar=calendar
+                calendar=calendar,
             )
             time0 = pendulum.datetime(
                 cftime_obj0.year,
@@ -627,13 +626,13 @@ class ACDDBaseCheck(BaseCheck):
                 cftime_obj0.hour,
                 cftime_obj0.minute,
                 cftime_obj0.second,
-                tz='UTC'
+                tz="UTC",
             )
-            
+
             cftime_obj1 = num2date(
                 ds.variables[timevar][-1],
                 ds.variables[timevar].units,
-                calendar=calendar
+                calendar=calendar,
             )
             time1 = pendulum.datetime(
                 cftime_obj1.year,
@@ -642,7 +641,7 @@ class ACDDBaseCheck(BaseCheck):
                 cftime_obj1.hour,
                 cftime_obj1.minute,
                 cftime_obj1.second,
-                tz='UTC'
+                tz="UTC",
             )
         except ValueError:
             return Result(
