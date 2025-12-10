@@ -167,4 +167,7 @@ texinfo_documents = [
 ]
 
 # GitHub issuecomment anchors are returning as broken for some reason.
-linkcheck_ignore = ["https://github.com/ioos/compliance-checker/issues/.*"]
+linkcheck_ignore = [
+    "https://github.com/ioos/compliance-checker/issues/.*",
+    "https://compliance.ioos.us/index.html",
+]
