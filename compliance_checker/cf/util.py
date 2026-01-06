@@ -927,16 +927,35 @@ def get_flag_variables(nc):
     return flag_variables
 
 
+def extract_grid_mapping_names(grid_mapping_string):
+    """
+    Extracts all grid mapping variable names from a grid_mapping string.
+
+    :param str grid_mapping_string: The grid_mapping attribute string
+    :return list[str]: List of grid mapping variable names
+    """
+    return (
+        re.findall(r"\b(\w+):", grid_mapping_string)
+        if ":" in grid_mapping_string
+        else grid_mapping_string.split()
+    )
+
+
 def get_grid_mapping_variables(nc):
     """
-    Returns a list of grid mapping variables
+    Returns a set of all grid mapping variable names that are present in the dataset.
 
     :param netCDF4.Dataset nc: An open netCDF4 Dataset
+    :return set[str]: Set of grid mapping variable names
     """
     grid_mapping_variables = set()
     for ncvar in nc.get_variables_by_attributes(grid_mapping=lambda x: x is not None):
-        if ncvar.grid_mapping in nc.variables:
-            grid_mapping_variables.add(ncvar.grid_mapping)
+        grid_mapping_string = ncvar.grid_mapping
+        grid_mapping_names = extract_grid_mapping_names(grid_mapping_string)
+        for name in grid_mapping_names:
+            if name in nc.variables:
+                grid_mapping_variables.add(name)
+
     return grid_mapping_variables
 
 
