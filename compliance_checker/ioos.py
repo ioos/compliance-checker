@@ -30,7 +30,7 @@ class IOOSBaseCheck(BaseCheck):
     _cc_spec_version = "0.1"
     _cc_description = "IOOS Inventory Metadata"
     _cc_url = "https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes"
-    _cc_display_headers = {3: "Highly Recommended", 2: "Recommended", 1: "Suggested"}
+    _cc_display_headers = {3: "Required", 2: "Recommended", 1: "Suggested"}
 
     @classmethod
     def _has_attr(cls, ds, attr, concept_name, priority=BaseCheck.HIGH):
@@ -307,7 +307,7 @@ class IOOS1_1Check(IOOSNCCheck):
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         """
-        Performs a check on each highly recommended attributes' existence in the dataset
+        Performs a check on each required attributes' existence in the dataset
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
@@ -636,7 +636,7 @@ class IOOS1_2Check(IOOSNCCheck):
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
         """
-        Performs a check on each highly recommended attributes' existence in the dataset
+        Performs a check on each required attributes' existence in the dataset
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
