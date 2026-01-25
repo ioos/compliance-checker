@@ -2299,11 +2299,26 @@ class CF1_6Check(CFNCCheck):
                     coord_var = ds.variables[dim]
                     std_name = getattr(coord_var, "standard_name", None)
 
-                    check_spatiotemporal_dims_coords.assert_true(
-                        std_name == expected_standard_names[dim],
-                        f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', "
-                        f"found: '{std_name}'",
-                    )
+                    if dim == "time":
+                        is_valid_time_std_name = std_name == "time"
+                        if not is_valid_time_std_name and std_name in self._std_names:
+                            entry = self._std_names[std_name]
+                            if entry.canonical_units and cfutil.units_convertible(
+                                entry.canonical_units,
+                                "seconds",
+                            ):
+                                is_valid_time_std_name = True
+
+                        check_spatiotemporal_dims_coords.assert_true(
+                            is_valid_time_std_name,
+                            f"Coordinate variable '{dim}' should have a valid time standard_name, found: '{std_name}'",
+                        )
+                    else:
+                        check_spatiotemporal_dims_coords.assert_true(
+                            std_name == expected_standard_names[dim],
+                            f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', "
+                            f"found: '{std_name}'",
+                        )
 
             ret_val.append(check_spatiotemporal_dims_coords.to_result())
         return ret_val
