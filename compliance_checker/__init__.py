@@ -2,6 +2,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
+
 from compliance_checker.runner import ComplianceChecker
 
 try:
@@ -36,6 +37,7 @@ def tempnc(data: BinaryIO) -> Generator[str, None, None]:
     finally:
         if tmp is not None:
             tmp.close()
+
 
 def run_checker(
     ds_loc,

@@ -1,7 +1,7 @@
 """
 Compliance Checker suite runner
 """
-import threading
+
 import codecs
 import inspect
 import itertools
@@ -10,6 +10,7 @@ import re
 import subprocess
 import sys
 import textwrap
+import threading
 import warnings
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -59,11 +60,10 @@ class CheckSuite:
     checkers = (
         {}
     )  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
-    templates_root = "compliance_checker" 
+    templates_root = "compliance_checker"
     _instance = None
-    _lock = threading.Lock()                        
-    _checkers_loaded = False 
- 
+    _lock = threading.Lock()
+    _checkers_loaded = False
 
     def __init__(self, options=None):
         self.col_width = 40
@@ -81,10 +81,8 @@ class CheckSuite:
                     cls._instance = instance
         return cls._instance
 
-
     @classmethod
     def _get_generator_plugins(cls):
-
         """
         Return a list of classes from external plugins that are used to
         generate checker classes
