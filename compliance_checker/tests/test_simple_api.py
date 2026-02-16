@@ -1,7 +1,7 @@
 import pytest
 from compliance_checker.suite import CheckSuite
 from compliance_checker import run_checker
-from compliance_checker.runner import ComplianceChecker
+
 
 class TestSimpleAPI:
     

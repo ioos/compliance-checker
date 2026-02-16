@@ -2,6 +2,8 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
+from compliance_checker.suite import CheckSuite
+from compliance_checker.runner import ComplianceChecker
 
 try:
     from ._version import __version__
@@ -35,13 +37,6 @@ def tempnc(data: BinaryIO) -> Generator[str, None, None]:
     finally:
         if tmp is not None:
             tmp.close()
-
-
-            
-
-from compliance_checker.suite import CheckSuite
-from compliance_checker.runner import ComplianceChecker
-
 
 def run_checker(
     ds_loc,
