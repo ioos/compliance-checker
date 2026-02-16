@@ -1,7 +1,7 @@
 """
 Compliance Checker suite runner
 """
-
+import threading
 import codecs
 import inspect
 import itertools
@@ -59,14 +59,32 @@ class CheckSuite:
     checkers = (
         {}
     )  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
-    templates_root = "compliance_checker"  # modify to load alternative Jinja2 templates
+    templates_root = "compliance_checker" 
+    _instance = None
+    _lock = threading.Lock()                        
+    _checkers_loaded = False 
+ 
 
     def __init__(self, options=None):
         self.col_width = 40
         self.options = options or {}
 
     @classmethod
+    def _get_instance(cls):
+        """Factory method that returns a CheckSuite with checkers pre-loaded."""
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    instance = cls()
+                    instance.load_all_available_checkers()
+                    cls._checkers_loaded = True
+                    cls._instance = instance
+        return cls._instance
+
+
+    @classmethod
     def _get_generator_plugins(cls):
+
         """
         Return a list of classes from external plugins that are used to
         generate checker classes
@@ -141,6 +159,7 @@ class CheckSuite:
         cls._load_checkers(
             entry_points(group="compliance_checker.suites"),
         )
+        cls._checkers_loaded = True
 
     @classmethod
     def _load_checkers(cls, checkers):

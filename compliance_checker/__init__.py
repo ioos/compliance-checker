@@ -35,3 +35,43 @@ def tempnc(data: BinaryIO) -> Generator[str, None, None]:
     finally:
         if tmp is not None:
             tmp.close()
+
+
+            
+
+from compliance_checker.suite import CheckSuite
+from compliance_checker.runner import ComplianceChecker
+
+
+def run_checker(
+    ds_loc,
+    checker_names,
+    verbose=False,
+    criteria="normal",
+    output_format="text",
+    output_filename="-",
+    skip_checks=None,
+    include_checks=None,
+    options=None,
+):
+    """
+    Simplified API to run compliance checks.
+
+    Usage:
+        from compliance_checker import run_checker
+        passed, errors = run_checker('my_data.nc', 'cf')
+    """
+    if isinstance(checker_names, str):
+        checker_names = [checker_names]
+
+    return ComplianceChecker.run_checker(
+        ds_loc=ds_loc,
+        checker_names=checker_names,
+        verbose=verbose,
+        criteria=criteria,
+        skip_checks=skip_checks,
+        include_checks=include_checks,
+        output_filename=output_filename,
+        output_format=output_format,
+        options=options,
+    )

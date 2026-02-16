@@ -57,6 +57,10 @@ class ComplianceChecker:
 
         @returns                If the tests failed (based on the criteria)
         """
+
+        if not CheckSuite._checkers_loaded:
+            CheckSuite._get_instance()
+
         all_groups = []
         cs = CheckSuite(options=options or {})
         # using OrderedDict is important here to preserve the order
