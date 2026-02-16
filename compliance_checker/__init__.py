@@ -2,7 +2,6 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
-from compliance_checker.suite import CheckSuite
 from compliance_checker.runner import ComplianceChecker
 
 try:
