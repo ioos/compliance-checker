@@ -188,8 +188,7 @@ class CFBaseCheck(BaseCheck):
             )
             defines_grid_mapping.assert_true(
                 (isinstance(grid_mapping, str) and grid_mapping),
-                f"{variable.name}'s grid_mapping attribute must be a "
-                "space-separated non-empty string",
+                f"Variable '{variable.name}' must have a non-empty, space-separated 'grid_mapping' attribute.",
             )
             if isinstance(grid_mapping, str):
                 # TODO (badams): refactor functionality to split functionality
@@ -209,7 +208,7 @@ class CFBaseCheck(BaseCheck):
                         for grid_var_name, coord_var_str in re_all:
                             defines_grid_mapping.assert_true(
                                 grid_var_name in ds.variables,
-                                f"grid mapping variable {grid_var_name} must exist in this dataset",
+                                f"Grid mapping variable {grid_var_name} must exist in the dataset.",
                             )
                             for ref_var in coord_var_str.split():
                                 defines_grid_mapping.assert_true(
@@ -221,7 +220,7 @@ class CFBaseCheck(BaseCheck):
                     for grid_var_name in grid_mapping.split():
                         defines_grid_mapping.assert_true(
                             grid_var_name in ds.variables,
-                            f"grid mapping variable {grid_var_name} must exist in this dataset",
+                            f"Grid mapping variable '{grid_var_name}' must exist in the dataset.",
                         )
             ret_val[variable.name] = defines_grid_mapping.to_result()
 
@@ -234,12 +233,17 @@ class CFBaseCheck(BaseCheck):
             )
             grid_var = ds.variables[grid_var_name]
 
+            # Grid mapping variables should have 0 dimensions.
+            valid_grid_mapping.assert_true(
+                len(grid_var.dimensions) == 0,
+                f"Grid mapping variable '{grid_var_name}' has dimensions but should be scalar (0-dimensional).",
+            )
             grid_mapping_name = getattr(grid_var, "grid_mapping_name", None)
 
             # Grid mapping name must be in appendix F
             valid_grid_mapping.assert_true(
                 grid_mapping_name in self.grid_mapping_dict,
-                f"{grid_mapping_name} is not a valid grid_mapping_name."
+                f"Grid mapping variable '{grid_var_name}' has an invalid grid_mapping_name: '{grid_mapping_name}'."
                 + " See Appendix F for valid grid mappings",
             )
 
@@ -256,11 +260,12 @@ class CFBaseCheck(BaseCheck):
 
             grid_mapping = self.grid_mapping_dict[grid_mapping_name]
             required_attrs = grid_mapping[0]
+
             # Make sure all the required attributes are defined
             for req in required_attrs:
                 valid_grid_mapping.assert_true(
                     hasattr(grid_var, req),
-                    f"{req} is a required attribute for grid mapping {grid_mapping_name}",
+                    f"The attribute '{req}' is required for grid mapping variable '{grid_var_name}' with the grid_mapping_name '{grid_mapping_name}'.",
                 )
 
             # Make sure that exactly one of the exclusive attributes exist
@@ -270,10 +275,10 @@ class CFBaseCheck(BaseCheck):
                 for attr in at_least_attr:
                     if hasattr(grid_var, attr):
                         number_found += 1
+
                 valid_grid_mapping.assert_true(
                     number_found == 1,
-                    f"grid mapping {grid_mapping_name}"
-                    + "must define exactly one of these attributes: "
+                    f"Grid mapping variable '{grid_var_name}' with grid_mapping_name '{grid_mapping_name}' must define exactly one of the following attributes:"
                     + "{}".format(" or ".join(at_least_attr)),
                 )
 
@@ -283,11 +288,10 @@ class CFBaseCheck(BaseCheck):
                 found_vars = ds.get_variables_by_attributes(
                     standard_name=expected_std_name,
                 )
+
                 valid_grid_mapping.assert_true(
                     len(found_vars) == 1,
-                    f"grid mapping {grid_mapping_name} requires exactly "
-                    + "one variable with standard_name "
-                    + f"{expected_std_name} to be defined",
+                    f"Grid mapping variable '{grid_var_name}' with grid_mapping_name '{grid_mapping_name}' requires exactly one variable with standard_name '{expected_std_name}' to be defined.",
                 )
 
             ret_val[grid_var_name] = valid_grid_mapping.to_result()
