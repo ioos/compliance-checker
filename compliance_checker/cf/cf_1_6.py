@@ -2281,6 +2281,10 @@ class CF1_6Check(CFNCCheck):
         geophysical_variables = self._find_geophysical_vars(ds)
         for var_name in geophysical_variables:
             var = ds.variables[var_name]
+            check_spatiotemporal_dims_coords_std_name = TestCtx(
+                BaseCheck.MEDIUM,
+                self.section_titles["4"],
+            )
             check_spatiotemporal_dims_coords = TestCtx(
                 BaseCheck.HIGH,
                 self.section_titles["5.1"],
@@ -2299,13 +2303,14 @@ class CF1_6Check(CFNCCheck):
                     coord_var = ds.variables[dim]
                     std_name = getattr(coord_var, "standard_name", None)
 
-                    check_spatiotemporal_dims_coords.assert_true(
+                    check_spatiotemporal_dims_coords_std_name.assert_true(
                         std_name == expected_standard_names[dim],
                         f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', "
                         f"found: '{std_name}'",
                     )
 
             ret_val.append(check_spatiotemporal_dims_coords.to_result())
+            ret_val.append(check_spatiotemporal_dims_coords_std_name.to_result())
         return ret_val
 
     # IMPLEMENTATION Section 2.5.1 Coordinate Systems and Domain
