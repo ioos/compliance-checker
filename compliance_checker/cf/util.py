@@ -2347,9 +2347,9 @@ def download_cf_standard_name_table(version, location=None):
         location = files("compliance_checker") / "data/cf-standard-name-table.xml"
 
     if version == "latest":
-        url = "http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml"
+        url = "https://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml"
     else:
-        url = f"http://cfconventions.org/Data/cf-standard-names/{version}/src/cf-standard-name-table.xml"
+        url = f"https://cfconventions.org/Data/cf-standard-names/{version}/src/cf-standard-name-table.xml"
 
     r = requests.get(url, allow_redirects=True)
     r.raise_for_status()

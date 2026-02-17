@@ -823,7 +823,7 @@ class TestCF1_6(BaseTestCase):
         """
         Test that a user can download a specific standard name table
         """
-        version = "35"
+        version = "92"
 
         data_directory = create_cached_data_dir()
         location = os.path.join(

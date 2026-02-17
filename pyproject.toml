@@ -12,10 +12,10 @@ description = "Checks Datasets and SOS endpoints for standards compliance"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = { text = "Apache-2.0" }
 maintainers = [
-  { name = "Dave Foster", email = "dave@axiomdatascience.com" },
   { name = "Benjamin Adams" },
-  { name = "Luke Campbell" },
+  { name = "Dave Foster", email = "dave@axiomdatascience.com" },
   { name = "Filipe Fernandes" },
+  { name = "Luke Campbell" },
 ]
 requires-python = ">=3.10"
 classifiers = [
@@ -57,7 +57,6 @@ dependencies = [
   "shapely>=1.7.1",
   "validators>=0.14.2",
 ]
-
 urls.documentation = "https://ioos.github.io/compliance-checker"
 urls.homepage = "https://compliance.ioos.us/index.html"
 urls.repository = "https://github.com/ioos/compliance-checker"
@@ -87,20 +86,16 @@ include-package-data = true
 script-files = [
   "cchecker.py",
 ]
-
-[tool.setuptools.package-data]
-compliance_checker = [
+dynamic.dependencies = { file = [
+  "requirements.txt",
+] }
+package-data.compliance_checker = [
   "data/*.xml",
   "tests/data/*.nc",
   "tests/data/*.cdl",
   "tests/data/non-comp/*.cdl",
   "data/templates/*.j2",
 ]
-
-[tool.setuptools.dynamic]
-dependencies = { file = [
-  "requirements.txt",
-] }
 
 [tool.setuptools_scm]
 write_to = "compliance_checker/_version.py"
@@ -110,11 +105,9 @@ tag_regex = "^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$"
 [tool.ruff]
 target-version = "py310"
 line-length = 200
-
 exclude = [
   "compliance_checker/cf/cf.py",
 ]
-
 lint.select = [
   "A",  # flake8-builtins
   "B",  # flake8-bugbear
@@ -128,10 +121,9 @@ lint.select = [
 lint.ignore = [
   "E501",
 ]
-
 lint.per-file-ignores."compliance_checker/cf/appendix_f.py" = [
   "B033",
-] # ignore duplicates items in the set
+]  # ignore duplicates items in the set
 lint.per-file-ignores."compliance_checker/cfutil.py" = [
   "B028",
 ]
@@ -140,12 +132,12 @@ lint.per-file-ignores."docs/source/conf.py" = [
   "E402",
 ]
 
-[tool.pytest.ini_options]
-markers = [
+[tool.pytest]
+ini_options.markers = [
   "integration: marks integration tests (deselect with '-m \"not integration\"')",
   "slowtest: marks slow tests (deselect with '-m \"not slowtest\"')",
 ]
-filterwarnings = [
+ini_options.filterwarnings = [
   "error",
   "ignore:this date/calendar/year zero convention is not supported by CF", # CFtime warning, probably harmless here?
   "ignore:Received exception when making HEAD request to",                 # In compliance_checker/protocols/netcdf.py::is_remote_netcdf We can still tell if it is remote without the handshake.

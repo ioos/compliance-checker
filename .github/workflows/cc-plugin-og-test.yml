@@ -32,7 +32,7 @@ jobs:
 
     - name: cc-plugin-og tests
       run: >
-        git clone https://github.com/uw-farlab/cc-plugin-og.git
+        git clone https://github.com/ioos/cc-plugin-og.git
         && cd cc-plugin-og
         && micromamba install --file requirements.txt --channel conda-forge
         && micromamba remove compliance-checker --no-prune-deps --force

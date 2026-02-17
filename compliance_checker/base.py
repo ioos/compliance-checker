@@ -3,6 +3,7 @@
 """
 Compliance Checker
 """
+
 import csv
 import itertools
 import pprint

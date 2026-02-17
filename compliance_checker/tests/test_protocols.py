@@ -4,6 +4,7 @@ compliance_checker/tests/test_protocols.py
 
 Unit tests that ensure the compliance checker can successfully identify protocol endpoints
 """
+
 import platform
 
 import pytest
@@ -34,13 +35,15 @@ def test_netcdf_content_type(cs):
 
 def test_erddap(cs):
     """
-    Tests that a connection can be made to ERDDAP's GridDAP
+    Tests that a connection can be made to ERDDAP's OPeNDAP GridDAP.
     """
     url = "https://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest"
     ds = cs.load_dataset(url)
     assert ds is not None
 
 
+# This URL is unresponsive.
+@pytest.mark.xfail
 def test_hyrax(cs):
     """
     Tests that a connection can be made to Hyrax
@@ -48,9 +51,6 @@ def test_hyrax(cs):
     NOTE: This test creates a VCR file that is larger than GH's limit.
     We are not recording.
     """
-    # Returns: error 405
-    # url = "http://test.opendap.org:8080/opendap/ioos/mday_joinExist.ncml"
-    # More direct file
     url = "http://test.opendap.org:8080/opendap/ioos/mday_joinExist.ncml.dap.nc4"
     ds = cs.load_dataset(url)
     assert ds is not None
@@ -63,8 +63,6 @@ def test_thredds(cs):
     NOTE: This test creates a VCR file that is larger than GH's limit.
     We are not recording.
     """
-    # Returns: error 400
-    # url = "http://thredds.ucar.edu/thredds/dodsC/grib/NCEP/GFS/Global_0p25deg_ana/TP"
     # Use a smaller dataset
     url = "https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/GFS/Global_0p25deg_ana/TP?var=Temperature_altitude_above_msl&accept=netcdf3"
 

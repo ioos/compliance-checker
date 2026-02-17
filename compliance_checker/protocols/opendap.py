@@ -4,6 +4,7 @@ compliance_checker/protocols/opendap.py
 
 Functions to assist in determining if the URL is an OPeNDAP endpoint
 """
+
 import urllib.parse
 import urllib.request
 

@@ -3,6 +3,7 @@
 Tests for command line output and parsing
 
 """
+
 import importlib.util
 import io
 import json
