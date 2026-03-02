@@ -30,13 +30,13 @@ repos:
 
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.0
+  rev: v0.15.4
   hooks:
     - id: ruff
       args: ["--fix", "--show-fixes"]
 
 - repo: https://github.com/tox-dev/pyproject-fmt
-  rev: v2.15.3
+  rev: v2.16.2
   hooks:
     - id: pyproject-fmt
 
