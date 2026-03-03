@@ -53,8 +53,6 @@ def main():
     parser.add_argument(
         "--test",
         "-t",
-        "--test=",
-        "-t=",
         default=[],
         action="append",
         help=(
