@@ -13,7 +13,6 @@ from collections import defaultdict
 from functools import wraps
 from io import StringIO
 from re import Pattern
-from warnings import deprecated
 
 import validators
 from lxml import etree
@@ -21,6 +20,7 @@ from netCDF4 import Dataset
 from owslib.namespaces import Namespaces
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
+from typing_extensions import deprecated
 
 from compliance_checker import __version__
 from compliance_checker.util import kvp_convert

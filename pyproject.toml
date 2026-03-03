@@ -55,6 +55,7 @@ dependencies = [
   "requests>=2.2.1",
   "setuptools>=15",
   "shapely>=1.7.1",
+  "typing-extensions",
   "validators>=0.14.2",
 ]
 urls.documentation = "https://ioos.github.io/compliance-checker"

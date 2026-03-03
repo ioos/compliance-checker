@@ -4,11 +4,11 @@ Check for IOOS-approved attributes
 
 import re
 from numbers import Number
-from warnings import deprecated
 
 import validators
 from lxml.etree import XPath
 from owslib.namespaces import Namespaces
+from typing_extensions import deprecated
 
 import compliance_checker.cf.util as cfutil
 from compliance_checker import base
