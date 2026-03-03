@@ -12,6 +12,7 @@ import warnings
 from collections import defaultdict
 from functools import wraps
 from io import StringIO
+from re import Pattern
 
 import validators
 from lxml import etree
@@ -22,14 +23,6 @@ from owslib.swe.sensor.sml import SensorML
 
 from compliance_checker import __version__
 from compliance_checker.util import kvp_convert
-
-# Python 3.5+ should work, also have a fallback
-try:
-    from re import Pattern
-
-    re_pattern_type = Pattern
-except ImportError:
-    re_pattern_type = type(re.compile(""))
 
 
 def get_namespaces():
@@ -513,7 +506,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
         msgs = [] if res_tup[1] is None else res_tup[1]
 
         ret_val.append(Result(priority, res_tup[0], name, msgs))
-    elif isinstance(other, re_pattern_type):
+    elif isinstance(other, Pattern):
         attr_result = maybe_get_global_attr(name, ds)
         if not attr_result[0]:
             return attr_result
