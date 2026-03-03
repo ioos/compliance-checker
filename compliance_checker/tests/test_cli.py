@@ -11,9 +11,9 @@ import os
 import platform
 import subprocess
 import sys
-from argparse import Namespace
 from collections import defaultdict
 from importlib.machinery import SourceFileLoader
+from types import SimpleNamespace
 
 import pytest
 
@@ -93,18 +93,19 @@ class TestCLI:
         attributes
         """
 
-        # hack: use argparse.Namespace to mock checker object with attributes
-        # since SimpleNamespace is Python 3.3+ only
-        CheckSuite.checkers.clear()
         # need to mock setuptools entrypoints here in order to load in checkers
+        CheckSuite.checkers.clear()
 
         def checker_1():
-            return Namespace(name="checker_1")
+            return SimpleNamespace(name="checker_1")
 
         def checker_2():
-            return Namespace(_cc_spec="checker_2", _cc_spec_version="2.2")
+            return SimpleNamespace(_cc_spec="checker_2", _cc_spec_version="2.2")
 
-        mock_checkers = [Namespace(load=checker_1), Namespace(load=checker_2)]
+        mock_checkers = [
+            SimpleNamespace(load=checker_1),
+            SimpleNamespace(load=checker_2),
+        ]
         with pytest.warns(DeprecationWarning):
             CheckSuite._load_checkers(mock_checkers)
 
