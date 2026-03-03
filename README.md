@@ -205,7 +205,7 @@ optional arguments:
 ## Examples
 
 ### Check a local file against CF 1.6
-```
+```shell
 compliance-checker --test=cf:1.6 compliance_checker/tests/data/examples/hycom_global.nc
 ```
 
@@ -296,19 +296,19 @@ compliance-checker --test=acdd:1.3 --format=html --output=/tmp/report.html compl
 
 ### Output text from multiple input files to one output file
 
-```
+```shell
 compliance-checker --test=cf:1.6 --format text --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
 ```
 
 ### Output html and text files from multiple input files (part 1)
 In this case you'll get 2 files ```/tmp/combined_output.txt``` and ```/tmp/combined_output.html``` that contain cf check results for both input files because you only specified 1 output filename.
-```
+```shell
 compliance-checker --test=cf:1.6 --format text --format html --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
 ```
 
 ### Output html and text files from multiple input files (part 2)
 In this case you'll get 4 files ```/tmp/hycom.txt```, ```/tmp/hycom.html```, ```/tmp/ww3.txt```, and ```/tmp/ww3.html``` that contain cf check results because you specified as many output filenames as input filenames.
-```
+```shell
 compliance-checker --test=cf:1.6 --format text --format html --output=/tmp/hycom.txt --output=/tmp/ww3.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
 ```
 
@@ -319,11 +319,8 @@ During the CF test, if a file has a particular version of the cf standard name t
 (i.e. ```:standard_name_vocabulary = "CF Standard Name Table v30" ;```) that doesn't match the packaged version, it will
 try to download the specified version. If it fails, it will fall back to packaged version.
 
-```
+```shell
 compliance-checker -d 35
-```
-
-Downloading cf-standard-names table version 35 from: http://cfconventions.org/Data/cf-standard-names/35/src/cf-standard-name-table.xml
 ```
 
 Alternatively, you can specify an absolute path to a standard name table you may have locally in an environment variable named CF_STANDARD_NAME_TABLE and the compliance checker will use that version instead.
@@ -340,12 +337,12 @@ check_suite = CheckSuite()
 check_suite.load_all_available_checkers()
 
 # Run cf and adcc checks
-path = '/path/or/url/to/your/dataset'
-checker_names = ['cf', 'acdd']
+path = "/path/or/url/to/your/dataset"
+checker_names = ["cf", "acdd"]
 verbose = 0
-criteria = 'normal'
-output_filename = '/output/report.json'
-output_format = 'json'
+criteria = "normal"
+output_filename = "/output/report.json"
+output_format = "json"
 """
 Inputs to ComplianceChecker.run_checker
 
@@ -358,19 +355,21 @@ output_format   Format of the output
 
 @returns                If the tests failed (based on the criteria)
 """
-return_value, errors = ComplianceChecker.run_checker(path,
-                                                     checker_names,
-                                                     verbose,
-                                                     criteria,
-                                                     output_filename=output_filename,
-                                                     output_format=output_format)
+return_value, errors = ComplianceChecker.run_checker(
+    path,
+    checker_names,
+    verbose,
+    criteria,
+    output_filename=output_filename,
+    output_format=output_format,
+)
 
 # Open the JSON output and get the compliance scores
-with open(output_filename, 'r') as fp:
+with open(output_filename, "r") as fp:
     cc_data = json.load(fp)
-    scored = cc_data[cc_test[0]]['scored_points']
-    possible = cc_data[cc_test[0]]['possible_points']
-    log.debug('CC Scored {} out of {} possible points'.format(scored, possible))
+    scored = cc_data[cc_test[0]]["scored_points"]
+    possible = cc_data[cc_test[0]]["possible_points"]
+    log.debug(f"CC Scored {scored} out of {possible} possible points")
 ```
 
 ## Compliance Checker Plug-Ins
@@ -396,13 +395,13 @@ This is a checker for UGRID (https://ugrid-conventions.github.io/ugrid-conventio
 
 These plug-ins must be installed separately but work on top of the base compliance checker software.
 
-```
+```shell
 pip install cc-plugin-ncei
 ```
 
 Check to see if it installed correctly, list the tests:
 
-```
+```shell
 compliance-checker -l
 ```
 
@@ -426,19 +425,20 @@ Once installing the plug-in the usage is similar to the built in checkers.
 
 1. Run the NCEI Point check on a THREDDS endpoint
 
-```python
+```shell
 compliance-checker -t ncei-point -v "https://data.nodc.noaa.gov/thredds/dodsC/testdata/mbiddle/GOLD_STANDARD_NETCDF/1.1/NODC_point_template_v1.1_2016-06-15_133710.844375.nc"
 ```
 
 2. Run NCEI Trajectory Profile Orthogonal Check on local dataset
 
-```python
+```shell
 compliance-checker -t ncei-trajectory-profile-orthogonal -v ~/data/sample-trajectory-profile.nc
 
 ```
 
 3. Outputting JSON from a gridded file check
-```
+
+```shell
 compliance-checker -t ncei-grid -f json -o ~/Documents/sample_grid_report.json ~/Documents/sample_grid_report.nc
 ```
 
