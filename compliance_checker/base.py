@@ -142,6 +142,9 @@ class BaseCheck:
 
     supported_ds = []
 
+    @deprecated(
+        "Passing the dataset to every single check is deprecated. The future version will take the ds only in the test constructor.",
+    )
     def setup(self, ds):
         """
         Common setup method for a Checker.
