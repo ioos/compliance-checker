@@ -143,4 +143,5 @@ ini_options.filterwarnings = [
   "ignore:Received exception when making HEAD request to",                 # In compliance_checker/protocols/netcdf.py::is_remote_netcdf We can still tell if it is remote without the handshake.
   "ignore:unclosed database in",                                           # Not sure what is causing this one, only happens in Python 3.13.
   "ignore:unclosed file",                                                  # Should make Windows + Python 3.10 and 3.11 pass, we should check when this warning was triggered first.
+  "ignore:The ioos_sos checker is deprecated and will be removed",
 ]

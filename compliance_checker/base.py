@@ -13,6 +13,7 @@ from collections import defaultdict
 from functools import wraps
 from io import StringIO
 from re import Pattern
+from warnings import deprecated
 
 import validators
 from lxml import etree
@@ -205,6 +206,9 @@ class BaseNCCheck:
         return name in dataset.ncattrs()
 
 
+@deprecated(
+    "The ioos_sos checker is deprecated and will be removed in the next compliance-checker version.",
+)
 class BaseSOSGCCheck:
     """
     Base class for SOS-GetCapabilities supporting Check Suites.
@@ -213,6 +217,9 @@ class BaseSOSGCCheck:
     supported_ds = [SensorObservationService_1_0_0]
 
 
+@deprecated(
+    "The ioos_sos checker is deprecated and will be removed in the next compliance-checker version.",
+)
 class BaseSOSDSCheck:
     """
     Base class for SOS-DescribeSensor supporting Check Suites.
