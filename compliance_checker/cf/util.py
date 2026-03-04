@@ -442,10 +442,7 @@ def get_auxiliary_coordinate_variables(nc):
         referenced_variables = ncvar.coordinates.split(" ")
         # if the variable names exist, add them
         for referenced_variable in referenced_variables:
-            if (
-                referenced_variable in nc.variables
-                and referenced_variable not in aux_vars
-            ):
+            if referenced_variable in nc.variables and referenced_variable not in aux_vars:
                 aux_vars.append(referenced_variable)
     # axis variables are automatically in
     for variable in get_axis_variables(nc):
@@ -613,10 +610,7 @@ def get_z_variables(nc):
             "altitude",
         ):
             z_variables.append(coord_name)
-        if (
-            coord_name not in z_variables
-            and standard_name in DIMENSIONLESS_VERTICAL_COORDINATES
-        ):
+        if coord_name not in z_variables and standard_name in DIMENSIONLESS_VERTICAL_COORDINATES:
             z_variables.append(coord_name)
 
     return z_variables
@@ -647,11 +641,7 @@ def get_latitude_variables(nc):
 
     # Then axis
     for variable in nc.get_variables_by_attributes(axis="Y"):
-        if not (
-            variable.name in latitude_variables
-            or getattr(variable, "standard_name", None)
-            in {"projection_y_coordinate", "projection_y_angular_coordinate"}
-        ):
+        if not (variable.name in latitude_variables or getattr(variable, "standard_name", None) in {"projection_y_coordinate", "projection_y_angular_coordinate"}):
             latitude_variables.append(variable.name)
 
     check_fn = partial(
@@ -717,11 +707,7 @@ def get_longitude_variables(nc):
 
     # Then axis
     for variable in nc.get_variables_by_attributes(axis="X"):
-        if not (
-            variable.name in longitude_variables
-            or getattr(variable, "standard_name", None)
-            in {"projection_x_coordinate", "projection_x_angular_coordinate"}
-        ):
+        if not (variable.name in longitude_variables or getattr(variable, "standard_name", None) in {"projection_x_coordinate", "projection_x_angular_coordinate"}):
             longitude_variables.append(variable.name)
 
     check_fn = partial(
@@ -1170,10 +1156,7 @@ def is_dataset_valid_ragged_array_repr_featureType(nc, feature_type: str):
         # check the dimension of the count var is the same and that the
         # sample_dimension attribute points to the same dimension that
         # the geophysical variables have
-        if (
-            count_vars[0].dimensions != profile_cf_role_var.dimensions
-            or (count_vars[0].sample_dimension,) != geophysical_dims[0]
-        ):
+        if count_vars[0].dimensions != profile_cf_role_var.dimensions or (count_vars[0].sample_dimension,) != geophysical_dims[0]:
             return False
 
     else:
@@ -1398,11 +1381,7 @@ def isTimeSeries(nc, variable):
 
     # first three check if variable is a valid multidimensional
     # representation, the last checks if it's a valid ragged array
-    if (
-        is_timeseries(nc, variable)
-        or is_multi_timeseries_orthogonal(nc, variable)
-        or is_multi_timeseries_incomplete(nc, variable)
-    ):
+    if is_timeseries(nc, variable) or is_multi_timeseries_orthogonal(nc, variable) or is_multi_timeseries_incomplete(nc, variable):
         return True
 
     return False
@@ -2244,9 +2223,7 @@ class VariableReferenceError(Exception):
         self.dataset_path = dataset.filepath() if dataset is not None else None
 
     def __str__(self):
-        return (
-            f"Cannot find variable named {self.name} in dataset " f"{self}.dataset_path"
-        )
+        return f"Cannot find variable named {self.name} in dataset {self}.dataset_path"
 
 
 class StandardNameTable:
@@ -2341,9 +2318,7 @@ def download_cf_standard_name_table(version, location=None):
     :param str location: Path/filename to write downloaded xml file to
     """
 
-    if (
-        location is None
-    ):  # This case occurs when updating the packaged version from command line
+    if location is None:  # This case occurs when updating the packaged version from command line
         location = files("compliance_checker") / "data/cf-standard-name-table.xml"
 
     if version == "latest":
@@ -2464,8 +2439,7 @@ def string_from_var_type(variable):
         return variable.tobytes().rstrip(strip_char).decode("utf-8")
     else:
         raise TypeError(
-            f"Variable '{variable.name} has non-string/character' "
-            f"dtype {variable.dtype}",
+            f"Variable '{variable.name} has non-string/character' dtype {variable.dtype}",
         )
 
 
@@ -2502,9 +2476,7 @@ def maybe_lateral_reference_variable_or_dimension(
 
         # alphanumeric string by itself, not a relative or absolute
         # search by proximity
-        if posixpath.split(name)[0] == "" and not (
-            name.startswith(".") or name.startswith("/")
-        ):
+        if posixpath.split(name)[0] == "" and not (name.startswith(".") or name.startswith("/")):
             group_traverse = group
             while group_traverse.parent:
                 group_traverse = group_traverse.parent

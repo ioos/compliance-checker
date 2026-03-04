@@ -81,11 +81,7 @@ class MockVariable:
         self._arr[idx] = val
 
     def ncattrs(self):
-        return [
-            att
-            for att in vars(self)
-            if att not in {"ndim", "name", "dtype", "dimensions"}
-        ]
+        return [att for att in vars(self) if att not in {"ndim", "name", "dtype", "dimensions"}]
 
 
 class MockRaggedArrayRepr(MockNetCDF):

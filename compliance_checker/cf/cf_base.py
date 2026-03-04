@@ -188,8 +188,7 @@ class CFBaseCheck(BaseCheck):
             )
             defines_grid_mapping.assert_true(
                 (isinstance(grid_mapping, str) and grid_mapping),
-                f"{variable.name}'s grid_mapping attribute must be a "
-                "space-separated non-empty string",
+                f"{variable.name}'s grid_mapping attribute must be a space-separated non-empty string",
             )
             if isinstance(grid_mapping, str):
                 # TODO (badams): refactor functionality to split functionality
@@ -239,8 +238,7 @@ class CFBaseCheck(BaseCheck):
             # Grid mapping name must be in appendix F
             valid_grid_mapping.assert_true(
                 grid_mapping_name in self.grid_mapping_dict,
-                f"{grid_mapping_name} is not a valid grid_mapping_name."
-                + " See Appendix F for valid grid mappings",
+                f"{grid_mapping_name} is not a valid grid_mapping_name." + " See Appendix F for valid grid mappings",
             )
 
             # The self.grid_mapping_dict has a values of:
@@ -272,9 +270,7 @@ class CFBaseCheck(BaseCheck):
                         number_found += 1
                 valid_grid_mapping.assert_true(
                     number_found == 1,
-                    f"grid mapping {grid_mapping_name}"
-                    + "must define exactly one of these attributes: "
-                    + "{}".format(" or ".join(at_least_attr)),
+                    f"grid mapping {grid_mapping_name}" + "must define exactly one of these attributes: " + "{}".format(" or ".join(at_least_attr)),
                 )
 
             # Make sure that exactly one variable is defined for each of the required standard_names
@@ -285,9 +281,7 @@ class CFBaseCheck(BaseCheck):
                 )
                 valid_grid_mapping.assert_true(
                     len(found_vars) == 1,
-                    f"grid mapping {grid_mapping_name} requires exactly "
-                    + "one variable with standard_name "
-                    + f"{expected_std_name} to be defined",
+                    f"grid mapping {grid_mapping_name} requires exactly " + "one variable with standard_name " + f"{expected_std_name} to be defined",
                 )
 
             ret_val[grid_var_name] = valid_grid_mapping.to_result()
@@ -315,8 +309,7 @@ class CFBaseCheck(BaseCheck):
                     break
             else:
                 reasoning = [
-                    "§2.6.1 Conventions global attribute does not contain "
-                    f'"{correct_version_string}"',
+                    f'§2.6.1 Conventions global attribute does not contain "{correct_version_string}"',
                 ]
         else:
             valid = False
@@ -378,8 +371,7 @@ class CFBaseCheck(BaseCheck):
 
         valid_formula_terms.assert_true(
             isinstance(formula_terms, str) and formula_terms,
-            f"§4.3.2: {coord}'s formula_terms is a required attribute and must be a non-empty string"
-            "",
+            f"§4.3.2: {coord}'s formula_terms is a required attribute and must be a non-empty string",
         )
         # We can't check any more
         if not formula_terms:
@@ -420,16 +412,14 @@ class CFBaseCheck(BaseCheck):
 
         valid_formula_terms.assert_true(
             standard_name in dimless_coords_dict,
-            f"unknown standard_name '{standard_name}' for dimensionless vertical coordinate {coord}"
-            "",
+            f"unknown standard_name '{standard_name}' for dimensionless vertical coordinate {coord}",
         )
         if standard_name not in dimless_coords_dict:
             return valid_formula_terms.to_result()
 
         valid_formula_terms.assert_true(
             no_missing_terms(standard_name, terms, dimless_coords_dict),
-            f"{coord}'s formula_terms are invalid for {standard_name}, please see appendix D of CF 1.6"
-            "",
+            f"{coord}'s formula_terms are invalid for {standard_name}, please see appendix D of CF 1.6",
         )
 
         return valid_formula_terms.to_result()
@@ -479,8 +469,7 @@ class CFBaseCheck(BaseCheck):
 
         ctx.assert_true(
             type_match,
-            f"Attribute '{attr_name}' (type: {val_type}) and parent variable '{var.name}' (type: {var.dtype.type}) "
-            "must have equivalent datatypes",
+            f"Attribute '{attr_name}' (type: {val_type}) and parent variable '{var.name}' (type: {var.dtype.type}) must have equivalent datatypes",
         )
 
     def _find_aux_coord_vars(self, ds, refresh=False):
@@ -606,16 +595,9 @@ class CFBaseCheck(BaseCheck):
         version = None
         try:
             if "cf standard name table" in standard_name_vocabulary.lower():
-                version = [
-                    s.strip("(").strip(")").strip("v").strip(",")
-                    for s in standard_name_vocabulary.split()
-                ]
+                version = [s.strip("(").strip(")").strip("v").strip(",") for s in standard_name_vocabulary.split()]
                 # This assumes that table version number won't start with 0.
-                version = [
-                    s
-                    for s in version
-                    if s.isdigit() and len(s) <= 2 and not s.startswith("0")
-                ]
+                version = [s for s in version if s.isdigit() and len(s) <= 2 and not s.startswith("0")]
                 if len(version) > 1:
                     return False
                 else:
@@ -623,8 +605,7 @@ class CFBaseCheck(BaseCheck):
                         version = version[0]
                     except IndexError:
                         warn(
-                            "Cannot extract CF standard name version number "
-                            "from standard_name_vocabulary string",
+                            "Cannot extract CF standard name version number from standard_name_vocabulary string",
                             stacklevel=2,
                         )
                         return False
@@ -635,9 +616,7 @@ class CFBaseCheck(BaseCheck):
         # data type
         except AttributeError:
             warn(
-                "Cannot convert standard name table to lowercase.  This can "
-                "occur if a non-string standard_name_vocabulary global "
-                "attribute is supplied",
+                "Cannot convert standard name table to lowercase.  This can occur if a non-string standard_name_vocabulary global attribute is supplied",
                 stacklevel=2,
             )
             return False
@@ -678,8 +657,7 @@ class CFBaseCheck(BaseCheck):
         except Exception as e:
             # There was an error downloading the CF table. That's ok, we'll just use the packaged version
             warn(
-                f"Problem fetching standard name table:\n{e}\n"
-                f"Using packaged v{self._std_names._version}",
+                f"Problem fetching standard name table:\n{e}\nUsing packaged v{self._std_names._version}",
                 stacklevel=2,
             )
             return False
@@ -762,9 +740,7 @@ class CFBaseCheck(BaseCheck):
             elif getattr(var, "cf_role", "") != "":
                 self._metadata_vars[ds_str].append(name)
 
-            elif (
-                getattr(var, "standard_name", None) is None and len(var.dimensions) == 0
-            ):
+            elif getattr(var, "standard_name", None) is None and len(var.dimensions) == 0:
                 self._metadata_vars[ds_str].append(name)
 
         return self._metadata_vars[ds_str]
@@ -1052,10 +1028,7 @@ class CFBaseCheck(BaseCheck):
             # should be either G, C, or D but if another
             # category is added, this will be useful.
             else:
-                valid_loc = (
-                    ", ".join(loc_sort[:-1])
-                    + f", and {att_loc_print_helper(loc_sort[-1])}"
-                )
+                valid_loc = ", ".join(loc_sort[:-1]) + f", and {att_loc_print_helper(loc_sort[-1])}"
             return f"This attribute may only appear in {valid_loc}."
 
         for global_att_name in possible_global_atts:
@@ -1077,8 +1050,7 @@ class CFBaseCheck(BaseCheck):
             test_ctx.out_of += 1
             if "G" not in att_loc:
                 test_ctx.messages.append(
-                    f'[Appendix A] Attribute "{global_att_name}" should not be present in global (G) '
-                    f"attributes. {valid_loc_warn}",
+                    f'[Appendix A] Attribute "{global_att_name}" should not be present in global (G) attributes. {valid_loc_warn}',
                 )
             else:
                 result = self._handle_dtype_check(global_att, global_att_name, att_dict)
@@ -1116,8 +1088,7 @@ class CFBaseCheck(BaseCheck):
                     test_ctx.out_of += 1
                     if coord_letter not in att_loc:
                         test_ctx.messages.append(
-                            f'[Appendix A] Attribute "{att_name}" should not be present in {att_loc_print_helper(coord_letter)} '
-                            f'variable "{var_name}". {valid_loc_warn}',
+                            f'[Appendix A] Attribute "{att_name}" should not be present in {att_loc_print_helper(coord_letter)} variable "{var_name}". {valid_loc_warn}',
                         )
                     else:
                         result = self._handle_dtype_check(att, att_name, att_dict, var)
@@ -1199,13 +1170,9 @@ class CFBaseCheck(BaseCheck):
         attr_type = attr_dict["Type"]
         if variable is None and "G" not in attr_dict["attr_loc"]:
             raise ValueError(
-                "Non-global attributes must be associated with a " " variable",
+                "Non-global attributes must be associated with a  variable",
             )
-        attr_str = (
-            f"Global attribute {attr_name}"
-            if "G" in attr_dict["attr_loc"] and variable is None
-            else f"Attribute {attr_name} in variable {variable.name}"
-        )
+        attr_str = f"Global attribute {attr_name}" if "G" in attr_dict["attr_loc"] and variable is None else f"Attribute {attr_name} in variable {variable.name}"
 
         # check the type
         return_value = self._check_attr_type(attr_name, attr_type, attribute, variable)

@@ -66,10 +66,7 @@ def main():
     parser.add_argument(
         "--criteria",
         "-c",
-        help=(
-            "Define the criteria for the checks. "
-            "Either Strict, Normal, or Lenient.  Defaults to Normal."
-        ),
+        help=("Define the criteria for the checks. Either Strict, Normal, or Lenient.  Defaults to Normal."),
         default="normal",
         choices=["lenient", "normal", "strict"],
     )
@@ -85,11 +82,7 @@ def main():
     parser.add_argument(
         "--describe-checks",
         "-D",
-        help=(
-            "Describes checks for checkers specified using "
-            "`-t`. If `-t` is not specified, lists checks "
-            "from all available checkers."
-        ),
+        help=("Describes checks for checkers specified using `-t`. If `-t` is not specified, lists checks from all available checkers."),
         action="store_true",
     )
 
@@ -246,17 +239,12 @@ def main():
         else:
             # skip "latest" meta-versions (":latest" or no explicit version
             # specifier)
-            checker_names = [
-                c
-                for c in check_suite.checkers
-                if ":" in c and not c.endswith(":latest")
-            ]
+            checker_names = [c for c in check_suite.checkers if ":" in c and not c.endswith(":latest")]
 
         for checker_name in sorted(checker_names):
             if checker_name not in check_suite.checkers:
                 print(
-                    f"Cannot find checker '{checker_name}' with which to "
-                    "describe checks",
+                    f"Cannot find checker '{checker_name}' with which to describe checks",
                     file=sys.stderr,
                 )
                 error_stat = 1

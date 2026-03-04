@@ -14,9 +14,7 @@ def to_singleton_var(item):
     Get the first value of a list if this implements iterator protocol and is
     not a string
     """
-    return [
-        x[0] if hasattr(x, "__iter__") and not isinstance(x, str) else x for x in item
-    ]
+    return [x[0] if hasattr(x, "__iter__") and not isinstance(x, str) else x for x in item]
 
 
 def check_varset_nonintersect(group0, group1):
@@ -145,9 +143,7 @@ class TestACDD1_1(BaseTestCase):
         ]
         results = self.acdd.check_recommended(self.ds)
         for result in results:
-            if (result.msgs) and all(
-                m in ncei_exceptions for m in result.msgs
-            ):  # we're doing string comparisons, this is kind of hacky...
+            if (result.msgs) and all(m in ncei_exceptions for m in result.msgs):  # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
 
@@ -180,9 +176,7 @@ class TestACDD1_1(BaseTestCase):
 
         results = self.acdd.check_suggested(self.ds)
         for result in results:
-            if (result.msgs) and all(
-                m in missing for m in result.msgs
-            ):  # we're doing string comparisons, this is kind of hacky...
+            if (result.msgs) and all(m in missing for m in result.msgs):  # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
 
@@ -337,9 +331,7 @@ class TestACDD1_3(BaseTestCase):
             "time_coverage_resolution not present",
         ]
         for result in results:
-            if (result.msgs) and all(
-                m in ncei_exceptions for m in result.msgs
-            ):  # we're doing string comparisons, this is kind of hacky...
+            if (result.msgs) and all(m in ncei_exceptions for m in result.msgs):  # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
 
@@ -362,9 +354,7 @@ class TestACDD1_3(BaseTestCase):
             "geospatial_vertical_resolution not present",
         ]
         for result in results:
-            if (result.msgs) and all(
-                m in ncei_exceptions for m in result.msgs
-            ):  # we're doing string comparisons, this is kind of hacky...
+            if (result.msgs) and all(m in ncei_exceptions for m in result.msgs):  # we're doing string comparisons, this is kind of hacky...
                 self.assert_result_is_bad(result)
                 continue
             self.assert_result_is_good(result)
@@ -437,11 +427,7 @@ class TestACDD1_3(BaseTestCase):
         results = self.acdd.check_recommended(empty_ds)
         for result in results:
             if result.variable_name == "geospatial_bounds":
-                assert (
-                    "Could not parse WKT from geospatial_bounds,"
-                    f' possible bad value: "{empty_ds.geospatial_bounds}"'
-                    in result.msgs
-                )
+                assert f'Could not parse WKT from geospatial_bounds, possible bad value: "{empty_ds.geospatial_bounds}"' in result.msgs
         empty_ds.close()
 
     def test_time_extents(self):

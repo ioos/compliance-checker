@@ -117,11 +117,7 @@ class TestBase:
         ctx2 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, "Test Name", "test_var_name")
         ctx3 = self.acdd.get_test_ctx(base.BaseCheck.HIGH, "Test Name", "test_var_name")
         # check that variable cache is working
-        assert ctx3 is (
-            self.acdd._defined_results["Test Name"]["test_var_name"][
-                base.BaseCheck.HIGH
-            ]
-        )
+        assert ctx3 is (self.acdd._defined_results["Test Name"]["test_var_name"][base.BaseCheck.HIGH])
 
     def test_email_validation(self):
         test_attr_name = "test"

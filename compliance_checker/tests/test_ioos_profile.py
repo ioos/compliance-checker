@@ -480,10 +480,7 @@ class TestIOOS1_2(BaseTestCase):
         ds.variables["time"].setncattr("standard_name", "time")
         result = self.ioos.check_gts_ingest_requirements(ds)
         assert not result.value
-        assert (
-            "The following variables did not qualify for NDBC/GTS Ingest: time\n"
-            in result.msgs
-        )
+        assert "The following variables did not qualify for NDBC/GTS Ingest: time\n" in result.msgs
 
         # set ancillary var with bad standard name
         tmp = ds.createVariable("tmp", np.byte, ("time",))
@@ -491,30 +488,21 @@ class TestIOOS1_2(BaseTestCase):
         ds.variables["time"].setncattr("ancillary_variables", "tmp")
         result = self.ioos.check_gts_ingest_requirements(ds)
         assert not result.value
-        assert (
-            "The following variables did not qualify for NDBC/GTS Ingest: time\n"
-            in result.msgs
-        )
+        assert "The following variables did not qualify for NDBC/GTS Ingest: time\n" in result.msgs
 
         # good ancillary var standard name, time units are bad
         tmp.setncattr("standard_name", "aggregate_quality_flag")
         ds.variables["time"].setncattr("units", "bad since bad")
         result = self.ioos.check_gts_ingest_requirements(ds)
         assert not result.value
-        assert (
-            "The following variables did not qualify for NDBC/GTS Ingest: time\n"
-            in result.msgs
-        )
+        assert "The following variables did not qualify for NDBC/GTS Ingest: time\n" in result.msgs
 
         # good ancillary var stdname, good units, pass
         tmp.setncattr("standard_name", "aggregate_quality_flag")
         ds.variables["time"].setncattr("units", "seconds since 1970-01-01T00:00:00Z")
         result = self.ioos.check_gts_ingest_requirements(ds)
         assert not result.value
-        assert (
-            "The following variables qualified for NDBC/GTS Ingest: time\n"
-            in result.msgs
-        )
+        assert "The following variables qualified for NDBC/GTS Ingest: time\n" in result.msgs
 
     def test_check_instrument_variables(self):
         ds = MockTimeSeries()  # time, lat, lon, depth
@@ -630,8 +618,7 @@ class TestIOOS1_2(BaseTestCase):
         bad_result = validator.validate(test_attr_name, "webmaster.ioos.us@noaa.gov")
         assert not bad_result[0]
         assert bad_result[1] == [
-            "naming_authority should either be a URL or a "
-            'reversed DNS name (e.g "edu.ucar.unidata")',
+            'naming_authority should either be a URL or a reversed DNS name (e.g "edu.ucar.unidata")',
         ]
 
     def test_platform_id_validation(self):
@@ -735,10 +722,7 @@ class TestIOOS1_2(BaseTestCase):
         # QARTOD variable with flag meanings, without flag_meanings
         qr.setncattr("flag_values", np.array([0, 1, 2], dtype=np.byte))
         results = self.ioos.check_qartod_variables_flags(ds)
-        assert (
-            "Variable depth_qc must have attribute flag_meanings defined when flag_values attribute is present"
-            in results[0].msgs
-        )
+        assert "Variable depth_qc must have attribute flag_meanings defined when flag_values attribute is present" in results[0].msgs
         assert results[0].value[0] != results[0].value[1]  # should fail
         assert not results[1].value  # still fail
 
@@ -832,11 +816,7 @@ class TestIOOS1_2(BaseTestCase):
         # test units
         nc_obj.variables["depth"].units = "furlong"
         result = self.ioos.check_vertical_coordinates(nc_obj)[0]
-        expected_msg = (
-            "depth's units attribute furlong is not equivalent to "
-            "one of ('meter', 'inch', 'foot', 'yard', "
-            "'US_survey_foot', 'mile', 'fathom')"
-        )
+        expected_msg = "depth's units attribute furlong is not equivalent to one of ('meter', 'inch', 'foot', 'yard', 'US_survey_foot', 'mile', 'fathom')"
         assert result.msgs[0] == expected_msg
         assert result.value[0] < result.value[1]
         accepted_units = (

@@ -441,15 +441,12 @@ class NamingAuthorityValidator(base.UrlValidator):
     naming_authority
     """
 
-    validator_fail_msg = (
-        '{} should either be a URL or a reversed DNS name (e.g "edu.ucar.unidata")'
-    )
+    validator_fail_msg = '{} should either be a URL or a reversed DNS name (e.g "edu.ucar.unidata")'
 
     def validator_func(self, input_value):
         return (
             # also check for reverse DNS strings
-            super().validator_func(input_value)
-            or validators.domain(".".join(input_value.split(".")[::-1]))
+            super().validator_func(input_value) or validators.domain(".".join(input_value.split(".")[::-1]))
         )
 
 
@@ -627,11 +624,7 @@ class IOOS1_2Check(IOOSNCCheck):
         plat_vars = ds.get_variables_by_attributes(
             platform=lambda p: isinstance(p, str),
         )
-        return {
-            ds.variables[var.platform]
-            for var in plat_vars
-            if var.platform in ds.variables
-        }
+        return {ds.variables[var.platform] for var in plat_vars if var.platform in ds.variables}
 
     @check_has(BaseCheck.HIGH)
     def check_high(self, ds):
@@ -690,14 +683,9 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         r = True
-        m = (
-            "To disallow harvest of this dataset to IOOS national products, "
-            'global attribute "ioos_ingest" must be a string with value "false"'
-        )
+        m = 'To disallow harvest of this dataset to IOOS national products, global attribute "ioos_ingest" must be a string with value "false"'
         igst = getattr(ds, "ioos_ingest", None)
-        if (isinstance(igst, str) and igst.lower() not in ("true", "false")) or (
-            not isinstance(igst, str) and igst is not None
-        ):
+        if (isinstance(igst, str) and igst.lower() not in ("true", "false")) or (not isinstance(igst, str) and igst is not None):
             r = False
 
         return Result(BaseCheck.MEDIUM, r, "ioos_ingest", None if r else [m])
@@ -835,18 +823,13 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         results = []
-        msg = (
-            "Variable '{v}' attribute 'accuracy' should have the " "same units as '{v}'"
-        )
+        msg = "Variable '{v}' attribute 'accuracy' should have the same units as '{v}'"
         for v in cfutil.get_geophysical_variables(ds):
             _v = ds.variables[v]
             std_name = getattr(_v, "standard_name", None)
             gts_ingest = getattr(_v, "gts_ingest", None)
             if (std_name == "sea_water_practical_salinity") and (gts_ingest == "true"):
-                msg = (
-                    "Variable '{v}' should have an 'accuracy' attribute "
-                    "that is numeric and of the same units as '{v}'"
-                )
+                msg = "Variable '{v}' should have an 'accuracy' attribute that is numeric and of the same units as '{v}'"
                 r = isinstance(getattr(_v, "accuracy", None), Number)
             else:  # only test if exists
                 r = getattr(_v, "accuracy", None) is not None
@@ -923,10 +906,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 False,
                 "CF DSG: Invalid featureType",
                 [
-                    (
-                        f"Invalid featureType '{feature_type_attr}'; please see the "
-                        "IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"
-                    ),
+                    (f"Invalid featureType '{feature_type_attr}'; please see the IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"),
                 ],
             )
 
@@ -960,11 +940,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 False,
                 "CF DSG: Unknown featureType",
                 [
-                    (
-                        f"Invalid featureType '{feature_type_attr}'; "
-                        "please see the IOOS 1.2 Profile and CF-1.7 "
-                        "Conformance documents for valid featureType"
-                    ),
+                    (f"Invalid featureType '{feature_type_attr}'; please see the IOOS 1.2 Profile and CF-1.7 Conformance documents for valid featureType"),
                 ],
             )
 
@@ -983,10 +959,7 @@ class IOOS1_2Check(IOOSNCCheck):
         if (not cf_role_vars) or (len(cf_role_vars) > 1):
             _val = False
             msgs = [
-                (
-                    "The IOOS-1.2 Profile specifies a single variable "
-                    "must be present with attribute cf_role=timeseries_id"
-                ),
+                ("The IOOS-1.2 Profile specifies a single variable must be present with attribute cf_role=timeseries_id"),
             ]
 
         else:
@@ -1031,10 +1004,7 @@ class IOOS1_2Check(IOOSNCCheck):
         if len(cf_role_vars) != 2:
             _val = False
             msgs = [
-                (
-                    "Datasets of featureType=timeSeriesProfile must have variables "
-                    "containing cf_role=timeseries_id and cf_role=profile_id"
-                ),
+                ("Datasets of featureType=timeSeriesProfile must have variables containing cf_role=timeseries_id and cf_role=profile_id"),
             ]
 
         else:
@@ -1080,10 +1050,7 @@ class IOOS1_2Check(IOOSNCCheck):
         if len(cf_role_vars) != 1:
             _val = False
             msgs = [
-                (
-                    "Datasets of featureType=trajectory must have a variable "
-                    "containing cf_role=trajectory_id"
-                ),
+                ("Datasets of featureType=trajectory must have a variable containing cf_role=trajectory_id"),
             ]
 
         else:
@@ -1123,10 +1090,7 @@ class IOOS1_2Check(IOOSNCCheck):
         if len(cf_role_vars) != 2:
             _val = False
             msgs = [
-                (
-                    "Datasets of featureType=trajectoryProfile must have variables "
-                    "containing cf_role=trajectory_id and cf_role=profile_id"
-                ),
+                ("Datasets of featureType=trajectoryProfile must have variables containing cf_role=trajectory_id and cf_role=profile_id"),
             ]
 
         else:
@@ -1228,8 +1192,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 else:
                     pass_stat = False
                     messages.append(
-                        f"If specified, {global_att_name} must be in value list "
-                        f"({sorted(expected_types)})",
+                        f"If specified, {global_att_name} must be in value list ({sorted(expected_types)})",
                     )
 
             result_list.append(
@@ -1253,10 +1216,7 @@ class IOOS1_2Check(IOOSNCCheck):
         """
 
         r = False
-        m = (
-            'The global attribute "platform" must be a single string '
-            + "containing no blank characters; it is {}"
-        )
+        m = 'The global attribute "platform" must be a single string ' + "containing no blank characters; it is {}"
         p = getattr(ds, "platform", None)
         if p:
             if re.match(r"^\S+$", p):
@@ -1372,9 +1332,7 @@ class IOOS1_2Check(IOOSNCCheck):
                 "mile",
                 "fathom",
             )
-            unit_def_set = {
-                Unit(unit_str).definition for unit_str in expected_unit_strs
-            }
+            unit_def_set = {Unit(unit_str).definition for unit_str in expected_unit_strs}
 
             try:
                 units = Unit(units_str)
@@ -1384,16 +1342,10 @@ class IOOS1_2Check(IOOSNCCheck):
                 pass_stat = False
 
             valid_vertical_coord = TestCtx(BaseCheck.HIGH, "Vertical coordinates")
-            units_set_msg = (
-                f"{name}'s units attribute {units_str} is not equivalent to one "
-                f"of {expected_unit_strs}"
-            )
+            units_set_msg = f"{name}'s units attribute {units_str} is not equivalent to one of {expected_unit_strs}"
             valid_vertical_coord.assert_true(pass_stat, units_set_msg)
 
-            pos_msg = (
-                f"{name}: vertical coordinates must include a positive "
-                "attribute that is either 'up' or 'down'"
-            )
+            pos_msg = f"{name}: vertical coordinates must include a positive attribute that is either 'up' or 'down'"
             valid_vertical_coord.assert_true(positive in ("up", "down"), pos_msg)
 
             ret_val.append(valid_vertical_coord.to_result())
@@ -1453,10 +1405,7 @@ class IOOS1_2Check(IOOSNCCheck):
         anc_vars = str(getattr(var, "ancillary_variables", "")).split(" ")
         for av in anc_vars:
             if av in ds.variables:
-                if (
-                    getattr(ds.variables[av], "standard_name", "")
-                    == "aggregate_quality_flag"
-                ):
+                if getattr(ds.variables[av], "standard_name", "") == "aggregate_quality_flag":
                     avar_val = True
                     break
 
@@ -1512,12 +1461,8 @@ class IOOS1_2Check(IOOSNCCheck):
 
         # check variables
         all_passed_ingest_reqs = True  # default
-        var_failed_ingest_msg = (
-            "The following variables did not qualify for NDBC/GTS Ingest: {}\n"
-        )
-        var_passed_ingest_msg = (
-            "The following variables qualified for NDBC/GTS Ingest: {}\n"
-        )
+        var_failed_ingest_msg = "The following variables did not qualify for NDBC/GTS Ingest: {}\n"
+        var_passed_ingest_msg = "The following variables qualified for NDBC/GTS Ingest: {}\n"
 
         var_passed_ingest_reqs = set()
         for v in ds.get_variables_by_attributes(gts_ingest=lambda x: x == "true"):
@@ -1530,9 +1475,7 @@ class IOOS1_2Check(IOOSNCCheck):
 
         all_passed_ingest_reqs = all(x[1] for x in var_passed_ingest_reqs)
         if not all_passed_ingest_reqs:
-            _var_failed = (
-                y[0] for y in filter(lambda x: not x[1], var_passed_ingest_reqs)
-            )
+            _var_failed = (y[0] for y in filter(lambda x: not x[1], var_passed_ingest_reqs))
 
         return Result(
             BaseCheck.HIGH,
@@ -1681,10 +1624,7 @@ class IOOS1_2Check(IOOSNCCheck):
         ):
             attval = getattr(v, "references", None)
             if attval is None:
-                msg = (
-                    f'"references" attribute not present for variable {v.name}.'
-                    "If present, it should be a valid URL."
-                )
+                msg = f'"references" attribute not present for variable {v.name}.If present, it should be a valid URL.'
                 val = False
             else:
                 msg = f'"references" attribute for variable "{v.name}" must be a valid URL'
@@ -1723,17 +1663,11 @@ class IOOS1_2Check(IOOSNCCheck):
 
         valid = True
         ctxt = "wmo_platform_code"
-        msg = (
-            "The wmo_platform_code must be an alphanumeric string of 5 "
-            "characters or a numeric string of 7 characters"
-        )
+        msg = "The wmo_platform_code must be an alphanumeric string of 5 characters or a numeric string of 7 characters"
 
         code = getattr(ds, "wmo_platform_code", None)
         if code:
-            if not (
-                isinstance(code, str)
-                and (re.search(r"^(?:[a-zA-Z0-9]{5}|[0-9]{7})$", code))
-            ):
+            if not (isinstance(code, str) and (re.search(r"^(?:[a-zA-Z0-9]{5}|[0-9]{7})$", code))):
                 valid = False
 
         return Result(BaseCheck.HIGH, valid, ctxt, None if valid else [msg])
@@ -1761,11 +1695,7 @@ class IOOS1_2Check(IOOSNCCheck):
                     BaseCheck.MEDIUM,
                     valid,
                     "instrument_variable:make_model",
-                    (
-                        None
-                        if valid
-                        else [f"Attribute {v}:make_model ({mm}) should be a string"]
-                    ),
+                    (None if valid else [f"Attribute {v}:make_model ({mm}) should be a string"]),
                 ),
             )
 
@@ -1799,10 +1729,7 @@ class IOOS1_2Check(IOOSNCCheck):
 class IOOSBaseSOSCheck(BaseCheck):
     _cc_spec = "ioos_sos"
     _cc_spec_version = "0.1"
-    _cc_description = (
-        "IOOS Inventory Metadata checks for the Sensor Observation System (SOS). "
-        "Checks SOS functions GetCapabilities and DescribeSensor."
-    )
+    _cc_description = "IOOS Inventory Metadata checks for the Sensor Observation System (SOS). Checks SOS functions GetCapabilities and DescribeSensor."
     register_checker = True
     # requires login
     _cc_url = "http://sdf.ndbc.noaa.gov/sos/"

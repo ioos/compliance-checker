@@ -249,8 +249,7 @@ class ACDDBaseCheck(BaseCheck):
                 False,
                 "geospatial_lat_extents_match",
                 [
-                    f"Could not convert one of geospatial_lat_min ({ds.geospatial_lat_min}) or max ({ds.geospatial_lat_max}) to float see CF-1.6 spec chapter 4.1"
-                    "",
+                    f"Could not convert one of geospatial_lat_min ({ds.geospatial_lat_min}) or max ({ds.geospatial_lat_max}) to float see CF-1.6 spec chapter 4.1",
                 ],
             )
 
@@ -291,12 +290,8 @@ class ACDDBaseCheck(BaseCheck):
         # sort by criteria passed
         final_lats = sorted(lat_vars, key=lambda x: lat_vars[x], reverse=True)
 
-        obs_mins = {
-            var._name: np.nanmin(var) for var in final_lats if not np.isnan(var).all()
-        }
-        obs_maxs = {
-            var._name: np.nanmax(var) for var in final_lats if not np.isnan(var).all()
-        }
+        obs_mins = {var._name: np.nanmin(var) for var in final_lats if not np.isnan(var).all()}
+        obs_maxs = {var._name: np.nanmax(var) for var in final_lats if not np.isnan(var).all()}
 
         min_pass = any(np.isclose(lat_min, min_val) for min_val in obs_mins.values())
         max_pass = any(np.isclose(lat_max, max_val) for max_val in obs_maxs.values())
@@ -328,9 +323,7 @@ class ACDDBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
 
-        if not (
-            hasattr(ds, "geospatial_lon_min") and hasattr(ds, "geospatial_lon_max")
-        ):
+        if not (hasattr(ds, "geospatial_lon_min") and hasattr(ds, "geospatial_lon_max")):
             return Result(
                 BaseCheck.MEDIUM,
                 False,
@@ -347,8 +340,7 @@ class ACDDBaseCheck(BaseCheck):
                 False,
                 "geospatial_lon_extents_match",
                 [
-                    f"Could not convert one of geospatial_lon_min ({ds.geospatial_lon_min}) or max ({ds.geospatial_lon_max}) to float see CF-1.6 spec chapter 4.1"
-                    "",
+                    f"Could not convert one of geospatial_lon_min ({ds.geospatial_lon_min}) or max ({ds.geospatial_lon_max}) to float see CF-1.6 spec chapter 4.1",
                 ],
             )
 
@@ -389,12 +381,8 @@ class ACDDBaseCheck(BaseCheck):
         # sort by criteria passed
         final_lons = sorted(lon_vars, key=lambda x: lon_vars[x], reverse=True)
 
-        obs_mins = {
-            var._name: np.nanmin(var) for var in final_lons if not np.isnan(var).all()
-        }
-        obs_maxs = {
-            var._name: np.nanmax(var) for var in final_lons if not np.isnan(var).all()
-        }
+        obs_mins = {var._name: np.nanmin(var) for var in final_lons if not np.isnan(var).all()}
+        obs_maxs = {var._name: np.nanmax(var) for var in final_lons if not np.isnan(var).all()}
 
         min_pass = any(np.isclose(lon_min, min_val) for min_val in obs_mins.values())
         max_pass = any(np.isclose(lon_max, max_val) for max_val in obs_maxs.values())
@@ -438,10 +426,7 @@ class ACDDBaseCheck(BaseCheck):
                 False,
                 "Global Attributes",  # grouped with Globals
                 [
-                    (
-                        "Could not parse WKT from geospatial_bounds,"
-                        f' possible bad value: "{ds.geospatial_bounds}"'
-                    ),
+                    (f'Could not parse WKT from geospatial_bounds, possible bad value: "{ds.geospatial_bounds}"'),
                 ],
                 variable_name="geospatial_bounds",
             )
@@ -484,9 +469,7 @@ class ACDDBaseCheck(BaseCheck):
 
         if zvalue.size == 0:
             msgs.append(
-                "Cannot compare geospatial vertical extents "
-                "against min/max of data, as non-masked data "
-                "length is zero",
+                "Cannot compare geospatial vertical extents against min/max of data, as non-masked data length is zero",
             )
             return Result(
                 BaseCheck.MEDIUM,
@@ -550,10 +533,7 @@ class ACDDBaseCheck(BaseCheck):
 
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
-        if not (
-            hasattr(ds, "geospatial_vertical_min")
-            and hasattr(ds, "geospatial_vertical_max")
-        ):
+        if not (hasattr(ds, "geospatial_vertical_min") and hasattr(ds, "geospatial_vertical_max")):
             return
 
         z_variable = cfutil.get_z_variable(ds)
@@ -575,9 +555,7 @@ class ACDDBaseCheck(BaseCheck):
         """
         Check that the values of time_coverage_start/time_coverage_end approximately match the data.
         """
-        if not (
-            hasattr(ds, "time_coverage_start") and hasattr(ds, "time_coverage_end")
-        ):
+        if not (hasattr(ds, "time_coverage_start") and hasattr(ds, "time_coverage_end")):
             return
 
         # Parse the ISO 8601 formatted dates
@@ -658,14 +636,12 @@ class ACDDBaseCheck(BaseCheck):
         msgs = []
         if start_dt > timedelta(hours=1):
             msgs.append(
-                "Date time mismatch between time_coverage_start and actual "
-                f"time values {t_min.isoformat()} (time_coverage_start) != {time0.isoformat()} (time[0])",
+                f"Date time mismatch between time_coverage_start and actual time values {t_min.isoformat()} (time_coverage_start) != {time0.isoformat()} (time[0])",
             )
             score -= 1
         if end_dt > timedelta(hours=1):
             msgs.append(
-                "Date time mismatch between time_coverage_end and actual "
-                f"time values {t_max.isoformat()} (time_coverage_end) != {time1.isoformat()} (time[N])",
+                f"Date time mismatch between time_coverage_end and actual time values {t_max.isoformat()} (time_coverage_end) != {time1.isoformat()} (time[N])",
             )
             score -= 1
 
@@ -676,9 +652,7 @@ class ACDDBaseCheck(BaseCheck):
         Verify that the version in the Conventions field is correct
         """
         try:
-            for convention in (
-                getattr(ds, "Conventions", "").replace(" ", "").split(",")
-            ):
+            for convention in getattr(ds, "Conventions", "").replace(" ", "").split(","):
                 if convention == "ACDD-" + self._cc_spec_version:
                     return ratable_result(
                         (2, 2),
@@ -779,9 +753,7 @@ class ACDD1_3Check(ACDDNCCheck):
         self.rec_atts = kvp_convert(self.rec_atts)
         self.rec_atts["date_created"] = partial(_check_attr_is_iso_date, "date_created")
         self.sug_atts = kvp_convert(self.sug_atts)
-        for k in (
-            f"date_{suffix}" for suffix in ("issued", "modified", "metadata_modified")
-        ):
+        for k in (f"date_{suffix}" for suffix in ("issued", "modified", "metadata_modified")):
             self.sug_atts[k] = partial(_check_attr_is_iso_date, k)
 
     def check_metadata_link(self, ds):
