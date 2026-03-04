@@ -82,9 +82,7 @@ dimless_vertical_coordinates_1_6 = {  # only for CF-1.6
     ),
 }
 
-dimless_vertical_coordinates_1_7 = (
-    dimless_vertical_coordinates_1_6.copy()
-)  # shallow copy
+dimless_vertical_coordinates_1_7 = dimless_vertical_coordinates_1_6.copy()  # shallow copy
 dimless_vertical_coordinates_1_7.update(
     {  # extends 1.6
         "ocean_s_coordinate_g1": (

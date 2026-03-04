@@ -61,9 +61,7 @@ grid_mapping_attr_types16 = {
     "straight_vertical_longitude_from_pole": {"type": "N", "extra_condition": True},
 }
 
-grid_mapping_attr_types17 = (
-    grid_mapping_attr_types16.copy()
-)  # need shallow copy; update() returns None
+grid_mapping_attr_types17 = grid_mapping_attr_types16.copy()  # need shallow copy; update() returns None
 
 grid_mapping_attr_types17.update(
     {
@@ -164,9 +162,7 @@ grid_mapping_dict16 = {
     ],
 }
 
-grid_mapping_dict17 = (
-    grid_mapping_dict16.copy()
-)  # need shallow copy; update() returns None
+grid_mapping_dict17 = grid_mapping_dict16.copy()  # need shallow copy; update() returns None
 grid_mapping_dict17.update(
     {
         "geostationary": [

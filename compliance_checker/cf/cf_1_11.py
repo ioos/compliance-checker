@@ -20,11 +20,7 @@ def _temperature_standard_names(standard_name_table):
     # need to include aliases for variable names that match temperature as well
     aliases = standard_name_table._root.findall("alias")
     all_names = temp_var_name_set.union(
-        {
-            alias.attrib["id"]
-            for alias in aliases
-            if alias.find("entry_id").text in temp_var_name_set
-        },
+        {alias.attrib["id"] for alias in aliases if alias.find("entry_id").text in temp_var_name_set},
     )
     return all_names
 
@@ -60,10 +56,7 @@ class CF1_11Check(CF1_10Check):
                 "temperature: on_scale",
                 "temperature: unknown",
             ]
-            if (
-                getattr(temperature_variable, "units_metadata", None)
-                not in valid_temperature_units_metadata
-            ):
+            if getattr(temperature_variable, "units_metadata", None) not in valid_temperature_units_metadata:
                 temperature_units_metadata_ctx.messages.append(
                     f"Variable {temperature_variable.name} has a temperature related standard_name "
                     "and it is recommended that the units_metadata attribute is present and has one of the values "
@@ -95,10 +88,7 @@ class CF1_11Check(CF1_10Check):
                 "leap_seconds: utc",
                 "leap_seconds: unknown",
             ]
-            if (
-                getattr(time_variable, "units_metadata", None)
-                not in valid_time_units_metadata
-            ):
+            if getattr(time_variable, "units_metadata", None) not in valid_time_units_metadata:
                 time_units_metadata_ctx.messages.append(
                     f"Variable {time_variable.name} has a calendar attribute of "
                     f"{time_variable.calendar} and it is recommended that the units_metadata attribute is present "
@@ -123,11 +113,7 @@ class CF1_11Check(CF1_10Check):
         """
         results = []
 
-        appendix_a_bi_attrs = {
-            attribute_name
-            for attribute_name, data_dict in appendix_a.items()
-            if "BI" in data_dict["Use"]
-        }
+        appendix_a_bi_attrs = {attribute_name for attribute_name, data_dict in appendix_a.items() if "BI" in data_dict["Use"]}
         for parent_variable in ds.get_variables_by_attributes(
             bounds=lambda b: b is not None,
         ):
@@ -151,8 +137,7 @@ class CF1_11Check(CF1_10Check):
             bounds_bi_ctx.out_of += 1
             if bounds_bi_only_attrs:
                 bounds_bi_ctx.messages.append(
-                    f"Bounds variable {bounds_variable.name} has the following attributes which must appear on the parent variable {parent_variable.name}: "
-                    f"{sorted(bounds_bi_only_attrs)}",
+                    f"Bounds variable {bounds_variable.name} has the following attributes which must appear on the parent variable {parent_variable.name}: {sorted(bounds_bi_only_attrs)}",
                 )
             else:
                 bounds_bi_ctx.score += 1
@@ -165,10 +150,7 @@ class CF1_11Check(CF1_10Check):
                 bounds_attr_val = getattr(bounds_variable, bi_attr)
                 # IMPLEMENTATION CONFORMANCE 7.3 REQUIRED 5
                 # If a boundary variable has an inheritable attribute then its data type and its value must be exactly the same as the parent variable’s attribute.
-                if (
-                    type(parent_attr_val) is not type(bounds_attr_val)
-                    or parent_attr_val != bounds_attr_val
-                ):
+                if type(parent_attr_val) is not type(bounds_attr_val) or parent_attr_val != bounds_attr_val:
                     no_match_attrs.append(bi_attr)
                 else:
                     match_attrs.append(bi_attr)
@@ -195,14 +177,10 @@ class CF1_11Check(CF1_10Check):
             BaseCheck.HIGH,
             self.section_titles["9.5"],
         )
-        cf_role_var_names = [
-            var.name
-            for var in (ds.get_variables_by_attributes(cf_role=lambda x: x is not None))
-        ]
+        cf_role_var_names = [var.name for var in (ds.get_variables_by_attributes(cf_role=lambda x: x is not None))]
         test_ctx.assert_true(
             len(cf_role_var_names) < 2,
-            "There may only be one variable containing the cf_role attribute. "
-            f"Currently the following variables have cf_role attributes: {cf_role_var_names}",
+            f"There may only be one variable containing the cf_role attribute. Currently the following variables have cf_role attributes: {cf_role_var_names}",
         )
         return test_ctx.to_result()
 
@@ -227,9 +205,7 @@ class CF1_11Check(CF1_10Check):
         for both_var in sorted(both, key=lambda var: var.name):
             if both_var.scale_factor.dtype != both_var.add_offset.dtype:
                 both_msgs.append(
-                    "When both scale_factor and add_offset "
-                    f"are supplied for variable {both_var.name}, "
-                    "they must have the same type",
+                    f"When both scale_factor and add_offset are supplied for variable {both_var.name}, they must have the same type",
                 )
         results.append(
             Result(
@@ -262,10 +238,7 @@ class CF1_11Check(CF1_10Check):
         """
 
         msgs = []
-        error_msg_template = (
-            f"When attribute {attr_name} is of type {{}} variable "
-            f"{variable.name} must be of type {{}}"
-        )
+        error_msg_template = f"When attribute {attr_name} is of type {{}} variable {variable.name} must be of type {{}}"
 
         att = getattr(variable, attr_name, None)
         float_dtypes = (np.byte, np.ubyte, np.short, np.ushort)

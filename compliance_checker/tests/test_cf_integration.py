@@ -139,14 +139,8 @@ dataset_stem__expected_messages = [
             'Units "hours since 2016-01-01T12:00:00Z" for variable time_offset must be convertible to canonical units "s"',
             f"standard_name cloud_cover is not defined in Standard Name Table v{std_names._version}. Possible close match(es): ['land_cover', 'land_cover_lccs', 'cloud_albedo']",
             f"standard_name dew_point is not defined in Standard Name Table v{std_names._version}. Possible close match(es): ['dew_point_depression', 'dew_point_temperature']",
-            (
-                "GRID is not a valid CF featureType. It must be one of point, timeseries, "
-                "trajectory, profile, timeseriesprofile, trajectoryprofile"
-            ),
-            (
-                "global attribute _CoordSysBuilder should begin with a letter and "
-                "be composed of letters, digits, and underscores"
-            ),
+            ("GRID is not a valid CF featureType. It must be one of point, timeseries, trajectory, profile, timeseriesprofile, trajectoryprofile"),
+            ("global attribute _CoordSysBuilder should begin with a letter and be composed of letters, digits, and underscores"),
             'units for cl, "fraction" are not recognized by UDUNITS',
         ],
     ),
@@ -290,13 +284,9 @@ class TestCFIntegration:
         # it's not clear to me what this is supposed to be doing -- this else clause is outside of the if
         else:
             raise AssertionError(
-                '"dimensions for auxiliary coordinate variable siglay (node, siglay) '
-                'are not a subset of dimensions for variable u (siglay, nele, time)"'
-                " not in messages",
+                '"dimensions for auxiliary coordinate variable siglay (node, siglay) are not a subset of dimensions for variable u (siglay, nele, time)" not in messages',
             )
-        assert (
-            '§2.6.1 Conventions global attribute does not contain "CF-1.8"'
-        ) in messages
+        assert ('§2.6.1 Conventions global attribute does not contain "CF-1.8"') in messages
 
     @pytest.mark.parametrize(
         "loaded_dataset",

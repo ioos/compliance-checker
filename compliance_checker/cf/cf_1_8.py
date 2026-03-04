@@ -93,8 +93,7 @@ class CF1_8Check(CF1_7Check):
             for attr in ginstance.ncattrs():
                 if attr in CF1_8Check.ROOT_GROUP_ONLY_ATTRS:
                     ctx_hi.messages.append(
-                        f'§2.7.2 Attribute "{attr}" MAY ONLY be used in the root group '
-                        "and SHALL NOT be duplicated or overridden in child groups.",
+                        f'§2.7.2 Attribute "{attr}" MAY ONLY be used in the root group and SHALL NOT be duplicated or overridden in child groups.',
                     )
 
                     results.append(ctx_hi.to_result())
@@ -198,13 +197,8 @@ class CF1_8Check(CF1_7Check):
             current_path, group = group_stack.pop()
 
             for var_name, var in group.variables.items():
-                coords = (
-                    var.getncattr("coordinates")
-                    if "coordinates" in var.ncattrs()
-                    else ""
-                )
+                coords = var.getncattr("coordinates") if "coordinates" in var.ncattrs() else ""
                 for coord_ref in coords.split():
-
                     # ---------------------------------------
                     # 1. Absolute Path Check: /group1/lat
                     # ---------------------------------------
@@ -286,11 +280,7 @@ class CF1_8Check(CF1_7Check):
                         nonlocal nug_coord_violation
                         # Step 1: Check this group's variables
                         for vname, v in g.variables.items():
-                            if (
-                                vname == coord
-                                and len(v.dimensions) == 1
-                                and vname == v.dimensions[0]
-                            ):
+                            if vname == coord and len(v.dimensions) == 1 and vname == v.dimensions[0]:
                                 nug_coord_violation = True
 
                         # Step 2: Recursively check child groups
@@ -408,10 +398,7 @@ class CF1_8Check(CF1_7Check):
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 4/20:
             # only legal values for geometry_type
             if geometry_type not in ["point", "line", "polygon"]:
-                geom_type_err_template = (
-                    "geometry_type on {geometry_var_name}"
-                    " must be 'point', 'line', or 'polygon'"
-                )
+                geom_type_err_template = "geometry_type on {geometry_var_name} must be 'point', 'line', or 'polygon'"
                 err_msg = geom_type_err_template.format(
                     geometry_var_name=geometry_var_name,
                 )
@@ -427,9 +414,7 @@ class CF1_8Check(CF1_7Check):
                 # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 3/20 continued:
                 # geometry container must have node_coordinates
                 geom_valid.messages.append(
-                    "Could not find required attribute "
-                    '"node_coordinates" in geometry '
-                    f'variable "{geometry_var_name}"',
+                    f'Could not find required attribute "node_coordinates" in geometry variable "{geometry_var_name}"',
                 )
                 results.append(geom_valid.to_result())
                 return results
@@ -439,9 +424,7 @@ class CF1_8Check(CF1_7Check):
             # node_coordinates must be string
             if not isinstance(node_coord_var_names, str):
                 geom_valid.messages.append(
-                    "Attribute node_coordinates in geometry "
-                    f'variable "{geometry_var_name}" must be '
-                    "a string",
+                    f'Attribute node_coordinates in geometry variable "{geometry_var_name}" must be a string',
                 )
                 results.append(geom_valid.to_result())
                 return results
@@ -460,10 +443,7 @@ class CF1_8Check(CF1_7Check):
             # all variable names must exist
             if not_found_node_vars:
                 geom_valid.messages.append(
-                    "The following referenced node coordinate "
-                    "variables for geometry variable "
-                    f"{geometry_var_name} were not found: "
-                    f"{not_found_node_vars}",
+                    f"The following referenced node coordinate variables for geometry variable {geometry_var_name} were not found: {not_found_node_vars}",
                 )
                 results.append(geom_valid.to_result())
                 return results
@@ -498,8 +478,7 @@ class CF1_8Check(CF1_7Check):
                         geom_valid.score += 1
                     else:
                         geom_valid.messages.append(
-                            f"Parent variable '{parent_var.name}' does not include geometry "
-                            f"dimension '{shared_geom_dim}' used in geometry variable '{geometry_var_name}'",
+                            f"Parent variable '{parent_var.name}' does not include geometry dimension '{shared_geom_dim}' used in geometry variable '{geometry_var_name}'",
                         )
 
             # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 8–9/20:
@@ -550,11 +529,7 @@ class CF1_8Check(CF1_7Check):
                         )
                     else:
                         nodes_var = ds.variables[nodes_attr]
-                        if (
-                            hasattr(coord_var, "grid_mapping")
-                            and hasattr(nodes_var, "grid_mapping")
-                            and coord_var.grid_mapping != nodes_var.grid_mapping
-                        ):
+                        if hasattr(coord_var, "grid_mapping") and hasattr(nodes_var, "grid_mapping") and coord_var.grid_mapping != nodes_var.grid_mapping:
                             geom_valid.messages.append(
                                 f"grid_mapping mismatch between {coord_var.name} and {nodes_attr}",
                             )
@@ -664,10 +639,7 @@ class CF1_8Check(CF1_7Check):
 
                 # IMPLEMENTATION CONFORMANCE 7.5 REQUIRED 19/20:
                 # The single dimension of the interior_ring variable must match that of part_node_count
-                elif (
-                    part_node_count.dimensions != interior_ring.dimensions
-                    or not len(part_node_count) == 1
-                ):
+                elif part_node_count.dimensions != interior_ring.dimensions or not len(part_node_count) == 1:
                     geom_valid.messages.append(
                         f"part_node_count variable {part_node_count.name} must have the same single dimension as interior ring variable {interior_ring.name}",
                     )
@@ -770,8 +742,7 @@ class CF1_8Check(CF1_7Check):
             invalid_coord_vars = set(coordinate_var_names) - ds.variables.keys()
             if invalid_coord_vars:
                 valid_taxa.add_failure(
-                    'The following values for "coordinates" attributes were not found in the dataset\'s variables '
-                    f"{invalid_coord_vars}",
+                    f'The following values for "coordinates" attributes were not found in the dataset\'s variables {invalid_coord_vars}',
                 )
 
             if len(coordinate_var_names) > 2:
@@ -780,13 +751,9 @@ class CF1_8Check(CF1_7Check):
                 )
                 continue
 
-            coordinate_vars = [
-                ds.variables[var_name] for var_name in coordinate_var_names
-            ]
+            coordinate_vars = [ds.variables[var_name] for var_name in coordinate_var_names]
 
-            coord_var_standard_names = {
-                var: getattr(var, "standard_name", None) for var in coordinate_vars
-            }
+            coord_var_standard_names = {var: getattr(var, "standard_name", None) for var in coordinate_vars}
             # if we have no authority, we can't check validity of the name -- assume it's OK
             standard_name_set = set(coord_var_standard_names.values())
             if set(coord_var_standard_names.keys()) == {"biological_taxon_name"}:
@@ -871,22 +838,16 @@ class CF1_8Check(CF1_7Check):
                     pattern = re.compile(r"<.*?>")
                     problem_text = pattern.sub(" ", response.text)
                     messages.append(
-                        "http://lsid.info returned an error message "
-                        f"for submitted LSID string '{lsid_str}': "
-                        f"{problem_text}",
+                        f"http://lsid.info returned an error message for submitted LSID string '{lsid_str}': {problem_text}",
                     )
                 else:
                     messages.append(
-                        "Error occurred attempting to check LSID "
-                        f"'{lsid_str}': {str(e)}",
+                        f"Error occurred attempting to check LSID '{lsid_str}': {str(e)}",
                     )
                 continue
 
             # WoRMS -- marine bio data
-            if (
-                taxon_match["authority"] == "marinespecies.org"
-                and taxon_match["namespace"] == "taxname"
-            ):
+            if taxon_match["authority"] == "marinespecies.org" and taxon_match["namespace"] == "taxname":
                 try:
                     response = requests.get(
                         f"http://www.marinespecies.org/rest/AphiaRecordByAphiaID/{taxon_match['object_id']}",
@@ -895,38 +856,29 @@ class CF1_8Check(CF1_7Check):
                     response.raise_for_status()
                 except requests.exceptions.RequestException as e:  # noqa: F841
                     messages.append(
-                        "Aphia ID {taxon_match['object_id'] returned "
-                        "other error: {str(e)}",
+                        "Aphia ID {taxon_match['object_id'] returned other error: {str(e)}",
                     )
                 # record not found in database
                 if response.status_code == 204:
                     messages.append(
-                        "Aphia ID {taxon_match['object_id'] "
-                        "not found in WoRMS database",
+                        "Aphia ID {taxon_match['object_id'] not found in WoRMS database",
                     )
                 # good case, parse JSON
                 elif response.status_code == 200:
                     valid_name = response.json()["valid_name"]
                     if valid_name != taxon_name_str:
                         messages.append(
-                            "Supplied taxon name and WoRMS valid name do not match. "
-                            f"Supplied taxon name is '{taxon_name_str}', WoRMS valid name "
-                            f"is '{valid_name}.'",
+                            f"Supplied taxon name and WoRMS valid name do not match. Supplied taxon name is '{taxon_name_str}', WoRMS valid name is '{valid_name}.'",
                         )
                 # Misc non-error code.  Should not reach here.
                 else:
                     messages.append(
-                        f"Aphia ID {taxon_match['object_id']}"
-                        "returned an unhandled HTTP status "
-                        f"code {response.status_code}",
+                        f"Aphia ID {taxon_match['object_id']}returned an unhandled HTTP status code {response.status_code}",
                     )
                     continue
 
             # ITIS -- freshwater bio data
-            elif (
-                taxon_match["authority"] == "itis.gov"
-                and taxon_match["namespace"] == "itis_tsn"
-            ):
+            elif taxon_match["authority"] == "itis.gov" and taxon_match["namespace"] == "itis_tsn":
                 itis_url = f"https://www.itis.gov/ITISWebService/jsonservice/getFullRecordFromTSN?tsn={taxon_match['object_id']}"
                 try:
                     itis_response = requests.get(itis_url, timeout=15)
@@ -934,12 +886,12 @@ class CF1_8Check(CF1_7Check):
                 except requests.exceptions.RequestException as e:
                     if itis_response.status_code == 404:
                         messages.append(
-                            "itis.gov TSN " f"{taxon_match['object_id']} not found.",
+                            f"itis.gov TSN {taxon_match['object_id']} not found.",
                         )
                         continue
                     else:
                         messages.append(
-                            "itis.gov identifier returned other " f"error: {str(e)}",
+                            f"itis.gov identifier returned other error: {str(e)}",
                         )
                         continue
                 json_contents = itis_response.json()
@@ -983,8 +935,7 @@ class GeometryStorage:
         # can't continue if the geometry variables are not the correct size
         if invalid_vars:
             self.errors.append(
-                "The following geometry variables "
-                f"have non-numeric contents: {invalid_vars}",
+                f"The following geometry variables have non-numeric contents: {invalid_vars}",
             )
 
     def _split_mulitpart_geometry(self):
@@ -1004,10 +955,7 @@ class PointGeometry(GeometryStorage):
             same_dim = next(same_dim_group, True) and not next(same_dim_group, False)
             if not same_dim:
                 self.errors.append(
-                    "For a point geometry, coordinate "
-                    "variables must be the same length as "
-                    "node_count defined, or must be "
-                    "length 1 if node_count is not set",
+                    "For a point geometry, coordinate variables must be the same length as node_count defined, or must be length 1 if node_count is not set",
                 )
         return self.errors
 
@@ -1030,34 +978,24 @@ class LineGeometry(GeometryStorage):
         same_dim = next(same_dim_group, True) and not next(same_dim_group, False)
         if not same_dim:
             raise IndexError(
-                "Coordinate variables must be the same length. "
-                "If node_count is specified, this value must "
-                "also sum to the length of the coordinate "
-                "variables.",
+                "Coordinate variables must be the same length. If node_count is specified, this value must also sum to the length of the coordinate variables.",
             )
         # if a multipart
         if self.node_count is not None:
-            same_length = (
-                len(self.coord_vars[0]) == np.atleast_1d(self.node_count)[:].sum()
-            )
+            same_length = len(self.coord_vars[0]) == np.atleast_1d(self.node_count)[:].sum()
             if not same_length:
                 geom_errors.append(
-                    "Coordinate variables must be the same "
-                    "length. If node_count is specified, this "
-                    "value must also sum to the length of the "
-                    "coordinate variables.",
+                    "Coordinate variables must be the same length. If node_count is specified, this value must also sum to the length of the coordinate variables.",
                 )
         if self.part_node_count is not None:
             if not np.issubdtype(self.part_node_count.dtype, np.integer):
                 geom_errors.append(
-                    "when part_node_count is specified, it must "
-                    "be an array of integers",
+                    "when part_node_count is specified, it must be an array of integers",
                 )
             same_node_count = len(self.coord_vars[0]) == self.node_count[:].sum()
             if not same_node_count:
                 geom_errors.append(
-                    "The sum of part_node_count must be equal "
-                    "to the value of node_count",
+                    "The sum of part_node_count must be equal to the value of node_count",
                 )
         return geom_errors
 
@@ -1128,15 +1066,7 @@ class PolygonGeometry(LineGeometry):
                 ring_orientation[i],
             )
             if not pass_orientation:
-                orient_fix = (
-                    ("exterior", "counterclockwise")
-                    if not ring_orientation[i]
-                    else ("interior", "clockwise")
-                )
-                message = (
-                    f"An {orient_fix[0]} polygon referred to by "
-                    f"coordinates ({poly_sliced}) must have coordinates "
-                    f"in {orient_fix[1]} order"
-                )
+                orient_fix = ("exterior", "counterclockwise") if not ring_orientation[i] else ("interior", "clockwise")
+                message = f"An {orient_fix[0]} polygon referred to by coordinates ({poly_sliced}) must have coordinates in {orient_fix[1]} order"
                 messages.append(message)
         return messages

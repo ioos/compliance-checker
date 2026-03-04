@@ -44,8 +44,7 @@ class CF1_9Check(CF1_8Check):
                     True,
                     self.section_titles["4.4.1"],
                     [
-                        f'Time coordinate variable "{name}" should have a '
-                        'string valued attribute "calendar"',
+                        f'Time coordinate variable "{name}" should have a string valued attribute "calendar"',
                     ],
                 )
                 ret_val.append(result)
@@ -76,11 +75,7 @@ class CF1_9Check(CF1_8Check):
                         [reasoning],
                     )
                 elif reference_year < 0:
-                    reasoning = (
-                        f'For time variable "{time_var.name}", when using '
-                        "the Gregorian or Julian calendars, negative "
-                        "years are not allowed."
-                    )
+                    reasoning = f'For time variable "{time_var.name}", when using the Gregorian or Julian calendars, negative years are not allowed.'
                     result = Result(
                         BaseCheck.MEDIUM,
                         False,
@@ -119,8 +114,7 @@ class CF1_9Check(CF1_8Check):
             if match:
                 test_ctx.assert_true(
                     match.group("seconds") is None or int(match.group("seconds")) < 60,
-                    f'Time coordinate variable "{name}" must have '
-                    "units with seconds less than 60",
+                    f'Time coordinate variable "{name}" must have units with seconds less than 60',
                 )
                 prev_return.append(test_ctx.to_result())
         return prev_return
@@ -135,9 +129,7 @@ class CF1_9Check(CF1_8Check):
         )
         if is_ragged_array_repr:
             domain_valid.out_of += 1
-            ragged_array_dim_variable, ragged_attr_name = (
-                cfutil.resolve_ragged_array_dimension(ds)
-            )
+            ragged_array_dim_variable, ragged_attr_name = cfutil.resolve_ragged_array_dimension(ds)
             dim_name = getattr(ragged_array_dim_variable, ragged_attr_name)
             referenced_dim = reference_attr_variables(
                 ds,
@@ -146,8 +138,7 @@ class CF1_9Check(CF1_8Check):
             )
             if isinstance(referenced_dim, VariableReferenceError):
                 domain_valid.messages.append(
-                    f"Found ragged array variable {ragged_array_dim_variable.name}, "
-                    f"but dimension {dim_name} referenced from {ragged_attr_name} does not exist in file",
+                    f"Found ragged array variable {ragged_array_dim_variable.name}, but dimension {dim_name} referenced from {ragged_attr_name} does not exist in file",
                 )
 
             coord_var_reference_failures = []
@@ -163,19 +154,14 @@ class CF1_9Check(CF1_8Check):
                     util.get_possible_label_variable_dimensions(coord_var),
                 ).issubset({referenced_dim}):
                     domain_valid.messages.append(
-                        f"Found ragged array variable {ragged_array_dim_variable.name}, "
-                        f"but dimension {dim_name} referenced from {ragged_attr_name} does not exist in file",
+                        f"Found ragged array variable {ragged_array_dim_variable.name}, but dimension {dim_name} referenced from {ragged_attr_name} does not exist in file",
                     )
                 else:
                     domain_valid.score += 1
         else:
             # IMPLICIT CONFORMANCE REQUIRED 1/4
             # Domain variables must have a dimensions attribute
-            for domain_var in (
-                ds.variables[var]
-                for var in ds.variables
-                if "dimensions" in ds.variables[var].ncattrs()
-            ):
+            for domain_var in (ds.variables[var] for var in ds.variables if "dimensions" in ds.variables[var].ncattrs()):
                 # store NetCDF variable attribute named "dimensions"
                 dim_nc_attr = domain_var.getncattr("dimensions")
                 # Every variable should have dimensionality (not to be confused with
@@ -185,9 +171,7 @@ class CF1_9Check(CF1_8Check):
                 domain_valid.out_of += 3
                 if domain_var.dimensions:
                     domain_valid.messages.append(
-                        "Domain variable "
-                        f"{domain_var.name} should not have non-scalar/"
-                        "non-empty variable dimensions",
+                        f"Domain variable {domain_var.name} should not have non-scalar/non-empty variable dimensions",
                     )
                 else:
                     domain_valid.score += 1
@@ -205,28 +189,16 @@ class CF1_9Check(CF1_8Check):
                 if dim_errors:
                     errors_str = ", ".join(dim_errors)
                     domain_valid.messages.append(
-                        "Could not find the following "
-                        "dimensions referenced in "
-                        "dimensions attribute from "
-                        "domain variable "
-                        f"{domain_var.name}: {errors_str}",
+                        f"Could not find the following dimensions referenced in dimensions attribute from domain variable {domain_var.name}: {errors_str}",
                     )
                 else:
                     domain_valid.score += 1
                 if "coordinates" in domain_var.ncattrs():
-                    domain_coord_vars, domain_coord_var_errors = (
-                        reference_attr_variables(ds, domain_var.coordinates, " ")
-                    )
+                    domain_coord_vars, domain_coord_var_errors = reference_attr_variables(ds, domain_var.coordinates, " ")
                     if domain_coord_var_errors:
-                        errors_str = ", ".join(
-                            err.name for err in domain_coord_var_errors
-                        )
+                        errors_str = ", ".join(err.name for err in domain_coord_var_errors)
                         domain_valid.messages.append(
-                            "Could not find the following "
-                            "variables referenced in "
-                            "coordinates attribute from "
-                            "domain variable "
-                            f"{domain_var.name}: {errors_str}",
+                            f"Could not find the following variables referenced in coordinates attribute from domain variable {domain_var.name}: {errors_str}",
                         )
                     else:
                         domain_valid.score += 1
@@ -246,11 +218,7 @@ class CF1_9Check(CF1_8Check):
                                 ).issubset(domain_dims_names)
                             ):
                                 domain_valid.messages.append(
-                                    "Could not find the following "
-                                    "variables referenced in "
-                                    "coordinates attribute from "
-                                    "domain variable "
-                                    f"{variable_dim}: {domain_dims_names}",
+                                    f"Could not find the following variables referenced in coordinates attribute from domain variable {variable_dim}: {domain_dims_names}",
                                 )
                             else:
                                 domain_valid.score += 1
@@ -260,26 +228,20 @@ class CF1_9Check(CF1_8Check):
                 long_name = getattr(domain_var, "long_name", None)
                 if long_name is None or not isinstance(long_name, str):
                     domain_valid.messages.append(
-                        f"For domain variable {domain_var.name} "
-                        f"it is recommended that attribute long_name be present and a string",
+                        f"For domain variable {domain_var.name} it is recommended that attribute long_name be present and a string",
                     )
                 else:
                     domain_valid.score += 1
 
                 appendix_a_not_recommended_attrs = []
                 for attr_name in domain_var.ncattrs():
-                    if (
-                        attr_name in self.appendix_a
-                        and "D" not in self.appendix_a[attr_name]["attr_loc"]
-                    ):
+                    if attr_name in self.appendix_a and "D" not in self.appendix_a[attr_name]["attr_loc"]:
                         appendix_a_not_recommended_attrs.append(attr_name)
 
                 domain_valid.out_of += 1
                 if appendix_a_not_recommended_attrs:
                     domain_valid.messages.append(
-                        f"The following attributes appear in variable {domain_var.name} "
-                        "and CF Appendix A, but are not for use in domain variables: "
-                        f"{appendix_a_not_recommended_attrs}",
+                        f"The following attributes appear in variable {domain_var.name} and CF Appendix A, but are not for use in domain variables: {appendix_a_not_recommended_attrs}",
                     )
                 else:
                     # no errors occurred
@@ -304,8 +266,7 @@ class CF1_9Check(CF1_8Check):
                             set(cell_measures_variable.dimensions).issubset(
                                 {dd.name for dd in domain_dims},
                             ),
-                            "Variables named in the cell_measures attributes must have dimensions with "
-                            "values that are a subset of the referring domain variable's dimensions attribute",
+                            "Variables named in the cell_measures attributes must have dimensions with values that are a subset of the referring domain variable's dimensions attribute",
                         )
 
             results.append(domain_valid.to_result())

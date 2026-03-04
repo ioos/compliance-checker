@@ -56,9 +56,7 @@ def extract_docstring_summary(docstring):
 
 
 class CheckSuite:
-    checkers = (
-        {}
-    )  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
+    checkers = {}  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
     templates_root = "compliance_checker"  # modify to load alternative Jinja2 templates
 
     def __init__(self, options=None):
@@ -171,10 +169,7 @@ class CheckSuite:
                         None,
                     )
                     warnings.warn(
-                        "Checker for {} should implement both "
-                        '"_cc_spec" and "_cc_spec_version" '
-                        'attributes. "name" attribute is deprecated. '
-                        "Assuming checker is latest version.",
+                        'Checker for {} should implement both "_cc_spec" and "_cc_spec_version" attributes. "name" attribute is deprecated. Assuming checker is latest version.',
                         DeprecationWarning,
                         stacklevel=2,
                     )
@@ -194,9 +189,7 @@ class CheckSuite:
             # if the version can't be parsed, do it according to character collation
             except ValueError:
                 latest_version = max(version_nums)
-            cls.checkers[spec] = cls.checkers[spec + ":latest"] = cls.checkers[
-                ":".join((spec, latest_version))
-            ]
+            cls.checkers[spec] = cls.checkers[spec + ":latest"] = cls.checkers[":".join((spec, latest_version))]
 
     def _get_checks(self, checkclass, include_checks, skip_checks):
         """
@@ -222,10 +215,7 @@ class CheckSuite:
                     returned_checks.append((fn_obj, skip_checks[fn_name]))
         else:
             for fn_name, fn_obj in meths:
-                if (
-                    fn_name.startswith("check_")
-                    and skip_checks[fn_name] != BaseCheck.HIGH
-                ):
+                if fn_name.startswith("check_") and skip_checks[fn_name] != BaseCheck.HIGH:
                     returned_checks.append((fn_obj, skip_checks[fn_name]))
 
         return returned_checks
@@ -304,11 +294,7 @@ class CheckSuite:
         if len(checker_names) == 0:
             checker_names = list(self.checkers.keys())
 
-        args = [
-            (name, self.checkers[name])
-            for name in checker_names
-            if name in self.checkers
-        ]
+        args = [(name, self.checkers[name]) for name in checker_names if name in self.checkers]
         valid = []
 
         all_checked = {a[1] for a in args}  # only class types
@@ -350,8 +336,7 @@ class CheckSuite:
                     check_max_level = check_lookup[split_check_spec[1]]
                 except KeyError:
                     warnings.warn(
-                        f"Skip specifier '{split_check_spec[1]}' on check '{check_name}' not found,"
-                        " defaulting to skip entire check",
+                        f"Skip specifier '{split_check_spec[1]}' on check '{check_name}' not found, defaulting to skip entire check",
                         stacklevel=2,
                     )
                     check_max_level = BaseCheck.HIGH
@@ -675,10 +660,7 @@ class CheckSuite:
         groups_sorted = sorted(groups, key=weight_sort, reverse=True)
 
         # create dict of the groups -> {level: [reasons]}
-        result = {
-            key: [v for v in valuesiter if v.value[0] != v.value[1]]
-            for key, valuesiter in itertools.groupby(groups_sorted, key=weight_sort)
-        }
+        result = {key: [v for v in valuesiter if v.value[0] != v.value[1]] for key, valuesiter in itertools.groupby(groups_sorted, key=weight_sort)}
         priorities = self.checkers[check]._cc_display_headers
 
         def process_table(res, check):
@@ -733,9 +715,7 @@ class CheckSuite:
                     if has_printed:
                         print("")
                     # join alphabetized reasons together
-                    reason_str = "\n".join(
-                        f"* {r}" for r in sorted(reasons, key=lambda x: x[0])
-                    )
+                    reason_str = "\n".join(f"* {r}" for r in sorted(reasons, key=lambda x: x[0]))
                     proc_str = f"{issue}\n{reason_str}"
                     print(proc_str)
                     proc_strs.append(proc_str)
@@ -793,8 +773,7 @@ class CheckSuite:
                 # Exit program if neither a netCDF Classic nor a netCDF-4 file
                 # could be created.
                 print(
-                    "netCDF Classic file could not be generated from cdl file"
-                    + "with message:",
+                    "netCDF Classic file could not be generated from cdl file" + "with message:",
                 )
                 print(iostat.stderr.decode())
                 sys.exit(1)

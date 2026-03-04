@@ -126,9 +126,7 @@ class CF1_7Check(CF1_6Check):
             else:
                 out_of += 1
                 try:
-                    if (
-                        len(variable.actual_range) != 2
-                    ):  # TODO is the attr also a numpy array? if so, .size
+                    if len(variable.actual_range) != 2:  # TODO is the attr also a numpy array? if so, .size
                         msgs.append(
                             f"actual_range of '{name}' must be 2 elements",
                         )
@@ -176,9 +174,7 @@ class CF1_7Check(CF1_6Check):
                 # check that the actual range is within the valid range
                 if hasattr(variable, "valid_range"):  # check within valid_range
                     out_of += 1
-                    if (variable.actual_range[0] < variable.valid_range[0]) or (
-                        variable.actual_range[1] > variable.valid_range[1]
-                    ):
+                    if (variable.actual_range[0] < variable.valid_range[0]) or (variable.actual_range[1] > variable.valid_range[1]):
                         msgs.append(
                             f'"{name}"\'s actual_range must be within valid_range',
                         )
@@ -245,8 +241,7 @@ class CF1_7Check(CF1_6Check):
             if boundary_variable_name not in ds.variables:
                 valid = False
                 reasoning.append(
-                    f"Boundary variable {boundary_variable_name} referenced by {variable.name} not "
-                    + "found in dataset variables",
+                    f"Boundary variable {boundary_variable_name} referenced by {variable.name} not " + "found in dataset variables",
                 )
             else:
                 boundary_variable = ds.variables[boundary_variable_name]
@@ -257,9 +252,7 @@ class CF1_7Check(CF1_6Check):
             if boundary_variable.ndim < 2:
                 valid = False
                 reasoning.append(
-                    f"Boundary variable {boundary_variable.name} specified by {variable.name}"
-                    + " should have at least two dimensions to enclose the base "
-                    + "case of a one dimensionsal variable",
+                    f"Boundary variable {boundary_variable.name} specified by {variable.name}" + " should have at least two dimensions to enclose the base " + "case of a one dimensionsal variable",
                 )
             if boundary_variable.ndim != variable.ndim + 1:
                 valid = False
@@ -271,17 +264,13 @@ class CF1_7Check(CF1_6Check):
             if variable.dimensions[:] != boundary_variable.dimensions[: variable.ndim]:
                 valid = False
                 reasoning.append(
-                    f"Boundary variable coordinates (for {variable.name}) are in improper order: {boundary_variable.dimensions}. Bounds-specific dimensions should be last"
-                    "",
+                    f"Boundary variable coordinates (for {variable.name}) are in improper order: {boundary_variable.dimensions}. Bounds-specific dimensions should be last",
                 )
 
             # 7.1 Required 2/5: continue
             # Ensure p vertices form a valid simplex given previous a...n
             # previous auxiliary coordinates
-            if (
-                ds.dimensions[boundary_variable.dimensions[-1]].size
-                < len(boundary_variable.dimensions[:-1]) + 1
-            ):
+            if ds.dimensions[boundary_variable.dimensions[-1]].size < len(boundary_variable.dimensions[:-1]) + 1:
                 valid = False
                 reasoning.append(
                     f"Dimension {boundary_variable.name} of boundary variable (for {variable.name}) must have at least {len(variable.dimensions) + 1} elements to form a simplex/closed cell with previous dimensions {boundary_variable.dimensions[:-1]}.",
@@ -292,8 +281,7 @@ class CF1_7Check(CF1_6Check):
             if boundary_variable.dtype.kind not in "biufc":
                 valid = False
                 reasoning.append(
-                    f"Boundary variable {boundary_variable.name} specified by {variable.name}"
-                    + "must be a numeric data type ",
+                    f"Boundary variable {boundary_variable.name} specified by {variable.name}" + "must be a numeric data type ",
                 )
 
             # 7.1 Required 4/5:
@@ -374,10 +362,7 @@ class CF1_7Check(CF1_6Check):
 
             for ii in range(len(variable[:])):
                 if abs(boundary_variable[ii][1]) >= abs(boundary_variable[ii][0]):
-                    if not (
-                        (abs(variable[ii]) >= abs(boundary_variable[ii][0]))
-                        and (abs(variable[ii]) <= abs(boundary_variable[ii][1]))
-                    ):
+                    if not ((abs(variable[ii]) >= abs(boundary_variable[ii][0])) and (abs(variable[ii]) <= abs(boundary_variable[ii][1]))):
                         valid = False
                         reasoning.append(
                             f"The points specified by the coordinate variable {variable_name} ({variable[ii]})"
@@ -497,9 +482,7 @@ class CF1_7Check(CF1_6Check):
 
         msg = "Both geoid_name and geopotential_datum_name cannot exist"
 
-        if ("geoid_name" in var.ncattrs()) and (
-            "geopotential_datum_name" in var.ncattrs()
-        ):
+        if ("geoid_name" in var.ncattrs()) and ("geopotential_datum_name" in var.ncattrs()):
             return (False, msg)
 
         else:
@@ -516,10 +499,7 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple (bool, str)
         """
 
-        msg = (
-            "If any of reference_ellipsoid_name, prime_meridian_name, "
-            "or horizontal_datum_name are defined, all must be defined."
-        )
+        msg = "If any of reference_ellipsoid_name, prime_meridian_name, or horizontal_datum_name are defined, all must be defined."
 
         _ncattrs = set(var.ncattrs())
 
@@ -590,12 +570,7 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        query_str = (
-            "SELECT 1 FROM vertical_datum WHERE name = ? "
-            "UNION ALL "
-            "SELECT 1 FROM alias_name WHERE alt_name = ? "
-            "AND table_name = 'vertical_datum' LIMIT 1"
-        )
+        query_str = "SELECT 1 FROM vertical_datum WHERE name = ? UNION ALL SELECT 1 FROM alias_name WHERE alt_name = ? AND table_name = 'vertical_datum' LIMIT 1"
 
         # try to find the value in the database
         res_set = self._exec_query_str_with_params(query_str, (val, val))
@@ -614,12 +589,7 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        query_str = (
-            "SELECT 1 FROM vertical_datum WHERE name = ? "
-            "UNION ALL "
-            "SELECT 1 FROM alias_name WHERE alt_name = ? "
-            "AND table_name = 'vertical_datum' LIMIT 1"
-        )
+        query_str = "SELECT 1 FROM vertical_datum WHERE name = ? UNION ALL SELECT 1 FROM alias_name WHERE alt_name = ? AND table_name = 'vertical_datum' LIMIT 1"
 
         # try to find the value in the database
         res_set = self._exec_query_str_with_params(query_str, (val, val))
@@ -640,10 +610,7 @@ class CF1_7Check(CF1_6Check):
 
         return (
             val in horizontal_datum_names17,
-            (
-                "{} must be a valid Horizontal Datum Name; "
-                "see https://github.com/cf-convention/cf-conventions/wiki/Mapping-from-CF-Grid-Mapping-Attributes-to-CRS-WKT-Elements."
-            ),
+            ("{} must be a valid Horizontal Datum Name; see https://github.com/cf-convention/cf-conventions/wiki/Mapping-from-CF-Grid-Mapping-Attributes-to-CRS-WKT-Elements."),
         )
 
     def _evaluate_prime_meridian_name(self, val):
@@ -657,10 +624,7 @@ class CF1_7Check(CF1_6Check):
 
         return (
             val in prime_meridian_names17,
-            (
-                "{} must be a valid Prime Meridian name; "
-                "see https://github.com/cf-convention/cf-conventions/wiki/csv/prime_meridian.csv."
-            ),
+            ("{} must be a valid Prime Meridian name; see https://github.com/cf-convention/cf-conventions/wiki/csv/prime_meridian.csv."),
         )
 
     def _evaluate_projected_crs_name(self, val):
@@ -672,12 +636,7 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        query_str = (
-            "SELECT 1 FROM projected_crs WHERE name = ? "
-            "UNION ALL "
-            "SELECT 1 FROM alias_name WHERE alt_name = ? "
-            "AND table_name = 'projected_crs' LIMIT 1"
-        )
+        query_str = "SELECT 1 FROM projected_crs WHERE name = ? UNION ALL SELECT 1 FROM alias_name WHERE alt_name = ? AND table_name = 'projected_crs' LIMIT 1"
 
         # try to find the value in the database
         res_set = self._exec_query_str_with_params(query_str, (val, val))
@@ -698,10 +657,7 @@ class CF1_7Check(CF1_6Check):
 
         return (
             val in ellipsoid_names17,
-            (
-                "{} must be a valid Ellipsoid Name; "
-                "see https://github.com/cf-convention/cf-conventions/wiki/csv/ellipsoid.csv."
-            ),
+            ("{} must be a valid Ellipsoid Name; see https://github.com/cf-convention/cf-conventions/wiki/csv/ellipsoid.csv."),
         )
 
     def _evaluate_towgs84(self, val):
@@ -713,10 +669,7 @@ class CF1_7Check(CF1_6Check):
         :return two-tuple of (bool, str)
         """
 
-        msg = (
-            "towgs84 must be an array of length 3, 6, or 7 of double-precision"
-            " and correspond to anm OGC WKT TOWGS84 node"
-        )
+        msg = "towgs84 must be an array of length 3, 6, or 7 of double-precision and correspond to anm OGC WKT TOWGS84 node"
 
         # if not numpy type, return false
         if not getattr(val, "dtype", None):
@@ -768,9 +721,7 @@ class CF1_7Check(CF1_6Check):
                     test_ctx.out_of += 1
 
             # existence_conditions
-            exist_cond_1 = (
-                self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(var)
-            )
+            exist_cond_1 = self._check_gmattr_existence_condition_geoid_name_geoptl_datum_name(var)
             test_ctx.assert_true(exist_cond_1[0], exist_cond_1[1])
             exist_cond_2 = self._check_gmattr_existence_condition_ell_pmerid_hdatum(var)
             test_ctx.assert_true(exist_cond_2[0], exist_cond_2[1])
@@ -785,9 +736,7 @@ class CF1_7Check(CF1_6Check):
             if len_vdatum_name_attrs == 2:
                 test_ctx.out_of += 1
                 test_ctx.messages.append(
-                    "Cannot have both 'geoid_name' and "
-                    "'geopotential_datum_name' attributes in "
-                    f"grid mapping variable '{var.name}'",
+                    f"Cannot have both 'geoid_name' and 'geopotential_datum_name' attributes in grid mapping variable '{var.name}'",
                 )
             elif len_vdatum_name_attrs == 1:
                 # should be one or zero attrs
@@ -801,17 +750,12 @@ class CF1_7Check(CF1_6Check):
                             conn,
                         )
 
-                        invalid_msg = (
-                            f"Vertical datum value '{v_datum_value}' for "
-                            f"attribute '{v_datum_attr}' in grid mapping "
-                            f"variable '{var.name}' is not valid"
-                        )
+                        invalid_msg = f"Vertical datum value '{v_datum_value}' for attribute '{v_datum_attr}' in grid mapping variable '{var.name}' is not valid"
                         test_ctx.assert_true(v_datum_str_valid, invalid_msg)
                 except sqlite3.Error as e:
                     # if we hit an error, skip the check
                     warn(
-                        "Error occurred while trying to query "
-                        f"Proj4 SQLite database at {proj_db_path}: {str(e)}",
+                        f"Error occurred while trying to query Proj4 SQLite database at {proj_db_path}: {str(e)}",
                         stacklevel=2,
                     )
             prev_return[var.name] = test_ctx.to_result()
@@ -870,8 +814,7 @@ class CF1_7Check(CF1_6Check):
         # IMPLEMENTATION CONFORMANCE 4.3.3 REQUIRED
         correct_computed_std_name_ctx.assert_true(
             not (formula_terms is None and hasattr(variable, "computed_standard_name")),
-            f"Variable {vname} should have formula_terms attribute when "
-            "computed_standard_name attribute is defined",
+            f"Variable {vname} should have formula_terms attribute when computed_standard_name attribute is defined",
         )
         if formula_terms is None and standard_name not in dim_vert_coords_dict:
             return
