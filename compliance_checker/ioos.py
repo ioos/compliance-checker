@@ -8,6 +8,7 @@ from numbers import Number
 import validators
 from lxml.etree import XPath
 from owslib.namespaces import Namespaces
+from typing_extensions import deprecated
 
 import compliance_checker.cf.util as cfutil
 from compliance_checker import base
@@ -1726,6 +1727,9 @@ class IOOS1_2Check(IOOSNCCheck):
         return results
 
 
+@deprecated(
+    "The ioos_sos checker is deprecated and will be removed in the next compliance-checker version.",
+)
 class IOOSBaseSOSCheck(BaseCheck):
     _cc_spec = "ioos_sos"
     _cc_spec_version = "0.1"
@@ -1735,6 +1739,9 @@ class IOOSBaseSOSCheck(BaseCheck):
     _cc_url = "http://sdf.ndbc.noaa.gov/sos/"
 
 
+@deprecated(
+    "The ioos_sos checker is deprecated and will be removed in the next compliance-checker version.",
+)
 class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseSOSCheck):
     # set up namespaces for XPath
     ns = Namespaces().get_namespaces(["sos", "gml", "xlink"])
@@ -1813,6 +1820,9 @@ class IOOSSOSGCCheck(BaseSOSGCCheck, IOOSBaseSOSCheck):
         return ["altitude_units"]
 
 
+@deprecated(
+    "The ioos_sos checker is deprecated and will be removed in the next compliance-checker version.",
+)
 class IOOSSOSDSCheck(BaseSOSDSCheck, IOOSBaseSOSCheck):
     # set up namespaces for XPath
     ns = Namespaces().get_namespaces(["sml", "swe", "gml", "xlink"])
