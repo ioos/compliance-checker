@@ -290,6 +290,9 @@ class ACDDBaseCheck(BaseCheck):
         # sort by criteria passed
         final_lats = sorted(lat_vars, key=lambda x: lat_vars[x], reverse=True)
 
+        # np.isnan raises TypeError on non-numeric dtypes (e.g. char variables with units).
+        final_lats = [v for v in final_lats if np.issubdtype(v[:].dtype, np.number)]
+
         obs_mins = {var._name: np.nanmin(var) for var in final_lats if not np.isnan(var).all()}
         obs_maxs = {var._name: np.nanmax(var) for var in final_lats if not np.isnan(var).all()}
 
@@ -380,6 +383,9 @@ class ACDDBaseCheck(BaseCheck):
 
         # sort by criteria passed
         final_lons = sorted(lon_vars, key=lambda x: lon_vars[x], reverse=True)
+
+        # np.isnan raises TypeError on non-numeric dtypes (e.g. char variables with units).
+        final_lons = [v for v in final_lons if np.issubdtype(v[:].dtype, np.number)]
 
         obs_mins = {var._name: np.nanmin(var) for var in final_lons if not np.isnan(var).all()}
         obs_maxs = {var._name: np.nanmax(var) for var in final_lons if not np.isnan(var).all()}
@@ -592,8 +598,20 @@ class ACDDBaseCheck(BaseCheck):
             # to create pendulum datetime objects
             calendar = getattr(ds.variables[timevar], "calendar", "standard")
 
+            time_first = ds.variables[timevar][0]
+            time_last = ds.variables[timevar][-1]
+
+            # num2date raises TypeError on masked scalars (all-fill time variables).
+            if np.ma.is_masked(time_first) or np.ma.is_masked(time_last):
+                return Result(
+                    BaseCheck.MEDIUM,
+                    False,
+                    "time_coverage_extents_match",
+                    [f"Time variable '{timevar}' has masked values; cannot compare time extents."],
+                )
+
             cftime_obj0 = num2date(
-                ds.variables[timevar][0],
+                time_first,
                 ds.variables[timevar].units,
                 calendar=calendar,
             )
@@ -608,7 +626,7 @@ class ACDDBaseCheck(BaseCheck):
             )
 
             cftime_obj1 = num2date(
-                ds.variables[timevar][-1],
+                time_last,
                 ds.variables[timevar].units,
                 calendar=calendar,
             )
