@@ -72,7 +72,7 @@ entry-points."compliance_checker.suites"."cf-1.9" = "compliance_checker.cf.cf:CF
 entry-points."compliance_checker.suites"."ioos-0.1" = "compliance_checker.ioos:IOOS0_1Check"
 entry-points."compliance_checker.suites"."ioos-1.1" = "compliance_checker.ioos:IOOS1_1Check"
 entry-points."compliance_checker.suites"."ioos-1.2" = "compliance_checker.ioos:IOOS1_2Check"
-entry-points."compliance_checker.suites"."ioos_sos" = "compliance_checker.ioos:IOOSBaseSOSCheck"
+entry-points."compliance_checker.suites".ioos_sos = "compliance_checker.ioos:IOOSBaseSOSCheck"
 
 [tool.setuptools]
 packages = [
