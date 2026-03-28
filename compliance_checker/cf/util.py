@@ -2067,7 +2067,7 @@ def is_3d_static_grid(nc, variable):
 def is_mapped_grid(nc, variable):
     """
     Returns true if the feature-type of variable corresponds to a mapped grid
-    type. Characterized by Appedix F of CF-1.6
+    type. Characterized by Appendix F of CF-1.6
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
