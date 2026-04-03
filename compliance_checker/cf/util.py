@@ -2067,7 +2067,7 @@ def is_3d_static_grid(nc, variable):
 def is_mapped_grid(nc, variable):
     """
     Returns true if the feature-type of variable corresponds to a mapped grid
-    type. Characterized by Appedix F of CF-1.6
+    type. Characterized by Appendix F of CF-1.6
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
@@ -2322,11 +2322,11 @@ def download_cf_standard_name_table(version, location=None):
         location = files("compliance_checker") / "data/cf-standard-name-table.xml"
 
     if version == "latest":
-        url = "https://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml"
-    else:
-        url = f"https://cfconventions.org/Data/cf-standard-names/{version}/src/cf-standard-name-table.xml"
+        version = "current"
 
-    r = requests.get(url, allow_redirects=True)
+    url = f"https://github.com/cf-convention/cf-convention.github.io/raw/refs/heads/main/Data/cf-standard-names/{version}/src/cf-standard-name-table.xml"
+
+    r = requests.get(url, allow_redirects=True, timeout=10)
     r.raise_for_status()
 
     print(
