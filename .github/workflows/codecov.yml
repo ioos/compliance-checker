@@ -14,7 +14,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup Micromamba
-      uses: mamba-org/setup-micromamba@add3a49764cedee8ee24e82dfde87f5bc2914462 # v2.0.7
+      uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
       with:
         environment-name: TEST
         init-shell: bash
@@ -38,7 +38,7 @@ jobs:
       continue-on-error: true
 
     - name: Upload to codecov
-      uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad  # v5.5.3
+      uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2  # v6.0.0
       with:
         files: coverage.xml
     permissions:
