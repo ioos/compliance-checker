@@ -20,6 +20,7 @@ from netCDF4 import Dataset
 from owslib.namespaces import Namespaces
 from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
 from owslib.swe.sensor.sml import SensorML
+from typing_extensions import deprecated
 
 from compliance_checker import __version__
 from compliance_checker.util import kvp_convert
@@ -205,6 +206,9 @@ class BaseNCCheck:
         return name in dataset.ncattrs()
 
 
+@deprecated(
+    "The ioos_sos checker is deprecated and will be removed in the next compliance-checker version.",
+)
 class BaseSOSGCCheck:
     """
     Base class for SOS-GetCapabilities supporting Check Suites.
@@ -213,6 +217,9 @@ class BaseSOSGCCheck:
     supported_ds = [SensorObservationService_1_0_0]
 
 
+@deprecated(
+    "The ioos_sos checker is deprecated and will be removed in the next compliance-checker version.",
+)
 class BaseSOSDSCheck:
     """
     Base class for SOS-DescribeSensor supporting Check Suites.
