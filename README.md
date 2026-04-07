@@ -122,84 +122,46 @@ parse it's contents.
 > **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPeNDAP URL, please be sure the size is reasonable!
 
 ```
-usage: cchecker.py [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
-                   [--verbose] [--describe-checks] [--skip-checks SKIP_CHECKS]
-                   [-f {text,html,json,json_new}] [-o OUTPUT] [-O OPTION] [-V]
-                   [-l] [-d DOWNLOAD_STANDARD_NAMES]
-                   [dataset_location [dataset_location ...]]
+usage: cchecker.py [-h] [--test TEST] [--criteria {lenient,normal,strict}] [--verbose] [--describe-checks] [--skip-checks SKIP_CHECKS | --include-checks INCLUDE_CHECKS]
+                   [-f {text,html,json,json_new}] [-o OUTPUT] [-O OPTION] [-V] [-l] [-d DOWNLOAD_STANDARD_NAMES]
+                   [dataset_location ...]
 
 positional arguments:
-  dataset_location      Defines the location of the dataset to be checked.
-                        The location can be a local netCDF file, a remote
-                        OPeNDAP endpoint, a remote netCDF file which returns
-                        content-type header of 'application/x-netcdf', or an
-                        ERDDAP TableDAP endpoint. Note that the ERDDAP TableDAP
-                        endpoint will currently attempt to fetch the entire
-                        TableDAP dataset.
+  dataset_location      Defines the location of the dataset to be checked. The location can be a local netCDF file, a remote OPeNDAP endpoint, a remote netCDF file which
+                        returns content-type header of 'application/x-netcdf', or an ERDDAP TableDAP endpoint. Note that the ERDDAP TableDAP endpoint will currently attempt
+                        to fetch the entire TableDAP dataset.
 
-
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  --test TEST, -t TEST, --test= TEST, -t= TEST
-                        Select the Checks you want to perform. Defaults to
-                        'acdd' if unspecified. Versions of standards can be
-                        specified via `-t <test_standard>:<version>`. If
-                        `<version>` is omitted, or is "latest", the latest
-                        version of the test standard is used.
-  --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
-                        Define the criteria for the checks. Either Strict,
-                        Normal, or Lenient. Defaults to Normal.
+  --test, -t TEST       Select the Checks you want to perform. Defaults to 'acdd' if unspecified. Versions of standards can be specified via `-t <test_standard>:<version>`.
+                        If `<version>` is omitted the latest version of the test standard is used.
+  --criteria, -c {lenient,normal,strict}
+                        Define the criteria for the checks. Either Strict, Normal, or Lenient. Defaults to Normal.
   --verbose, -v         Increase output. May be specified up to three times.
   --describe-checks, -D
-                        Describes checks for checkers specified using `-t`. If
-                        `-t` is not specified, lists checks from all available
-                        checkers.
-  --skip-checks SKIP_CHECKS, -s SKIP_CHECKS
-                        Specifies tests to skip. Can take the form of either
-                        `<check_name>` or `<check_name>:<skip_level>`. The
-                        first form skips any checks matching the name. In the
-                        second form <skip_level> may be specified as "A", "M",
-                        or "L". "A" skips all checks and is equivalent to
-                        calling the first form. "M" will only show high
-                        priority output from the given check and will skip
-                        medium and low. "L" will show both high and medium
-                        priority issues, while skipping low priority issues.
-  -f {text,html,json,json_new}, --format {text,html,json,json_new}
-                        Output format(s). Options are 'text', 'html', 'json',
-                        'json_new'. The difference between the 'json' and the
-                        'json_new' formats is that the 'json' format has the
-                        check as the top level key, whereas the 'json_new'
-                        format has the dataset name(s) as the main key in the
-                        output follow by any checks as subkeys. Also, 'json'
-                        format can be only be run against one input file,
-                        whereas 'json_new' can be run against multiple files.
-  -o OUTPUT, --output OUTPUT
-                        Output filename(s). If '-' is supplied, output to
-                        stdout. Can either be one or many files. If one file
-                        is supplied, but the checker is run against many
-                        files, all the output from the checks goes to that
-                        file (does not presently work with 'json' format). If
-                        more than one output file is supplied, the number of
-                        input datasets supplied must match the number of
-                        output files.
-  -O OPTION, --option OPTION
-                        Additional options to be passed to the checkers.
-                        Multiple options can be specified via multiple
-                        invocations of this switch. Options should be prefixed
-                        with a the checker name followed by the option, e.g.
-                        '<checker>:<option_name>' Available options:
-                        'cf:enable_appendix_a_checks' - Allow check results
-                        against CF Appendix A for attribute location and data
-                        types.
-
-  -V, --version         Display the IOOS Compliance Checker version
-                        information.
+                        Describes checks for checkers specified using `-t`. If `-t` is not specified, lists checks from all available checkers.
+  --skip-checks, -s SKIP_CHECKS
+                        Specifies tests to skip. Can take the form of either `<check_name>` or `<check_name>:<skip_level>`. The first form skips any checks matching the
+                        name. In the second form <skip_level> may be specified as "A", "M", or "L". "A" skips all checks and is equivalent to calling the first form. "M"
+                        will only show high priority output from the given check and will skip medium and low. "L" will show both high and medium priority issues, while
+                        skipping low priority issues. Cannot be used with `-i`/`--include-checks` option.
+  --include-checks, -i INCLUDE_CHECKS
+                        Specifies checks to include. Can only take the form of `<check_name>`. Cannot be specified along with `-s`/`skip_checks`.
+  -f, --format {text,html,json,json_new}
+                        Output format(s). Options are 'text', 'html', 'json', 'json_new'. The difference between the 'json' and the 'json_new' formats is that the 'json'
+                        format has the check as the top level key, whereas the 'json_new' format has the dataset name(s) as the main key in the output follow by any checks
+                        as subkeys. Also, 'json' format can be only be run against one input file, whereas 'json_new' can be run against multiple files.
+  -o, --output OUTPUT   Output filename(s). If '-' is supplied, output to stdout. Can either be one or many files. If one file is supplied, but the checker is run against
+                        many files, all the output from the checks goes to that file (does not presently work with 'json' format). If more than one output file is supplied,
+                        the number of input datasets supplied must match the number of output files.
+  -O, --option OPTION   Additional options to be passed to the checkers. Multiple options can be specified via multiple invocations of this switch. Options should be
+                        prefixed with a the checker name followed by the option, potentially followed by a value, e.g. '<checker>:<option_name>[:<option_value>]' Available
+                        options: 'cf:enable_appendix_a_checks' - Allow check results against CF Appendix A for attribute location and data types.
+  -V, --version         Display the IOOS Compliance Checker version information.
   -l, --list-tests      List the available tests
-  -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
-                        Specify a version of the cf standard name table to
-                        download as packaged version. Either specify a version
-                        number (e.g. "72") to fetch a specific version or
-                        "latest" to get the latest CF standard name table.
+  -d, --download-standard-names DOWNLOAD_STANDARD_NAMES
+                        Specify a version of the cf standard name table to download as packaged version. Either specify a version number (e.g. "72") to fetch a specific
+                        version or "latest" to get the latest CF standard name table.
 ```
 
 ## Examples

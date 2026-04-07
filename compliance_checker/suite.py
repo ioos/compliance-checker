@@ -36,6 +36,20 @@ if sys.stderr.encoding is None:
     sys.stderr = codecs.getwriter("utf8")(sys.stderr)
 
 
+def _human_key(item: tuple) -> tuple[list[str | int], str]:
+    key, value = item
+    key = str(key)
+
+    def try_int(key: str) -> str | int:
+        """If `s` is a number, return an int, else `s` unchanged."""
+        try:
+            return int(key)
+        except ValueError:
+            return key
+
+    return ([try_int(c) for c in re.split(r"(\d+)", key.casefold())], item)
+
+
 def extract_docstring_summary(docstring):
     """
     Returns a dedented docstring without parameter information
@@ -81,8 +95,7 @@ class CheckSuite:
     def _print_suites(self, verbose=0):
         """
         Prints out available check suites.  If the verbose argument is True,
-        includes the internal module version number of the check and also displays
-        "latest" meta-versions.
+        includes the internal module version number of the check.
         :param check_suite: Check suite object
         :param verbose: Integer indicating whether to print verbose output
         :type verbose: int
@@ -91,9 +104,7 @@ class CheckSuite:
             version = getattr(self.checkers[checker], "_cc_checker_version", "???")
             if verbose > 0:
                 print(f" - {checker} (v{version})")
-            elif ":" in checker and not checker.endswith(
-                ":latest",
-            ):  # Skip the "latest" output
+            elif ":" in checker:  # Skip the unversioned latest alias.
                 print(f" - {checker}")
 
     def _print_checker(self, checker_obj):
@@ -181,7 +192,7 @@ class CheckSuite:
                 print("Could not load", c, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
-        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":" in c])
+        ver_checkers = [c.split(":", 1) for c in cls.checkers if ":" in c]
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
             version_nums = [v[-1] for v in versions]
             try:
@@ -189,7 +200,8 @@ class CheckSuite:
             # if the version can't be parsed, do it according to character collation
             except ValueError:
                 latest_version = max(version_nums)
-            cls.checkers[spec] = cls.checkers[spec + ":latest"] = cls.checkers[":".join((spec, latest_version))]
+            cls.checkers[spec] = cls.checkers[":".join((spec, latest_version))]
+        cls.checkers = dict(sorted(cls.checkers.items(), key=_human_key))
 
     def _get_checks(self, checkclass, include_checks, skip_checks):
         """
@@ -268,7 +280,7 @@ class CheckSuite:
 
         Returns the check name with the version number it checked
         """
-        if ":" not in check_name or ":latest" in check_name:
+        if ":" not in check_name:
             check_name = ":".join(
                 (check_name.split(":")[0], self.checkers[check_name]._cc_spec_version),
             )
