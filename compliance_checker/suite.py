@@ -95,8 +95,7 @@ class CheckSuite:
     def _print_suites(self, verbose=0):
         """
         Prints out available check suites.  If the verbose argument is True,
-        includes the internal module version number of the check and also displays
-        "latest" meta-versions.
+        includes the internal module version number of the check.
         :param check_suite: Check suite object
         :param verbose: Integer indicating whether to print verbose output
         :type verbose: int
@@ -105,9 +104,7 @@ class CheckSuite:
             version = getattr(self.checkers[checker], "_cc_checker_version", "???")
             if verbose > 0:
                 print(f" - {checker} (v{version})")
-            elif ":" in checker and not checker.endswith(
-                ":latest",
-            ):  # Skip the "latest" output
+            elif ":" in checker:  # Skip the unversioned latest alias.
                 print(f" - {checker}")
 
     def _print_checker(self, checker_obj):
@@ -283,7 +280,7 @@ class CheckSuite:
 
         Returns the check name with the version number it checked
         """
-        if ":" not in check_name or ":latest" in check_name:
+        if ":" not in check_name:
             check_name = ":".join(
                 (check_name.split(":")[0], self.checkers[check_name]._cc_spec_version),
             )

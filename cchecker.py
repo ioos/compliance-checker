@@ -58,8 +58,8 @@ def main():
         help=(
             "Select the Checks you want to perform. Defaults to 'acdd'"
             " if unspecified.  Versions of standards can be specified via "
-            "`-t <test_standard>:<version>`.  If `<version>` is omitted, or "
-            'is "latest", the latest version of the test standard is used.'
+            "`-t <test_standard>:<version>`.  If `<version>` is omitted "
+            "the latest version of the test standard is used."
         ),
     )
 
