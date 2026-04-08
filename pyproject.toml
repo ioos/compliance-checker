@@ -145,4 +145,5 @@ ini_options.filterwarnings = [
   "ignore:unclosed database in",                                           # Not sure what is causing this one, only happens in Python 3.13.
   "ignore:unclosed file",                                                  # Should make Windows + Python 3.10 and 3.11 pass, we should check when this warning was triggered first.
   "ignore:The ioos_sos checker is deprecated and will be removed",
+  "ignore:Passing the dataset to every single check is deprecated."
 ]
