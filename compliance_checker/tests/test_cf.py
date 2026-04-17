@@ -1988,6 +1988,39 @@ class TestCF1_7(BaseTestCase):
             assert score < out_of
             assert "'a' has 'formula_terms' attr, bounds variable 'b' must also have 'formula_terms'" in messages
 
+    def _make_bounds_dataset(
+        self,
+        centers,
+        bnds,
+        *,
+        coord_name="rlon",
+        is_longitude=True,
+        center_dtype=np.float64,
+        bnds_dtype=np.float64,
+    ):
+        """Build a minimal dataset with one coord variable and its bounds.
+
+        Helper for ``check_cell_boundaries_interval`` tests.
+        """
+        centers = np.asarray(centers, dtype=center_dtype)
+        bnds = np.asarray(bnds, dtype=bnds_dtype)
+        dataset = MockTimeSeries()
+        dataset.createDimension(f"{coord_name}_d", centers.shape[0])
+        dataset.createDimension(f"{coord_name}_nv", bnds.shape[1])
+        cvar = dataset.createVariable(coord_name, center_dtype, (f"{coord_name}_d",))
+        bvar = dataset.createVariable(
+            f"{coord_name}_bnds",
+            bnds_dtype,
+            (f"{coord_name}_d", f"{coord_name}_nv"),
+        )
+        cvar.bounds = f"{coord_name}_bnds"
+        cvar.axis = "X" if is_longitude else "Y"
+        cvar.standard_name = "longitude" if is_longitude else "latitude"
+        cvar.units = "degrees_east" if is_longitude else "degrees_north"
+        cvar[:] = centers
+        bvar[:] = bnds
+        return dataset
+
     def test_check_cell_boundaries_interval(self):
         """
         7.1 Cell Boundaries
@@ -1995,31 +2028,122 @@ class TestCF1_7(BaseTestCase):
         The points specified by a coordinate or auxiliary coordinate variable
         should lie within, or on the boundary, of the cells specified by the
         associated boundary variable.
+
+        The check emits one Result per coordinate variable: pass iff every
+        center lies within the bounding box of its cell's vertices.
         """
 
-        # create Cells on a longitude axis
-        dataset = MockTimeSeries()
-        dataset.createDimension("rnv", 2)
-        dataset.createDimension("rlon", 3)
-        dataset.createVariable("rlon", "d", ("rlon",))
-        dataset.createVariable("rlon_bnds", "d", ("rlon", "rnv"))
-
-        rlon = dataset.variables["rlon"]
-        rlon.standard_name = "longitude"
-        rlon.units = "degrees_east"
-        rlon.axis = "X"
-        rlon.long_name = "Longitude"
-        rlon.bounds = "rlon_bnds"
-        rlon[:] = np.array([-97.5, -99.5, 0.0], dtype=np.float64)
-
-        rlon_bnds = dataset.variables["rlon_bnds"]
-        rlon_bnds.long_name = "Longitude Cell Boundaries"
-        # We expect: True, False, True
-        rlon_bnds[:] = np.array([[-97, -98], [-98, -99], [-0.9375, 0.9375]], dtype=np.float64)
-
+        # Original scenario: two cells, second center (-99.5) lies outside its
+        # (-99, -98) cell → the whole coordinate fails.
+        dataset = self._make_bounds_dataset(
+            centers=[-97.5, -99.5],
+            bnds=[[-97, -98], [-98, -99]],
+        )
         results = self.cf.check_cell_boundaries_interval(dataset)
         score, out_of, messages = get_results(results)
-        assert (score, out_of) == (1, 3)
+        assert (score, out_of) == (0, 1)
+        assert any("1 point(s)" in m for m in messages)
+
+    def test_check_cell_boundaries_interval_all_inside(self):
+        """Interval (N, 2) bounds, every center inside → pass."""
+        dataset = self._make_bounds_dataset(
+            centers=[-97.5, -98.5, -99.5],
+            bnds=[[-97, -98], [-98, -99], [-99, -100]],
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (1, 1)
+        assert messages == []
+
+    def test_check_cell_boundaries_interval_descending_bounds(self):
+        """Descending (N, 2) bounds must be handled correctly."""
+        # Center 0.5 inside a descending cell [1, 0]; center 2.0 outside [1, 0].
+        dataset = self._make_bounds_dataset(
+            centers=[0.5, 2.0],
+            bnds=[[1.0, 0.0], [1.0, 0.0]],
+            coord_name="rlat",
+            is_longitude=False,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (0, 1)
+        assert any("1 point(s)" in m for m in messages)
+
+    def test_check_cell_boundaries_polygonal_bounds(self):
+        """Polygonal (N, nvertices > 2) bounds: center inside the vertex box → pass."""
+        # 3 cells, each with 4 vertices; all centers inside bounding boxes.
+        dataset = self._make_bounds_dataset(
+            centers=[10.0, 20.0, 30.0],
+            bnds=[
+                [9.0, 11.0, 10.5, 9.5],
+                [19.0, 21.0, 20.5, 19.5],
+                [29.0, 31.0, 30.5, 29.5],
+            ],
+            coord_name="lat_unstruct",
+            is_longitude=False,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (1, 1)
+
+        # Now move the second center outside its (19, 21) bounding box.
+        dataset2 = self._make_bounds_dataset(
+            centers=[10.0, 25.0, 30.0],
+            bnds=[
+                [9.0, 11.0, 10.5, 9.5],
+                [19.0, 21.0, 20.5, 19.5],
+                [29.0, 31.0, 30.5, 29.5],
+            ],
+            coord_name="lat_unstruct",
+            is_longitude=False,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset2)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (0, 1)
+        assert any("1 point(s)" in m for m in messages)
+
+    def test_check_cell_boundaries_interval_float_precision(self):
+        """float32 coord vs float64 bounds must not trigger precision-noise flags."""
+        # float32 rounds -75.013 to -75.01300048828125; bounds stored as float64
+        # with exact -75.013. Old bounding-box test without a tolerance would
+        # report a spurious violation.
+        dataset = self._make_bounds_dataset(
+            centers=np.array([-75.013], dtype=np.float32),
+            bnds=np.array([[-75.013, -74.9]], dtype=np.float64),
+            coord_name="lat_precision",
+            is_longitude=False,
+            center_dtype=np.float32,
+            bnds_dtype=np.float64,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (1, 1)
+        assert messages == []
+
+    def test_check_cell_boundaries_interval_longitude_wrap(self):
+        """Antimeridian-crossing cell: center +179.5° in cell [+179°, -179°] → pass."""
+        dataset = self._make_bounds_dataset(
+            centers=[179.5],
+            bnds=[[179.0, -179.0]],
+            coord_name="lon_wrap",
+            is_longitude=True,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (1, 1)
+        assert messages == []
+
+        # Non-wrap outside: center +20° with cell [0°, 10°] → fail.
+        dataset2 = self._make_bounds_dataset(
+            centers=[20.0],
+            bnds=[[0.0, 10.0]],
+            coord_name="lon_no_wrap",
+            is_longitude=True,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset2)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (0, 1)
+        assert any("1 point(s)" in m for m in messages)
 
     def test_cell_measures(self):
         # create a temporary variable and test this only
