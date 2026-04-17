@@ -26,7 +26,7 @@ def create_DAP_variable_str(url):
     """
 
     # get dds
-    with urllib.request.urlopen(f"{url}.dds") as resp:
+    with urllib.request.urlopen(f"{url}.dds", timeout=10) as resp:
         _str = resp.read().decode()[8:]
 
     # remove beginning and ending braces, split on newlines
@@ -58,7 +58,7 @@ def is_opendap(url):
         das_url = url + ".das"
 
     try:
-        response = requests.get(das_url, allow_redirects=True)
+        response = requests.get(das_url, allow_redirects=True, timeout=10)
 
         if "xdods-server" in response.headers:
             return True
