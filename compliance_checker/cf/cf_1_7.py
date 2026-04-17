@@ -387,10 +387,7 @@ class CF1_7Check(CF1_6Check):
             # the antimeridian have vertices on both sides of +/-180 and the raw
             # bounding box spans almost the whole globe. Unwrap vertices relative
             # to the cell center so the min/max reflects the true (wrapped) cell.
-            is_lon = (
-                str(getattr(variable, "units", "")).strip() == "degrees_east"
-                or str(getattr(variable, "standard_name", "")).strip() == "longitude"
-            )
+            is_lon = str(getattr(variable, "units", "")).strip() == "degrees_east" or str(getattr(variable, "standard_name", "")).strip() == "longitude"
             if is_lon:
                 span = bmax - bmin
                 wrap = np.asarray(span > 180.0)
@@ -419,9 +416,7 @@ class CF1_7Check(CF1_6Check):
             if bad.any():
                 n_bad = int(bad.sum())
                 reasoning.append(
-                    f"{n_bad} point(s) specified by the coordinate variable "
-                    f"'{variable_name}' lie outside the bounding box of the "
-                    f"associated boundary variable '{boundary_variable_name}'",
+                    f"{n_bad} point(s) specified by the coordinate variable '{variable_name}' lie outside the bounding box of the associated boundary variable '{boundary_variable_name}'",
                 )
 
             ret_val.append(
