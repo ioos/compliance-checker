@@ -382,6 +382,28 @@ class CF1_7Check(CF1_6Check):
             # between coordinate and bounds variables.
             bmin = bnds.min(axis=-1)
             bmax = bnds.max(axis=-1)
+
+            # Longitude-wrap awareness: for longitude coordinates, cells crossing
+            # the antimeridian have vertices on both sides of +/-180 and the raw
+            # bounding box spans almost the whole globe. Unwrap vertices relative
+            # to the cell center so the min/max reflects the true (wrapped) cell.
+            is_lon = (
+                str(getattr(variable, "units", "")).strip() == "degrees_east"
+                or str(getattr(variable, "standard_name", "")).strip() == "longitude"
+            )
+            if is_lon:
+                span = bmax - bmin
+                wrap = np.asarray(span > 180.0)
+                if wrap.any():
+                    c_col = np.asarray(centers)[:, None]
+                    delta = np.asarray(bnds) - c_col
+                    delta = np.where(delta > 180.0, delta - 360.0, delta)
+                    delta = np.where(delta < -180.0, delta + 360.0, delta)
+                    bnds_unwrapped = c_col + delta
+                    bnds = np.where(wrap[:, None], bnds_unwrapped, np.asarray(bnds))
+                    bmin = bnds.min(axis=-1)
+                    bmax = bnds.max(axis=-1)
+
             tol = 0.0
             if centers.dtype.kind == "f" or bnds.dtype.kind == "f":
                 rtol = 1e-5
