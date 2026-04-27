@@ -2000,7 +2000,7 @@ class TestCF1_7(BaseTestCase):
         # create Cells on a longitude axis
         dataset = MockTimeSeries()
         dataset.createDimension("rnv", 2)
-        dataset.createDimension("rlon", 2)
+        dataset.createDimension("rlon", 3)
         dataset.createVariable("rlon", "d", ("rlon",))
         dataset.createVariable("rlon_bnds", "d", ("rlon", "rnv"))
 
@@ -2010,15 +2010,16 @@ class TestCF1_7(BaseTestCase):
         rlon.axis = "X"
         rlon.long_name = "Longitude"
         rlon.bounds = "rlon_bnds"
-        rlon[:] = np.array([-97.5, -99.5], dtype=np.float64)
+        rlon[:] = np.array([-97.5, -99.5, 0.0], dtype=np.float64)
 
         rlon_bnds = dataset.variables["rlon_bnds"]
         rlon_bnds.long_name = "Longitude Cell Boundaries"
-        rlon_bnds[:] = np.array([[-97, -98], [-98, -99]], dtype=np.float64)
+        # We expect: True, False, True
+        rlon_bnds[:] = np.array([[-97, -98], [-98, -99], [-0.9375, 0.9375]], dtype=np.float64)
 
         results = self.cf.check_cell_boundaries_interval(dataset)
         score, out_of, messages = get_results(results)
-        assert (score, out_of) == (1, 2)
+        assert (score, out_of) == (1, 3)
 
     def test_cell_measures(self):
         # create a temporary variable and test this only
