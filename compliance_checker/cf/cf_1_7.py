@@ -361,6 +361,9 @@ class CF1_7Check(CF1_6Check):
             boundary_variable = ds.variables[boundary_variable_name]
 
             for k in range(len(variable[:])):
+                if len(boundary_variable[k]) != 2:
+                    # We do not check 2D+ coords bounds.
+                    continue
                 if not min(boundary_variable[k]) <= variable[k] <= max(boundary_variable[k]):
                     valid = False
                     reasoning.append(
