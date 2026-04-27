@@ -364,9 +364,9 @@ class CF1_7Check(CF1_6Check):
                 if not min(boundary_variable[k]) <= variable[k] <= max(boundary_variable[k]):
                     valid = False
                     reasoning.append(
-                        f"The points specified by the coordinate variable {variable_name} ({variable[k]})"
-                        " lie outside the boundary of the cell specified by the "
-                        f"associated boundary variable {boundary_variable_name} ({boundary_variable[k]})",
+                        f"The points specified by the coordinate variable {variable_name} ({variable[k]}) "
+                        "lie outside the boundary of the cell specified by the "
+                        f"associated boundary variable {boundary_variable_name} ({boundary_variable[k]}).",
                     )
 
                 result = Result(
