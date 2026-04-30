@@ -360,15 +360,17 @@ class CF1_7Check(CF1_6Check):
             variable = ds.variables[variable_name]
             boundary_variable = ds.variables[boundary_variable_name]
 
-            for ii in range(len(variable[:])):
-                if abs(boundary_variable[ii][1]) >= abs(boundary_variable[ii][0]):
-                    if not ((abs(variable[ii]) >= abs(boundary_variable[ii][0])) and (abs(variable[ii]) <= abs(boundary_variable[ii][1]))):
-                        valid = False
-                        reasoning.append(
-                            f"The points specified by the coordinate variable {variable_name} ({variable[ii]})"
-                            " lie outside the boundary of the cell specified by the "
-                            f"associated boundary variable {boundary_variable_name} ({boundary_variable[ii]})",
-                        )
+            for k in range(len(variable[:])):
+                if len(boundary_variable[k]) != 2:
+                    # We do not check 2D+ coords bounds.
+                    continue
+                if not min(boundary_variable[k]) <= variable[k] <= max(boundary_variable[k]):
+                    valid = False
+                    reasoning.append(
+                        f"The points specified by the coordinate variable {variable_name} ({variable[k]}) "
+                        "lie outside the boundary of the cell specified by the "
+                        f"associated boundary variable {boundary_variable_name} ({boundary_variable[k]}).",
+                    )
 
                 result = Result(
                     BaseCheck.MEDIUM,
@@ -377,7 +379,7 @@ class CF1_7Check(CF1_6Check):
                     reasoning,
                 )
                 ret_val.append(result)
-            return ret_val
+        return ret_val
 
     def check_cell_measures(self, ds):
         """
