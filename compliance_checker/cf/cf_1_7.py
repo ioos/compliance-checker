@@ -370,9 +370,12 @@ class CF1_7Check(CF1_6Check):
                 # If the variable cannot be materialised (e.g. very large), skip.
                 continue
 
-            if bnds.ndim < 2 or bnds.shape[-1] < 2 or bnds.shape[0] != centers.shape[0]:
-                # Shape mismatch is handled by check_cell_boundaries;
-                # this recommendation check cannot meaningfully proceed.
+            # ``bnds`` must add exactly one trailing vertex axis to ``centers``:
+            # 1-D coord ``(N,)`` -> bounds ``(N, k)``; 2-D curvilinear coord
+            # ``(J, I)`` -> bounds ``(J, I, k)``. Anything else is handled by
+            # check_cell_boundaries and the recommendation check cannot
+            # meaningfully proceed.
+            if bnds.ndim != centers.ndim + 1 or bnds.shape[-1] < 2 or bnds.shape[:-1] != centers.shape:
                 continue
 
             # Bounding-box test: center must lie within [min(bnds), max(bnds)] along
@@ -392,12 +395,16 @@ class CF1_7Check(CF1_6Check):
                 span = bmax - bmin
                 wrap = np.asarray(span > 180.0)
                 if wrap.any():
-                    c_col = np.asarray(centers)[:, None]
+                    # Use ellipsis indexing so this works for both 1-D
+                    # ``(N,)`` and 2-D curvilinear ``(J, I)`` centers; ``[:, None]``
+                    # would broadcast 2-D centers to ``(J, 1, I)`` and fail
+                    # against bounds ``(J, I, k)``.
+                    c_col = np.asarray(centers)[..., None]
                     delta = np.asarray(bnds) - c_col
                     delta = np.where(delta > 180.0, delta - 360.0, delta)
                     delta = np.where(delta < -180.0, delta + 360.0, delta)
                     bnds_unwrapped = c_col + delta
-                    bnds = np.where(wrap[:, None], bnds_unwrapped, np.asarray(bnds))
+                    bnds = np.where(wrap[..., None], bnds_unwrapped, np.asarray(bnds))
                     bmin = bnds.min(axis=-1)
                     bmax = bnds.max(axis=-1)
 

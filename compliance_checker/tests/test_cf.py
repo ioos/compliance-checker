@@ -2029,7 +2029,7 @@ class TestCF1_7(BaseTestCase):
         should lie within, or on the boundary, of the cells specified by the
         associated boundary variable.
 
-        The check emits one Result per coordinate variable: pass iff every
+        The check emits one Result per coordinate variable: pass if every
         center lies within the bounding box of its cell's vertices.
         """
 
@@ -2144,6 +2144,121 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(results)
         assert (score, out_of) == (0, 1)
         assert any("1 point(s)" in m for m in messages)
+
+    def _make_2d_curvilinear_dataset(self, lon_centers, lat_centers, *, wrap_seam=False):
+        """Build a 3x4 curvilinear MockTimeSeries with bounds (3, 4, 4)."""
+        lat_bnds = np.empty((3, 4, 4), dtype=np.float64)
+        lon_bnds = np.empty((3, 4, 4), dtype=np.float64)
+        for j in range(3):
+            for i in range(4):
+                lat_bnds[j, i, :] = [
+                    lat_centers[j, i] - 5,
+                    lat_centers[j, i] - 5,
+                    lat_centers[j, i] + 5,
+                    lat_centers[j, i] + 5,
+                ]
+                lon_bnds[j, i, :] = [
+                    lon_centers[j, i] - 0.5,
+                    lon_centers[j, i] + 0.5,
+                    lon_centers[j, i] + 0.5,
+                    lon_centers[j, i] - 0.5,
+                ]
+        if wrap_seam:
+            # Force the antimeridian wrap on cell [1, 0].
+            lon_bnds[1, 0, :] = [179.0, -179.0, -179.0, 179.0]
+
+        dataset = MockTimeSeries()
+        dataset.createDimension("j", 3)
+        dataset.createDimension("i", 4)
+        dataset.createDimension("nv", 4)
+        for name, vals, std, units in (
+            ("lat2d", lat_centers, "latitude", "degrees_north"),
+            ("lon2d", lon_centers, "longitude", "degrees_east"),
+        ):
+            v = dataset.createVariable(name, np.float64, ("j", "i"))
+            v.standard_name = std
+            v.units = units
+            v.bounds = f"{name}_bnds"
+            v[:] = vals
+        for name, vals in (("lat2d_bnds", lat_bnds), ("lon2d_bnds", lon_bnds)):
+            v = dataset.createVariable(name, np.float64, ("j", "i", "nv"))
+            v[:] = vals
+        return dataset
+
+    def test_check_cell_boundaries_interval_2d_curvilinear_pass(self):
+        """2-D curvilinear ``(J, I)`` centers with bounds ``(J, I, 4)``,
+        every center inside its bounding box. Regression test that the
+        bounding-box test broadcasts correctly for 2-D shapes."""
+        lat_centers = np.array(
+            [[10.0] * 4, [20.0] * 4, [30.0] * 4],
+            dtype=np.float64,
+        )
+        lon_centers = np.array(
+            [
+                [-10.0, 0.0, 10.0, 20.0],
+                [-10.0, 10.0, 20.0, 30.0],
+                [-10.0, 0.0, 10.0, 20.0],
+            ],
+            dtype=np.float64,
+        )
+        dataset = self._make_2d_curvilinear_dataset(lon_centers, lat_centers)
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        # Two coords (lat2d, lon2d) -> two Results, both pass.
+        assert (score, out_of) == (2, 2)
+        assert messages == []
+
+    def test_check_cell_boundaries_interval_2d_curvilinear_wrap(self):
+        """2-D curvilinear grid with one antimeridian-crossing cell: the
+        longitude-wrap branch runs on a 2-D shape (regression for the
+        UKESM1-0-LL ``tos`` broadcast failure reported on PR #1292)."""
+        lat_centers = np.array(
+            [[10.0] * 4, [20.0] * 4, [30.0] * 4],
+            dtype=np.float64,
+        )
+        # Cell [1, 0]: center 179.5°, bounds will be forced to the seam.
+        lon_centers = np.array(
+            [
+                [-10.0, 0.0, 10.0, 20.0],
+                [179.5, 10.0, 20.0, 30.0],
+                [-10.0, 0.0, 10.0, 20.0],
+            ],
+            dtype=np.float64,
+        )
+        dataset = self._make_2d_curvilinear_dataset(
+            lon_centers,
+            lat_centers,
+            wrap_seam=True,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (2, 2)
+        assert messages == []
+
+    def test_check_cell_boundaries_interval_2d_curvilinear_fail(self):
+        """2-D curvilinear grid with one center deliberately outside its
+        bounding box: the failure path must report the coord and a count."""
+        lat_centers = np.array(
+            [[10.0] * 4, [20.0] * 4, [30.0] * 4],
+            dtype=np.float64,
+        )
+        lon_centers = np.array(
+            [
+                [-10.0, 0.0, 10.0, 20.0],
+                [-10.0, 10.0, 20.0, 30.0],
+                [-10.0, 0.0, 10.0, 20.0],
+            ],
+            dtype=np.float64,
+        )
+        dataset = self._make_2d_curvilinear_dataset(lon_centers, lat_centers)
+        # Move cell [2, 2]'s lon bounds away from its center (10.0).
+        dataset.variables["lon2d_bnds"][2, 2, :] = [50.0, 51.0, 51.0, 50.0]
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        # lat2d still passes; lon2d fails with 1 offending point.
+        assert (score, out_of) == (1, 2)
+        assert any("1 point(s)" in m for m in messages)
+        assert any("lon2d" in m for m in messages)
 
     def test_cell_measures(self):
         # create a temporary variable and test this only
