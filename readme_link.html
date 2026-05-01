@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>IOOS Compliance Checker &#8212; compliance_checker 5.4.2 documentation</title>
+    <title>IOOS Compliance Checker &#8212; compliance_checker 6.0.2 documentation</title>
   
   
   
@@ -27,21 +27,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
   
   <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="_static/documentation_options.js?v=41d0e7f4"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/documentation_options.js?v=81158f5a"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'readme_link';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="API" href="compliance_checker_api.html" />
@@ -49,23 +50,29 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="5.4.2" />
+  <meta name="docsearch:version" content="6.0.2" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/readme_link.html" />
 
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -202,10 +209,11 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.4.2
+  Version 6.0.2
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
         <div class="sidebar-primary-item">
+
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
@@ -407,84 +415,46 @@ parse it’s contents.</p>
 <blockquote>
 <div><p><strong>WARNING</strong> The CF/ACDD checks <strong>will access data</strong>, so if using a remote OPeNDAP URL, please be sure the size is reasonable!</p>
 </div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>usage: cchecker.py [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
-                   [--verbose] [--describe-checks] [--skip-checks SKIP_CHECKS]
-                   [-f {text,html,json,json_new}] [-o OUTPUT] [-O OPTION] [-V]
-                   [-l] [-d DOWNLOAD_STANDARD_NAMES]
-                   [dataset_location [dataset_location ...]]
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>usage: cchecker.py [-h] [--test TEST] [--criteria {lenient,normal,strict}] [--verbose] [--describe-checks] [--skip-checks SKIP_CHECKS | --include-checks INCLUDE_CHECKS]
+                   [-f {text,html,json,json_new}] [-o OUTPUT] [-O OPTION] [-V] [-l] [-d DOWNLOAD_STANDARD_NAMES]
+                   [dataset_location ...]
 
 positional arguments:
-  dataset_location      Defines the location of the dataset to be checked.
-                        The location can be a local netCDF file, a remote
-                        OPeNDAP endpoint, a remote netCDF file which returns
-                        content-type header of &#39;application/x-netcdf&#39;, or an
-                        ERDDAP TableDAP endpoint. Note that the ERDDAP TableDAP
-                        endpoint will currently attempt to fetch the entire
-                        TableDAP dataset.
+  dataset_location      Defines the location of the dataset to be checked. The location can be a local netCDF file, a remote OPeNDAP endpoint, a remote netCDF file which
+                        returns content-type header of &#39;application/x-netcdf&#39;, or an ERDDAP TableDAP endpoint. Note that the ERDDAP TableDAP endpoint will currently attempt
+                        to fetch the entire TableDAP dataset.
 
-
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  --test TEST, -t TEST, --test= TEST, -t= TEST
-                        Select the Checks you want to perform. Defaults to
-                        &#39;acdd&#39; if unspecified. Versions of standards can be
-                        specified via `-t &lt;test_standard&gt;:&lt;version&gt;`. If
-                        `&lt;version&gt;` is omitted, or is &quot;latest&quot;, the latest
-                        version of the test standard is used.
-  --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
-                        Define the criteria for the checks. Either Strict,
-                        Normal, or Lenient. Defaults to Normal.
+  --test, -t TEST       Select the Checks you want to perform. Defaults to &#39;acdd&#39; if unspecified. Versions of standards can be specified via `-t &lt;test_standard&gt;:&lt;version&gt;`.
+                        If `&lt;version&gt;` is omitted the latest version of the test standard is used.
+  --criteria, -c {lenient,normal,strict}
+                        Define the criteria for the checks. Either Strict, Normal, or Lenient. Defaults to Normal.
   --verbose, -v         Increase output. May be specified up to three times.
   --describe-checks, -D
-                        Describes checks for checkers specified using `-t`. If
-                        `-t` is not specified, lists checks from all available
-                        checkers.
-  --skip-checks SKIP_CHECKS, -s SKIP_CHECKS
-                        Specifies tests to skip. Can take the form of either
-                        `&lt;check_name&gt;` or `&lt;check_name&gt;:&lt;skip_level&gt;`. The
-                        first form skips any checks matching the name. In the
-                        second form &lt;skip_level&gt; may be specified as &quot;A&quot;, &quot;M&quot;,
-                        or &quot;L&quot;. &quot;A&quot; skips all checks and is equivalent to
-                        calling the first form. &quot;M&quot; will only show high
-                        priority output from the given check and will skip
-                        medium and low. &quot;L&quot; will show both high and medium
-                        priority issues, while skipping low priority issues.
-  -f {text,html,json,json_new}, --format {text,html,json,json_new}
-                        Output format(s). Options are &#39;text&#39;, &#39;html&#39;, &#39;json&#39;,
-                        &#39;json_new&#39;. The difference between the &#39;json&#39; and the
-                        &#39;json_new&#39; formats is that the &#39;json&#39; format has the
-                        check as the top level key, whereas the &#39;json_new&#39;
-                        format has the dataset name(s) as the main key in the
-                        output follow by any checks as subkeys. Also, &#39;json&#39;
-                        format can be only be run against one input file,
-                        whereas &#39;json_new&#39; can be run against multiple files.
-  -o OUTPUT, --output OUTPUT
-                        Output filename(s). If &#39;-&#39; is supplied, output to
-                        stdout. Can either be one or many files. If one file
-                        is supplied, but the checker is run against many
-                        files, all the output from the checks goes to that
-                        file (does not presently work with &#39;json&#39; format). If
-                        more than one output file is supplied, the number of
-                        input datasets supplied must match the number of
-                        output files.
-  -O OPTION, --option OPTION
-                        Additional options to be passed to the checkers.
-                        Multiple options can be specified via multiple
-                        invocations of this switch. Options should be prefixed
-                        with a the checker name followed by the option, e.g.
-                        &#39;&lt;checker&gt;:&lt;option_name&gt;&#39; Available options:
-                        &#39;cf:enable_appendix_a_checks&#39; - Allow check results
-                        against CF Appendix A for attribute location and data
-                        types.
-
-  -V, --version         Display the IOOS Compliance Checker version
-                        information.
+                        Describes checks for checkers specified using `-t`. If `-t` is not specified, lists checks from all available checkers.
+  --skip-checks, -s SKIP_CHECKS
+                        Specifies tests to skip. Can take the form of either `&lt;check_name&gt;` or `&lt;check_name&gt;:&lt;skip_level&gt;`. The first form skips any checks matching the
+                        name. In the second form &lt;skip_level&gt; may be specified as &quot;A&quot;, &quot;M&quot;, or &quot;L&quot;. &quot;A&quot; skips all checks and is equivalent to calling the first form. &quot;M&quot;
+                        will only show high priority output from the given check and will skip medium and low. &quot;L&quot; will show both high and medium priority issues, while
+                        skipping low priority issues. Cannot be used with `-i`/`--include-checks` option.
+  --include-checks, -i INCLUDE_CHECKS
+                        Specifies checks to include. Can only take the form of `&lt;check_name&gt;`. Cannot be specified along with `-s`/`skip_checks`.
+  -f, --format {text,html,json,json_new}
+                        Output format(s). Options are &#39;text&#39;, &#39;html&#39;, &#39;json&#39;, &#39;json_new&#39;. The difference between the &#39;json&#39; and the &#39;json_new&#39; formats is that the &#39;json&#39;
+                        format has the check as the top level key, whereas the &#39;json_new&#39; format has the dataset name(s) as the main key in the output follow by any checks
+                        as subkeys. Also, &#39;json&#39; format can be only be run against one input file, whereas &#39;json_new&#39; can be run against multiple files.
+  -o, --output OUTPUT   Output filename(s). If &#39;-&#39; is supplied, output to stdout. Can either be one or many files. If one file is supplied, but the checker is run against
+                        many files, all the output from the checks goes to that file (does not presently work with &#39;json&#39; format). If more than one output file is supplied,
+                        the number of input datasets supplied must match the number of output files.
+  -O, --option OPTION   Additional options to be passed to the checkers. Multiple options can be specified via multiple invocations of this switch. Options should be
+                        prefixed with a the checker name followed by the option, potentially followed by a value, e.g. &#39;&lt;checker&gt;:&lt;option_name&gt;[:&lt;option_value&gt;]&#39; Available
+                        options: &#39;cf:enable_appendix_a_checks&#39; - Allow check results against CF Appendix A for attribute location and data types.
+  -V, --version         Display the IOOS Compliance Checker version information.
   -l, --list-tests      List the available tests
-  -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
-                        Specify a version of the cf standard name table to
-                        download as packaged version. Either specify a version
-                        number (e.g. &quot;72&quot;) to fetch a specific version or
-                        &quot;latest&quot; to get the latest CF standard name table.
+  -d, --download-standard-names DOWNLOAD_STANDARD_NAMES
+                        Specify a version of the cf standard name table to download as packaged version. Either specify a version number (e.g. &quot;72&quot;) to fetch a specific
+                        version or &quot;latest&quot; to get the latest CF standard name table.
 </pre></div>
 </div>
 </section>
@@ -492,7 +462,7 @@ optional arguments:
 <h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h2>
 <section id="check-a-local-file-against-cf-1-6">
 <h3>Check a local file against CF 1.6<a class="headerlink" href="#check-a-local-file-against-cf-1-6" title="Link to this heading">#</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">--</span><span class="n">test</span><span class="o">=</span><span class="n">cf</span><span class="p">:</span><span class="mf">1.6</span> <span class="n">compliance_checker</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">hycom_global</span><span class="o">.</span><span class="n">nc</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>compliance-checker<span class="w"> </span>--test<span class="o">=</span>cf:1.6<span class="w"> </span>compliance_checker/tests/data/examples/hycom_global.nc
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>--------------------------------------------------------------------------------
@@ -579,21 +549,21 @@ contains valid packing:                are not of type float or double.
 </section>
 <section id="output-text-from-multiple-input-files-to-one-output-file">
 <h3>Output text from multiple input files to one output file<a class="headerlink" href="#output-text-from-multiple-input-files-to-one-output-file" title="Link to this heading">#</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">--</span><span class="n">test</span><span class="o">=</span><span class="n">cf</span><span class="p">:</span><span class="mf">1.6</span> <span class="o">--</span><span class="nb">format</span> <span class="n">text</span> <span class="o">--</span><span class="n">output</span><span class="o">=/</span><span class="n">tmp</span><span class="o">/</span><span class="n">combined_output</span><span class="o">.</span><span class="n">txt</span> <span class="n">compliance_checker</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">hycom_global</span><span class="o">.</span><span class="n">nc</span> <span class="n">compliance_checker</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">ww3</span><span class="o">.</span><span class="n">nc</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>compliance-checker<span class="w"> </span>--test<span class="o">=</span>cf:1.6<span class="w"> </span>--format<span class="w"> </span>text<span class="w"> </span>--output<span class="o">=</span>/tmp/combined_output.txt<span class="w"> </span>compliance_checker/tests/data/examples/hycom_global.nc<span class="w"> </span>compliance_checker/tests/data/examples/ww3.nc
 </pre></div>
 </div>
 </section>
 <section id="output-html-and-text-files-from-multiple-input-files-part-1">
 <h3>Output html and text files from multiple input files (part 1)<a class="headerlink" href="#output-html-and-text-files-from-multiple-input-files-part-1" title="Link to this heading">#</a></h3>
 <p>In this case you’ll get 2 files <code class="docutils literal notranslate"><span class="pre">/tmp/combined_output.txt</span></code> and <code class="docutils literal notranslate"><span class="pre">/tmp/combined_output.html</span></code> that contain cf check results for both input files because you only specified 1 output filename.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">--</span><span class="n">test</span><span class="o">=</span><span class="n">cf</span><span class="p">:</span><span class="mf">1.6</span> <span class="o">--</span><span class="nb">format</span> <span class="n">text</span> <span class="o">--</span><span class="nb">format</span> <span class="n">html</span> <span class="o">--</span><span class="n">output</span><span class="o">=/</span><span class="n">tmp</span><span class="o">/</span><span class="n">combined_output</span><span class="o">.</span><span class="n">txt</span> <span class="n">compliance_checker</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">hycom_global</span><span class="o">.</span><span class="n">nc</span> <span class="n">compliance_checker</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">ww3</span><span class="o">.</span><span class="n">nc</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>compliance-checker<span class="w"> </span>--test<span class="o">=</span>cf:1.6<span class="w"> </span>--format<span class="w"> </span>text<span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="o">=</span>/tmp/combined_output.txt<span class="w"> </span>compliance_checker/tests/data/examples/hycom_global.nc<span class="w"> </span>compliance_checker/tests/data/examples/ww3.nc
 </pre></div>
 </div>
 </section>
 <section id="output-html-and-text-files-from-multiple-input-files-part-2">
 <h3>Output html and text files from multiple input files (part 2)<a class="headerlink" href="#output-html-and-text-files-from-multiple-input-files-part-2" title="Link to this heading">#</a></h3>
 <p>In this case you’ll get 4 files <code class="docutils literal notranslate"><span class="pre">/tmp/hycom.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">/tmp/hycom.html</span></code>, <code class="docutils literal notranslate"><span class="pre">/tmp/ww3.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">/tmp/ww3.html</span></code> that contain cf check results because you specified as many output filenames as input filenames.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">--</span><span class="n">test</span><span class="o">=</span><span class="n">cf</span><span class="p">:</span><span class="mf">1.6</span> <span class="o">--</span><span class="nb">format</span> <span class="n">text</span> <span class="o">--</span><span class="nb">format</span> <span class="n">html</span> <span class="o">--</span><span class="n">output</span><span class="o">=/</span><span class="n">tmp</span><span class="o">/</span><span class="n">hycom</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">output</span><span class="o">=/</span><span class="n">tmp</span><span class="o">/</span><span class="n">ww3</span><span class="o">.</span><span class="n">txt</span> <span class="n">compliance_checker</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">hycom_global</span><span class="o">.</span><span class="n">nc</span> <span class="n">compliance_checker</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">ww3</span><span class="o">.</span><span class="n">nc</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>compliance-checker<span class="w"> </span>--test<span class="o">=</span>cf:1.6<span class="w"> </span>--format<span class="w"> </span>text<span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="o">=</span>/tmp/hycom.txt<span class="w"> </span>--output<span class="o">=</span>/tmp/ww3.txt<span class="w"> </span>compliance_checker/tests/data/examples/hycom_global.nc<span class="w"> </span>compliance_checker/tests/data/examples/ww3.nc
 </pre></div>
 </div>
 </section>
@@ -603,59 +573,57 @@ contains valid packing:                are not of type float or double.
 During the CF test, if a file has a particular version of the cf standard name table specified in the global attributes
 (i.e. <code class="docutils literal notranslate"><span class="pre">:standard_name_vocabulary</span> <span class="pre">=</span> <span class="pre">&quot;CF</span> <span class="pre">Standard</span> <span class="pre">Name</span> <span class="pre">Table</span> <span class="pre">v30&quot;</span> <span class="pre">;</span></code>) that doesn’t match the packaged version, it will
 try to download the specified version. If it fails, it will fall back to packaged version.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">-</span><span class="n">d</span> <span class="mi">35</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>compliance-checker<span class="w"> </span>-d<span class="w"> </span><span class="m">35</span>
 </pre></div>
 </div>
-<p>Downloading cf-standard-names table version 35 from: http://cfconventions.org/Data/cf-standard-names/35/src/cf-standard-name-table.xml</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
-Alternatively, you can specify an absolute path to a standard name table you may have locally in an environment variable named CF_STANDARD_NAME_TABLE and the compliance checker will use that version instead.
-
-
-## Python Usage
-
-If you are interested in incorporating the IOOS Compliance Checker into your own python projects, check out the following python code example:
-```python
-from compliance_checker.runner import ComplianceChecker, CheckSuite
-
-# Load all available checker classes
-check_suite = CheckSuite()
-check_suite.load_all_available_checkers()
-
-# Run cf and adcc checks
-path = &#39;/path/or/url/to/your/dataset&#39;
-checker_names = [&#39;cf&#39;, &#39;acdd&#39;]
-verbose = 0
-criteria = &#39;normal&#39;
-output_filename = &#39;/output/report.json&#39;
-output_format = &#39;json&#39;
-&quot;&quot;&quot;
-Inputs to ComplianceChecker.run_checker
-
-path            Dataset location (url or file)
-checker_names   List of string names to run, should match keys of checkers dict (empty list means run all)
-verbose         Verbosity of the output (0, 1, 2)
-criteria        Determines failure (lenient, normal, strict)
-output_filename Path to the file for output
-output_format   Format of the output
-
-@returns                If the tests failed (based on the criteria)
-&quot;&quot;&quot;
-return_value, errors = ComplianceChecker.run_checker(path,
-                                                     checker_names,
-                                                     verbose,
-                                                     criteria,
-                                                     output_filename=output_filename,
-                                                     output_format=output_format)
-
-# Open the JSON output and get the compliance scores
-with open(output_filename, &#39;r&#39;) as fp:
-    cc_data = json.load(fp)
-    scored = cc_data[cc_test[0]][&#39;scored_points&#39;]
-    possible = cc_data[cc_test[0]][&#39;possible_points&#39;]
-    log.debug(&#39;CC Scored {} out of {} possible points&#39;.format(scored, possible))
-</pre></div>
-</div>
+<p>Alternatively, you can specify an absolute path to a standard name table you may have locally in an environment variable named CF_STANDARD_NAME_TABLE and the compliance checker will use that version instead.</p>
 </section>
+</section>
+<section id="python-usage">
+<h2>Python Usage<a class="headerlink" href="#python-usage" title="Link to this heading">#</a></h2>
+<p>If you are interested in incorporating the IOOS Compliance Checker into your own python projects, check out the following python code example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">compliance_checker.runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">ComplianceChecker</span><span class="p">,</span> <span class="n">CheckSuite</span>
+
+<span class="c1"># Load all available checker classes</span>
+<span class="n">check_suite</span> <span class="o">=</span> <span class="n">CheckSuite</span><span class="p">()</span>
+<span class="n">check_suite</span><span class="o">.</span><span class="n">load_all_available_checkers</span><span class="p">()</span>
+
+<span class="c1"># Run cf and adcc checks</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;/path/or/url/to/your/dataset&quot;</span>
+<span class="n">checker_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cf&quot;</span><span class="p">,</span> <span class="s2">&quot;acdd&quot;</span><span class="p">]</span>
+<span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">criteria</span> <span class="o">=</span> <span class="s2">&quot;normal&quot;</span>
+<span class="n">output_filename</span> <span class="o">=</span> <span class="s2">&quot;/output/report.json&quot;</span>
+<span class="n">output_format</span> <span class="o">=</span> <span class="s2">&quot;json&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Inputs to ComplianceChecker.run_checker</span>
+
+<span class="sd">path            Dataset location (url or file)</span>
+<span class="sd">checker_names   List of string names to run, should match keys of checkers dict (empty list means run all)</span>
+<span class="sd">verbose         Verbosity of the output (0, 1, 2)</span>
+<span class="sd">criteria        Determines failure (lenient, normal, strict)</span>
+<span class="sd">output_filename Path to the file for output</span>
+<span class="sd">output_format   Format of the output</span>
+
+<span class="sd">@returns                If the tests failed (based on the criteria)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">return_value</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">ComplianceChecker</span><span class="o">.</span><span class="n">run_checker</span><span class="p">(</span>
+    <span class="n">path</span><span class="p">,</span>
+    <span class="n">checker_names</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">,</span>
+    <span class="n">criteria</span><span class="p">,</span>
+    <span class="n">output_filename</span><span class="o">=</span><span class="n">output_filename</span><span class="p">,</span>
+    <span class="n">output_format</span><span class="o">=</span><span class="n">output_format</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Open the JSON output and get the compliance scores</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+    <span class="n">cc_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+    <span class="n">scored</span> <span class="o">=</span> <span class="n">cc_data</span><span class="p">[</span><span class="n">cc_test</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">&quot;scored_points&quot;</span><span class="p">]</span>
+    <span class="n">possible</span> <span class="o">=</span> <span class="n">cc_data</span><span class="p">[</span><span class="n">cc_test</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">&quot;possible_points&quot;</span><span class="p">]</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CC Scored </span><span class="si">{</span><span class="n">scored</span><span class="si">}</span><span class="s2"> out of </span><span class="si">{</span><span class="n">possible</span><span class="si">}</span><span class="s2"> possible points&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 <section id="compliance-checker-plug-ins">
 <h2>Compliance Checker Plug-Ins<a class="headerlink" href="#compliance-checker-plug-ins" title="Link to this heading">#</a></h2>
@@ -678,11 +646,11 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
 </ul>
 <p>This is a checker for UGRID (https://ugrid-conventions.github.io/ugrid-conventions/)</p>
 <p>These plug-ins must be installed separately but work on top of the base compliance checker software.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">cc</span><span class="o">-</span><span class="n">plugin</span><span class="o">-</span><span class="n">ncei</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>cc-plugin-ncei
 </pre></div>
 </div>
 <p>Check to see if it installed correctly, list the tests:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">-</span><span class="n">l</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>compliance-checker<span class="w"> </span>-l
 </pre></div>
 </div>
 <p>You should see</p>
@@ -704,20 +672,19 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
 <ol class="arabic simple">
 <li><p>Run the NCEI Point check on a THREDDS endpoint</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">-</span><span class="n">t</span> <span class="n">ncei</span><span class="o">-</span><span class="n">point</span> <span class="o">-</span><span class="n">v</span> <span class="s2">&quot;https://data.nodc.noaa.gov/thredds/dodsC/testdata/mbiddle/GOLD_STANDARD_NETCDF/1.1/NODC_point_template_v1.1_2016-06-15_133710.844375.nc&quot;</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>compliance-checker<span class="w"> </span>-t<span class="w"> </span>ncei-point<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;https://data.nodc.noaa.gov/thredds/dodsC/testdata/mbiddle/GOLD_STANDARD_NETCDF/1.1/NODC_point_template_v1.1_2016-06-15_133710.844375.nc&quot;</span>
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
 <li><p>Run NCEI Trajectory Profile Orthogonal Check on local dataset</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">-</span><span class="n">t</span> <span class="n">ncei</span><span class="o">-</span><span class="n">trajectory</span><span class="o">-</span><span class="n">profile</span><span class="o">-</span><span class="n">orthogonal</span> <span class="o">-</span><span class="n">v</span> <span class="o">~/</span><span class="n">data</span><span class="o">/</span><span class="n">sample</span><span class="o">-</span><span class="n">trajectory</span><span class="o">-</span><span class="n">profile</span><span class="o">.</span><span class="n">nc</span>
-
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>compliance-checker<span class="w"> </span>-t<span class="w"> </span>ncei-trajectory-profile-orthogonal<span class="w"> </span>-v<span class="w"> </span>~/data/sample-trajectory-profile.nc
 </pre></div>
 </div>
 <ol class="arabic simple" start="3">
 <li><p>Outputting JSON from a gridded file check</p></li>
 </ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">compliance</span><span class="o">-</span><span class="n">checker</span> <span class="o">-</span><span class="n">t</span> <span class="n">ncei</span><span class="o">-</span><span class="n">grid</span> <span class="o">-</span><span class="n">f</span> <span class="n">json</span> <span class="o">-</span><span class="n">o</span> <span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">sample_grid_report</span><span class="o">.</span><span class="n">json</span> <span class="o">~/</span><span class="n">Documents</span><span class="o">/</span><span class="n">sample_grid_report</span><span class="o">.</span><span class="n">nc</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>compliance-checker<span class="w"> </span>-t<span class="w"> </span>ncei-grid<span class="w"> </span>-f<span class="w"> </span>json<span class="w"> </span>-o<span class="w"> </span>~/Documents/sample_grid_report.json<span class="w"> </span>~/Documents/sample_grid_report.nc
 </pre></div>
 </div>
 </section>
@@ -785,18 +752,18 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">IOOS Compliance Checker</a><ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">IOOS Compliance Checker</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advice-to-data-providers">Advice to data providers</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#the-compliance-checker-web-tool">The Compliance Checker Web Tool</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#the-compliance-checker-web-tool">The Compliance Checker Web Tool</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usage">Usage</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api">API</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#the-compliance-checker-command-line-tool">The Compliance Checker Command Line Tool</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#the-compliance-checker-command-line-tool">The Compliance Checker Command Line Tool</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#concepts-terminology">Concepts &amp; Terminology</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#command-line-usage">Command Line Usage</a></li>
@@ -813,6 +780,7 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#download-a-particular-cf-standard-names-table-for-use-in-the-test">Download a particular CF standard names table for use in the test</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-usage">Python Usage</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compliance-checker-plug-ins">Compliance Checker Plug-Ins</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-plug-in-releases">Current Plug-in Releases:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-of-how-to-use-the-plug-ins">Examples of how to use the Plug-Ins</a></li>
@@ -831,13 +799,13 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/readme_link.md.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/readme_link.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -852,8 +820,8 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -864,7 +832,7 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
 
   <p class="copyright">
     
-      © Copyright 2025, Dave Foster.
+      © Copyright 2026, Dave Foster.
       <br/>
     
   </p>
@@ -873,7 +841,7 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>
@@ -887,7 +855,7 @@ Compliance Checker, but they are all designed to run with the Compliance Checker
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
 </p></div>
       
     </div>

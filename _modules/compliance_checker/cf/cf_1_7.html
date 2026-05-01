@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.cf.cf_1_7 &#8212; compliance_checker 5.4.2 documentation</title>
+    <title>compliance_checker.cf.cf_1_7 &#8212; compliance_checker 6.0.2 documentation</title>
   
   
   
@@ -26,43 +26,50 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../../_static/documentation_options.js?v=41d0e7f4"></script>
-    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/documentation_options.js?v=81158f5a"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/cf/cf_1_7';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="5.4.2" />
+  <meta name="docsearch:version" content="6.0.2" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/_modules/compliance_checker/cf/cf_1_7.html" />
 
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -201,7 +208,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.4.2
+  Version 6.0.2
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
@@ -400,9 +407,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">out_of</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="nb">len</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">actual_range</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span>
-                    <span class="p">):</span>  <span class="c1"># TODO is the attr also a numpy array? if so, .size</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">actual_range</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># TODO is the attr also a numpy array? if so, .size</span>
                         <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                             <span class="sa">f</span><span class="s2">&quot;actual_range of &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must be 2 elements&quot;</span><span class="p">,</span>
                         <span class="p">)</span>
@@ -450,9 +455,7 @@
                 <span class="c1"># check that the actual range is within the valid range</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="s2">&quot;valid_range&quot;</span><span class="p">):</span>  <span class="c1"># check within valid_range</span>
                     <span class="n">out_of</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">actual_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">variable</span><span class="o">.</span><span class="n">valid_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span>
-                        <span class="n">variable</span><span class="o">.</span><span class="n">actual_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">variable</span><span class="o">.</span><span class="n">valid_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">actual_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">variable</span><span class="o">.</span><span class="n">valid_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">actual_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">variable</span><span class="o">.</span><span class="n">valid_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
                         <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                             <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;</span><span class="se">\&#39;</span><span class="s1">s actual_range must be within valid_range&#39;</span><span class="p">,</span>
                         <span class="p">)</span>
@@ -522,8 +525,7 @@
             <span class="k">if</span> <span class="n">boundary_variable_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
                 <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Boundary variable </span><span class="si">{</span><span class="n">boundary_variable_name</span><span class="si">}</span><span class="s2"> referenced by </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> not &quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;found in dataset variables&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Boundary variable </span><span class="si">{</span><span class="n">boundary_variable_name</span><span class="si">}</span><span class="s2"> referenced by </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> not &quot;</span> <span class="o">+</span> <span class="s2">&quot;found in dataset variables&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">boundary_variable</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">boundary_variable_name</span><span class="p">]</span>
@@ -534,9 +536,7 @@
             <span class="k">if</span> <span class="n">boundary_variable</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Boundary variable </span><span class="si">{</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> specified by </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot; should have at least two dimensions to enclose the base &quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;case of a one dimensionsal variable&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Boundary variable </span><span class="si">{</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> specified by </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; should have at least two dimensions to enclose the base &quot;</span> <span class="o">+</span> <span class="s2">&quot;case of a one dimensionsal variable&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="n">boundary_variable</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="n">variable</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
@@ -548,17 +548,13 @@
             <span class="k">if</span> <span class="n">variable</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[:]</span> <span class="o">!=</span> <span class="n">boundary_variable</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[:</span> <span class="n">variable</span><span class="o">.</span><span class="n">ndim</span><span class="p">]:</span>
                 <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Boundary variable coordinates (for </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">) are in improper order: </span><span class="si">{</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">dimensions</span><span class="si">}</span><span class="s2">. Bounds-specific dimensions should be last&quot;</span>
-                    <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Boundary variable coordinates (for </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">) are in improper order: </span><span class="si">{</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">dimensions</span><span class="si">}</span><span class="s2">. Bounds-specific dimensions should be last&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="c1"># 7.1 Required 2/5: continue</span>
             <span class="c1"># Ensure p vertices form a valid simplex given previous a...n</span>
             <span class="c1"># previous auxiliary coordinates</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="n">ds</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">size</span>
-                <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="p">):</span>
+            <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Dimension </span><span class="si">{</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> of boundary variable (for </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">) must have at least </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> elements to form a simplex/closed cell with previous dimensions </span><span class="si">{</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
@@ -569,8 +565,7 @@
             <span class="k">if</span> <span class="n">boundary_variable</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">&quot;biufc&quot;</span><span class="p">:</span>
                 <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Boundary variable </span><span class="si">{</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> specified by </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;must be a numeric data type &quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Boundary variable </span><span class="si">{</span><span class="n">boundary_variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> specified by </span><span class="si">{</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;must be a numeric data type &quot;</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="c1"># 7.1 Required 4/5:</span>
@@ -652,18 +647,17 @@
             <span class="n">variable</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
             <span class="n">boundary_variable</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">boundary_variable_name</span><span class="p">]</span>
 
-            <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">variable</span><span class="p">[:])):</span>
-                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="mi">0</span><span class="p">]):</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
-                        <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">variable</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
-                        <span class="ow">and</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">variable</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
-                    <span class="p">):</span>
-                        <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
-                        <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;The points specified by the coordinate variable </span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">variable</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span>
-                            <span class="s2">&quot; lie outside the boundary of the cell specified by the &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;associated boundary variable </span><span class="si">{</span><span class="n">boundary_variable_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
-                        <span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">variable</span><span class="p">[:])):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="c1"># We do not check 2D+ coords bounds.</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">min</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">variable</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">k</span><span class="p">]):</span>
+                    <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;The points specified by the coordinate variable </span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">variable</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">) &quot;</span>
+                        <span class="s2">&quot;lie outside the boundary of the cell specified by the &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;associated boundary variable </span><span class="si">{</span><span class="n">boundary_variable_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
 
                 <span class="n">result</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
                     <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
@@ -672,7 +666,7 @@
                     <span class="n">reasoning</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">ret_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">ret_val</span></div>
+        <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
 <div class="viewcode-block" id="CF1_7Check.check_cell_measures">
@@ -781,9 +775,7 @@
 
         <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Both geoid_name and geopotential_datum_name cannot exist&quot;</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;geoid_name&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">())</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="s2">&quot;geopotential_datum_name&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">()</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;geoid_name&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">())</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;geopotential_datum_name&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">()):</span>
             <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -800,10 +792,7 @@
 <span class="sd">        :return two-tuple (bool, str)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;If any of reference_ellipsoid_name, prime_meridian_name, &quot;</span>
-            <span class="s2">&quot;or horizontal_datum_name are defined, all must be defined.&quot;</span>
-        <span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;If any of reference_ellipsoid_name, prime_meridian_name, or horizontal_datum_name are defined, all must be defined.&quot;</span>
 
         <span class="n">_ncattrs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">ncattrs</span><span class="p">())</span>
 
@@ -874,12 +863,7 @@
 <span class="sd">        :return two-tuple of (bool, str)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">query_str</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;SELECT 1 FROM vertical_datum WHERE name = ? &quot;</span>
-            <span class="s2">&quot;UNION ALL &quot;</span>
-            <span class="s2">&quot;SELECT 1 FROM alias_name WHERE alt_name = ? &quot;</span>
-            <span class="s2">&quot;AND table_name = &#39;vertical_datum&#39; LIMIT 1&quot;</span>
-        <span class="p">)</span>
+        <span class="n">query_str</span> <span class="o">=</span> <span class="s2">&quot;SELECT 1 FROM vertical_datum WHERE name = ? UNION ALL SELECT 1 FROM alias_name WHERE alt_name = ? AND table_name = &#39;vertical_datum&#39; LIMIT 1&quot;</span>
 
         <span class="c1"># try to find the value in the database</span>
         <span class="n">res_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exec_query_str_with_params</span><span class="p">(</span><span class="n">query_str</span><span class="p">,</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
@@ -898,12 +882,7 @@
 <span class="sd">        :return two-tuple of (bool, str)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">query_str</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;SELECT 1 FROM vertical_datum WHERE name = ? &quot;</span>
-            <span class="s2">&quot;UNION ALL &quot;</span>
-            <span class="s2">&quot;SELECT 1 FROM alias_name WHERE alt_name = ? &quot;</span>
-            <span class="s2">&quot;AND table_name = &#39;vertical_datum&#39; LIMIT 1&quot;</span>
-        <span class="p">)</span>
+        <span class="n">query_str</span> <span class="o">=</span> <span class="s2">&quot;SELECT 1 FROM vertical_datum WHERE name = ? UNION ALL SELECT 1 FROM alias_name WHERE alt_name = ? AND table_name = &#39;vertical_datum&#39; LIMIT 1&quot;</span>
 
         <span class="c1"># try to find the value in the database</span>
         <span class="n">res_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exec_query_str_with_params</span><span class="p">(</span><span class="n">query_str</span><span class="p">,</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
@@ -924,10 +903,7 @@
 
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">val</span> <span class="ow">in</span> <span class="n">horizontal_datum_names17</span><span class="p">,</span>
-            <span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must be a valid Horizontal Datum Name; &quot;</span>
-                <span class="s2">&quot;see https://github.com/cf-convention/cf-conventions/wiki/Mapping-from-CF-Grid-Mapping-Attributes-to-CRS-WKT-Elements.&quot;</span>
-            <span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must be a valid Horizontal Datum Name; see https://github.com/cf-convention/cf-conventions/wiki/Mapping-from-CF-Grid-Mapping-Attributes-to-CRS-WKT-Elements.&quot;</span><span class="p">),</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_prime_meridian_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
@@ -941,10 +917,7 @@
 
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">val</span> <span class="ow">in</span> <span class="n">prime_meridian_names17</span><span class="p">,</span>
-            <span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must be a valid Prime Meridian name; &quot;</span>
-                <span class="s2">&quot;see https://github.com/cf-convention/cf-conventions/wiki/csv/prime_meridian.csv.&quot;</span>
-            <span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must be a valid Prime Meridian name; see https://github.com/cf-convention/cf-conventions/wiki/csv/prime_meridian.csv.&quot;</span><span class="p">),</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_projected_crs_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
@@ -956,12 +929,7 @@
 <span class="sd">        :return two-tuple of (bool, str)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">query_str</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;SELECT 1 FROM projected_crs WHERE name = ? &quot;</span>
-            <span class="s2">&quot;UNION ALL &quot;</span>
-            <span class="s2">&quot;SELECT 1 FROM alias_name WHERE alt_name = ? &quot;</span>
-            <span class="s2">&quot;AND table_name = &#39;projected_crs&#39; LIMIT 1&quot;</span>
-        <span class="p">)</span>
+        <span class="n">query_str</span> <span class="o">=</span> <span class="s2">&quot;SELECT 1 FROM projected_crs WHERE name = ? UNION ALL SELECT 1 FROM alias_name WHERE alt_name = ? AND table_name = &#39;projected_crs&#39; LIMIT 1&quot;</span>
 
         <span class="c1"># try to find the value in the database</span>
         <span class="n">res_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exec_query_str_with_params</span><span class="p">(</span><span class="n">query_str</span><span class="p">,</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
@@ -982,10 +950,7 @@
 
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">val</span> <span class="ow">in</span> <span class="n">ellipsoid_names17</span><span class="p">,</span>
-            <span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must be a valid Ellipsoid Name; &quot;</span>
-                <span class="s2">&quot;see https://github.com/cf-convention/cf-conventions/wiki/csv/ellipsoid.csv.&quot;</span>
-            <span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must be a valid Ellipsoid Name; see https://github.com/cf-convention/cf-conventions/wiki/csv/ellipsoid.csv.&quot;</span><span class="p">),</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate_towgs84</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
@@ -997,10 +962,7 @@
 <span class="sd">        :return two-tuple of (bool, str)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;towgs84 must be an array of length 3, 6, or 7 of double-precision&quot;</span>
-            <span class="s2">&quot; and correspond to anm OGC WKT TOWGS84 node&quot;</span>
-        <span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;towgs84 must be an array of length 3, 6, or 7 of double-precision and correspond to anm OGC WKT TOWGS84 node&quot;</span>
 
         <span class="c1"># if not numpy type, return false</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
@@ -1054,9 +1016,7 @@
                     <span class="n">test_ctx</span><span class="o">.</span><span class="n">out_of</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="c1"># existence_conditions</span>
-            <span class="n">exist_cond_1</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_check_gmattr_existence_condition_geoid_name_geoptl_datum_name</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">exist_cond_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_gmattr_existence_condition_geoid_name_geoptl_datum_name</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
             <span class="n">test_ctx</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span><span class="n">exist_cond_1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">exist_cond_1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">exist_cond_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_gmattr_existence_condition_ell_pmerid_hdatum</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
             <span class="n">test_ctx</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span><span class="n">exist_cond_2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">exist_cond_2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -1071,9 +1031,7 @@
             <span class="k">if</span> <span class="n">len_vdatum_name_attrs</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">test_ctx</span><span class="o">.</span><span class="n">out_of</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">test_ctx</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="s2">&quot;Cannot have both &#39;geoid_name&#39; and &quot;</span>
-                    <span class="s2">&quot;&#39;geopotential_datum_name&#39; attributes in &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;grid mapping variable &#39;</span><span class="si">{</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot have both &#39;geoid_name&#39; and &#39;geopotential_datum_name&#39; attributes in grid mapping variable &#39;</span><span class="si">{</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">len_vdatum_name_attrs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># should be one or zero attrs</span>
@@ -1087,17 +1045,12 @@
                             <span class="n">conn</span><span class="p">,</span>
                         <span class="p">)</span>
 
-                        <span class="n">invalid_msg</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Vertical datum value &#39;</span><span class="si">{</span><span class="n">v_datum_value</span><span class="si">}</span><span class="s2">&#39; for &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;attribute &#39;</span><span class="si">{</span><span class="n">v_datum_attr</span><span class="si">}</span><span class="s2">&#39; in grid mapping &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;variable &#39;</span><span class="si">{</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not valid&quot;</span>
-                        <span class="p">)</span>
+                        <span class="n">invalid_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Vertical datum value &#39;</span><span class="si">{</span><span class="n">v_datum_value</span><span class="si">}</span><span class="s2">&#39; for attribute &#39;</span><span class="si">{</span><span class="n">v_datum_attr</span><span class="si">}</span><span class="s2">&#39; in grid mapping variable &#39;</span><span class="si">{</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; is not valid&quot;</span>
                         <span class="n">test_ctx</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span><span class="n">v_datum_str_valid</span><span class="p">,</span> <span class="n">invalid_msg</span><span class="p">)</span>
                 <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="c1"># if we hit an error, skip the check</span>
                     <span class="n">warn</span><span class="p">(</span>
-                        <span class="s2">&quot;Error occurred while trying to query &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Proj4 SQLite database at </span><span class="si">{</span><span class="n">proj_db_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot;Error occurred while trying to query Proj4 SQLite database at </span><span class="si">{</span><span class="n">proj_db_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                         <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                     <span class="p">)</span>
             <span class="n">prev_return</span><span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_ctx</span><span class="o">.</span><span class="n">to_result</span><span class="p">()</span>
@@ -1160,8 +1113,7 @@
         <span class="c1"># IMPLEMENTATION CONFORMANCE 4.3.3 REQUIRED</span>
         <span class="n">correct_computed_std_name_ctx</span><span class="o">.</span><span class="n">assert_true</span><span class="p">(</span>
             <span class="ow">not</span> <span class="p">(</span><span class="n">formula_terms</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="s2">&quot;computed_standard_name&quot;</span><span class="p">)),</span>
-            <span class="sa">f</span><span class="s2">&quot;Variable </span><span class="si">{</span><span class="n">vname</span><span class="si">}</span><span class="s2"> should have formula_terms attribute when &quot;</span>
-            <span class="s2">&quot;computed_standard_name attribute is defined&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Variable </span><span class="si">{</span><span class="n">vname</span><span class="si">}</span><span class="s2"> should have formula_terms attribute when computed_standard_name attribute is defined&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">formula_terms</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">standard_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dim_vert_coords_dict</span><span class="p">:</span>
             <span class="k">return</span>
@@ -1254,8 +1206,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1266,7 +1218,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025, Dave Foster.
+      © Copyright 2026, Dave Foster.
       <br/>
     
   </p>
@@ -1275,7 +1227,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>
@@ -1289,7 +1241,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
 </p></div>
       
     </div>

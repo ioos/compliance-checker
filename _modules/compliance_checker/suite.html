@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.suite &#8212; compliance_checker 5.4.2 documentation</title>
+    <title>compliance_checker.suite &#8212; compliance_checker 6.0.2 documentation</title>
   
   
   
@@ -26,43 +26,50 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../_static/documentation_options.js?v=41d0e7f4"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/documentation_options.js?v=81158f5a"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/suite';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="5.4.2" />
+  <meta name="docsearch:version" content="6.0.2" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/_modules/compliance_checker/suite.html" />
 
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -201,7 +208,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.4.2
+  Version 6.0.2
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
@@ -300,6 +307,20 @@
     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getwriter</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_human_key</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">item</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">try_int</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If `s` is a number, return an int, else `s` unchanged.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">key</span>
+
+    <span class="k">return</span> <span class="p">([</span><span class="n">try_int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\d+)&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">casefold</span><span class="p">())],</span> <span class="n">item</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="extract_docstring_summary">
 <a class="viewcode-back" href="../../generated/compliance_checker.suite.extract_docstring_summary.html#compliance_checker.suite.extract_docstring_summary">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_docstring_summary</span><span class="p">(</span><span class="n">docstring</span><span class="p">):</span>
@@ -325,9 +346,7 @@
 <div class="viewcode-block" id="CheckSuite">
 <a class="viewcode-back" href="../../generated/compliance_checker.suite.CheckSuite.html#compliance_checker.suite.CheckSuite">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CheckSuite</span><span class="p">:</span>
-    <span class="n">checkers</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">{}</span>
-    <span class="p">)</span>  <span class="c1"># Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation</span>
+    <span class="n">checkers</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation</span>
     <span class="n">templates_root</span> <span class="o">=</span> <span class="s2">&quot;compliance_checker&quot;</span>  <span class="c1"># modify to load alternative Jinja2 templates</span>
 
 <div class="viewcode-block" id="CheckSuite.__init__">
@@ -355,8 +374,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_print_suites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prints out available check suites.  If the verbose argument is True,</span>
-<span class="sd">        includes the internal module version number of the check and also displays</span>
-<span class="sd">        &quot;latest&quot; meta-versions.</span>
+<span class="sd">        includes the internal module version number of the check.</span>
 <span class="sd">        :param check_suite: Check suite object</span>
 <span class="sd">        :param verbose: Integer indicating whether to print verbose output</span>
 <span class="sd">        :type verbose: int</span>
@@ -365,9 +383,7 @@
             <span class="n">version</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="n">checker</span><span class="p">],</span> <span class="s2">&quot;_cc_checker_version&quot;</span><span class="p">,</span> <span class="s2">&quot;???&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">checker</span><span class="si">}</span><span class="s2"> (v</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">checker</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">checker</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
-                <span class="s2">&quot;:latest&quot;</span><span class="p">,</span>
-            <span class="p">):</span>  <span class="c1"># Skip the &quot;latest&quot; output</span>
+            <span class="k">elif</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">checker</span><span class="p">:</span>  <span class="c1"># Skip the unversioned latest alias.</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">checker</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_print_checker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checker_obj</span><span class="p">):</span>
@@ -452,10 +468,7 @@
                         <span class="kc">None</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="s2">&quot;Checker for </span><span class="si">{}</span><span class="s2"> should implement both &quot;</span>
-                        <span class="s1">&#39;&quot;_cc_spec&quot; and &quot;_cc_spec_version&quot; &#39;</span>
-                        <span class="s1">&#39;attributes. &quot;name&quot; attribute is deprecated. &#39;</span>
-                        <span class="s2">&quot;Assuming checker is latest version.&quot;</span><span class="p">,</span>
+                        <span class="s1">&#39;Checker for </span><span class="si">{}</span><span class="s1"> should implement both &quot;_cc_spec&quot; and &quot;_cc_spec_version&quot; attributes. &quot;name&quot; attribute is deprecated. Assuming checker is latest version.&#39;</span><span class="p">,</span>
                         <span class="ne">DeprecationWarning</span><span class="p">,</span>
                         <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                     <span class="p">)</span>
@@ -467,7 +480,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not load&quot;</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
         <span class="c1"># find the latest version of versioned checkers and set that as the</span>
         <span class="c1"># default checker for compliance checker if no version is specified</span>
-        <span class="n">ver_checkers</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span> <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">c</span><span class="p">])</span>
+        <span class="n">ver_checkers</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span> <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">spec</span><span class="p">,</span> <span class="n">versions</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">ver_checkers</span><span class="p">,</span> <span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
             <span class="n">version_nums</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">]</span>
             <span class="k">try</span><span class="p">:</span>
@@ -475,9 +488,8 @@
             <span class="c1"># if the version can&#39;t be parsed, do it according to character collation</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="n">latest_version</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">version_nums</span><span class="p">)</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot;:latest&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span>
-                <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">spec</span><span class="p">,</span> <span class="n">latest_version</span><span class="p">))</span>
-            <span class="p">]</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">spec</span><span class="p">,</span> <span class="n">latest_version</span><span class="p">))]</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">checkers</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">_human_key</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_checks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkclass</span><span class="p">,</span> <span class="n">include_checks</span><span class="p">,</span> <span class="n">skip_checks</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -503,10 +515,7 @@
                     <span class="n">returned_checks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">fn_obj</span><span class="p">,</span> <span class="n">skip_checks</span><span class="p">[</span><span class="n">fn_name</span><span class="p">]))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">fn_name</span><span class="p">,</span> <span class="n">fn_obj</span> <span class="ow">in</span> <span class="n">meths</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">fn_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;check_&quot;</span><span class="p">)</span>
-                    <span class="ow">and</span> <span class="n">skip_checks</span><span class="p">[</span><span class="n">fn_name</span><span class="p">]</span> <span class="o">!=</span> <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span>
-                <span class="p">):</span>
+                <span class="k">if</span> <span class="n">fn_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;check_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">skip_checks</span><span class="p">[</span><span class="n">fn_name</span><span class="p">]</span> <span class="o">!=</span> <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span><span class="p">:</span>
                     <span class="n">returned_checks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">fn_obj</span><span class="p">,</span> <span class="n">skip_checks</span><span class="p">[</span><span class="n">fn_name</span><span class="p">]))</span>
 
         <span class="k">return</span> <span class="n">returned_checks</span>
@@ -559,7 +568,7 @@
 
 <span class="sd">        Returns the check name with the version number it checked</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">check_name</span> <span class="ow">or</span> <span class="s2">&quot;:latest&quot;</span> <span class="ow">in</span> <span class="n">check_name</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">check_name</span><span class="p">:</span>
             <span class="n">check_name</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="p">(</span><span class="n">check_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="n">check_name</span><span class="p">]</span><span class="o">.</span><span class="n">_cc_spec_version</span><span class="p">),</span>
             <span class="p">)</span>
@@ -585,11 +594,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">checker_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">checker_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkers</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">checker_names</span>
-            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkers</span>
-        <span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">checker_names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkers</span><span class="p">]</span>
         <span class="n">valid</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="n">all_checked</span> <span class="o">=</span> <span class="p">{</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">}</span>  <span class="c1"># only class types</span>
@@ -631,8 +636,7 @@
                     <span class="n">check_max_level</span> <span class="o">=</span> <span class="n">check_lookup</span><span class="p">[</span><span class="n">split_check_spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Skip specifier &#39;</span><span class="si">{</span><span class="n">split_check_spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; on check &#39;</span><span class="si">{</span><span class="n">check_name</span><span class="si">}</span><span class="s2">&#39; not found,&quot;</span>
-                        <span class="s2">&quot; defaulting to skip entire check&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot;Skip specifier &#39;</span><span class="si">{</span><span class="n">split_check_spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; on check &#39;</span><span class="si">{</span><span class="n">check_name</span><span class="si">}</span><span class="s2">&#39; not found, defaulting to skip entire check&quot;</span><span class="p">,</span>
                         <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">check_max_level</span> <span class="o">=</span> <span class="n">BaseCheck</span><span class="o">.</span><span class="n">HIGH</span>
@@ -991,10 +995,7 @@
         <span class="n">groups_sorted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">groups</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">weight_sort</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># create dict of the groups -&gt; {level: [reasons]}</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">key</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">valuesiter</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">valuesiter</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">groups_sorted</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">weight_sort</span><span class="p">)</span>
-        <span class="p">}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">valuesiter</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">valuesiter</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">groups_sorted</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">weight_sort</span><span class="p">)}</span>
         <span class="n">priorities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkers</span><span class="p">[</span><span class="n">check</span><span class="p">]</span><span class="o">.</span><span class="n">_cc_display_headers</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">process_table</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">check</span><span class="p">):</span>
@@ -1049,9 +1050,7 @@
                     <span class="k">if</span> <span class="n">has_printed</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
                     <span class="c1"># join alphabetized reasons together</span>
-                    <span class="n">reason_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;* </span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">reasons</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="p">)</span>
+                    <span class="n">reason_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;* </span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">reasons</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
                     <span class="n">proc_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">issue</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">reason_str</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="nb">print</span><span class="p">(</span><span class="n">proc_str</span><span class="p">)</span>
                     <span class="n">proc_strs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proc_str</span><span class="p">)</span>
@@ -1115,8 +1114,7 @@
                 <span class="c1"># Exit program if neither a netCDF Classic nor a netCDF-4 file</span>
                 <span class="c1"># could be created.</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;netCDF Classic file could not be generated from cdl file&quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;with message:&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;netCDF Classic file could not be generated from cdl file&quot;</span> <span class="o">+</span> <span class="s2">&quot;with message:&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">iostat</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -1387,8 +1385,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1399,7 +1397,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025, Dave Foster.
+      © Copyright 2026, Dave Foster.
       <br/>
     
   </p>
@@ -1408,7 +1406,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>
@@ -1422,7 +1420,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
 </p></div>
       
     </div>

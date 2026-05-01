@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.acdd &#8212; compliance_checker 5.4.2 documentation</title>
+    <title>compliance_checker.acdd &#8212; compliance_checker 6.0.2 documentation</title>
   
   
   
@@ -26,43 +26,50 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../_static/documentation_options.js?v=41d0e7f4"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/documentation_options.js?v=81158f5a"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/acdd';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="5.4.2" />
+  <meta name="docsearch:version" content="6.0.2" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
     <link rel="canonical" href="https://ioos.github.io/compliance-checker/latest/_modules/compliance_checker/acdd.html" />
 
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -201,7 +208,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 5.4.2
+  Version 6.0.2
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
@@ -274,7 +281,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pendulum</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">cftime</span><span class="w"> </span><span class="kn">import</span> <span class="n">num2pydate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cftime</span><span class="w"> </span><span class="kn">import</span> <span class="n">num2date</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pygeoif</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_wkt</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">compliance_checker.cf.util</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cfutil</span>
@@ -544,8 +551,7 @@
                 <span class="kc">False</span><span class="p">,</span>
                 <span class="s2">&quot;geospatial_lat_extents_match&quot;</span><span class="p">,</span>
                 <span class="p">[</span>
-                    <span class="sa">f</span><span class="s2">&quot;Could not convert one of geospatial_lat_min (</span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lat_min</span><span class="si">}</span><span class="s2">) or max (</span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lat_max</span><span class="si">}</span><span class="s2">) to float see CF-1.6 spec chapter 4.1&quot;</span>
-                    <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Could not convert one of geospatial_lat_min (</span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lat_min</span><span class="si">}</span><span class="s2">) or max (</span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lat_max</span><span class="si">}</span><span class="s2">) to float see CF-1.6 spec chapter 4.1&quot;</span><span class="p">,</span>
                 <span class="p">],</span>
             <span class="p">)</span>
 
@@ -586,12 +592,8 @@
         <span class="c1"># sort by criteria passed</span>
         <span class="n">final_lats</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lat_vars</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">lat_vars</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">obs_mins</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lats</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-        <span class="p">}</span>
-        <span class="n">obs_maxs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lats</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-        <span class="p">}</span>
+        <span class="n">obs_mins</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lats</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()}</span>
+        <span class="n">obs_maxs</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lats</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()}</span>
 
         <span class="n">min_pass</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">lat_min</span><span class="p">,</span> <span class="n">min_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">min_val</span> <span class="ow">in</span> <span class="n">obs_mins</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="n">max_pass</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">lat_max</span><span class="p">,</span> <span class="n">max_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">max_val</span> <span class="ow">in</span> <span class="n">obs_maxs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
@@ -626,9 +628,7 @@
 <span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
-            <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_lon_min&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_lon_max&quot;</span><span class="p">)</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_lon_min&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_lon_max&quot;</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
                 <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
                 <span class="kc">False</span><span class="p">,</span>
@@ -645,8 +645,7 @@
                 <span class="kc">False</span><span class="p">,</span>
                 <span class="s2">&quot;geospatial_lon_extents_match&quot;</span><span class="p">,</span>
                 <span class="p">[</span>
-                    <span class="sa">f</span><span class="s2">&quot;Could not convert one of geospatial_lon_min (</span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lon_min</span><span class="si">}</span><span class="s2">) or max (</span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lon_max</span><span class="si">}</span><span class="s2">) to float see CF-1.6 spec chapter 4.1&quot;</span>
-                    <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Could not convert one of geospatial_lon_min (</span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lon_min</span><span class="si">}</span><span class="s2">) or max (</span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_lon_max</span><span class="si">}</span><span class="s2">) to float see CF-1.6 spec chapter 4.1&quot;</span><span class="p">,</span>
                 <span class="p">],</span>
             <span class="p">)</span>
 
@@ -687,12 +686,8 @@
         <span class="c1"># sort by criteria passed</span>
         <span class="n">final_lons</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lon_vars</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">lon_vars</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">obs_mins</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lons</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-        <span class="p">}</span>
-        <span class="n">obs_maxs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lons</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-        <span class="p">}</span>
+        <span class="n">obs_mins</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lons</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()}</span>
+        <span class="n">obs_maxs</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">final_lons</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">var</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()}</span>
 
         <span class="n">min_pass</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">lon_min</span><span class="p">,</span> <span class="n">min_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">min_val</span> <span class="ow">in</span> <span class="n">obs_mins</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="n">max_pass</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">lon_max</span><span class="p">,</span> <span class="n">max_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">max_val</span> <span class="ow">in</span> <span class="n">obs_maxs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
@@ -739,10 +734,7 @@
                 <span class="kc">False</span><span class="p">,</span>
                 <span class="s2">&quot;Global Attributes&quot;</span><span class="p">,</span>  <span class="c1"># grouped with Globals</span>
                 <span class="p">[</span>
-                    <span class="p">(</span>
-                        <span class="s2">&quot;Could not parse WKT from geospatial_bounds,&quot;</span>
-                        <span class="sa">f</span><span class="s1">&#39; possible bad value: &quot;</span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_bounds</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
-                    <span class="p">),</span>
+                    <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Could not parse WKT from geospatial_bounds, possible bad value: &quot;</span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">geospatial_bounds</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">),</span>
                 <span class="p">],</span>
                 <span class="n">variable_name</span><span class="o">=</span><span class="s2">&quot;geospatial_bounds&quot;</span><span class="p">,</span>
             <span class="p">)</span>
@@ -786,9 +778,7 @@
 
         <span class="k">if</span> <span class="n">zvalue</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s2">&quot;Cannot compare geospatial vertical extents &quot;</span>
-                <span class="s2">&quot;against min/max of data, as non-masked data &quot;</span>
-                <span class="s2">&quot;length is zero&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Cannot compare geospatial vertical extents against min/max of data, as non-masked data length is zero&quot;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
                 <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
@@ -854,10 +844,7 @@
 
 <span class="sd">        :param netCDF4.Dataset ds: An open netCDF dataset</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
-            <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_vertical_min&quot;</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_vertical_max&quot;</span><span class="p">)</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_vertical_min&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;geospatial_vertical_max&quot;</span><span class="p">)):</span>
             <span class="k">return</span>
 
         <span class="n">z_variable</span> <span class="o">=</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_z_variable</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
@@ -882,9 +869,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check that the values of time_coverage_start/time_coverage_end approximately match the data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
-            <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;time_coverage_start&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;time_coverage_end&quot;</span><span class="p">)</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;time_coverage_start&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;time_coverage_end&quot;</span><span class="p">)):</span>
             <span class="k">return</span>
 
         <span class="c1"># Parse the ISO 8601 formatted dates</span>
@@ -915,18 +900,40 @@
 
         <span class="c1"># Time should be monotonically increasing, so we make that assumption here so we don&#39;t have to download THE ENTIRE ARRAY</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># num2date returns as naive date, but with time adjusted to UTC</span>
-            <span class="c1"># we need to attach timezone information here, or the date</span>
-            <span class="c1"># subtraction from t_min/t_max will assume that a naive timestamp is</span>
-            <span class="c1"># in the same time zone and cause erroneous results.</span>
-            <span class="c1"># Pendulum uses UTC by default, but we are being explicit here</span>
-            <span class="n">time0</span> <span class="o">=</span> <span class="n">pendulum</span><span class="o">.</span><span class="n">instance</span><span class="p">(</span>
-                <span class="n">num2pydate</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">),</span>
-                <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+            <span class="c1"># num2date returns cftime objects which work with all calendar types</span>
+            <span class="c1"># For non-standard calendars (all_leap, noleap, 360_day, etc.),</span>
+            <span class="c1"># we need to use num2date and extract datetime components</span>
+            <span class="c1"># to create pendulum datetime objects</span>
+            <span class="n">calendar</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">],</span> <span class="s2">&quot;calendar&quot;</span><span class="p">,</span> <span class="s2">&quot;standard&quot;</span><span class="p">)</span>
+
+            <span class="n">cftime_obj0</span> <span class="o">=</span> <span class="n">num2date</span><span class="p">(</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+                <span class="n">calendar</span><span class="o">=</span><span class="n">calendar</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">time1</span> <span class="o">=</span> <span class="n">pendulum</span><span class="o">.</span><span class="n">instance</span><span class="p">(</span>
-                <span class="n">num2pydate</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">),</span>
-                <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+            <span class="n">time0</span> <span class="o">=</span> <span class="n">pendulum</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span>
+                <span class="n">cftime_obj0</span><span class="o">.</span><span class="n">year</span><span class="p">,</span>
+                <span class="n">cftime_obj0</span><span class="o">.</span><span class="n">month</span><span class="p">,</span>
+                <span class="n">cftime_obj0</span><span class="o">.</span><span class="n">day</span><span class="p">,</span>
+                <span class="n">cftime_obj0</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span>
+                <span class="n">cftime_obj0</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span>
+                <span class="n">cftime_obj0</span><span class="o">.</span><span class="n">second</span><span class="p">,</span>
+                <span class="n">tz</span><span class="o">=</span><span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">cftime_obj1</span> <span class="o">=</span> <span class="n">num2date</span><span class="p">(</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">timevar</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+                <span class="n">calendar</span><span class="o">=</span><span class="n">calendar</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">time1</span> <span class="o">=</span> <span class="n">pendulum</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span>
+                <span class="n">cftime_obj1</span><span class="o">.</span><span class="n">year</span><span class="p">,</span>
+                <span class="n">cftime_obj1</span><span class="o">.</span><span class="n">month</span><span class="p">,</span>
+                <span class="n">cftime_obj1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span>
+                <span class="n">cftime_obj1</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span>
+                <span class="n">cftime_obj1</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span>
+                <span class="n">cftime_obj1</span><span class="o">.</span><span class="n">second</span><span class="p">,</span>
+                <span class="n">tz</span><span class="o">=</span><span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Result</span><span class="p">(</span>
@@ -943,14 +950,12 @@
         <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">start_dt</span> <span class="o">&gt;</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s2">&quot;Date time mismatch between time_coverage_start and actual &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;time values </span><span class="si">{</span><span class="n">t_min</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2"> (time_coverage_start) != </span><span class="si">{</span><span class="n">time0</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2"> (time[0])&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;Date time mismatch between time_coverage_start and actual time values </span><span class="si">{</span><span class="n">t_min</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2"> (time_coverage_start) != </span><span class="si">{</span><span class="n">time0</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2"> (time[0])&quot;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">score</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">end_dt</span> <span class="o">&gt;</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s2">&quot;Date time mismatch between time_coverage_end and actual &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;time values </span><span class="si">{</span><span class="n">t_max</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2"> (time_coverage_end) != </span><span class="si">{</span><span class="n">time1</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2"> (time[N])&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;Date time mismatch between time_coverage_end and actual time values </span><span class="si">{</span><span class="n">t_max</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2"> (time_coverage_end) != </span><span class="si">{</span><span class="n">time1</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2"> (time[N])&quot;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">score</span> <span class="o">-=</span> <span class="mi">1</span>
 
@@ -964,9 +969,7 @@
 <span class="sd">        Verify that the version in the Conventions field is correct</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">convention</span> <span class="ow">in</span> <span class="p">(</span>
-                <span class="nb">getattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;Conventions&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
-            <span class="p">):</span>
+            <span class="k">for</span> <span class="n">convention</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="s2">&quot;Conventions&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">convention</span> <span class="o">==</span> <span class="s2">&quot;ACDD-&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cc_spec_version</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">ratable_result</span><span class="p">(</span>
                         <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
@@ -1082,9 +1085,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span> <span class="o">=</span> <span class="n">kvp_convert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rec_atts</span><span class="p">[</span><span class="s2">&quot;date_created&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_check_attr_is_iso_date</span><span class="p">,</span> <span class="s2">&quot;date_created&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sug_atts</span> <span class="o">=</span> <span class="n">kvp_convert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sug_atts</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;date_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;issued&quot;</span><span class="p">,</span> <span class="s2">&quot;modified&quot;</span><span class="p">,</span> <span class="s2">&quot;metadata_modified&quot;</span><span class="p">)</span>
-        <span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;date_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;issued&quot;</span><span class="p">,</span> <span class="s2">&quot;modified&quot;</span><span class="p">,</span> <span class="s2">&quot;metadata_modified&quot;</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sug_atts</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_check_attr_is_iso_date</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span></div>
 
 
@@ -1208,8 +1209,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1220,7 +1221,7 @@
 
   <p class="copyright">
     
-      © Copyright 2025, Dave Foster.
+      © Copyright 2026, Dave Foster.
       <br/>
     
   </p>
@@ -1229,7 +1230,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
   </p>
 </div>
@@ -1243,7 +1244,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
 </p></div>
       
     </div>
