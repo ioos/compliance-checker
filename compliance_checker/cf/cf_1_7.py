@@ -349,36 +349,91 @@ class CF1_7Check(CF1_6Check):
         The points specified by a coordinate or auxiliary coordinate variable
         should lie within, or on the boundary, of the cells specified by the
         associated boundary variable.
+
+        Works for interval bounds ``(N, 2)`` and for polygonal / unstructured
+        bounds ``(N, nvertices)`` via a bounding-box test (center lies within
+        the [min, max] of the vertex set). Vectorized over N; emits a single
+        Result per coordinate.
         """
         ret_val = []
-        reasoning = []
         for variable_name, boundary_variable_name in cfutil.get_cell_boundary_map(
             ds,
         ).items():
-            valid = True
-
             variable = ds.variables[variable_name]
             boundary_variable = ds.variables[boundary_variable_name]
 
-            for k in range(len(variable[:])):
-                if len(boundary_variable[k]) != 2:
-                    # We do not check 2D+ coords bounds.
-                    continue
-                if not min(boundary_variable[k]) <= variable[k] <= max(boundary_variable[k]):
-                    valid = False
-                    reasoning.append(
-                        f"The points specified by the coordinate variable {variable_name} ({variable[k]}) "
-                        "lie outside the boundary of the cell specified by the "
-                        f"associated boundary variable {boundary_variable_name} ({boundary_variable[k]}).",
-                    )
+            # Single bulk read instead of per-element netCDF slicing.
+            try:
+                centers = np.ma.asanyarray(variable[:])
+                bnds = np.ma.asanyarray(boundary_variable[:])
+            except Exception:
+                # If the variable cannot be materialised (e.g. very large), skip.
+                continue
 
-                result = Result(
+            # ``bnds`` must add exactly one trailing vertex axis to ``centers``:
+            # 1-D coord ``(N,)`` -> bounds ``(N, k)``; 2-D curvilinear coord
+            # ``(J, I)`` -> bounds ``(J, I, k)``. Anything else is handled by
+            # check_cell_boundaries and the recommendation check cannot
+            # meaningfully proceed.
+            if bnds.ndim != centers.ndim + 1 or bnds.shape[-1] < 2 or bnds.shape[:-1] != centers.shape:
+                continue
+
+            # Bounding-box test: center must lie within [min(bnds), max(bnds)] along
+            # the last (vertex) axis. Works for intervals (N, 2) as well as for
+            # polygonal / unstructured cell bounds (N, nvertices). A float
+            # tolerance accommodates common float32/float64 precision mismatches
+            # between coordinate and bounds variables.
+            bmin = bnds.min(axis=-1)
+            bmax = bnds.max(axis=-1)
+
+            # Longitude-wrap awareness: for longitude coordinates, cells crossing
+            # the antimeridian have vertices on both sides of +/-180 and the raw
+            # bounding box spans almost the whole globe. Unwrap vertices relative
+            # to the cell center so the min/max reflects the true (wrapped) cell.
+            is_lon = str(getattr(variable, "units", "")).strip() == "degrees_east" or str(getattr(variable, "standard_name", "")).strip() == "longitude"
+            if is_lon:
+                span = bmax - bmin
+                wrap = np.asarray(span > 180.0)
+                if wrap.any():
+                    # Use ellipsis indexing so this works for both 1-D
+                    # ``(N,)`` and 2-D curvilinear ``(J, I)`` centers; ``[:, None]``
+                    # would broadcast 2-D centers to ``(J, 1, I)`` and fail
+                    # against bounds ``(J, I, k)``.
+                    c_col = np.asarray(centers)[..., None]
+                    delta = np.asarray(bnds) - c_col
+                    delta = np.where(delta > 180.0, delta - 360.0, delta)
+                    delta = np.where(delta < -180.0, delta + 360.0, delta)
+                    bnds_unwrapped = c_col + delta
+                    bnds = np.where(wrap[..., None], bnds_unwrapped, np.asarray(bnds))
+                    bmin = bnds.min(axis=-1)
+                    bmax = bnds.max(axis=-1)
+
+            tol = 0.0
+            if centers.dtype.kind == "f" or bnds.dtype.kind == "f":
+                rtol = 1e-5
+                atol = 1e-8
+                scale = np.maximum(np.abs(bmin), np.abs(bmax))
+                tol = atol + rtol * scale
+            bad = (centers < bmin - tol) | (centers > bmax + tol)
+            if np.ma.is_masked(bad):
+                bad = bad.filled(False)
+            bad = np.asarray(bad, dtype=bool).reshape(-1)
+
+            reasoning = []
+            if bad.any():
+                n_bad = int(bad.sum())
+                reasoning.append(
+                    f"{n_bad} point(s) specified by the coordinate variable '{variable_name}' lie outside the bounding box of the associated boundary variable '{boundary_variable_name}'",
+                )
+
+            ret_val.append(
+                Result(
                     BaseCheck.MEDIUM,
-                    valid,
+                    not bad.any(),
                     self.section_titles["7.1"],
                     reasoning,
-                )
-                ret_val.append(result)
+                ),
+            )
         return ret_val
 
     def check_cell_measures(self, ds):
