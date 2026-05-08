@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>compliance_checker.cf.cf_1_7 &#8212; compliance_checker 6.0.2 documentation</title>
+    <title>compliance_checker.cf.cf_1_7 &#8212; compliance_checker 6.1.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../../_static/documentation_options.js?v=81158f5a"></script>
+    <script src="../../../_static/documentation_options.js?v=6340cb70"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/compliance_checker/cf/cf_1_7';</script>
@@ -47,7 +47,7 @@
     
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="6.0.2" />
+  <meta name="docsearch:version" content="6.1.0" />
   
     
     <script src="../../../_static/searchtools.js"></script>
@@ -208,7 +208,7 @@
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
         <div class="sidebar-primary-item"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Version 6.0.2
+  Version 6.1.0
 </a>
 <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="version-menu"></div></div>
     </div>
@@ -636,36 +636,91 @@
 <span class="sd">        The points specified by a coordinate or auxiliary coordinate variable</span>
 <span class="sd">        should lie within, or on the boundary, of the cells specified by the</span>
 <span class="sd">        associated boundary variable.</span>
+
+<span class="sd">        Works for interval bounds ``(N, 2)`` and for polygonal / unstructured</span>
+<span class="sd">        bounds ``(N, nvertices)`` via a bounding-box test (center lies within</span>
+<span class="sd">        the [min, max] of the vertex set). Vectorized over N; emits a single</span>
+<span class="sd">        Result per coordinate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret_val</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">reasoning</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">variable_name</span><span class="p">,</span> <span class="n">boundary_variable_name</span> <span class="ow">in</span> <span class="n">cfutil</span><span class="o">.</span><span class="n">get_cell_boundary_map</span><span class="p">(</span>
             <span class="n">ds</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span>
-
             <span class="n">variable</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
             <span class="n">boundary_variable</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">boundary_variable_name</span><span class="p">]</span>
 
-            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">variable</span><span class="p">[:])):</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="c1"># We do not check 2D+ coords bounds.</span>
-                    <span class="k">continue</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">min</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">variable</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">k</span><span class="p">]):</span>
-                    <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;The points specified by the coordinate variable </span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">variable</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">) &quot;</span>
-                        <span class="s2">&quot;lie outside the boundary of the cell specified by the &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;associated boundary variable </span><span class="si">{</span><span class="n">boundary_variable_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">boundary_variable</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">,</span>
-                    <span class="p">)</span>
+            <span class="c1"># Single bulk read instead of per-element netCDF slicing.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">variable</span><span class="p">[:])</span>
+                <span class="n">bnds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">boundary_variable</span><span class="p">[:])</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="c1"># If the variable cannot be materialised (e.g. very large), skip.</span>
+                <span class="k">continue</span>
 
-                <span class="n">result</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
+            <span class="c1"># ``bnds`` must add exactly one trailing vertex axis to ``centers``:</span>
+            <span class="c1"># 1-D coord ``(N,)`` -&gt; bounds ``(N, k)``; 2-D curvilinear coord</span>
+            <span class="c1"># ``(J, I)`` -&gt; bounds ``(J, I, k)``. Anything else is handled by</span>
+            <span class="c1"># check_cell_boundaries and the recommendation check cannot</span>
+            <span class="c1"># meaningfully proceed.</span>
+            <span class="k">if</span> <span class="n">bnds</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="n">centers</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">bnds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">bnds</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">centers</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Bounding-box test: center must lie within [min(bnds), max(bnds)] along</span>
+            <span class="c1"># the last (vertex) axis. Works for intervals (N, 2) as well as for</span>
+            <span class="c1"># polygonal / unstructured cell bounds (N, nvertices). A float</span>
+            <span class="c1"># tolerance accommodates common float32/float64 precision mismatches</span>
+            <span class="c1"># between coordinate and bounds variables.</span>
+            <span class="n">bmin</span> <span class="o">=</span> <span class="n">bnds</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">bmax</span> <span class="o">=</span> <span class="n">bnds</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Longitude-wrap awareness: for longitude coordinates, cells crossing</span>
+            <span class="c1"># the antimeridian have vertices on both sides of +/-180 and the raw</span>
+            <span class="c1"># bounding box spans almost the whole globe. Unwrap vertices relative</span>
+            <span class="c1"># to the cell center so the min/max reflects the true (wrapped) cell.</span>
+            <span class="n">is_lon</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;degrees_east&quot;</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="s2">&quot;standard_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;longitude&quot;</span>
+            <span class="k">if</span> <span class="n">is_lon</span><span class="p">:</span>
+                <span class="n">span</span> <span class="o">=</span> <span class="n">bmax</span> <span class="o">-</span> <span class="n">bmin</span>
+                <span class="n">wrap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">span</span> <span class="o">&gt;</span> <span class="mf">180.0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">wrap</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="c1"># Use ellipsis indexing so this works for both 1-D</span>
+                    <span class="c1"># ``(N,)`` and 2-D curvilinear ``(J, I)`` centers; ``[:, None]``</span>
+                    <span class="c1"># would broadcast 2-D centers to ``(J, 1, I)`` and fail</span>
+                    <span class="c1"># against bounds ``(J, I, k)``.</span>
+                    <span class="n">c_col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">centers</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+                    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bnds</span><span class="p">)</span> <span class="o">-</span> <span class="n">c_col</span>
+                    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">delta</span> <span class="o">&gt;</span> <span class="mf">180.0</span><span class="p">,</span> <span class="n">delta</span> <span class="o">-</span> <span class="mf">360.0</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+                    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">delta</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">180.0</span><span class="p">,</span> <span class="n">delta</span> <span class="o">+</span> <span class="mf">360.0</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+                    <span class="n">bnds_unwrapped</span> <span class="o">=</span> <span class="n">c_col</span> <span class="o">+</span> <span class="n">delta</span>
+                    <span class="n">bnds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">wrap</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">bnds_unwrapped</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bnds</span><span class="p">))</span>
+                    <span class="n">bmin</span> <span class="o">=</span> <span class="n">bnds</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">bmax</span> <span class="o">=</span> <span class="n">bnds</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">tol</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">if</span> <span class="n">centers</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;f&quot;</span> <span class="ow">or</span> <span class="n">bnds</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;f&quot;</span><span class="p">:</span>
+                <span class="n">rtol</span> <span class="o">=</span> <span class="mf">1e-5</span>
+                <span class="n">atol</span> <span class="o">=</span> <span class="mf">1e-8</span>
+                <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">bmin</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">bmax</span><span class="p">))</span>
+                <span class="n">tol</span> <span class="o">=</span> <span class="n">atol</span> <span class="o">+</span> <span class="n">rtol</span> <span class="o">*</span> <span class="n">scale</span>
+            <span class="n">bad</span> <span class="o">=</span> <span class="p">(</span><span class="n">centers</span> <span class="o">&lt;</span> <span class="n">bmin</span> <span class="o">-</span> <span class="n">tol</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">centers</span> <span class="o">&gt;</span> <span class="n">bmax</span> <span class="o">+</span> <span class="n">tol</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">is_masked</span><span class="p">(</span><span class="n">bad</span><span class="p">):</span>
+                <span class="n">bad</span> <span class="o">=</span> <span class="n">bad</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">bad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bad</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">reasoning</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">bad</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="n">n_bad</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bad</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+                <span class="n">reasoning</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n_bad</span><span class="si">}</span><span class="s2"> point(s) specified by the coordinate variable &#39;</span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s2">&#39; lie outside the bounding box of the associated boundary variable &#39;</span><span class="si">{</span><span class="n">boundary_variable_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">ret_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Result</span><span class="p">(</span>
                     <span class="n">BaseCheck</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
-                    <span class="n">valid</span><span class="p">,</span>
+                    <span class="ow">not</span> <span class="n">bad</span><span class="o">.</span><span class="n">any</span><span class="p">(),</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">section_titles</span><span class="p">[</span><span class="s2">&quot;7.1&quot;</span><span class="p">],</span>
                     <span class="n">reasoning</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">ret_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">ret_val</span></div>
 
 
