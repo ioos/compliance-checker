@@ -254,7 +254,7 @@ class TestCFIntegration:
         # CF: incorrect errors for ragged array structure\n
         # \n
         # Structure needs to be correctly identified\n
-        # http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#_indexed_ragged_array_representation\n
+        # https://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#_indexed_ragged_array_representation\n
         # https://github.com/ioos/compliance-checker/issues/845
         [
             ("index_ragged2", "are not a subset of dimensions for variable"),

@@ -1305,7 +1305,7 @@ def is_multi_timeseries_orthogonal(nc, variable):
     representation of time series. For more information on what this means see
     CF 1.6 §H.2.1
 
-    http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_orthogonal_multidimensional_array_representation_of_time_series
+    https://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_orthogonal_multidimensional_array_representation_of_time_series
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check
@@ -1341,7 +1341,7 @@ def is_multi_timeseries_incomplete(nc, variable):
     representation of time series. For more information on what this means see
     CF 1.6 §H.2.2
 
-    http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_incomplete_multidimensional_array_representation_of_time_series
+    https://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#_incomplete_multidimensional_array_representation_of_time_series
 
     :param netCDF4.Dataset nc: An open netCDF dataset
     :param str variable: name of the variable to check

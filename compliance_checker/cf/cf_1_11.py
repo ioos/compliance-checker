@@ -27,7 +27,7 @@ def _temperature_standard_names(standard_name_table):
 
 class CF1_11Check(CF1_10Check):
     _cc_spec_version = "1.11"
-    _cc_url = "http://cfconventions.org/Data/cf-conventions/cf-conventions-1.11/cf-conventions.html"
+    _cc_url = "https://cfconventions.org/Data/cf-conventions/cf-conventions-1.11/cf-conventions.html"
 
     def __init__(self, options=None):
         super().__init__(options)

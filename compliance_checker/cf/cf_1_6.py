@@ -32,7 +32,7 @@ class CF1_6Check(CFNCCheck):
     _cc_spec = "cf"
     _cc_spec_version = "1.6"
     _cc_description = "Climate and Forecast Conventions (CF)"
-    _cc_url = "http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html"
+    _cc_url = "https://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html"
     _cc_display_headers = {3: "Errors", 2: "Warnings", 1: "Info"}
     appendix_a = appendix_a_base
     appendix_d_parametric_coords = dimless_vertical_coordinates_1_6
@@ -105,7 +105,7 @@ class CF1_6Check(CFNCCheck):
         the data type of the attribute must match the type of its parent variable as specified in the
         NetCDF User Guide (NUG) https://docs.unidata.ucar.edu/netcdf-c/current/attribute_conventions.html,
         referenced in the CF Conventions in Section 2.5.2
-        (http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#missing-data)
+        (https://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#missing-data)
 
         :param netCDF4.Dataset ds: open netCDF dataset object
         :rtype: compliance_checker.base.Result
