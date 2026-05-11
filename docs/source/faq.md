@@ -14,7 +14,7 @@ providers can simply provide a link or upload their datasets and get the full su
 
 It currently supports the following sources and standards:
 - [ACDD (1.1, 1.3)](https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3)
-- [CF (1.6, 1.7)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html)
+- [CF (1.6, 1.7)](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html)
 - [IOOS (1.1, 1.2)](https://ioos.github.io/ioos-metadata/)
 - [Glider DAC](https://github.com/ioos/ioosngdac/wiki/NetCDF-Specification)
 - [NCEI (1.1, 2.0)](https://www.ncei.noaa.gov/data/oceans/ncei/formats/netcdf/v2.0/index.html)
@@ -30,9 +30,9 @@ you should supply the URL like so:
 "https://standards.sensors.ioos.us/erddap/tabledap/morro-bay-bs1-met".
 
 
-## What version of the Compliance Checker is run on [compliance.ioos.us](https://compliance.ioos.us/index.html)?
+## What version of the Compliance Checker is run on [the web-app](https://ioos.github.io/compliance-checker-wasm-web/ioos_cc_browser.html)?
 
-This web site is using [version 5.0.0](https://pypi.org/project/compliance-checker/) of the Compliance Checker.
+This web site always use the [latest version](https://pypi.org/project/compliance-checker/) of the Compliance Checker. If by any reason you still see an older version, clear your cache and refresh the page to ensure the latest one will be loaded.
 
 ## Is there an API?
 
