@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import compliance_checker.cf.util as cfutil  # noqa: F401
 from compliance_checker.base import (  # noqa: F401
     BaseCheck,

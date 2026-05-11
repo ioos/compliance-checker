@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Appendix F. Grid Mappings
 ---

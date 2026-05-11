@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 """
 Appendix E: Cell Methods
 To be imported into cf.py upon initialization of a CF Checker class.

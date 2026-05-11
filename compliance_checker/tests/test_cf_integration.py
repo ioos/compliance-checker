@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import pytest
 
 from compliance_checker.cf import util

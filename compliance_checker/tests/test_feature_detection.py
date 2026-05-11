@@ -1,5 +1,3 @@
-#!/usr/bin/env python """ compliance_checker/tests/test_feature_detection.py """
-
 from netCDF4 import Dataset
 
 from compliance_checker.cf import util
