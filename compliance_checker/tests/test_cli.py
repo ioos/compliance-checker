@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Tests for command line output and parsing
 

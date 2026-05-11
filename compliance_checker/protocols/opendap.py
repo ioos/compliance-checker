@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 compliance_checker/protocols/opendap.py
 
