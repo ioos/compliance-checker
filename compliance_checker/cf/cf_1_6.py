@@ -33,7 +33,7 @@ class CF1_6Check(CFNCCheck):
     _cc_spec_version = "1.6"
     _cc_description = "Climate and Forecast Conventions (CF)"
     _cc_url = "http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html"
-    _cc_display_headers = {3: "Errors", 2: "Warnings", 1: "Info"}
+    _cc_display_headers = {3: "Required", 2: "Recommended", 1: "Suggested"}
     appendix_a = appendix_a_base
     appendix_d_parametric_coords = dimless_vertical_coordinates_1_6
     _allowed_numeric_var_types = {
