@@ -11,8 +11,7 @@ import requests_mock
 from netCDF4 import Dataset, stringtoarr
 
 import compliance_checker.cf.util as cfutil
-from compliance_checker.cf.appendix_d import no_missing_terms
-from compliance_checker.cf.cf import (
+from compliance_checker.cf import (
     CF1_6Check,
     CF1_7Check,
     CF1_8Check,
@@ -21,6 +20,7 @@ from compliance_checker.cf.cf import (
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
+from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.util import (
     StandardNameTable,
     create_cached_data_dir,
