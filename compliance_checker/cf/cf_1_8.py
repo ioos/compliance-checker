@@ -817,14 +817,14 @@ class CF1_8Check(CF1_7Check):
                     "- www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
                     "- lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
                     "- lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
-                    "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
-                    "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
-                    "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
-                    "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>",
+                    "- https://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                    "- https://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
+                    "- https://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                    "- https://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>",
                 )
                 continue
             if lsid_str.startswith("urn"):
-                lsid_url = f"http://www.lsid.info/{lsid_str}"
+                lsid_url = f"https://www.lsid.info/{lsid_str}"
             else:
                 lsid_url = lsid_str
 
