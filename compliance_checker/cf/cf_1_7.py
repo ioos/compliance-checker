@@ -29,7 +29,7 @@ class CF1_7Check(CF1_6Check):
 
     # things that are specific to 1.7
     _cc_spec_version = "1.7"
-    _cc_url = "http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html"
+    _cc_url = "https://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html"
 
     appendix_a = appendix_a_base.copy()
     appendix_a.update(

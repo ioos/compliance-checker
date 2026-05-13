@@ -315,7 +315,7 @@ class TestIOOS1_2(BaseTestCase):
         temp.setncattr("standard_name", "sea_surface_temperature")
         temp.setncattr(
             "standard_name_url",
-            "http://cfconventions.org/Data/cf-standard-names/64/build/cf-standard-name-table.html",
+            "https://cfconventions.org/Data/cf-standard-names/64/build/cf-standard-name-table.html",
         )
         temp.setncattr("units", "degree_C")
         temp.setncattr("platform", "myPlatform")

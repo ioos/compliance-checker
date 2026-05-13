@@ -30,7 +30,7 @@ class CF1_8Check(CF1_7Check):
 
     # things that are specific to 1.8
     _cc_spec_version = "1.8"
-    _cc_url = "http://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html"
+    _cc_url = "https://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html"
 
     ROOT_GROUP_ONLY_ATTRS = ["Conventions", "external_variables"]
     NON_ROOT_GROUP_OPT = ["title", "history"]
@@ -691,7 +691,7 @@ class CF1_8Check(CF1_7Check):
         Species (WoRMS) for oceanographic data and Integrated Taxonomic Information System (ITIS)
         for freshwater and terrestrial data. WoRMS LSIDs are built from the WoRMS AphiaID taxon
         identifier such as "urn:lsid:marinespecies.org:taxname:104464" for AphiaID 104464. This may
-        be converted to a URL by adding prefixes such as http://www.lsid.info/. ITIS LSIDs are
+        be converted to a URL by adding prefixes such as https://www.lsid.info/. ITIS LSIDs are
         built from the ITIS Taxonomic Serial Number (TSN), such as
         "urn:lsid:itis.gov:itis_tsn:180543".
 
@@ -817,14 +817,14 @@ class CF1_8Check(CF1_7Check):
                     "- www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
                     "- lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
                     "- lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
-                    "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
-                    "- http://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
-                    "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
-                    "- http://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>",
+                    "- https://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                    "- https://lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>\n"
+                    "- https://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>\n"
+                    "- https://www.lsid.info/urn:lsid.info:<authority>:<namespace>/<object_id>:<version>",
                 )
                 continue
             if lsid_str.startswith("urn"):
-                lsid_url = f"http://www.lsid.info/{lsid_str}"
+                lsid_url = f"https://www.lsid.info/{lsid_str}"
             else:
                 lsid_url = lsid_str
 

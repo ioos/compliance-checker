@@ -16,7 +16,7 @@ from compliance_checker.cf.util import (
 
 class CF1_9Check(CF1_8Check):
     _cc_spec_version = "1.9"
-    _cc_url = "http://cfconventions.org/Data/cf-conventions/cf-conventions-1.9/cf-conventions.html"
+    _cc_url = "https://cfconventions.org/Data/cf-conventions/cf-conventions-1.9/cf-conventions.html"
     _allowed_numeric_var_types = CF1_8Check._allowed_numeric_var_types.union(
         {np.ubyte, np.uint16, np.uint32, np.uint64, np.int64},
     )
