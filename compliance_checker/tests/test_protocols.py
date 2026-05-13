@@ -36,7 +36,7 @@ def test_erddap(cs):
     """
     Tests that a connection can be made to ERDDAP's OPeNDAP GridDAP.
     """
-    url = "https://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest"
+    url = "https://www.ncei.noaa.gov/erddap/griddap/AEC_gomex_satellite_climo"
     ds = cs.load_dataset(url)
     assert ds is not None
 
