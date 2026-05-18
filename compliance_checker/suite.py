@@ -19,10 +19,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
-from lxml import etree as ET
 from netCDF4 import Dataset
-from owslib.sos import SensorObservationService
-from owslib.swe.sensor.sml import SensorML
 from packaging.version import parse
 
 from compliance_checker import __version__, tempnc
@@ -309,7 +306,6 @@ class CheckSuite:
         args = [(name, self.checkers[name]) for name in checker_names if name in self.checkers]
         valid = []
 
-        all_checked = {a[1] for a in args}  # only class types
         checker_queue = set(args)
         while len(checker_queue):
             name, a = checker_queue.pop()
@@ -317,13 +313,6 @@ class CheckSuite:
             # for the checker class?
             if type(ds) in a().supported_ds:
                 valid.append((name, a))
-
-            # add subclasses of SOS checks
-            if "ioos_sos" in name:
-                for subc in a.__subclasses__():
-                    if subc not in all_checked:
-                        all_checked.add(subc)
-                        checker_queue.add((name, subc))
 
         return valid
 
@@ -734,24 +723,6 @@ class CheckSuite:
                     has_printed = True
         return "\n".join(proc_strs)
 
-    def process_doc(self, doc):
-        """
-        Attempt to parse an xml string conforming to either an SOS or SensorML
-        dataset and return the results
-        """
-        xml_doc = ET.fromstring(doc)
-        if xml_doc.tag == "{http://www.opengis.net/sos/1.0}Capabilities":
-            ds = SensorObservationService(None, xml=doc)
-            # SensorObservationService does not store the etree doc root,
-            # so maybe use monkey patching here for now?
-            ds._root = xml_doc
-
-        elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
-            ds = SensorML(xml_doc)
-        else:
-            raise ValueError(f"Unrecognized XML root element: {xml_doc.tag}")
-        return ds
-
     def generate_dataset(self, cdl_path):
         """
         Use ncgen to generate a netCDF file from a .cdl file
@@ -793,8 +764,7 @@ class CheckSuite:
 
     def load_dataset(self, ds_str):
         """
-        Returns an instantiated instance of either a netCDF file or an SOS
-        mapped DS object.
+        Returns an instantiated instance of a netCDF-like file mapped DS object.
 
         :param str ds_str: URL of the resource to load
         """
@@ -825,7 +795,7 @@ class CheckSuite:
 
     def load_remote_dataset(self, ds_str):
         """
-        Returns a dataset instance for the remote resource, either OPeNDAP or SOS
+        Returns a dataset instance for the remote resource.
 
         :param str ds_str: URL to the remote resource
         """
@@ -855,15 +825,10 @@ class CheckSuite:
         elif opendap.is_opendap(ds_str):
             return Dataset(ds_str)
 
-        # Check if the HTTP response is XML, if it is, it's likely SOS so
-        # we'll attempt to parse the response as SOS.
-        # Some SOS servers don't seem to support HEAD requests.
-        # Issue GET instead if we reach here and can't get the response
         response = requests.get(ds_str, allow_redirects=True, timeout=60)
         content_type = response.headers.get("content-type")
-        if content_type.split(";")[0] == "text/xml":
-            return self.process_doc(response.content)
-        elif content_type.split(";")[0] == "application/x-netcdf":
+
+        if content_type.split(";")[0] == "application/x-netcdf":
             return Dataset(
                 urlparse(response.url).path,
                 memory=response.content,
