@@ -33,6 +33,7 @@ jobs:
     - name: Setup Micromamba ${{ matrix.python-version }}
       uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
       with:
+        micromamba-version: '2.6.0-0'
         environment-name: TEST
         init-shell: bash
         create-args: >-

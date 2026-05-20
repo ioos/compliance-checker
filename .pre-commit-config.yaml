@@ -24,7 +24,7 @@ repos:
     - id: add-trailing-comma
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.12
+  rev: v0.15.13
   hooks:
     - id: ruff
       args: ["--fix", "--show-fixes"]
@@ -50,7 +50,7 @@ repos:
           )$
 
 - repo: https://github.com/woodruffw/zizmor-pre-commit
-  rev: v1.24.1
+  rev: v1.25.2
   hooks:
     - id: zizmor
 

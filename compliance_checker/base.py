@@ -15,20 +15,10 @@ from re import Pattern
 import validators
 from lxml import etree
 from netCDF4 import Dataset
-from owslib.namespaces import Namespaces
-from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
-from owslib.swe.sensor.sml import SensorML
 from typing_extensions import deprecated
 
 from compliance_checker import __version__
 from compliance_checker.util import kvp_convert
-
-
-def get_namespaces():
-    n = Namespaces()
-    ns = n.get_namespaces(["ogc", "sml", "gml", "sos", "swe", "xlink"])
-    ns["ows"] = n.get_namespace("ows110")
-    return ns
 
 
 def csv_splitter(input_string):
@@ -205,28 +195,6 @@ class BaseNCCheck:
     @classmethod
     def std_check(cls, dataset, name):
         return name in dataset.ncattrs()
-
-
-@deprecated(
-    "The ioos_sos checker is deprecated and will be removed in the next compliance-checker version.",
-)
-class BaseSOSGCCheck:
-    """
-    Base class for SOS-GetCapabilities supporting Check Suites.
-    """
-
-    supported_ds = [SensorObservationService_1_0_0]
-
-
-@deprecated(
-    "The ioos_sos checker is deprecated and will be removed in the next compliance-checker version.",
-)
-class BaseSOSDSCheck:
-    """
-    Base class for SOS-DescribeSensor supporting Check Suites.
-    """
-
-    supported_ds = [SensorML]
 
 
 class Result:

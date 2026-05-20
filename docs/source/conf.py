@@ -170,4 +170,5 @@ texinfo_documents = [
 linkcheck_ignore = [
     "https://github.com/ioos/compliance-checker/issues/.*",
     "urn:lsid.*",
+    "https://mmisw.org/ont/.*",
 ]
