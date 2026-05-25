@@ -765,6 +765,12 @@ class CF1_6Check(CFNCCheck):
             # but a standard name error will be raised elsewhere
             except KeyError:
                 return valid_units.to_result()
+            # If canonical_units is None, this is a categorical variable
+            # (e.g. soil_type, region, area_type) with no physical units defined.
+            # Units are not meaningful for these variables — accept units="1"
+            # or missing units without raising an error.
+            if reference is None:
+                return valid_units.to_result()
         elif unit_type == "1":
             reference = "1"
         elif unit_type is None:
