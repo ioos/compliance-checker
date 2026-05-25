@@ -12,10 +12,8 @@ from compliance_checker.cf import util
 from compliance_checker.cf.appendix_c import valid_modifiers
 from compliance_checker.cf.appendix_d import dimless_vertical_coordinates_1_6
 from compliance_checker.cf.appendix_e import cell_methods16
-from compliance_checker.cf.appendix_f import (
-    grid_mapping_attr_types16,
-    grid_mapping_dict16,
-)
+from compliance_checker.cf.appendix_f import (grid_mapping_attr_types16,
+                                              grid_mapping_dict16)
 from compliance_checker.cf.cf_base import CFNCCheck, appendix_a_base
 from compliance_checker.cfunits import Unit
 
@@ -83,7 +81,11 @@ class CF1_6Check(CFNCCheck):
         total = len(ds.variables)
 
         for k, v in ds.variables.items():
-            if v.dtype is not str and v.dtype.kind != "S" and v.dtype.type not in self._allowed_numeric_var_types:
+            if (
+                v.dtype is not str
+                and v.dtype.kind != "S"
+                and v.dtype.type not in self._allowed_numeric_var_types
+            ):
                 fails.append(
                     f"The variable {k} failed because the datatype is {v.datatype}",
                 )
@@ -145,7 +147,8 @@ class CF1_6Check(CFNCCheck):
         else:
             same_type = att.dtype == variable.dtype
             val = (same_type) or (  # will short-circuit or if first condition is true
-                isinstance(att, (np.float32 | np.float64 | float)) and variable.dtype in (np.byte, np.short, np.int16, np.int32, int)
+                isinstance(att, (np.float32 | np.float64 | float))
+                and variable.dtype in (np.byte, np.short, np.int16, np.int32, int)
             )
         if not val:
             msgs.append(error_msg)
@@ -304,7 +307,11 @@ class CF1_6Check(CFNCCheck):
         for k in ds.variables:
             names[k.lower()] += 1
 
-        fails = [f"Variables are not case sensitive. Duplicate variables named: {k}" for k, v in names.items() if v > 1]
+        fails = [
+            f"Variables are not case sensitive. Duplicate variables named: {k}"
+            for k, v in names.items()
+            if v > 1
+        ]
         return Result(
             BaseCheck.MEDIUM,
             (total - len(fails), total),
@@ -417,7 +424,13 @@ class CF1_6Check(CFNCCheck):
 
             if hasattr(variable, "_FillValue") and hasattr(variable, "missing_value"):
                 total = total + 1
-                if not (variable._FillValue == variable.missing_value or (np.isnan(variable._FillValue) and np.isnan(variable.missing_value))):
+                if not (
+                    variable._FillValue == variable.missing_value
+                    or (
+                        np.isnan(variable._FillValue)
+                        and np.isnan(variable.missing_value)
+                    )
+                ):
                     fails.append(
                         f"For the variable {variable.name} the missing_value must be equal to the _FillValue",
                     )
@@ -666,7 +679,11 @@ class CF1_6Check(CFNCCheck):
         # unit_containing =
         unit_required_variables = (
             set(
-                coordinate_variables + auxiliary_coordinates + geophysical_variables + forecast_variables + modifier_variables,
+                coordinate_variables
+                + auxiliary_coordinates
+                + geophysical_variables
+                + forecast_variables
+                + modifier_variables,
             )  # standard names with modifiers require proper units, *except* for flags, where they should not be present
             - dimless_vert
         )
@@ -684,7 +701,9 @@ class CF1_6Check(CFNCCheck):
                 continue
 
             # Skip labels
-            if (hasattr(variable.dtype, "char") and variable.dtype.char == "S") or variable.dtype == str:
+            if (
+                hasattr(variable.dtype, "char") and variable.dtype.char == "S"
+            ) or variable.dtype == str:
                 continue
 
             standard_name = getattr(variable, "standard_name", None)
@@ -782,7 +801,12 @@ class CF1_6Check(CFNCCheck):
 
         # Is this even in the database? also, if there is no standard_name,
         # there's no way to know if it is dimensionless.
-        should_be_dimensionless = variable.dtype is str or (hasattr(variable.dtype, "char") and variable.dtype.char == "S") or std_name_units_dimensionless or standard_name is None
+        should_be_dimensionless = (
+            variable.dtype is str
+            or (hasattr(variable.dtype, "char") and variable.dtype.char == "S")
+            or std_name_units_dimensionless
+            or standard_name is None
+        )
 
         # 1) Units must exist
         valid_units.assert_true(
@@ -840,7 +864,11 @@ class CF1_6Check(CFNCCheck):
         )
 
         # If the variable is supposed to be dimensionless, it automatically passes
-        should_be_dimensionless = variable.dtype is str or (hasattr(variable.dtype, "char") and variable.dtype.char == "S") or std_name_units_dimensionless
+        should_be_dimensionless = (
+            variable.dtype is str
+            or (hasattr(variable.dtype, "char") and variable.dtype.char == "S")
+            or std_name_units_dimensionless
+        )
 
         valid_udunits = TestCtx(BaseCheck.HIGH, self.section_titles["3.1"])
         are_udunits = units is not None and util.units_known(units)
@@ -948,7 +976,9 @@ class CF1_6Check(CFNCCheck):
         flag_vars = cfutil.get_flag_variables(ds)
         geophysical_vars = self._find_geophysical_vars(ds)
 
-        variables_requiring_standard_names = coord_vars + aux_coord_vars + axis_vars + flag_vars + geophysical_vars
+        variables_requiring_standard_names = (
+            coord_vars + aux_coord_vars + axis_vars + flag_vars + geophysical_vars
+        )
         for name in set(variables_requiring_standard_names):
             # Compression indices used in reduced horizontal grids or
             # compression schemes do not require attributes other than compress
@@ -1149,7 +1179,10 @@ class CF1_6Check(CFNCCheck):
                 # IMPLEMENTATION CONFORMANCE 3.5 RECOMMENDED 1/1
                 # If shapes aren't equal, we can't do proper elementwise
                 # comparison
-                if vals_arr.size != masks_arr.size or not (np.issubdtype(vals_arr.dtype, np.integer) and np.issubdtype(masks_arr.dtype, np.integer)):
+                if vals_arr.size != masks_arr.size or not (
+                    np.issubdtype(vals_arr.dtype, np.integer)
+                    and np.issubdtype(masks_arr.dtype, np.integer)
+                ):
                     allv = False
                 else:
                     allv = np.all(vals_arr & masks_arr == vals_arr)
@@ -1198,7 +1231,11 @@ class CF1_6Check(CFNCCheck):
 
         # IMPLEMENTATION CONFORMANCE 3.5 REQUIRED 1/8
         # the data type for flag_values should be the same as the variable
-        flag_values_type = flag_values.dtype.type if hasattr(flag_values, "dtype") else type(flag_values)
+        flag_values_type = (
+            flag_values.dtype.type
+            if hasattr(flag_values, "dtype")
+            else type(flag_values)
+        )
         valid_values.assert_true(
             variable.dtype.type == flag_values_type,
             f"flag_values ({flag_values_type}) must be the same data type as {name} ({variable.dtype.type})",
@@ -1234,13 +1271,19 @@ class CF1_6Check(CFNCCheck):
 
         valid_masks = TestCtx(BaseCheck.HIGH, self.section_titles["3.5"])
 
-        flag_masks_type = flag_masks.dtype.type if hasattr(flag_masks, "dtype") else type(flag_masks)
+        flag_masks_type = (
+            flag_masks.dtype.type if hasattr(flag_masks, "dtype") else type(flag_masks)
+        )
         valid_masks.assert_true(
             variable.dtype.type == flag_masks_type,
             f"flag_masks ({flag_masks_type}) must be the same data type as {name} ({variable.dtype.type})",
         )
 
-        type_ok = np.issubdtype(variable.dtype, np.integer) or np.issubdtype(variable.dtype, "S") or np.issubdtype(variable.dtype, "b")
+        type_ok = (
+            np.issubdtype(variable.dtype, np.integer)
+            or np.issubdtype(variable.dtype, "S")
+            or np.issubdtype(variable.dtype, "b")
+        )
 
         valid_masks.assert_true(
             0 not in np.array(flag_masks),
@@ -1305,7 +1348,8 @@ class CF1_6Check(CFNCCheck):
             if flag_regx.match(meaning) is None:
                 valid_meanings.assert_true(
                     False,
-                    f"{name}'s flag_meanings attribute defined an illegal flag meaning " + f"{meaning}",
+                    f"{name}'s flag_meanings attribute defined an illegal flag meaning "
+                    + f"{meaning}",
                 )
         return valid_meanings.to_result()
 
@@ -1631,7 +1675,10 @@ class CF1_6Check(CFNCCheck):
             units = getattr(variable, "units", None)
             positive = getattr(variable, "positive", None)
             # Skip the variable if it's dimensionless
-            if hasattr(variable, "formula_terms") or standard_name in dimless_vertical_coordinates:
+            if (
+                hasattr(variable, "formula_terms")
+                or standard_name in dimless_vertical_coordinates
+            ):
                 continue
 
             valid_vertical_coord = TestCtx(BaseCheck.HIGH, self.section_titles["4.3"])
@@ -1966,7 +2013,9 @@ class CF1_6Check(CFNCCheck):
         leap_time.out_of = 1
         # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 2, 3 / 5
         if not hasattr(time_variable, "month_lengths") or not (
-            hasattr(time_variable.month_lengths, "dtype") and np.issubdtype(time_variable.month_lengths.dtype, np.integer) and time_variable.month_lengths.size == 12
+            hasattr(time_variable.month_lengths, "dtype")
+            and np.issubdtype(time_variable.month_lengths.dtype, np.integer)
+            and time_variable.month_lengths.size == 12
         ):
             leap_time.messages.append(
                 f"For nonstandard calendar on variable {time_variable.name}, attribute month_lengths must be supplied as a 12-element integer array",
@@ -1995,7 +2044,8 @@ class CF1_6Check(CFNCCheck):
         # IMPLEMENTATION CONFORMANCE 4.4.1 REQUIRED 5/5
         if has_leap_year:
             leap_time.assert_true(
-                np.isscalar(time_variable.leap_year) and hasattr(time_variable.leap_year, "dtype"),
+                np.isscalar(time_variable.leap_year)
+                and hasattr(time_variable.leap_year, "dtype"),
                 f"When attribute leap_year is supplied for variable {time_variable.name}, the value must be a scalar integer",
             )
         return leap_time.to_result()
@@ -2064,7 +2114,10 @@ class CF1_6Check(CFNCCheck):
 
                 # TODO CONFORMANCE: Partial implementation of labels
                 # §6.1 Allows for "labels" to be referenced as coordinates
-                if hasattr(ds.variables[aux_coord].dtype, "char") and ds.variables[aux_coord].dtype.char == "S":
+                if (
+                    hasattr(ds.variables[aux_coord].dtype, "char")
+                    and ds.variables[aux_coord].dtype.char == "S"
+                ):
                     continue
                 elif ds.variables[aux_coord].dtype == str:
                     continue
@@ -2112,7 +2165,9 @@ class CF1_6Check(CFNCCheck):
 
             # Check for unexpected characters (e.g., commas or brackets)
             if isinstance(coord_attr, str):
-                has_invalid_chars = any(char in coord_attr for char in [",", "[", "]", "(", ")"])
+                has_invalid_chars = any(
+                    char in coord_attr for char in [",", "[", "]", "(", ")"]
+                )
                 check_coords_attrs_format.assert_true(
                     not has_invalid_chars,
                     f"The 'coordinates' attribute of variable '{var_name}' contains invalid characters: {coord_attr}",
@@ -2328,7 +2383,10 @@ class CF1_6Check(CFNCCheck):
             # contents of the `coordinates` attribute only.
             axis_map = cfutil.get_axis_map(ds, variable)
 
-            msg = '{}\'s coordinate variable "{}" is not one of the variables identifying true ' + "latitude/longitude and its dimensions are not a subset of {}'s dimensions"
+            msg = (
+                '{}\'s coordinate variable "{}" is not one of the variables identifying true '
+                + "latitude/longitude and its dimensions are not a subset of {}'s dimensions"
+            )
 
             alt = "{} has no coordinate associated with a variable identified as true latitude/longitude; its coordinate variable should also share a subset of {}'s dimensions"
 
@@ -2415,7 +2473,9 @@ class CF1_6Check(CFNCCheck):
             )
             valid_rgrid.assert_true(
                 len(axis_map["C"]) == 1,
-                "{} can not be associated with more than one compressed coordinates: ({})".format(name, ", ".join(axis_map["C"])),
+                "{} can not be associated with more than one compressed coordinates: ({})".format(
+                    name, ", ".join(axis_map["C"])
+                ),
             )
 
             for compressed_coord in axis_map["C"]:
@@ -2751,7 +2811,8 @@ class CF1_6Check(CFNCCheck):
             if boundary_variable_name not in ds.variables:
                 valid = False
                 reasoning.append(
-                    f"Boundary variable {boundary_variable_name} referenced by {variable.name} not " + "found in dataset variables",
+                    f"Boundary variable {boundary_variable_name} referenced by {variable.name} not "
+                    + "found in dataset variables",
                 )
             else:
                 boundary_variable = ds.variables[boundary_variable_name]
@@ -2760,7 +2821,9 @@ class CF1_6Check(CFNCCheck):
             if boundary_variable.ndim < 2:
                 valid = False
                 reasoning.append(
-                    f"Boundary variable {boundary_variable.name} specified by {variable.name}" + " should have at least two dimensions to enclose the base " + "case of a one dimensionsal variable",
+                    f"Boundary variable {boundary_variable.name} specified by {variable.name}"
+                    + " should have at least two dimensions to enclose the base "
+                    + "case of a one dimensionsal variable",
                 )
             if boundary_variable.ndim != variable.ndim + 1:
                 valid = False
@@ -2777,7 +2840,10 @@ class CF1_6Check(CFNCCheck):
 
             # ensure p vertices form a valid simplex given previous a...n
             # previous auxiliary coordinates
-            if ds.dimensions[boundary_variable.dimensions[-1]].size < len(boundary_variable.dimensions[:-1]) + 1:
+            if (
+                ds.dimensions[boundary_variable.dimensions[-1]].size
+                < len(boundary_variable.dimensions[:-1]) + 1
+            ):
                 valid = False
                 reasoning.append(
                     f"Dimension {boundary_variable.name} of boundary variable (for {variable.name}) must have at least {len(variable.dimensions) + 1} elements to form a simplex/closed cell with previous dimensions {boundary_variable.dimensions[:-1]}.",
@@ -2794,7 +2860,9 @@ class CF1_6Check(CFNCCheck):
     def _cell_measures_core(self, ds, var, external_set, variable_template):
         # IMPLEMENTATION CONFORMANCE REQUIRED 1/2
         reasoning = []
-        search_str = r"^(?P<measure_type>area|volume):\s+(?P<cell_measure_var_name>\w+)$"
+        search_str = (
+            r"^(?P<measure_type>area|volume):\s+(?P<cell_measure_var_name>\w+)$"
+        )
         search_res = regex.match(search_str, var.cell_measures)
         if not search_res:
             valid = False
@@ -2956,7 +3024,11 @@ class CF1_6Check(CFNCCheck):
                 for var_raw_str in match.captures("vars"):
                     # strip off the ' :' at the end of each match
                     var_str = var_raw_str[:-2]
-                    if var_str in var.dimensions or var_str == "area" or var_str in getattr(var, "coordinates", ""):
+                    if (
+                        var_str in var.dimensions
+                        or var_str == "area"
+                        or var_str in getattr(var, "coordinates", "")
+                    ):
                         valid = True
                     else:
                         valid = False
@@ -2975,7 +3047,9 @@ class CF1_6Check(CFNCCheck):
                 # CF section 7.3 - "Case is not significant in the method name."
                 valid_cell_methods.assert_true(
                     match.group("method").lower() in self.cell_methods,
-                    "{}:cell_methods contains an invalid method: {}".format(var.name, match.group("method")),
+                    "{}:cell_methods contains an invalid method: {}".format(
+                        var.name, match.group("method")
+                    ),
                 )
 
             ret_val.append(valid_cell_methods.to_result())
@@ -3198,7 +3272,8 @@ class CF1_6Check(CFNCCheck):
                 for same_attr in ("units", "standard_name", "calendar"):
                     if hasattr(clim_var, same_attr):
                         climatology_ctx.assert_true(
-                            getattr(clim_var, same_attr) == getattr(clim_coord_var, same_attr, None),
+                            getattr(clim_var, same_attr)
+                            == getattr(clim_coord_var, same_attr, None),
                             f"Attribute {same_attr} must have the same value in both variables {clim_var.name} and {clim_coord_var.name}",
                         )
             ret_val.append(climatology_ctx.to_result())
@@ -3206,7 +3281,12 @@ class CF1_6Check(CFNCCheck):
             # check that coordinate bounds are in the proper order.
             # make sure last elements are boundary variable specific dimensions
             # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 3/6
-            if clim_coord_var.dimensions[:] != ds.variables[clim_coord_var.climatology].dimensions[: clim_coord_var.ndim]:
+            if (
+                clim_coord_var.dimensions[:]
+                != ds.variables[clim_coord_var.climatology].dimensions[
+                    : clim_coord_var.ndim
+                ]
+            ):
                 total_climate_count += 1
                 reasoning.append(
                     f"Climatology variable coordinates are in improper order: {ds.variables[clim_coord_var.climatology].dimensions}. Bounds-specific dimensions should be last",
@@ -3221,7 +3301,12 @@ class CF1_6Check(CFNCCheck):
 
             # IMPLEMENTATION CONFORMANCE 7.4 REQUIRED 3/6 - dim size of 2 for
             # climatology-specific dimension
-            elif ds.dimensions[ds.variables[clim_coord_var.climatology].dimensions[-1]].size != 2:
+            elif (
+                ds.dimensions[
+                    ds.variables[clim_coord_var.climatology].dimensions[-1]
+                ].size
+                != 2
+            ):
                 reasoning.append(
                     f'Climatology dimension "{ds.variables[clim_coord_var.climatology].name}" should only contain two elements',
                 )
@@ -3259,7 +3344,9 @@ class CF1_6Check(CFNCCheck):
         for cell_method_var in ds.get_variables_by_attributes(
             cell_methods=lambda s: s is not None,
         ):
-            if any(dim in all_clim_coord_var_names for dim in cell_method_var.dimensions):
+            if any(
+                dim in all_clim_coord_var_names for dim in cell_method_var.dimensions
+            ):
                 total_climate_count += 1
                 if not regex.search(re_string, cell_method_var.cell_methods):
                     reasoning.append(
@@ -3456,7 +3543,9 @@ class CF1_6Check(CFNCCheck):
             # IMPLEMENTATION CONFORMANCE 8.2 REQUIRED 1/3
             # ensure compression variable is a proper index, and thus is an
             # signed or unsigned integer type of some sort
-            if (compress_var.dtype is str) or (compress_var.dtype.kind not in {"i", "u"}):
+            if (compress_var.dtype is str) or (
+                compress_var.dtype.kind not in {"i", "u"}
+            ):
                 valid = False
                 reasoning.append(
                     f"Compression variable {compress_var.name} must be an integer type to form a proper array index",
@@ -3476,7 +3565,11 @@ class CF1_6Check(CFNCCheck):
             # sizes minus 1 (CDL index conventions).
 
             # Put the the values of the associated coordinate variable into a list
-            coord_list_size = [item.size for item in ds.dimensions.values() if item.name in compress_set]
+            coord_list_size = [
+                item.size
+                for item in ds.dimensions.values()
+                if item.name in compress_set
+            ]
             # get the upper limit of the dimenssion size
             upper_limit_size = np.prod(coord_list_size) - 1
 
@@ -3530,7 +3623,9 @@ class CF1_6Check(CFNCCheck):
         )
         valid_feature_type.assert_true(
             feature_type is None or feature_type.lower() in feature_list,
-            "{} is not a valid CF featureType. It must be one of {}".format(feature_type, ", ".join(feature_list)),
+            "{} is not a valid CF featureType. It must be one of {}".format(
+                feature_type, ", ".join(feature_list)
+            ),
         )
         return valid_feature_type.to_result()
 
@@ -3552,7 +3647,9 @@ class CF1_6Check(CFNCCheck):
             cf_role = variable.cf_role
             valid_cf_role.assert_true(
                 cf_role in valid_roles,
-                "{} is not a valid cf_role value. It must be one of {}".format(cf_role, ", ".join(valid_roles)),
+                "{} is not a valid cf_role value. It must be one of {}".format(
+                    cf_role, ", ".join(valid_roles)
+                ),
             )
         if variable_count > 0:
             return valid_cf_role.to_result()
@@ -3600,7 +3697,10 @@ class CF1_6Check(CFNCCheck):
         # create explanation of all of the different featureTypes
         # found in the dataset
         feature_description = ", ".join(
-            ["{} ({})".format(ftr, ", ".join(vrs)) for ftr, vrs in feature_types_found.items()],
+            [
+                "{} ({})".format(ftr, ", ".join(vrs))
+                for ftr, vrs in feature_types_found.items()
+            ],
         )
         all_same_features = TestCtx(BaseCheck.HIGH, self.section_titles["9.1"])
         all_same_features.assert_true(
