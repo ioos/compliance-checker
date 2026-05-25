@@ -8,8 +8,6 @@ import os
 import tempfile
 
 import netCDF4 as nc
-import numpy as np
-import pytest
 
 from compliance_checker.cf.cf_1_6 import CF1_6Check
 
@@ -52,9 +50,7 @@ def test_soil_type_no_units_no_error():
         var.standard_name = "soil_type"
         # No units attribute intentionally
         messages = get_messages(ds)
-        bad = [
-            m for m in messages if "units attribute is required" in m and "SOILTYP" in m
-        ]
+        bad = [m for m in messages if "units attribute is required" in m and "SOILTYP" in m]
         assert not bad, f"Unexpected units required errors: {bad}"
         ds.close()
     finally:
