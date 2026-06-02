@@ -78,29 +78,29 @@ entry-points."compliance_checker.suites"."ioos-1.2" = "compliance_checker.ioos:I
 packages = [
   "compliance_checker",
 ]
-license-files = [
-  "LICENSE",
-]
-zip-safe = false
 include-package-data = true
-script-files = [
-  "cchecker.py",
+package-data.compliance_checker = [
+  "data/*.xml",
+  "data/templates/*.j2",
+  "tests/data/*.cdl",
+  "tests/data/*.nc",
+  "tests/data/non-comp/*.cdl",
 ]
 dynamic.dependencies = { file = [
   "requirements.txt",
 ] }
-package-data.compliance_checker = [
-  "data/*.xml",
-  "tests/data/*.nc",
-  "tests/data/*.cdl",
-  "tests/data/non-comp/*.cdl",
-  "data/templates/*.j2",
+license-files = [
+  "LICENSE",
 ]
+script-files = [
+  "cchecker.py",
+]
+zip-safe = false
 
 [tool.setuptools_scm]
+tag_regex = "^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$"
 write_to = "compliance_checker/_version.py"
 write_to_template = "__version__ = '{version}'"
-tag_regex = "^(?P<prefix>v)?(?P<version>[^\\+]+)(?P<suffix>.*)?$"
 
 [tool.ruff]
 target-version = "py310"
@@ -139,10 +139,10 @@ ini_options.markers = [
 ]
 ini_options.filterwarnings = [
   "error",
-  "ignore:this date/calendar/year zero convention is not supported by CF", # CFtime warning, probably harmless here?
+  "ignore:Passing the dataset to every single check is deprecated.",
   "ignore:Received exception when making HEAD request to",                 # In compliance_checker/protocols/netcdf.py::is_remote_netcdf We can still tell if it is remote without the handshake.
-  "ignore:unclosed database in",                                           # Not sure what is causing this one, only happens in Python 3.13.
-  "ignore:unclosed file",                                                  # Should make Windows + Python 3.10 and 3.11 pass, we should check when this warning was triggered first.
   "ignore:The ioos_sos checker is deprecated and will be removed",
-  "ignore:Passing the dataset to every single check is deprecated."
+  "ignore:this date/calendar/year zero convention is not supported by CF", # CFtime warning, probably harmless here?
+  "ignore:unclosed database in",                                           # Not sure what is causing this one, only happens in Python 3.13.
+  "ignore:unclosed file"
 ]
