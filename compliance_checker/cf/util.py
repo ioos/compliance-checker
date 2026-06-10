@@ -259,19 +259,20 @@ def is_dimensionless_standard_name(standard_name_table, standard_name):
     units and units that are defined as constant units in the CF standard name
     table i.e. '1', or '1e-3'.
     """
-    # standard_name must be string, so if it is not, it is *wrong* by default
     if not isinstance(standard_name, str):
         return False
     found_standard_name = standard_name_table.find(
         f".//entry[@id='{standard_name}']",
     )
     if found_standard_name is not None:
-        canonical_units = Unit(found_standard_name.find("canonical_units").text)
+        canonical_units_text = found_standard_name.find("canonical_units").text
+        if not canonical_units_text:
+            return False
+        canonical_units = Unit(canonical_units_text)
         return canonical_units.is_dimensionless()
     # if the standard name is not found, assume we need units for the time being
     else:
         return False
-
 
 def get_sea_names():
     """
