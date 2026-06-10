@@ -8,7 +8,7 @@ import platform
 
 import pytest
 
-from compliance_checker.protocols import zarr
+from compliance_checker.protocols import netcdf, zarr
 from compliance_checker.suite import CheckSuite
 
 from .conftest import datadir
@@ -19,6 +19,24 @@ pytestmark = [pytest.mark.integration]
 @pytest.fixture
 def cs():
     return CheckSuite()
+
+
+extension_io = [
+    ("myfunc", False),
+    ("data.sync", False),
+    ("stats.inc", False),
+    ("foo.nc", True),
+]
+
+
+@pytest.mark.parametrize("url_in, expected", extension_io)
+def test_is_netcdf_extension(url_in, expected):
+    """
+    Test that only paths with a proper .nc extension are assumed to be netCDF
+    files; other paths ending in the letters "nc" must fall through to
+    inspecting the file contents.
+    """
+    assert netcdf.is_netcdf(url_in) == expected
 
 
 @pytest.mark.vcr()
