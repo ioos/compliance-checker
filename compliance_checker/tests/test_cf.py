@@ -3647,6 +3647,19 @@ class TestCF1_9(BaseTestCase):
         results = self.cf.check_domain_variables(dataset)
         assert results[0].value[0] == results[0].value[1]
 
+    def test_domain_invalid_dimensions(self):
+        # TEST CONFORMANCE 5.8 REQUIRED 2/4
+        # a domain variable with a dimensions attribute referencing a
+        # nonexistent dimension should fail the check, not crash it
+        dataset = MockTimeSeries()
+        domain_var = dataset.createVariable("domain", "c", ())
+        domain_var.long_name = "Domain variable"
+        domain_var.coordinates = "lon lat depth"
+        domain_var.setncattr("dimensions", "xyxz")
+        results = self.cf.check_domain_variables(dataset)
+        assert results[0].value[0] != results[0].value[1]
+        assert "Could not find the following dimensions referenced in dimensions attribute from domain variable domain: xyxz" in results[0].msgs
+
 
 class TestCF1_11(BaseTestCase):
     def setup_method(self):
@@ -4114,3 +4127,27 @@ class TestCFUtil(BaseTestCase):
                 "trajectoryprofile",
             )
         )
+
+    def test_resolve_ragged_array_dimension(self):
+        # must return both the variable bearing the ragged array
+        # attribute and the attribute name, as unpacked by
+        # CF1_9Check.check_domain_variables
+        nc = MockRaggedArrayRepr("timeseries", "contiguous")
+        ragged_variable, ragged_type = cfutil.resolve_ragged_array_dimension(nc)
+        assert ragged_variable.name == "counter_var"
+        assert ragged_type == "sample_dimension"
+
+        nc = MockRaggedArrayRepr("timeseries", "indexed")
+        ragged_variable, ragged_type = cfutil.resolve_ragged_array_dimension(nc)
+        assert ragged_variable.name == "index_var"
+        assert ragged_type == "instance_dimension"
+
+        # no ragged array related variables present
+        nc = MockTimeSeries()
+        with pytest.raises(ValueError):
+            cfutil.resolve_ragged_array_dimension(nc)
+
+    def test_variable_reference_error_str(self):
+        # str() must not recurse into __str__ via {self}
+        err = cfutil.VariableReferenceError("foo")
+        assert str(err) == "Cannot find variable named foo in dataset None"

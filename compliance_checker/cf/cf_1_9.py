@@ -187,7 +187,7 @@ class CF1_9Check(CF1_8Check):
                     "dimensions",
                 )
                 if dim_errors:
-                    errors_str = ", ".join(dim_errors)
+                    errors_str = ", ".join(err.name for err in dim_errors)
                     domain_valid.messages.append(
                         f"Could not find the following dimensions referenced in dimensions attribute from domain variable {domain_var.name}: {errors_str}",
                     )

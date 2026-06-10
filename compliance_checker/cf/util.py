@@ -1177,9 +1177,9 @@ def resolve_ragged_array_dimension(ds: Dataset):
             instance_dimension=lambda s: isinstance(s, str),
         )
         ragged_type = "instance_dimension"
-    if ragged_variable is None:
+    if not ragged_variable:
         raise ValueError("Could not find a ragged array related variable")
-    return ragged_type
+    return ragged_variable[0], ragged_type
 
 
 def is_variable_valid_ragged_array_repr_featureType(nc, variable: str) -> bool:
@@ -2223,7 +2223,7 @@ class VariableReferenceError(Exception):
         self.dataset_path = dataset.filepath() if dataset is not None else None
 
     def __str__(self):
-        return f"Cannot find variable named {self.name} in dataset {self}.dataset_path"
+        return f"Cannot find variable named {self.name} in dataset {self.dataset_path}"
 
 
 class StandardNameTable:
