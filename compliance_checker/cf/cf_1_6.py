@@ -765,6 +765,12 @@ class CF1_6Check(CFNCCheck):
             # but a standard name error will be raised elsewhere
             except KeyError:
                 return valid_units.to_result()
+            # If canonical_units is None, this is a categorical variable
+            # (e.g. soil_type, region, area_type) with no physical units defined.
+            # Units are not meaningful for these variables — accept units="1"
+            # or missing units without raising an error.
+            if reference is None:
+                return valid_units.to_result()
         elif unit_type == "1":
             reference = "1"
         elif unit_type is None:
@@ -2409,7 +2415,10 @@ class CF1_6Check(CFNCCheck):
             )
             valid_rgrid.assert_true(
                 len(axis_map["C"]) == 1,
-                "{} can not be associated with more than one compressed coordinates: ({})".format(name, ", ".join(axis_map["C"])),
+                "{} can not be associated with more than one compressed coordinates: ({})".format(
+                    name,
+                    ", ".join(axis_map["C"]),
+                ),
             )
 
             for compressed_coord in axis_map["C"]:
@@ -2969,7 +2978,10 @@ class CF1_6Check(CFNCCheck):
                 # CF section 7.3 - "Case is not significant in the method name."
                 valid_cell_methods.assert_true(
                     match.group("method").lower() in self.cell_methods,
-                    "{}:cell_methods contains an invalid method: {}".format(var.name, match.group("method")),
+                    "{}:cell_methods contains an invalid method: {}".format(
+                        var.name,
+                        match.group("method"),
+                    ),
                 )
 
             ret_val.append(valid_cell_methods.to_result())
@@ -3524,7 +3536,10 @@ class CF1_6Check(CFNCCheck):
         )
         valid_feature_type.assert_true(
             feature_type is None or feature_type.lower() in feature_list,
-            "{} is not a valid CF featureType. It must be one of {}".format(feature_type, ", ".join(feature_list)),
+            "{} is not a valid CF featureType. It must be one of {}".format(
+                feature_type,
+                ", ".join(feature_list),
+            ),
         )
         return valid_feature_type.to_result()
 
@@ -3546,7 +3561,10 @@ class CF1_6Check(CFNCCheck):
             cf_role = variable.cf_role
             valid_cf_role.assert_true(
                 cf_role in valid_roles,
-                "{} is not a valid cf_role value. It must be one of {}".format(cf_role, ", ".join(valid_roles)),
+                "{} is not a valid cf_role value. It must be one of {}".format(
+                    cf_role,
+                    ", ".join(valid_roles),
+                ),
             )
         if variable_count > 0:
             return valid_cf_role.to_result()
