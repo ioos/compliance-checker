@@ -170,5 +170,7 @@ texinfo_documents = [
 linkcheck_ignore = [
     "https://github.com/ioos/compliance-checker/issues/.*",
     "urn:lsid.*",
-    "https://mmisw.org/ont/.*",
+    "https://docs.unidata.ucar.edu/.*",  # broken ssl
+    "https://mmisw.org/ont/.*",  # returns 403 when tested from GH
+    "https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3",
 ]

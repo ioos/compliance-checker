@@ -1,10 +1,6 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = [
-  "setuptools>=42",
-  "setuptools-scm",
-  "wheel",
-]
+requires = [ "setuptools>=42", "setuptools-scm" ]
 
 [project]
 name = "compliance-checker"
@@ -53,11 +49,12 @@ dependencies = [
   "pyudunits2; sys_platform=='emscripten'",
   "regex>=2017.7.28",
   "requests>=2.2.1",
-  "setuptools>=15",
   "shapely>=1.7.1",
   "typing-extensions",
   "validators>=0.14.2",
 ]
+optional-dependencies.docs = [ "myst-parser", "numpydoc", "pydata-sphinx-theme" ]
+optional-dependencies.test = [ "pytest>=2.9", "pytest-vcr", "requests-mock" ]
 urls.documentation = "https://ioos.github.io/compliance-checker"
 urls.homepage = "https://compliance.ioos.us/index.html"
 urls.repository = "https://github.com/ioos/compliance-checker"

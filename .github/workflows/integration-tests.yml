@@ -4,8 +4,12 @@ on:
   pull_request:
   push:
 
+# Deny all permissions by default
+permissions: {}
+
 jobs:
   run:
+    name: cf-units ${{ matrix.cf_units }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,28 +26,24 @@ jobs:
       with:
         persist-credentials: false
 
-    - name: Setup Micromamba
-      uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
+    - name: Set up Python
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
       with:
-        environment-name: TEST
-        init-shell: bash
-        create-args: >-
-          python=3 pip
-          --file test_requirements.txt
-          --channel conda-forge
+        python-version: "3.x"
+
+    - name: Install netcdf-c
+      run: >
+        sudo apt-get update
+        && sudo apt-get install netcdf-bin libnetcdf-dev
 
     - name: Test with cf-units (optional)
       if: matrix.cf_units == true
       run: >-
-        micromamba install cf-units --channel conda-forge
+        python -m pip install cf-units
 
     - name: Install compliance-checker
-      shell: bash -l {0}
       run: |
-        python -m pip install -e . --no-deps --force-reinstall
+        python -m pip install -e .[test]
 
     - name: Integration Tests
-      shell: bash -l {0}
       run: python -m pytest -m "integration" -s -rxs -v --vcr-record=none compliance_checker
-    permissions:
-      actions: none
