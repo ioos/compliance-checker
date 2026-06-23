@@ -13,10 +13,6 @@ repos:
     - id: check-json
     - id: check-merge-conflict
     - id: check-yaml
-    - id: requirements-txt-fixer
-      args:
-        - test_requirements.txt
-
 
 - repo: https://github.com/asottile/add-trailing-comma
   rev: v4.0.0
@@ -24,14 +20,14 @@ repos:
     - id: add-trailing-comma
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.15
+  rev: v0.15.18
   hooks:
     - id: ruff
       args: ["--fix", "--show-fixes"]
     - id: ruff-format
 
 - repo: https://github.com/tox-dev/pyproject-fmt
-  rev: v2.23.0
+  rev: v2.25.0
   hooks:
     - id: pyproject-fmt
 
@@ -50,7 +46,7 @@ repos:
           )$
 
 - repo: https://github.com/woodruffw/zizmor-pre-commit
-  rev: v1.25.2
+  rev: v1.26.1
   hooks:
     - id: zizmor
 
@@ -66,6 +62,5 @@ ci:
         for more information, see https://pre-commit.ci
     autofix_prs: false
     autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-    autoupdate_schedule: monthly
     skip: []
     submodules: false

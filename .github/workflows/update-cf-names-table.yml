@@ -5,6 +5,9 @@ on:
     - cron: '0 0 1 * *'
   workflow_dispatch:
 
+# Deny all permissions by default
+permissions: {}
+
 jobs:
   update-cftable:
     if: github.repository == 'ioos/compliance-checker'

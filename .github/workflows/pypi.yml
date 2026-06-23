@@ -1,11 +1,12 @@
 name: Publish to PyPI
 
 on:
-  pull_request:
-  push:
   release:
     types:
       - published
+
+# Deny all permissions by default
+permissions: {}
 
 jobs:
   pypi-publish:
