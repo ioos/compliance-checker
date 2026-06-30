@@ -2796,79 +2796,95 @@ class CF1_6Check(CFNCCheck):
 
     def _cell_measures_core(self, ds, var, external_set, variable_template):
         # IMPLEMENTATION CONFORMANCE REQUIRED 1/2
+        # CF 1.11 §7.2: cell_measures may carry MULTIPLE measure entries
+        # ("area: a volume: v"), and each entry must be of a different type.
+        # Walk every "type: var" pair instead of trying to match the whole
+        # string as a single pair.
         reasoning = []
-        search_str = r"^(?P<measure_type>area|volume):\s+(?P<cell_measure_var_name>\w+)$"
-        search_res = regex.match(search_str, var.cell_measures)
-        if not search_res:
+        pair_re = r"(?P<measure_type>area|volume):\s+(?P<cell_measure_var_name>\w+)"
+        matches = list(regex.finditer(pair_re, var.cell_measures))
+        # Reject if the parsed pairs don't account for the whole attribute
+        # (catches malformed entries like ``area:`` with no variable or
+        # ``area: foo bogus volume: bar``). Compare on whitespace-normalised
+        # forms so the check accepts any consistent spacing variant.
+        canonical_from_pairs = " ".join(f"{m.group('measure_type')}: {m.group('cell_measure_var_name')}" for m in matches)
+        canonical_input = " ".join(var.cell_measures.split())
+        if not matches or canonical_from_pairs != canonical_input:
             valid = False
             reasoning.append(
                 f"The cell_measures attribute for variable {var.name} "
                 "is formatted incorrectly. It should take the "
-                "form of either 'area: cell_var' or "
-                "'volume: cell_var' where cell_var is an existing name of "
-                "a variable describing the cell measures.",
+                "form of 'area: cell_var', 'volume: cell_var', or "
+                "multiple such pairs separated by spaces (e.g. "
+                "'area: a volume: v'), where each cell_var is an "
+                "existing variable describing the cell measures.",
             )
-        else:
-            valid = True
-            cell_measure_var_name = search_res.group("cell_measure_var_name")
+            return Result(
+                BaseCheck.MEDIUM,
+                valid,
+                (self.section_titles["7.2"]),
+                reasoning,
+            )
+        seen_types = set()
+        valid = True
+        for search_res in matches:
             cell_measure_type = search_res.group("measure_type")
-            # TODO: cache previous results
+            cell_measure_var_name = search_res.group("cell_measure_var_name")
+            # CF 1.11 §7.2: "Multiple measures may be specified for the
+            # same variable, but they should be of different types."
+            if cell_measure_type in seen_types:
+                valid = False
+                reasoning.append(
+                    f"The cell_measures attribute for variable {var.name} has more than one '{cell_measure_type}' entry; each measure type may only appear once.",
+                )
+                continue
+            seen_types.add(cell_measure_type)
             if cell_measure_var_name not in set(ds.variables.keys()).union(
                 external_set,
             ):
                 valid = False
                 reasoning.append(
-                    f"Cell measure variable {cell_measure_var_name} referred to by {var.name} is not present in {variable_template}s".format(
-                        cell_measure_var_name,
-                        var.name,
-                    ),
+                    f"Cell measure variable {cell_measure_var_name} referred to by {var.name} is not present in {variable_template}s",
                 )
+                continue
             # CF 1.7+ assume external variables -- further checks can't be run here
-            elif cell_measure_var_name in external_set:
-                # can't test anything on an external var
-                return Result(
-                    BaseCheck.MEDIUM,
-                    valid,
-                    (self.section_titles["7.2"]),
-                    reasoning,
+            if cell_measure_var_name in external_set:
+                continue
+
+            cell_measure_var = ds.variables[cell_measure_var_name]
+            if not hasattr(cell_measure_var, "units"):
+                valid = False
+                reasoning.append(
+                    f"Cell measure variable {cell_measure_var_name} is required to have units attribute defined",
                 )
-
             else:
-                cell_measure_var = ds.variables[cell_measure_var_name]
-                if not hasattr(cell_measure_var, "units"):
+                # IMPLEMENTATION CONFORMANCE REQUIRED 2/2
+                exponent_lookup = {"area": 2, "volume": 3}
+                exponent = exponent_lookup[cell_measure_type]
+                conversion_failure_msg = (
+                    f'Variable "{cell_measure_var.name}" must have units which are convertible '
+                    f'to UDUNITS "m{exponent}" when variable is referred to by a {variable_template} with '
+                    f'cell_methods attribute with a measure type of "{cell_measure_type}".'
+                )
+                try:
+                    cell_measure_units = Unit(cell_measure_var.units)
+                except ValueError:
                     valid = False
-                    reasoning.append(
-                        f"Cell measure variable {cell_measure_var_name} is required to have units attribute defined",
-                    )
+                    reasoning.append(conversion_failure_msg)
                 else:
-                    # IMPLEMENTATION CONFORMANCE REQUIRED 2/2
-                    # verify this combination {area: 'm2', volume: 'm3'}
-
-                    # key is valid measure types, value is expected
-                    # exponent
-                    exponent_lookup = {"area": 2, "volume": 3}
-                    exponent = exponent_lookup[search_res.group("measure_type")]
-                    conversion_failure_msg = (
-                        f'Variable "{cell_measure_var.name}" must have units which are convertible '
-                        f'to UDUNITS "m{exponent}" when variable is referred to by a {variable_template} with '
-                        f'cell_methods attribute with a measure type of "{cell_measure_type}".'
-                    )
-                    try:
-                        cell_measure_units = Unit(cell_measure_var.units)
-                    except ValueError:
+                    if not cell_measure_units.is_convertible(
+                        Unit(f"m{exponent}"),
+                    ):
                         valid = False
                         reasoning.append(conversion_failure_msg)
-                    else:
-                        if not cell_measure_units.is_convertible(
-                            Unit(f"m{exponent}"),
-                        ):
-                            valid = False
-                            reasoning.append(conversion_failure_msg)
-                    if not set(cell_measure_var.dimensions).issubset(var.dimensions):
-                        valid = False
-                        reasoning.append(
-                            f"Cell measure variable {cell_measure_var_name} must have dimensions which are a subset of those defined in variable {var.name}.",
-                        )
+                # Dimension-subset check stays parallel to the unit checks
+                # (inside the ``has units`` branch) to preserve the original
+                # behaviour for cell_measure vars that lack a units attr.
+                if not set(cell_measure_var.dimensions).issubset(var.dimensions):
+                    valid = False
+                    reasoning.append(
+                        f"Cell measure variable {cell_measure_var_name} must have dimensions which are a subset of those defined in variable {var.name}.",
+                    )
 
         return Result(BaseCheck.MEDIUM, valid, (self.section_titles["7.2"]), reasoning)
 
