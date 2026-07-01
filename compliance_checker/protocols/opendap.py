@@ -23,6 +23,9 @@ def create_DAP_variable_str(url):
     -------
     str
     """
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError("URL must have http or https scheme")
 
     # get dds
     with urllib.request.urlopen(f"{url}.dds", timeout=10) as resp:
@@ -50,6 +53,10 @@ def is_opendap(url):
 
     :param str url: URL for a remote OPeNDAP endpoint
     """
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        return False
+
     # If the server replies to a Data Attribute Structure request
     if url.endswith("#fillmismatch"):
         das_url = url.replace("#fillmismatch", ".das")
