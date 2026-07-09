@@ -22,6 +22,27 @@ from compliance_checker.cfunits import Unit
 logger = logging.getLogger(__name__)
 
 
+# CF §7.3.4: when an operation in cell_methods applies to a "collapsed"
+# dimension that doesn't have an explicit coordinate variable, the name
+# component may be one of these reserved tokens instead of a dim or
+# coord variable name. Spec text (CF 1.13 §7.3.4):
+#   "the strings 'area:' or 'longitude:', 'latitude:' (in lieu of a
+#    2-D or scalar lat/lon coordinate) may be used; for vertical,
+#    'height:', 'altitude:', 'depth:', 'pressure:' may be used (in
+#    lieu of a vertical scalar coordinate)."
+CF_NO_COORDINATE_NAMES = frozenset(
+    {
+        "area",
+        "longitude",
+        "latitude",
+        "height",
+        "altitude",
+        "depth",
+        "pressure",
+    },
+)
+
+
 class CF1_6Check(CFNCCheck):
     """CF-1.6-specific implementation of CFBaseCheck; supports checking
     netCDF datasets.
@@ -2959,14 +2980,16 @@ class CF1_6Check(CFNCCheck):
                 for var_raw_str in match.captures("vars"):
                     # strip off the ' :' at the end of each match
                     var_str = var_raw_str[:-2]
-                    if var_str in var.dimensions or var_str == "area" or var_str in getattr(var, "coordinates", ""):
+                    if var_str in var.dimensions or var_str in CF_NO_COORDINATE_NAMES or var_str in getattr(var, "coordinates", ""):
                         valid = True
                     else:
                         valid = False
 
                     valid_cell_names.assert_true(
                         valid,
-                        f"{var.name}'s cell_methods name component {var_str} does not match a dimension, area or auxiliary coordinate",
+                        f"{var.name}'s cell_methods name component {var_str} does not match a dimension, "
+                        "auxiliary coordinate, or one of the CF §7.3.4 collapsed-dimension names "
+                        f"({', '.join(sorted(CF_NO_COORDINATE_NAMES))})",
                     )
 
             ret_val.append(valid_cell_names.to_result())
