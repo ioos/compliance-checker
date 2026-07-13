@@ -810,7 +810,7 @@ class CheckSuite:
         # if application/x-netcdf wasn't detected in the Content-Type headers
         # and this is some kind of erddap tabledap form, then try to get the
         # .ncCF file from ERDDAP
-        elif "tabledap" in ds_str and not url_parsed.query:
+        elif "/tabledap/" in ds_str and not url_parsed.query:
             # modify ds_str to contain the full variable request
             variables_str = opendap.create_DAP_variable_str(ds_str)
 
