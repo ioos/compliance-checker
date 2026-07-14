@@ -611,9 +611,9 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         expected_message = (
             "The cell_measures attribute for variable PS is formatted incorrectly. "
-            "It should take the form of either 'area: cell_var' or 'volume: cell_var' "
-            "where cell_var is an existing name of a variable describing the "
-            "cell measures."
+            "It should take the form of 'area: cell_var', 'volume: cell_var', or "
+            "multiple such pairs separated by spaces (e.g. 'area: a volume: v'), "
+            "where each cell_var is an existing variable describing the cell measures."
         )
         assert expected_message in messages
 
@@ -653,6 +653,31 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
         assert "Cell measure variable cell_area2 must have dimensions which are a subset of those defined in variable PS." in messages
+
+        # CF 1.11 §7.2: a variable may carry multiple cell_measures entries,
+        # one per measure type. Both entries should validate.
+        dataset_multi = MockTimeSeries()
+        dataset_multi.createVariable("PS", "d", ("time",))
+        dataset_multi.variables["PS"].setncattr(
+            "cell_measures",
+            "area: area_var volume: volume_var",
+        )
+        for name, units in (("area_var", "m2"), ("volume_var", "m3")):
+            v = dataset_multi.createVariable(name, "d", ("time",))
+            v.setncattr("units", units)
+        results = self.cf.check_cell_measures(dataset_multi)
+        score, out_of, messages = get_results(results)
+        assert score == out_of and score > 0, f"multi-measure case should pass but got messages: {messages}"
+
+        # CF 1.11 §7.2: each measure type may appear at most once. Reject a
+        # second 'area:' entry as malformed.
+        dataset_multi.variables["PS"].setncattr(
+            "cell_measures",
+            "area: area_var area: area_var",
+        )
+        results = self.cf.check_cell_measures(dataset_multi)
+        score, out_of, messages = get_results(results)
+        assert any("more than one 'area' entry" in m for m in messages), f"duplicate measure type should fail but messages were: {messages}"
 
     def test_climatology_cell_methods(self):
         """
@@ -2278,9 +2303,10 @@ class TestCF1_7(BaseTestCase):
             score, out_of, messages = get_results(results)
             assert (
                 "The cell_measures attribute for variable PS is formatted "
-                "incorrectly. It should take the form of either 'area: "
-                "cell_var' or 'volume: cell_var' where cell_var is an "
-                "existing name of a variable describing the cell measures." in messages
+                "incorrectly. It should take the form of 'area: cell_var', "
+                "'volume: cell_var', or multiple such pairs separated by spaces "
+                "(e.g. 'area: a volume: v'), where each cell_var is an existing "
+                "variable describing the cell measures." in messages
             )
 
             # proper measure type, but referenced variable does not exist
@@ -2321,8 +2347,9 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(results)
         expected_message = (
             "The cell_measures attribute for variable PS is formatted incorrectly. "
-            "It should take the form of either 'area: cell_var' or 'volume: cell_var' "
-            "where cell_var is an existing name of a variable describing the cell measures."
+            "It should take the form of 'area: cell_var', 'volume: cell_var', or "
+            "multiple such pairs separated by spaces (e.g. 'area: a volume: v'), "
+            "where each cell_var is an existing variable describing the cell measures."
         )
         assert expected_message in messages
 
