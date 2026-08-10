@@ -30,7 +30,7 @@ you should supply the URL like so:
 "https://standards.sensors.ioos.us/erddap/tabledap/morro-bay-bs1-met".
 
 
-## What version of the Compliance Checker is run on [the web-app](https://ioos.github.io/compliance-checker-wasm-web/ioos_cc_browser.html)?
+## What version of the Compliance Checker is run on [the web-app](https://compliance.ioos.us/index.html)?
 
 This web site always use the [latest version](https://pypi.org/project/compliance-checker/) of the Compliance Checker. If by any reason you still see an older version, clear your cache and refresh the page to ensure the latest one will be loaded.
 
