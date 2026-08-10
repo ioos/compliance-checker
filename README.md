@@ -11,7 +11,7 @@ for completeness and community standard compliance of local or remote
 file standards. The python module can be used as a command-line tool or as a
 library that can be integrated into other software.
 
-A [web-based version](https://ioos.github.io/compliance-checker-wasm-web/ioos_cc_browser.html) of the Compliance
+A [web-based version](https://ioos.github.io/compliance-checker-wasm-web/index.html) of the Compliance
 Checker was developed to enable a broader audience and improve accessibility for the
 checker. With the web version, providers can simply provide a link or upload their
 datasets and get the full suite of capabilities that Compliance Checker offers.
@@ -51,7 +51,7 @@ the IOOS Program Office Operations Division for assistance.
 
 The IOOS Compliance Checker front end companion.
 
-[https://github.com/ioos/compliance-checker-wasm-web](https://ioos.github.io/compliance-checker-wasm-web/ioos_cc_browser.html)
+[https://compliance.ioos.us/](https://compliance.ioos.us/index.html)
 
 Source Code is available on GitHub:
 
