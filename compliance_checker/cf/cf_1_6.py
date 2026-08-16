@@ -344,6 +344,55 @@ class CF1_6Check(CFNCCheck):
             msgs=fails,
         )
 
+    @staticmethod
+    def _get_formula_terms_bounds_variables(ds, bounds_variables):
+        """
+        Returns the set of variables that hold the bounds of the terms of a
+        parametric vertical coordinate.
+
+        CF §4.3.3 requires the boundary variable of a parametric vertical
+        coordinate to carry its own ``formula_terms``, in which the terms that
+        depend on the vertical dimension name a *different* variable than the
+        coordinate's own ``formula_terms`` does::
+
+            lev:formula_terms      = "ap: ap b: b ps: ps" ;
+            lev_bnds:formula_terms = "ap: ap_bnds b: b_bnds ps: ps" ;
+
+        ``ap_bnds`` and ``b_bnds`` are bounds variables, but they are named by
+        ``formula_terms`` rather than by a ``bounds`` attribute, so
+        :func:`~compliance_checker.cf.util.get_cell_boundary_variables` does
+        not find them.
+
+        Terms that do not depend on the vertical dimension keep the same name
+        in both attributes (``ps`` above). Those are ordinary variables and
+        must not be treated as bounds, so only the names that differ between
+        the two attributes are returned.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bounds_variables: names of the variables named by a ``bounds``
+                                 attribute
+        :rtype: set
+        """
+        formula_bounds = set()
+        for parent in ds.variables.values():
+            bounds_name = getattr(parent, "bounds", None)
+            if bounds_name not in bounds_variables:
+                continue
+            bounds_var = ds.variables.get(bounds_name)
+            if bounds_var is None:
+                continue
+            parent_terms = getattr(parent, "formula_terms", None)
+            bounds_terms = getattr(bounds_var, "formula_terms", None)
+            if not bounds_terms:
+                continue
+            # Same tokenisation as _check_formula_terms: the variable name is
+            # the second group of each "component: variable_name" pair.
+            pattern = r"(\w+):\s+(\w+)(?:\s+(?!$)|$)"
+            bounds_named = {m.group(2) for m in regex.finditer(pattern, bounds_terms)}
+            parent_named = {m.group(2) for m in regex.finditer(pattern, parent_terms or "")}
+            formula_bounds |= (bounds_named - parent_named) & set(ds.variables)
+        return formula_bounds
+
     def check_dimension_order(self, ds):
         """
         Checks each variable's dimension order to ensure that the order is
@@ -365,14 +414,16 @@ class CF1_6Check(CFNCCheck):
         coord_axis_map = self._get_coord_axis_map(ds)
 
         # Check each variable's dimension order, excluding climatology and
-        # bounds variables
+        # bounds variables (including the formula_terms bounds of a
+        # parametric vertical coordinate, see CF §4.3.3)
         any_clim = cfutil.get_climatology_variable(ds)
         any_bounds = cfutil.get_cell_boundary_variables(ds)
+        any_formula_bounds = self._get_formula_terms_bounds_variables(ds, any_bounds)
         for name, variable in ds.variables.items():
             # Skip bounds/climatology variables, as they should implicitly
             # have the same order except for the bounds specific dimension.
             # This is tested later in the respective checks
-            if name in any_bounds or name == any_clim:
+            if name in any_bounds or name in any_formula_bounds or name == any_clim:
                 continue
 
             # Skip strings/labels
