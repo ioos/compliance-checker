@@ -2796,10 +2796,11 @@ class CF1_6Check(CFNCCheck):
 
     def _cell_measures_core(self, ds, var, external_set, variable_template):
         # IMPLEMENTATION CONFORMANCE REQUIRED 1/2
-        # CF 1.11 §7.2: cell_measures may carry MULTIPLE measure entries
-        # ("area: a volume: v"), and each entry must be of a different type.
-        # Walk every "type: var" pair instead of trying to match the whole
-        # string as a single pair.
+        # CF §7.2 has described cell_measures as "a list of blank-separated
+        # pairs of words of the form 'measure: name'" since CF 1.6, so a
+        # variable may carry more than one entry ("area: a volume: v").
+        # Walk every "measure: name" pair instead of matching the whole
+        # attribute as a single pair.
         reasoning = []
         pair_re = r"(?P<measure_type>area|volume):\s+(?P<cell_measure_var_name>\w+)"
         matches = list(regex.finditer(pair_re, var.cell_measures))
@@ -2830,8 +2831,10 @@ class CF1_6Check(CFNCCheck):
         for search_res in matches:
             cell_measure_type = search_res.group("measure_type")
             cell_measure_var_name = search_res.group("cell_measure_var_name")
-            # CF 1.11 §7.2: "Multiple measures may be specified for the
-            # same variable, but they should be of different types."
+            # CF §7.2 defines "area" and "volume" as the only measures and
+            # gives each one meaning, so two entries of the same type would
+            # have to disagree. The convention does not state this, so it is
+            # this checker's reading rather than a quotation.
             if cell_measure_type in seen_types:
                 valid = False
                 reasoning.append(

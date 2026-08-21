@@ -654,8 +654,8 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         assert "Cell measure variable cell_area2 must have dimensions which are a subset of those defined in variable PS." in messages
 
-        # CF 1.11 §7.2: a variable may carry multiple cell_measures entries,
-        # one per measure type. Both entries should validate.
+        # CF §7.2 allows a list of "measure: name" pairs, so a variable may
+        # carry more than one entry. Both should validate.
         dataset_multi = MockTimeSeries()
         dataset_multi.createVariable("PS", "d", ("time",))
         dataset_multi.variables["PS"].setncattr(
@@ -669,8 +669,8 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         assert score == out_of and score > 0, f"multi-measure case should pass but got messages: {messages}"
 
-        # CF 1.11 §7.2: each measure type may appear at most once. Reject a
-        # second 'area:' entry as malformed.
+        # Two entries of the same measure type would have to disagree, so a
+        # second 'area:' is rejected. See the note in cf_1_6.py.
         dataset_multi.variables["PS"].setncattr(
             "cell_measures",
             "area: area_var area: area_var",
