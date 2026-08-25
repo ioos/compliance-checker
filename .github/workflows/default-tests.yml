@@ -6,6 +6,7 @@ on:
 
 jobs:
   run:
+    name: "Default Tests (${{ matrix.os }} ${{ matrix.python-version }} cf_units=${{ matrix.cf_units }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
