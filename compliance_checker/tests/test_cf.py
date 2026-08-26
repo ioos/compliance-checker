@@ -148,16 +148,11 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_data_types(dataset)
         assert result.value[0] == result.value[1]
 
+        dataset = self.load_dataset(STATIC_FILES["rutgers"])
+
         # check bad data types
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_data_types(dataset)
-
-        # TODO
-        # the acdd_reformat_rebase branch has a new .nc file
-        # which constructs the temp variable with an int64 dtype --
-        # upon rebasing, this should work as expected
-        # assert result.msgs[0] == u'The variable temp failed because the datatype is int64'
-        # assert result.value == (6, 7)
 
     def test_check_child_attr_data_types(self):
         """
@@ -1697,8 +1692,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["ints64"])
         suite = CheckSuite()
         suite.checkers = {"cf": CF1_6Check}
-        # suite.run(dataset, "cf")
-        suite.run_all(dataset, ["cf"], skip_checks=["cf"])
+        suite.run_all(dataset, ["cf"])
 
     def test_variable_feature_check(self):
         # non-compliant dataset -- 1/1 fail
