@@ -6,6 +6,7 @@ on:
 
 jobs:
   run:
+    name: "Default Tests (${{ matrix.os }} ${{ matrix.python-version }} cf_units=${{ matrix.cf_units }})"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -18,8 +19,10 @@ jobs:
             cf_units: true
           - os: windows-latest
             python-version: "3.14"
+            cf_units: true
           - os: macos-latest
             python-version: "3.14"
+            cf_units: true
       fail-fast: false
     defaults:
       run:
