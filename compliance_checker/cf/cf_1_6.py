@@ -1461,8 +1461,6 @@ class CF1_6Check(CFNCCheck):
             )
             ret_val.append(valid_latitude.to_result())
 
-            # Check that latitude uses standard_name latitude if it defines a standard_name
-            check_standard_name = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.1"])
             # Check that latitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.1"])
             if standard_name == "grid_latitude":
@@ -1478,12 +1476,7 @@ class CF1_6Check(CFNCCheck):
                     units_is_string and units.lower() in allowed_lat_units,
                     f"latitude variable '{latitude}' should define valid units for latitude",
                 )
-                check_standard_name.assert_true(
-                    standard_name is not None and standard_name == "latitude",
-                    f"latitude variable '{latitude}' should have standard_name='latitude'",
-                )
             ret_val.append(allowed_units.to_result())
-            ret_val.append(check_standard_name.to_result())
 
             # Check that latitude uses degrees_north
             if standard_name == "latitude" and units != "degrees_north":
@@ -1571,8 +1564,6 @@ class CF1_6Check(CFNCCheck):
             )
             ret_val.append(valid_longitude.to_result())
 
-            # Check that longitude uses standard_name longitude if it defines a standard_name
-            check_standard_name = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.2"])
             # Check that longitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.2"])
             if standard_name == "grid_longitude":
@@ -1588,12 +1579,7 @@ class CF1_6Check(CFNCCheck):
                     units_is_string and units.lower() in allowed_lon_units,
                     f"longitude variable '{longitude}' should define valid units for longitude",
                 )
-                check_standard_name.assert_true(
-                    standard_name is not None and standard_name == "longitude",
-                    f"longitude variable '{longitude}' should have standard_name='longitude'",
-                )
             ret_val.append(allowed_units.to_result())
-            ret_val.append(check_standard_name.to_result())
 
             # Check that longitude uses degrees_east
             if standard_name == "longitude" and units != "degrees_east":
@@ -1848,6 +1834,16 @@ class CF1_6Check(CFNCCheck):
                     [message],
                 )
                 ret_val.append(result)
+
+            # Check that longitude uses allowed units
+            standard_name = getattr(variable, "standard_name", None)
+            check_standard_name = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.4"])
+            check_standard_name.assert_true(
+                standard_name is not None and standard_name == "time",
+                f"time variable '{variable}' should have standard_name='time'",
+            )
+            ret_val.append(check_standard_name)
+
         return ret_val
 
     def check_calendar(self, ds):
