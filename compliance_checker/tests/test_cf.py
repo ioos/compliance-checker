@@ -1354,6 +1354,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["example-grid"])
         results = self.cf.check_spatiotemporal_dims_have_coordinate_vars(dataset)
         result_dict = {result.name: result for result in results}
+        print(result_dict)
         result = result_dict["§5.1 Independent Latitude, Longitude, Vertical, and Time Axes"]
         assert result.msgs == []  # shouldn't have any messages
         assert result.value == (4, 4)

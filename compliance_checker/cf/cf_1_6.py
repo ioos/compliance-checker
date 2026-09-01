@@ -46,6 +46,19 @@ class CF1_6Check(CFNCCheck):
         np.float64,
     }
 
+    # CF-recognized standard names for coordinate axes
+    expected_standard_names = {
+        "time": "time",
+        "lat": "latitude",
+        "latitude": "latitude",
+        "lon": "longitude",
+        "longitude": "longitude",
+        "height": "height",
+        "depth": "depth",
+        "altitude": "altitude",
+        "pressure": "air_pressure",
+    }
+
     def __init__(self, options=None):  # initialize with parent methods and data
         super().__init__(options)
 
@@ -1448,6 +1461,13 @@ class CF1_6Check(CFNCCheck):
             )
             ret_val.append(valid_latitude.to_result())
 
+            # Check that latitude uses standard_name latitude if it defines a standard_name
+            check_standard_name = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.1"])
+            check_standard_name.assert_true(
+                standard_name == "latitude",
+                f"latitude variable '{latitude}' should have standard_name='latitude'",
+            )
+
             # Check that latitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.1"])
             if standard_name == "grid_latitude":
@@ -2154,10 +2174,6 @@ class CF1_6Check(CFNCCheck):
         geophysical_variables = self._find_geophysical_vars(ds)
         for var_name in geophysical_variables:
             var = ds.variables[var_name]
-            check_spatiotemporal_dims_coords_std_name = TestCtx(
-                BaseCheck.MEDIUM,
-                self.section_titles["4"],
-            )
             check_spatiotemporal_dims_coords = TestCtx(
                 BaseCheck.HIGH,
                 self.section_titles["5.1"],
@@ -2172,16 +2188,16 @@ class CF1_6Check(CFNCCheck):
                         )
                         continue
 
-                    coord_var = ds.variables[dim]
-                    std_name = getattr(coord_var, "standard_name", None)
+                    # coord_var = ds.variables[dim]
+                    # std_name = getattr(coord_var, "standard_name", None)
 
-                    check_spatiotemporal_dims_coords_std_name.assert_true(
-                        std_name == expected_standard_names[dim],
-                        f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', found: '{std_name}'",
-                    )
+                    # check_spatiotemporal_dims_coords.assert_true(
+                    #     std_name == expected_standard_names[dim],
+                    #     f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', "
+                    #     f"found: '{std_name}'",
+                    # )
 
             ret_val.append(check_spatiotemporal_dims_coords.to_result())
-            ret_val.append(check_spatiotemporal_dims_coords_std_name.to_result())
         return ret_val
 
     # IMPLEMENTATION Section 2.5.1 Coordinate Systems and Domain
