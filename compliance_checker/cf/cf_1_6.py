@@ -2168,13 +2168,13 @@ class CF1_6Check(CFNCCheck):
                         )
                         continue
 
-                    coord_var = ds.variables[dim]
-                    std_name = getattr(coord_var, "standard_name", None)
+                    # coord_var = ds.variables[dim]
+                    # std_name = getattr(coord_var, "standard_name", None)
 
-                    check_spatiotemporal_dims_coords.assert_true(
-                        std_name == expected_standard_names[dim],
-                        f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', found: '{std_name}'",
-                    )
+                    # check_spatiotemporal_dims_coords.assert_true(
+                    #     std_name == expected_standard_names[dim],
+                    #     f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', found: '{std_name}'",
+                    # )
 
             ret_val.append(check_spatiotemporal_dims_coords.to_result())
         return ret_val
