@@ -1630,6 +1630,7 @@ class CF1_6Check(CFNCCheck):
             standard_name = getattr(variable, "standard_name", None)
             units = getattr(variable, "units", None)
             positive = getattr(variable, "positive", None)
+            axis = getattr(variable, "axis", None)
             # Skip the variable if it's dimensionless
             if hasattr(variable, "formula_terms") or standard_name in dimless_vertical_coordinates:
                 continue
@@ -1650,6 +1651,15 @@ class CF1_6Check(CFNCCheck):
             # already verifies that this coordinate has valid units
 
             ret_val.append(valid_vertical_coord.to_result())
+
+            z_variables = ds.get_variables_by_attributes(axis="Z")
+            # Check that vertical coordinate defines either standard_name or axis
+            definition = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.3"])
+            definition.assert_true(
+                standard_name is not None or axis == "Z" or z_variables != [],
+                f"vertical coordinate variable '{name}' should define appropriate standard_name or axis='Z'",
+            )
+            ret_val.append(definition.to_result())
 
         return ret_val
 
@@ -1761,6 +1771,8 @@ class CF1_6Check(CFNCCheck):
         ret_val = []
         for name in cfutil.get_time_variables(ds):
             variable = ds.variables[name]
+            standard_name = getattr(variable, "standard_name", None)
+            axis = getattr(variable, "axis", None)
             # Has units
             has_units = hasattr(variable, "units")
             if not has_units:
@@ -1813,6 +1825,16 @@ class CF1_6Check(CFNCCheck):
                     [message],
                 )
                 ret_val.append(result)
+
+            t_variables = ds.get_variables_by_attributes(axis="T")
+            # Check that time coordinate defines either standard_name or axis
+            definition = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.4"])
+            definition.assert_true(
+                standard_name == "time" or axis == "T" or t_variables != [],
+                f"time variable '{name}' should define standard_name='time' or axis='T'",
+            )
+            ret_val.append(definition.to_result())
+
         return ret_val
 
     def check_calendar(self, ds):
@@ -2168,13 +2190,13 @@ class CF1_6Check(CFNCCheck):
                         )
                         continue
 
-                    coord_var = ds.variables[dim]
-                    std_name = getattr(coord_var, "standard_name", None)
+                    # coord_var = ds.variables[dim]
+                    # std_name = getattr(coord_var, "standard_name", None)
 
-                    check_spatiotemporal_dims_coords.assert_true(
-                        std_name == expected_standard_names[dim],
-                        f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', found: '{std_name}'",
-                    )
+                    # check_spatiotemporal_dims_coords.assert_true(
+                    #     std_name == expected_standard_names[dim],
+                    #     f"Coordinate variable '{dim}' should have standard_name='{expected_standard_names[dim]}', found: '{std_name}'",
+                    # )
 
             ret_val.append(check_spatiotemporal_dims_coords.to_result())
         return ret_val
