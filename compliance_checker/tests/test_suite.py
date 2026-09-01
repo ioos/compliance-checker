@@ -104,15 +104,8 @@ class TestSuite:
         ds = self.cs.load_dataset(static_files["2dim"])
         # exclude title from the check attributes
         score_groups = self.cs.run_all(ds, ["acdd"], skip_checks=["check_high"])
-        msg_set = {
-            msg
-            for sg in score_groups["acdd"][0]
-            for msg in sg.msgs
-            if sg.weight == BaseCheck.HIGH
-        }
-        skipped_messages = {
-            att + " not present" for att in ACDDBaseCheck().high_rec_atts
-        }
+        msg_set = {msg for sg in score_groups["acdd"][0] for msg in sg.msgs if sg.weight == BaseCheck.HIGH}
+        skipped_messages = {att + " not present" for att in ACDDBaseCheck().high_rec_atts}
         # none of the skipped messages should be in the result set
         assert len(msg_set & skipped_messages) == 0
 

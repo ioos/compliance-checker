@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import copy
 import json
 import os
@@ -13,8 +11,7 @@ import requests_mock
 from netCDF4 import Dataset, stringtoarr
 
 import compliance_checker.cf.util as cfutil
-from compliance_checker.cf.appendix_d import no_missing_terms
-from compliance_checker.cf.cf import (
+from compliance_checker.cf import (
     CF1_6Check,
     CF1_7Check,
     CF1_8Check,
@@ -23,6 +20,7 @@ from compliance_checker.cf.cf import (
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
+from compliance_checker.cf.appendix_d import no_missing_terms
 from compliance_checker.cf.util import (
     StandardNameTable,
     create_cached_data_dir,
@@ -240,20 +238,14 @@ class TestCF1_6(BaseTestCase):
         self.cf.setup(dataset)
         aa_results = self.cf.check_appendix_a(dataset)
         flat_messages = {msg for res in aa_results for msg in res.msgs}
-        assert (
-            '[Appendix A] Attribute "compress" should not be present in non-coordinate data (D) variable "temp". This attribute may only appear in coordinate data (C).'
-            in flat_messages
-        )
+        assert '[Appendix A] Attribute "compress" should not be present in non-coordinate data (D) variable "temp". This attribute may only appear in coordinate data (C).' in flat_messages
         assert "add_offset must be a numeric type" in flat_messages
         nc_obj = MockTimeSeries()
         nc_obj._FillValue = "-9999.00"
         new_check.setup(nc_obj)
         res2 = new_check.check_appendix_a(nc_obj)
         flat_messages = {msg for res in res2 for msg in res.msgs}
-        assert (
-            '[Appendix A] Attribute "_FillValue" should not be present in global (G) attributes. This attribute may only appear in coordinate data (C) and non-coordinate data (D).'
-            in flat_messages
-        )
+        assert '[Appendix A] Attribute "_FillValue" should not be present in global (G) attributes. This attribute may only appear in coordinate data (C) and non-coordinate data (D).' in flat_messages
 
     def test_naming_conventions(self):
         """
@@ -317,10 +309,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["chap2"])
         result = self.cf.check_names_unique(dataset)
         assert result.value == (6, 7)
-        assert (
-            result.msgs[0]
-            == "Variables are not case sensitive. Duplicate variables named: not_unique"
-        )
+        assert result.msgs[0] == "Variables are not case sensitive. Duplicate variables named: not_unique"
 
     def test_check_dimension_names(self):
         """
@@ -389,10 +378,7 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_fill_value_equal_missing_value(dataset)
 
         # check if the test fails when when variable "a" is checked.
-        expected_msgs = [
-            f"For the variable {v_name} the missing_value must be equal to the _FillValue"
-            for v_name in ("a")
-        ]
+        expected_msgs = [f"For the variable {v_name} the missing_value must be equal to the _FillValue" for v_name in ("a")]
 
         assert result.msgs == expected_msgs
 
@@ -429,11 +415,7 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_valid_range_and_valid_min_max_present(dataset)
 
         # check if the test fails when when variable "a" is checked.
-        expected_msgs = [
-            f"For the variable {v_name} the valid_range attribute must not be present "
-            f"if the valid_min and/or valid_max attributes are present"
-            for v_name in ("a")
-        ]
+        expected_msgs = [f"For the variable {v_name} the valid_range attribute must not be present if the valid_min and/or valid_max attributes are present" for v_name in ("a")]
 
         assert result.msgs == expected_msgs
         assert result.value[0] < result.value[1]
@@ -445,18 +427,12 @@ class TestCF1_6(BaseTestCase):
         # TEST CONFORMANCE 2.5.1 REQUIRED
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_fill_value_outside_valid_range(dataset)
-        assert result.msgs[0] == (
-            "salinity:_FillValue (1.0) should be outside the "
-            "range specified by valid_min/valid_max (-10, 10)"
-        )
+        assert result.msgs[0] == ("salinity:_FillValue (1.0) should be outside the range specified by valid_min/valid_max (-10, 10)")
 
         dataset = self.load_dataset(STATIC_FILES["chap2"])
         result = self.cf.check_fill_value_outside_valid_range(dataset)
         assert result.value == (1, 2)
-        assert result.msgs[0] == (
-            "wind_speed:_FillValue (12.0) should be outside the "
-            "range specified by valid_min/valid_max (0.0, 20.0)"
-        )
+        assert result.msgs[0] == ("wind_speed:_FillValue (12.0) should be outside the range specified by valid_min/valid_max (0.0, 20.0)")
 
     def test_check_conventions_are_cf_16(self):
         """
@@ -479,9 +455,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["conv_bad"])
         result = self.cf.check_conventions_version(dataset)
         assert not result.value
-        assert result.msgs[0] == (
-            "§2.6.1 Conventions global attribute does not contain " '"CF-1.6"'
-        )
+        assert result.msgs[0] == ('§2.6.1 Conventions global attribute does not contain "CF-1.6"')
 
     def test_check_convention_globals(self):
         """
@@ -499,10 +473,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         result = self.cf.check_convention_globals(dataset)
         assert result.value[0] != result.value[1]
-        assert (
-            result.msgs[0]
-            == "§2.6.2 global attribute title should exist and be a non-empty string"
-        )
+        assert result.msgs[0] == "§2.6.2 global attribute title should exist and be a non-empty string"
 
     def test_check_convention_possibly_var_attrs(self):
         """
@@ -527,10 +498,7 @@ class TestCF1_6(BaseTestCase):
         # 1x source
         # 1x EMPTY references
         assert result.value[0] != result.value[1]
-        assert (
-            result.msgs[0]
-            == "§2.6.2 references global attribute should be a non-empty string"
-        )
+        assert result.msgs[0] == "§2.6.2 references global attribute should be a non-empty string"
 
         # load bad_data_type.nc
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
@@ -542,9 +510,7 @@ class TestCF1_6(BaseTestCase):
         # comments don't matter unless they're empty
 
         assert result.value[0] != result.value[1]
-        assert (
-            result.msgs[0] == "§2.6.2 salinity:institution should be a non-empty string"
-        )
+        assert result.msgs[0] == "§2.6.2 salinity:institution should be a non-empty string"
 
     def test_check_standard_name(self):
         """
@@ -593,10 +559,7 @@ class TestCF1_6(BaseTestCase):
         # bad modifier
         temperature_flag.standard_name = "sea_water_temperature status flag"
         _, _, messages = get_results(self.cf.check_standard_name(dataset))
-        assert (
-            'Standard name modifier "status flag" for variable temperature_flag is not a valid modifier according to CF Appendix C'
-            in messages
-        )
+        assert 'Standard name modifier "status flag" for variable temperature_flag is not a valid modifier according to CF Appendix C' in messages
         # proper name, units supplied
         temperature_flag.standard_name = "sea_water_temperature status_flag"
         temperature_flag.units = "1"
@@ -606,10 +569,7 @@ class TestCF1_6(BaseTestCase):
         # long_name or standard_name present
         del temperature.standard_name
         _, _, messages = get_results(self.cf.check_standard_name(dataset))
-        assert (
-            "Attribute long_name or/and standard_name is highly "
-            "recommended for variable temperature" in messages
-        )
+        assert "Attribute long_name or/and standard_name is highly recommended for variable temperature" in messages
 
     def test_cell_bounds(self):
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
@@ -672,9 +632,7 @@ class TestCF1_6(BaseTestCase):
         # TEST CONFORMANCE 7.2 REQUIRED
         # inappropriate length exponent for area
         expected_fail_msg = (
-            'Variable "cell_area" must have units which are convertible '
-            'to UDUNITS "m2" when variable is referred to by a dataset variable with '
-            'cell_methods attribute with a measure type of "area".'
+            'Variable "cell_area" must have units which are convertible to UDUNITS "m2" when variable is referred to by a dataset variable with cell_methods attribute with a measure type of "area".'
         )
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
@@ -694,10 +652,7 @@ class TestCF1_6(BaseTestCase):
         dataset.variables["cell_area2"].setncattr("units", "m2")
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
-        assert (
-            "Cell measure variable cell_area2 must have dimensions which are a subset of those defined in variable PS."
-            in messages
-        )
+        assert "Cell measure variable cell_area2 must have dimensions which are a subset of those defined in variable PS." in messages
 
     def test_climatology_cell_methods(self):
         """
@@ -723,23 +678,17 @@ class TestCF1_6(BaseTestCase):
         assert score != out_of
         # can only have third method over years if first two are within and
         # over days, respectively
-        temp_var.cell_methods = (
-            "time: mean within years time: mean over years time: sum over years"
-        )
+        temp_var.cell_methods = "time: mean within years time: mean over years time: sum over years"
         results = self.cf.check_climatological_statistics(dataset)
         score, out_of, messages = get_results(results)
         assert score != out_of
         # this, on the other hand, should work.
-        temp_var.cell_methods = (
-            "time: mean within days time: mean over days time: sum over years"
-        )
+        temp_var.cell_methods = "time: mean within days time: mean over days time: sum over years"
         results = self.cf.check_climatological_statistics(dataset)
         score, out_of, messages = get_results(results)
         assert score == out_of
         # parenthesized comment to describe climatology
-        temp_var.cell_methods = (
-            "time: sum within days time: maximum over days (ENSO years)"
-        )
+        temp_var.cell_methods = "time: sum within days time: maximum over days (ENSO years)"
         results = self.cf.check_climatological_statistics(dataset)
         score, out_of, messages = get_results(results)
         assert score == out_of
@@ -760,18 +709,12 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_climatological_statistics(dataset)
         score, out_of, messages = get_results(results)
         for attr_name in ("calendar", "standard_name", "units"):
-            assert (
-                f"Attribute {attr_name} must have the same value in both variables {clim_bounds.name} and time"
-                in messages
-            )
+            assert f"Attribute {attr_name} must have the same value in both variables {clim_bounds.name} and time" in messages
         # TEST CONFORMANCE 7.4 REQUIRED 6/6
         clim_bounds.missing_value = clim_bounds._FillValue = -9999.99
         results = self.cf.check_climatological_statistics(dataset)
         score, out_of, messages = get_results(results)
-        assert (
-            f"Climatology variable {clim_bounds.name} may not contain attributes _FillValue or missing_value"
-            in messages
-        )
+        assert f"Climatology variable {clim_bounds.name} may not contain attributes _FillValue or missing_value" in messages
 
         # TEST CONFORMANCE 7.4 REQUIRED 3/6
         bad_dim_ds = MockTimeSeries()
@@ -782,24 +725,14 @@ class TestCF1_6(BaseTestCase):
         temp.climatology = "clim_bounds"
         results = self.cf.check_climatological_statistics(bad_dim_ds)
         assert results[1].value[0] < results[1].value[1]
-        assert (
-            results[1].msgs[0] == 'Climatology dimension "clim_bounds" '
-            "should only contain two elements"
-        )
+        assert results[1].msgs[0] == 'Climatology dimension "clim_bounds" should only contain two elements'
         # TEST CONFORMANCE 7.4 REQUIRED 1/6
-        assert (
-            results[0].msgs[0]
-            == "Variable temperature is not detected as a time coordinate "
-            "variable, but has climatology attribute"
-        )
+        assert results[0].msgs[0] == "Variable temperature is not detected as a time coordinate variable, but has climatology attribute"
 
         # TEST CONFORMANCE 7.4 REQUIRED 2/6
         bad_dim_ds.variables["time"].climatology = 1
         results = self.cf.check_climatological_statistics(bad_dim_ds)
-        assert (
-            results[0].msgs[0]
-            == "Variable time must have a climatology attribute which is a string"
-        )
+        assert results[0].msgs[0] == "Variable time must have a climatology attribute which is a string"
 
     def test_check_ancillary_variables(self):
         """
@@ -856,8 +789,7 @@ class TestCF1_6(BaseTestCase):
         nc_obj.standard_name_vocabulary = "CF Standard Name Table vNN???"
         with pytest.warns(
             UserWarning,
-            match="Cannot extract CF standard name version "
-            "number from standard_name_vocabulary string",
+            match="Cannot extract CF standard name version number from standard_name_vocabulary string",
         ):
             assert not self.cf._find_cf_standard_name_table(nc_obj)
 
@@ -902,27 +834,18 @@ class TestCF1_6(BaseTestCase):
         flags_var.flag_masks = np.array([0, 1], dtype="i2")
         results = self.cf.check_flags(dataset)
         score, out_of, messages = get_results(results)
-        assert (
-            "flag_masks for variable flags must not contain zero as an "
-            "element" in messages
-        )
+        assert "flag_masks for variable flags must not contain zero as an element" in messages
         # test wrong type for flag_masks
         flags_var.flag_masks = "[0 1]"
         results = self.cf.check_flags(dataset)
         score, out_of, messages = get_results(results)
-        assert (
-            "flag_masks (<class 'str'>) must be the same data type as "
-            "flags (<class 'numpy.float64'>)" in messages
-        )
+        assert "flag_masks (<class 'str'>) must be the same data type as flags (<class 'numpy.float64'>)" in messages
         # IMPLEMENTATION 3.5 REQUIRED 1/1
         flags_var.flag_masks = np.array([1], dtype="i2")
         flags_var.flag_values = np.array([2], dtype="i2")
         results = self.cf.check_flags(dataset)
         score, out_of, messages = get_results(results)
-        assert (
-            "flag masks and flag values for 'flags' combined don't equal "
-            "flag values" in messages
-        )
+        assert "flag masks and flag values for 'flags' combined don't equal flag values" in messages
 
     def test_check_bad_units(self):
         """Load a dataset with units that are expected to fail (bad_units.nc).
@@ -1223,10 +1146,7 @@ class TestCF1_6(BaseTestCase):
         # blank string is not valid and won't match, ensure this is caught
         lev2.formula_terms = ""
         results = self.cf.check_dimensionless_vertical_coordinates(dataset)
-        assert (
-            "§4.3.2: lev2's formula_terms is a required attribute and must be a non-empty string"
-            in results[-1].msgs[0]
-        )
+        assert "§4.3.2: lev2's formula_terms is a required attribute and must be a non-empty string" in results[-1].msgs[0]
 
     def test_is_time_variable(self):
         var1 = MockVariable()
@@ -1297,16 +1217,11 @@ class TestCF1_6(BaseTestCase):
         # NB: >= 60 seconds is nonstandard, but isn't actually a CF requirement
         # until CF 1.9 onwards
         dataset.variables["time"].units = "months since 0-1-1 23:00:60"
-        dataset.variables["time"].climatology = (
-            "nonexistent_variable_reference_only_used_to_test_year_zero_failure"
-        )
+        dataset.variables["time"].climatology = "nonexistent_variable_reference_only_used_to_test_year_zero_failure"
         results = self.cf.check_time_coordinate(dataset)
         scored, out_of, messages = get_results(results)
         assert scored < out_of
-        assert (
-            "Using relative time interval of months or years is not recommended for coordinate variable time"
-            in messages
-        )
+        assert "Using relative time interval of months or years is not recommended for coordinate variable time" in messages
 
     def test_check_calendar(self):
         """Load a dataset with an invalid calendar attribute (non-comp/bad.nc).
@@ -1321,10 +1236,7 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
         # TEST CONFORMANCE 4.4.1 REQUIRED 2, 3 / 5
-        bad_month_msg = (
-            "For nonstandard calendar on variable time, attribute "
-            "month_lengths must be supplied as a 12-element integer array"
-        )
+        bad_month_msg = "For nonstandard calendar on variable time, attribute month_lengths must be supplied as a 12-element integer array"
         assert bad_month_msg in messages
 
         dataset = MockTimeSeries()
@@ -1372,11 +1284,7 @@ class TestCF1_6(BaseTestCase):
         assert bad_month_msg not in messages
 
         # TEST CONFORMANCE 4.4.1 REQUIRED 4,5/5
-        leap_month_msg = (
-            "When attribute leap_month is supplied for variable "
-            "time, the value must be a scalar integer between 1 "
-            "and 12"
-        )
+        leap_month_msg = "When attribute leap_month is supplied for variable time, the value must be a scalar integer between 1 and 12"
         dataset.variables["time"].leap_month = np.array([0], dtype=np.uint8)
         results = self.cf.check_calendar(dataset)
         scored, out_of, messages = get_results(results)
@@ -1387,16 +1295,10 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
         assert leap_month_msg not in messages
         # TEST CONFORMANCE 4.4.1 RECOMMENDED 1/2
-        assert (
-            "For time variable time, attribute leap_year must be present "
-            "if leap_month attribute is defined" in messages
-        )
+        assert "For time variable time, attribute leap_year must be present if leap_month attribute is defined" in messages
 
         # TEST CONFORMANCE 4.4.1 REQUIRED 5/5
-        leap_year_msg = (
-            "When attribute leap_year is supplied for variable "
-            "time, the value must be a scalar integer"
-        )
+        leap_year_msg = "When attribute leap_year is supplied for variable time, the value must be a scalar integer"
 
         dataset.variables["time"].leap_year = ["2.18"]
         results = self.cf.check_calendar(dataset)
@@ -1418,25 +1320,14 @@ class TestCF1_6(BaseTestCase):
             dataset.variables["time"][1:] = np.arange(-2, 497)
             results = self.cf.check_calendar(dataset)
             scored, out_of, messages = get_results(results)
-            assert messages[-1] == (
-                "Variable time has time values prior to "
-                "1582-10-15T00:00Z and utilizes the "
-                "standard or Gregorian calendar"
-            )
+            assert messages[-1] == ("Variable time has time values prior to 1582-10-15T00:00Z and utilizes the standard or Gregorian calendar")
             dataset.variables["time"][:] = np.arange(0, 500)
             results = self.cf.check_calendar(dataset)
             scored, out_of, messages = get_results(results)
-            assert messages[-1] == (
-                "Variable time has standard or Gregorian "
-                "calendar and does not cross 1582-10-15T00:00Z"
-            )
+            assert messages[-1] == ("Variable time has standard or Gregorian calendar and does not cross 1582-10-15T00:00Z")
             # TEST CONFORMANCE 4.4.1 RECOMMENDED 3/4
             if calendar == "gregorian":
-                assert (
-                    "For time variable time, when using the standard "
-                    'Gregorian calendar, the value "standard" is preferred '
-                    'over "gregorian" for the calendar attribute' in messages
-                )
+                assert 'For time variable time, when using the standard Gregorian calendar, the value "standard" is preferred over "gregorian" for the calendar attribute' in messages
 
     def test_check_aux_coordinates(self):
         dataset = self.load_dataset(STATIC_FILES["illegal-aux-coords"])
@@ -1463,9 +1354,7 @@ class TestCF1_6(BaseTestCase):
         dataset = self.load_dataset(STATIC_FILES["example-grid"])
         results = self.cf.check_spatiotemporal_dims_have_coordinate_vars(dataset)
         result_dict = {result.name: result for result in results}
-        result = result_dict[
-            "§5.1 Independent Latitude, Longitude, Vertical, and Time Axes"
-        ]
+        result = result_dict["§5.1 Independent Latitude, Longitude, Vertical, and Time Axes"]
         assert result.msgs == []  # shouldn't have any messages
         assert result.value == (4, 4)
 
@@ -1487,9 +1376,7 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_grid_coordinates(dataset)
         scored, out_of, messages = get_results(results)
         result_dict = {result.name: result for result in results}
-        result = result_dict[
-            "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
-        ]
+        result = result_dict["§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"]
         assert result.value == (2, 2)
         assert (scored, out_of) == (2, 2)
 
@@ -1506,11 +1393,7 @@ class TestCF1_6(BaseTestCase):
         # all variables checked fail (2)
         assert len(results) == 2
         assert scored < out_of
-        assert all(
-            r.name
-            == "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
-            for r in results
-        )
+        assert all(r.name == "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections" for r in results)
 
     def test_check_reduced_horizontal_grid(self):
         dataset = self.load_dataset(STATIC_FILES["rhgrid"])
@@ -1535,9 +1418,7 @@ class TestCF1_6(BaseTestCase):
 
         assert len(results) == 6
         assert len([r.value for r in results.values() if r.value[0] < r.value[1]]) == 0
-        expected_name = (
-            "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
-        )
+        expected_name = "§5.6 Horizontal Coordinate Reference Systems, Grid Mappings, Projections"
         assert all(r.name == expected_name for r in results.values())
 
     def test_is_geophysical(self):
@@ -1552,9 +1433,7 @@ class TestCF1_6(BaseTestCase):
             result = cfutil.is_geophysical(dataset, "j")
         except AttributeError:
             pytest.fail(
-                "Test probably fails because var.dtype.kind or var.dtype.char "
-                "was tested on string-type variable. Consider checking for "
-                "`var.dtype is str`",
+                "Test probably fails because var.dtype.kind or var.dtype.char was tested on string-type variable. Consider checking for `var.dtype is str`",
             )
         assert not result
 
@@ -1619,9 +1498,7 @@ class TestCF1_6(BaseTestCase):
         att_type = "D"  # should be same datatypes
         res = self.cf._check_attr_type(att_name, att_type, att, _var)
         assert not res[0]
-        assert (
-            res[1] == "test_att must be numeric and must be equivalent to float64 dtype"
-        )
+        assert res[1] == "test_att must be numeric and must be equivalent to float64 dtype"
 
     def test_check_grid_mapping_attr_condition(self):
         """
@@ -1672,10 +1549,7 @@ class TestCF1_6(BaseTestCase):
         # only one variable failed this check in this ds out of 2
         assert len(results) == 2
         assert scored < out_of
-        assert (
-            "6.1.1 'Neverland' specified by 'neverland' is not a valid region"
-            in messages
-        )
+        assert "6.1.1 'Neverland' specified by 'neverland' is not a valid region" in messages
 
     def test_check_packed_data_is_same_type_as_variable(self):
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
@@ -1888,16 +1762,11 @@ class TestCF1_6(BaseTestCase):
         scored, out_of, messages = get_results(results)
 
         # check non-standard comments are gauged correctly
-        temp.cell_methods = (
-            "lat: lon: mean depth: mean (comment: should not go here interval: 2.5 m)"
-        )
+        temp.cell_methods = "lat: lon: mean depth: mean (comment: should not go here interval: 2.5 m)"
         results = self.cf.check_cell_methods(nc_obj)
         scored, out_of, messages = get_results(results)
 
-        assert (
-            '§7.3.3 The non-standard "comment:" element must come after any standard elements in cell_methods for variable temperature'
-            in messages
-        )
+        assert '§7.3.3 The non-standard "comment:" element must come after any standard elements in cell_methods for variable temperature' in messages
 
         # standalone comments require no keyword
         temp.cell_methods = "lon: mean (This is a standalone comment)"
@@ -1906,26 +1775,16 @@ class TestCF1_6(BaseTestCase):
         assert "standalone" not in messages
 
         # check that invalid keywords dealt with
-        temp.cell_methods = (
-            "lat: lon: mean depth: mean (invalid_keyword: this is invalid)"
-        )
+        temp.cell_methods = "lat: lon: mean depth: mean (invalid_keyword: this is invalid)"
         results = self.cf.check_cell_methods(nc_obj)
         scored, out_of, messages = get_results(results)
-        assert (
-            '§7.3.3 Invalid cell_methods keyword "invalid_keyword:" for variable temperature. Must be one of [interval, comment]'
-            in messages
-        )
+        assert '§7.3.3 Invalid cell_methods keyword "invalid_keyword:" for variable temperature. Must be one of [interval, comment]' in messages
 
         # check that "parenthetical elements" are well-formed (they should not be)
-        temp.cell_methods = (
-            "lat: lon: mean depth: mean (interval 0.2 m interval: 0.01 degrees)"
-        )
+        temp.cell_methods = "lat: lon: mean depth: mean (interval 0.2 m interval: 0.01 degrees)"
         results = self.cf.check_cell_methods(nc_obj)
         scored, out_of, messages = get_results(results)
-        assert (
-            "§7.3.3 Parenthetical content inside temperature:cell_methods is not well formed: interval 0.2 m interval: 0.01 degrees"
-            in messages
-        )
+        assert "§7.3.3 Parenthetical content inside temperature:cell_methods is not well formed: interval 0.2 m interval: 0.01 degrees" in messages
 
     # --------------------------------------------------------------------------------
     # Utility Method Tests
@@ -2019,10 +1878,7 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 1
-        assert (
-            messages[0]
-            == "actual_range elements of 'a' inconsistent with its min/max values"
-        )
+        assert messages[0] == "actual_range elements of 'a' inconsistent with its min/max values"
         dataset.close()
 
         # case If the data is packed and valid_range is defined
@@ -2083,13 +1939,8 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(result)
         assert score < out_of
         assert len(messages) == 2
-        assert (
-            messages[0] == '"a"\'s actual_range first element must be >= valid_min (42)'
-        )
-        assert (
-            messages[1]
-            == '"a"\'s actual_range second element must be <= valid_max (45)'
-        )
+        assert messages[0] == '"a"\'s actual_range first element must be >= valid_min (42)'
+        assert messages[1] == '"a"\'s actual_range second element must be <= valid_max (45)'
         dataset.close()
 
     def test_check_cell_boundaries(self):
@@ -2133,10 +1984,40 @@ class TestCF1_7(BaseTestCase):
             results = self.cf.check_cell_boundaries(dataset)
             score, out_of, messages = get_results(results)
             assert score < out_of
-            assert (
-                "'a' has 'formula_terms' attr, bounds variable 'b' must also have 'formula_terms'"
-                in messages
-            )
+            assert "'a' has 'formula_terms' attr, bounds variable 'b' must also have 'formula_terms'" in messages
+
+    def _make_bounds_dataset(
+        self,
+        centers,
+        bnds,
+        *,
+        coord_name="rlon",
+        is_longitude=True,
+        center_dtype=np.float64,
+        bnds_dtype=np.float64,
+    ):
+        """Build a minimal dataset with one coord variable and its bounds.
+
+        Helper for ``check_cell_boundaries_interval`` tests.
+        """
+        centers = np.asarray(centers, dtype=center_dtype)
+        bnds = np.asarray(bnds, dtype=bnds_dtype)
+        dataset = MockTimeSeries()
+        dataset.createDimension(f"{coord_name}_d", centers.shape[0])
+        dataset.createDimension(f"{coord_name}_nv", bnds.shape[1])
+        cvar = dataset.createVariable(coord_name, center_dtype, (f"{coord_name}_d",))
+        bvar = dataset.createVariable(
+            f"{coord_name}_bnds",
+            bnds_dtype,
+            (f"{coord_name}_d", f"{coord_name}_nv"),
+        )
+        cvar.bounds = f"{coord_name}_bnds"
+        cvar.axis = "X" if is_longitude else "Y"
+        cvar.standard_name = "longitude" if is_longitude else "latitude"
+        cvar.units = "degrees_east" if is_longitude else "degrees_north"
+        cvar[:] = centers
+        bvar[:] = bnds
+        return dataset
 
     def test_check_cell_boundaries_interval(self):
         """
@@ -2145,30 +2026,237 @@ class TestCF1_7(BaseTestCase):
         The points specified by a coordinate or auxiliary coordinate variable
         should lie within, or on the boundary, of the cells specified by the
         associated boundary variable.
+
+        The check emits one Result per coordinate variable: pass if every
+        center lies within the bounding box of its cell's vertices.
         """
 
-        # create Cells on a longitude axis
-        dataset = MockTimeSeries()
-        dataset.createDimension("rnv", 2)
-        dataset.createDimension("rlon", 2)
-        dataset.createVariable("rlon", "d", ("rlon",))
-        dataset.createVariable("rlon_bnds", "d", ("rlon", "rnv"))
-
-        rlon = dataset.variables["rlon"]
-        rlon.standard_name = "longitude"
-        rlon.units = "degrees_east"
-        rlon.axis = "X"
-        rlon.long_name = "Longitude"
-        rlon.bounds = "rlon_bnds"
-        rlon[:] = np.array([-97.5, -99.5], dtype=np.float64)
-
-        rlon_bnds = dataset.variables["rlon_bnds"]
-        rlon_bnds.long_name = "Longitude Cell Boundaries"
-        rlon_bnds[:] = np.array([[-97, -98], [-98, -99]], dtype=np.float64)
-
+        # Original scenario: two cells, second center (-99.5) lies outside its
+        # (-99, -98) cell → the whole coordinate fails.
+        dataset = self._make_bounds_dataset(
+            centers=[-97.5, -99.5],
+            bnds=[[-97, -98], [-98, -99]],
+        )
         results = self.cf.check_cell_boundaries_interval(dataset)
         score, out_of, messages = get_results(results)
+        assert (score, out_of) == (0, 1)
+        assert any("1 point(s)" in m for m in messages)
+
+    def test_check_cell_boundaries_interval_all_inside(self):
+        """Interval (N, 2) bounds, every center inside → pass."""
+        dataset = self._make_bounds_dataset(
+            centers=[-97.5, -98.5, -99.5],
+            bnds=[[-97, -98], [-98, -99], [-99, -100]],
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (1, 1)
+        assert messages == []
+
+    def test_check_cell_boundaries_interval_descending_bounds(self):
+        """Descending (N, 2) bounds must be handled correctly."""
+        # Center 0.5 inside a descending cell [1, 0]; center 2.0 outside [1, 0].
+        dataset = self._make_bounds_dataset(
+            centers=[0.5, 2.0],
+            bnds=[[1.0, 0.0], [1.0, 0.0]],
+            coord_name="rlat",
+            is_longitude=False,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (0, 1)
+        assert any("1 point(s)" in m for m in messages)
+
+    def test_check_cell_boundaries_polygonal_bounds(self):
+        """Polygonal (N, nvertices > 2) bounds: center inside the vertex box → pass."""
+        # 3 cells, each with 4 vertices; all centers inside bounding boxes.
+        dataset = self._make_bounds_dataset(
+            centers=[10.0, 20.0, 30.0],
+            bnds=[
+                [9.0, 11.0, 10.5, 9.5],
+                [19.0, 21.0, 20.5, 19.5],
+                [29.0, 31.0, 30.5, 29.5],
+            ],
+            coord_name="lat_unstruct",
+            is_longitude=False,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (1, 1)
+
+        # Now move the second center outside its (19, 21) bounding box.
+        dataset2 = self._make_bounds_dataset(
+            centers=[10.0, 25.0, 30.0],
+            bnds=[
+                [9.0, 11.0, 10.5, 9.5],
+                [19.0, 21.0, 20.5, 19.5],
+                [29.0, 31.0, 30.5, 29.5],
+            ],
+            coord_name="lat_unstruct",
+            is_longitude=False,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset2)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (0, 1)
+        assert any("1 point(s)" in m for m in messages)
+
+    def test_check_cell_boundaries_interval_float_precision(self):
+        """float32 coord vs float64 bounds must not trigger precision-noise flags."""
+        # float32 rounds -75.013 to -75.01300048828125; bounds stored as float64
+        # with exact -75.013. Old bounding-box test without a tolerance would
+        # report a spurious violation.
+        dataset = self._make_bounds_dataset(
+            centers=np.array([-75.013], dtype=np.float32),
+            bnds=np.array([[-75.013, -74.9]], dtype=np.float64),
+            coord_name="lat_precision",
+            is_longitude=False,
+            center_dtype=np.float32,
+            bnds_dtype=np.float64,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (1, 1)
+        assert messages == []
+
+    def test_check_cell_boundaries_interval_longitude_wrap(self):
+        """Antimeridian-crossing cell: center +179.5° in cell [+179°, -179°] → pass."""
+        dataset = self._make_bounds_dataset(
+            centers=[179.5],
+            bnds=[[179.0, -179.0]],
+            coord_name="lon_wrap",
+            is_longitude=True,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (1, 1)
+        assert messages == []
+
+        # Non-wrap outside: center +20° with cell [0°, 10°] → fail.
+        dataset2 = self._make_bounds_dataset(
+            centers=[20.0],
+            bnds=[[0.0, 10.0]],
+            coord_name="lon_no_wrap",
+            is_longitude=True,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset2)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (0, 1)
+        assert any("1 point(s)" in m for m in messages)
+
+    def _make_2d_curvilinear_dataset(self, lon_centers, lat_centers, *, wrap_seam=False):
+        """Build a 3x4 curvilinear MockTimeSeries with bounds (3, 4, 4)."""
+        lat_bnds = np.empty((3, 4, 4), dtype=np.float64)
+        lon_bnds = np.empty((3, 4, 4), dtype=np.float64)
+        for j in range(3):
+            for i in range(4):
+                lat_bnds[j, i, :] = [
+                    lat_centers[j, i] - 5,
+                    lat_centers[j, i] - 5,
+                    lat_centers[j, i] + 5,
+                    lat_centers[j, i] + 5,
+                ]
+                lon_bnds[j, i, :] = [
+                    lon_centers[j, i] - 0.5,
+                    lon_centers[j, i] + 0.5,
+                    lon_centers[j, i] + 0.5,
+                    lon_centers[j, i] - 0.5,
+                ]
+        if wrap_seam:
+            # Force the antimeridian wrap on cell [1, 0].
+            lon_bnds[1, 0, :] = [179.0, -179.0, -179.0, 179.0]
+
+        dataset = MockTimeSeries()
+        dataset.createDimension("j", 3)
+        dataset.createDimension("i", 4)
+        dataset.createDimension("nv", 4)
+        for name, vals, std, units in (
+            ("lat2d", lat_centers, "latitude", "degrees_north"),
+            ("lon2d", lon_centers, "longitude", "degrees_east"),
+        ):
+            v = dataset.createVariable(name, np.float64, ("j", "i"))
+            v.standard_name = std
+            v.units = units
+            v.bounds = f"{name}_bnds"
+            v[:] = vals
+        for name, vals in (("lat2d_bnds", lat_bnds), ("lon2d_bnds", lon_bnds)):
+            v = dataset.createVariable(name, np.float64, ("j", "i", "nv"))
+            v[:] = vals
+        return dataset
+
+    def test_check_cell_boundaries_interval_2d_curvilinear_pass(self):
+        """2-D curvilinear ``(J, I)`` centers with bounds ``(J, I, 4)``,
+        every center inside its bounding box. Regression test that the
+        bounding-box test broadcasts correctly for 2-D shapes."""
+        lat_centers = np.array(
+            [[10.0] * 4, [20.0] * 4, [30.0] * 4],
+            dtype=np.float64,
+        )
+        lon_centers = np.array(
+            [
+                [-10.0, 0.0, 10.0, 20.0],
+                [-10.0, 10.0, 20.0, 30.0],
+                [-10.0, 0.0, 10.0, 20.0],
+            ],
+            dtype=np.float64,
+        )
+        dataset = self._make_2d_curvilinear_dataset(lon_centers, lat_centers)
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        # Two coords (lat2d, lon2d) -> two Results, both pass.
+        assert (score, out_of) == (2, 2)
+        assert messages == []
+
+    def test_check_cell_boundaries_interval_2d_curvilinear_wrap(self):
+        """2-D curvilinear grid with one antimeridian-crossing cell: the
+        longitude-wrap branch runs on a 2-D shape (regression for the
+        UKESM1-0-LL ``tos`` broadcast failure reported on PR #1292)."""
+        lat_centers = np.array(
+            [[10.0] * 4, [20.0] * 4, [30.0] * 4],
+            dtype=np.float64,
+        )
+        # Cell [1, 0]: center 179.5°, bounds will be forced to the seam.
+        lon_centers = np.array(
+            [
+                [-10.0, 0.0, 10.0, 20.0],
+                [179.5, 10.0, 20.0, 30.0],
+                [-10.0, 0.0, 10.0, 20.0],
+            ],
+            dtype=np.float64,
+        )
+        dataset = self._make_2d_curvilinear_dataset(
+            lon_centers,
+            lat_centers,
+            wrap_seam=True,
+        )
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        assert (score, out_of) == (2, 2)
+        assert messages == []
+
+    def test_check_cell_boundaries_interval_2d_curvilinear_fail(self):
+        """2-D curvilinear grid with one center deliberately outside its
+        bounding box: the failure path must report the coord and a count."""
+        lat_centers = np.array(
+            [[10.0] * 4, [20.0] * 4, [30.0] * 4],
+            dtype=np.float64,
+        )
+        lon_centers = np.array(
+            [
+                [-10.0, 0.0, 10.0, 20.0],
+                [-10.0, 10.0, 20.0, 30.0],
+                [-10.0, 0.0, 10.0, 20.0],
+            ],
+            dtype=np.float64,
+        )
+        dataset = self._make_2d_curvilinear_dataset(lon_centers, lat_centers)
+        # Move cell [2, 2]'s lon bounds away from its center (10.0).
+        dataset.variables["lon2d_bnds"][2, 2, :] = [50.0, 51.0, 51.0, 50.0]
+        results = self.cf.check_cell_boundaries_interval(dataset)
+        score, out_of, messages = get_results(results)
+        # lat2d still passes; lon2d fails with 1 offending point.
         assert (score, out_of) == (1, 2)
+        assert any("1 point(s)" in m for m in messages)
+        assert any("lon2d" in m for m in messages)
 
     def test_cell_measures(self):
         # create a temporary variable and test this only
@@ -2199,19 +2287,13 @@ class TestCF1_7(BaseTestCase):
             dataset.variables["PS"].cell_measures = "area: NONEXISTENT_VAR"
             results = self.cf.check_cell_measures(dataset)
             score, out_of, messages = get_results(results)
-            assert (
-                "Cell measure variable NONEXISTENT_VAR referred to by "
-                "PS is not present in dataset or external variables" in messages
-            )
+            assert "Cell measure variable NONEXISTENT_VAR referred to by PS is not present in dataset or external variables" in messages
 
             dataset.variables["PS"].cell_measures = "area: no_units"
             dataset.createVariable("no_units", "i2", ())
             results = self.cf.check_cell_measures(dataset)
             score, out_of, messages = get_results(results)
-            assert (
-                "Cell measure variable no_units is required to have units "
-                "attribute defined" in messages
-            )
+            assert "Cell measure variable no_units is required to have units attribute defined" in messages
 
         # cell_area variable is in
         # the global attr "external_variables"
@@ -2360,12 +2442,7 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(results)
         # without false_easting warning in current file
         msg_len = len(
-            [
-                m
-                for m in messages
-                if m
-                != "false_easting is a required attribute for grid mapping stereographic"
-            ],
+            [m for m in messages if m != "false_easting is a required attribute for grid mapping stereographic"],
         )
         assert msg_len == 0
 
@@ -2383,10 +2460,7 @@ class TestCF1_7(BaseTestCase):
         malformed_sep = "crsOSGB: x y : lat lon"
         dataset.variables["temp"].grid_mapping = malformed_sep
         results = valid_grid_mapping.check_grid_mapping(dataset)
-        assert (
-            "Could not consume entire grid_mapping expression, please check for well-formedness"
-            in results["temp"].msgs
-        )
+        assert "Could not consume entire grid_mapping expression, please check for well-formedness" in results["temp"].msgs
         assert results["temp"].value[0] < results["temp"].value[1]
         malformed_var = "crsOSGB: x y_null z_null"
         dataset.variables["temp"].grid_mapping = malformed_var
@@ -2407,10 +2481,7 @@ class TestCF1_7(BaseTestCase):
         geopotential_datum_name_bad = copy.deepcopy(self.cf)
         results = self.cf.check_grid_mapping(dataset)
         score, out_of, messages = get_results(results)
-        assert (
-            "Cannot have both 'geoid_name' and 'geopotential_datum_name' attributes in grid mapping variable 'wgs84'"
-            in messages
-        )
+        assert "Cannot have both 'geoid_name' and 'geopotential_datum_name' attributes in grid mapping variable 'wgs84'" in messages
         del dataset.variables["wgs84"].geopotential_datum_name
         results = geoid_name_good.check_grid_mapping(dataset)
         assert results["wgs84"].value[0] == results["wgs84"].value[1]
@@ -2419,10 +2490,7 @@ class TestCF1_7(BaseTestCase):
         del dataset.variables["wgs84"].geoid_name
         results = geopotential_datum_name_bad.check_grid_mapping(dataset)
         assert results["wgs84"].value[0] < results["wgs84"].value[1]
-        assert (
-            "Vertical datum value 'WGS84' for attribute 'geopotential_datum_name' in grid mapping variable 'wgs84' is not valid"
-            in results["wgs84"].msgs
-        )
+        assert "Vertical datum value 'WGS84' for attribute 'geopotential_datum_name' in grid mapping variable 'wgs84' is not valid" in results["wgs84"].msgs
 
     def test_check_conventions_are_cf_1_7(self):
         """Ensure the check_conventions_are_cf_1_7() check works as expected"""
@@ -2564,10 +2632,7 @@ class TestCF1_7(BaseTestCase):
         results = self.cf.check_dimensionless_vertical_coordinates(dataset)
 
         # FIXME: get_results messages variable doesn't return message here
-        assert (
-            "Variable lev should have formula_terms attribute when "
-            "computed_standard_name attribute is defined" in results[-1].msgs
-        )
+        assert "Variable lev should have formula_terms attribute when computed_standard_name attribute is defined" in results[-1].msgs
 
     def test_check_attr_type(self):
         """
@@ -2609,9 +2674,7 @@ class TestCF1_7(BaseTestCase):
         _var = nc_obj.variables["temperature"]
         _var.test_att = np.int8(45)
         attr_type = "D"  # should match
-        assert not (
-            self.cf._check_attr_type(att_name, attr_type, _var.test_att, _var)[0]
-        )
+        assert not (self.cf._check_attr_type(att_name, attr_type, _var.test_att, _var)[0])
 
     def test_check_grid_mapping_attr_condition(self):
         """
@@ -2803,11 +2866,7 @@ class TestCF1_7(BaseTestCase):
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         score, out_of, messages = get_results(r)
         # messages should be non-empty for improper type
-        assert (
-            "Variable temp and add_offset must be equivalent "
-            "data types or temp must be of type byte, short, or int "
-            "and add_offset must be float or double" in messages
-        )
+        assert "Variable temp and add_offset must be equivalent data types or temp must be of type byte, short, or int and add_offset must be float or double" in messages
         del temp.add_offset
 
         # check matching types between variables and attributes
@@ -2821,11 +2880,7 @@ class TestCF1_7(BaseTestCase):
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         score, out_of, messages = get_results(r)
         assert score < out_of
-        assert (
-            "When both scale_factor and add_offset "
-            "are supplied for variable temp, "
-            "they must have the same type" in messages
-        )
+        assert "When both scale_factor and add_offset are supplied for variable temp, they must have the same type" in messages
 
         # set good
         temp.setncattr("scale_factor", float(5))
@@ -2860,10 +2915,7 @@ class TestCF1_7(BaseTestCase):
             r = self.cf.check_add_offset_scale_factor_type(dataset)
             score, out_of, messages = get_results(r)
             # TEST CONFORMANCE 8.1 REQUIRED 1/3
-            assert (
-                f"When both scale_factor and add_offset are supplied for variable coarse_temp_{var_bytes}, they must have the same type"
-                in messages
-            )
+            assert f"When both scale_factor and add_offset are supplied for variable coarse_temp_{var_bytes}, they must have the same type" in messages
             del dataset.variables[f"coarse_temp_{var_bytes}"]
 
         # TEST CONFORMANCE 8.1 RECOMMENDED 1/1
@@ -2878,14 +2930,8 @@ class TestCF1_7(BaseTestCase):
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         score, out_of, messages = get_results(r)
         assert score < out_of
-        assert (
-            "When add_offset is of type float, the variable mismatch must not be an integer type"
-            in messages
-        )
-        assert (
-            "When scale_factor is of type float, the variable mismatch must not be an integer type"
-            in messages
-        )
+        assert "When add_offset is of type float, the variable mismatch must not be an integer type" in messages
+        assert "When scale_factor is of type float, the variable mismatch must not be an integer type" in messages
 
 
 class TestCF1_8(BaseTestCase):
@@ -2900,10 +2946,7 @@ class TestCF1_8(BaseTestCase):
         nonroot_group.setncattr("external_variables", "ext1")
         results = self.cf.check_groups(dataset)
         bad_msg_template = '§2.7.2 Attribute "{}" MAY ONLY be used in the root group and SHALL NOT be duplicated or overridden in child groups.'
-        bad_messages = {
-            bad_msg_template.format(attr_name)
-            for attr_name in ["Conventions", "external_variables"]
-        }
+        bad_messages = {bad_msg_template.format(attr_name) for attr_name in ["Conventions", "external_variables"]}
         assert bad_messages == set(results[0].msgs)
 
     def test_check_invalid_same_named_dimension_across_groups(self):
@@ -3016,10 +3059,7 @@ class TestCF1_8(BaseTestCase):
 
     # TEST CONFORMANCE 7.5 REQUIRED 10/20
     @pytest.mark.parametrize(
-        "geom_grid_mapping,geom_coordinates,"
-        "geom_geometry_type,geom_node_coordinates,"
-        "geom_node_count,geom_part_node_count,geom_interior_ring,"
-        "expected_msg",
+        "geom_grid_mapping,geom_coordinates,geom_geometry_type,geom_node_coordinates,geom_node_count,geom_part_node_count,geom_interior_ring,expected_msg",
         [
             (
                 None,  # grid_mapping
@@ -3125,8 +3165,7 @@ class TestCF1_8(BaseTestCase):
                     "Parent variable 'someData' does not include geometry dimension 'point_count' used in geometry variable 'geometry'",
                     "Missing axis attribute on node coord vars: ['w']",
                     "'nodes' attr on y must point to one of the node coordinate vars",
-                    "Sum mismatch: node_count = 11, part_node_count = 8"
-                    "part_node_count variable part_node_count must have the same single dimension as interior ring variable interior_ring",
+                    "Sum mismatch: node_count = 11, part_node_count = 8part_node_count variable part_node_count must have the same single dimension as interior ring variable interior_ring",
                 ],
             ),
         ],
@@ -3239,11 +3278,7 @@ class TestCF1_8(BaseTestCase):
         )
         del dataset.variables["geometry_container"].part_node_count
         results = self.cf.check_geometry(dataset)
-        assert (
-            "For geometry variable 'geometry_container' "
-            "which defines the interior_ring attribute, "
-            "the part_node_count attribute must also be present" in results[0].msgs
-        )
+        assert "For geometry variable 'geometry_container' which defines the interior_ring attribute, the part_node_count attribute must also be present" in results[0].msgs
         dataset.close()
         # TEST CONFORMANCE 7.5 REQUIRED 20/20
         # part_node_count and interior_ring variables should have the same dimensions
@@ -3259,11 +3294,7 @@ class TestCF1_8(BaseTestCase):
         dataset.variables["geometry_container"].part_node_count = "part_node_count_bad"
         dataset.createVariable("part_node_count_bad", "i4", ("time",))
         results = self.cf.check_geometry(dataset)
-        assert (
-            "part_node_count variable part_node_count_bad "
-            "must have the same single dimension as interior ring "
-            "variable interior_ring" in results[0].msgs
-        )
+        assert "part_node_count variable part_node_count_bad must have the same single dimension as interior ring variable interior_ring" in results[0].msgs
         dataset.close()
 
     def test_bad_lsid(self):
@@ -3274,9 +3305,7 @@ class TestCF1_8(BaseTestCase):
         # TODO: handle scalar dimension
         dataset.createDimension("taxon", 1)
         abundance = dataset.createVariable("abundance", "f8", ("time",))
-        abundance.standard_name = (
-            "number_concentration_of_biological_taxon_in_sea_water"
-        )
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
         abundance.units = "m-3"
         abundance.coordinates = "taxon_name taxon_lsid"
         taxon_name = dataset.createVariable("taxon_name", str, ("taxon",))
@@ -3289,7 +3318,7 @@ class TestCF1_8(BaseTestCase):
             # bad ID
             taxon_lsid[0] = "99999999999"
             m.get(
-                "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999",
+                "https://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999",
                 status_code=400,
                 text="<html><head><title>400 Bad Request</head><body><h1>Bad Request</h1><p>Unknown LSID</p></body></html>",
             )
@@ -3298,9 +3327,7 @@ class TestCF1_8(BaseTestCase):
             messages = results[0].msgs
             assert results[0].value[0] < results[0].value[1]
             assert len(messages) == 1
-            taxon_lsid[0] = (
-                "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999"
-            )
+            taxon_lsid[0] = "https://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999"
             results = self.cf.check_taxa(dataset)
             assert messages[0].startswith(
                 "Taxon id must match one of the following forms:",
@@ -3315,7 +3342,7 @@ class TestCF1_8(BaseTestCase):
             # assume LSID lookups for WoRMS return valid HTTP status code
             m.get(
                 re.compile(
-                    r"^http://www.lsid.info/urn:lsid:marinespecies.org:taxname:\d+$",
+                    r"^https://www.lsid.info/urn:lsid:marinespecies.org:taxname:\d+$",
                 ),
             )
             response_1 = json.dumps(
@@ -3402,9 +3429,7 @@ class TestCF1_8(BaseTestCase):
         # TODO: handle scalar dimension
         dataset.createDimension("taxon", 1)
         abundance = dataset.createVariable("abundance", "f8", ("time",))
-        abundance.standard_name = (
-            "number_concentration_of_biological_taxon_in_sea_water"
-        )
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
         abundance.units = "m-3"
         abundance.coordinates = "taxon_name taxon_lsid"
         taxon_name = dataset.createVariable("taxon_name", str, ("taxon",))
@@ -3415,7 +3440,7 @@ class TestCF1_8(BaseTestCase):
         taxon_lsid[0] = "urn:lsid:itis.gov:itis_tsn:162139"
 
         with requests_mock.Mocker() as m:
-            m.get(re.compile(r"^http://www.lsid.info/urn:lsid:itis.gov:itis_tsn:\d+$"))
+            m.get(re.compile(r"^https://www.lsid.info/urn:lsid:itis.gov:itis_tsn:\d+$"))
             response = r"""{"acceptedNameList":{"acceptedNames":[null],"class":"gov.usgs.itis.itis_service.data.SvcAcceptedNameList","tsn":"162139"},"class":"gov.usgs.itis.itis_service.data.SvcFullRecord","commentList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonCommentList","comments":[null],"tsn":"162139"},"commonNameList":{"class":"gov.usgs.itis.itis_service.data.SvcCommonNameList","commonNames":[{"class":"gov.usgs.itis.itis_service.data.SvcCommonName","commonName":"northern pike","language":"English","tsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcCommonName","commonName":"grand brochet","language":"French","tsn":"162139"}],"tsn":"162139"},"completenessRating":{"class":"gov.usgs.itis.itis_service.data.SvcGlobalSpeciesCompleteness","completeness":"","rankId":220,"tsn":"162139"},"coreMetadata":{"class":"gov.usgs.itis.itis_service.data.SvcCoreMetadata","credRating":"TWG standards met","rankId":220,"taxonCoverage":"","taxonCurrency":"","taxonUsageRating":"valid","tsn":"162139","unacceptReason":""},"credibilityRating":{"class":"gov.usgs.itis.itis_service.data.SvcCredibilityData","credRating":"TWG standards met","tsn":"162139"},"currencyRating":{"class":"gov.usgs.itis.itis_service.data.SvcCurrencyData","rankId":220,"taxonCurrency":"","tsn":"162139"},"dateData":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonDateData","initialTimeStamp":"1996-06-13 14:51:08.0","tsn":"162139","updateDate":"2004-01-22"},"expertList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonExpertList","experts":[{"class":"gov.usgs.itis.itis_service.data.SvcTaxonExpert","comment":"Research Curator of Fishes, North Carolina State Museum of Natural Sciences, Research Laboratory, 4301 Reedy Creek Rd., Raleigh, NC, 27607, USA","expert":"Wayne C. Starnes","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"updateDate":"2004-02-23"}],"tsn":"162139"},"geographicDivisionList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonGeoDivisionList","geoDivisions":[{"class":"gov.usgs.itis.itis_service.data.SvcTaxonGeoDivision","geographicValue":"North America","updateDate":"1998-09-14"}],"tsn":"162139"},"hierarchyUp":{"author":null,"class":"gov.usgs.itis.itis_service.data.SvcHierarchyRecord","parentName":"Esox","parentTsn":"162138","rankName":"Species","taxonName":"Esox lucius","tsn":"162139"},"jurisdictionalOriginList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOriginList","jurisdictionalOrigins":[{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOrigin","jurisdictionValue":"Alaska","origin":"Native","updateDate":"2004-01-22"},{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOrigin","jurisdictionValue":"Canada","origin":"Native","updateDate":"2004-01-22"},{"class":"gov.usgs.itis.itis_service.data.SvcTaxonJurisdictionalOrigin","jurisdictionValue":"Continental US","origin":"Native & Introduced","updateDate":"2004-01-22"}],"tsn":"162139"},"kingdom":{"class":"gov.usgs.itis.itis_service.data.SvcKingdomInfo","kingdomId":"5","kingdomName":"Animalia  ","tsn":"162139"},"otherSourceList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSourceList","otherSources":[{"acquisitionDate":"2003-03-17","class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSource","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"source":"Catalog of Fishes, 17-Mar-2003","sourceComment":"http://www.calacademy.org/research/ichthyology/catalog/","sourceType":"website","updateDate":"2004-02-11","version":"13-Mar-03"},{"acquisitionDate":"1996-07-29","class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSource","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"source":"NODC Taxonomic Code","sourceComment":"","sourceType":"database","updateDate":"2010-01-14","version":"8.0"},{"acquisitionDate":"2003-05-06","class":"gov.usgs.itis.itis_service.data.SvcTaxonOtherSource","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"northern pike","refLanguage":"English","referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"grand brochet","refLanguage":"French","referredTsn":"162139"}],"source":"<a href=\"http://www.menv.gouv.qc.ca/biodiversite/centre.htm\">CDP","sourceComment":"","sourceType":"database","updateDate":"2003-05-08","version":"1999"}],"tsn":"162139"},"parentTSN":{"class":"gov.usgs.itis.itis_service.data.SvcParentTsn","parentTsn":"162138","tsn":"162139"},"publicationList":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonPublicationList","publications":[{"actualPubDate":"2004-07-01","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"1-888569-61-1","issn":"0097-0638","listedPubDate":"2004-01-01","pages":"ix + 386","pubComment":"Full author list: Nelson, Joseph S., Edwin J. Crossman, H�ctor Espinosa-P�rez, Lloyd T. Findley, Carter R. Gilbert, Robert N. Lea, and James D. Williams","pubName":"American Fisheries Society Special Publication, no. 29","pubPlace":"Bethesda, Maryland, USA","publisher":"American Fisheries Society","referenceAuthor":"Nelson, Joseph S., Edwin J. Crossman, H. Espinosa-P�rez, L. T. Findley, C. R. Gilbert, et al., eds.","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"grand brochet","refLanguage":"French","referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"northern pike","refLanguage":"English","referredTsn":"162139"}],"title":"Common and scientific names of fishes from the United States, Canada, and Mexico, Sixth Edition","updateDate":"2021-10-27"},{"actualPubDate":"2003-12-31","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"","issn":"","listedPubDate":"2003-12-31","pages":"","pubComment":"As-yet (2003) unpublished manuscript from 1998","pubName":"Checklist of Vertebrates of the United States, the U.S. Territories, and Canada","pubPlace":"","publisher":"","referenceAuthor":"Banks, R. C., R. W. McDiarmid, A. L. Gardner, and W. C. Starnes","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"title":"","updateDate":"2021-08-26"},{"actualPubDate":"1980-01-01","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"","issn":"0097-0638","listedPubDate":"1980-01-01","pages":"174","pubComment":"","pubName":"American Fisheries Society Special Publication, no. 12","pubPlace":"Bethesda, Maryland, USA","publisher":"American Fisheries Society","referenceAuthor":"Robins, Richard C., Reeve M. Bailey, Carl E. Bond, James R. Brooker, Ernest A. Lachner, et al.","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"},{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"northern pike","refLanguage":"English","referredTsn":"162139"}],"title":"A List of Common and Scientific Names of Fishes from the United States and Canada, Fourth Edition","updateDate":"2021-10-27"},{"actualPubDate":"1991-01-01","class":"gov.usgs.itis.itis_service.data.SvcTaxonPublication","isbn":"0-913235-70-9","issn":"0097-0638","listedPubDate":"1991-01-01","pages":"183","pubComment":"","pubName":"American Fisheries Society Special Publication, no. 20","pubPlace":"Bethesda, Maryland, USA","publisher":"American Fisheries Society","referenceAuthor":"Robins, Richard C., Reeve M. Bailey, Carl E. Bond, James R. Brooker, Ernest A. Lachner, et al.","referenceFor":[{"class":"gov.usgs.itis.itis_service.data.SvcReferenceForElement","name":"Esox lucius","refLanguage":null,"referredTsn":"162139"}],"title":"Common and Scientific Names of Fishes from the United States and Canada, Fifth Edition","updateDate":"2021-10-27"}],"tsn":"162139"},"scientificName":{"author":"Linnaeus, 1758","class":"gov.usgs.itis.itis_service.data.SvcScientificName","combinedName":"Esox lucius","kingdom":null,"tsn":"162139","unitInd1":null,"unitInd2":null,"unitInd3":null,"unitInd4":null,"unitName1":"Esox                               ","unitName2":"lucius","unitName3":null,"unitName4":null},"synonymList":{"class":"gov.usgs.itis.itis_service.data.SvcSynonymNameList","synonyms":[null],"tsn":"162139"},"taxRank":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonRankInfo","kingdomId":"5","kingdomName":"Animalia  ","rankId":"220","rankName":"Species        ","tsn":"162139"},"taxonAuthor":{"authorship":"Linnaeus, 1758","class":"gov.usgs.itis.itis_service.data.SvcTaxonAuthorship","tsn":"162139","updateDate":"2004-04-09"},"tsn":"162139","unacceptReason":{"class":"gov.usgs.itis.itis_service.data.SvcUnacceptData","tsn":"162139","unacceptReason":null},"usage":{"class":"gov.usgs.itis.itis_service.data.SvcTaxonUsageData","taxonUsageRating":"valid","tsn":"162139"}}"""
             m.get(
                 "https://www.itis.gov/ITISWebService/jsonservice/getFullRecordFromTSN?tsn=162139",
@@ -3432,9 +3457,7 @@ class TestCF1_8(BaseTestCase):
             results = self.cf.check_taxa(dataset)
             result = results[0]
             assert result.msgs == [
-                "Supplied taxon name and ITIS scientific name do not match. "
-                "Supplied taxon name is 'Morone saxitilis', ITIS scientific name "
-                "for TSN 162139 is 'Esox lucius.'",
+                "Supplied taxon name and ITIS scientific name do not match. Supplied taxon name is 'Morone saxitilis', ITIS scientific name for TSN 162139 is 'Esox lucius.'",
             ]
 
     def test_taxonomy_skip_lsid(self):
@@ -3445,9 +3468,7 @@ class TestCF1_8(BaseTestCase):
         # TODO: handle scalar dimension
         dataset.createDimension("taxon", 1)
         abundance = dataset.createVariable("abundance", "f8", ("time",))
-        abundance.standard_name = (
-            "number_concentration_of_biological_taxon_in_sea_water"
-        )
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
         abundance.units = "m-3"
         abundance.coordinates = "taxon_name taxon_lsid"
         taxon_name = dataset.createVariable("taxon_name", str, ("taxon",))
@@ -3466,9 +3487,7 @@ class TestCF1_8(BaseTestCase):
         dataset.createDimension("string80", 80)
         dataset.createDimension("taxon", 1)
         abundance = dataset.createVariable("abundance", "f8", ("time",))
-        abundance.standard_name = (
-            "number_concentration_of_biological_taxon_in_sea_water"
-        )
+        abundance.standard_name = "number_concentration_of_biological_taxon_in_sea_water"
         abundance.units = "m-3"
         abundance.coordinates = "taxon_name taxon_lsid"
         taxon_name = dataset.createVariable("taxon_name", "S1", ("taxon", "string80"))
@@ -3506,10 +3525,7 @@ class TestCF1_9(BaseTestCase):
         dataset.variables["time"].units = "months since 0-1-1 23:00:60"
         results = self.cf.check_time_coordinate(dataset)
         scored, out_of, messages = get_results(results)
-        assert (
-            'Time coordinate variable "time" must have units with seconds less than 60'
-            in messages
-        )
+        assert 'Time coordinate variable "time" must have units with seconds less than 60' in messages
         # For data with no seconds, we skip the less than sixty seconds
         # check because that component is not present
         dataset.variables["time"].units = "seconds since 2000-1-1 00:00"
@@ -3524,10 +3540,7 @@ class TestCF1_9(BaseTestCase):
         del dataset.variables["time"].calendar
         results = self.cf.check_time_coordinate_variable_has_calendar(dataset)
         scored, out_of, messages = get_results(results)
-        assert (
-            'Time coordinate variable "time" should have a string valued attribute "calendar"'
-            in messages
-        )
+        assert 'Time coordinate variable "time" should have a string valued attribute "calendar"' in messages
         # FIXME: NetCDF files shouldn't normally be modified so we can usually
         # depend on cached results. Here we need to recreate the checker
         # instance in order to not have previous results included pass condition
@@ -3576,10 +3589,7 @@ class TestCF1_9(BaseTestCase):
             dataset.variables["time"].calendar = calendar_name
             results = self.cf.check_time_coordinate_variable_has_calendar(dataset)
             scored, out_of, messages = get_results(results)
-            assert (
-                'For time variable "time", when using the Gregorian or Julian '
-                "calendars, negative years are not allowed." in messages
-            )
+            assert 'For time variable "time", when using the Gregorian or Julian calendars, negative years are not allowed.' in messages
 
     def test_domain(self):
         dataset = MockTimeSeries()
@@ -3596,22 +3606,14 @@ class TestCF1_9(BaseTestCase):
         results = self.cf.check_domain_variables(dataset)
         assert results[0].value[0] != results[0].value[1]
         assert results[0].msgs
-        assert (
-            results[0].msgs[0]
-            == "For domain variable domain it is recommended that attribute long_name be present and a string"
-        )
+        assert results[0].msgs[0] == "For domain variable domain it is recommended that attribute long_name be present and a string"
 
         # bad coordinates variable
         domain_var.coordinates = "lon lat depth xyxz abc"
         domain_var.long_name = "Domain variable"
         results = self.cf.check_domain_variables(dataset)
         assert results[0].value[0] != results[0].value[1]
-        assert (
-            results[0].msgs[0]
-            == "Could not find the following variables referenced in "
-            "coordinates attribute from domain variable domain: "
-            "xyxz, abc"
-        )
+        assert results[0].msgs[0] == "Could not find the following variables referenced in coordinates attribute from domain variable domain: xyxz, abc"
         # TEST CONFORMANCE 5.8 REQUIRED 4/4
         # check reference cell measures
         domain_var.cell_measures = "volume: cube"
@@ -3631,11 +3633,7 @@ class TestCF1_9(BaseTestCase):
         domain_var.cell_measures = "volume: cube_bad"
         dataset.createVariable("cube_bad", "f8", ("lon", "lat", "depth", "time"))
         results = self.cf.check_domain_variables(dataset)
-        assert (
-            "Variables named in the cell_measures attributes must have "
-            "dimensions with values that are a subset of the referring domain "
-            "variable's dimensions attribute" in results[0].msgs
-        )
+        assert "Variables named in the cell_measures attributes must have dimensions with values that are a subset of the referring domain variable's dimensions attribute" in results[0].msgs
         del dataset
         dataset = MockTimeSeries()
         # domain should be dimensionless in terms of variable dimensions
@@ -3643,10 +3641,7 @@ class TestCF1_9(BaseTestCase):
         domain_var.setncattr("dimensions", "time")
         domain_var.long_name = "Domain variable"
         results = self.cf.check_domain_variables(dataset)
-        assert (
-            "Domain variable domain should not have non-scalar/"
-            "non-empty variable dimensions" in results[0].msgs
-        )
+        assert "Domain variable domain should not have non-scalar/non-empty variable dimensions" in results[0].msgs
         # check ragged array results
         dataset = Dataset(STATIC_FILES["indexed_ragged_domain"])
         results = self.cf.check_domain_variables(dataset)
@@ -3676,31 +3671,23 @@ class TestCF1_11(BaseTestCase):
         _, _, messages = get_results(results)
         assert expected_msg in messages
         # add units_metadata, should be valid now
-        temperature_dataset.variables["temperature"].units_metadata = (
-            "temperature: on_scale"
-        )
+        temperature_dataset.variables["temperature"].units_metadata = "temperature: on_scale"
         results = self.cf.check_temperature_units_metadata(temperature_dataset)
         scored, out_of, _ = get_results(results)
         assert scored == out_of
-        temperature_dataset.variables["temperature"].standard_name = (
-            "integral_wrt_depth_of_product_of_potential_temperature_and_sea_water_density"
-        )
+        temperature_dataset.variables["temperature"].standard_name = "integral_wrt_depth_of_product_of_potential_temperature_and_sea_water_density"
         temperature_dataset.variables["temperature"].units = "lb degree_F ft-2"
         scored, out_of, _ = get_results(results)
         assert scored == out_of
 
         # check against compound temperature units
-        temperature_dataset.variables["temperature"].standard_name = (
-            "square_of_air_temperature"
-        )
+        temperature_dataset.variables["temperature"].standard_name = "square_of_air_temperature"
         temperature_dataset.variables["temperature"].units = "degrees_Celsius2"
         scored, out_of, _ = get_results(results)
         assert scored == out_of
 
         # check against aliased temperature names
-        temperature_dataset.variables["temperature"].standard_name = (
-            "equivalent_temperature"
-        )
+        temperature_dataset.variables["temperature"].standard_name = "equivalent_temperature"
         temperature_dataset.variables["temperature"].units = "degrees_Celsius"
         scored, out_of, _ = get_results(results)
         assert scored == out_of
@@ -3768,11 +3755,7 @@ class TestCF1_11(BaseTestCase):
         ts2.cf_role = "timeseries_id"
         result = self.cf.check_single_cf_role(ds)
         assert result.value[0] < result.value[1]
-        assert (
-            "There may only be one variable containing the cf_role attribute. "
-            "Currently the following variables have cf_role attributes: ['ts', 'ts2']"
-            in result.msgs
-        )
+        assert "There may only be one variable containing the cf_role attribute. Currently the following variables have cf_role attributes: ['ts', 'ts2']" in result.msgs
 
     def test_check_add_offset_scale_factor_type(self):
         # TEST CONFORMANCE 8.1 REQUIRED 1/3
@@ -3788,10 +3771,7 @@ class TestCF1_11(BaseTestCase):
         temp.setncattr("add_offset", np.float32(1.0))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         score, out_of, messages = get_results(r)
-        assert (
-            "When both scale_factor and add_offset are supplied for variable temp, they must have the same type"
-            in messages
-        )
+        assert "When both scale_factor and add_offset are supplied for variable temp, they must have the same type" in messages
         # test improper types
         temp.setncattr("add_offset", 1)
         temp.setncattr("scale_factor", 2)
@@ -3809,10 +3789,7 @@ class TestCF1_11(BaseTestCase):
         bad_float.setncattr("scale_factor", np.float32(2.0))
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         score, out_of, messages = get_results(r)
-        assert (
-            "When attribute add_offset is of type float variable bad_float must be of type byte, unsigned byte, short, or unsigned short"
-            in messages
-        )
+        assert "When attribute add_offset is of type float variable bad_float must be of type byte, unsigned byte, short, or unsigned short" in messages
 
         del dataset.variables["bad_float"]
         # TEST CONFORMANCE 8.1 REQUIRED 3/3
@@ -3831,10 +3808,7 @@ class TestCF1_11(BaseTestCase):
         r = self.cf.check_add_offset_scale_factor_type(dataset)
         score, out_of, messages = get_results(r)
         assert score < out_of
-        assert (
-            "When attribute add_offset is of type double variable bad_double must be of type byte, unsigned byte, short, unsigned short, int, or unsigned int"
-            in messages
-        )
+        assert "When attribute add_offset is of type double variable bad_double must be of type byte, unsigned byte, short, unsigned short, int, or unsigned int" in messages
 
 
 class TestCFUtil(BaseTestCase):
@@ -3880,17 +3854,13 @@ class TestCFUtil(BaseTestCase):
         nc = MockRaggedArrayRepr("timeseries", "indexed")
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries"))
 
         # we'll add another index variable, also bad
         nc = MockRaggedArrayRepr("timeseries", "indexed")
         v = nc.createVariable("index_var2", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("instance_dimension", "INSTANCE_DIMENSION")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries"))
 
         # ----- timeseries, contiguous ----- #
         nc = MockRaggedArrayRepr("timeseries", "contiguous")
@@ -3900,9 +3870,7 @@ class TestCFUtil(BaseTestCase):
         nc = MockRaggedArrayRepr("timeseries", "contiguous")
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries"))
 
         # add another count variable, bad
         v = nc.createVariable(
@@ -3912,9 +3880,7 @@ class TestCFUtil(BaseTestCase):
             fill_value=None,
         )
         v.setncattr("sample_dimension", "SAMPLE_DIMENSION")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "timeseries"))
 
         # ----- profile, indexed ----- #
 
@@ -3925,17 +3891,13 @@ class TestCFUtil(BaseTestCase):
         nc = MockRaggedArrayRepr("profile", "indexed")
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "profile"))
 
         # we'll add another index variable, also bad
         nc = MockRaggedArrayRepr("profile", "indexed")
         v = nc.createVariable("index_var2", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("instance_dimension", "INSTANCE_DIMENSION")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "profile"))
 
         # ----- profile, contiguous ----- #
         nc = MockRaggedArrayRepr("profile", "contiguous")
@@ -3945,9 +3907,7 @@ class TestCFUtil(BaseTestCase):
         nc = MockRaggedArrayRepr("profile", "contiguous")
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "profile"))
 
         # we'll add another count variable, also bad
         nc = MockRaggedArrayRepr("profile", "contiguous")
@@ -3958,9 +3918,7 @@ class TestCFUtil(BaseTestCase):
             fill_value=None,
         )
         v.setncattr("sample_dimension", "SAMPLE_DIMENSION")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "profile")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "profile"))
 
         # ----- trajectory, indexed ----- #
         nc = MockRaggedArrayRepr("trajectory", "indexed")
@@ -3970,17 +3928,13 @@ class TestCFUtil(BaseTestCase):
         nc = MockRaggedArrayRepr("trajectory", "indexed")
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory"))
 
         # we'll add another index variable, also bad
         nc = MockRaggedArrayRepr("trajectory", "indexed")
         v = nc.createVariable("index_var2", "i", ("SAMPLE_DIMENSION",), fill_value=None)
         v.setncattr("instance_dimension", "INSTANCE_DIMENSION")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory"))
 
         # ----- trajectory, contiguous ----- #
         nc = MockRaggedArrayRepr("trajectory", "contiguous")
@@ -3990,9 +3944,7 @@ class TestCFUtil(BaseTestCase):
         nc = MockRaggedArrayRepr("trajectory", "contiguous")
         v = nc.createVariable("var2", "i", ("INSTANCE_DIMENSION",), fill_value=None)
         v.setncattr("cf_role", "yeetyeet_id")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory"))
 
         # we'll add another count variable, also bad
         nc = MockRaggedArrayRepr("trajectory", "contiguous")
@@ -4003,9 +3955,7 @@ class TestCFUtil(BaseTestCase):
             fill_value=None,
         )
         v.setncattr("sample_dimension", "SAMPLE_DIMENSION")
-        assert not (
-            cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory")
-        )
+        assert not (cfutil.is_dataset_valid_ragged_array_repr_featureType(nc, "trajectory"))
 
         # ----- now test compound featureType ----- #
 

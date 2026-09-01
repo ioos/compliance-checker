@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 compliance_checker/protocols/netcdf.py
 
@@ -22,7 +21,7 @@ def is_netcdf(url):
         return False
 
     # If it's a known extension, give it a shot
-    if url.endswith("nc"):
+    if url.endswith(".nc"):
         return True
 
     try:

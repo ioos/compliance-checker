@@ -6,12 +6,12 @@
 The IOOS Compliance Checker is a python based tool for data providers to check
 for completeness and community standard compliance of local or remote
 [netCDF](https://en.wikipedia.org/wiki/NetCDF) files against
-[CF](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html) and
+[CF](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html) and
 [ACDD](https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3)
 file standards. The python module can be used as a command-line tool or as a
 library that can be integrated into other software.
 
-A [web-based version](https://compliance.ioos.us/index.html) of the Compliance
+A [web-based version](https://ioos.github.io/compliance-checker-wasm-web/index.html) of the Compliance
 Checker was developed to enable a broader audience and improve accessibility for the
 checker. With the web version, providers can simply provide a link or upload their
 datasets and get the full suite of capabilities that Compliance Checker offers.
@@ -22,11 +22,11 @@ It currently supports the following sources and standards:
 | Standard                                                                                                                   | Source                                                            | Release Date |
 | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------ |
 | [ACDD (1.1, 1.3)](https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3)                                    | Built-in                                                          | X            |
-| [CF (1.11)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.11/cf-conventions.html)                          | Built-in                                                          | Aug 25, 2025 |
-| [CF (1.10)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.10/cf-conventions.html)                          | Built-in                                                          | Apr 29, 2025 |
-| [CF (1.9)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.9/cf-conventions.html)                            | Built-in                                                          | May 15, 2023 |
-| [CF (1.8)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html)                            | Built-in                                                          | Jan 25, 2022 |
-| [CF (1.7)](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html)                            | Built-in                                                          | Jan 25, 2022 |
+| [CF (1.11)](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.11/cf-conventions.html)                         | Built-in                                                          | Aug 25, 2025 |
+| [CF (1.10)](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.10/cf-conventions.html)                         | Built-in                                                          | Apr 29, 2025 |
+| [CF (1.9)](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.9/cf-conventions.html)                           | Built-in                                                          | May 15, 2023 |
+| [CF (1.8)](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html)                           | Built-in                                                          | Jan 25, 2022 |
+| [CF (1.7)](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html)                           | Built-in                                                          | Jan 25, 2022 |
 | [CF (1.6)](https://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html)                                            | Built-in                                                          | Jan 20, 2022 |
 | [IOOS (1.1)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-1.html#ioos-netcdf-metadata-profile-attributes) | Built-in                                                          | X            |
 | [IOOS (1.2)](https://ioos.github.io/ioos-metadata/ioos-metadata-profile-v1-2.html)                                         | Built-in                                                          | X            |
@@ -47,11 +47,11 @@ If you feel you will need to run a batch of files through the Compliance Checker
 the IOOS Program Office Operations Division for assistance.
 
 
-# [The Compliance Checker Web Tool](https://compliance.ioos.us/index.html)
+# The Compliance Checker Web Tool
 
 The IOOS Compliance Checker front end companion.
 
-[https://compliance.ioos.us/index.html](https://compliance.ioos.us/index.html)
+[https://compliance.ioos.us/](https://compliance.ioos.us/index.html)
 
 Source Code is available on GitHub:
 
@@ -122,90 +122,52 @@ parse it's contents.
 > **WARNING** The CF/ACDD checks **will access data**, so if using a remote OPeNDAP URL, please be sure the size is reasonable!
 
 ```
-usage: cchecker.py [-h] [--test TEST] [--criteria [{lenient,normal,strict}]]
-                   [--verbose] [--describe-checks] [--skip-checks SKIP_CHECKS]
-                   [-f {text,html,json,json_new}] [-o OUTPUT] [-O OPTION] [-V]
-                   [-l] [-d DOWNLOAD_STANDARD_NAMES]
-                   [dataset_location [dataset_location ...]]
+usage: cchecker.py [-h] [--test TEST] [--criteria {lenient,normal,strict}] [--verbose] [--describe-checks] [--skip-checks SKIP_CHECKS | --include-checks INCLUDE_CHECKS]
+                   [-f {text,html,json,json_new}] [-o OUTPUT] [-O OPTION] [-V] [-l] [-d DOWNLOAD_STANDARD_NAMES]
+                   [dataset_location ...]
 
 positional arguments:
-  dataset_location      Defines the location of the dataset to be checked.
-                        The location can be a local netCDF file, a remote
-                        OPeNDAP endpoint, a remote netCDF file which returns
-                        content-type header of 'application/x-netcdf', or an
-                        ERDDAP TableDAP endpoint. Note that the ERDDAP TableDAP
-                        endpoint will currently attempt to fetch the entire
-                        TableDAP dataset.
+  dataset_location      Defines the location of the dataset to be checked. The location can be a local netCDF file, a remote OPeNDAP endpoint, a remote netCDF file which
+                        returns content-type header of 'application/x-netcdf', or an ERDDAP TableDAP endpoint. Note that the ERDDAP TableDAP endpoint will currently attempt
+                        to fetch the entire TableDAP dataset.
 
-
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  --test TEST, -t TEST, --test= TEST, -t= TEST
-                        Select the Checks you want to perform. Defaults to
-                        'acdd' if unspecified. Versions of standards can be
-                        specified via `-t <test_standard>:<version>`. If
-                        `<version>` is omitted, or is "latest", the latest
-                        version of the test standard is used.
-  --criteria [{lenient,normal,strict}], -c [{lenient,normal,strict}]
-                        Define the criteria for the checks. Either Strict,
-                        Normal, or Lenient. Defaults to Normal.
+  --test, -t TEST       Select the Checks you want to perform. Defaults to 'acdd' if unspecified. Versions of standards can be specified via `-t <test_standard>:<version>`.
+                        If `<version>` is omitted the latest version of the test standard is used.
+  --criteria, -c {lenient,normal,strict}
+                        Define the criteria for the checks. Either Strict, Normal, or Lenient. Defaults to Normal.
   --verbose, -v         Increase output. May be specified up to three times.
   --describe-checks, -D
-                        Describes checks for checkers specified using `-t`. If
-                        `-t` is not specified, lists checks from all available
-                        checkers.
-  --skip-checks SKIP_CHECKS, -s SKIP_CHECKS
-                        Specifies tests to skip. Can take the form of either
-                        `<check_name>` or `<check_name>:<skip_level>`. The
-                        first form skips any checks matching the name. In the
-                        second form <skip_level> may be specified as "A", "M",
-                        or "L". "A" skips all checks and is equivalent to
-                        calling the first form. "M" will only show high
-                        priority output from the given check and will skip
-                        medium and low. "L" will show both high and medium
-                        priority issues, while skipping low priority issues.
-  -f {text,html,json,json_new}, --format {text,html,json,json_new}
-                        Output format(s). Options are 'text', 'html', 'json',
-                        'json_new'. The difference between the 'json' and the
-                        'json_new' formats is that the 'json' format has the
-                        check as the top level key, whereas the 'json_new'
-                        format has the dataset name(s) as the main key in the
-                        output follow by any checks as subkeys. Also, 'json'
-                        format can be only be run against one input file,
-                        whereas 'json_new' can be run against multiple files.
-  -o OUTPUT, --output OUTPUT
-                        Output filename(s). If '-' is supplied, output to
-                        stdout. Can either be one or many files. If one file
-                        is supplied, but the checker is run against many
-                        files, all the output from the checks goes to that
-                        file (does not presently work with 'json' format). If
-                        more than one output file is supplied, the number of
-                        input datasets supplied must match the number of
-                        output files.
-  -O OPTION, --option OPTION
-                        Additional options to be passed to the checkers.
-                        Multiple options can be specified via multiple
-                        invocations of this switch. Options should be prefixed
-                        with a the checker name followed by the option, e.g.
-                        '<checker>:<option_name>' Available options:
-                        'cf:enable_appendix_a_checks' - Allow check results
-                        against CF Appendix A for attribute location and data
-                        types.
-
-  -V, --version         Display the IOOS Compliance Checker version
-                        information.
+                        Describes checks for checkers specified using `-t`. If `-t` is not specified, lists checks from all available checkers.
+  --skip-checks, -s SKIP_CHECKS
+                        Specifies tests to skip. Can take the form of either `<check_name>` or `<check_name>:<skip_level>`. The first form skips any checks matching the
+                        name. In the second form <skip_level> may be specified as "A", "M", or "L". "A" skips all checks and is equivalent to calling the first form. "M"
+                        will only show high priority output from the given check and will skip medium and low. "L" will show both high and medium priority issues, while
+                        skipping low priority issues. Cannot be used with `-i`/`--include-checks` option.
+  --include-checks, -i INCLUDE_CHECKS
+                        Specifies checks to include. Can only take the form of `<check_name>`. Cannot be specified along with `-s`/`skip_checks`.
+  -f, --format {text,html,json,json_new}
+                        Output format(s). Options are 'text', 'html', 'json', 'json_new'. The difference between the 'json' and the 'json_new' formats is that the 'json'
+                        format has the check as the top level key, whereas the 'json_new' format has the dataset name(s) as the main key in the output follow by any checks
+                        as subkeys. Also, 'json' format can be only be run against one input file, whereas 'json_new' can be run against multiple files.
+  -o, --output OUTPUT   Output filename(s). If '-' is supplied, output to stdout. Can either be one or many files. If one file is supplied, but the checker is run against
+                        many files, all the output from the checks goes to that file (does not presently work with 'json' format). If more than one output file is supplied,
+                        the number of input datasets supplied must match the number of output files.
+  -O, --option OPTION   Additional options to be passed to the checkers. Multiple options can be specified via multiple invocations of this switch. Options should be
+                        prefixed with a the checker name followed by the option, potentially followed by a value, e.g. '<checker>:<option_name>[:<option_value>]' Available
+                        options: 'cf:enable_appendix_a_checks' - Allow check results against CF Appendix A for attribute location and data types.
+  -V, --version         Display the IOOS Compliance Checker version information.
   -l, --list-tests      List the available tests
-  -d DOWNLOAD_STANDARD_NAMES, --download-standard-names DOWNLOAD_STANDARD_NAMES
-                        Specify a version of the cf standard name table to
-                        download as packaged version. Either specify a version
-                        number (e.g. "72") to fetch a specific version or
-                        "latest" to get the latest CF standard name table.
+  -d, --download-standard-names DOWNLOAD_STANDARD_NAMES
+                        Specify a version of the cf standard name table to download as packaged version. Either specify a version number (e.g. "72") to fetch a specific
+                        version or "latest" to get the latest CF standard name table.
 ```
 
 ## Examples
 
 ### Check a local file against CF 1.6
-```
+```shell
 compliance-checker --test=cf:1.6 compliance_checker/tests/data/examples/hycom_global.nc
 ```
 
@@ -296,19 +258,19 @@ compliance-checker --test=acdd:1.3 --format=html --output=/tmp/report.html compl
 
 ### Output text from multiple input files to one output file
 
-```
+```shell
 compliance-checker --test=cf:1.6 --format text --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
 ```
 
 ### Output html and text files from multiple input files (part 1)
 In this case you'll get 2 files ```/tmp/combined_output.txt``` and ```/tmp/combined_output.html``` that contain cf check results for both input files because you only specified 1 output filename.
-```
+```shell
 compliance-checker --test=cf:1.6 --format text --format html --output=/tmp/combined_output.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
 ```
 
 ### Output html and text files from multiple input files (part 2)
 In this case you'll get 4 files ```/tmp/hycom.txt```, ```/tmp/hycom.html```, ```/tmp/ww3.txt```, and ```/tmp/ww3.html``` that contain cf check results because you specified as many output filenames as input filenames.
-```
+```shell
 compliance-checker --test=cf:1.6 --format text --format html --output=/tmp/hycom.txt --output=/tmp/ww3.txt compliance_checker/tests/data/examples/hycom_global.nc compliance_checker/tests/data/examples/ww3.nc
 ```
 
@@ -319,11 +281,8 @@ During the CF test, if a file has a particular version of the cf standard name t
 (i.e. ```:standard_name_vocabulary = "CF Standard Name Table v30" ;```) that doesn't match the packaged version, it will
 try to download the specified version. If it fails, it will fall back to packaged version.
 
-```
+```shell
 compliance-checker -d 35
-```
-
-Downloading cf-standard-names table version 35 from: http://cfconventions.org/Data/cf-standard-names/35/src/cf-standard-name-table.xml
 ```
 
 Alternatively, you can specify an absolute path to a standard name table you may have locally in an environment variable named CF_STANDARD_NAME_TABLE and the compliance checker will use that version instead.
@@ -340,12 +299,12 @@ check_suite = CheckSuite()
 check_suite.load_all_available_checkers()
 
 # Run cf and adcc checks
-path = '/path/or/url/to/your/dataset'
-checker_names = ['cf', 'acdd']
+path = "/path/or/url/to/your/dataset"
+checker_names = ["cf", "acdd"]
 verbose = 0
-criteria = 'normal'
-output_filename = '/output/report.json'
-output_format = 'json'
+criteria = "normal"
+output_filename = "/output/report.json"
+output_format = "json"
 """
 Inputs to ComplianceChecker.run_checker
 
@@ -358,19 +317,21 @@ output_format   Format of the output
 
 @returns                If the tests failed (based on the criteria)
 """
-return_value, errors = ComplianceChecker.run_checker(path,
-                                                     checker_names,
-                                                     verbose,
-                                                     criteria,
-                                                     output_filename=output_filename,
-                                                     output_format=output_format)
+return_value, errors = ComplianceChecker.run_checker(
+    path,
+    checker_names,
+    verbose,
+    criteria,
+    output_filename=output_filename,
+    output_format=output_format,
+)
 
 # Open the JSON output and get the compliance scores
-with open(output_filename, 'r') as fp:
+with open(output_filename, "r") as fp:
     cc_data = json.load(fp)
-    scored = cc_data[cc_test[0]]['scored_points']
-    possible = cc_data[cc_test[0]]['possible_points']
-    log.debug('CC Scored {} out of {} possible points'.format(scored, possible))
+    scored = cc_data[cc_test[0]]["scored_points"]
+    possible = cc_data[cc_test[0]]["possible_points"]
+    log.debug(f"CC Scored {scored} out of {possible} possible points")
 ```
 
 ## Compliance Checker Plug-Ins
@@ -396,13 +357,13 @@ This is a checker for UGRID (https://ugrid-conventions.github.io/ugrid-conventio
 
 These plug-ins must be installed separately but work on top of the base compliance checker software.
 
-```
+```shell
 pip install cc-plugin-ncei
 ```
 
 Check to see if it installed correctly, list the tests:
 
-```
+```shell
 compliance-checker -l
 ```
 
@@ -426,19 +387,20 @@ Once installing the plug-in the usage is similar to the built in checkers.
 
 1. Run the NCEI Point check on a THREDDS endpoint
 
-```python
+```shell
 compliance-checker -t ncei-point -v "https://data.nodc.noaa.gov/thredds/dodsC/testdata/mbiddle/GOLD_STANDARD_NETCDF/1.1/NODC_point_template_v1.1_2016-06-15_133710.844375.nc"
 ```
 
 2. Run NCEI Trajectory Profile Orthogonal Check on local dataset
 
-```python
+```shell
 compliance-checker -t ncei-trajectory-profile-orthogonal -v ~/data/sample-trajectory-profile.nc
 
 ```
 
 3. Outputting JSON from a gridded file check
-```
+
+```shell
 compliance-checker -t ncei-grid -f json -o ~/Documents/sample_grid_report.json ~/Documents/sample_grid_report.nc
 ```
 
@@ -448,7 +410,7 @@ Compliance Checker does not support UGRID in the base package, although implicit
 
 ## Disclaimer
 
-The objective of the IOOS Compliance Checker is to check your file against our interpretation of select dataset metadata standards to use as a guideline in generating compliant files. The compliance checker should not be considered the authoritative source on whether your file is 100% "compliant". Instead, we recommend that users use the results as a guide to work towards compliance.  A table with the current CF feature support documenting implemented portions of CF is located here for reference: [Feature Parity Matrix](docs/cf_feature_parity_matrix.md)
+The objective of the IOOS Compliance Checker is to check your file against our interpretation of select dataset metadata standards to use as a guideline in generating compliant files. The compliance checker should not be considered the authoritative source on whether your file is 100% "compliant". Instead, we recommend that users use the results as a guide to work towards compliance.  A table with the current CF feature support documenting implemented portions of CF is located here for reference: [Feature Parity Matrix](cf_feature_parity_matrix)
 
 
 ## Miscellaneous/Acknowledgements

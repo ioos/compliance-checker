@@ -16,7 +16,7 @@ def glob_down(pth, suffix, lvls):
     """globs down up to (lvls: int) levels of subfolders\n
     suffix in the form ".ipynb"\n
     pth: Path"""
-    return list(chain(*[pth.glob(f'*{"/*"*lvl}{suffix}') for lvl in range(lvls)]))
+    return list(chain(*[pth.glob(f"*{'/*' * lvl}{suffix}") for lvl in range(lvls)]))
 
 
 def generate_dataset(cdl_path, nc_path):
@@ -32,20 +32,14 @@ def static_files(cdl_stem):
     assert datadir.exists(), f"{datadir} not found"
 
     cdl_paths = glob_down(datadir, f"{cdl_stem}.cdl", 3)
-    assert (
-        len(cdl_paths) > 0
-    ), f"No file named {cdl_stem}.cdl found in {datadir} or its subfolders"
-    assert (
-        len(cdl_paths) == 1
-    ), f"Multiple candidates found with the name {cdl_stem}.cdl:\n{cdl_paths}\nPlease reconcile naming conflict"
+    assert len(cdl_paths) > 0, f"No file named {cdl_stem}.cdl found in {datadir} or its subfolders"
+    assert len(cdl_paths) == 1, f"Multiple candidates found with the name {cdl_stem}.cdl:\n{cdl_paths}\nPlease reconcile naming conflict"
     cdl_path = cdl_paths[0]  # PurePath object
 
     nc_path = cdl_path.parent / f"{cdl_path.stem}.nc"
     if not nc_path.exists():
         generate_dataset(cdl_path, nc_path)
-        assert (
-            nc_path.exists()
-        ), f"ncgen CLI utility failed to produce {nc_path} from {cdl_path}"
+        assert nc_path.exists(), f"ncgen CLI utility failed to produce {nc_path} from {cdl_path}"
     return str(nc_path)
 
 

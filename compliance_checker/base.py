@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 Compliance Checker
 """
@@ -12,31 +10,15 @@ import warnings
 from collections import defaultdict
 from functools import wraps
 from io import StringIO
+from re import Pattern
 
 import validators
 from lxml import etree
 from netCDF4 import Dataset
-from owslib.namespaces import Namespaces
-from owslib.swe.observation.sos100 import SensorObservationService_1_0_0
-from owslib.swe.sensor.sml import SensorML
+from typing_extensions import deprecated
 
 from compliance_checker import __version__
 from compliance_checker.util import kvp_convert
-
-# Python 3.5+ should work, also have a fallback
-try:
-    from re import Pattern
-
-    re_pattern_type = Pattern
-except ImportError:
-    re_pattern_type = type(re.compile(""))
-
-
-def get_namespaces():
-    n = Namespaces()
-    ns = n.get_namespaces(["ogc", "sml", "gml", "sos", "swe", "xlink"])
-    ns["ows"] = n.get_namespace("ows110")
-    return ns
 
 
 def csv_splitter(input_string):
@@ -148,6 +130,9 @@ class BaseCheck:
 
     supported_ds = []
 
+    @deprecated(
+        "Passing the dataset to every single check is deprecated. The future version will take the ds only in the test constructor.",
+    )
     def setup(self, ds):
         """
         Common setup method for a Checker.
@@ -210,22 +195,6 @@ class BaseNCCheck:
     @classmethod
     def std_check(cls, dataset, name):
         return name in dataset.ncattrs()
-
-
-class BaseSOSGCCheck:
-    """
-    Base class for SOS-GetCapabilities supporting Check Suites.
-    """
-
-    supported_ds = [SensorObservationService_1_0_0]
-
-
-class BaseSOSDSCheck:
-    """
-    Base class for SOS-DescribeSensor supporting Check Suites.
-    """
-
-    supported_ds = [SensorML]
 
 
 class Result:
@@ -513,7 +482,7 @@ def attr_check(kvp, ds, priority, ret_val, gname=None, var_name=None):
         msgs = [] if res_tup[1] is None else res_tup[1]
 
         ret_val.append(Result(priority, res_tup[0], name, msgs))
-    elif isinstance(other, re_pattern_type):
+    elif isinstance(other, Pattern):
         attr_result = maybe_get_global_attr(name, ds)
         if not attr_result[0]:
             return attr_result

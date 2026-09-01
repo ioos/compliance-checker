@@ -19,10 +19,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
-from lxml import etree as ET
 from netCDF4 import Dataset
-from owslib.sos import SensorObservationService
-from owslib.swe.sensor.sml import SensorML
 from packaging.version import parse
 
 from compliance_checker import __version__, tempnc
@@ -34,6 +31,20 @@ if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter("utf8")(sys.stdout)
 if sys.stderr.encoding is None:
     sys.stderr = codecs.getwriter("utf8")(sys.stderr)
+
+
+def _human_key(item: tuple) -> tuple[list[str | int], str]:
+    key, value = item
+    key = str(key)
+
+    def try_int(key: str) -> str | int:
+        """If `s` is a number, return an int, else `s` unchanged."""
+        try:
+            return int(key)
+        except ValueError:
+            return key
+
+    return ([try_int(c) for c in re.split(r"(\d+)", key.casefold())], item)
 
 
 def extract_docstring_summary(docstring):
@@ -56,9 +67,7 @@ def extract_docstring_summary(docstring):
 
 
 class CheckSuite:
-    checkers = (
-        {}
-    )  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
+    checkers = {}  # Base dict of checker names to BaseCheck derived types, override this in your CheckSuite implementation
     templates_root = "compliance_checker"  # modify to load alternative Jinja2 templates
 
     def __init__(self, options=None):
@@ -83,8 +92,7 @@ class CheckSuite:
     def _print_suites(self, verbose=0):
         """
         Prints out available check suites.  If the verbose argument is True,
-        includes the internal module version number of the check and also displays
-        "latest" meta-versions.
+        includes the internal module version number of the check.
         :param check_suite: Check suite object
         :param verbose: Integer indicating whether to print verbose output
         :type verbose: int
@@ -93,9 +101,7 @@ class CheckSuite:
             version = getattr(self.checkers[checker], "_cc_checker_version", "???")
             if verbose > 0:
                 print(f" - {checker} (v{version})")
-            elif ":" in checker and not checker.endswith(
-                ":latest",
-            ):  # Skip the "latest" output
+            elif ":" in checker:  # Skip the unversioned latest alias.
                 print(f" - {checker}")
 
     def _print_checker(self, checker_obj):
@@ -171,10 +177,7 @@ class CheckSuite:
                         None,
                     )
                     warnings.warn(
-                        "Checker for {} should implement both "
-                        '"_cc_spec" and "_cc_spec_version" '
-                        'attributes. "name" attribute is deprecated. '
-                        "Assuming checker is latest version.",
+                        'Checker for {} should implement both "_cc_spec" and "_cc_spec_version" attributes. "name" attribute is deprecated. Assuming checker is latest version.',
                         DeprecationWarning,
                         stacklevel=2,
                     )
@@ -186,7 +189,7 @@ class CheckSuite:
                 print("Could not load", c, ":", e, file=sys.stderr)
         # find the latest version of versioned checkers and set that as the
         # default checker for compliance checker if no version is specified
-        ver_checkers = sorted([c.split(":", 1) for c in cls.checkers if ":" in c])
+        ver_checkers = [c.split(":", 1) for c in cls.checkers if ":" in c]
         for spec, versions in itertools.groupby(ver_checkers, itemgetter(0)):
             version_nums = [v[-1] for v in versions]
             try:
@@ -194,9 +197,8 @@ class CheckSuite:
             # if the version can't be parsed, do it according to character collation
             except ValueError:
                 latest_version = max(version_nums)
-            cls.checkers[spec] = cls.checkers[spec + ":latest"] = cls.checkers[
-                ":".join((spec, latest_version))
-            ]
+            cls.checkers[spec] = cls.checkers[":".join((spec, latest_version))]
+        cls.checkers = dict(sorted(cls.checkers.items(), key=_human_key))
 
     def _get_checks(self, checkclass, include_checks, skip_checks):
         """
@@ -222,10 +224,7 @@ class CheckSuite:
                     returned_checks.append((fn_obj, skip_checks[fn_name]))
         else:
             for fn_name, fn_obj in meths:
-                if (
-                    fn_name.startswith("check_")
-                    and skip_checks[fn_name] != BaseCheck.HIGH
-                ):
+                if fn_name.startswith("check_") and skip_checks[fn_name] != BaseCheck.HIGH:
                     returned_checks.append((fn_obj, skip_checks[fn_name]))
 
         return returned_checks
@@ -278,7 +277,7 @@ class CheckSuite:
 
         Returns the check name with the version number it checked
         """
-        if ":" not in check_name or ":latest" in check_name:
+        if ":" not in check_name:
             check_name = ":".join(
                 (check_name.split(":")[0], self.checkers[check_name]._cc_spec_version),
             )
@@ -304,14 +303,9 @@ class CheckSuite:
         if len(checker_names) == 0:
             checker_names = list(self.checkers.keys())
 
-        args = [
-            (name, self.checkers[name])
-            for name in checker_names
-            if name in self.checkers
-        ]
+        args = [(name, self.checkers[name]) for name in checker_names if name in self.checkers]
         valid = []
 
-        all_checked = {a[1] for a in args}  # only class types
         checker_queue = set(args)
         while len(checker_queue):
             name, a = checker_queue.pop()
@@ -319,13 +313,6 @@ class CheckSuite:
             # for the checker class?
             if type(ds) in a().supported_ds:
                 valid.append((name, a))
-
-            # add subclasses of SOS checks
-            if "ioos_sos" in name:
-                for subc in a.__subclasses__():
-                    if subc not in all_checked:
-                        all_checked.add(subc)
-                        checker_queue.add((name, subc))
 
         return valid
 
@@ -350,8 +337,7 @@ class CheckSuite:
                     check_max_level = check_lookup[split_check_spec[1]]
                 except KeyError:
                     warnings.warn(
-                        f"Skip specifier '{split_check_spec[1]}' on check '{check_name}' not found,"
-                        " defaulting to skip entire check",
+                        f"Skip specifier '{split_check_spec[1]}' on check '{check_name}' not found, defaulting to skip entire check",
                         stacklevel=2,
                     )
                     check_max_level = BaseCheck.HIGH
@@ -675,10 +661,7 @@ class CheckSuite:
         groups_sorted = sorted(groups, key=weight_sort, reverse=True)
 
         # create dict of the groups -> {level: [reasons]}
-        result = {
-            key: [v for v in valuesiter if v.value[0] != v.value[1]]
-            for key, valuesiter in itertools.groupby(groups_sorted, key=weight_sort)
-        }
+        result = {key: [v for v in valuesiter if v.value[0] != v.value[1]] for key, valuesiter in itertools.groupby(groups_sorted, key=weight_sort)}
         priorities = self.checkers[check]._cc_display_headers
 
         def process_table(res, check):
@@ -733,32 +716,12 @@ class CheckSuite:
                     if has_printed:
                         print("")
                     # join alphabetized reasons together
-                    reason_str = "\n".join(
-                        f"* {r}" for r in sorted(reasons, key=lambda x: x[0])
-                    )
+                    reason_str = "\n".join(f"* {r}" for r in sorted(reasons, key=lambda x: x[0]))
                     proc_str = f"{issue}\n{reason_str}"
                     print(proc_str)
                     proc_strs.append(proc_str)
                     has_printed = True
         return "\n".join(proc_strs)
-
-    def process_doc(self, doc):
-        """
-        Attempt to parse an xml string conforming to either an SOS or SensorML
-        dataset and return the results
-        """
-        xml_doc = ET.fromstring(doc)
-        if xml_doc.tag == "{http://www.opengis.net/sos/1.0}Capabilities":
-            ds = SensorObservationService(None, xml=doc)
-            # SensorObservationService does not store the etree doc root,
-            # so maybe use monkey patching here for now?
-            ds._root = xml_doc
-
-        elif xml_doc.tag == "{http://www.opengis.net/sensorML/1.0.1}SensorML":
-            ds = SensorML(xml_doc)
-        else:
-            raise ValueError(f"Unrecognized XML root element: {xml_doc.tag}")
-        return ds
 
     def generate_dataset(self, cdl_path):
         """
@@ -793,8 +756,7 @@ class CheckSuite:
                 # Exit program if neither a netCDF Classic nor a netCDF-4 file
                 # could be created.
                 print(
-                    "netCDF Classic file could not be generated from cdl file"
-                    + "with message:",
+                    "netCDF Classic file could not be generated from cdl file" + "with message:",
                 )
                 print(iostat.stderr.decode())
                 sys.exit(1)
@@ -802,8 +764,7 @@ class CheckSuite:
 
     def load_dataset(self, ds_str):
         """
-        Returns an instantiated instance of either a netCDF file or an SOS
-        mapped DS object.
+        Returns an instantiated instance of a netCDF-like file mapped DS object.
 
         :param str ds_str: URL of the resource to load
         """
@@ -834,7 +795,7 @@ class CheckSuite:
 
     def load_remote_dataset(self, ds_str):
         """
-        Returns a dataset instance for the remote resource, either OPeNDAP or SOS
+        Returns a dataset instance for the remote resource.
 
         :param str ds_str: URL to the remote resource
         """
@@ -849,7 +810,7 @@ class CheckSuite:
         # if application/x-netcdf wasn't detected in the Content-Type headers
         # and this is some kind of erddap tabledap form, then try to get the
         # .ncCF file from ERDDAP
-        elif "tabledap" in ds_str and not url_parsed.query:
+        elif "/tabledap/" in ds_str and not url_parsed.query:
             # modify ds_str to contain the full variable request
             variables_str = opendap.create_DAP_variable_str(ds_str)
 
@@ -864,15 +825,10 @@ class CheckSuite:
         elif opendap.is_opendap(ds_str):
             return Dataset(ds_str)
 
-        # Check if the HTTP response is XML, if it is, it's likely SOS so
-        # we'll attempt to parse the response as SOS.
-        # Some SOS servers don't seem to support HEAD requests.
-        # Issue GET instead if we reach here and can't get the response
         response = requests.get(ds_str, allow_redirects=True, timeout=60)
         content_type = response.headers.get("content-type")
-        if content_type.split(";")[0] == "text/xml":
-            return self.process_doc(response.content)
-        elif content_type.split(";")[0] == "application/x-netcdf":
+
+        if content_type.split(";")[0] == "application/x-netcdf":
             return Dataset(
                 urlparse(response.url).path,
                 memory=response.content,

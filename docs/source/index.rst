@@ -11,6 +11,7 @@ Python tool to check your datasets against compliance standards.
    compliance_checker_api
    faq
    development
+   cf_feature_parity_matrix
 
 Indices and tables
 ==================

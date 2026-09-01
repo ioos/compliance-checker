@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 compliance_checker/protocols/opendap.py
 
@@ -26,7 +25,7 @@ def create_DAP_variable_str(url):
     """
 
     # get dds
-    with urllib.request.urlopen(f"{url}.dds") as resp:
+    with urllib.request.urlopen(f"{url}.dds", timeout=10) as resp:
         _str = resp.read().decode()[8:]
 
     # remove beginning and ending braces, split on newlines
@@ -58,16 +57,12 @@ def is_opendap(url):
         das_url = url + ".das"
 
     try:
-        response = requests.get(das_url, allow_redirects=True)
+        response = requests.get(das_url, allow_redirects=True, timeout=10)
 
         if "xdods-server" in response.headers:
             return True
         # Check if it is an access restricted ESGF thredds service
-        if (
-            response.status_code == 401
-            and "text/html" in response.headers["content-type"]
-            and "The following URL requires authentication:" in response.text
-        ):
+        if response.status_code == 401 and "text/html" in response.headers["content-type"] and "The following URL requires authentication:" in response.text:
             return True
     except requests.exceptions.InvalidSchema:
         return False  # not opendap if url + ".das" isn't found

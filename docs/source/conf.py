@@ -169,5 +169,8 @@ texinfo_documents = [
 # GitHub issuecomment anchors are returning as broken for some reason.
 linkcheck_ignore = [
     "https://github.com/ioos/compliance-checker/issues/.*",
-    "https://compliance.ioos.us/index.html",
+    "urn:lsid.*",
+    "https://docs.unidata.ucar.edu/.*",  # broken ssl
+    "https://mmisw.org/ont/.*",  # returns 403 when tested from GH
+    "https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3",
 ]

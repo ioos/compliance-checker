@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 compliance_checker/tests/test_protocols.py
 
@@ -9,7 +8,7 @@ import platform
 
 import pytest
 
-from compliance_checker.protocols import zarr
+from compliance_checker.protocols import netcdf, zarr
 from compliance_checker.suite import CheckSuite
 
 from .conftest import datadir
@@ -20,6 +19,24 @@ pytestmark = [pytest.mark.integration]
 @pytest.fixture
 def cs():
     return CheckSuite()
+
+
+extension_io = [
+    ("myfunc", False),
+    ("data.sync", False),
+    ("stats.inc", False),
+    ("foo.nc", True),
+]
+
+
+@pytest.mark.parametrize("url_in, expected", extension_io)
+def test_is_netcdf_extension(url_in, expected):
+    """
+    Test that only paths with a proper .nc extension are assumed to be netCDF
+    files; other paths ending in the letters "nc" must fall through to
+    inspecting the file contents.
+    """
+    assert netcdf.is_netcdf(url_in) == expected
 
 
 @pytest.mark.vcr()
@@ -37,7 +54,7 @@ def test_erddap(cs):
     """
     Tests that a connection can be made to ERDDAP's OPeNDAP GridDAP.
     """
-    url = "https://www.neracoos.org/erddap/griddap/WW3_EastCoast_latest"
+    url = "https://www.ncei.noaa.gov/erddap/griddap/AEC_gomex_satellite_climo"
     ds = cs.load_dataset(url)
     assert ds is not None
 
