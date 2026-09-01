@@ -1467,6 +1467,7 @@ class CF1_6Check(CFNCCheck):
                 standard_name is not None and standard_name == "latitude",
                 f"latitude variable '{latitude}' should have standard_name='latitude'",
             )
+            ret_val.append(check_standard_name.to_result())
 
             # Check that latitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.1"])
@@ -1577,6 +1578,7 @@ class CF1_6Check(CFNCCheck):
                 standard_name is not None and standard_name == "longitude",
                 f"longitude variable '{longitude}' should have standard_name='longitude'",
             )
+            ret_val.append(check_standard_name.to_result())
 
             # Check that longitude uses allowed units
             allowed_units = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.2"])
@@ -1677,6 +1679,14 @@ class CF1_6Check(CFNCCheck):
             # already verifies that this coordinate has valid units
 
             ret_val.append(valid_vertical_coord.to_result())
+
+            # Check that vertical coordinate standard_name is defined if it defines a standard_name
+            check_standard_name = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.1"])
+            check_standard_name.assert_true(
+                standard_name is not None,
+                f"vertical coordinate variable '{name}' should have an appropriate standard_name defined",
+            )
+            ret_val.append(check_standard_name.to_result())
 
         return ret_val
 
