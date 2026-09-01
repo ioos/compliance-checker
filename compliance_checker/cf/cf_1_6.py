@@ -1572,7 +1572,7 @@ class CF1_6Check(CFNCCheck):
             ret_val.append(valid_longitude.to_result())
 
             # Check that longitude uses standard_name longitude if it defines a standard_name
-            check_standard_name = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.1"])
+            check_standard_name = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.2"])
             check_standard_name.assert_true(
                 standard_name is not None and standard_name == "longitude",
                 f"longitude variable '{longitude}' should have standard_name='longitude'",
