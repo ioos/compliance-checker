@@ -1827,7 +1827,7 @@ class CF1_6Check(CFNCCheck):
                 ret_val.append(result)
 
             t_variables = ds.get_variables_by_attributes(axis="T")
-            # Check that vertical coordinate defines either standard_name or axis
+            # Check that time coordinate defines either standard_name or axis
             definition = TestCtx(BaseCheck.MEDIUM, self.section_titles["4.4"])
             definition.assert_true(
                 standard_name == "time" or axis == "T" or t_variables != [],
