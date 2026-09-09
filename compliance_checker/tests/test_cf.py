@@ -350,6 +350,79 @@ class TestCF1_6(BaseTestCase):
         assert (3, 3) == result.value
         assert [] == result.msgs
 
+    @staticmethod
+    def _hybrid_sigma_dataset(ps_dims=("time", "lat", "lon")):
+        """Minimal parametric vertical coordinate with CF §4.3.3 bounds."""
+        ds = MockNetCDF()
+        ds.createDimension("time", 1)
+        ds.createDimension("lev", 2)
+        ds.createDimension("lat", 2)
+        ds.createDimension("lon", 2)
+        ds.createDimension("bnds", 2)
+
+        time = ds.createVariable("time", "d", ("time",))
+        time.standard_name = "time"
+        time.units = "days since 2000-01-01"
+        time.axis = "T"
+        lat = ds.createVariable("lat", "d", ("lat",))
+        lat.standard_name = "latitude"
+        lat.units = "degrees_north"
+        lat.axis = "Y"
+        lon = ds.createVariable("lon", "d", ("lon",))
+        lon.standard_name = "longitude"
+        lon.units = "degrees_east"
+        lon.axis = "X"
+
+        lev = ds.createVariable("lev", "d", ("lev",))
+        lev.standard_name = "atmosphere_hybrid_sigma_pressure_coordinate"
+        lev.units = "1"
+        lev.axis = "Z"
+        lev.positive = "down"
+        lev.formula_terms = "ap: ap b: b ps: ps"
+        lev.bounds = "lev_bnds"
+
+        lev_bnds = ds.createVariable("lev_bnds", "d", ("lev", "bnds"))
+        # The vertical-dependent terms name different variables here; ps does
+        # not depend on the vertical dimension and keeps its name.
+        lev_bnds.formula_terms = "ap: ap_bnds b: b_bnds ps: ps"
+
+        ds.createVariable("ap", "d", ("lev",))
+        ds.createVariable("b", "d", ("lev",))
+        ds.createVariable("ap_bnds", "d", ("lev", "bnds"))
+        ds.createVariable("b_bnds", "d", ("lev", "bnds"))
+
+        ps = ds.createVariable("ps", "f", ps_dims)
+        ps.standard_name = "surface_air_pressure"
+        ps.units = "Pa"
+        ta = ds.createVariable("ta", "f", ("time", "lev", "lat", "lon"))
+        ta.standard_name = "air_temperature"
+        ta.units = "K"
+        return ds
+
+    def test_check_dimension_order_formula_terms_bounds(self):
+        """
+        CF §4.3.3: the boundary variable of a parametric vertical coordinate
+        carries its own formula_terms naming the bounds of each vertical-
+        dependent term (ap_bnds, b_bnds). Those are bounds variables and must
+        not be subject to the §2.4 dimension order recommendation, even though
+        they are named by formula_terms rather than by a bounds attribute.
+        """
+        dataset = self._hybrid_sigma_dataset()
+        result = self.cf.check_dimension_order(dataset)
+        assert [] == result.msgs
+        assert result.value[0] == result.value[1]
+
+    def test_check_dimension_order_formula_terms_shared_variable(self):
+        """
+        Terms that do not depend on the vertical dimension keep the same name
+        in both formula_terms attributes (ps). Those are ordinary variables and
+        must still be checked, otherwise the exclusion hides real findings.
+        """
+        dataset = self._hybrid_sigma_dataset(ps_dims=("lat", "time", "lon"))
+        result = self.cf.check_dimension_order(dataset)
+        assert any(msg.startswith("ps's") for msg in result.msgs)
+        assert not any(msg.startswith(("ap_bnds's", "b_bnds's")) for msg in result.msgs)
+
     def test_check_fill_value_equal_missing_value(self):
         """
         According to CF §2.5.1 Recommendations: If both missing_value and _FillValue be used,
