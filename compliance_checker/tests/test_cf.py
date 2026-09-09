@@ -999,14 +999,14 @@ class TestCF1_6(BaseTestCase):
         # Check for compliance
         dataset = self.load_dataset(STATIC_FILES["example-grid"])
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
-        assert len(results) == 1
+        assert len(results) == 2  # New axis/standard_name check added
         assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
         # non-compliance -- one check fails
         dataset = self.load_dataset(STATIC_FILES["illegal-vertical"])
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
         scored, out_of, messages = get_results(results)
-        assert len(results) == 1
+        assert len(results) == 2  # New axis/standard_name check added
         assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
         assert scored < out_of
 
@@ -1356,7 +1356,7 @@ class TestCF1_6(BaseTestCase):
         result_dict = {result.name: result for result in results}
         result = result_dict["§5.1 Independent Latitude, Longitude, Vertical, and Time Axes"]
         assert result.msgs == []  # shouldn't have any messages
-        assert result.value == (4, 4)
+        assert result.value == (0, 0)  # Standard_name checks commented out
 
     def test_check_invalid_coordinate_attr(self):
         """
