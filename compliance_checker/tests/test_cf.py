@@ -1753,9 +1753,22 @@ class TestCF1_6(BaseTestCase):
         temp = nc_obj.variables["temperature"]
         temp.cell_methods = "lat: lon: mean depth: mean (interval: 20 meters)"
         results = self.cf.check_cell_methods(nc_obj)
-        # invalid components lat, lon, and depth -- expect score == (6, 9)
+        # invalid components 'lat' and 'lon' (the spec uses 'latitude' /
+        # 'longitude' as the CF §7.3.4 collapsed-dim tokens, not the
+        # abbreviated forms). 'depth' is one of the §7.3.4 reserved names
+        # and IS valid even though the variable has no explicit depth
+        # coord. Total: 2 invalid components, so score != out_of.
         scored, out_of, messages = get_results(results)
         assert scored != out_of
+
+        # CF §7.3.4 collapsed-dim tokens: each one should validate without
+        # an explicit coordinate variable, mirroring the existing 'area'
+        # special case. Regression for the previously-missing names.
+        for token in ("longitude", "latitude", "height", "altitude", "depth", "pressure"):
+            temp.cell_methods = f"{token}: time: mean"
+            results = self.cf.check_cell_methods(nc_obj)
+            scored, out_of, messages = get_results(results)
+            assert scored == out_of, f"§7.3.4 collapsed-dim token {token!r} should validate but messages were: {messages}"
 
         temp.cell_methods = "lat: lon: mean depth: mean (interval: x whizbangs)"
         results = self.cf.check_cell_methods(nc_obj)
