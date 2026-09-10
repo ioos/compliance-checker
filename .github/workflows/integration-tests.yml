@@ -9,17 +9,14 @@ permissions: {}
 
 jobs:
   run:
-    name: cf-units ${{ matrix.cf_units }}
+    name: cf-pyudunits2 ${{ matrix.pyudunits2 }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cf_units: [ false ]
+        pyudunits2: [ false ]
         include:
-          - cf_units: true
+          - pyudunits2: true
       fail-fast: false
-    defaults:
-      run:
-        shell: bash -l {0}
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -36,14 +33,16 @@ jobs:
         sudo apt-get update
         && sudo apt-get install netcdf-bin libnetcdf-dev
 
-    - name: Test with cf-units (optional)
-      if: matrix.cf_units == true
-      run: >-
-        python -m pip install cf-units
-
     - name: Install compliance-checker
       run: |
         python -m pip install -e .[test]
+
+    - name: Test with cf-units (optional)
+      # This will run pyudunits2 only on Lunix and stable Python.
+      if: matrix.pyudunits2 == true
+      run: |
+        pip uninstall cf-units --yes
+        pip install pyudunits2
 
     - name: Integration Tests
       run: python -m pytest -m "integration" -s -rxs -v --vcr-record=none compliance_checker

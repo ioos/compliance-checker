@@ -13,7 +13,7 @@ maintainers = [
   { name = "Filipe Fernandes" },
   { name = "Luke Campbell" },
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
@@ -24,11 +24,11 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Topic :: Scientific/Engineering",
 ]
 dynamic = [
@@ -54,7 +54,7 @@ dependencies = [
   "validators>=0.14.2",
 ]
 optional-dependencies.docs = [ "myst-parser", "numpydoc", "pydata-sphinx-theme" ]
-optional-dependencies.test = [ "pytest>=2.9", "pytest-vcr", "requests-mock" ]
+optional-dependencies.test = [ "prek", "pytest>=2.9", "pytest-vcr", "requests-mock" ]
 urls.documentation = "https://ioos.github.io/compliance-checker"
 urls.homepage = "https://compliance.ioos.us/index.html"
 urls.repository = "https://github.com/ioos/compliance-checker"
