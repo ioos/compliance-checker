@@ -6,16 +6,13 @@ on:
 
 jobs:
   run:
+    name: "Default Tests (${{ matrix.os }} ${{ matrix.python-version }}"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
+        python-version: [ "3.11", "3.14" ]
         os: [ ubuntu-latest ]
-        cf_units: [ false ]
         include:
-          - python-version: "3.14"
-            os: ubuntu-latest
-            cf_units: true
           - os: windows-latest
             python-version: "3.14"
           - os: macos-latest
@@ -36,20 +33,16 @@ jobs:
         environment-name: TEST
         init-shell: bash
         create-args: >-
-          python=${{ matrix.python-version }} pip
-          --file test_requirements.txt
-          --channel conda-forge
-
-    - name: Test with cf-units (optional)
-      if: matrix.cf_units == true
-      run: >-
-        micromamba install cf-units --channel conda-forge
+          python=${{ matrix.python-version }} toml --channel conda-forge
 
     - name: Install compliance-checker
+      # Revert to wheels only when we have an ncgen alternative.
       run: |
+        python install_from_toml.py
         python -m pip install -e . --no-deps --force-reinstall
 
     - name: Default Tests
       run: python -m pytest -s -rxs -v -k "not integration" compliance_checker
+
     permissions:
       actions: none
