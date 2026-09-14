@@ -10,13 +10,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [ "3.11", "3.15" ]
+        python-version: [ "3.11", "3.15.0rc2" ]
         os: [ ubuntu-latest ]
         include:
           - os: windows-latest
-            python-version: "3.15"
+            python-version: "3.15.0rc2"
           - os: macos-latest
-            python-version: "3.15"
+            python-version: "3.15.0rc2"
       fail-fast: false
     defaults:
       run:
@@ -33,7 +33,7 @@ jobs:
         environment-name: TEST
         init-shell: bash
         create-args: >-
-          python=${{ matrix.python-version }} toml --channel conda-forge
+          python=${{ matrix.python-version }} toml --channel conda-forge/label/python_rc --channel-priority flexible
 
     - name: Install compliance-checker
       # Revert to wheels only when we have an ncgen alternative.
