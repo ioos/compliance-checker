@@ -100,7 +100,7 @@ write_to = "compliance_checker/_version.py"
 write_to_template = "__version__ = '{version}'"
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 200
 exclude = [
   "compliance_checker/cf/cf.py",
