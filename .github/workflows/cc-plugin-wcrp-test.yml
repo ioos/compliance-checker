@@ -1,4 +1,4 @@
-name: SGRID Plugin Tests
+name: WCRP Plugin Tests
 
 on:
   pull_request:
@@ -21,14 +21,19 @@ jobs:
       with:
         python-version: "3.x"
 
+    - name: Install netcdf-c
+      run: >
+        sudo apt-get update
+        && sudo apt-get install netcdf-bin
+
     - name: Install compliance-checker
       run: |
         python -m pip install -e .[test]
 
-    - name: cc-plugin-sgrid tests
+    - name: cc-plugin-wcrp tests
+      shell: bash -l {0}
       run: >
-        git clone https://github.com/ioos/cc-plugin-sgrid.git
-        && cd cc-plugin-sgrid
-        && python -m pip install --requirement requirements-dev.txt
+        git clone https://github.com/ESGF/cc-plugin-wcrp.git
+        && cd cc-plugin-wcrp
         && python -m pip install -e .
-        && python -m pytest -s -rxs -v cc_plugin_sgrid
+        && python -m pytest -s -rxs -v tests/test_registry_units.py

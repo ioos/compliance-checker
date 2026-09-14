@@ -22,6 +22,27 @@ from compliance_checker.cfunits import Unit
 logger = logging.getLogger(__name__)
 
 
+# CF §7.3.4: when an operation in cell_methods applies to a "collapsed"
+# dimension that doesn't have an explicit coordinate variable, the name
+# component may be one of these reserved tokens instead of a dim or
+# coord variable name. Spec text (CF 1.13 §7.3.4):
+#   "the strings 'area:' or 'longitude:', 'latitude:' (in lieu of a
+#    2-D or scalar lat/lon coordinate) may be used; for vertical,
+#    'height:', 'altitude:', 'depth:', 'pressure:' may be used (in
+#    lieu of a vertical scalar coordinate)."
+CF_NO_COORDINATE_NAMES = frozenset(
+    {
+        "area",
+        "longitude",
+        "latitude",
+        "height",
+        "altitude",
+        "depth",
+        "pressure",
+    },
+)
+
+
 class CF1_6Check(CFNCCheck):
     """CF-1.6-specific implementation of CFBaseCheck; supports checking
     netCDF datasets.
@@ -335,6 +356,55 @@ class CF1_6Check(CFNCCheck):
             msgs=fails,
         )
 
+    @staticmethod
+    def _get_formula_terms_bounds_variables(ds, bounds_variables):
+        """
+        Returns the set of variables that hold the bounds of the terms of a
+        parametric vertical coordinate.
+
+        CF §4.3.3 requires the boundary variable of a parametric vertical
+        coordinate to carry its own ``formula_terms``, in which the terms that
+        depend on the vertical dimension name a *different* variable than the
+        coordinate's own ``formula_terms`` does::
+
+            lev:formula_terms      = "ap: ap b: b ps: ps" ;
+            lev_bnds:formula_terms = "ap: ap_bnds b: b_bnds ps: ps" ;
+
+        ``ap_bnds`` and ``b_bnds`` are bounds variables, but they are named by
+        ``formula_terms`` rather than by a ``bounds`` attribute, so
+        :func:`~compliance_checker.cf.util.get_cell_boundary_variables` does
+        not find them.
+
+        Terms that do not depend on the vertical dimension keep the same name
+        in both attributes (``ps`` above). Those are ordinary variables and
+        must not be treated as bounds, so only the names that differ between
+        the two attributes are returned.
+
+        :param netCDF4.Dataset ds: An open netCDF dataset
+        :param bounds_variables: names of the variables named by a ``bounds``
+                                 attribute
+        :rtype: set
+        """
+        formula_bounds = set()
+        for parent in ds.variables.values():
+            bounds_name = getattr(parent, "bounds", None)
+            if bounds_name not in bounds_variables:
+                continue
+            bounds_var = ds.variables.get(bounds_name)
+            if bounds_var is None:
+                continue
+            parent_terms = getattr(parent, "formula_terms", None)
+            bounds_terms = getattr(bounds_var, "formula_terms", None)
+            if not bounds_terms:
+                continue
+            # Same tokenisation as _check_formula_terms: the variable name is
+            # the second group of each "component: variable_name" pair.
+            pattern = r"(\w+):\s+(\w+)(?:\s+(?!$)|$)"
+            bounds_named = {m.group(2) for m in regex.finditer(pattern, bounds_terms)}
+            parent_named = {m.group(2) for m in regex.finditer(pattern, parent_terms or "")}
+            formula_bounds |= (bounds_named - parent_named) & set(ds.variables)
+        return formula_bounds
+
     def check_dimension_order(self, ds):
         """
         Checks each variable's dimension order to ensure that the order is
@@ -356,14 +426,16 @@ class CF1_6Check(CFNCCheck):
         coord_axis_map = self._get_coord_axis_map(ds)
 
         # Check each variable's dimension order, excluding climatology and
-        # bounds variables
+        # bounds variables (including the formula_terms bounds of a
+        # parametric vertical coordinate, see CF §4.3.3)
         any_clim = cfutil.get_climatology_variable(ds)
         any_bounds = cfutil.get_cell_boundary_variables(ds)
+        any_formula_bounds = self._get_formula_terms_bounds_variables(ds, any_bounds)
         for name, variable in ds.variables.items():
             # Skip bounds/climatology variables, as they should implicitly
             # have the same order except for the bounds specific dimension.
             # This is tested later in the respective checks
-            if name in any_bounds or name == any_clim:
+            if name in any_bounds or name in any_formula_bounds or name == any_clim:
                 continue
 
             # Skip strings/labels
@@ -2787,79 +2859,98 @@ class CF1_6Check(CFNCCheck):
 
     def _cell_measures_core(self, ds, var, external_set, variable_template):
         # IMPLEMENTATION CONFORMANCE REQUIRED 1/2
+        # CF §7.2 has described cell_measures as "a list of blank-separated
+        # pairs of words of the form 'measure: name'" since CF 1.6, so a
+        # variable may carry more than one entry ("area: a volume: v").
+        # Walk every "measure: name" pair instead of matching the whole
+        # attribute as a single pair.
         reasoning = []
-        search_str = r"^(?P<measure_type>area|volume):\s+(?P<cell_measure_var_name>\w+)$"
-        search_res = regex.match(search_str, var.cell_measures)
-        if not search_res:
+        pair_re = r"(?P<measure_type>area|volume):\s+(?P<cell_measure_var_name>\w+)"
+        matches = list(regex.finditer(pair_re, var.cell_measures))
+        # Reject if the parsed pairs don't account for the whole attribute
+        # (catches malformed entries like ``area:`` with no variable or
+        # ``area: foo bogus volume: bar``). Compare on whitespace-normalised
+        # forms so the check accepts any consistent spacing variant.
+        canonical_from_pairs = " ".join(f"{m.group('measure_type')}: {m.group('cell_measure_var_name')}" for m in matches)
+        canonical_input = " ".join(var.cell_measures.split())
+        if not matches or canonical_from_pairs != canonical_input:
             valid = False
             reasoning.append(
                 f"The cell_measures attribute for variable {var.name} "
                 "is formatted incorrectly. It should take the "
-                "form of either 'area: cell_var' or "
-                "'volume: cell_var' where cell_var is an existing name of "
-                "a variable describing the cell measures.",
+                "form of 'area: cell_var', 'volume: cell_var', or "
+                "multiple such pairs separated by spaces (e.g. "
+                "'area: a volume: v'), where each cell_var is an "
+                "existing variable describing the cell measures.",
             )
-        else:
-            valid = True
-            cell_measure_var_name = search_res.group("cell_measure_var_name")
+            return Result(
+                BaseCheck.MEDIUM,
+                valid,
+                (self.section_titles["7.2"]),
+                reasoning,
+            )
+        seen_types = set()
+        valid = True
+        for search_res in matches:
             cell_measure_type = search_res.group("measure_type")
-            # TODO: cache previous results
+            cell_measure_var_name = search_res.group("cell_measure_var_name")
+            # CF §7.2 defines "area" and "volume" as the only measures and
+            # gives each one meaning, so two entries of the same type would
+            # have to disagree. The convention does not state this, so it is
+            # this checker's reading rather than a quotation.
+            if cell_measure_type in seen_types:
+                valid = False
+                reasoning.append(
+                    f"The cell_measures attribute for variable {var.name} has more than one '{cell_measure_type}' entry; each measure type may only appear once.",
+                )
+                continue
+            seen_types.add(cell_measure_type)
             if cell_measure_var_name not in set(ds.variables.keys()).union(
                 external_set,
             ):
                 valid = False
                 reasoning.append(
-                    f"Cell measure variable {cell_measure_var_name} referred to by {var.name} is not present in {variable_template}s".format(
-                        cell_measure_var_name,
-                        var.name,
-                    ),
+                    f"Cell measure variable {cell_measure_var_name} referred to by {var.name} is not present in {variable_template}s",
                 )
+                continue
             # CF 1.7+ assume external variables -- further checks can't be run here
-            elif cell_measure_var_name in external_set:
-                # can't test anything on an external var
-                return Result(
-                    BaseCheck.MEDIUM,
-                    valid,
-                    (self.section_titles["7.2"]),
-                    reasoning,
+            if cell_measure_var_name in external_set:
+                continue
+
+            cell_measure_var = ds.variables[cell_measure_var_name]
+            if not hasattr(cell_measure_var, "units"):
+                valid = False
+                reasoning.append(
+                    f"Cell measure variable {cell_measure_var_name} is required to have units attribute defined",
                 )
-
             else:
-                cell_measure_var = ds.variables[cell_measure_var_name]
-                if not hasattr(cell_measure_var, "units"):
+                # IMPLEMENTATION CONFORMANCE REQUIRED 2/2
+                exponent_lookup = {"area": 2, "volume": 3}
+                exponent = exponent_lookup[cell_measure_type]
+                conversion_failure_msg = (
+                    f'Variable "{cell_measure_var.name}" must have units which are convertible '
+                    f'to UDUNITS "m{exponent}" when variable is referred to by a {variable_template} with '
+                    f'cell_methods attribute with a measure type of "{cell_measure_type}".'
+                )
+                try:
+                    cell_measure_units = Unit(cell_measure_var.units)
+                except ValueError:
                     valid = False
-                    reasoning.append(
-                        f"Cell measure variable {cell_measure_var_name} is required to have units attribute defined",
-                    )
+                    reasoning.append(conversion_failure_msg)
                 else:
-                    # IMPLEMENTATION CONFORMANCE REQUIRED 2/2
-                    # verify this combination {area: 'm2', volume: 'm3'}
-
-                    # key is valid measure types, value is expected
-                    # exponent
-                    exponent_lookup = {"area": 2, "volume": 3}
-                    exponent = exponent_lookup[search_res.group("measure_type")]
-                    conversion_failure_msg = (
-                        f'Variable "{cell_measure_var.name}" must have units which are convertible '
-                        f'to UDUNITS "m{exponent}" when variable is referred to by a {variable_template} with '
-                        f'cell_methods attribute with a measure type of "{cell_measure_type}".'
-                    )
-                    try:
-                        cell_measure_units = Unit(cell_measure_var.units)
-                    except ValueError:
+                    if not cell_measure_units.is_convertible(
+                        Unit(f"m{exponent}"),
+                    ):
                         valid = False
                         reasoning.append(conversion_failure_msg)
-                    else:
-                        if not cell_measure_units.is_convertible(
-                            Unit(f"m{exponent}"),
-                        ):
-                            valid = False
-                            reasoning.append(conversion_failure_msg)
-                    if not set(cell_measure_var.dimensions).issubset(var.dimensions):
-                        valid = False
-                        reasoning.append(
-                            f"Cell measure variable {cell_measure_var_name} must have dimensions which are a subset of those defined in variable {var.name}.",
-                        )
+                # Dimension-subset check stays parallel to the unit checks
+                # (inside the ``has units`` branch) to preserve the original
+                # behaviour for cell_measure vars that lack a units attr.
+                if not set(cell_measure_var.dimensions).issubset(var.dimensions):
+                    valid = False
+                    reasoning.append(
+                        f"Cell measure variable {cell_measure_var_name} must have dimensions which are a subset of those defined in variable {var.name}.",
+                    )
 
         return Result(BaseCheck.MEDIUM, valid, (self.section_titles["7.2"]), reasoning)
 
@@ -2950,14 +3041,16 @@ class CF1_6Check(CFNCCheck):
                 for var_raw_str in match.captures("vars"):
                     # strip off the ' :' at the end of each match
                     var_str = var_raw_str[:-2]
-                    if var_str in var.dimensions or var_str == "area" or var_str in getattr(var, "coordinates", ""):
+                    if var_str in var.dimensions or var_str in CF_NO_COORDINATE_NAMES or var_str in getattr(var, "coordinates", ""):
                         valid = True
                     else:
                         valid = False
 
                     valid_cell_names.assert_true(
                         valid,
-                        f"{var.name}'s cell_methods name component {var_str} does not match a dimension, area or auxiliary coordinate",
+                        f"{var.name}'s cell_methods name component {var_str} does not match a dimension, "
+                        "auxiliary coordinate, or one of the CF §7.3.4 collapsed-dimension names "
+                        f"({', '.join(sorted(CF_NO_COORDINATE_NAMES))})",
                     )
 
             ret_val.append(valid_cell_names.to_result())

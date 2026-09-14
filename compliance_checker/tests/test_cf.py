@@ -345,6 +345,79 @@ class TestCF1_6(BaseTestCase):
         assert (3, 3) == result.value
         assert [] == result.msgs
 
+    @staticmethod
+    def _hybrid_sigma_dataset(ps_dims=("time", "lat", "lon")):
+        """Minimal parametric vertical coordinate with CF §4.3.3 bounds."""
+        ds = MockNetCDF()
+        ds.createDimension("time", 1)
+        ds.createDimension("lev", 2)
+        ds.createDimension("lat", 2)
+        ds.createDimension("lon", 2)
+        ds.createDimension("bnds", 2)
+
+        time = ds.createVariable("time", "d", ("time",))
+        time.standard_name = "time"
+        time.units = "days since 2000-01-01"
+        time.axis = "T"
+        lat = ds.createVariable("lat", "d", ("lat",))
+        lat.standard_name = "latitude"
+        lat.units = "degrees_north"
+        lat.axis = "Y"
+        lon = ds.createVariable("lon", "d", ("lon",))
+        lon.standard_name = "longitude"
+        lon.units = "degrees_east"
+        lon.axis = "X"
+
+        lev = ds.createVariable("lev", "d", ("lev",))
+        lev.standard_name = "atmosphere_hybrid_sigma_pressure_coordinate"
+        lev.units = "1"
+        lev.axis = "Z"
+        lev.positive = "down"
+        lev.formula_terms = "ap: ap b: b ps: ps"
+        lev.bounds = "lev_bnds"
+
+        lev_bnds = ds.createVariable("lev_bnds", "d", ("lev", "bnds"))
+        # The vertical-dependent terms name different variables here; ps does
+        # not depend on the vertical dimension and keeps its name.
+        lev_bnds.formula_terms = "ap: ap_bnds b: b_bnds ps: ps"
+
+        ds.createVariable("ap", "d", ("lev",))
+        ds.createVariable("b", "d", ("lev",))
+        ds.createVariable("ap_bnds", "d", ("lev", "bnds"))
+        ds.createVariable("b_bnds", "d", ("lev", "bnds"))
+
+        ps = ds.createVariable("ps", "f", ps_dims)
+        ps.standard_name = "surface_air_pressure"
+        ps.units = "Pa"
+        ta = ds.createVariable("ta", "f", ("time", "lev", "lat", "lon"))
+        ta.standard_name = "air_temperature"
+        ta.units = "K"
+        return ds
+
+    def test_check_dimension_order_formula_terms_bounds(self):
+        """
+        CF §4.3.3: the boundary variable of a parametric vertical coordinate
+        carries its own formula_terms naming the bounds of each vertical-
+        dependent term (ap_bnds, b_bnds). Those are bounds variables and must
+        not be subject to the §2.4 dimension order recommendation, even though
+        they are named by formula_terms rather than by a bounds attribute.
+        """
+        dataset = self._hybrid_sigma_dataset()
+        result = self.cf.check_dimension_order(dataset)
+        assert [] == result.msgs
+        assert result.value[0] == result.value[1]
+
+    def test_check_dimension_order_formula_terms_shared_variable(self):
+        """
+        Terms that do not depend on the vertical dimension keep the same name
+        in both formula_terms attributes (ps). Those are ordinary variables and
+        must still be checked, otherwise the exclusion hides real findings.
+        """
+        dataset = self._hybrid_sigma_dataset(ps_dims=("lat", "time", "lon"))
+        result = self.cf.check_dimension_order(dataset)
+        assert any(msg.startswith("ps's") for msg in result.msgs)
+        assert not any(msg.startswith(("ap_bnds's", "b_bnds's")) for msg in result.msgs)
+
     def test_check_fill_value_equal_missing_value(self):
         """
         According to CF §2.5.1 Recommendations: If both missing_value and _FillValue be used,
@@ -606,9 +679,9 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         expected_message = (
             "The cell_measures attribute for variable PS is formatted incorrectly. "
-            "It should take the form of either 'area: cell_var' or 'volume: cell_var' "
-            "where cell_var is an existing name of a variable describing the "
-            "cell measures."
+            "It should take the form of 'area: cell_var', 'volume: cell_var', or "
+            "multiple such pairs separated by spaces (e.g. 'area: a volume: v'), "
+            "where each cell_var is an existing variable describing the cell measures."
         )
         assert expected_message in messages
 
@@ -648,6 +721,31 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_cell_measures(dataset)
         score, out_of, messages = get_results(results)
         assert "Cell measure variable cell_area2 must have dimensions which are a subset of those defined in variable PS." in messages
+
+        # CF §7.2 allows a list of "measure: name" pairs, so a variable may
+        # carry more than one entry. Both should validate.
+        dataset_multi = MockTimeSeries()
+        dataset_multi.createVariable("PS", "d", ("time",))
+        dataset_multi.variables["PS"].setncattr(
+            "cell_measures",
+            "area: area_var volume: volume_var",
+        )
+        for name, units in (("area_var", "m2"), ("volume_var", "m3")):
+            v = dataset_multi.createVariable(name, "d", ("time",))
+            v.setncattr("units", units)
+        results = self.cf.check_cell_measures(dataset_multi)
+        score, out_of, messages = get_results(results)
+        assert score == out_of and score > 0, f"multi-measure case should pass but got messages: {messages}"
+
+        # Two entries of the same measure type would have to disagree, so a
+        # second 'area:' is rejected. See the note in cf_1_6.py.
+        dataset_multi.variables["PS"].setncattr(
+            "cell_measures",
+            "area: area_var area: area_var",
+        )
+        results = self.cf.check_cell_measures(dataset_multi)
+        score, out_of, messages = get_results(results)
+        assert any("more than one 'area' entry" in m for m in messages), f"duplicate measure type should fail but messages were: {messages}"
 
     def test_climatology_cell_methods(self):
         """
@@ -1747,9 +1845,22 @@ class TestCF1_6(BaseTestCase):
         temp = nc_obj.variables["temperature"]
         temp.cell_methods = "lat: lon: mean depth: mean (interval: 20 meters)"
         results = self.cf.check_cell_methods(nc_obj)
-        # invalid components lat, lon, and depth -- expect score == (6, 9)
+        # invalid components 'lat' and 'lon' (the spec uses 'latitude' /
+        # 'longitude' as the CF §7.3.4 collapsed-dim tokens, not the
+        # abbreviated forms). 'depth' is one of the §7.3.4 reserved names
+        # and IS valid even though the variable has no explicit depth
+        # coord. Total: 2 invalid components, so score != out_of.
         scored, out_of, messages = get_results(results)
         assert scored != out_of
+
+        # CF §7.3.4 collapsed-dim tokens: each one should validate without
+        # an explicit coordinate variable, mirroring the existing 'area'
+        # special case. Regression for the previously-missing names.
+        for token in ("longitude", "latitude", "height", "altitude", "depth", "pressure"):
+            temp.cell_methods = f"{token}: time: mean"
+            results = self.cf.check_cell_methods(nc_obj)
+            scored, out_of, messages = get_results(results)
+            assert scored == out_of, f"§7.3.4 collapsed-dim token {token!r} should validate but messages were: {messages}"
 
         temp.cell_methods = "lat: lon: mean depth: mean (interval: x whizbangs)"
         results = self.cf.check_cell_methods(nc_obj)
@@ -2272,9 +2383,10 @@ class TestCF1_7(BaseTestCase):
             score, out_of, messages = get_results(results)
             assert (
                 "The cell_measures attribute for variable PS is formatted "
-                "incorrectly. It should take the form of either 'area: "
-                "cell_var' or 'volume: cell_var' where cell_var is an "
-                "existing name of a variable describing the cell measures." in messages
+                "incorrectly. It should take the form of 'area: cell_var', "
+                "'volume: cell_var', or multiple such pairs separated by spaces "
+                "(e.g. 'area: a volume: v'), where each cell_var is an existing "
+                "variable describing the cell measures." in messages
             )
 
             # proper measure type, but referenced variable does not exist
@@ -2315,8 +2427,9 @@ class TestCF1_7(BaseTestCase):
         score, out_of, messages = get_results(results)
         expected_message = (
             "The cell_measures attribute for variable PS is formatted incorrectly. "
-            "It should take the form of either 'area: cell_var' or 'volume: cell_var' "
-            "where cell_var is an existing name of a variable describing the cell measures."
+            "It should take the form of 'area: cell_var', 'volume: cell_var', or "
+            "multiple such pairs separated by spaces (e.g. 'area: a volume: v'), "
+            "where each cell_var is an existing variable describing the cell measures."
         )
         assert expected_message in messages
 
