@@ -3681,8 +3681,26 @@ class CF1_6Check(CFNCCheck):
                     ", ".join(valid_roles),
                 ),
             )
-        if variable_count > 0:
+        if variable_count == 0:
             return valid_cf_role.to_result()
+
+        feature_type = getattr(ds, "featureType", "").lower()
+        max_cf_role_variable_count = {
+            "timeseries": 1,
+            "profile": 1,
+            "trajectory": 1,
+            "timeseriesprofile": 2,
+            "trajectoryprofile": 2,
+        }.get(feature_type)
+
+        # CF does not specify a maximum for point or unknown feature types.
+        if max_cf_role_variable_count is not None:
+            valid_cf_role.assert_true(
+                variable_count <= max_cf_role_variable_count,
+                f"Current number of cf_role attributes in variables is {variable_count}. For featureType {ds.featureType} the maximum number of cf_role attributes is {max_cf_role_variable_count}",
+            )
+
+        return valid_cf_role.to_result()
 
     def check_variable_features(self, ds):
         """
