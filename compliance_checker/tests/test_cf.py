@@ -1637,10 +1637,7 @@ class TestCF1_6(BaseTestCase):
         extra_variable.cf_role = cf_roles[0]
         result = self.cf.check_cf_role(ds)
         assert result.value[0] < result.value[1]
-        assert (
-            f"For featureType {feature_type} the maximum number of cf_role "
-            f"attributes is {len(cf_roles)}"
-        ) in result.msgs[0]
+        assert (f"For featureType {feature_type} the maximum number of cf_role attributes is {len(cf_roles)}") in result.msgs[0]
 
     def test_check_units(self):
         """
