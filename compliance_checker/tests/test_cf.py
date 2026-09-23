@@ -1608,6 +1608,40 @@ class TestCF1_6(BaseTestCase):
         result = self.cf.check_feature_type(nc)
         assert result.value == (0, 1)
 
+    @pytest.mark.parametrize(
+        ("feature_type", "cf_roles"),
+        [
+            # Simple discrete sampling geometries allow one cf_role variable.
+            ("tImEsErIeS", ["timeseries_id"]),
+            ("profile", ["profile_id"]),
+            ("trajectory", ["trajectory_id"]),
+            # Compound profile geometries allow one cf_role per structure level.
+            ("timeSeriesProfile", ["timeseries_id", "profile_id"]),
+            ("trajectoryProfile", ["trajectory_id", "profile_id"]),
+        ],
+    )
+    def test_cf_role_count(self, feature_type, cf_roles):
+        ds = MockNetCDF()
+        ds.featureType = feature_type
+
+        # The maximum permitted number of cf_role variables should pass.
+        for index, cf_role in enumerate(cf_roles):
+            variable = ds.createVariable(f"id_{index}", "i4")
+            variable.cf_role = cf_role
+
+        result = self.cf.check_cf_role(ds)
+        assert result.value[0] == result.value[1]
+
+        # One additional variable with an otherwise valid role should fail.
+        extra_variable = ds.createVariable("extra_id", "i4")
+        extra_variable.cf_role = cf_roles[0]
+        result = self.cf.check_cf_role(ds)
+        assert result.value[0] < result.value[1]
+        assert (
+            f"For featureType {feature_type} the maximum number of cf_role "
+            f"attributes is {len(cf_roles)}"
+        ) in result.msgs[0]
+
     def test_check_units(self):
         """
         Ensure that container variables are not checked for units but geophysical variables are
@@ -3743,19 +3777,6 @@ class TestCF1_11(BaseTestCase):
             "Bounds variable time_bounds and parent variable time have the following matching attributes ['axis'].  It is recommended that only the parent variable of the bounds variable contains these attributes",
         }
         assert expected_msgs == set(messages)
-
-    def test_single_cf_role(self):
-        ds = MockTimeSeries()
-        ds.createDimension("ts_no")
-        ts = ds.createVariable("ts", "i4", ("ts_no",))
-        ts.cf_role = "timeseries_id"
-        result = self.cf.check_single_cf_role(ds)
-        assert result.value[0] == result.value[1]
-        ts2 = ds.createVariable("ts2", "i4", ("ts_no",))
-        ts2.cf_role = "timeseries_id"
-        result = self.cf.check_single_cf_role(ds)
-        assert result.value[0] < result.value[1]
-        assert "There may only be one variable containing the cf_role attribute. Currently the following variables have cf_role attributes: ['ts', 'ts2']" in result.msgs
 
     def test_check_add_offset_scale_factor_type(self):
         # TEST CONFORMANCE 8.1 REQUIRED 1/3

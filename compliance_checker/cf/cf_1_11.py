@@ -172,18 +172,6 @@ class CF1_11Check(CF1_10Check):
             results.append(bounds_bi_ctx.to_result())
         return results
 
-    def check_single_cf_role(self, ds):
-        test_ctx = self.get_test_ctx(
-            BaseCheck.HIGH,
-            self.section_titles["9.5"],
-        )
-        cf_role_var_names = [var.name for var in (ds.get_variables_by_attributes(cf_role=lambda x: x is not None))]
-        test_ctx.assert_true(
-            len(cf_role_var_names) < 2,
-            f"There may only be one variable containing the cf_role attribute. Currently the following variables have cf_role attributes: {cf_role_var_names}",
-        )
-        return test_ctx.to_result()
-
     def check_add_offset_scale_factor_type(self, ds):
         """
         If a variable has the attributes add_offset and scale_factor,
