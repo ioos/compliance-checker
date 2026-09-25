@@ -12,7 +12,7 @@ import sys
 import textwrap
 import warnings
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from importlib.metadata import entry_points
 from operator import itemgetter
 from pathlib import Path
@@ -510,7 +510,7 @@ class CheckSuite:
         aggregates["scoreheader"] = self.checkers[check_name]._cc_display_headers
         aggregates["cc_spec_version"] = self.checkers[check_name]._cc_spec_version
         aggregates["cc_url"] = self._get_check_url(aggregates["testname"])
-        aggregates["report_timestamp"] = datetime.now(timezone.utc).strftime(
+        aggregates["report_timestamp"] = datetime.now(UTC).strftime(
             "%Y-%m-%dT%H:%M:%SZ",
         )
         aggregates["cc_version"] = __version__
@@ -621,7 +621,7 @@ class CheckSuite:
         print(f"Version {__version__}".center(width))
         print(
             "Report generated {}".format(
-                datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
             ).center(width),
         )
         print(f"{check_name}".center(width))
