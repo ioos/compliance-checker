@@ -873,7 +873,9 @@ class CF1_7Check(CF1_6Check):
             not (formula_terms is None and hasattr(variable, "computed_standard_name")),
             f"Variable {vname} should have formula_terms attribute when computed_standard_name attribute is defined",
         )
-        if formula_terms is None and standard_name not in dim_vert_coords_dict:
+        # Unknown standard_names are already reported by the formula_terms
+        # check, and there is no computed_standard_name to compare against.
+        if standard_name not in dim_vert_coords_dict:
             return
 
         # assert that the computed_standard_name is maps to the standard_name correctly

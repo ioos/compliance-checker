@@ -2745,6 +2745,28 @@ class TestCF1_7(BaseTestCase):
             score, out_of, messages = get_results(ret_val)
             assert score == out_of
 
+    def test_dimensionless_vertical_unknown_standard_name(self):
+        """
+        A vertical coordinate with formula_terms whose standard_name is not
+        listed in Appendix D should be reported as a failure instead of
+        raising a KeyError (GH #1336).
+        """
+        with MockTimeSeries() as dataset:
+            dataset.createDimension("lev", 3)
+            lev = dataset.createVariable("lev", "d", ("lev",))
+            lev.standard_name = "hybrid_sigma_pressure"
+            lev.axis = "Z"
+            lev.formula_terms = "ap: hyam b: hybm ps: aps"
+            dataset.createVariable("hyam", "d", ("lev",))
+            dataset.createVariable("hybm", "d", ("lev",))
+
+            results = self.cf.check_dimensionless_vertical_coordinates(dataset)
+            scored, out_of, messages = get_results(results)
+
+        assert scored < out_of
+        assert "unknown standard_name 'hybrid_sigma_pressure' for dimensionless vertical coordinate lev" in messages
+        assert "The following variable(s) referenced in lev:formula_terms are not present in the dataset: aps" in messages
+
     def test_dimensionless_vertical(self):
         """
         Section 4.3.2 check, but for CF-1.7 implementation. With the refactor in
