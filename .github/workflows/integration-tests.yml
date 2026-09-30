@@ -9,13 +9,13 @@ permissions: {}
 
 jobs:
   run:
-    name: cf-pyudunits2 ${{ matrix.pyudunits2 }}
+    name: WASM=${{ matrix.emscripten }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pyudunits2: [ false ]
+        emscripten: [ false ]
         include:
-          - pyudunits2: true
+          - emscripten: true
       fail-fast: false
 
     steps:
@@ -38,11 +38,11 @@ jobs:
         python -m pip install -e .[test]
 
     - name: Test with cf-units (optional)
-      # This will run pyudunits2 only on Lunix and stable Python.
-      if: matrix.pyudunits2 == true
-      run: |
+      if: matrix.emscripten == true
+      run: >
         pip uninstall cf-units --yes
-        pip install pyudunits2
+        && pip install pyudunits2
+        && pip install pydap
 
     - name: Integration Tests
       run: python -m pytest -m "integration" -s -rxs -v --vcr-record=none compliance_checker
