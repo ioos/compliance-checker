@@ -1,4 +1,4 @@
-name: Integration Tests
+name: Full Tests (Integration)
 
 on:
   pull_request:
@@ -45,4 +45,4 @@ jobs:
         && pip install pydap
 
     - name: Integration Tests
-      run: python -m pytest -m "integration" -s -rxs -v --vcr-record=none compliance_checker
+      run: python -m pytest -s -rxs -v --vcr-record=none compliance_checker
