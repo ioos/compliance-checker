@@ -26,6 +26,14 @@ from compliance_checker import __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
 from compliance_checker.protocols import cdl, netcdf, opendap, zarr
 
+try:
+    from pydap.client import open_url
+    from pydap.net import create_session
+
+    PYDAP = True
+except ImportError:
+    PYDAP = False
+
 # Ensure output is encoded as Unicode when checker output is redirected or piped
 if sys.stdout.encoding is None:
     sys.stdout = codecs.getwriter("utf8")(sys.stdout)
@@ -45,6 +53,15 @@ def _human_key(item: tuple) -> tuple[list[str | int], str]:
             return key
 
     return ([try_int(c) for c in re.split(r"(\d+)", key.casefold())], item)
+
+
+def _opendap_dataset(ds_str):
+    if PYDAP:
+        session = create_session()
+        ds_str = ds_str.replace("https://", "dap2://").replace("http://", "dap2://")
+        return open_url(ds_str, session=session)
+    else:
+        return Dataset(ds_str)
 
 
 def extract_docstring_summary(docstring):
@@ -817,13 +834,14 @@ class CheckSuite:
             # join to create a URL to an .ncCF resource
             ds_str = f"{ds_str}.ncCF?{variables_str}"
 
+        # HTTP file via requests.
         nc_remote_result = self.check_remote_netcdf(ds_str)
         if nc_remote_result:
             return nc_remote_result
 
-        # if it's just an OPeNDAP endpoint, use that
+        # If it's just an OPeNDAP endpoint, use that.
         elif opendap.is_opendap(ds_str):
-            return Dataset(ds_str)
+            return _opendap_dataset(ds_str)
 
         response = requests.get(ds_str, allow_redirects=True, timeout=60)
         content_type = response.headers.get("content-type")

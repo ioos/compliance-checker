@@ -4,6 +4,9 @@ on:
   pull_request:
   push:
 
+# Deny all permissions by default
+permissions: {}
+
 jobs:
   run:
     name: "Default Tests (${{ matrix.os }} ${{ matrix.python-version }}"
@@ -43,6 +46,3 @@ jobs:
 
     - name: Default Tests
       run: python -m pytest -s -rxs -v -k "not integration" compliance_checker
-
-    permissions:
-      actions: none
