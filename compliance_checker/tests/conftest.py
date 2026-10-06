@@ -123,6 +123,6 @@ def download_test_data() -> None:
         known_hash="sha256:0b74716d156bd437e53d8515db70999ef1153779cb67fb1697afb4c30938f624",
     )
 
-    here = Path(__file__).resolve().parent
+    here = Path(__file__).resolve().parent.parent.parent
     with zipfile.ZipFile(fname, "r") as zip_ref:
         zip_ref.extractall(here)
