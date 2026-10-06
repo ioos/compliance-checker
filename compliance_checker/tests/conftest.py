@@ -120,9 +120,9 @@ def download_test_data() -> None:
 
     fname = pooch.retrieve(
         url=f"{url}/{version}/test_data.zip",
-        known_hash="sha256:0b74716d156bd437e53d8515db70999ef1153779cb67fb1697afb4c30938f624",
+        known_hash="sha256:e1eacc2ce1d1647c26d8ce9ee05bd3e442b14526b10afa23f17a44f5569d030f",
     )
 
-    here = Path(__file__).resolve().parent.parent.parent
+    here = Path(__file__).resolve().parent
     with zipfile.ZipFile(fname, "r") as zip_ref:
         zip_ref.extractall(here)

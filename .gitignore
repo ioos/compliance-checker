@@ -99,9 +99,11 @@ ENV/
 # vim
 *.swp
 
-# netCDF Files
+# Data Files
 *.nc
-conda-requirements.txt
+*.yaml
+*.zarr
+*.zip
 
 compliance_checker/_version.py
 .venv
