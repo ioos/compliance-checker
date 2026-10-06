@@ -1,8 +1,11 @@
 import os
 import subprocess
+import zipfile
 from importlib.resources import files
 from itertools import chain
+from pathlib import Path
 
+import pooch
 import pytest
 from netCDF4 import Dataset
 
@@ -107,3 +110,19 @@ def checksuite_setup():
     """For test_cli"""
     CheckSuite.checkers.clear()
     CheckSuite.load_all_available_checkers()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def download_test_data() -> None:
+    """Fetch cassettes yaml data from cassettes test release."""
+    url = "https://github.com/ioos/compliance-checker/releases/download"
+    version = "v2026.10.06"
+
+    fname = pooch.retrieve(
+        url=f"{url}/{version}/test_data.zip",
+        known_hash="sha256:0b74716d156bd437e53d8515db70999ef1153779cb67fb1697afb4c30938f624",
+    )
+
+    here = Path(__file__).resolve().parent
+    with zipfile.ZipFile(fname, "r") as zip_ref:
+        zip_ref.extractall(here)
