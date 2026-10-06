@@ -9,7 +9,7 @@ permissions: {}
 
 jobs:
   run:
-    name: cf-pyudunits2 ${{ matrix.pyudunits2 }}
+    name: pyudunits2 ${{ matrix.pyudunits2 }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
