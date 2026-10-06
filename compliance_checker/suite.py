@@ -23,7 +23,11 @@ from lxml import etree as ET
 from netCDF4 import Dataset
 from owslib.sos import SensorObservationService
 from owslib.swe.sensor.sml import SensorML
-from pkg_resources import working_set
+
+if sys.version_info >= (3, 10):
+    from importlib.metadata import entry_points
+else:
+    from importlib_metadata import entry_points
 
 from compliance_checker import MemoizedDataset, __version__, tempnc
 from compliance_checker.base import BaseCheck, GenericFile, Result, fix_return_value
@@ -73,8 +77,8 @@ class CheckSuite(object):
         """
 
         if not hasattr(cls, "suite_generators"):
-            gens = working_set.iter_entry_points("compliance_checker.generators")
-            cls.suite_generators = [x.resolve() for x in gens]
+            gens = entry_points(group="compliance_checker.generators")
+            cls.suite_generators = [x.load() for x in gens]
 
         return cls.suite_generators
 
@@ -136,7 +140,7 @@ class CheckSuite(object):
         Helper method to retrieve all sub checker classes derived from various
         base classes.
         """
-        cls._load_checkers(working_set.iter_entry_points("compliance_checker.suites"))
+        cls._load_checkers(entry_points(group="compliance_checker.suites"))
 
     @classmethod
     def _load_checkers(cls, checkers):
@@ -147,7 +151,7 @@ class CheckSuite(object):
 
         for c in checkers:
             try:
-                check_obj = c.resolve()
+                check_obj = c.load()
                 if hasattr(check_obj, "_cc_spec") and hasattr(
                     check_obj, "_cc_spec_version"
                 ):

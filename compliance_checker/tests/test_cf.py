@@ -2802,7 +2802,7 @@ class TestCF1_8(BaseTestCase):
             m.get(
                 "http://www.lsid.info/urn:lsid:marinespecies.org:taxname:99999999999",
                 status_code=400,
-                text="<html><head><title>400 Bad Request</head><body><h1>Bad Request</h1><p>Unknown LSID</p></body></html>",
+                text="<html><head><title>400 Bad Request</title></head><body><h1>Bad Request</h1><p>Unknown LSID</p></body></html>",
             )
             results = self.cf.check_taxa(dataset)
             assert len(results) == 1

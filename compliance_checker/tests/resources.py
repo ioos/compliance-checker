@@ -1,14 +1,14 @@
 import os
 import subprocess
 
-from pkg_resources import resource_filename
+from compliance_checker import get_package_path
 
 
 def get_filename(path):
     """
     Returns the path to a valid dataset
     """
-    filename = resource_filename("compliance_checker", path)
+    filename = get_package_path(path)
     nc_path = filename.replace(".cdl", ".nc")
     if not os.path.exists(nc_path):
         generate_dataset(filename, nc_path)

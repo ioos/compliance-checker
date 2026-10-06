@@ -1,3 +1,4 @@
+import os
 from contextlib import contextmanager
 from functools import lru_cache
 from tempfile import NamedTemporaryFile
@@ -9,6 +10,17 @@ try:
     from ._version import __version__
 except ImportError:
     __version__ = "unknown"
+
+
+def get_package_path(*relative_path_parts: str) -> str:
+    """
+    Returns an absolute filesystem path to a resource bundled within the
+    compliance_checker package, given a path relative to the package root
+    (e.g. "data/seanames.csv" or "tests/data"). This replaces the former
+    dependency on pkg_resources.resource_filename, which requires an old
+    version of setuptools.
+    """
+    return os.path.join(os.path.dirname(__file__), *relative_path_parts)
 
 
 class MemoizedDataset(Dataset):

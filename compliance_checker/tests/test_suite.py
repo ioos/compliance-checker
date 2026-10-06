@@ -4,29 +4,21 @@ import unittest
 from pathlib import Path
 
 import numpy as np
-from pkg_resources import resource_filename
 
+from compliance_checker import get_package_path
 from compliance_checker.acdd import ACDDBaseCheck
 from compliance_checker.base import BaseCheck, GenericFile, Result
 from compliance_checker.suite import CheckSuite
 
 static_files = {
-    "2dim": resource_filename("compliance_checker", "tests/data/2dim-grid.nc"),
-    "bad_region": resource_filename("compliance_checker", "tests/data/bad_region.nc"),
-    "bad_data_type": resource_filename(
-        "compliance_checker", "tests/data/bad_data_type.nc"
-    ),
-    "test_cdl": resource_filename("compliance_checker", "tests/data/test_cdl.cdl"),
-    "test_cdl_nc": resource_filename(
-        "compliance_checker", "tests/data/test_cdl_nc_file.nc"
-    ),
-    "empty": resource_filename("compliance_checker", "tests/data/non-comp/empty.file"),
-    "ru07": resource_filename(
-        "compliance_checker", "tests/data/ru07-20130824T170228_rt0.nc"
-    ),
-    "netCDF4": resource_filename(
-        "compliance_checker", "tests/data/test_cdl_nc4_file.cdl"
-    ),
+    "2dim": get_package_path("tests", "data", "2dim-grid.nc"),
+    "bad_region": get_package_path("tests", "data", "bad_region.nc"),
+    "bad_data_type": get_package_path("tests", "data", "bad_data_type.nc"),
+    "test_cdl": get_package_path("tests", "data", "test_cdl.cdl"),
+    "test_cdl_nc": get_package_path("tests", "data", "test_cdl_nc_file.nc"),
+    "empty": get_package_path("tests", "data", "non-comp", "empty.file"),
+    "ru07": get_package_path("tests", "data", "ru07-20130824T170228_rt0.nc"),
+    "netCDF4": get_package_path("tests", "data", "test_cdl_nc4_file.cdl"),
 }
 
 
