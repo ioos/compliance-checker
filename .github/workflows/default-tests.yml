@@ -42,6 +42,7 @@ jobs:
         python -m pip install -e . --no-deps --force-reinstall
 
     - name: Default Tests
+      # Use the --record-mode=rewrite if you need to re-record the cassetts.
       run: python -m pytest -s -rxs -v -k "not integration" compliance_checker
 
     permissions:
