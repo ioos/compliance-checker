@@ -595,14 +595,14 @@ def get_z_variables(nc):
         positive = getattr(coord_var, "positive", None)
         standard_name = getattr(coord_var, "standard_name", None)
         axis = getattr(coord_var, "axis", None)
-        # If there are no units, we can't identify it as a vertical coordinate
-        # by checking pressure or positive
+        # CF §4.3 defines pressure units and positive="up|down" as alternative
+        # identifiers; §4.3.2 does not require units for dimensionless coordinates.
         if units is not None:
             if units_convertible(units, "bar"):
                 z_variables.append(coord_name)
-            elif isinstance(positive, str):
-                if positive.lower() in ["up", "down"]:
-                    z_variables.append(coord_name)
+        if coord_name not in z_variables and isinstance(positive, str):
+            if positive.lower() in ["up", "down"]:
+                z_variables.append(coord_name)
         # if axis='Z' we're good
         if coord_name not in z_variables and axis == "Z":
             z_variables.append(coord_name)

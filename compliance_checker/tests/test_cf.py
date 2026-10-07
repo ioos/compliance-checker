@@ -1209,6 +1209,7 @@ class TestCF1_6(BaseTestCase):
         # Check affirmative compliance
         dataset = self.load_dataset(STATIC_FILES["dimensionless"])
         results = self.cf.check_dimensionless_vertical_coordinates(dataset)
+
         scored, out_of, messages = get_results(results)
 
         # all variables checked (2) pass
@@ -2753,6 +2754,7 @@ class TestCF1_7(BaseTestCase):
         # Check affirmative compliance
         dataset = self.load_dataset(STATIC_FILES["dimensionless"])
         dataset.variables["lev"] = MockVariable(dataset.variables["lev"])
+        results = self.cf.check_dimensionless_vertical_coordinates(dataset)
         dataset.variables["lev"].computed_standard_name = "air_pressure"
         results = self.cf.check_dimensionless_vertical_coordinates(dataset)
         scored, out_of, messages = get_results(results)
@@ -2762,6 +2764,12 @@ class TestCF1_7(BaseTestCase):
         assert scored == out_of
         assert all(r.name == "§4.3 Vertical Coordinate" for r in results)
 
+        dataset.variables["lev"].standard_name = "hybrid_sigma_pressure"
+        results = self.cf.check_dimensionless_vertical_coordinates(dataset)
+        scored, out_of, messages = get_results(results)
+        assert "Supplied CF standard_name 'hybrid_sigma_pressure' is not contained in the list of dimensionless vertical coordinates" in messages
+        # revert to original valid CF standard_name
+        dataset.variables["lev"].standard_name = "atmosphere_sigma_coordinate"
         # make one variable's computed_standard_name incorrect, one should fail
         dataset.variables["lev"].computed_standard_name = "definitely_not_right"
         results = self.cf.check_dimensionless_vertical_coordinates(dataset)

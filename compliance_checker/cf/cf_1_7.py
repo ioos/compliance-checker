@@ -873,15 +873,21 @@ class CF1_7Check(CF1_6Check):
             not (formula_terms is None and hasattr(variable, "computed_standard_name")),
             f"Variable {vname} should have formula_terms attribute when computed_standard_name attribute is defined",
         )
+
         if formula_terms is None and standard_name not in dim_vert_coords_dict:
             return
 
         # assert that the computed_standard_name is maps to the standard_name correctly
-        _comp_std_name = dim_vert_coords_dict[standard_name][1]
-        correct_computed_std_name_ctx.assert_true(
-            getattr(variable, "computed_standard_name", None) in _comp_std_name,
-            f"§4.3.3 The standard_name of `{vname}` must map to the correct computed_standard_name, `{sorted(_comp_std_name)}`",
-        )
+        correct_computed_std_name_ctx.out_of += 1
+        if standard_name not in dim_vert_coords_dict:
+            correct_computed_std_name_ctx.messages.append(f"Supplied CF standard_name '{standard_name}' is not contained in the list of dimensionless vertical coordinates")
+        else:
+            correct_computed_std_name_ctx.score += 1
+            _comp_std_name = dim_vert_coords_dict[standard_name][1]
+            correct_computed_std_name_ctx.assert_true(
+                getattr(variable, "computed_standard_name", None) in _comp_std_name,
+                f"§4.3.3 The standard_name of `{vname}` must map to the correct computed_standard_name, `{sorted(_comp_std_name)}`",
+            )
         ret_val.append(correct_computed_std_name_ctx.to_result())
 
     def check_dimensionless_vertical_coordinates(self, ds):
