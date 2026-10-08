@@ -9,7 +9,7 @@ permissions: {}
 
 jobs:
   run:
-    name: cf-pyudunits2 ${{ matrix.pyudunits2 }}
+    name: pyudunits2 ${{ matrix.pyudunits2 }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -45,4 +45,5 @@ jobs:
         pip install pyudunits2
 
     - name: Integration Tests
-      run: python -m pytest -m "integration" -s -rxs -v --vcr-record=none compliance_checker
+      # Use the --record-mode=rewrite if you need to re-record the cassetts.
+      run: python -m pytest -m "integration" -s -rxs -v compliance_checker

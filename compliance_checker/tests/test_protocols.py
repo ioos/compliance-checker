@@ -50,11 +50,12 @@ def test_netcdf_content_type(cs):
     assert ds is not None
 
 
+@pytest.mark.vcr()
 def test_erddap(cs):
     """
     Tests that a connection can be made to ERDDAP's OPeNDAP GridDAP.
     """
-    url = "https://www.ncei.noaa.gov/erddap/griddap/AEC_gomex_satellite_climo"
+    url = "https://erddap.ioos.us/erddap/griddap/etopo5_EDDGridCopy"
     ds = cs.load_dataset(url)
     assert ds is not None
 
