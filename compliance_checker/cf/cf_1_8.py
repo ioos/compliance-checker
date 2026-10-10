@@ -868,7 +868,7 @@ class CF1_8Check(CF1_7Check):
                     valid_name = response.json()["valid_name"]
                     if valid_name != taxon_name_str:
                         messages.append(
-                            f"Supplied taxon name and WoRMS valid name do not match. Supplied taxon name is '{taxon_name_str}', WoRMS valid name is '{valid_name}.'",
+                            f"Supplied taxon name and WoRMS valid name do not match. Supplied taxon name is '{taxon_name_str}', WoRMS valid name is '{valid_name}'.",
                         )
                 # Misc non-error code.  Should not reach here.
                 else:
@@ -901,7 +901,7 @@ class CF1_8Check(CF1_7Check):
                     messages.append(
                         "Supplied taxon name and ITIS scientific name do not match. "
                         f"Supplied taxon name is '{taxon_name_str}', ITIS scientific name "
-                        f"for TSN {taxon_match['object_id']} is '{combined_name}.'",
+                        f"for TSN {taxon_match['object_id']} is '{combined_name}'.",
                     )
 
             else:

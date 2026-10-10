@@ -3609,7 +3609,7 @@ class TestCF1_8(BaseTestCase):
             results = self.cf.check_taxa(dataset)
             result = results[0]
             assert result.msgs == [
-                "Supplied taxon name and ITIS scientific name do not match. Supplied taxon name is 'Morone saxitilis', ITIS scientific name for TSN 162139 is 'Esox lucius.'",
+                "Supplied taxon name and ITIS scientific name do not match. Supplied taxon name is 'Morone saxitilis', ITIS scientific name for TSN 162139 is 'Esox lucius'.",
             ]
 
     def test_taxonomy_skip_lsid(self):
