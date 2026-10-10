@@ -2591,6 +2591,27 @@ class TestCF1_7(BaseTestCase):
         )
         assert msg_len == 0
 
+    def test_check_grid_mapping_attr_types(self):
+        dataset = self.load_dataset(STATIC_FILES["mapping"])
+        dataset.variables["wgs84"] = MockVariable(dataset.variables["wgs84"])
+        results = self.cf.check_grid_mapping(dataset)
+        score, out_of, messages = get_results(results)
+        assert not [m for m in messages if "must be a" in m]
+
+        # numeric attribute given as a string
+        dataset.variables["wgs84"].semi_major_axis = "6378137."
+        results = self.cf.check_grid_mapping(dataset)
+        score, out_of, messages = get_results(results)
+        assert "grid mapping variable wgs84: semi_major_axis must be a numeric type" in messages
+
+        # string attribute given as a number
+        dataset.variables["wgs84"].semi_major_axis = 6378137.0
+        dataset.variables["wgs84"].grid_mapping_name = "latitude_longitude"
+        dataset.variables["wgs84"].geographic_crs_name = 4326
+        results = self.cf.check_grid_mapping(dataset)
+        score, out_of, messages = get_results(results)
+        assert "grid mapping variable wgs84: geographic_crs_name must be a string" in messages
+
     def test_check_grid_mapping_coordinates(self):
         """
         Checks that coordinates variables referred to by a grid mapping
