@@ -455,19 +455,22 @@ class CF1_6Check(CFNCCheck):
 
             if variable.dimensions:
                 dimension_order = self._get_dimension_order(ds, name, coord_axis_map)
+                dimension_type_help = "with U: other/unknown; L: unlimited"
+                if "H" in dimension_order:
+                    dimension_type_help = "with U: other/unknown; H: unstructured horizontal; L: unlimited"
                 valid_dimension_order.assert_true(
                     self._dims_in_order(dimension_order),
                     "{}'s spatio-temporal dimensions are not in the "
                     "recommended order T, Z, Y, X and/or further dimensions "
                     "are not located left of T, Z, Y, X. The dimensions (and "
-                    "their guessed types) are {} (with U: other/unknown; L: "
-                    "unlimited).".format(
+                    "their guessed types) are {} ({}).".format(
                         name,
                         self._get_pretty_dimension_order_with_type(
                             ds,
                             name,
                             dimension_order,
                         ),
+                        dimension_type_help,
                     ),
                 )
         return valid_dimension_order.to_result()

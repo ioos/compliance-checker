@@ -350,6 +350,53 @@ class TestCF1_6(BaseTestCase):
         assert (3, 3) == result.value
         assert [] == result.msgs
 
+    def test_check_dimension_order_unstructured_grid(self):
+        """A shared cell dimension for auxiliary latitude and longitude is horizontal."""
+        dataset = MockNetCDF()
+        dataset.createDimension("time", 2)
+        dataset.createDimension("lev", 2)
+        dataset.createDimension("ncells", 3)
+
+        time = dataset.createVariable("time", "d", ("time",))
+        time.standard_name = "time"
+        time.units = "days since 2000-01-01"
+        time.axis = "T"
+
+        lev = dataset.createVariable("lev", "d", ("lev",))
+        lev.standard_name = "depth"
+        lev.units = "m"
+        lev.axis = "Z"
+
+        lat = dataset.createVariable("lat", "d", ("ncells",))
+        lat.standard_name = "latitude"
+        lat.units = "degrees_north"
+        lon = dataset.createVariable("lon", "d", ("ncells",))
+        lon.standard_name = "longitude"
+        lon.units = "degrees_east"
+
+        temperature = dataset.createVariable(
+            "thetao",
+            "f",
+            ("time", "lev", "ncells"),
+        )
+        temperature.standard_name = "sea_water_potential_temperature"
+        temperature.units = "K"
+        temperature.coordinates = "lat lon"
+
+        bad_temperature = dataset.createVariable(
+            "bad_thetao",
+            "f",
+            ("ncells", "time", "lev"),
+        )
+        bad_temperature.standard_name = "sea_water_potential_temperature"
+        bad_temperature.units = "K"
+        bad_temperature.coordinates = "lat lon"
+
+        result = self.cf.check_dimension_order(dataset)
+        assert not any(message.startswith("thetao's") for message in result.msgs)
+        bad_order_message = next(message for message in result.msgs if message.startswith("bad_thetao's"))
+        assert "H: unstructured horizontal" in bad_order_message
+
     @staticmethod
     def _hybrid_sigma_dataset(ps_dims=("time", "lat", "lon")):
         """Minimal parametric vertical coordinate with CF §4.3.3 bounds."""

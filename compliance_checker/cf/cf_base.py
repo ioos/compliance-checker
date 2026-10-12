@@ -440,10 +440,13 @@ class CFBaseCheck(BaseCheck):
         """
         :param list dimension_order: A list of axes
         :rtype: bool
-        :return: Returns True if the dimensions are in order U*, T, Z, Y, X,
-                 False otherwise
+        :return: Returns True if the dimensions are in order U*, T, Z, then
+                 Y, X or a single H horizontal dimension, False otherwise
         """
-        regx = regex.compile(r"^[^TZYX]*T?Z?Y?X?$")
+        # H represents the one horizontal dimension of an unstructured grid,
+        # where auxiliary latitude and longitude share a cell dimension. It
+        # occupies the same ordering slot as either Y or X.
+        regx = regex.compile(r"^[^TZYXH]*T?Z?(?:Y?X?|H?)$")
         dimension_string = "".join(dimension_order)
         return regx.match(dimension_string) is not None
 
@@ -764,7 +767,9 @@ class CFBaseCheck(BaseCheck):
         # Z - Depth/Altitude Coordinate
         # Y - Y-Coordinate (latitude)
         # X - X-Coordinate (longitude)
-        # A - Auxiliary Coordinate
+        # A - Auxiliary coordinate dimension
+        # H - Unstructured horizontal dimension with 1-D latitude/longitude
+        #     auxiliary coordinates
         # I - Instance Coordinate
 
         time_variables = cfutil.get_time_variables(ds)
@@ -810,8 +815,9 @@ class CFBaseCheck(BaseCheck):
                 coord_axis_map[dimension] = "I"
 
         # Dimensions of auxiliary coordinate variables will be marked with A.
-        # This is useful to help determine if the dimensions are used like a
-        # mapping from grid coordinates to physical lat/lon
+        # A dimension spanned by 1-D auxiliary latitude and longitude
+        # coordinates is a single horizontal slot for unstructured grids.
+        horizontal_aux_axes = defaultdict(set)
         for coord_name in self._find_aux_coord_vars(ds):
             coord_var = ds.variables[coord_name]
             # Skip label auxiliary coordinates
@@ -822,6 +828,16 @@ class CFBaseCheck(BaseCheck):
             for dimension in coord_var.dimensions:
                 if dimension not in coord_axis_map:
                     coord_axis_map[dimension] = "A"
+            if len(coord_var.dimensions) == 1:
+                dimension = coord_var.dimensions[0]
+                if coord_name in lat_variables:
+                    horizontal_aux_axes[dimension].add("Y")
+                if coord_name in lon_variables:
+                    horizontal_aux_axes[dimension].add("X")
+
+        for dimension, axes in horizontal_aux_axes.items():
+            if coord_axis_map.get(dimension) in {"A", "U"}:
+                coord_axis_map[dimension] = "H" if len(axes) > 1 else next(iter(axes))
 
         # If a dimension does not have a coordinate variable mark it as unknown
         # 'U'
