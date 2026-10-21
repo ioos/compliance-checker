@@ -2725,9 +2725,11 @@ class TestCF1_7(BaseTestCase):
                 dimless_vertical_coordinates_1_7,
             )
 
-            # one should have failed, as no computed_standard_name is assigned
+            # computed_standard_name is optional in CF (section 4.3.3), so a
+            # variable without it should not fail (issue #722)
             score, out_of, messages = get_results(ret_val)
-            assert score < out_of
+            assert score == out_of
+            assert not any("must map to the correct computed_standard_name" in m for m in messages)
 
             # this time, assign computed_standard_name
             ret_val = []
