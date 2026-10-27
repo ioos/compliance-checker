@@ -539,6 +539,48 @@ class TestACDD1_3(BaseTestCase):
         result = self.acdd.check_lon_extents(ds)
         self.assert_result_is_bad(result)
 
+    def test_check_lat_extents_char_variable(self):
+        """Char-typed variable with a units attr must not raise TypeError (issue #1155)."""
+        ds = Dataset(os.devnull, "w", diskless=True)
+        ds.createDimension("time", 3)
+        ds.createDimension("str_len", 5)
+        char_lat = ds.createVariable("lat", "S1", ("time", "str_len"))
+        char_lat.units = "degrees_north"
+        char_lat.axis = "Y"
+        ds.setncattr("geospatial_lat_min", -10.0)
+        ds.setncattr("geospatial_lat_max", 10.0)
+        result = self.acdd.check_lat_extents(ds)
+        assert result is not None
+        ds.close()
+
+    def test_check_lon_extents_char_variable(self):
+        """Char-typed variable with a units attr must not raise TypeError (issue #1155)."""
+        ds = Dataset(os.devnull, "w", diskless=True)
+        ds.createDimension("time", 3)
+        ds.createDimension("str_len", 5)
+        char_lon = ds.createVariable("lon", "S1", ("time", "str_len"))
+        char_lon.units = "degrees_east"
+        char_lon.axis = "X"
+        ds.setncattr("geospatial_lon_min", -10.0)
+        ds.setncattr("geospatial_lon_max", 10.0)
+        result = self.acdd.check_lon_extents(ds)
+        assert result is not None
+        ds.close()
+
+    def test_check_time_extents_masked_time(self):
+        """All-masked time values must not raise TypeError in num2date (issue #1155)."""
+        ds = Dataset(os.devnull, "w", diskless=True)
+        ds.createDimension("time", 3)
+        tv = ds.createVariable("time", "f4", ("time",), fill_value=1e20)
+        tv.units = "seconds since 1970-01-01"
+        tv.axis = "T"
+        tv[:] = np.ma.masked_all(3)
+        ds.time_coverage_start = "2016-01-02T00:00:00Z"
+        ds.time_coverage_end = "2016-01-02T00:00:00Z"
+        result = self.acdd.check_time_extents(ds)
+        self.assert_result_is_bad(result)
+        ds.close()
+
     def test_check_geospatial_vertical_max(self):
         ds = MockTimeSeries()
         ds.variables["depth"][:] = np.linspace(0.0, 30.0, num=500)
