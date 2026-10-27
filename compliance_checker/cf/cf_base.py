@@ -260,6 +260,20 @@ class CFBaseCheck(BaseCheck):
                     f"{req} is a required attribute for grid mapping {grid_mapping_name}",
                 )
 
+            # Make sure the attributes defined in Appendix F have the right type
+            for attr_name, attr_info in self.grid_mapping_attr_types.items():
+                if attr_name in grid_var.ncattrs():
+                    type_ok, type_msg = self._check_attr_type(
+                        attr_name,
+                        attr_info["type"],
+                        getattr(grid_var, attr_name),
+                        grid_var,
+                    )
+                    valid_grid_mapping.assert_true(
+                        type_ok,
+                        f"grid mapping variable {grid_var_name}: {type_msg}",
+                    )
+
             # Make sure that exactly one of the exclusive attributes exist
             if len(grid_mapping) == 4:
                 at_least_attr = grid_mapping[3]
