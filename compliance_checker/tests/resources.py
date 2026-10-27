@@ -46,6 +46,7 @@ STATIC_FILES = {
     "cont_ragged": get_filename("tests/data/cont_ragged.cdl"),
     "conv_multi": get_filename("tests/data/conv_multi.cdl"),
     "conv_bad": get_filename("tests/data/conv_bad.cdl"),
+    "conv_cf_1_12": get_filename("tests/data/conv_cf_1_12.cdl"),
     "coordinates_and_metadata": get_filename("tests/data/coordinates_and_metadata.cdl"),
     "coordinate_types": get_filename("tests/data/coordinate_types.cdl"),
     "dimensionless": get_filename("tests/data/dimensionless.cdl"),
