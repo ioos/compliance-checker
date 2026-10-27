@@ -11,6 +11,7 @@ from compliance_checker.cf.cf_1_8 import CF1_8Check
 from compliance_checker.cf.cf_1_9 import CF1_9Check
 from compliance_checker.cf.cf_1_10 import CF1_10Check
 from compliance_checker.cf.cf_1_11 import CF1_11Check
+from compliance_checker.cf.cf_1_12 import CF1_12Check
 
 __all__ = [
     "CF1_6Check",
@@ -19,6 +20,7 @@ __all__ = [
     "CF1_9Check",
     "CF1_10Check",
     "CF1_11Check",
+    "CF1_12Check",
     "dimless_vertical_coordinates_1_6",
     "dimless_vertical_coordinates_1_7",
     "util",
