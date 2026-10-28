@@ -8,6 +8,24 @@ import isodate
 import pendulum
 
 
+def iter_groups(root):
+    """Yield root and its descendant groups in parent-first depth-first order."""
+    stack = [root]
+    while stack:
+        group = stack.pop()
+        yield group
+        stack.extend(reversed(list(group.groups.values())))
+
+
+def iter_variables(root, **attributes):
+    """Yield variables throughout root's subtree, optionally filtering attributes."""
+    for group in iter_groups(root):
+        if attributes:
+            yield from group.get_variables_by_attributes(**attributes)
+        else:
+            yield from group.variables.values()
+
+
 def datetime_is_iso(date_str):
     """Attempts to parse a date formatted in ISO 8601 format"""
     try:
