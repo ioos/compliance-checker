@@ -1,0 +1,5 @@
+netcdf conv_cf_1_12 {
+
+// global attributes:
+		:Conventions = "CF-1.12" ;
+}

@@ -17,6 +17,7 @@ from compliance_checker.cf import (
     CF1_8Check,
     CF1_9Check,
     CF1_11Check,
+    CF1_12Check,
     dimless_vertical_coordinates_1_6,
     dimless_vertical_coordinates_1_7,
 )
@@ -3948,6 +3949,29 @@ class TestCF1_11(BaseTestCase):
         score, out_of, messages = get_results(r)
         assert score < out_of
         assert "When attribute add_offset is of type double variable bad_double must be of type byte, unsigned byte, short, unsigned short, int, or unsigned int" in messages
+
+
+class TestCF1_12(BaseTestCase):
+    def setup_method(self):
+        self.cf = CF1_12Check()
+
+    def test_check_conventions_are_cf_1_12(self):
+        # TEST CONFORMANCE 2.6.1
+        # :Conventions = "CF-1.12", as in CMIP7 files (issue #1348)
+        dataset = self.load_dataset(STATIC_FILES["conv_cf_1_12"])
+        result = self.cf.check_conventions_version(dataset)
+        assert result.value
+
+        # the CF 1.11 suite does not accept CF-1.12
+        result = CF1_11Check().check_conventions_version(dataset)
+        assert not result.value
+        assert result.msgs[0] == '§2.6.1 Conventions global attribute does not contain "CF-1.11"'
+
+        with MockTimeSeries() as dataset:
+            dataset.setncattr("Conventions", "CF-1.11")
+            result = self.cf.check_conventions_version(dataset)
+            assert not result.value
+            assert result.msgs[0] == '§2.6.1 Conventions global attribute does not contain "CF-1.12"'
 
 
 class TestCFUtil(BaseTestCase):
