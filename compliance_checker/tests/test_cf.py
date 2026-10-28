@@ -22,7 +22,6 @@ from compliance_checker.cf import (
     dimless_vertical_coordinates_1_7,
 )
 from compliance_checker.cf.appendix_d import no_missing_terms
-from compliance_checker.cf.cf_1_12 import CF1_12Check
 from compliance_checker.cf.util import (
     StandardNameTable,
     create_cached_data_dir,
@@ -3973,6 +3972,78 @@ class TestCF1_12(BaseTestCase):
             result = self.cf.check_conventions_version(dataset)
             assert not result.value
             assert result.msgs[0] == '§2.6.1 Conventions global attribute does not contain "CF-1.12"'
+
+    # TEST CONFORMANCE 2.5 REQUIRED 1/1 (CF §1.3 Terminology)
+    @pytest.mark.parametrize("group_path", ["/", "/ocean", "/ocean/instruments"])
+    def test_rejects_1d_vlen_string_with_same_dimension_name(self, group_path):
+        with MockNetCDF() as ds:
+            ds.createDimension("station", 2)
+            group = ds if group_path == "/" else ds.createGroup(group_path)
+            group.createVariable("station", str, ("station",))
+
+            results = self.cf.check_string_variables_not_same_dimension_name(ds)
+
+            score, out_of, messages = get_results(results)
+            assert (score, out_of) == (0, 1)
+            assert len(messages) == 1
+            assert "station" in messages[0]
+            assert results[0].weight == self.cf.HIGH
+            assert results[0].name == "§1.3 Terminology"
+
+    def test_fixed_length_character_labels(self):
+        with MockNetCDF() as ds:
+            ds.createDimension("station", 2)
+            ds.createDimension("strlen", 8)
+            ds.createVariable("station", "S1", ("station", "strlen"))
+
+            results = self.cf.check_string_variables_not_same_dimension_name(ds)
+
+            score, out_of, messages = get_results(results)
+            assert score == out_of
+            assert messages == []
+
+    def test_numeric_coordinate_variables(self):
+        with MockTimeSeries() as ds:
+            results = self.cf.check_string_variables_not_same_dimension_name(ds)
+
+            score, out_of, messages = get_results(results)
+            assert score == out_of
+            assert messages == []
+
+    @pytest.mark.parametrize(
+        ("name", "dimensions"),
+        [
+            ("station_name", ("station",)),
+            ("station", ()),
+            ("station", ("station", "observation")),
+        ],
+    )
+    def test_allowed_vlen_string_variables(self, name, dimensions):
+        with MockNetCDF() as ds:
+            ds.createDimension("station", 2)
+            ds.createDimension("observation", 3)
+            ds.createVariable(name, str, dimensions)
+
+            results = self.cf.check_string_variables_not_same_dimension_name(ds)
+
+            score, out_of, messages = get_results(results)
+            assert score == out_of
+            assert messages == []
+
+    def test_checks_all_variables_and_groups(self):
+        with MockTimeSeries() as ds:
+            ds.createDimension("station", 2)
+            ds.createDimension("strlen", 8)
+            ds.createVariable("station", "S1", ("station", "strlen"))
+            ds.createVariable("station_name", str, ("station",))
+            for path in ("/ocean", "/atmosphere/instruments"):
+                ds.createGroup(path).createVariable("station", str, ("station",))
+
+            results = self.cf.check_string_variables_not_same_dimension_name(ds)
+
+            score, out_of, messages = get_results(results)
+            assert out_of - score == 2
+            assert len(messages) == 2
 
 
 class TestCFUtil(BaseTestCase):
