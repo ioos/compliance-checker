@@ -1,0 +1,38 @@
+name: Linkcheck
+
+on:
+  pull_request:
+  push:
+  release:
+    types:
+      - published
+
+# Deny all permissions by default
+permissions: {}
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Set up Python
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+      with:
+        python-version: "3.x"
+
+    - name: Install compliance-checker
+      run: |
+        python -m pip install -e .[docs] --force-reinstall
+
+    - name: Build documentation
+      run: |
+        set -e
+        pushd docs
+        make clean html linkcheck
+        popd

@@ -36,7 +36,7 @@ jobs:
       run: |
         set -e
         pushd docs
-        make clean html linkcheck
+        make clean html
         popd
 
     - name: Deploy
