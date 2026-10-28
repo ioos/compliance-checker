@@ -28,7 +28,7 @@ class CF1_12Check(CF1_11Check):
                 # Maybe use those instead?
                 if var.ndim == 1 and var.dimensions[0] == var.name:
                     var_str_test.messages = [
-                        f"One-dimensional variable length string variable {var.name} must not have the same name as its dimension's name to prevent confusion with coordinate variables"
+                        f"One-dimensional variable length string variable {var.name} must not have the same name as its dimension's name to prevent confusion with coordinate variables",
                     ]
                 else:
                     var_str_test.score += 1
