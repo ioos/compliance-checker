@@ -22,6 +22,7 @@ from compliance_checker.cf import (
     dimless_vertical_coordinates_1_7,
 )
 from compliance_checker.cf.appendix_d import no_missing_terms
+from compliance_checker.cf.cf_1_12 import CF1_12Check
 from compliance_checker.cf.util import (
     StandardNameTable,
     create_cached_data_dir,
