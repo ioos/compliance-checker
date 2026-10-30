@@ -673,6 +673,15 @@ class TestCF1_6(BaseTestCase):
         score, out_of, messages = get_results(results)
         assert (score, out_of) == (0, 2)
 
+        # a scalar coordinate variable has one dimensional bounds
+        with MockTimeSeries() as dataset:
+            dataset.createDimension("nv", 2)
+            dataset.createVariable("height", "d", ()).bounds = "height_bnds"
+            dataset.createVariable("height_bnds", "d", ("nv",))
+            results = self.cf.check_cell_boundaries(dataset)
+            score, out_of, messages = get_results(results)
+            assert (score, out_of) == (1, 1)
+
     def test_cell_measures(self):
         dataset = self.load_dataset(STATIC_FILES["cell_measure"])
         results = self.cf.check_cell_measures(dataset)
@@ -2092,10 +2101,12 @@ class TestCF1_7(BaseTestCase):
         Check our over-ridden check_cell_boundaries method behaves as expected
         """
 
+        # long_name is not one of the attributes which must agree with those
+        # of the associated variable
         dataset = self.load_dataset(STATIC_FILES["grid-boundaries"])
         results = self.cf.check_cell_boundaries(dataset)
         score, out_of, messages = get_results(results)
-        assert (score, out_of) == (0, 2)
+        assert (score, out_of) == (2, 2)
 
         dataset = self.load_dataset(STATIC_FILES["cf_example_cell_measures"])
         results = self.cf.check_cell_boundaries(dataset)
@@ -2129,6 +2140,49 @@ class TestCF1_7(BaseTestCase):
             score, out_of, messages = get_results(results)
             assert score < out_of
             assert "'a' has 'formula_terms' attr, bounds variable 'b' must also have 'formula_terms'" in messages
+
+        # the formula_terms of the bounds variable name the bounds of the
+        # terms which depend on the vertical dimension, so they differ from
+        # those of the parametric vertical coordinate
+        with MockTimeSeries() as dataset:
+            dataset.createDimension("lev", 2)
+            dataset.createDimension("nv", 2)
+            lev = dataset.createVariable("lev", "d", ("lev",))
+            lev.standard_name = "atmosphere_hybrid_sigma_pressure_coordinate"
+            lev.formula_terms = "ap: ap b: b ps: ps"
+            lev.bounds = "lev_bnds"
+            lev_bnds = dataset.createVariable("lev_bnds", "d", ("lev", "nv"))
+            lev_bnds.formula_terms = "ap: ap_bnds b: b_bnds ps: ps"
+            results = self.cf.check_cell_boundaries(dataset)
+            score, out_of, messages = get_results(results)
+            assert (score, out_of) == (1, 1)
+
+            # attributes CF requires to agree are still compared
+            lev_bnds.standard_name = "atmosphere_sigma_coordinate"
+            results = self.cf.check_cell_boundaries(dataset)
+            score, out_of, messages = get_results(results)
+            assert score < out_of
+            assert any(msg.startswith("'lev_bnds' has attr 'standard_name'") and "does not agree" in msg for msg in messages)
+
+        # array valued attributes are compared element-wise
+        with MockTimeSeries() as dataset:
+            dataset.createDimension("nv", 2)
+            month_lengths = np.array([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+            dataset.variables["time"].month_lengths = month_lengths
+            dataset.variables["time"].bounds = "time_bnds"
+            dataset.createVariable("time_bnds", "d", ("time", "nv")).month_lengths = month_lengths
+            results = self.cf.check_cell_boundaries(dataset)
+            score, out_of, messages = get_results(results)
+            assert not any("does not agree" in msg for msg in messages)
+
+        # a scalar coordinate variable has one dimensional bounds
+        with MockTimeSeries() as dataset:
+            dataset.createDimension("nv", 2)
+            dataset.createVariable("height", "d", ()).bounds = "height_bnds"
+            dataset.createVariable("height_bnds", "d", ("nv",))
+            results = self.cf.check_cell_boundaries(dataset)
+            score, out_of, messages = get_results(results)
+            assert (score, out_of) == (1, 1)
 
     def _make_bounds_dataset(
         self,
