@@ -3366,15 +3366,18 @@ class CF1_6Check(CFNCCheck):
         # optionally followed by parentheses for explaining additional
         # info, e.g.
         # "time: method1 within years time: method2 over years (sidereal years)"
+        # Entries for other axes may precede or follow the time entries, e.g.
+        # "area: mean time: maximum within days time: mean over days"
 
         meth_regex = "(?:{})".format(
             "|".join(methods),
         )  # "or" comparison for the methods
         re_string = (
-            rf"^time: {meth_regex} within (years|days)"  # regex string to test
-            rf" time: {meth_regex} over \1(:?(?<=days) time: {meth_regex} over years)?"
-            r"(?: \([^)]+\))?$"  # parenthesized comment section
+            rf"(?<!\S)time: {meth_regex} within (years|days)"  # regex string to test
+            rf" time: {meth_regex} over \1(?:(?<=days) time: {meth_regex} over years)?"
+            r"(?: \([^)]+\))?(?!\S)"  # parenthesized comment section
         )
+        time_entry_regex = r"(?<!\S)time:"
 
         # find any variables with a valid climatological cell_methods
         for cell_method_var in ds.get_variables_by_attributes(
@@ -3382,7 +3385,14 @@ class CF1_6Check(CFNCCheck):
         ):
             if any(dim in all_clim_coord_var_names for dim in cell_method_var.dimensions):
                 total_climate_count += 1
-                if not regex.search(re_string, cell_method_var.cell_methods):
+                cell_methods = cell_method_var.cell_methods
+                match = regex.search(re_string, cell_methods)
+                # the climatological time entries must be the only time
+                # entries in the attribute
+                if match is None or regex.search(
+                    time_entry_regex,
+                    f"{cell_methods[: match.start()]} {cell_methods[match.end() :]}",
+                ):
                     reasoning.append(
                         f'The "time: method within years/days over years/days" format is not correct in variable {cell_method_var.name}.',
                     )
