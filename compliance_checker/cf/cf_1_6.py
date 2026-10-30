@@ -2853,12 +2853,8 @@ class CF1_6Check(CFNCCheck):
             else:
                 boundary_variable = ds.variables[boundary_variable_name]
             # The number of dimensions in the bounds variable should always be
-            # the number of dimensions in the referring variable + 1
-            if boundary_variable.ndim < 2:
-                valid = False
-                reasoning.append(
-                    f"Boundary variable {boundary_variable.name} specified by {variable.name}" + " should have at least two dimensions to enclose the base " + "case of a one dimensionsal variable",
-                )
+            # the number of dimensions in the referring variable + 1, so a
+            # scalar coordinate variable has one dimensional bounds
             if boundary_variable.ndim != variable.ndim + 1:
                 valid = False
                 reasoning.append(
