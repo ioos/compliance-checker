@@ -796,6 +796,27 @@ class TestCF1_6(BaseTestCase):
         results = self.cf.check_climatological_statistics(dataset)
         score, out_of, messages = get_results(results)
         assert score == out_of
+        # entries for other axes may precede or follow the time entries
+        for cell_methods in (
+            "area: mean time: maximum within days time: mean over days",
+            "time: mean within years time: mean over years area: mean",
+            "lat: lon: mean time: sum within days time: maximum over days (ENSO years) depth: mean",
+        ):
+            temp_var.cell_methods = cell_methods
+            results = self.cf.check_climatological_statistics(dataset)
+            score, out_of, messages = get_results(results)
+            assert score == out_of, cell_methods
+        # but no other time entries may appear alongside the climatological ones
+        for cell_methods in (
+            "area: mean time: mean within years time: mean over years time: sum over years",
+            "time: maximum area: mean time: mean within days time: mean over days",
+            "area: mean time: mean within days",
+            "area: mean xtime: mean within days time: mean over days",
+        ):
+            temp_var.cell_methods = cell_methods
+            results = self.cf.check_climatological_statistics(dataset)
+            score, out_of, messages = get_results(results)
+            assert score != out_of, cell_methods
 
         # TEST CONFORMANCE 7.4 REQUIRED 5/6
         dataset.variables["climatology_bounds"] = MockVariable(
