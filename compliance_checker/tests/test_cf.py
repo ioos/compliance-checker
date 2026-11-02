@@ -120,6 +120,19 @@ class TestCF1_6(BaseTestCase):
 
         assert 'Coordinate variable "time" must be strictly monotonic' in messages
 
+    def test_check_coordinate_variables_strict_monotonicity_string_var(self):
+        # a 1D NC_STRING variable named after its dimension should not crash
+        # monotonicity check
+        ds = MockTimeSeries()
+        ds.createDimension("x", 2)
+        x = ds.createVariable("x", str, ("x",))
+        x[0] = "a"
+        x[1] = "b"
+
+        result = self.cf.check_coordinate_variables_strict_monotonicity(ds)
+        _, _, messages = get_results(result)
+        assert not any('"x"' in msg for msg in messages)
+
     # --------------------------------------------------------------------------------
     # Compliance Tests
     # --------------------------------------------------------------------------------
