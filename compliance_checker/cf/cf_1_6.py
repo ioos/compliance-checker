@@ -637,6 +637,8 @@ class CF1_6Check(CFNCCheck):
         ret_val = []
         for coord_var_name in self._find_coord_vars(ds):
             coord_var = ds.variables[coord_var_name]
+            if not np.issubdtype(coord_var.dtype, np.number):
+                continue  # CF §1.3: coordinate variables are numeric
             arr_diff = np.diff(coord_var)
             monotonicity = TestCtx(BaseCheck.HIGH, self.section_titles["1.2"])
             monotonicity.assert_true(
