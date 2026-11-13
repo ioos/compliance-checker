@@ -248,12 +248,8 @@ class CF1_7Check(CF1_6Check):
 
             # 7.1 Required 2/5:
             # The number of dimensions in the bounds variable should always be
-            # the number of dimensions in the referring variable + 1
-            if boundary_variable.ndim < 2:
-                valid = False
-                reasoning.append(
-                    f"Boundary variable {boundary_variable.name} specified by {variable.name}" + " should have at least two dimensions to enclose the base " + "case of a one dimensionsal variable",
-                )
+            # the number of dimensions in the referring variable + 1, so a
+            # scalar coordinate variable has one dimensional bounds
             if boundary_variable.ndim != variable.ndim + 1:
                 valid = False
                 reasoning.append(
@@ -287,16 +283,25 @@ class CF1_7Check(CF1_6Check):
             # 7.1 Required 4/5:
             # If a boundary variable has units, standard_name, axis, positive, calendar, leap_month,
             # leap_year or month_lengths attributes, they must agree with those of its associated variable.
-            if boundary_variable.__dict__.keys():
-                for item in boundary_variable.__dict__.keys():
-                    if hasattr(variable, item):
-                        if getattr(variable, item) != getattr(boundary_variable, item):
-                            valid = False
-                            reasoning.append(
-                                f"'{boundary_variable_name}' has attr '{item}' with value '{getattr(boundary_variable, item)}' that does not agree "
-                                f"with its associated variable ('{variable.name}')'s attr value '{getattr(variable, item)}'"
-                                "",
-                            )
+            # Other attributes, such as formula_terms, legitimately differ.
+            for item in (
+                "units",
+                "standard_name",
+                "axis",
+                "positive",
+                "calendar",
+                "leap_month",
+                "leap_year",
+                "month_lengths",
+            ):
+                if hasattr(boundary_variable, item) and hasattr(variable, item):
+                    if not np.array_equal(getattr(variable, item), getattr(boundary_variable, item)):
+                        valid = False
+                        reasoning.append(
+                            f"'{boundary_variable_name}' has attr '{item}' with value '{getattr(boundary_variable, item)}' that does not agree "
+                            f"with its associated variable ('{variable.name}')'s attr value '{getattr(variable, item)}'"
+                            "",
+                        )
 
             # 7.1 Required 5/5:
             # check if formula_terms is present in the var; if so,
