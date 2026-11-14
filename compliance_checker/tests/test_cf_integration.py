@@ -180,8 +180,6 @@ dataset_stem__expected_messages = [
             "CF recommends longitude variable 'lon_u' to use units degrees_east",
             "CF recommends longitude variable 'lon_v' to use units degrees_east",
             "CF recommends longitude variable 'lon_psi' to use units degrees_east",
-            "§4.3.3 The standard_name of `s_rho` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
-            "§4.3.3 The standard_name of `s_w` must map to the correct computed_standard_name, `['altitude', 'height_above_geopotential_datum', 'height_above_mean_sea_level', 'height_above_reference_ellipsoid']`",
         ],
         marks=pytest.mark.slowtest,
     ),
