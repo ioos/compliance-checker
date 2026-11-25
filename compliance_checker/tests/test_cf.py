@@ -1664,6 +1664,28 @@ class TestCF1_6(BaseTestCase):
         assert scored < out_of
         assert "6.1.1 'Neverland' specified by 'neverland' is not a valid region" in messages
 
+    def test_check_geographic_region_cf_region_list_v5_names(self):
+        names = (
+            "atlantic_arctic_ocean",
+            "davis_strait",
+            "gibraltar_strait",
+            "indian_pacific_ocean",
+            "northern_hemisphere",
+            "southern_hemisphere",
+        )
+        dataset = MockNetCDF()
+        strlen = max(len(name) for name in names)
+        dataset.createDimension("strlen", strlen)
+        for name in names:
+            var = dataset.createVariable(name, "S1", ("strlen",))
+            var.standard_name = "region"
+            var[:] = stringtoarr(name, strlen)
+        results = self.cf.check_geographic_region(dataset)
+        scored, out_of, messages = get_results(results)
+        assert len(results) == len(names)
+        assert scored == out_of
+        assert messages == []
+
     def test_check_packed_data_is_same_type_as_variable(self):
         dataset = self.load_dataset(STATIC_FILES["bad_data_type"])
         results = self.cf.check_packed_data(dataset)
