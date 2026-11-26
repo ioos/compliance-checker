@@ -500,6 +500,21 @@ class TestACDD1_3(BaseTestCase):
         result = self.acdd.check_lat_extents(ds)
         self.assert_result_is_bad(result)
 
+    def test_check_lat_extents_one_attribute_missing(self):
+        """Only one of geospatial_lat_min/max set is a failed result, not an error"""
+        ds = MockTimeSeries()
+        ds.variables["lat"][:] = np.linspace(-135.0, -130.0, num=500)
+
+        ds.setncattr("geospatial_lat_min", -135.0)
+        result = self.acdd.check_lat_extents(ds)
+        self.assert_result_is_bad(result)
+        assert result.msgs == ["geospatial_lat_min/max attribute not found, CF-1.6 spec chapter 4.1"]
+
+        ds.delncattr("geospatial_lat_min")
+        ds.setncattr("geospatial_lat_max", -130.0)
+        result = self.acdd.check_lat_extents(ds)
+        self.assert_result_is_bad(result)
+
     def test_check_lon_extents(self):
         """Test the check_lon_extents() method behaves expectedly"""
 
@@ -570,6 +585,13 @@ class TestACDD1_3(BaseTestCase):
 
         result = self.acdd.check_vertical_extents(ds)
         self.assert_result_is_bad(result)
+
+        # a mismatched max reports the max attribute, not the min
+        ds.setncattr("geospatial_vertical_min", 0.0)
+        ds.setncattr("geospatial_vertical_max", 40.0)
+        result = self.acdd.check_vertical_extents(ds)
+        self.assert_result_is_bad(result)
+        assert result.msgs == ["geospatial_vertical_max != max(depth) values, 40.0 != 30.0"]
 
         # all masked values mean that there are no valid array elements to get
         # the min/max of
