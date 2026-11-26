@@ -232,7 +232,7 @@ class ACDDBaseCheck(BaseCheck):
         :param netCDF4.Dataset ds: An open netCDF dataset
         """
 
-        if not (hasattr(ds, "geospatial_lat_min") or hasattr(ds, "geospatial_lat_max")):
+        if not (hasattr(ds, "geospatial_lat_min") and hasattr(ds, "geospatial_lat_max")):
             return Result(
                 BaseCheck.MEDIUM,
                 False,
@@ -486,7 +486,7 @@ class ACDDBaseCheck(BaseCheck):
                 )
             if not np.isclose(vert_max, zmax):
                 msgs.append(
-                    f"geospatial_vertical_max != max({z_variable}) values, {vert_min} != {zmax}",
+                    f"geospatial_vertical_max != max({z_variable}) values, {vert_max} != {zmax}",
                 )
 
         return Result(
